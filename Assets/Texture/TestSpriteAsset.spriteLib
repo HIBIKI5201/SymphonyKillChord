@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Library:
+  - m_Name: Face
+    m_Hash: 623301721
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Happy
+      m_Hash: 1059892429
+      m_Sprite: {fileID: -1437589561436651375, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1437589561436651375, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+    - m_Name: Sad
+      m_Hash: 662877788
+      m_Sprite: {fileID: 3095245832481027502, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3095245832481027502, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 2
+  - m_Name: T-shirts
+    m_Hash: 768909609
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: (^p^)
+      m_Hash: 775580591
+      m_Sprite: {fileID: -6939318835097273579, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6939318835097273579, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+    - m_Name: "\u0669( \u2018\u03C9\u2019 )\u0648"
+      m_Hash: 8447813
+      m_Sprite: {fileID: -3411750420979926288, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3411750420979926288, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+    - m_Name: "(\uFFE3\u25BD\uFFE3)"
+      m_Hash: 318732129
+      m_Sprite: {fileID: 6824137461431814730, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6824137461431814730, guid: 7de73ead07c7c9c4b8cafad3f48f20c6, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 3
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 638507276121891134
+  m_Version: 1
