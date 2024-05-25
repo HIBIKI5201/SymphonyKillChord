@@ -4,17 +4,21 @@ using UnityEngine;
 
 public class RythemManager : MonoBehaviour
 {
+    [Header("再生する音楽のパラメーター")]
     public float BPM;
+    [SerializeField] private float speed;
+
+    [Header("ノーツのオブジェクト")]
     [SerializeField] private Vector2 ScorePosition;
     [SerializeField] private Vector2 NotesPosition;
     [SerializeField] private float endPosition;
-
-    [SerializeField] private float speed;
+    [Space]
 
     [SerializeField] private Canvas canvas;
     [SerializeField] private GameObject ScorePrefab;
     [SerializeField] private GameObject RednotesPrefab;
 
+    [Header("Audioの設定")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip HighHat;
     [SerializeField] private AudioClip BassDrum;

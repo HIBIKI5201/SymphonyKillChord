@@ -7,9 +7,12 @@ using UnityEngine;
 
 public class ControllerManager : MonoBehaviour
 {
+    [Header("リズムシステム")]
     [SerializeField] private RythemManager rythemManager;
 
+    [Header("プレイヤーのステータス")]
     [SerializeField] private GameObject Player;
+    [Space]
     [SerializeField] private float playerSpeed;
     [SerializeField] private float playerJumpPower;
 
@@ -27,14 +30,15 @@ public class ControllerManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A))
-        {
-            float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveHorizontal = Input.GetAxisRaw("Horizontal");
+        float moveVertical = Input.GetAxisRaw("Vertical");
 
+        if (moveHorizontal != 0)
+        {
             PlayerTransform.Translate(transform.right * moveHorizontal * Time.deltaTime * playerSpeed);
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (moveVertical == 1)
         {
             PlayerRB.velocity = new Vector2(PlayerRB.velocity.x, 0);
             PlayerRB.velocity = new Vector2(PlayerRB.velocity.x, playerJumpPower);
