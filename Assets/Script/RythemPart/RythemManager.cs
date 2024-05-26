@@ -20,6 +20,7 @@ public class RythemManager : MonoBehaviour
 
     [Header("Audio‚Ìİ’è")]
     [SerializeField] private AudioSource audioSource;
+    [Space]
     [SerializeField] private AudioClip HighHat;
     [SerializeField] private AudioClip BassDrum;
 
