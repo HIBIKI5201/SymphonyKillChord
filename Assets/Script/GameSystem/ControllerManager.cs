@@ -35,7 +35,7 @@ public class ControllerManager : MonoBehaviour
 
         if (moveHorizontal != 0)
         {
-            PlayerTransform.Translate(transform.right * moveHorizontal * Time.deltaTime * playerSpeed);
+           PlayerRB.velocity = new Vector2 (moveHorizontal * playerSpeed, PlayerRB.velocity.y);
         }
 
         if (moveVertical == 1)
