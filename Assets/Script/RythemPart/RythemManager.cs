@@ -64,15 +64,18 @@ public class RythemManager : MonoBehaviour
     {
         if (Time.time - Timer >= NotesSpawnSpeed)
         {
+            //二拍子
             if(Timer % (NotesSpawnSpeed * 4) == 0)
             {
                 ScoreSpawn(100);
                 audioSource.PlayOneShot(BassDrum);
             } 
+            //四拍子
             else if (Timer % (NotesSpawnSpeed * 2) == 0)
             {
                 ScoreSpawn(75);
             }
+            //八拍子
             else
             {
                 ScoreSpawn(50);
