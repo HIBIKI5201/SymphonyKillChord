@@ -7,10 +7,10 @@ using UnityEngine;
 
 public class ControllerManager : MonoBehaviour
 {
-    [Header("ƒŠƒYƒ€ƒVƒXƒeƒ€")]
+    [Header("ï¿½ï¿½ï¿½Yï¿½ï¿½ï¿½Vï¿½Xï¿½eï¿½ï¿½")]
     [SerializeField] private RythemManager rythemManager;
 
-    [Header("ƒvƒŒƒCƒ„[‚ÌƒXƒe[ƒ^ƒX")]
+    [Header("ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½ÌƒXï¿½eï¿½[ï¿½^ï¿½X")]
     [SerializeField] private GameObject Player;
     [Space]
     [SerializeField] private float playerSpeed;
@@ -35,13 +35,13 @@ public class ControllerManager : MonoBehaviour
 
         if (moveHorizontal != 0)
         {
-           PlayerRB.velocity = new Vector2 (moveHorizontal * playerSpeed, PlayerRB.velocity.y);
+           PlayerRB.linearVelocity = new Vector2 (moveHorizontal * playerSpeed, PlayerRB.linearVelocity.y);
         }
 
         if (moveVertical == 1)
         {
-            PlayerRB.velocity = new Vector2(PlayerRB.velocity.x, 0);
-            PlayerRB.velocity = new Vector2(PlayerRB.velocity.x, playerJumpPower);
+            PlayerRB.linearVelocity = new Vector2(PlayerRB.linearVelocity.x, 0);
+            PlayerRB.linearVelocity = new Vector2(PlayerRB.linearVelocity.x, playerJumpPower);
             Debug.Log("JumpTrue");
         }
 
@@ -50,7 +50,7 @@ public class ControllerManager : MonoBehaviour
             rythemManager.RedNotesSpawn();
         }
 
-        /* ƒN[ƒ‹ƒ_ƒEƒ“‚ÌƒR[ƒh
+        /* ï¿½Nï¿½[ï¿½ï¿½ï¿½_ï¿½Eï¿½ï¿½ï¿½ÌƒRï¿½[ï¿½h
         if (Timer == 0)
             {
                 rythemManager.RedNotesSpawn();
