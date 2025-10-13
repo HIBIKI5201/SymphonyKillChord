@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Mock/2D_Mock/TestWorld.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: Assets/Scenes/Mock/MusicSyncMock/MusicSyncMock.unity
+    guid: 94c39c902d6ea17489b29b49385982f1
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
   m_UseUCBPForAssetBundles: 0
