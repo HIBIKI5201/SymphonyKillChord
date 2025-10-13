@@ -7,14 +7,14 @@ namespace Mock.MusicSyncMock
     ///     音楽のバッファリングするクラス。
     /// </summary>
     [DisallowMultipleComponent]
-    public class MusicBuffer : MonoBehaviour
+    public class MusicBuffer : MonoBehaviour, IMusicBuffer
     {
-        public float CurrentBpm => _currentBpm;
+        public long CurrentBpm => _currentBpm;
 
-        public float BeatLength => 60f / _currentBpm;
-        public float CurrentBeat => _beat;
+        public long BeatLength => 60L / _currentBpm;
+        public long CurrentBeat => _beat;
 
-        public void Play(AudioSource source, float bpm)
+        public void Play(AudioSource source, long bpm)
         {
             source.Play();
 
@@ -25,9 +25,9 @@ namespace Mock.MusicSyncMock
         [SerializeField, ReadOnly, Tooltip("再生中のソース")]
         private AudioSource _currentSource;
         [SerializeField, ReadOnly, Tooltip("現在のBPM")]
-        private float _currentBpm;
+        private long _currentBpm;
 
-        private float _beat;
+        private long _beat;
 
         private void Update()
         {
@@ -43,7 +43,7 @@ namespace Mock.MusicSyncMock
 
         private void Tick()
         {
-            float beat = _currentSource.time / (60f / _currentBpm);
+            long beat = (long)(_currentSource.time / BeatLength);
             _beat = beat;
         }
     }
