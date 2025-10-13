@@ -1,9 +1,12 @@
 namespace Mock.MusicSyncMock
 {
+    /// <summary>
+    ///     ミュージックバッファのインターフェース。
+    /// </summary>
     public interface IMusicBuffer
     {
-        public long CurrentBpm { get; }
-        public long BeatLength { get; }
-        public long CurrentBeat { get; }
+        public double CurrentBpm { get; }
+        public double BeatLength { get; }
+        public double CurrentBeat { get; }
     }
 }

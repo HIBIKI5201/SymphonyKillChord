@@ -19,7 +19,7 @@ namespace Mock.MusicSyncMock
         [SerializeField]
         private Color[] _noteColor = { Color.white, Color.red, Color.blue, Color.green };
 
-        private List<float> _inputedTimingList = new();
+        private List<double> _inputedTimingList = new();
 
         private void Update()
         {
@@ -32,21 +32,21 @@ namespace Mock.MusicSyncMock
 
         private void HandleBeatInput()
         {
-            float beat = _musicBuffer.CurrentBeat; // 現在のビートを取得
+            double beat = _musicBuffer.CurrentBeat; // 現在のビートを取得
 
             int mostNearTimingIndex = -1;
-            float mostNearTimingValue = float.MaxValue;
+            double mostNearTimingValue = float.MaxValue;
 
             // 最後の入力からのビート数を計算し、最も近いタイミングを見つける
             if (0 < _inputedTimingList.Count)
             {
-                float lastBeat = _inputedTimingList[^1];
-                float betweenBeat = beat - lastBeat;
+                double lastBeat = _inputedTimingList[^1];
+                double betweenBeat = beat - lastBeat;
 
                 for (int i = 0; i < _timingBeats.Length; i++)
                 {
                     float timing = _timingBeats[i];
-                    float diff = Mathf.Abs(betweenBeat - timing);
+                    double diff = Abs(betweenBeat - timing);
 
                     // 最も近いタイミングを更新。
                     if (diff < mostNearTimingValue)
@@ -68,5 +68,7 @@ namespace Mock.MusicSyncMock
                 _inputedTimingList.RemoveAt(0);
             }
         }
+
+        private double Abs(double value) => value < 0 ? -value : value;
     }
 }
