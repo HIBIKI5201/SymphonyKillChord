@@ -9,12 +9,12 @@ namespace Mock.MusicSyncMock
     [DisallowMultipleComponent]
     public class MusicBuffer : MonoBehaviour, IMusicBuffer
     {
-        public long CurrentBpm => _currentBpm;
+        public double CurrentBpm => _currentBpm;
 
-        public long BeatLength => 60L / _currentBpm;
-        public long CurrentBeat => _beat;
+        public double BeatLength => 60L / _currentBpm;
+        public double CurrentBeat => _beat;
 
-        public void Play(AudioSource source, long bpm)
+        public void Play(AudioSource source, double bpm)
         {
             source.Play();
 
@@ -25,9 +25,9 @@ namespace Mock.MusicSyncMock
         [SerializeField, ReadOnly, Tooltip("çƒê∂íÜÇÃÉ\Å[ÉX")]
         private AudioSource _currentSource;
         [SerializeField, ReadOnly, Tooltip("åªç›ÇÃBPM")]
-        private long _currentBpm;
+        private double _currentBpm;
 
-        private long _beat;
+        private double _beat;
 
         private void Update()
         {
@@ -43,7 +43,7 @@ namespace Mock.MusicSyncMock
 
         private void Tick()
         {
-            long beat = (long)(_currentSource.time / BeatLength);
+            double beat = _currentSource.time / BeatLength;
             _beat = beat;
         }
     }
