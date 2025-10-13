@@ -12,9 +12,13 @@ namespace Mock.MusicSyncMock
     {
         [SerializeField]
         private MusicBuffer _musicBuffer;
+        [SerializeField]
+        private MusicUI _musicUI;
 
         [SerializeField]
         private float[] _timingBeats = { 1f, 2f, 3f, 4f };
+        [SerializeField]
+        private Color[] _noteColor = { Color.white, Color.red, Color.blue, Color.green };
 
         private List<float> _inputedTimingList = new();
 
@@ -31,7 +35,7 @@ namespace Mock.MusicSyncMock
         {
             float beat = _musicBuffer.CurrentBeat; // 現在のビートを取得
 
-            float mostNearTiming = 0;
+            int mostNearTimingIndex = -1;
             float mostNearTimingValue = float.MaxValue;
 
             // 最後の入力からのビート数を計算し、最も近いタイミングを見つける
@@ -40,18 +44,22 @@ namespace Mock.MusicSyncMock
                 float lastBeat = _inputedTimingList[^1];
                 float betweenBeat = beat - lastBeat;
 
-                foreach (float timing in _timingBeats)
+                for (int i = 0; i < _timingBeats.Length; i++)
                 {
+                    float timing = _timingBeats[i];
                     float diff = Mathf.Abs(betweenBeat - timing);
 
+                    // 最も近いタイミングを更新。
                     if (diff < mostNearTimingValue)
                     {
-                        mostNearTiming = timing;
+                        mostNearTimingIndex = i;
                         mostNearTimingValue = diff;
                     }
                 }
 
-                Debug.Log($"Input Beat: {beat}, Last Beat: {lastBeat}, Between: {betweenBeat}, Nearest Timing Diff: {mostNearTiming}");
+                Debug.Log($"Input Beat: {beat}, Last Beat: {lastBeat}, Between: {betweenBeat}, Nearest Timing Diff: {mostNearTimingIndex}");
+
+                _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
             }
 
             _inputedTimingList.Add(beat);
