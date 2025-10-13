@@ -4,14 +4,17 @@ using UnityEngine;
 
 namespace Mock.MusicSyncMock
 {
+    /// <summary>
+    ///     Criを用いた音楽のバッファリングするクラス。
+    /// </summary>
     public class CriMusicBuffer : MonoBehaviour, IMusicBuffer
     {
-        public long CurrentBpm => _currentBpm;
+        public double CurrentBpm => _currentBpm;
 
-        public long BeatLength => 60L / _currentBpm;
-        public long CurrentBeat => _beat;
+        public double BeatLength => 60L / _currentBpm;
+        public double CurrentBeat => _beat;
 
-        public void Play(CriAtomSource source, long bpm)
+        public void Play(CriAtomSource source, double bpm)
         {
             source.Play();
 
@@ -22,9 +25,9 @@ namespace Mock.MusicSyncMock
         [SerializeField, ReadOnly, Tooltip("再生中のソース")]
         private CriAtomSource _currentSource;
         [SerializeField, ReadOnly, Tooltip("現在のBPM")]
-        private long _currentBpm;
+        private double _currentBpm;
 
-        private long _beat;
+        private double _beat;
 
         private void Update()
         {
@@ -40,7 +43,7 @@ namespace Mock.MusicSyncMock
 
         private void Tick()
         {
-            long beat = _currentSource.time / BeatLength;
+            double beat = (_currentSource.time / 1000d) / BeatLength;
             _beat = beat;
         }
     }
