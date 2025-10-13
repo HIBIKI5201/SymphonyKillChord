@@ -10,7 +10,7 @@ namespace Mock.MusicSyncMock
     public class MusicInput : MonoBehaviour
     {
         [SerializeField]
-        private MusicBuffer _musicBuffer;
+        private CriMusicBuffer _musicBuffer;
         [SerializeField]
         private MusicUI _musicUI;
 

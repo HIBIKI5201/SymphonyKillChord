@@ -7,7 +7,7 @@ namespace Mock.MusicSyncMock
         [SerializeField]
         private AudioSource _audioSource;
         [SerializeField]
-        private float _bpm = 120f;
+        private long _bpm = 120L;
 
         private MusicBuffer _musicBuffer;
 
