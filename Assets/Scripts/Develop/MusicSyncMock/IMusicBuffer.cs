@@ -1,8 +1,9 @@
-using UnityEngine;
-
-public interface IMusicBuffer
+namespace Mock.MusicSyncMock
 {
-    public float CurrentBpm { get; }
-    public float BeatLength { get; }
-    public float CurrentBeat { get; }
+    public interface IMusicBuffer
+    {
+        public long CurrentBpm { get; }
+        public long BeatLength { get; }
+        public long CurrentBeat { get; }
+    }
 }
