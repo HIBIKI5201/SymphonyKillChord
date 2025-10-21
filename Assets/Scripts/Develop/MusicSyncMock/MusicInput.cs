@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mock.MusicSyncMock
@@ -19,7 +20,7 @@ namespace Mock.MusicSyncMock
         [SerializeField]
         private Color[] _noteColor = { Color.white, Color.red, Color.blue, Color.green };
 
-        private List<double> _inputedTimingList = new();
+        private Queue<double> _inputedTimingList = new();
 
         private void Update()
         {
@@ -40,7 +41,7 @@ namespace Mock.MusicSyncMock
             // 最後の入力からのビート数を計算し、最も近いタイミングを見つける
             if (0 < _inputedTimingList.Count)
             {
-                double lastBeat = _inputedTimingList[^1];
+                double lastBeat = _inputedTimingList.Last();
                 double betweenBeat = beat - lastBeat;
 
                 for (int i = 0; i < _timingBeats.Length; i++)
@@ -61,11 +62,11 @@ namespace Mock.MusicSyncMock
                 _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
             }
 
-            _inputedTimingList.Add(beat);
+            _inputedTimingList.Enqueue(beat);
 
             if (_inputedTimingList.Count > 10) // 10以上は古い入力を削除。
             {
-                _inputedTimingList.RemoveAt(0);
+                _inputedTimingList.Dequeue();
             }
         }
 
