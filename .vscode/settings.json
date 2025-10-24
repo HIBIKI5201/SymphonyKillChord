@@ -56,5 +56,90 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Symphony Kill Chord.sln"
+    "dotnet.defaultSolution": "Symphony Kill Chord.sln",
+    
+    // カスタムシンタックスハイライト設定
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": [
+                    "entity.name.function",
+                    "meta.function-call",
+                    "support.function"
+                ],
+                "settings": {
+                    "foreground": "#ffeb7c", // メソッド - 黄色
+                }
+            },
+            {
+                "scope": [
+                    "variable.other.member",
+                    "variable.other.property",
+                    "meta.field.declaration"
+                ],
+                "settings": {
+                    "foreground": "#FFFFFF" // フィールド変数 - 白
+                }
+            },
+            {
+                "scope": [
+                    "variable.other.local",
+                ],
+                "settings": {
+                    "foreground": "#ffffff" // ローカル変数 - 水色
+                }
+            },
+            {
+                "scope": [
+                    "entity.name.type",
+                    "entity.name.class",
+                    "entity.name.interface"
+                ],
+                "settings": {
+                    "foreground": "#4EC9B0", // クラス・型 - 青緑
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": [
+                    "keyword",
+                    "storage.type",
+                    "storage.modifier"
+                ],
+                "settings": {
+                    "foreground": "#C586C0", // キーワード - 紫
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": [
+                    "string",
+                    "string.quoted"
+                ],
+                "settings": {
+                    "foreground": "#CE9178" // 文字列 - オレンジ
+                }
+            },
+            {
+                "scope": [
+                    "constant.numeric",
+                    "constant.language"
+                ],
+                "settings": {
+                    "foreground": "#B5CEA8" // 数値・定数 - 薄緑
+                }
+            },
+            {
+                "scope": [
+                    "comment",
+                    "comment.line",
+                    "comment.block"
+                ],
+                "settings": {
+                    "foreground": "#6A9955", // コメント - 緑
+                    "fontStyle": "italic"
+                }
+            }
+        ]
+    }
 }
