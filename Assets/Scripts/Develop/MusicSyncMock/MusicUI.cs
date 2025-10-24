@@ -1,69 +1,72 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MusicUI : MonoBehaviour
+namespace Mock.MusicSyncMock
 {
-    [SerializeField]
-    private RectTransform _notesParent;
-    [SerializeField]
-    private RectTransform _originPos;
-    [SerializeField]
-    private RectTransform _noteEndPos;
-    [SerializeField]
-    private float _noteSpeed;
-
-    [SerializeField]
-    private Image _notePrefab;
-
-    private List<Image> _notes = new();
-
-    public void CreateNote(Color color)
+    public class MusicUI : MonoBehaviour
     {
-        Image note = Instantiate(_notePrefab);
-        note.transform.SetParent(_notesParent, false);
-        note.rectTransform.anchoredPosition = _originPos.anchoredPosition;
-        note.color = color;
+        [SerializeField]
+        private RectTransform _notesParent;
+        [SerializeField]
+        private RectTransform _originPos;
+        [SerializeField]
+        private RectTransform _noteEndPos;
+        [SerializeField]
+        private float _noteSpeed;
 
-        _notes.Add(note);
-    }
+        [SerializeField]
+        private Image _notePrefab;
 
-    private void Update()
-    {
-        MoveNotes();
-    }
+        private List<Image> _notes = new();
 
-    private void MoveNotes()
-    {
-        if (_notes.Count < 1) return;
-
-        float deltaSpeed = _noteSpeed * Time.deltaTime;
-
-        for (int i = 0; i < _notes.Count; i++)
+        public void CreateNote(Color color)
         {
-            Image note = _notes[i];
+            Image note = Instantiate(_notePrefab);
+            note.transform.SetParent(_notesParent, false);
+            note.rectTransform.anchoredPosition = _originPos.anchoredPosition;
+            note.color = color;
 
-            Vector2 forEndVec = _noteEndPos.anchoredPosition - note.rectTransform.anchoredPosition;
+            _notes.Add(note);
+        }
 
-            // I“_‚Ü‚Å‚Ì‹——£‚ªƒm[ƒc‚Ì‘¬“x‚æ‚è‚à¬‚³‚¢ê‡B
-            if (forEndVec.magnitude < deltaSpeed)
+        private void Update()
+        {
+            MoveNotes();
+        }
+
+        private void MoveNotes()
+        {
+            if (_notes.Count < 1) return;
+
+            float deltaSpeed = _noteSpeed * Time.deltaTime;
+
+            for (int i = 0; i < _notes.Count; i++)
             {
-                if (Mathf.Approximately(forEndVec.magnitude, 0f))
-                {
-                    // ƒm[ƒc‚ªI“_‚É“ž’B‚µ‚½‚çíœB
-                    Destroy(note.gameObject);
-                    _notes.RemoveAt(i);
-                }
-                else
-                {
-                    // ƒm[ƒc‚ðI“_‚ÉˆÚ“®‚³‚¹‚éB
-                    note.rectTransform.anchoredPosition = _noteEndPos.anchoredPosition;
-                }
-                continue;
-            }
+                Image note = _notes[i];
 
-            Vector2 dir = forEndVec.normalized;
-            note.rectTransform.anchoredPosition += dir * deltaSpeed;
+                Vector2 forEndVec = _noteEndPos.anchoredPosition - note.rectTransform.anchoredPosition;
+
+                // çµ‚ç‚¹ã¾ã§ã®è·é›¢ãŒãƒŽãƒ¼ãƒ„ã®é€Ÿåº¦ã‚ˆã‚Šã‚‚å°ã•ã„å ´åˆã€‚
+                if (forEndVec.magnitude < deltaSpeed)
+                {
+                    if (Mathf.Approximately(forEndVec.magnitude, 0f))
+                    {
+                        // ãƒŽãƒ¼ãƒ„ãŒçµ‚ç‚¹ã«åˆ°é”ã—ãŸã‚‰å‰Šé™¤ã€‚
+                        Destroy(note.gameObject);
+                        _notes.RemoveAt(i);
+                    }
+                    else
+                    {
+                        // ãƒŽãƒ¼ãƒ„ã‚’çµ‚ç‚¹ã«ç§»å‹•ã•ã›ã‚‹ã€‚
+                        note.rectTransform.anchoredPosition = _noteEndPos.anchoredPosition;
+                    }
+                    continue;
+                }
+
+                Vector2 dir = forEndVec.normalized;
+                note.rectTransform.anchoredPosition += dir * deltaSpeed;
+            }
         }
     }
 }
