@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
     "com.unity.addressables": "2.7.4",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.animation.rigging": "1.3.1",
