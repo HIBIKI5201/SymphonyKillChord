@@ -26,14 +26,11 @@ namespace Mock.MusicSyncMock
         private bool _enableQuantize = true; // クオンタイズ機能の有効/無効
 
         private Queue<double> _inputedTimingList = new();
-        private double _baseBeatLength; // 最小公分母から計算された基本拍の長さ
         private StringBuilder _debugLog = new StringBuilder(); // デバッグログ用
 
         private void Start()
         {
-            // 最小公分母を計算して基本拍の長さを設定
-            _baseBeatLength = CalculateLCDBeatLength();
-            Debug.Log($"Base Beat Length (LCD): {_baseBeatLength:F3}");
+            Debug.Log("Music Input initialized with beat-based quantization");
         }
 
         private void Update()
@@ -51,18 +48,18 @@ namespace Mock.MusicSyncMock
             _debugLog.AppendLine("=== Beat Input Debug ===");
             
             double beat = _musicBuffer.CurrentBeat; // 現在の拍を取得。
-            double quantizedBeat = QuantizeBeat(beat); // 基本拍の長さでクオンタイズ
 
             int mostNearTimingIndex = -1;
             double mostNearTimingValue = double.MaxValue;
+            double quantizedBeat = beat; // デフォルトは元の値
 
             // 最後の入力からの拍数を計算し、最も近いタイミングを見つける。
             if (0 < _inputedTimingList.Count)
             {
                 double lastBeat = _inputedTimingList.Last(); // 最後の入力の拍を取得。
-                double betweenBeat = quantizedBeat - lastBeat;
+                double betweenBeat = beat - lastBeat;
 
-                _debugLog.AppendLine($"Input Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
+                _debugLog.AppendLine($"Input Beat: {beat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
 
                 for (int i = 0; i < _timeSignatures.Length; i++)
                 {
@@ -79,10 +76,12 @@ namespace Mock.MusicSyncMock
                     }
                 }
 
-                // 最も近い拍子を常に選択
+                // 最も近い拍子のタイミングにクオンタイズ
                 float detectedBeatLength = 4f / _timeSignatures[mostNearTimingIndex];
+                quantizedBeat = lastBeat + detectedBeatLength;
 
                 _debugLog.AppendLine($"Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
+                _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
 
                 _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
                 _inputedTimingList.Enqueue(quantizedBeat);
@@ -90,15 +89,10 @@ namespace Mock.MusicSyncMock
             }
             else
             {
-                // 初回入力もクオンタイズされたタイミングを記録。
-                _debugLog.AppendLine($"First Input - Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}");
+                // 初回入力は現在のタイミングをそのまま記録
+                _debugLog.AppendLine($"First Input - Beat: {beat:F3}");
                 _musicUI.CreateNote(_noteColor[0]); // 初回は最初の色を使用
-                _inputedTimingList.Enqueue(quantizedBeat);
-                
-                // 初回入力のクオンタイズ情報も表示
-                double multiplier = beat / _baseBeatLength;
-                double roundedMultiplier = Math.Round(multiplier);
-                _debugLog.AppendLine($"First Input Quantize: Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}");
+                _inputedTimingList.Enqueue(beat);
             }
 
             if (_inputedTimingList.Count > 10) // 10個以上は古い入力を削除。
@@ -114,104 +108,5 @@ namespace Mock.MusicSyncMock
 
         private double Abs(double value) => value < 0 ? -value : value;
 
-        /// <summary>
-        /// 拍子の最小公分母から基本拍の長さを計算する
-        /// </summary>
-        private double CalculateLCDBeatLength()
-        {
-            // 各拍子の拍の長さを分数として表現
-            List<(int numerator, int denominator)> fractions = new List<(int, int)>();
-            
-            foreach (float timeSignature in _timeSignatures)
-            {
-                // 4/timeSignature を分数に変換
-                int numerator = 4;
-                int denominator = (int)timeSignature;
-                
-                // 約分
-                int gcd = CalculateGCD(numerator, denominator);
-                numerator /= gcd;
-                denominator /= gcd;
-                
-                fractions.Add((numerator, denominator));
-            }
-
-            // 最小公分母を計算
-            int lcd = CalculateLCD(fractions.Select(f => f.denominator).ToList());
-            
-            // 基本拍の長さ = 1/lcd（より正確な計算）
-            double baseBeatLength = 1.0 / lcd;
-            
-            Debug.Log($"LCD Calculation: LCD={lcd}, Base Beat Length={baseBeatLength:F6}");
-            Debug.Log($"Fractions: {string.Join(", ", fractions.Select(f => $"{f.numerator}/{f.denominator}"))}");
-            
-            return baseBeatLength;
-        }
-
-        /// <summary>
-        /// 複数の整数の最小公倍数を計算する
-        /// </summary>
-        private int CalculateLCM(List<int> values)
-        {
-            if (values.Count == 0) return 1;
-            if (values.Count == 1) return values[0];
-
-            int result = values[0];
-            for (int i = 1; i < values.Count; i++)
-            {
-                result = CalculateLCM(result, values[i]);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 2つの整数の最小公倍数を計算する
-        /// </summary>
-        private int CalculateLCM(int a, int b)
-        {
-            return (a * b) / CalculateGCD(a, b);
-        }
-
-        /// <summary>
-        /// 複数の整数の最小公分母を計算する
-        /// </summary>
-        private int CalculateLCD(List<int> denominators)
-        {
-            return CalculateLCM(denominators);
-        }
-
-        /// <summary>
-        /// 2つの整数の最大公約数を計算する
-        /// </summary>
-        private int CalculateGCD(int a, int b)
-        {
-            while (b != 0)
-            {
-                int temp = b;
-                b = a % b;
-                a = temp;
-            }
-            return a;
-        }
-
-        /// <summary>
-        /// 指定された拍を基本拍の長さでクオンタイズする
-        /// </summary>
-        private double QuantizeBeat(double beat)
-        {
-            if (!_enableQuantize) return beat;
-
-            // より正確なクオンタイズ計算
-            double multiplier = beat / _baseBeatLength;
-            double roundedMultiplier = Math.Round(multiplier);
-            
-            // 分数ベースで正確に計算
-            int lcd = (int)Math.Round(1.0 / _baseBeatLength);
-            double quantizedBeat = roundedMultiplier / lcd;
-            
-            _debugLog.AppendLine($"Quantize: Beat={beat:F3}, Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}, LCD={lcd}, Quantized={quantizedBeat:F3}");
-            
-            return quantizedBeat;
-        }
     }
 }
