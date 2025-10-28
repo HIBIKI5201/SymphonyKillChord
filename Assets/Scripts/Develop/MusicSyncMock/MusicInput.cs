@@ -94,6 +94,11 @@ namespace Mock.MusicSyncMock
                 _debugLog.AppendLine($"First Input - Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}");
                 _musicUI.CreateNote(_noteColor[0]); // 初回は最初の色を使用
                 _inputedTimingList.Enqueue(quantizedBeat);
+                
+                // 初回入力のクオンタイズ情報も表示
+                double multiplier = beat / _baseBeatLength;
+                double roundedMultiplier = Math.Round(multiplier);
+                _debugLog.AppendLine($"First Input Quantize: Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}");
             }
 
             if (_inputedTimingList.Count > 10) // 10個以上は古い入力を削除。
