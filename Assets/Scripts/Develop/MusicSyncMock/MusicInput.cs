@@ -89,10 +89,35 @@ namespace Mock.MusicSyncMock
             }
             else
             {
-                // 初回入力は現在のタイミングをそのまま記録
+                // 初回入力も最も近い拍子のタイミングにクオンタイズ
                 _debugLog.AppendLine($"First Input - Beat: {beat:F3}");
-                _musicUI.CreateNote(_noteColor[0]); // 初回は最初の色を使用
-                _inputedTimingList.Enqueue(beat);
+                
+                // 最も近い拍子を検出（基準は0拍からの距離）
+                for (int i = 0; i < _timeSignatures.Length; i++)
+                {
+                    float beatLength = 4f / _timeSignatures[i]; // 拍子の数から拍の長さを計算（4拍子基準）
+                    double diff = Abs(beat - beatLength); // 0拍からの距離とタイミングの差を計算。
+
+                    _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
+
+                    // 最も近い拍を更新。
+                    if (diff < mostNearTimingValue)
+                    {
+                        mostNearTimingIndex = i;
+                        mostNearTimingValue = diff;
+                    }
+                }
+
+                // 最も近い拍子のタイミングにクオンタイズ
+                float detectedBeatLength = 4f / _timeSignatures[mostNearTimingIndex];
+                quantizedBeat = detectedBeatLength;
+
+                _debugLog.AppendLine($"First Input Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
+                _debugLog.AppendLine($"First Input Quantized Beat: {quantizedBeat:F3}");
+
+                _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
+                _inputedTimingList.Enqueue(quantizedBeat);
+                _debugLog.AppendLine($"First Note created with color index {mostNearTimingIndex} ({_timeSignatures[mostNearTimingIndex]}拍子)");
             }
 
             if (_inputedTimingList.Count > 10) // 10個以上は古い入力を削除。
