@@ -16,7 +16,7 @@ namespace Mock.MusicSyncMock
         private MusicUI _musicUI;
 
         [SerializeField]
-        private float[] _timingBeats = { 1f, 2f, 3f, 4f };
+        private float[] _timeSignatures = { 4f, 8f, 3f, 6f }; // 拍子の数（4拍子、8拍子、3拍子、6拍子）
         [SerializeField]
         private Color[] _noteColor = { Color.white, Color.red, Color.blue, Color.green };
 
@@ -33,23 +33,23 @@ namespace Mock.MusicSyncMock
 
         private void HandleBeatInput()
         {
-            double beat = _musicBuffer.CurrentBeat; // 現在のビートを取得
+            double beat = _musicBuffer.CurrentBeat; // 現在の拍を取得。
 
             int mostNearTimingIndex = -1;
-            double mostNearTimingValue = float.MaxValue;
+            double mostNearTimingValue = double.MaxValue;
 
-            // 最後の入力からのビート数を計算し、最も近いタイミングを見つける
+            // 最後の入力からの拍数を計算し、最も近いタイミングを見つける。
             if (0 < _inputedTimingList.Count)
             {
-                double lastBeat = _inputedTimingList.Last();
+                double lastBeat = _inputedTimingList.Last(); // 最後の入力の拍を取得。
                 double betweenBeat = beat - lastBeat;
 
-                for (int i = 0; i < _timingBeats.Length; i++)
+                for (int i = 0; i < _timeSignatures.Length; i++)
                 {
-                    float timing = _timingBeats[i];
-                    double diff = Abs(betweenBeat - timing);
+                    float beatLength = 4f / _timeSignatures[i]; // 拍子の数から拍の長さを計算（4拍子基準）
+                    double diff = Abs(betweenBeat - beatLength); // 最後の入力からの拍数とタイミングの差を計算。
 
-                    // 最も近いタイミングを更新。
+                    // 最も近い拍を更新。
                     if (diff < mostNearTimingValue)
                     {
                         mostNearTimingIndex = i;
@@ -57,7 +57,7 @@ namespace Mock.MusicSyncMock
                     }
                 }
 
-                Debug.Log($"Input Beat: {beat}, Last Beat: {lastBeat}, Between: {betweenBeat}, Nearest Timing Diff: {mostNearTimingIndex}");
+                Debug.Log($"Input Beat: {beat}, Last Beat: {lastBeat}, Between: {betweenBeat}, Detected Beat Length: {4f / _timeSignatures[mostNearTimingIndex]} ({_timeSignatures[mostNearTimingIndex]}拍子)");
 
                 _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
             }
