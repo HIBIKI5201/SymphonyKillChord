@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace Mock.MusicSyncMock
@@ -26,6 +27,7 @@ namespace Mock.MusicSyncMock
 
         private Queue<double> _inputedTimingList = new();
         private double _baseBeatLength; // 最小公分母から計算された基本拍の長さ
+        private StringBuilder _debugLog = new StringBuilder(); // デバッグログ用
 
         private void Start()
         {
@@ -45,6 +47,9 @@ namespace Mock.MusicSyncMock
 
         private void HandleBeatInput()
         {
+            _debugLog.Clear(); // デバッグログをクリア
+            _debugLog.AppendLine("=== Beat Input Debug ===");
+            
             double beat = _musicBuffer.CurrentBeat; // 現在の拍を取得。
             double quantizedBeat = QuantizeBeat(beat); // 基本拍の長さでクオンタイズ
 
@@ -57,12 +62,14 @@ namespace Mock.MusicSyncMock
                 double lastBeat = _inputedTimingList.Last(); // 最後の入力の拍を取得。
                 double betweenBeat = quantizedBeat - lastBeat;
 
+                _debugLog.AppendLine($"Input Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
+
                 for (int i = 0; i < _timeSignatures.Length; i++)
                 {
                     float beatLength = 4f / _timeSignatures[i]; // 拍子の数から拍の長さを計算（4拍子基準）
                     double diff = Abs(betweenBeat - beatLength); // 最後の入力からの拍数とタイミングの差を計算。
 
-                    Debug.Log($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
+                    _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
 
                     // 最も近い拍を更新。
                     if (diff < mostNearTimingValue)
@@ -75,17 +82,16 @@ namespace Mock.MusicSyncMock
                 // 最も近い拍子を常に選択
                 float detectedBeatLength = 4f / _timeSignatures[mostNearTimingIndex];
 
-                Debug.Log($"Input Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
-                Debug.Log($"Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
+                _debugLog.AppendLine($"Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
 
                 _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
                 _inputedTimingList.Enqueue(quantizedBeat);
-                Debug.Log($"Note created with color index {mostNearTimingIndex} ({_timeSignatures[mostNearTimingIndex]}拍子)");
+                _debugLog.AppendLine($"Note created with color index {mostNearTimingIndex} ({_timeSignatures[mostNearTimingIndex]}拍子)");
             }
             else
             {
                 // 初回入力もクオンタイズされたタイミングを記録。
-                Debug.Log($"First Input - Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}");
+                _debugLog.AppendLine($"First Input - Beat: {beat:F3}, Quantized Beat: {quantizedBeat:F3}");
                 _musicUI.CreateNote(_noteColor[0]); // 初回は最初の色を使用
                 _inputedTimingList.Enqueue(quantizedBeat);
             }
@@ -95,7 +101,10 @@ namespace Mock.MusicSyncMock
                 _inputedTimingList.Dequeue();
             }
 
-            Debug.Log($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}");
+            _debugLog.AppendLine($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}");
+            
+            // すべてのデバッグ情報を一括で出力
+            Debug.Log(_debugLog.ToString());
         }
 
         private double Abs(double value) => value < 0 ? -value : value;
@@ -187,7 +196,7 @@ namespace Mock.MusicSyncMock
             double roundedMultiplier = Math.Round(multiplier);
             double quantizedBeat = roundedMultiplier * _baseBeatLength;
             
-            Debug.Log($"Quantize: Beat={beat:F3}, Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}, Quantized={quantizedBeat:F3}");
+            _debugLog.AppendLine($"Quantize: Beat={beat:F3}, Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}, Quantized={quantizedBeat:F3}");
             
             return quantizedBeat;
         }
