@@ -139,8 +139,13 @@ namespace Mock.MusicSyncMock
             // 最小公分母を計算
             int lcd = CalculateLCD(fractions.Select(f => f.denominator).ToList());
             
-            // 基本拍の長さ = 1/lcd
-            return 1.0 / lcd;
+            // 基本拍の長さ = 1/lcd（より正確な計算）
+            double baseBeatLength = 1.0 / lcd;
+            
+            Debug.Log($"LCD Calculation: LCD={lcd}, Base Beat Length={baseBeatLength:F6}");
+            Debug.Log($"Fractions: {string.Join(", ", fractions.Select(f => $"{f.numerator}/{f.denominator}"))}");
+            
+            return baseBeatLength;
         }
 
         /// <summary>
@@ -196,12 +201,15 @@ namespace Mock.MusicSyncMock
         {
             if (!_enableQuantize) return beat;
 
-            // 基本拍の長さの倍数に最も近い値にクオンタイズ
+            // より正確なクオンタイズ計算
             double multiplier = beat / _baseBeatLength;
             double roundedMultiplier = Math.Round(multiplier);
-            double quantizedBeat = roundedMultiplier * _baseBeatLength;
             
-            _debugLog.AppendLine($"Quantize: Beat={beat:F3}, Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}, Quantized={quantizedBeat:F3}");
+            // 分数ベースで正確に計算
+            int lcd = (int)Math.Round(1.0 / _baseBeatLength);
+            double quantizedBeat = roundedMultiplier / lcd;
+            
+            _debugLog.AppendLine($"Quantize: Beat={beat:F3}, Multiplier={multiplier:F3}, Rounded={roundedMultiplier:F0}, LCD={lcd}, Quantized={quantizedBeat:F3}");
             
             return quantizedBeat;
         }
