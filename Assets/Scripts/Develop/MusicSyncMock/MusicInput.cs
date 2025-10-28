@@ -48,79 +48,46 @@ namespace Mock.MusicSyncMock
             _debugLog.AppendLine("=== Beat Input Debug ===");
             
             double beat = _musicBuffer.CurrentBeat; // 現在の拍を取得。
+            double quantizedBeat;
+            int detectedTimeSignatureIndex;
 
-            int mostNearTimingIndex = -1;
-            double mostNearTimingValue = double.MaxValue;
-            double quantizedBeat = beat; // デフォルトは元の値
-
-            // 最後の入力からの拍数を計算し、最も近いタイミングを見つける。
             if (0 < _inputedTimingList.Count)
             {
-                double lastBeat = _inputedTimingList.Last(); // 最後の入力の拍を取得。
+                // 最後の入力との差を計算する。
+                double lastBeat = _inputedTimingList.Last();
                 double betweenBeat = beat - lastBeat;
-
+                
                 _debugLog.AppendLine($"Input Beat: {beat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
-
-                for (int i = 0; i < _timeSignatures.Length; i++)
-                {
-                    float beatLength = 4f / _timeSignatures[i]; // 拍子の数から拍の長さを計算（4拍子基準）
-                    double diff = Abs(betweenBeat - beatLength); // 最後の入力からの拍数とタイミングの差を計算。
-
-                    _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
-
-                    // 最も近い拍を更新。
-                    if (diff < mostNearTimingValue)
-                    {
-                        mostNearTimingIndex = i;
-                        mostNearTimingValue = diff;
-                    }
-                }
-
-                // 最も近い拍子のタイミングにクオンタイズ
-                float detectedBeatLength = 4f / _timeSignatures[mostNearTimingIndex];
-                quantizedBeat = lastBeat + detectedBeatLength;
-
-                _debugLog.AppendLine($"Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
+                
+                // 最も近い拍子を検出する。
+                detectedTimeSignatureIndex = FindNearestTimeSignature(betweenBeat);
+                // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
+                quantizedBeat = lastBeat + GetBeatLength(detectedTimeSignatureIndex);
+                
+                _debugLog.AppendLine($"Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
-
-                _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
-                _inputedTimingList.Enqueue(quantizedBeat);
-                _debugLog.AppendLine($"Note created with color index {mostNearTimingIndex} ({_timeSignatures[mostNearTimingIndex]}拍子)");
             }
             else
             {
-                // 初回入力も最も近い拍子のタイミングにクオンタイズ
+                // 初回入力処理
                 _debugLog.AppendLine($"First Input - Beat: {beat:F3}");
                 
-                // 最も近い拍子を検出（基準は0拍からの距離）
-                for (int i = 0; i < _timeSignatures.Length; i++)
-                {
-                    float beatLength = 4f / _timeSignatures[i]; // 拍子の数から拍の長さを計算（4拍子基準）
-                    double diff = Abs(beat - beatLength); // 0拍からの距離とタイミングの差を計算。
-
-                    _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
-
-                    // 最も近い拍を更新。
-                    if (diff < mostNearTimingValue)
-                    {
-                        mostNearTimingIndex = i;
-                        mostNearTimingValue = diff;
-                    }
-                }
-
-                // 最も近い拍子のタイミングにクオンタイズ
-                float detectedBeatLength = 4f / _timeSignatures[mostNearTimingIndex];
-                quantizedBeat = detectedBeatLength;
-
-                _debugLog.AppendLine($"First Input Detected Beat Length: {detectedBeatLength:F3} ({_timeSignatures[mostNearTimingIndex]}拍子), Timing Diff: {mostNearTimingValue:F3}");
+                // 最も近い拍子を検出する。
+                detectedTimeSignatureIndex = FindNearestTimeSignature(beat);
+                // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
+                quantizedBeat = GetBeatLength(detectedTimeSignatureIndex);
+                
+                _debugLog.AppendLine($"First Input Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"First Input Quantized Beat: {quantizedBeat:F3}");
-
-                _musicUI.CreateNote(_noteColor[mostNearTimingIndex]);
-                _inputedTimingList.Enqueue(quantizedBeat);
-                _debugLog.AppendLine($"First Note created with color index {mostNearTimingIndex} ({_timeSignatures[mostNearTimingIndex]}拍子)");
             }
 
-            if (_inputedTimingList.Count > 10) // 10個以上は古い入力を削除。
+            // ノート作成と記録
+            _musicUI.CreateNote(_noteColor[detectedTimeSignatureIndex]);
+            _inputedTimingList.Enqueue(quantizedBeat);
+            _debugLog.AppendLine($"Note created with color index {detectedTimeSignatureIndex} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
+
+            // 古い入力を削除
+            if (_inputedTimingList.Count > 10)
             {
                 _inputedTimingList.Dequeue();
             }
@@ -131,7 +98,45 @@ namespace Mock.MusicSyncMock
             Debug.Log(_debugLog.ToString());
         }
 
-        private double Abs(double value) => value < 0 ? -value : value;
+        /// <summary>
+        /// 指定された時間差に最も近い拍子のインデックスを取得する
+        /// </summary>
+        /// <param name="timeDifference">時間差</param>
+        /// <returns>最も近い拍子のインデックス</returns>
+        private int FindNearestTimeSignature(double timeDifference)
+        {
+            int mostNearTimingIndex = 0;
+            double mostNearTimingValue = double.MaxValue;
 
+            for (int i = 0; i < _timeSignatures.Length; i++)
+            {
+                float beatLength = GetBeatLength(i);
+                double diff = Abs(timeDifference - beatLength);
+
+                _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
+
+                if (diff < mostNearTimingValue)
+                {
+                    mostNearTimingIndex = i;
+                    mostNearTimingValue = diff;
+                }
+            }
+
+            return mostNearTimingIndex;
+        }
+
+        /// <summary>
+        /// 指定された拍子インデックスの拍の長さを取得する
+        /// </summary>
+        /// <param name="timeSignatureIndex">拍子インデックス</param>
+        /// <returns>拍の長さ</returns>
+        private float GetBeatLength(int timeSignatureIndex) => 4f / _timeSignatures[timeSignatureIndex];
+
+        /// <summary>
+        /// 指定された値の絶対値を取得する
+        /// </summary>
+        /// <param name="value">値</param>
+        /// <returns>絶対値</returns>
+        private double Abs(double value) => value < 0 ? -value : value;
     }
 }
