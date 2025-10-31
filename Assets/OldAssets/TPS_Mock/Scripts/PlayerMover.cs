@@ -1,38 +1,44 @@
 ﻿ using UnityEngine;
 
-public class PlayerMover
+namespace Mock.TPS
 {
-    public PlayerMover(Transform player, Transform camera)
-    {
-        _player = player;
-        _camera = camera;
-    }
-
     /// <summary>
-    ///     カメラ正面方向を基準にプレイヤーの移動量を計算する。
+    ///     プレイヤーの移動計算クラス。
     /// </summary>
-    /// <param name="inputDirection"></param>
-    public Vector3 CalcPlayerVelocityByInputDirection(in Vector3 inputDirection)
+    public class PlayerMover
     {
-        // カメラとプレイヤーの差からカメラの前方向を計算。
-        Vector3 cameraForward = (_player.position - _camera.position).normalized;
-        cameraForward.y = 0f;
+        public PlayerMover(Transform player, Transform camera)
+        {
+            _player = player;
+            _camera = camera;
+        }
 
-        // カメラの右方向を水平面上の垂直方向ベクトルとして計算。
-        Vector3 cameraRight = new Vector3(cameraForward.z, 0f, -cameraForward.x);
+        /// <summary>
+        ///     カメラ正面方向を基準にプレイヤーの移動量を計算する。
+        /// </summary>
+        /// <param name="inputDirection"></param>
+        public Vector3 CalcPlayerVelocityByInputDirection(in Vector3 inputDirection)
+        {
+            // カメラとプレイヤーの差からカメラの前方向を計算。
+            Vector3 cameraForward = (_player.position - _camera.position).normalized;
+            cameraForward.y = 0f;
 
-        // 入力方向をカメラ位置基準で変換。
-        Vector3 moveDir = cameraForward * inputDirection.z + cameraRight * inputDirection.x;
-        moveDir.y = 0f;
+            // カメラの右方向を水平面上の垂直方向ベクトルとして計算。
+            Vector3 cameraRight = new Vector3(cameraForward.z, 0f, -cameraForward.x);
 
-        // 移動量を計算。
-        Vector3 velocity = moveDir.normalized * _moveSpeed * Time.deltaTime;
+            // 入力方向をカメラ位置基準で変換。
+            Vector3 moveDir = cameraForward * inputDirection.z + cameraRight * inputDirection.x;
+            moveDir.y = 0f;
 
-        return velocity;
+            // 移動量を計算。
+            Vector3 velocity = moveDir.normalized * _moveSpeed * Time.deltaTime;
+
+            return velocity;
+        }
+
+        private readonly Transform _player;
+        private readonly Transform _camera;
+
+        private float _moveSpeed = 5f;
     }
-
-    private readonly Transform _player;
-    private readonly Transform _camera;
-
-    private float _moveSpeed = 5f;
 }
