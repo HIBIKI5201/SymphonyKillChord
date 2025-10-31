@@ -156,7 +156,7 @@ MonoBehaviour:
   _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
-  _volume: 1
+  _volume: 0.1
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
   need_to_player_update_all: 1
@@ -564,16 +564,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MusicInput
   _musicBuffer: {fileID: 124840359}
   _musicUI: {fileID: 1847886713}
-  _timingBeats:
-  - 0.125
-  - 0.25
-  - 0.33
-  - 0.5
-  - 0.66
-  - 1
-  - 1.33
-  - 2
+  _timeSignatures:
+  - 32
+  - 16
+  - 12
+  - 8
+  - 6
   - 4
+  - 3
+  - 2
+  - 1
   _noteColor:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 1, g: 0.38244036, b: 0, a: 1}
@@ -584,6 +584,7 @@ MonoBehaviour:
   - {r: 0.59375954, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 0.9233513, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
+  _enableQuantize: 1
 --- !u!4 &1168114727
 Transform:
   m_ObjectHideFlags: 0
