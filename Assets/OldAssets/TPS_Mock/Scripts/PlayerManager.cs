@@ -11,8 +11,8 @@ namespace Mock.TPS
         [SerializeField,Tooltip("プレイヤーのステータス")]
         private PlayerStatus _playerStatus = new PlayerStatus();
 
-        [SerializeField, Tooltip("カメラのX回転を反転")]
-        private bool _cameraFlipX = false;
+        [SerializeField, Tooltip("コンフィグ")]
+        private PlayerConfig _config;
 
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
@@ -23,7 +23,7 @@ namespace Mock.TPS
         {
             Rigidbody rb = GetComponent<Rigidbody>();
 
-            _playerMover = new PlayerMover(_playerStatus,
+            _playerMover = new PlayerMover(_playerStatus, _config,
                 transform, Camera.main.transform, rb);
 
             _inputBuffer = FindAnyObjectByType<InputBuffer>();
@@ -37,7 +37,6 @@ namespace Mock.TPS
 
         private void OnValidate()
         {
-            if (_playerMover != null) { _playerMover.CameraFlipX = _cameraFlipX; }
         }
 
         private void InputEventRegister(InputBuffer buffer)
