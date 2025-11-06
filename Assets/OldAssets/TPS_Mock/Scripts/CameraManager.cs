@@ -9,6 +9,11 @@ namespace Mock.TPS
     [RequireComponent(typeof(CinemachineCamera))]
     public class CameraManager : MonoBehaviour
     {
+        public void Init(InputBuffer inputBuffer)
+        {
+            _inputBuffer = inputBuffer;
+        }
+
         [SerializeField]
         private CameraConfig _config;
 
@@ -27,7 +32,6 @@ namespace Mock.TPS
 
         private void OnEnable()
         {
-            _inputBuffer = FindAnyObjectByType<InputBuffer>();
             if (_inputBuffer != null)
             {
                 _inputBuffer.LookAction.Performed += _mover.RotateCamera;

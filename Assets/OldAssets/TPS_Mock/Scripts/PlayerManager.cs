@@ -8,6 +8,11 @@ namespace Mock.TPS
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
+        public void Init(InputBuffer inputBuffer)
+        {
+            _inputBuffer = inputBuffer;
+        }
+
         [SerializeField, Tooltip("プレイヤーのステータス")]
         private PlayerStatus _playerStatus;
 
@@ -26,7 +31,6 @@ namespace Mock.TPS
             _playerMover = new PlayerMover(_playerStatus, _config,
                 transform, Camera.main.transform, rb);
 
-            _inputBuffer = FindAnyObjectByType<InputBuffer>();
             InputEventRegister(_inputBuffer);
         }
 
