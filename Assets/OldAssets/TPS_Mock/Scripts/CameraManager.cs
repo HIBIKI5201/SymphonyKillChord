@@ -12,6 +12,7 @@ namespace Mock.TPS
         [SerializeField]
         private CameraConfig _config;
 
+        private InputBuffer _inputBuffer;
         private CameraMover _mover;
 
         private CinemachineCamera _camera;
@@ -21,6 +22,25 @@ namespace Mock.TPS
             if (TryGetComponent(out _camera))
             {
                 _mover = new CameraMover(_config, transform, _camera.Follow);
+            }
+        }
+
+        private void OnEnable()
+        {
+            _inputBuffer = FindAnyObjectByType<InputBuffer>();
+            if (_inputBuffer != null)
+            {
+                _inputBuffer.LookAction.Performed += _mover.RotateCamera;
+                _inputBuffer.LookAction.Canceled += _mover.RotateCamera;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_inputBuffer != null)
+            {
+                _inputBuffer.LookAction.Performed -= _mover.RotateCamera;
+                _inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
             }
         }
 
