@@ -1,19 +1,27 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mock.TPS
 {
-    public class EnemyManager : MonoBehaviour
+    public class EnemyManager : MonoBehaviour, ICharacter
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
+
+        [SerializeField]
+        private float _maxHealth = 100f;
+        [SerializeField]
+        private HealthbarManager _healthbarManager;
+
+        private HealthEntity _healthEntity;
+
+        private void Awake()
         {
-        
+            _healthEntity = new HealthEntity(_maxHealth);
+            _healthEntity.OnHealthChanged += _healthbarManager.SetHealthBar;
         }
 
-        // Update is called once per frame
-        void Update()
+        private void Update()
         {
-        
+            _healthbarManager.MovePosition(transform.position);
         }
     }
 }
