@@ -59,6 +59,11 @@ namespace Mock.TPS
             _playerMover.FixedUpdate();
         }
 
+        private void OnDrawGizmos()
+        {
+            _playerAttacker?.OnDrawGizmos();
+        }
+
         private void InputEventRegister(InputBuffer buffer)
         {
             if (buffer == null) { return; }
