@@ -12,5 +12,8 @@ namespace Mock.TPS
 
         [SerializeField, Tooltip("カメラのX回転を反転")]
         private bool _isCameraFlipX;
+
+        [SerializeField, Tooltip("攻撃が当たらないタグ")]
+        private string _ignoreAttackTagName = "Player";
     }
 }
