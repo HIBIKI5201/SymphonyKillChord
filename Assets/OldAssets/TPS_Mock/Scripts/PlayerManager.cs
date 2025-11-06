@@ -9,7 +9,7 @@ namespace Mock.TPS
     public class PlayerManager : MonoBehaviour
     {
         [SerializeField, Tooltip("カメラのX回転を反転")]
-        private bool _cameraMoveXFlip = false;
+        private bool _cameraFlipX = false;
 
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
@@ -29,6 +29,11 @@ namespace Mock.TPS
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
+        }
+
+        private void OnValidate()
+        {
+            if (_playerMover != null) { _playerMover.CameraFlipX = _cameraFlipX; }
         }
 
         private void InputEventRegister(InputBuffer buffer)
@@ -53,9 +58,7 @@ namespace Mock.TPS
 
         private void HandleInputLook(Vector2 input)
         {
-            float cameraX = input.x;
-            if (_cameraMoveXFlip) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
-            transform.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
+            _playerMover.RotatePlayer(input);
         }
 
         private void HandleInputMove(Vector2 input)
