@@ -23,5 +23,20 @@ namespace Mock.TPS
                 _mover = new CameraMover(_config, transform, _camera.Follow);
             }
         }
+
+        private void Update()
+        {
+            _mover.Update();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            // カメラが無ければ取得を試みる。
+            if (_camera == null && !TryGetComponent(out _camera)) { return; } 
+
+            Vector3 position = _camera.Follow.position + _config.CameraOffset;
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(position, 0.2f);
+        }
     }
 }
