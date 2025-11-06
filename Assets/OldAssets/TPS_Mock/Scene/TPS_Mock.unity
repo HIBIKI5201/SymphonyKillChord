@@ -189,7 +189,7 @@ Transform:
   m_GameObject: {fileID: 9434006}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 1.9, z: -4.8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a100bfb2b0721814eaaed6d2ff21ab87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.CameraManager
-  _config: {fileID: 0}
+  _config: {fileID: 11400000, guid: dd0167c2fddb2d94e93de3154bc93b25, type: 2}
 --- !u!1 &99084027
 GameObject:
   m_ObjectHideFlags: 0
@@ -604,7 +604,7 @@ Transform:
   m_GameObject: {fileID: 1000218566}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 1.9, z: -4.8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
