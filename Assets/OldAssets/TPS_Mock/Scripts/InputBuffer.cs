@@ -25,10 +25,12 @@ namespace Mock.TPS
         public void Awake()
         {
             PlayerInput playerInput = GetComponent<PlayerInput>();
-            _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
-            _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-
-            Debug.Log(_lookActionEntity);
+            if (playerInput != null)
+            {
+                playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+                _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
+                _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
+            }
         }
     }
 
