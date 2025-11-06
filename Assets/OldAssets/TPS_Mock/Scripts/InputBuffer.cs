@@ -1,25 +1,59 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Mock.TPS
 {
     /// <summary>
     ///     入力バッファクラス。
     /// </summary>
+    [RequireComponent(typeof(PlayerInput))]
     public class InputBuffer : MonoBehaviour
     {
-        /// <summary> 視点移動方向プロパティ </summary>
-        public Vector2 LookDirection => _lookDirection;
+        public InputActionEntity<Vector2> LookAction => _lookActionEntity;
+        public InputActionEntity<Vector2> MoveAction => _moveActionEntity;
 
-        /// <summary> 移動方向プロパティ </summary>
-        public Vector3 MoveDirection => _moveDirection;
+        [SerializeField]
+        private string _lookActionName = "Look";
+        [SerializeField]
+        private string _moveActionName = "Move";
 
-        private Vector2 _lookDirection;
-        private Vector3 _moveDirection;
+        private InputActionEntity<Vector2> _lookActionEntity;
+        private InputActionEntity<Vector2> _moveActionEntity;
 
-        private void Update()
+        public void Start()
         {
-            _moveDirection = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-            _moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+            PlayerInput playerInput = GetComponent<PlayerInput>();
+            _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
+            _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
         }
+    }
+
+    public class InputActionEntity<T> where T : struct
+    {
+        public InputActionEntity(InputAction inputAction)
+        {
+            _inputAction = inputAction;
+        }
+
+        public event Action<T> Started
+        {
+            add => _inputAction.started += ctx => value(ctx.ReadValue<T>());
+            remove => _inputAction.started -= ctx => value(ctx.ReadValue<T>());
+        }
+
+        public event Action<T> Performed
+        {
+            add => _inputAction.performed += ctx => value(ctx.ReadValue<T>());
+            remove => _inputAction.performed -= ctx => value(ctx.ReadValue<T>());
+        }
+
+        public event Action<T> Canceled
+        {
+            add => _inputAction.canceled += ctx => value(ctx.ReadValue<T>());
+            remove => _inputAction.canceled -= ctx => value(ctx.ReadValue<T>());
+        }
+
+        private InputAction _inputAction;
     }
 }
