@@ -8,9 +8,15 @@ namespace Mock.TPS
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer)
+        public void Init(InputBuffer inputBuffer, CameraManager cameraManager)
         {
             _inputBuffer = inputBuffer;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+
+            _playerMover = new PlayerMover(_playerStatus, _config,
+                transform, Camera.main.transform, rb);
+            _playerAttacker = new PlayerAttacker(_playerStatus, cameraManager.transform);
         }
 
         [SerializeField, Tooltip("プレイヤーのステータス")]
@@ -27,12 +33,6 @@ namespace Mock.TPS
 
         private void OnEnable()
         {
-            Rigidbody rb = GetComponent<Rigidbody>();
-
-            _playerMover = new PlayerMover(_playerStatus, _config,
-                transform, Camera.main.transform, rb);
-            _playerAttacker = new PlayerAttacker(_playerStatus);
-
             InputEventRegister(_inputBuffer);
         }
 
@@ -73,6 +73,11 @@ namespace Mock.TPS
         private void HandleInputMove(Vector2 input)
         {
             _moveInput = new Vector3(input.x, 0, input.y);
+        }
+
+        private void HandleInputAttack()
+        {
+            _playerAttacker.Attack();
         }
     }
 }
