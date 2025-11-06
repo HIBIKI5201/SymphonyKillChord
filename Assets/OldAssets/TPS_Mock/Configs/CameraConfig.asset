@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a35570784e70ac4fb79341f20c905c4, type: 3}
   m_Name: CameraConfig
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.CameraConfig
+  _cameraOffset: {x: 0, y: 2, z: -4}
+  _cameraFollowSpeed: 10
+  _cameraLookAtSpeed: 10
   _cameraRotationSpeed: 3
