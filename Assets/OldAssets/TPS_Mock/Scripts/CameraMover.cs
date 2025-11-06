@@ -3,12 +3,11 @@
 namespace Mock.TPS
 {
     /// <summary>
-    ///     カメラ移動クラス。
+    ///     TPS用カメラ移動クラス。
     /// </summary>
     public class CameraMover
     {
-        public CameraMover(CameraConfig config,
-            Transform camera, Transform target)
+        public CameraMover(CameraConfig config, Transform camera, Transform target)
         {
             _config = config;
             _camera = camera;
@@ -29,23 +28,36 @@ namespace Mock.TPS
 
         private void UpdateMoveCamera()
         {
-            // カメラ位置をターゲットのオフセット位置に設定。
-            Vector3 targetPosition = _target.position
-                + Quaternion.Euler(0f, _currentCameraAngleY, 0f) * _config.CameraOffset;
-            _camera.position = Vector3.Lerp(_camera.position, targetPosition,
-                Mathf.Clamp01(Time.deltaTime * _config.CameraFollowSpeed));
+            // カメラオフセットを回転させる。
+            Quaternion rotation = Quaternion.Euler(0f, _currentCameraAngleY, 0f);
+            Vector3 rotatedCameraOffset = rotation * _config.CameraOffset;
+
+            // ターゲット位置からのカメラ目標位置を計算。
+            Vector3 targetPosition = _target.position + rotatedCameraOffset;
+
+            _camera.position = Vector3.Lerp(
+                _camera.position,
+                targetPosition,
+                Mathf.Clamp01(Time.deltaTime * _config.CameraFollowSpeed)
+            );
         }
 
         private void UpdateRotateCamera()
         {
-            // カメラの回転をターゲットの回転に合わせる。
+            // 注視点オフセットを回転させる。
+            Quaternion rotation = Quaternion.Euler(0f, _currentCameraAngleY, 0f);
+            Vector3 rotatedLookAtOffset = rotation * _config.CameraLookAtOffset;
+
+            // 注視点方向を算出。
+            Vector3 currentLookAtPosition = _target.position + rotatedLookAtOffset;
             Quaternion targetRotation = Quaternion.LookRotation(
-                _target.position + _config.CameraLookAtOffset - _camera.position);
+                currentLookAtPosition - _camera.position);
 
             _camera.rotation = Quaternion.Slerp(
                 _camera.rotation,
                 targetRotation,
-                Mathf.Clamp01(Time.deltaTime * _config.CameraLookAtSpeed));
+                Mathf.Clamp01(Time.deltaTime * _config.CameraLookAtSpeed)
+            );
         }
 
         private readonly CameraConfig _config;
