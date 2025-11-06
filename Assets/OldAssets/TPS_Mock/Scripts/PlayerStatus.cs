@@ -6,8 +6,8 @@ namespace Mock.TPS
     /// <summary>
     ///     プレイヤーのステータスクラス。
     /// </summary>
-    [Serializable]
-    public class PlayerStatus
+    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = "Mock/TPS/" + nameof(PlayerStatus), order = 0)]
+    public class PlayerStatus : ScriptableObject
     {
         public float MoveSpeed => _moveSpeed;
         public float JumpForce => _jumpForce;
