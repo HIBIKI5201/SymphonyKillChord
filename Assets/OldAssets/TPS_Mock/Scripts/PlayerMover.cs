@@ -7,8 +7,10 @@ namespace Mock.TPS
     /// </summary>
     public class PlayerMover
     {
-        public PlayerMover(Transform player, Transform camera, Rigidbody rb)
+        public PlayerMover(PlayerStatus status,
+            Transform player, Transform camera, Rigidbody rb)
         {
+            _status = status;
             _player = player;
             _camera = camera;
             _rb = rb;
@@ -34,7 +36,7 @@ namespace Mock.TPS
             moveDir.y = 0f;
 
             // 移動量を計算。
-            Vector3 velocity = moveDir.normalized * _moveSpeed * Time.deltaTime;
+            Vector3 velocity = moveDir.normalized * _status.MoveSpeed * Time.deltaTime;
 
             return velocity;
         }
@@ -46,17 +48,16 @@ namespace Mock.TPS
 
         public void RotatePlayer(Vector2 input)
         {
-            float cameraX = input.x;
+            float cameraX = input.x * _status.RotationSpeed;
             if (_cameraMoveXFlip) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
             _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
         }
 
+        private readonly PlayerStatus _status;
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
 
         private bool _cameraMoveXFlip = false;
-
-        private float _moveSpeed = 5f;
     }
 }
