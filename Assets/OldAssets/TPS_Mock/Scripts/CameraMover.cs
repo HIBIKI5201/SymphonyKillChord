@@ -7,6 +7,11 @@ namespace Mock.TPS
     /// </summary>
     public class CameraMover
     {
+        public CameraMover(Transform camera)
+        {
+            _camera = camera;
+        }
 
+        private readonly Transform _camera;
     }
 }
