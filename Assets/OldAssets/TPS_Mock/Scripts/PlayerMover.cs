@@ -7,10 +7,11 @@ namespace Mock.TPS
     /// </summary>
     public class PlayerMover
     {
-        public PlayerMover(Transform player, Transform camera)
+        public PlayerMover(Transform player, Transform camera, Rigidbody rb)
         {
             _player = player;
             _camera = camera;
+            _rb = rb;
         }
 
         /// <summary>
@@ -36,13 +37,14 @@ namespace Mock.TPS
             return velocity;
         }
 
-        public void MovePlayerPosition(Vector3 velocity)
+        public void SetPlayerVelocity(Vector3 velocity)
         {
-            _player.position += velocity;
+            _rb.angularVelocity = velocity;
         }
 
         private readonly Transform _player;
         private readonly Transform _camera;
+        private readonly Rigidbody _rb;
 
         private float _moveSpeed = 5f;
     }
