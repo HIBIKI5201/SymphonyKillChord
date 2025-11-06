@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Cinemachine;
+using UnityEngine;
 
 namespace Mock.TPS
 {
@@ -15,7 +16,7 @@ namespace Mock.TPS
         public float CameraLookAtSpeed => _cameraLookAtSpeed;
 
         public float CameraRotationSpeed => _cameraRotationSpeed;
-        public Vector2 MaxPicth => _maxPicth;
+        public Vector2 PicthRange => _picthRange;
 
         [SerializeField]
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
@@ -29,7 +30,7 @@ namespace Mock.TPS
 
         [SerializeField]
         private float _cameraRotationSpeed = 3f;
-        [SerializeField]
-        private Vector2 _maxPicth = new Vector2(-30f, 60f);
+        [SerializeField, MinMaxRangeSlider(-90, 90)]
+        private Vector2 _picthRange = new Vector2(-30f, 60f);
     }
 }
