@@ -8,7 +8,7 @@ namespace Mock.TPS
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
-        [SerializeField,Tooltip("プレイヤーのステータス")]
+        [SerializeField, Tooltip("プレイヤーのステータス")]
         private PlayerStatus _playerStatus;
 
         [SerializeField, Tooltip("コンフィグ")]
@@ -39,6 +39,8 @@ namespace Mock.TPS
         {
             Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
             _playerMover.SetPlayerVelocity(velocity);
+
+            _playerMover.Update();
         }
 
         private void FixedUpdate()
@@ -50,8 +52,6 @@ namespace Mock.TPS
         {
             if (buffer == null) { return; }
 
-            buffer.LookAction.Performed += HandleInputLook;
-            buffer.LookAction.Canceled += HandleInputLook;
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
         }
@@ -60,15 +60,8 @@ namespace Mock.TPS
         {
             if (buffer == null) { return; }
 
-            buffer.LookAction.Performed -= HandleInputLook;
-            buffer.LookAction.Canceled -= HandleInputLook;
             buffer.MoveAction.Performed -= HandleInputMove;
             buffer.MoveAction.Canceled -= HandleInputMove;
-        }
-
-        private void HandleInputLook(Vector2 input)
-        {
-            _playerMover.RotatePlayer(input);
         }
 
         private void HandleInputMove(Vector2 input)

@@ -54,7 +54,6 @@ namespace Mock.TPS
 
         public void Update()
         {
-
             _player.LookAt(_player.position + new Vector3(_velocity.x, 0f, _velocity.z));
         }
 
