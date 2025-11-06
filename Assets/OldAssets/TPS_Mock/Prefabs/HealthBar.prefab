@@ -89,7 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bde3f227f78d0094a92e76f6cac76977, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.HealthbarManager
-  _healthBar: {fileID: 6478141840092906337}
+  _bar: {fileID: 4932191654363062044}
+  _guage: {fileID: 6478141840092906337}
 --- !u!1 &5768112063685905022
 GameObject:
   m_ObjectHideFlags: 0
