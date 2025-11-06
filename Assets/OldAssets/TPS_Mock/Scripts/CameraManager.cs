@@ -9,6 +9,9 @@ namespace Mock.TPS
     [RequireComponent(typeof(CinemachineCamera))]
     public class CameraManager : MonoBehaviour
     {
+        [SerializeField]
+        private CameraConfig _config;
+
         private CameraMover _mover;
 
         private CinemachineCamera _camera;
@@ -17,7 +20,7 @@ namespace Mock.TPS
         {
             if (TryGetComponent(out _camera))
             {
-                _mover = new CameraMover(transform, _camera.Follow);
+                _mover = new CameraMover(_config, transform, _camera.Follow);
             }
         }
     }
