@@ -17,9 +17,24 @@ namespace Mock.TPS
 
         public void Update()
         {
+            MoveCamera();
+        }
+
+        private void MoveCamera()
+        {
             // カメラ位置をターゲットのオフセット位置に設定。
             Vector3 targetPosition = _target.position + _config.CameraOffset;
             _camera.position = Vector3.Lerp(_camera.position, targetPosition,
+                Mathf.Clamp01(Time.deltaTime));
+        }
+
+        private void RotateCamera()
+        {
+            // カメラの回転をターゲットの回転に合わせる。
+            Quaternion targetRotation = Quaternion.LookRotation(_target.position - _camera.position);
+            _camera.rotation = Quaternion.Slerp(
+                _camera.rotation,
+                targetRotation,
                 Mathf.Clamp01(Time.deltaTime * _config.CameraRotationSpeed));
         }
 
