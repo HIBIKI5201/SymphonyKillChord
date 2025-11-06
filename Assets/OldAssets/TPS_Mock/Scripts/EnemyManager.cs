@@ -6,6 +6,8 @@ namespace Mock.TPS
     {
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
 
+        public void Dead() => Destroy(gameObject);
+
         [SerializeField]
         private float _maxHealth = 100f;
         [SerializeField]
@@ -17,6 +19,7 @@ namespace Mock.TPS
         {
             _healthEntity = new HealthEntity(_maxHealth);
             _healthEntity.OnHealthChanged += _healthbarManager.SetHealthBar;
+            _healthEntity.OnDeath += Dead;
         }
 
         private void Update()
