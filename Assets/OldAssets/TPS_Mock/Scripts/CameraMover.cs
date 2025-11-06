@@ -23,14 +23,15 @@ namespace Mock.TPS
         public void RotateCamera(Vector2 input)
         {
             float cameraRotation = input.x * _config.CameraRotationSpeed;
-            _currentCameraAngleY += cameraRotation;
+
+            _currentCameraRotation = Quaternion.Euler(
+                0, _currentCameraRotation.eulerAngles.y + cameraRotation, 0);
         }
 
         private void UpdateMoveCamera()
         {
             // カメラオフセットを回転させる。
-            Quaternion rotation = Quaternion.Euler(0f, _currentCameraAngleY, 0f);
-            Vector3 rotatedCameraOffset = rotation * _config.CameraOffset;
+            Vector3 rotatedCameraOffset = _currentCameraRotation * _config.CameraOffset;
 
             // ターゲット位置からのカメラ目標位置を計算。
             Vector3 targetPosition = _target.position + rotatedCameraOffset;
@@ -45,8 +46,7 @@ namespace Mock.TPS
         private void UpdateRotateCamera()
         {
             // 注視点オフセットを回転させる。
-            Quaternion rotation = Quaternion.Euler(0f, _currentCameraAngleY, 0f);
-            Vector3 rotatedLookAtOffset = rotation * _config.CameraLookAtOffset;
+            Vector3 rotatedLookAtOffset = _currentCameraRotation * _config.CameraLookAtOffset;
 
             // 注視点方向を算出。
             Vector3 currentLookAtPosition = _target.position + rotatedLookAtOffset;
@@ -64,6 +64,6 @@ namespace Mock.TPS
         private readonly Transform _camera;
         private readonly Transform _target;
 
-        private float _currentCameraAngleY = 0f;
+        private Quaternion _currentCameraRotation = Quaternion.identity;
     }
 }
