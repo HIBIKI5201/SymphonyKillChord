@@ -18,7 +18,7 @@ namespace Mock.TPS
         private void Awake()
         {
             _cameraManager.Init(_inputBuffer);
-            _playerManager.Init(_inputBuffer);
+            _playerManager.Init(_inputBuffer, _cameraManager);
         }
     }
 }
