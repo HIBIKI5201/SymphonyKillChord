@@ -22,10 +22,21 @@ namespace Mock.TPS
         {
             if (Physics.Raycast(origin, direction, out RaycastHit hitInfo, _status.AttackRange))
             {
-                return hitInfo.transform.GetComponent<ICharacter>();
+                Transform target = hitInfo.transform;
+
+                // 無視タグのチェック。
+                if (target.CompareTag(_config.IgnoreAttackTagName)) { return null; }
+
+                return target.GetComponent<ICharacter>();
             }
 
             return null;
+        }
+
+        public void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(_camera.position, _camera.forward * _status.AttackRange);
         }
 
         private readonly PlayerStatus _status;
