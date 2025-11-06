@@ -23,7 +23,9 @@ namespace Mock.TPS
 
         private void Awake()
         {
-            _cameraManager.Init(_inputBuffer);
+            Cursor.lockState = CursorLockMode.Locked;
+
+            _cameraManager.Init(_inputBuffer, _enemyContainer);
             _playerManager.Init(_inputBuffer, _cameraManager, _healthbarManager);
         }
     }
