@@ -11,9 +11,14 @@ namespace Mock.TPS
     {
         private CameraMover _mover;
 
+        private CinemachineCamera _camera;
+
         private void Awake()
         {
-            _mover = new CameraMover(transform);
+            if (TryGetComponent(out _camera))
+            {
+                _mover = new CameraMover(transform, _camera.Follow);
+            }
         }
     }
 }
