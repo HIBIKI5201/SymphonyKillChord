@@ -8,6 +8,9 @@ namespace Mock.TPS
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
+        [SerializeField,Tooltip("プレイヤーのステータス")]
+        private PlayerStatus _playerStatus = new PlayerStatus();
+
         [SerializeField, Tooltip("カメラのX回転を反転")]
         private bool _cameraFlipX = false;
 
@@ -20,7 +23,8 @@ namespace Mock.TPS
         {
             Rigidbody rb = GetComponent<Rigidbody>();
 
-            _playerMover = new PlayerMover(transform, Camera.main.transform, rb);
+            _playerMover = new PlayerMover(_playerStatus,
+                transform, Camera.main.transform, rb);
 
             _inputBuffer = FindAnyObjectByType<InputBuffer>();
             InputEventRegister(_inputBuffer);
