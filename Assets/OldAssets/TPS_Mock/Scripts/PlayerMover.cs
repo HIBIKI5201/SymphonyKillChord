@@ -34,15 +34,15 @@ namespace Mock.TPS
             Vector3 moveDir = cameraForward * inputDirection.z + cameraRight * inputDirection.x;
             moveDir.y = 0f;
 
-            // 移動量を計算。
-            Vector3 velocity = moveDir.normalized * _status.MoveSpeed * Time.deltaTime;
+            // 移動速度を計算。
+            Vector3 velocity = moveDir.normalized * _status.MoveSpeed;
 
             return velocity;
         }
 
         public void SetPlayerVelocity(Vector3 velocity)
         {
-            _rb.angularVelocity = velocity;
+            _velocity = velocity;
         }
 
         public void RotatePlayer(Vector2 input)
@@ -52,11 +52,19 @@ namespace Mock.TPS
             _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
         }
 
+        public void FixedUpdate()
+        {
+            Vector3 velocity = new Vector3(_velocity.x, _rb.linearVelocity.y, _velocity.z);
+            _rb.linearVelocity = velocity;
+        }
+
         private readonly PlayerStatus _status;
         private readonly PlayerConfig _config;
 
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
+
+        private Vector3 _velocity;
     }
 }
