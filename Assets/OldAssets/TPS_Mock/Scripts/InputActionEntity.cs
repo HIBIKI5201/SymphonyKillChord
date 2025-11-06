@@ -4,6 +4,10 @@ using UnityEngine.InputSystem;
 
 namespace Mock.TPS
 {
+    /// <summary>
+    ///     入力アクションのイベントラッパークラス。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class InputActionEntity<T> where T : struct
     {
         public InputActionEntity(InputAction inputAction)
