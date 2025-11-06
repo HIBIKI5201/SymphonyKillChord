@@ -16,6 +16,7 @@ namespace Mock.TPS
             ICharacter target = FindAttackTarget(_camera.position, _camera.forward);
             if (target == null) { return; }
             Debug.Log($"Attack Target: {target.gameObject.name}");
+            target.TakeDamage(_status.AttackPower);
         }
 
         public ICharacter FindAttackTarget(Vector3 origin, Vector3 direction)
