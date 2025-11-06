@@ -36,6 +36,11 @@ namespace Mock.TPS
             return velocity;
         }
 
+        public void MovePlayerPosition(Vector3 velocity)
+        {
+            _player.position += velocity;
+        }
+
         private readonly Transform _player;
         private readonly Transform _camera;
 
