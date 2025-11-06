@@ -21,6 +21,7 @@ namespace Mock.TPS
 
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
+        private PlayerAttacker _playerAttacker;
 
         private Vector3 _moveInput;
 
@@ -30,6 +31,7 @@ namespace Mock.TPS
 
             _playerMover = new PlayerMover(_playerStatus, _config,
                 transform, Camera.main.transform, rb);
+            _playerAttacker = new PlayerAttacker(_playerStatus);
 
             InputEventRegister(_inputBuffer);
         }
