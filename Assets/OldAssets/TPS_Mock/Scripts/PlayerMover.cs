@@ -52,6 +52,12 @@ namespace Mock.TPS
             _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
         }
 
+        public void Update()
+        {
+
+            _player.LookAt(_player.position + new Vector3(_velocity.x, 0f, _velocity.z));
+        }
+
         public void FixedUpdate()
         {
             Vector3 velocity = new Vector3(_velocity.x, _rb.linearVelocity.y, _velocity.z);
