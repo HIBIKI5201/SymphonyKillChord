@@ -18,6 +18,7 @@ namespace Mock.TPS
         public void Update()
         {
             MoveCamera();
+            RotateCamera();
         }
 
         private void MoveCamera()
@@ -25,7 +26,7 @@ namespace Mock.TPS
             // カメラ位置をターゲットのオフセット位置に設定。
             Vector3 targetPosition = _target.position + _config.CameraOffset;
             _camera.position = Vector3.Lerp(_camera.position, targetPosition,
-                Mathf.Clamp01(Time.deltaTime));
+                Mathf.Clamp01(Time.deltaTime * _config.CameraFollowDamping));
         }
 
         private void RotateCamera()
