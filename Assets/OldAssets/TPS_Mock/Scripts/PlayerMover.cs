@@ -14,6 +14,8 @@ namespace Mock.TPS
             _rb = rb;
         }
 
+        public bool CameraFlipX { get => _cameraMoveXFlip; set => _cameraMoveXFlip = value; }
+
         /// <summary>
         ///     カメラ正面方向を基準にプレイヤーの移動量を計算する。
         /// </summary>
@@ -42,9 +44,18 @@ namespace Mock.TPS
             _rb.angularVelocity = velocity;
         }
 
+        public void RotatePlayer(Vector2 input)
+        {
+            float cameraX = input.x;
+            if (_cameraMoveXFlip) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
+            _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
+        }
+
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
+
+        private bool _cameraMoveXFlip = false;
 
         private float _moveSpeed = 5f;
     }
