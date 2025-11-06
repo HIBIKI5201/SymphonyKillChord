@@ -60,6 +60,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
+            buffer.AttackAction.Performed += HandleInputAttack;
         }
 
         private void InputEventUnregister(InputBuffer buffer)
@@ -68,6 +69,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed -= HandleInputMove;
             buffer.MoveAction.Canceled -= HandleInputMove;
+            buffer.AttackAction.Performed -= HandleInputAttack;
         }
 
         private void HandleInputMove(Vector2 input)
@@ -75,7 +77,7 @@ namespace Mock.TPS
             _moveInput = new Vector3(input.x, 0, input.y);
         }
 
-        private void HandleInputAttack()
+        private void HandleInputAttack(float input)
         {
             _playerAttacker.Attack();
         }
