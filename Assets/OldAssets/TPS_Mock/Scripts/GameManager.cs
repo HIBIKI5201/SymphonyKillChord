@@ -15,10 +15,13 @@ namespace Mock.TPS
         [SerializeField]
         private PlayerManager _playerManager;
 
+        [SerializeField]
+        private HealthbarManager _healthbarManager;
+
         private void Awake()
         {
             _cameraManager.Init(_inputBuffer);
-            _playerManager.Init(_inputBuffer, _cameraManager);
+            _playerManager.Init(_inputBuffer, _cameraManager, _healthbarManager);
         }
     }
 }
