@@ -12,6 +12,7 @@ namespace Mock.TPS
         public float MoveSpeed => _moveSpeed;
         public float JumpForce => _jumpForce;
         public float RotationSpeed => _rotationSpeed;
+        public float AttackRange => _attackRange;
 
         [SerializeField]
         private float _moveSpeed = 5f;
@@ -20,5 +21,8 @@ namespace Mock.TPS
 
         [SerializeField]
         private float _rotationSpeed = 3f;
+
+        [SerializeField]
+        private float _attackRange = 2f;
     }
 }
