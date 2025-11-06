@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,7 +8,7 @@ namespace Mock.TPS
     /// <summary>
     ///     入力バッファクラス。
     /// </summary>
-    [RequireComponent(typeof(PlayerInput))]
+    [RequireComponent(typeof(PlayerInput)), DefaultExecutionOrder(-1000)]
     public class InputBuffer : MonoBehaviour
     {
         public InputActionEntity<Vector2> LookAction => _lookActionEntity;
@@ -21,11 +22,13 @@ namespace Mock.TPS
         private InputActionEntity<Vector2> _lookActionEntity;
         private InputActionEntity<Vector2> _moveActionEntity;
 
-        public void Start()
+        public void Awake()
         {
             PlayerInput playerInput = GetComponent<PlayerInput>();
             _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
             _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
+
+            Debug.Log(_lookActionEntity);
         }
     }
 
@@ -38,22 +41,87 @@ namespace Mock.TPS
 
         public event Action<T> Started
         {
-            add => _inputAction.started += ctx => value(ctx.ReadValue<T>());
-            remove => _inputAction.started -= ctx => value(ctx.ReadValue<T>());
+            add
+            {
+                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
+                _startedHandlers[value] = handler;
+                _inputAction.started += handler;
+            }
+            remove
+            {
+                if (_startedHandlers.TryGetValue(value, out var handler))
+                {
+                    _inputAction.started -= handler;
+                    _startedHandlers.Remove(value);
+                }
+            }
         }
 
         public event Action<T> Performed
         {
-            add => _inputAction.performed += ctx => value(ctx.ReadValue<T>());
-            remove => _inputAction.performed -= ctx => value(ctx.ReadValue<T>());
+            add
+            {
+                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
+                _performedHandlers[value] = handler;
+                _inputAction.performed += handler;
+            }
+            remove
+            {
+                if (_performedHandlers.TryGetValue(value, out var handler))
+                {
+                    _inputAction.performed -= handler;
+                    _performedHandlers.Remove(value);
+                }
+            }
         }
 
         public event Action<T> Canceled
         {
-            add => _inputAction.canceled += ctx => value(ctx.ReadValue<T>());
-            remove => _inputAction.canceled -= ctx => value(ctx.ReadValue<T>());
+            add
+            {
+                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
+                _canceledHandlers[value] = handler;
+                _inputAction.canceled += handler;
+            }
+            remove
+            {
+                if (_canceledHandlers.TryGetValue(value, out var handler))
+                {
+                    _inputAction.canceled -= handler;
+                    _canceledHandlers.Remove(value);
+                }
+            }
         }
 
-        private InputAction _inputAction;
+        public void InvokeStarted(T value)
+        {
+            foreach (var kvp in _startedHandlers)
+            {
+                kvp.Key.Invoke(value);
+            }
+        }
+
+        public void InvokePerfomed(T value)
+        {
+            foreach (var kvp in _performedHandlers)
+            {
+                kvp.Key.Invoke(value);
+            }
+        }
+
+        public void InvokeCanceled(T value)
+        {
+            foreach (var kvp in _canceledHandlers)
+            {
+                kvp.Key.Invoke(value);
+            }
+        }
+
+        private readonly InputAction _inputAction;
+
+        // 各イベントごとにラムダを保持
+        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _startedHandlers = new();
+        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _performedHandlers = new();
+        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _canceledHandlers = new();
     }
 }
