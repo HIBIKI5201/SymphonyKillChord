@@ -9,8 +9,9 @@ namespace Mock.TPS
     [RequireComponent(typeof(CinemachineCamera))]
     public class CameraManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer)
+        public void Init(InputBuffer inputBuffer, EnemyContainer enemyContainer)
         {
+            _enemyContainer = enemyContainer;
             _inputBuffer = inputBuffer;
 
             if (TryGetComponent(out _camera))
@@ -24,6 +25,7 @@ namespace Mock.TPS
 
         private InputBuffer _inputBuffer;
         private CameraMover _mover;
+        private EnemyContainer _enemyContainer;
 
         private CinemachineCamera _camera;
 
