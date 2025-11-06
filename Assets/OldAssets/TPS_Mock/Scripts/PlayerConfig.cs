@@ -9,6 +9,7 @@ namespace Mock.TPS
     public class PlayerConfig :ScriptableObject
     {
         public bool IsCameraFlipX => _isCameraFlipX;
+        public string IgnoreAttackTagName => _ignoreAttackTagName;
 
         [SerializeField, Tooltip("カメラのX回転を反転")]
         private bool _isCameraFlipX;
