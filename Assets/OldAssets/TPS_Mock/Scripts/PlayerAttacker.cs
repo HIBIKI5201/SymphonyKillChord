@@ -4,9 +4,10 @@ namespace Mock.TPS
 {
     public class PlayerAttacker
     {
-        public PlayerAttacker(PlayerStatus status, Transform camera)
+        public PlayerAttacker(PlayerStatus status, PlayerConfig config, Transform camera)
         {
             _status = status;
+            _config = config;
             _camera = camera;
         }
 
@@ -28,6 +29,7 @@ namespace Mock.TPS
         }
 
         private readonly PlayerStatus _status;
+        private readonly PlayerConfig _config;
         private readonly Transform _camera;
     }
 }

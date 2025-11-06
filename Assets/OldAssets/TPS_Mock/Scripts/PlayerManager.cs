@@ -16,7 +16,7 @@ namespace Mock.TPS
 
             _playerMover = new PlayerMover(_playerStatus, _config,
                 transform, Camera.main.transform, rb);
-            _playerAttacker = new PlayerAttacker(_playerStatus, cameraManager.transform);
+            _playerAttacker = new PlayerAttacker(_playerStatus, _config, cameraManager.transform);
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _healthEntity.OnHealthChanged += healthbarManager.SetHealthBar;
         }
