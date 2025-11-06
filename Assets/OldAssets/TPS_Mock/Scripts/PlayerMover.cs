@@ -7,16 +7,15 @@ namespace Mock.TPS
     /// </summary>
     public class PlayerMover
     {
-        public PlayerMover(PlayerStatus status,
+        public PlayerMover(PlayerStatus status, PlayerConfig config,
             Transform player, Transform camera, Rigidbody rb)
         {
+            _config = config;
             _status = status;
             _player = player;
             _camera = camera;
             _rb = rb;
         }
-
-        public bool CameraFlipX { get => _cameraMoveXFlip; set => _cameraMoveXFlip = value; }
 
         /// <summary>
         ///     カメラ正面方向を基準にプレイヤーの移動量を計算する。
@@ -49,15 +48,15 @@ namespace Mock.TPS
         public void RotatePlayer(Vector2 input)
         {
             float cameraX = input.x * _status.RotationSpeed;
-            if (_cameraMoveXFlip) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
+            if (_config.IsCameraFlipX) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
             _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
         }
 
         private readonly PlayerStatus _status;
+        private readonly PlayerConfig _config;
+
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
-
-        private bool _cameraMoveXFlip = false;
     }
 }
