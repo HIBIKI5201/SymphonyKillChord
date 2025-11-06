@@ -9,6 +9,7 @@ namespace Mock.TPS
     public class CameraConfig : ScriptableObject
     {
         public Vector3 CameraOffset => _cameraOffset;
+        public Vector3 CameraLookAtOffset => _cameraLookAtOffset;
 
         public float CameraFollowSpeed => _cameraFollowSpeed;
         public float CameraLookAtSpeed => _cameraLookAtSpeed;
@@ -17,6 +18,8 @@ namespace Mock.TPS
 
         [SerializeField]
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
+        [SerializeField]
+        private Vector3 _cameraLookAtOffset = new Vector3(0f, 1.5f, 0f);
 
         [SerializeField]
         private float _cameraFollowSpeed = 1f;
