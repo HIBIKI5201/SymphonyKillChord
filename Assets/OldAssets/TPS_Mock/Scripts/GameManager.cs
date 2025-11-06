@@ -9,5 +9,16 @@ namespace Mock.TPS
     {
         [SerializeField]
         private InputBuffer _inputBuffer;
+
+        [SerializeField]
+        private CameraManager _cameraManager;
+        [SerializeField]
+        private PlayerManager _playerManager;
+
+        private void Awake()
+        {
+            _cameraManager.Init(_inputBuffer);
+            _playerManager.Init(_inputBuffer);
+        }
     }
 }
