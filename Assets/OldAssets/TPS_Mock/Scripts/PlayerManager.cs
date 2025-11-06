@@ -5,6 +5,7 @@ namespace Mock.TPS
     /// <summary>
     ///     プレイヤーの管理クラス。
     /// </summary>
+    [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
         [SerializeField, Tooltip("カメラのX回転を反転")]
@@ -17,21 +18,17 @@ namespace Mock.TPS
 
         private void OnEnable()
         {
-            _playerMover = new PlayerMover(transform, Camera.main.transform);
-            _inputBuffer = FindAnyObjectByType<InputBuffer>();
+            Rigidbody rb = GetComponent<Rigidbody>();
 
+            _playerMover = new PlayerMover(transform, Camera.main.transform, rb);
+
+            _inputBuffer = FindAnyObjectByType<InputBuffer>();
             InputEventRegister(_inputBuffer);
         }
 
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
-        }
-
-        private void Update()
-        {
-            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
-            _playerMover.MovePlayerPosition(velocity);
         }
 
         private void InputEventRegister(InputBuffer buffer)
@@ -64,6 +61,8 @@ namespace Mock.TPS
         private void HandleInputMove(Vector2 input)
         {
             _moveInput = new Vector3(input.x, 0, input.y);
+            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
+            _playerMover.SetPlayerVelocity(velocity);
         }
     }
 }
