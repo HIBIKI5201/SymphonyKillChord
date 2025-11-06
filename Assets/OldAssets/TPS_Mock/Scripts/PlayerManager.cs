@@ -13,6 +13,8 @@ namespace Mock.TPS
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
 
+        private Vector3 _moveInput;
+
         private void OnEnable()
         {
             _playerMover = new PlayerMover(transform, Camera.main.transform);
@@ -24,6 +26,12 @@ namespace Mock.TPS
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
+        }
+
+        private void Update()
+        {
+            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
+            _playerMover.MovePlayerPosition(velocity);
         }
 
         private void InputEventRegister(InputBuffer buffer)
@@ -55,8 +63,7 @@ namespace Mock.TPS
 
         private void HandleInputMove(Vector2 input)
         {
-            Vector3 inputDirection = new Vector3(input.x, 0, input.y);
-            transform.position += _playerMover.CalcPlayerVelocityByInputDirection(in inputDirection);
+            _moveInput = new Vector3(input.x, 0, input.y);
         }
     }
 }
