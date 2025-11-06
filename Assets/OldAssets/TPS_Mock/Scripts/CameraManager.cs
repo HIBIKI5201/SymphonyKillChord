@@ -12,6 +12,11 @@ namespace Mock.TPS
         public void Init(InputBuffer inputBuffer)
         {
             _inputBuffer = inputBuffer;
+
+            if (TryGetComponent(out _camera))
+            {
+                _mover = new CameraMover(_config, transform, _camera.Follow);
+            }
         }
 
         [SerializeField]
@@ -21,14 +26,6 @@ namespace Mock.TPS
         private CameraMover _mover;
 
         private CinemachineCamera _camera;
-
-        private void Awake()
-        {
-            if (TryGetComponent(out _camera))
-            {
-                _mover = new CameraMover(_config, transform, _camera.Follow);
-            }
-        }
 
         private void OnEnable()
         {
