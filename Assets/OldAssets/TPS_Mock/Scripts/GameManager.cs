@@ -18,6 +18,9 @@ namespace Mock.TPS
         [SerializeField]
         private HealthbarManager _healthbarManager;
 
+        [SerializeField]
+        private EnemyContainer _enemyContainer;
+
         private void Awake()
         {
             _cameraManager.Init(_inputBuffer);
