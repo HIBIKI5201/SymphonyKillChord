@@ -7,12 +7,15 @@ namespace Mock.TPS
     /// </summary>
     public class CameraMover
     {
-        public CameraMover(Transform camera, Transform target)
+        public CameraMover(CameraConfig config,
+            Transform camera, Transform target)
         {
+            _config = config;
             _camera = camera;
             _target = target;
         }
 
+        private readonly CameraConfig _config;
         private readonly Transform _camera;
         private readonly Transform _target;
     }
