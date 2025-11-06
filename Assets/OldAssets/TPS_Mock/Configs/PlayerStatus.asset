@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578d061d5ffe7d84299c1f08e48380fc, type: 3}
   m_Name: PlayerStatus
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.PlayerStatus
-  _moveSpeed: 5
+  _moveSpeed: 20
   _jumpForce: 5
-  _rotationSpeed: 3
+  _rotationSpeed: 0.3
