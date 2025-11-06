@@ -5,5 +5,7 @@ namespace Mock.TPS
     public interface ICharacter
     {
         public GameObject gameObject { get; }
+
+        public void TakeDamage(float damage);
     }
 }
