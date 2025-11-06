@@ -9,7 +9,7 @@ namespace Mock.TPS
     public class PlayerManager : MonoBehaviour
     {
         [SerializeField,Tooltip("プレイヤーのステータス")]
-        private PlayerStatus _playerStatus = new PlayerStatus();
+        private PlayerStatus _playerStatus;
 
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
@@ -35,8 +35,15 @@ namespace Mock.TPS
             InputEventUnregister(_inputBuffer);
         }
 
-        private void OnValidate()
+        private void Update()
         {
+            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
+            _playerMover.SetPlayerVelocity(velocity);
+        }
+
+        private void FixedUpdate()
+        {
+            _playerMover.FixedUpdate();
         }
 
         private void InputEventRegister(InputBuffer buffer)
@@ -67,8 +74,6 @@ namespace Mock.TPS
         private void HandleInputMove(Vector2 input)
         {
             _moveInput = new Vector3(input.x, 0, input.y);
-            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
-            _playerMover.SetPlayerVelocity(velocity);
         }
     }
 }
