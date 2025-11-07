@@ -7,7 +7,7 @@ namespace Mock.TPS
     {
         public EnemyManager this[int index] => 0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
 
-        private List<EnemyManager> _enemies;
+        private List<EnemyManager> _enemies = new();
 
         private void Awake()
         {
