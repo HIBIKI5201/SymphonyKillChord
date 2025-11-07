@@ -46,7 +46,7 @@ namespace Mock.TPS
         private void OnDrawGizmosSelected()
         {
             // カメラが無ければ取得を試みる。
-            if (_camera == null && !TryGetComponent(out _camera)) { return; } 
+            if (_camera == null && !TryGetComponent(out _camera)) { return; }
 
             Vector3 position = _camera.Follow.position + _config.CameraOffset;
             Gizmos.color = Color.cyan;
@@ -55,26 +55,28 @@ namespace Mock.TPS
 
         private void InputEventRegister(InputBuffer inputBuffer)
         {
-            if (inputBuffer != null)
-            {
-                inputBuffer.LookAction.Performed += _mover.RotateCamera;
-                inputBuffer.LookAction.Canceled += _mover.RotateCamera;
-
-                inputBuffer.AttackAction.Started += HandleLockTargetChange;
-            }
-            else
+            if (inputBuffer == null)
             {
                 Debug.LogError($"{nameof(InputBuffer)} is null");
+                return;
             }
+            inputBuffer.LookAction.Performed += _mover.RotateCamera;
+            inputBuffer.LookAction.Canceled += _mover.RotateCamera;
+
+            inputBuffer.AttackAction.Started += HandleLockTargetChange;
+
         }
 
         private void InputEventUnregister(InputBuffer inputBuffer)
         {
-            if (inputBuffer != null)
-            {
-                inputBuffer.LookAction.Performed -= _mover.RotateCamera;
-                inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
-            }
+
+
+            if (inputBuffer == null) { return; }
+
+            inputBuffer.LookAction.Performed -= _mover.RotateCamera;
+            inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
+
+            inputBuffer.AttackAction.Started -= HandleLockTargetChange;
         }
 
         private void HandleLockTargetChange(float value)
