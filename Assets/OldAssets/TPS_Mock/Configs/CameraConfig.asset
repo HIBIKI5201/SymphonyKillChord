@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a35570784e70ac4fb79341f20c905c4, type: 3}
   m_Name: CameraConfig
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.CameraConfig
-  _isCameraFlipX: 1
+  _isCameraFlipX: 0
   _cameraOffset: {x: 1, y: 2, z: -6}
   _cameraLookAtOffset: {x: 1, y: 1.5, z: 0}
-  _cameraFollowSpeed: 150
-  _cameraLookAtSpeed: 150
+  _cameraFollowDamping: 0
+  _cameraLookAtDamping: 0
   _cameraRotationSpeed: 1
   _picthRange: {x: -30, y: 60}
