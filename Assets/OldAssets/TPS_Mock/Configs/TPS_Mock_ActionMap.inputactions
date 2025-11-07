@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "name": "Symphony Kill Chord",
+    "name": "TPS_Mock_ActionMap",
     "maps": [
         {
             "name": "Player",
@@ -28,7 +28,7 @@
                     "name": "Fire",
                     "type": "Button",
                     "id": "0c44b6ca-f81a-444d-ad17-3a126a3fc4ed",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
