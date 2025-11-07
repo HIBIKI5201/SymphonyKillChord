@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Mock.TPS
 {
@@ -37,6 +38,7 @@ namespace Mock.TPS
         private HealthEntity _healthEntity;
 
         private Vector3 _moveInput;
+        private HashSet<Collision> _hitGrounds = new();
 
         private void OnDisable()
         {
@@ -54,6 +56,28 @@ namespace Mock.TPS
         private void FixedUpdate()
         {
             _playerMover.FixedUpdate();
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.contacts.Length == 0) { return; }
+
+            // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
+            Vector3 contactNormal = collision.contacts[0].normal;
+            if (Vector3.Dot(contactNormal, Vector3.up) > 0.5f)
+            {
+                _hitGrounds.Add(collision);
+                _playerMover.SetIsGround(0 < _hitGrounds.Count);
+            }
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (_hitGrounds.Remove(collision))
+            {
+                // 地面との接触がなくなった場合、接地フラグを更新する。
+                _playerMover.SetIsGround(0 < _hitGrounds.Count);
+            }
         }
 
         private void OnDrawGizmos()
