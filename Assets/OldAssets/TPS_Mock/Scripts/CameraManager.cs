@@ -38,19 +38,14 @@ namespace Mock.TPS
             InputEventUnregister(_inputBuffer);
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            _mover.Update();
+            _mover.LateUpdate();
         }
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
-            // カメラが無ければ取得を試みる。
-            if (_camera == null && !TryGetComponent(out _camera)) { return; }
-
-            Vector3 position = _camera.Follow.position + _config.CameraOffset;
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(position, 0.2f);
+            _mover?.OnDrawGizmos();
         }
 
         private void InputEventRegister(InputBuffer inputBuffer)
