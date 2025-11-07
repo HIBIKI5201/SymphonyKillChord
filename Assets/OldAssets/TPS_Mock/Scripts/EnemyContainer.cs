@@ -1,16 +1,26 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Mock.TPS
 {
     public class EnemyContainer : MonoBehaviour
     {
-        public EnemyManager this[int index] => _enemies[index % _enemies.Length];
+        public EnemyManager this[int index] => 0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
 
-        private EnemyManager[] _enemies;
+        private List<EnemyManager> _enemies;
 
         private void Awake()
         {
-            _enemies = FindObjectsByType<EnemyManager>(FindObjectsSortMode.None);
+            foreach (EnemyManager e in FindObjectsByType<EnemyManager>(FindObjectsSortMode.None))
+            {
+                Register(e);
+            }
+        }
+
+        private void Register(EnemyManager enemy)
+        {
+            _enemies.Add(enemy);
+            enemy.OnDeath += () => _enemies.Remove(enemy);
         }
     }
 }
