@@ -24,8 +24,8 @@ namespace Mock.TPS
         [SerializeField]
         private float _jumpForce = 5f;
 
-        [SerializeField]
-        private float _rotationSpeed = 3f;
+        [SerializeField, Range(0, 1)]
+        private float _rotationSpeed = 0.5f;
 
         [Header("Battle Status")]
         [SerializeField]
