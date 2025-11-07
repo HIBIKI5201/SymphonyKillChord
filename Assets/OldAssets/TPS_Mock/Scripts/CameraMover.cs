@@ -28,7 +28,7 @@ namespace Mock.TPS
             float yaw = input.x * _config.CameraRotationSpeed;
             float pitch = -input.y * _config.CameraRotationSpeed;
 
-            _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PicthRange.x, _config.PicthRange.y);
+            _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PicthRangeMin, _config.PicthRangeMax);
             _currentYaw += yaw;
 
             _currentCameraRotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
