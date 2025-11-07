@@ -42,6 +42,13 @@ namespace Mock.TPS
             _velocity = velocity;
         }
 
+        public void Jump(float jumpForce)
+        {
+            Vector3 velocity = _rb.linearVelocity;
+            velocity.y = jumpForce;
+            _rb.linearVelocity = velocity;
+        }
+
         public void Update()
         {
             Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
