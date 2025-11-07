@@ -33,6 +33,15 @@ namespace Mock.TPS
             return moveDir.normalized * _status.MoveSpeed;
         }
 
+        public void Jump()
+        {
+            if (!_isGround) { return; } // 地面にいる場合のみジャンプ可能。
+
+            Vector3 velocity = _rb.linearVelocity;
+            velocity.y = _status.JumpForce;
+            _rb.linearVelocity = velocity;
+        }
+
         /// <summary>
         ///     速度を設定する。
         /// </summary>
@@ -42,11 +51,9 @@ namespace Mock.TPS
             _velocity = velocity;
         }
 
-        public void Jump()
+        public void SetIsGround(bool isGround)
         {
-            Vector3 velocity = _rb.linearVelocity;
-            velocity.y = _status.JumpForce;
-            _rb.linearVelocity = velocity;
+            _isGround = isGround;
         }
 
         public void Update()
@@ -76,5 +83,6 @@ namespace Mock.TPS
         private readonly Rigidbody _rb;
 
         private Vector3 _velocity;
+        private bool _isGround;
     }
 }
