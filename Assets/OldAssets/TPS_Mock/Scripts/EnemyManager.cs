@@ -11,6 +11,8 @@ namespace Mock.TPS
             remove => _healthEntity.OnDeath -= value;
         }
 
+        public Transform LockTarget => _lockTarget;
+
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
 
         public void Dead() => Destroy(gameObject);
@@ -19,6 +21,9 @@ namespace Mock.TPS
         private float _maxHealth = 100f;
         [SerializeField]
         private HealthbarManager _healthbarManager;
+
+        [SerializeField]
+        private Transform _lockTarget;
 
         private HealthEntity _healthEntity;
 
