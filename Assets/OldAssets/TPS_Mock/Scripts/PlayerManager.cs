@@ -14,8 +14,8 @@ namespace Mock.TPS
 
             Rigidbody rb = GetComponent<Rigidbody>();
 
-            _playerMover = new PlayerMover(_playerStatus, _config,
-                transform, Camera.main.transform, rb);
+            _playerMover = new PlayerMover(_playerStatus, rb,
+                transform, Camera.main.transform);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, cameraManager.transform);
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _healthEntity.OnHealthChanged += healthbarManager.SetHealthBar;
