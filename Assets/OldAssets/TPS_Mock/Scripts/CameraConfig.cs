@@ -16,7 +16,9 @@ namespace Mock.TPS
         public float CameraLookAtSpeed => _cameraLookAtSpeed;
 
         public float CameraRotationSpeed => _cameraRotationSpeed;
-        public Vector2 PicthRange => _picthRange;
+
+        public float PicthRangeMin => _picthRange.x;
+        public float PicthRangeMax => _picthRange.y;
 
         [SerializeField]
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
