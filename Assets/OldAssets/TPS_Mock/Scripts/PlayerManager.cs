@@ -88,6 +88,11 @@ namespace Mock.TPS
             _moveInput = new Vector3(input.x, 0, input.y);
         }
 
+        private void HandleJump(float input)
+        {
+            _playerMover.Jump();
+        }
+
         private void HandleInputAttack(float input)
         {
             _playerAttacker.Attack();

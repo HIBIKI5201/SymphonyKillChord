@@ -42,10 +42,10 @@ namespace Mock.TPS
             _velocity = velocity;
         }
 
-        public void Jump(float jumpForce)
+        public void Jump()
         {
             Vector3 velocity = _rb.linearVelocity;
-            velocity.y = jumpForce;
+            velocity.y = _status.JumpForce;
             _rb.linearVelocity = velocity;
         }
 
