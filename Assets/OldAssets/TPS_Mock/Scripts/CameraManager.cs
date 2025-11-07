@@ -31,6 +31,8 @@ namespace Mock.TPS
 
         private CinemachineCamera _camera;
 
+        private int _lockTargetIndex = 0;
+
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
@@ -57,6 +59,8 @@ namespace Mock.TPS
             {
                 inputBuffer.LookAction.Performed += _mover.RotateCamera;
                 inputBuffer.LookAction.Canceled += _mover.RotateCamera;
+
+                inputBuffer.AttackAction.Started += HandleLockTargetChange;
             }
             else
             {
@@ -71,6 +75,13 @@ namespace Mock.TPS
                 inputBuffer.LookAction.Performed -= _mover.RotateCamera;
                 inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
             }
+        }
+
+        private void HandleLockTargetChange(float value)
+        {
+            _lockTargetIndex++;
+            Transform target = _enemyContainer[_lockTargetIndex]?.transform;
+            _mover.SetLockTarget(target);
         }
     }
 }
