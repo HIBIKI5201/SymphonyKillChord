@@ -12,15 +12,14 @@ namespace Mock.TPS
         public void Init(InputBuffer inputBuffer, EnemyContainer enemyContainer)
         {
             _enemyContainer = enemyContainer;
-
             _inputBuffer = inputBuffer;
-            InputEventRegister(inputBuffer);
-
 
             if (TryGetComponent(out _camera))
             {
                 _mover = new CameraMover(_config, transform, _camera.Follow);
             }
+
+            InputEventRegister(inputBuffer);
         }
 
         [SerializeField]

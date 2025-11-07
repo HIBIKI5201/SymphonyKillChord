@@ -11,7 +11,6 @@ namespace Mock.TPS
         public void Init(InputBuffer inputBuffer, CameraManager cameraManager, HealthbarManager healthbarManager)
         {
             _inputBuffer = inputBuffer;
-            InputEventRegister(inputBuffer);
 
             Rigidbody rb = GetComponent<Rigidbody>();
 
@@ -20,6 +19,8 @@ namespace Mock.TPS
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, cameraManager.transform);
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _healthEntity.OnHealthChanged += healthbarManager.SetHealthBar;
+
+            InputEventRegister(inputBuffer);
         }
 
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
