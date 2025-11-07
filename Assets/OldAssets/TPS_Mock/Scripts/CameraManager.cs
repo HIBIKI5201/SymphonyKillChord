@@ -12,7 +12,10 @@ namespace Mock.TPS
         public void Init(InputBuffer inputBuffer, EnemyContainer enemyContainer)
         {
             _enemyContainer = enemyContainer;
+
             _inputBuffer = inputBuffer;
+            InputEventRegister(inputBuffer);
+
 
             if (TryGetComponent(out _camera))
             {
@@ -29,22 +32,9 @@ namespace Mock.TPS
 
         private CinemachineCamera _camera;
 
-        private void OnEnable()
-        {
-            if (_inputBuffer != null)
-            {
-                _inputBuffer.LookAction.Performed += _mover.RotateCamera;
-                _inputBuffer.LookAction.Canceled += _mover.RotateCamera;
-            }
-        }
-
         private void OnDisable()
         {
-            if (_inputBuffer != null)
-            {
-                _inputBuffer.LookAction.Performed -= _mover.RotateCamera;
-                _inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
-            }
+            InputEventUnregister(_inputBuffer);
         }
 
         private void Update()
@@ -60,6 +50,28 @@ namespace Mock.TPS
             Vector3 position = _camera.Follow.position + _config.CameraOffset;
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(position, 0.2f);
+        }
+
+        private void InputEventRegister(InputBuffer inputBuffer)
+        {
+            if (inputBuffer != null)
+            {
+                inputBuffer.LookAction.Performed += _mover.RotateCamera;
+                inputBuffer.LookAction.Canceled += _mover.RotateCamera;
+            }
+            else
+            {
+                Debug.LogError($"{nameof(InputBuffer)} is null");
+            }
+        }
+
+        private void InputEventUnregister(InputBuffer inputBuffer)
+        {
+            if (inputBuffer != null)
+            {
+                inputBuffer.LookAction.Performed -= _mover.RotateCamera;
+                inputBuffer.LookAction.Canceled -= _mover.RotateCamera;
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Mock.TPS
         public void Init(InputBuffer inputBuffer, CameraManager cameraManager, HealthbarManager healthbarManager)
         {
             _inputBuffer = inputBuffer;
+            InputEventRegister(inputBuffer);
 
             Rigidbody rb = GetComponent<Rigidbody>();
 
@@ -35,11 +36,6 @@ namespace Mock.TPS
         private HealthEntity _healthEntity;
 
         private Vector3 _moveInput;
-
-        private void OnEnable()
-        {
-            InputEventRegister(_inputBuffer);
-        }
 
         private void OnDisable()
         {
@@ -66,7 +62,11 @@ namespace Mock.TPS
 
         private void InputEventRegister(InputBuffer buffer)
         {
-            if (buffer == null) { return; }
+            if (buffer == null)
+            {
+                Debug.LogError($"{nameof(InputBuffer)} is null");
+                return;
+            }
 
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
