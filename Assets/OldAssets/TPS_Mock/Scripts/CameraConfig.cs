@@ -14,8 +14,8 @@ namespace Mock.TPS
         public Vector3 CameraOffset => _cameraOffset;
         public Vector3 CameraLookAtOffset => _cameraLookAtOffset;
 
-        public float CameraFollowSpeed => _cameraFollowSpeed;
-        public float CameraLookAtSpeed => _cameraLookAtSpeed;
+        public float CameraFollowDamping => _cameraFollowDamping;
+        public float CameraLookAtDamping => _cameraLookAtDamping;
 
         public float CameraRotationSpeed => _cameraRotationSpeed;
 
@@ -32,9 +32,9 @@ namespace Mock.TPS
         private Vector3 _cameraLookAtOffset = new Vector3(0f, 1.5f, 0f);
 
         [SerializeField]
-        private float _cameraFollowSpeed = 1f;
+        private float _cameraFollowDamping = 0f;
         [SerializeField]
-        private float _cameraLookAtSpeed = 1f;
+        private float _cameraLookAtDamping = 0f;
 
         [SerializeField]
         private float _cameraRotationSpeed = 3f;
