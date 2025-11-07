@@ -9,6 +9,8 @@ namespace Mock.TPS
     [CreateAssetMenu(fileName = nameof(CameraConfig), menuName = "Mock/TPS/" + nameof(CameraConfig))]
     public class CameraConfig : ScriptableObject
     {
+        public bool IsCameraFlipX => _isCameraFlipX;
+
         public Vector3 CameraOffset => _cameraOffset;
         public Vector3 CameraLookAtOffset => _cameraLookAtOffset;
 
@@ -19,6 +21,10 @@ namespace Mock.TPS
 
         public float PicthRangeMin => _picthRange.x;
         public float PicthRangeMax => _picthRange.y;
+
+
+        [SerializeField, Tooltip("カメラのX回転を反転")]
+        private bool _isCameraFlipX;
 
         [SerializeField]
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
