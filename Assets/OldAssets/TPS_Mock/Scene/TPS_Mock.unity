@@ -755,7 +755,7 @@ MonoBehaviour:
   _cameraManager: {fileID: 9434012}
   _playerManager: {fileID: 639411144}
   _healthbarManager: {fileID: 1151803203}
-  _enemyContainer: {fileID: 0}
+  _enemyContainer: {fileID: 1424658968}
 --- !u!4 &1044861825
 Transform:
   m_ObjectHideFlags: 0
