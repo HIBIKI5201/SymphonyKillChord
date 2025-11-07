@@ -14,24 +14,45 @@ namespace Mock.TPS
             _target = target;
         }
 
-        public void Update()
+        public void LateUpdate()
         {
             UpdateYaw();
             UpdatePitch();
         }
 
+        /// <summary>
+        ///     カメラ回転を入力に基づき更新。
+        /// </summary>
+        /// <param name="input"></param>
         public void RotateCamera(Vector2 input)
         {
             // ロックオン中は入力回転を無効化。
             if (_lockTarget != null) return;
 
+            // 入力に基づき回転量を計算。
             float yaw = input.x * _config.CameraRotationSpeed * (_config.IsCameraFlipX ? -1 : 1);
             float pitch = -input.y * _config.CameraRotationSpeed;
 
+            // 入力に基づきカメラ回転を更新。
             _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PicthRangeMin, _config.PicthRangeMax);
             _currentYaw += yaw;
 
             _currentCameraRotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
+        }
+
+        /// <summary>
+        ///     ギズモ描画。
+        /// </summary>
+        public void OnDrawGizmos()
+        {
+            // ロックオン対象がいなければ終了。
+            if (_lockTarget == null) return;
+            // カメラ位置から敵までの方向を算出。
+            Vector3 lookDir = _lockTarget.position - _camera.position;
+            if (lookDir.sqrMagnitude <= 0.0001f) { lookDir = _camera.forward; }
+            // カメラの注視点を描画。
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(_camera.position, _camera.position + lookDir.normalized * 5f);
         }
 
         public void SetLockTarget(Transform lockTarget) => _lockTarget = lockTarget;
@@ -48,22 +69,30 @@ namespace Mock.TPS
 
         private void UpdateYaw()
         {
-            Quaternion rotation = _currentCameraRotation;
+            Quaternion rotation;
 
             // ロックオン時は敵を向く回転を使用（左右移動の処理を削除）。
             if (_lockTarget != null && TryGetLockYaw(out Quaternion lockRotation))
             {
                 rotation = lockRotation;
             }
+            else
+            {
+                rotation = _currentCameraRotation;
+            }
 
             // プレイヤーを中心にカメラを配置。
             Vector3 targetPosition = _target.position + rotation * _config.CameraOffset;
 
+            _camera.position = targetPosition;
+
+            /* 振動バグのため一旦コメントアウト
             _camera.position = Vector3.Lerp(
                 _camera.position,
                 targetPosition,
                 Mathf.Clamp01(Time.deltaTime * _config.CameraFollowSpeed)
             );
+            */
         }
 
         /// <summary>
@@ -100,11 +129,15 @@ namespace Mock.TPS
                 targetRotation = PlayerPitch();
             }
 
+            _camera.rotation = targetRotation;
+
+            /* 振動バグのため一旦コメントアウト
             _camera.rotation = Quaternion.Slerp(
                 _camera.rotation,
                 targetRotation,
                 Mathf.Clamp01(Time.deltaTime * _config.CameraLookAtSpeed)
             );
+            */
         }
 
         /// <summary>
