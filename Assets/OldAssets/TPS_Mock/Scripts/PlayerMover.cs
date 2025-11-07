@@ -1,4 +1,5 @@
-﻿ using UnityEngine;
+﻿using Unity.Cinemachine;
+using UnityEngine;
 
 namespace Mock.TPS
 {
@@ -45,15 +46,12 @@ namespace Mock.TPS
             _velocity = velocity;
         }
 
-        public void RotatePlayer(Vector2 input)
-        {
-            float cameraX = input.x * _status.RotationSpeed;
-            _player.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
-        }
-
         public void Update()
         {
-            _player.LookAt(_player.position + new Vector3(_velocity.x, 0f, _velocity.z));
+            Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
+            Vector3 dir = Vector3.Lerp(forward, new Vector3(_velocity.x, 0f, _velocity.z),
+                Mathf.Clamp01(_status.RotationSpeed * Time.deltaTime));
+            _player.LookAt(_player.position + dir.normalized);
         }
 
         public void FixedUpdate()
