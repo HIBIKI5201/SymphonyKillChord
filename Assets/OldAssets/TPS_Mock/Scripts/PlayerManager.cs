@@ -71,7 +71,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
-            buffer.AttackAction.Performed += HandleInputAttack;
+            buffer.AttackAction.Started += HandleInputAttack;
         }
 
         private void InputEventUnregister(InputBuffer buffer)
@@ -80,7 +80,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed -= HandleInputMove;
             buffer.MoveAction.Canceled -= HandleInputMove;
-            buffer.AttackAction.Performed -= HandleInputAttack;
+            buffer.AttackAction.Started -= HandleInputAttack;
         }
 
         private void HandleInputMove(Vector2 input)
