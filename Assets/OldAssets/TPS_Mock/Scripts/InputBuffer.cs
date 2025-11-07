@@ -36,7 +36,7 @@ namespace Mock.TPS
                 playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
                 _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
                 _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-                _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_jumpActionName]);
+                _jumpActionEntity = new InputActionEntity<float>(playerInput.actions[_jumpActionName]);
                 _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
             }
         }
