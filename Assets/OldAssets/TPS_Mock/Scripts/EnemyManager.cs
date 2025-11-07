@@ -1,9 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Mock.TPS
 {
     public class EnemyManager : MonoBehaviour, ICharacter
     {
+        public event Action OnDeath
+        {
+            add => _healthEntity.OnDeath += value;
+            remove => _healthEntity.OnDeath -= value;
+        }
+
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
 
         public void Dead() => Destroy(gameObject);
