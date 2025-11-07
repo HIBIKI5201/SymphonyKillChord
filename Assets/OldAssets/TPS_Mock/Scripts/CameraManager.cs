@@ -80,7 +80,7 @@ namespace Mock.TPS
         private void HandleLockTargetChange(float value)
         {
             _lockTargetIndex++;
-            Transform target = _enemyContainer[_lockTargetIndex]?.transform;
+            Transform target = _enemyContainer[_lockTargetIndex]?.LockTarget;
             _mover.SetLockTarget(target);
         }
     }
