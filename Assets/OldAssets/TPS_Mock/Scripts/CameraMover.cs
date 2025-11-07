@@ -25,7 +25,7 @@ namespace Mock.TPS
             // ロックオン中は入力回転を無効化。
             if (_lockTarget != null) return;
 
-            float yaw = input.x * _config.CameraRotationSpeed;
+            float yaw = input.x * _config.CameraRotationSpeed * (_config.IsCameraFlipX ? -1 : 1);
             float pitch = -input.y * _config.CameraRotationSpeed;
 
             _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PicthRangeMin, _config.PicthRangeMax);
