@@ -15,7 +15,7 @@ MonoBehaviour:
   _isCameraFlipX: 0
   _cameraOffset: {x: 1, y: 2, z: -6}
   _cameraLookAtOffset: {x: 1, y: 1.5, z: 0}
-  _cameraFollowDamping: 0
-  _cameraLookAtDamping: 0
+  _cameraFollowDamping: 0.005
+  _cameraLookAtDamping: 0.01
   _cameraRotationSpeed: 1
   _picthRange: {x: -30, y: 60}
