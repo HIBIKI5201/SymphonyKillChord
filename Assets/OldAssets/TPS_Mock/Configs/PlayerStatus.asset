@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TPS_Mock::Mock.TPS.PlayerStatus
   _moveSpeed: 20
   _jumpForce: 5
-  _rotationDamping: 0
+  _rotationDamping: 0.2
   _attackPower: 20
   _attackRange: 100
   _maxHealth: 100
