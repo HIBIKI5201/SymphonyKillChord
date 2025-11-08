@@ -47,15 +47,20 @@ namespace Mock.TPS
 
         private void Update()
         {
-            Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
-            _playerMover.SetPlayerVelocity(velocity);
-
-            _playerMover.Update();
+            if (_playerMover != null)
+            {
+                Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
+                _playerMover.SetPlayerVelocity(velocity);
+                _playerMover.Update();
+            }
         }
 
         private void FixedUpdate()
         {
-            _playerMover.FixedUpdate();
+            if (_playerMover != null)
+            {
+                _playerMover.FixedUpdate();
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
