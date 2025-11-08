@@ -38,9 +38,10 @@ namespace Mock.TPS
             InputEventUnregister(_inputBuffer);
         }
 
-        private void LateUpdate()
+        private void FixedUpdate()
         {
-            _mover.LateUpdate();
+            _mover.UpdatePitch();
+            _mover.UpdateYaw();
         }
 
         private void OnDrawGizmos()
