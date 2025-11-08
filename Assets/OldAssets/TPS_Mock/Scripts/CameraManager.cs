@@ -40,8 +40,11 @@ namespace Mock.TPS
 
         private void FixedUpdate()
         {
-            _mover.UpdatePitch();
-            _mover.UpdateYaw();
+            if (_mover != null)
+            {
+                _mover.UpdatePitch();
+                _mover.UpdateYaw();
+            }
         }
 
         private void OnDrawGizmos()
