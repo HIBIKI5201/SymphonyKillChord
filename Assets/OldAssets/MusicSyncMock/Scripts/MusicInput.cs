@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -21,7 +20,7 @@ namespace Mock.MusicSyncMock
         private float[] _timeSignatures = { 4f, 8f, 3f, 6f }; // 拍子の数（4拍子、8拍子、3拍子、6拍子）
         [SerializeField]
         private Color[] _noteColor = { Color.white, Color.red, Color.blue, Color.green };
-        
+
         [SerializeField]
         private bool _enableQuantize = true; // クオンタイズ機能の有効/無効
 
@@ -46,7 +45,7 @@ namespace Mock.MusicSyncMock
         {
             _debugLog.Clear(); // デバッグログをクリア
             _debugLog.AppendLine("=== Beat Input Debug ===");
-            
+
             double beat = _musicBuffer.CurrentBeat; // 現在の拍を取得。
             double quantizedBeat;
             int detectedTimeSignatureIndex;
@@ -56,14 +55,14 @@ namespace Mock.MusicSyncMock
                 // 最後の入力との差を計算する。
                 double lastBeat = _inputedTimingList.Last();
                 double betweenBeat = beat - lastBeat;
-                
+
                 _debugLog.AppendLine($"Input Beat: {beat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
-                
+
                 // 最も近い拍子を検出する。
                 detectedTimeSignatureIndex = FindNearestTimeSignature(betweenBeat);
                 // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
                 quantizedBeat = lastBeat + GetBeatLength(detectedTimeSignatureIndex);
-                
+
                 _debugLog.AppendLine($"Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
             }
@@ -71,12 +70,12 @@ namespace Mock.MusicSyncMock
             {
                 // 初回入力処理
                 _debugLog.AppendLine($"First Input - Beat: {beat:F3}");
-                
+
                 // 最も近い拍子を検出する。
                 detectedTimeSignatureIndex = FindNearestTimeSignature(beat);
                 // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
                 quantizedBeat = GetBeatLength(detectedTimeSignatureIndex);
-                
+
                 _debugLog.AppendLine($"First Input Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"First Input Quantized Beat: {quantizedBeat:F3}");
             }
@@ -93,7 +92,7 @@ namespace Mock.MusicSyncMock
             }
 
             _debugLog.AppendLine($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}");
-            
+
             // すべてのデバッグ情報を一括で出力
             Debug.Log(_debugLog.ToString());
         }
