@@ -31,6 +31,10 @@ namespace Mock.TPS
             _currentCameraRotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
         }
 
+        /// <summary>
+        ///     ヨー方向の更新。
+        ///     カメラの横回転を制御する。
+        /// </summary>
         public void UpdateYaw()
         {
             // ロック対象がいる場合はその方向、そうでなければ現在のカメラ回転を使う。
@@ -46,15 +50,10 @@ namespace Mock.TPS
             _camera.position = Vector3.Lerp(_camera.position, targetPosition, t);
         }
 
-        public void OnDrawGizmos()
-        {
-            if (_lockTarget == null) { return; }
-            Vector3 lookDir = _lockTarget.position - _camera.position;
-            if (lookDir.sqrMagnitude <= 0.0001f) lookDir = _camera.forward;
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(_camera.position, _camera.position + lookDir.normalized * 5f);
-        }
-
+        /// <summary>
+        ///     ピッチ方向の更新。
+        ///     カメラの縦回転を制御する。
+        /// </summary>
         public void UpdatePitch()
         {
             // ロック対象がいる場合はその方向、そうでなければプレイヤー方向を使う。
@@ -64,6 +63,15 @@ namespace Mock.TPS
             float damping = Mathf.Max(_config.CameraLookAtDamping, 0.0001f);
             float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
+        }
+
+        public void OnDrawGizmos()
+        {
+            if (_lockTarget == null) { return; }
+            Vector3 lookDir = _lockTarget.position - _camera.position;
+            if (lookDir.sqrMagnitude <= 0.0001f) lookDir = _camera.forward;
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(_camera.position, _camera.position + lookDir.normalized * 5f);
         }
 
         /// <summary>
