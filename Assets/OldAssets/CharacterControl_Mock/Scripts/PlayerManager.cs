@@ -10,8 +10,11 @@ namespace Mock.CharacterControl
     /// </summary>
     public class PlayerManager
     {
-        public PlayerManager(SymphonyAnimeController animeController)
+        public PlayerManager(PlayerStatus status,
+            SymphonyAnimeController animeController)
         {
+            _status = status;
+
             if (animeController == null) { return; }
 
             _animeController = animeController;
@@ -31,6 +34,7 @@ namespace Mock.CharacterControl
             });
         }
 
+        private readonly PlayerStatus _status;
         private readonly SymphonyAnimeController _animeController;
         private readonly Rigidbody _rigidbody;
         private readonly NavMeshAgent _agent;
@@ -38,6 +42,8 @@ namespace Mock.CharacterControl
         private void HandleMove(InputAction.CallbackContext context)
         {
             Vector2 input = context.ReadValue<Vector2>();
+
+            _rigidbody.AddForce(input);
         }
     }
 }
