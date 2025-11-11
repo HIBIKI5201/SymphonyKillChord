@@ -8,9 +8,12 @@ namespace Mock.CharacterControl
     public class InputBuffer : MonoBehaviour
     {
         public InputAction MoveAction => _playerInput.actions[_moveActionName];
+        public InputAction AttackAction => _playerInput.actions[_attackActionName];
 
         [SerializeField]
         private string _moveActionName = "Move";
+        [SerializeField]
+        private string _attackActionName = "Attack";
 
         private PlayerInput _playerInput;
 
