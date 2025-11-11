@@ -24,5 +24,10 @@ namespace Mock.CharacterControl
             if (_inputBuffer == null) { return; }
             _playerManager.InputRegister(_inputBuffer);
         }
+
+        private void Update()
+        {
+            _playerManager.Update(Time.deltaTime);
+        }
     }
 }
