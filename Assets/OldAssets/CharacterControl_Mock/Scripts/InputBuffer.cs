@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace Mock.CharacterControl
 {
+    [DefaultExecutionOrder(-1000)]
     [RequireComponent(typeof(PlayerInput))]
     public class InputBuffer : MonoBehaviour
     {
