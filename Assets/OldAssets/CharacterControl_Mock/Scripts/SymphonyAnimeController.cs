@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Mock.CharacterControl
 {
@@ -9,20 +10,31 @@ namespace Mock.CharacterControl
     [RequireComponent(typeof(Animator))]
     public class SymphonyAnimeController : MonoBehaviour, IRootMotionReciever
     {
-        public bool IsRootMotion 
+        public event Action<bool> OnRootMotionChanged;
+        public event Action OnAnimatorMoveAction;
+
+        public bool IsRootMotion => _animator.applyRootMotion;
+
+        void IRootMotionReciever.ActiveRootMotion()
         {
-            get => _animator.applyRootMotion;
-            set => _animator.applyRootMotion = value;
+            _animator.applyRootMotion = true;
+            OnRootMotionChanged?.Invoke(true);
         }
-
-        void IRootMotionReciever.ActiveRootMotion() => _animator.applyRootMotion = true;
-        void IRootMotionReciever.InactiveRootMotion() => _animator.applyRootMotion = false;
-
+        void IRootMotionReciever.InactiveRootMotion()
+        {
+            _animator.applyRootMotion = false;
+            OnRootMotionChanged?.Invoke(false);
+        }
         private Animator _animator;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
+        }
+
+        private void OnAnimatorMove()
+        {
+            OnAnimatorMoveAction?.Invoke();
         }
     }
 }

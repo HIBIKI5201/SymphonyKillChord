@@ -23,11 +23,17 @@ namespace Mock.CharacterControl
 
             _animeController = animeController;
             _transform = animeController.transform;
+            animeController.OnAnimatorMoveAction += OnAnimatorMove;
+            animeController.OnRootMotionChanged += isRootMotion =>
+            {
+                if (isRootMotion) { OnAttackStart(); }
+                else { OnAttackEnd(); }
+            };
 
             // Rigidbody取得・設定
             if (animeController.TryGetComponent(out _rigidbody))
             {
-                _rigidbody.isKinematic = true; // RootMotionを扱うためKinematicに
+                _rigidbody.isKinematic = false;
             }
             else
             {
@@ -62,27 +68,25 @@ namespace Mock.CharacterControl
 
         public void Update(float deltaTime)
         {
-            if (_isAttacking)
-                return; // 攻撃中はRootMotionに任せる
+            if (_isAttacking) return;
 
-            if (_velocity != Vector3.zero)
-            {
-                Vector3 move = _velocity * deltaTime;
-                _rigidbody.MovePosition(_rigidbody.position + move);
-            }
+            // 入力移動は Rigidbody.velocity で反映
+            _rigidbody.linearVelocity = _velocity;
+            if (_velocity.sqrMagnitude > 0f)
+                _transform.rotation = Quaternion.LookRotation(_velocity.normalized, Vector3.up);
         }
+
 
         // 攻撃アニメーションから呼び出される（Animation Event想定）
         public void OnAttackStart()
         {
             _isAttacking = true;
-            _animator.applyRootMotion = true;
+            _rigidbody.linearVelocity = Vector3.zero; // RootMotion中は入力移動を止める
         }
 
         public void OnAttackEnd()
         {
             _isAttacking = false;
-            _animator.applyRootMotion = false;
         }
 
         // AnimatorのRootMotion反映
@@ -90,8 +94,11 @@ namespace Mock.CharacterControl
         {
             if (_isAttacking)
             {
-                _rigidbody.MovePosition(_animator.rootPosition);
-                _transform.rotation = _animator.rootRotation;
+                Vector3 delta = _animator.deltaPosition;
+                Quaternion deltaRot = _animator.deltaRotation;
+
+                _rigidbody.MovePosition(_rigidbody.position + delta);
+                _rigidbody.MoveRotation(_rigidbody.rotation * deltaRot);
             }
         }
 
@@ -115,12 +122,13 @@ namespace Mock.CharacterControl
 
             if (dirMag > 0f)
             {
-                _transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-                _velocity = dir * _status.MoveSpeed;
+                Vector3 velocity = dir * _status.MoveSpeed;
+                velocity.y = _rigidbody.linearVelocity.y;
+                _velocity = velocity;
             }
             else
             {
-                _velocity = Vector3.zero;
+                _velocity = Vector3.up * _rigidbody.linearVelocity.y;
             }
         }
 
