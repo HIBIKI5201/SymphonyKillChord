@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85386cde6690fb54bb2b17a36c1a8695, type: 3}
   m_Name: PlayerStatus
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.PlayerStatus
-  _moveSpeed: 3
+  _moveSpeed: 5
