@@ -1,62 +1,132 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Mock.TPS
 {
     /// <summary>
     ///     プレイヤーの管理クラス。
     /// </summary>
-    public class PlayerManager : MonoBehaviour
+    [RequireComponent(typeof(Rigidbody))]
+    public class PlayerManager : MonoBehaviour, ICharacter
     {
-        [SerializeField, Tooltip("カメラのX回転を反転")]
-        private bool _cameraMoveXFlip = false;
+        public void Init(InputBuffer inputBuffer, CameraManager cameraManager, HealthbarManager healthbarManager)
+        {
+            _inputBuffer = inputBuffer;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+
+            _playerMover = new PlayerMover(_playerStatus, rb,
+                transform, Camera.main.transform);
+            _playerAttacker = new PlayerAttacker(_playerStatus, _config, cameraManager.transform);
+            _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
+            _healthEntity.OnHealthChanged += healthbarManager.SetHealthBar;
+
+            InputEventRegister(inputBuffer);
+        }
+
+        public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
+
+        [SerializeField, Tooltip("プレイヤーのステータス")]
+        private PlayerStatus _playerStatus;
+
+        [SerializeField, Tooltip("コンフィグ")]
+        private PlayerConfig _config;
 
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
+        private PlayerAttacker _playerAttacker;
+        private HealthEntity _healthEntity;
 
-        private void OnEnable()
-        {
-            _playerMover = new PlayerMover(transform, Camera.main.transform);
-            _inputBuffer = FindAnyObjectByType<InputBuffer>();
-
-            InputEventRegister(_inputBuffer);
-        }
+        private Vector3 _moveInput;
+        private HashSet<Collision> _hitGrounds = new();
 
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
         }
 
+        private void Update()
+        {
+            if (_playerMover != null)
+            {
+                Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(in _moveInput);
+                _playerMover.SetPlayerVelocity(velocity);
+                _playerMover.Update();
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_playerMover != null)
+            {
+                _playerMover.FixedUpdate();
+            }
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.contacts.Length == 0) { return; }
+
+            // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
+            Vector3 contactNormal = collision.contacts[0].normal;
+            if (Vector3.Dot(contactNormal, Vector3.up) > 0.5f)
+            {
+                _hitGrounds.Add(collision);
+                _playerMover.SetIsGround(0 < _hitGrounds.Count);
+            }
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (_hitGrounds.Remove(collision))
+            {
+                // 地面との接触がなくなった場合、接地フラグを更新する。
+                _playerMover.SetIsGround(0 < _hitGrounds.Count);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            _playerAttacker?.OnDrawGizmos();
+        }
+
         private void InputEventRegister(InputBuffer buffer)
         {
-            if (buffer == null) { return; }
+            if (buffer == null)
+            {
+                Debug.LogError($"{nameof(InputBuffer)} is null");
+                return;
+            }
 
-            buffer.LookAction.Performed += HandleInputLook;
-            buffer.LookAction.Canceled += HandleInputLook;
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
+            buffer.JumpAction.Started += HandleJump;
+            buffer.AttackAction.Started += HandleInputAttack;
         }
 
         private void InputEventUnregister(InputBuffer buffer)
         {
             if (buffer == null) { return; }
 
-            buffer.LookAction.Performed -= HandleInputLook;
-            buffer.LookAction.Canceled -= HandleInputLook;
             buffer.MoveAction.Performed -= HandleInputMove;
             buffer.MoveAction.Canceled -= HandleInputMove;
-        }
-
-        private void HandleInputLook(Vector2 input)
-        {
-            float cameraX = input.x;
-            if (_cameraMoveXFlip) { cameraX = -cameraX; } // X軸反転設定が有効な場合は反転。
-            transform.Rotate(0f, cameraX, 0f); // プレイヤーのY軸回転。
+            buffer.JumpAction.Started -= HandleJump;
+            buffer.AttackAction.Started -= HandleInputAttack;
         }
 
         private void HandleInputMove(Vector2 input)
         {
-            Vector3 inputDirection = new Vector3(input.x, 0, input.y);
-            transform.position += _playerMover.CalcPlayerVelocityByInputDirection(in inputDirection);
+            _moveInput = new Vector3(input.x, 0, input.y);
+        }
+
+        private void HandleJump(float input)
+        {
+            _playerMover.Jump();
+        }
+
+        private void HandleInputAttack(float input)
+        {
+            _playerAttacker.Attack();
         }
     }
 }
