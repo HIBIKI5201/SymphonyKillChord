@@ -72,8 +72,13 @@ namespace Mock.CharacterControl
 
             // 入力移動は Rigidbody.velocity で反映
             _rigidbody.linearVelocity = _velocity;
-            if (_velocity.sqrMagnitude > 0f)
-                _transform.rotation = Quaternion.LookRotation(_velocity.normalized, Vector3.up);
+
+            // 移動方向がほぼ水平の場合のみ回転
+            Vector3 horizontalVelocity = new Vector3(_velocity.x, 0f, _velocity.z);
+            if (horizontalVelocity.sqrMagnitude > 0.001f)
+            {
+                _transform.rotation = Quaternion.LookRotation(horizontalVelocity.normalized, Vector3.up);
+            }
         }
 
 
@@ -81,7 +86,7 @@ namespace Mock.CharacterControl
         public void OnAttackStart()
         {
             _isAttacking = true;
-            _rigidbody.linearVelocity = Vector3.zero; // RootMotion中は入力移動を止める
+            _velocity = Vector3.zero; // RootMotion中は入力移動を止める
         }
 
         public void OnAttackEnd()
@@ -117,19 +122,18 @@ namespace Mock.CharacterControl
                 return;
 
             Vector2 input = context.ReadValue<Vector2>();
-            Vector3 dir = new(input.x, 0, input.y);
+            Vector3 dir = new Vector3(input.x, 0f, input.y);
             float dirMag = dir.magnitude;
+
+            Vector3 horizontalVelocity = Vector3.zero;
 
             if (dirMag > 0f)
             {
-                Vector3 velocity = dir * _status.MoveSpeed;
-                velocity.y = _rigidbody.linearVelocity.y;
-                _velocity = velocity;
+                horizontalVelocity = dir.normalized * _status.MoveSpeed;
             }
-            else
-            {
-                _velocity = Vector3.up * _rigidbody.linearVelocity.y;
-            }
+
+            // Y方向はRigidbodyの現在の速度を保持（重力反映）
+            _velocity = new Vector3(horizontalVelocity.x, _rigidbody.linearVelocity.y, horizontalVelocity.z);
         }
 
         private void HandleAttack(InputAction.CallbackContext context)
