@@ -18,7 +18,16 @@ namespace Mock.CharacterControl
             if (animeController == null) { return; }
 
             _animeController = animeController;
-            if (!animeController.TryGetComponent(out _rigidbody)) { Debug.LogError($"{animeController.name}に{nameof(Rigidbody)}がありません。"); }
+            if (animeController.TryGetComponent(out _rigidbody)) 
+            {
+                _rigidbody.isKinematic = true;
+            }
+            else
+            {
+                Debug.LogError($"{animeController.name}に{nameof(Rigidbody)}がありません。");
+            }
+
+
             if (!animeController.TryGetComponent(out _agent)) { Debug.LogError($"{animeController.name}に{nameof(NavMeshAgent)}がありません。"); }
         }
 
@@ -34,17 +43,31 @@ namespace Mock.CharacterControl
             });
         }
 
+        public void Update(float deltaTime)
+        {
+            _transform.Translate(_velocity * deltaTime);
+        }
+
         private readonly PlayerStatus _status;
         private readonly SymphonyAnimeController _animeController;
         private readonly Rigidbody _rigidbody;
         private readonly NavMeshAgent _agent;
+        private Transform _transform => _animeController.transform;
+
+        private Vector3 _velocity;
 
         private void HandleMove(InputAction.CallbackContext context)
         {
             Vector2 input = context.ReadValue<Vector2>();
             Vector3 dir = new(input.x, 0, input.y);
+            float dirMag = dir.magnitude;
 
-            _rigidbody.AddForce(dir * _status.MoveSpeed);
+            if (0 < dirMag) // 移動方向がある時だけ向く。
+            {
+                _transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            }
+
+            _velocity = dir * _status.MoveSpeed;
         }
     }
 }
