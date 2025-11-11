@@ -154,6 +154,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8048339362685235905}
+    - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1877645500318241145}
   m_SourcePrefab: {fileID: -3956505258223990651, guid: d91034d52857be0498686f7803764974, type: 3}
 --- !u!1 &2121048020602013572 stripped
 GameObject:
@@ -210,3 +213,15 @@ CapsuleCollider:
   m_Height: 1.4
   m_Direction: 1
   m_Center: {x: 0, y: 0.7, z: 0}
+--- !u!114 &1877645500318241145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121048020602013572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 518b09473a6e025498cf19f10e168404, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.SymphonyAnimeController
