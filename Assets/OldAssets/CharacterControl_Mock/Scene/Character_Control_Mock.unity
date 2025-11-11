@@ -381,6 +381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 122b249e199c3e5478ec2c4bf93cd1de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.PlayerInitializer
+  _status: {fileID: 11400000, guid: ce48caa85e280914e865d54ad466d740, type: 2}
   _inputBuffer: {fileID: 782391280}
   _symphonyAnimeController: {fileID: 1957064468}
 --- !u!4 &867165294
