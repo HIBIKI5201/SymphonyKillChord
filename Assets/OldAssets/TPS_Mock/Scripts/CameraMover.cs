@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace Mock.TPS
 {
@@ -44,6 +45,8 @@ namespace Mock.TPS
 
             Vector3 targetPosition = _target.position + rotation * _config.CameraOffset;
 
+            targetPosition = AdjustCameraForObstacles(targetPosition);
+
             // Damping補完。
             float damping = Mathf.Max(_config.CameraFollowDamping, 0.0001f);
             float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
@@ -63,26 +66,6 @@ namespace Mock.TPS
             float damping = Mathf.Max(_config.CameraLookAtDamping, 0.0001f);
             float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
-        }
-
-        /// <summary>
-        ///    カメラとプレイヤーの間に障害物があるかを確認。
-        ///    障害物があればカメラ位置を調整する。
-        /// </summary>
-        public void AdjustCameraForObstacles()
-        {
-            var hitInfo = new RaycastHit();
-            Vector3 rayDirection = _camera.position - _target.position;
-            //仮で100f
-            if (Physics.SphereCast(_target.position, _config.CameraCollisionRadius, rayDirection,
-                out hitInfo, 100f))
-            {
-                _camera.position = hitInfo.point + hitInfo.normal * _config.CameraCollisionRadius;
-            }
-            else
-            {
-                _camera.position = _camera.position;
-            }
         }
 
         /// <summary>
@@ -134,6 +117,29 @@ namespace Mock.TPS
 
             rotation = Quaternion.identity;
             return false;
+        }
+
+        /// <summary>
+        ///    カメラとプレイヤーの間に障害物があるかを確認。
+        ///    障害物があればカメラ位置を調整する。
+        /// </summary>
+        private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
+        {
+            var hitInfo = new RaycastHit();
+            Vector3 rayDirection = cameraPosition - _target.position;
+            // 仮で100f。
+            // レイキャストで障害物を検出。
+            if (Physics.SphereCast(_target.position, _config.CameraCollisionRadius, rayDirection,
+                out hitInfo, 100f))
+            {
+                // 障害物がある場合、カメラ位置を調整。
+                return hitInfo.point + hitInfo.normal * _config.CameraCollisionRadius;
+            }
+            else
+            {
+                // 障害物がない場合、元の位置を維持。
+                return cameraPosition;
+            }
         }
 
         /// <summary>

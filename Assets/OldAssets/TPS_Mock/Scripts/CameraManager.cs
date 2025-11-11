@@ -44,7 +44,6 @@ namespace Mock.TPS
             {
                 _mover.UpdatePitch();
                 _mover.UpdateYaw();
-                _mover.AdjustCameraForObstacles();
             }
         }
 
