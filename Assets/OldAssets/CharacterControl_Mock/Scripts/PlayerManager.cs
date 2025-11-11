@@ -42,8 +42,9 @@ namespace Mock.CharacterControl
         private void HandleMove(InputAction.CallbackContext context)
         {
             Vector2 input = context.ReadValue<Vector2>();
+            Vector3 dir = new(input.x, 0, input.y);
 
-            _rigidbody.AddForce(input);
+            _rigidbody.AddForce(dir * _status.MoveSpeed);
         }
     }
 }
