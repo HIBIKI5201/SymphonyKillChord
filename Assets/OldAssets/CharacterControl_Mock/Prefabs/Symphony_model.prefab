@@ -157,6 +157,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1877645500318241145}
+    - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8383556860307481185}
   m_SourcePrefab: {fileID: -3956505258223990651, guid: d91034d52857be0498686f7803764974, type: 3}
 --- !u!1 &2121048020602013572 stripped
 GameObject:
@@ -225,3 +228,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 518b09473a6e025498cf19f10e168404, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.SymphonyAnimeController
+--- !u!195 &8383556860307481185
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121048020602013572}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
