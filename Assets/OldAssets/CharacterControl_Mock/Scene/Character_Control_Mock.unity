@@ -287,6 +287,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.InputBuffer
   _moveActionName: Move
+  _attackActionName: Attack
 --- !u!1 &865023752
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,7 +746,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3671312492117075346, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 3.16
       objectReference: {fileID: 0}
     - target: {fileID: 3671312492117075346, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -782,6 +783,10 @@ PrefabInstance:
     - target: {fileID: 3671312492117075346, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5832867299028996485, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
+      propertyPath: m_Constraints
+      value: 112
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
