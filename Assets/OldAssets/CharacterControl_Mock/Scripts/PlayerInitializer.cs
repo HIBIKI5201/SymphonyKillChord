@@ -10,6 +10,15 @@ namespace Mock.CharacterControl
         [SerializeField]
         private SymphonyAnimeController _symphonyAnimeController;
 
+        private PlayerManager _playerManager;
+        private void Awake()
+        {
+            _playerManager = new(_symphonyAnimeController);
+        }
 
+        private void Update()
+        {
+            _playerManager?.Update();
+        }
     }
 }
