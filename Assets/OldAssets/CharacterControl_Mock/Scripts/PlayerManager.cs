@@ -18,6 +18,8 @@ namespace Mock.CharacterControl
             if (animeController == null) { return; }
 
             _animeController = animeController;
+            _transform = animeController.transform;
+
             if (animeController.TryGetComponent(out _rigidbody)) 
             {
                 _rigidbody.isKinematic = true;
@@ -26,7 +28,6 @@ namespace Mock.CharacterControl
             {
                 Debug.LogError($"{animeController.name}に{nameof(Rigidbody)}がありません。");
             }
-
 
             if (!animeController.TryGetComponent(out _agent)) { Debug.LogError($"{animeController.name}に{nameof(NavMeshAgent)}がありません。"); }
         }
@@ -45,14 +46,14 @@ namespace Mock.CharacterControl
 
         public void Update(float deltaTime)
         {
-            _transform.Translate(_velocity * deltaTime);
+            _transform.Translate(_velocity * deltaTime, Space.World);
         }
 
         private readonly PlayerStatus _status;
         private readonly SymphonyAnimeController _animeController;
+        private readonly Transform _transform;
         private readonly Rigidbody _rigidbody;
         private readonly NavMeshAgent _agent;
-        private Transform _transform => _animeController.transform;
 
         private Vector3 _velocity;
 
