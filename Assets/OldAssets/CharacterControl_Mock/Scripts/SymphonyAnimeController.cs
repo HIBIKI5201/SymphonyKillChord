@@ -1,19 +1,18 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mock.CharacterControl
 {
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(Animator))]
     public class SymphonyAnimeController : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
         
-        }
 
-        // Update is called once per frame
-        void Update()
+        private Animator _animator;
+
+        private void Awake()
         {
-        
+            _animator = GetComponent<Animator>();
         }
     }
 }
