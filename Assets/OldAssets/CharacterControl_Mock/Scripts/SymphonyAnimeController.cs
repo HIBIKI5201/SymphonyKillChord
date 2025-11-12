@@ -15,6 +15,8 @@ namespace Mock.CharacterControl
 
         public bool IsRootMotion => _animator.applyRootMotion;
 
+        public void AttackTrigger() => _animator?.SetTrigger(_attackTriggerHash);
+
         void IRootMotionReciever.ActiveRootMotion()
         {
             _animator.applyRootMotion = true;
@@ -25,6 +27,11 @@ namespace Mock.CharacterControl
             _animator.applyRootMotion = false;
             OnRootMotionChanged?.Invoke(false);
         }
+
+        [SerializeField, Delayed]
+        private string _attackTriggerName = "Attack";
+
+        private int _attackTriggerHash;
         private Animator _animator;
 
         private void Awake()
@@ -35,6 +42,11 @@ namespace Mock.CharacterControl
         private void OnAnimatorMove()
         {
             OnAnimatorMoveAction?.Invoke();
+        }
+
+        private void OnValidate()
+        {
+            _attackTriggerHash = Animator.StringToHash(_attackTriggerName);
         }
     }
 }
