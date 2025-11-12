@@ -740,6 +740,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1877645500318241145, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
+      propertyPath: _moveVelocityName
+      value: MoveValocity
+      objectReference: {fileID: 0}
     - target: {fileID: 2121048020602013572, guid: 753d6cbaeb66afd48b30552679eab12e, type: 3}
       propertyPath: m_Name
       value: Symphony_model
