@@ -20,6 +20,7 @@ namespace Mock.CharacterControl
         public Quaternion DeltaRotation => _animator.deltaRotation;
 
         public void AttackTrigger() => _animator?.SetTrigger(_attackTriggerHash);
+        public void MoveSpeed(float value) => _animator?.SetFloat(_moveVelocityHash, value);
 
         void IRootMotionReciever.ActiveRootMotion()
         {
@@ -34,8 +35,11 @@ namespace Mock.CharacterControl
 
         [SerializeField, Delayed]
         private string _attackTriggerName = "Attack";
+        [SerializeField, Delayed]
+        private string _moveVelocityName = "MoveVelocity";
 
         private int _attackTriggerHash;
+        private int _moveVelocityHash;
         private Animator _animator;
 
         private void Awake()
@@ -52,6 +56,7 @@ namespace Mock.CharacterControl
         private void OnValidate()
         {
             _attackTriggerHash = Animator.StringToHash(_attackTriggerName);
+            _moveVelocityHash = Animator.StringToHash(_moveVelocityName);
         }
     }
 }
