@@ -56,7 +56,7 @@ namespace Mock.CharacterControl
             });
         }
 
-        public void Update(float deltaTime)
+        public void FixedUpdate(float deltaTime)
         {
             if (_isAttacking) return;
 
