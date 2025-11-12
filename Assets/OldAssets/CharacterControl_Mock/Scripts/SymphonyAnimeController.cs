@@ -46,6 +46,7 @@ namespace Mock.CharacterControl
         {
             _animator = GetComponent<Animator>();
             _animator.applyRootMotion = false;
+            _animator.updateMode = AnimatorUpdateMode.Fixed;
         }
 
         private void OnAnimatorMove()
