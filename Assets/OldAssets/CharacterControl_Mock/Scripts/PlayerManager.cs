@@ -60,11 +60,14 @@ namespace Mock.CharacterControl
         {
             if (_isAttacking) return;
 
+            Vector3 velocity = GetVelocity();
             // 入力移動は Rigidbody.velocity で反映
-            _rigidbody.linearVelocity = _velocity;
+            _rigidbody.linearVelocity = velocity;
+
+            _animeController.MoveSpeed(_direction.magnitude);
 
             // 移動方向がほぼ水平の場合のみ回転
-            Vector3 horizontalVelocity = new Vector3(_velocity.x, 0f, _velocity.z);
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
             if (horizontalVelocity.sqrMagnitude > 0.001f)
             {
                 _transform.rotation = Quaternion.LookRotation(horizontalVelocity.normalized, Vector3.up);
@@ -89,25 +92,13 @@ namespace Mock.CharacterControl
         private readonly Transform _transform;
         private readonly Rigidbody _rigidbody;
 
-        private Vector3 _velocity;
+        private Vector3 _direction;
         private bool _isAttacking = false;
 
         private void HandleMove(InputAction.CallbackContext context)
         {
             Vector2 input = context.ReadValue<Vector2>();
-            Vector3 dir = new Vector3(input.x, 0f, input.y);
-            float dirMag = dir.magnitude;
-
-            Vector3 horizontalVelocity = Vector3.zero;
-
-            if (dirMag > 0f)
-            {
-                horizontalVelocity = dir.normalized * _status.MoveSpeed;
-            }
-
-            // Y方向はRigidbodyの現在の速度を保持（重力反映）
-            _velocity = new Vector3(horizontalVelocity.x, _rigidbody.linearVelocity.y, horizontalVelocity.z);
-            _animeController.MoveSpeed(dirMag);
+            _direction = new Vector3(input.x, 0f, input.y);
         }
 
         private void HandleAttack(InputAction.CallbackContext context)
@@ -126,6 +117,13 @@ namespace Mock.CharacterControl
         private void OnAttackEnd()
         {
             _isAttacking = false;
+        }
+
+        private Vector3 GetVelocity()
+        {
+            Vector3 velocity = _direction * _status.MoveSpeed;
+            velocity.y = _rigidbody.linearVelocity.y; // 落下速度を上書き。
+            return velocity;
         }
     }
 }
