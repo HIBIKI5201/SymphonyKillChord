@@ -39,16 +39,6 @@ namespace Mock.CharacterControl
             {
                 Debug.LogError($"{animeController.name} に {nameof(Rigidbody)} がありません。");
             }
-
-            // Animator取得
-            if (animeController.TryGetComponent(out _animator))
-            {
-                _animator.applyRootMotion = false;
-            }
-            else
-            {
-                Debug.LogError($"{animeController.name} に {nameof(Animator)} がありません。");
-            }
         }
 
         public void InputRegister(InputBuffer inputBuffer, CancellationToken token = default)
@@ -66,32 +56,22 @@ namespace Mock.CharacterControl
             });
         }
 
-        public void Update(float deltaTime)
+        public void FixedUpdate(float deltaTime)
         {
             if (_isAttacking) return;
 
+            Vector3 velocity = GetVelocity();
             // 入力移動は Rigidbody.velocity で反映
-            _rigidbody.linearVelocity = _velocity;
+            _rigidbody.linearVelocity = velocity;
+
+            _animeController.MoveSpeed(_direction.magnitude);
 
             // 移動方向がほぼ水平の場合のみ回転
-            Vector3 horizontalVelocity = new Vector3(_velocity.x, 0f, _velocity.z);
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
             if (horizontalVelocity.sqrMagnitude > 0.001f)
             {
                 _transform.rotation = Quaternion.LookRotation(horizontalVelocity.normalized, Vector3.up);
             }
-        }
-
-
-        // 攻撃アニメーションから呼び出される（Animation Event想定）
-        public void OnAttackStart()
-        {
-            _isAttacking = true;
-            _velocity = Vector3.zero; // RootMotion中は入力移動を止める
-        }
-
-        public void OnAttackEnd()
-        {
-            _isAttacking = false;
         }
 
         // AnimatorのRootMotion反映
@@ -99,8 +79,8 @@ namespace Mock.CharacterControl
         {
             if (_isAttacking)
             {
-                Vector3 delta = _animator.deltaPosition;
-                Quaternion deltaRot = _animator.deltaRotation;
+                Vector3 delta = _animeController.DeltaPosition;
+                Quaternion deltaRot = _animeController.DeltaRotation;
 
                 _rigidbody.MovePosition(_rigidbody.position + delta);
                 _rigidbody.MoveRotation(_rigidbody.rotation * deltaRot);
@@ -111,29 +91,14 @@ namespace Mock.CharacterControl
         private readonly SymphonyAnimeController _animeController;
         private readonly Transform _transform;
         private readonly Rigidbody _rigidbody;
-        private readonly Animator _animator;
 
-        private Vector3 _velocity;
+        private Vector3 _direction;
         private bool _isAttacking = false;
 
         private void HandleMove(InputAction.CallbackContext context)
         {
-            if (_isAttacking)
-                return;
-
             Vector2 input = context.ReadValue<Vector2>();
-            Vector3 dir = new Vector3(input.x, 0f, input.y);
-            float dirMag = dir.magnitude;
-
-            Vector3 horizontalVelocity = Vector3.zero;
-
-            if (dirMag > 0f)
-            {
-                horizontalVelocity = dir.normalized * _status.MoveSpeed;
-            }
-
-            // Y方向はRigidbodyの現在の速度を保持（重力反映）
-            _velocity = new Vector3(horizontalVelocity.x, _rigidbody.linearVelocity.y, horizontalVelocity.z);
+            _direction = new Vector3(input.x, 0f, input.y);
         }
 
         private void HandleAttack(InputAction.CallbackContext context)
@@ -141,7 +106,24 @@ namespace Mock.CharacterControl
             if (_isAttacking)
                 return;
 
-            _animator.SetTrigger("Attack");
+            _animeController.AttackTrigger();
+        }
+
+        private void OnAttackStart()
+        {
+            _isAttacking = true;
+        }
+
+        private void OnAttackEnd()
+        {
+            _isAttacking = false;
+        }
+
+        private Vector3 GetVelocity()
+        {
+            Vector3 velocity = _direction * _status.MoveSpeed;
+            velocity.y = _rigidbody.linearVelocity.y; // 落下速度を上書き。
+            return velocity;
         }
     }
 }

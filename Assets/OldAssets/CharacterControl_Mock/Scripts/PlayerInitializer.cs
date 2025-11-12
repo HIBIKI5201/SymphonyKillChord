@@ -25,9 +25,9 @@ namespace Mock.CharacterControl
             _playerManager.InputRegister(_inputBuffer);
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            _playerManager.Update(Time.deltaTime);
+            _playerManager.FixedUpdate(Time.deltaTime);
         }
     }
 }
