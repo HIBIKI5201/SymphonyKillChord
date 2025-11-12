@@ -39,16 +39,6 @@ namespace Mock.CharacterControl
             {
                 Debug.LogError($"{animeController.name} に {nameof(Rigidbody)} がありません。");
             }
-
-            // Animator取得
-            if (animeController.TryGetComponent(out _animator))
-            {
-                _animator.applyRootMotion = false;
-            }
-            else
-            {
-                Debug.LogError($"{animeController.name} に {nameof(Animator)} がありません。");
-            }
         }
 
         public void InputRegister(InputBuffer inputBuffer, CancellationToken token = default)
@@ -81,26 +71,13 @@ namespace Mock.CharacterControl
             }
         }
 
-
-        // 攻撃アニメーションから呼び出される（Animation Event想定）
-        public void OnAttackStart()
-        {
-            _isAttacking = true;
-            _velocity = Vector3.zero; // RootMotion中は入力移動を止める
-        }
-
-        public void OnAttackEnd()
-        {
-            _isAttacking = false;
-        }
-
         // AnimatorのRootMotion反映
         public void OnAnimatorMove()
         {
             if (_isAttacking)
             {
-                Vector3 delta = _animator.deltaPosition;
-                Quaternion deltaRot = _animator.deltaRotation;
+                Vector3 delta = _animeController.DeltaPosition;
+                Quaternion deltaRot = _animeController.DeltaRotation;
 
                 _rigidbody.MovePosition(_rigidbody.position + delta);
                 _rigidbody.MoveRotation(_rigidbody.rotation * deltaRot);
@@ -111,16 +88,12 @@ namespace Mock.CharacterControl
         private readonly SymphonyAnimeController _animeController;
         private readonly Transform _transform;
         private readonly Rigidbody _rigidbody;
-        private readonly Animator _animator;
 
         private Vector3 _velocity;
         private bool _isAttacking = false;
 
         private void HandleMove(InputAction.CallbackContext context)
         {
-            if (_isAttacking)
-                return;
-
             Vector2 input = context.ReadValue<Vector2>();
             Vector3 dir = new Vector3(input.x, 0f, input.y);
             float dirMag = dir.magnitude;
@@ -142,6 +115,16 @@ namespace Mock.CharacterControl
                 return;
 
             _animeController.AttackTrigger();
+        }
+
+        private void OnAttackStart()
+        {
+            _isAttacking = true;
+        }
+
+        private void OnAttackEnd()
+        {
+            _isAttacking = false;
         }
     }
 }

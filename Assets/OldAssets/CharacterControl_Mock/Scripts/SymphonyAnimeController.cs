@@ -10,10 +10,14 @@ namespace Mock.CharacterControl
     [RequireComponent(typeof(Animator))]
     public class SymphonyAnimeController : MonoBehaviour, IRootMotionReciever
     {
+        /// <summary> ルートモーションのアクティブ状態が変化した時 </summary>
         public event Action<bool> OnRootMotionChanged;
+        /// <summary> ルートモーションで移動した時 </summary> 
         public event Action OnAnimatorMoveAction;
 
         public bool IsRootMotion => _animator.applyRootMotion;
+        public Vector3 DeltaPosition => _animator.deltaPosition;
+        public Quaternion DeltaRotation => _animator.deltaRotation;
 
         public void AttackTrigger() => _animator?.SetTrigger(_attackTriggerHash);
 
@@ -37,6 +41,7 @@ namespace Mock.CharacterControl
         private void Awake()
         {
             _animator = GetComponent<Animator>();
+            _animator.applyRootMotion = false;
         }
 
         private void OnAnimatorMove()
