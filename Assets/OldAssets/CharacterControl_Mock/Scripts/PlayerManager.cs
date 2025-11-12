@@ -107,6 +107,7 @@ namespace Mock.CharacterControl
 
             // Y方向はRigidbodyの現在の速度を保持（重力反映）
             _velocity = new Vector3(horizontalVelocity.x, _rigidbody.linearVelocity.y, horizontalVelocity.z);
+            _animeController.MoveSpeed(dirMag);
         }
 
         private void HandleAttack(InputAction.CallbackContext context)
