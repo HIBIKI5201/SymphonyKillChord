@@ -141,7 +141,7 @@ namespace Mock.CharacterControl
             if (_isAttacking)
                 return;
 
-            _animator.SetTrigger("Attack");
+            _animeController.AttackTrigger();
         }
     }
 }
