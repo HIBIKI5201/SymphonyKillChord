@@ -32,6 +32,6 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ env.NOTION_DATABASE_ID }}
-          NOTION_DATABASE_DATE_PROPERTY: ${{ env.NOTION_DATABASE_DATE_PROPERTY }}
+          NOTION_DATABASE_ID: ${{ NOTION_DATABASE_ID }}
+          NOTION_DATABASE_DATE_PROPERTY: ${{ NOTION_DATABASE_DATE_PROPERTY }}
         run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
