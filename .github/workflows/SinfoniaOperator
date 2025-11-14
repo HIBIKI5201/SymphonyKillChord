@@ -30,4 +30,4 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           NOTION_DATABASE_DATE_PROPERTY: ${{ secrets.NOTION_DATABASE_DATE_PROPERTY }}
-        run: dotnet run --project ./SinfoniaStudio.csproj --configuration Release
+        run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
