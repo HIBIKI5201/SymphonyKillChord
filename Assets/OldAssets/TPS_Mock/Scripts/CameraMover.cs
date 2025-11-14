@@ -25,7 +25,7 @@ namespace Mock.TPS
             float yaw = input.x * _config.CameraRotationSpeed * (_config.IsCameraFlipX ? -1 : 1);
             float pitch = -input.y * _config.CameraRotationSpeed;
 
-            _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PicthRangeMin, _config.PicthRangeMax);
+            _currentPitch = Mathf.Clamp(_currentPitch + pitch, _config.PitchRangeMin, _config.PitchRangeMax);
             _currentYaw += yaw;
 
             _currentCameraRotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
@@ -43,6 +43,8 @@ namespace Mock.TPS
                 : _currentCameraRotation;
 
             Vector3 targetPosition = _target.position + rotation * _config.CameraOffset;
+
+            targetPosition = AdjustCameraForObstacles(targetPosition);
 
             // Damping補完。
             float damping = Mathf.Max(_config.CameraFollowDamping, 0.0001f);
@@ -65,6 +67,9 @@ namespace Mock.TPS
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
         }
 
+        /// <summary>
+        ///    ギズモの描画。
+        /// </summary>
         public void OnDrawGizmos()
         {
             if (_lockTarget == null) { return; }
@@ -91,7 +96,11 @@ namespace Mock.TPS
         private Quaternion _currentCameraRotation = Quaternion.identity;
 
 
-
+        /// <summary>
+        ///    ロック対象の方向を向くためのヨー回転を取得する。
+        /// </summary>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
         private bool TryGetLockYaw(out Quaternion rotation)
         {
             Vector3 toEnemy = _lockTarget.position - _target.position;
@@ -109,6 +118,41 @@ namespace Mock.TPS
             return false;
         }
 
+        /// <summary>
+        ///    カメラとプレイヤーの間に障害物があるかを確認。
+        ///    障害物があればカメラ位置を調整する。
+        /// </summary>
+        private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
+        {
+            var hitInfo = new RaycastHit();
+            // プレイヤーからカメラへの方向ベクトル。
+            Vector3 rayDirection = cameraPosition - _target.position;
+            float distance = rayDirection.magnitude;
+            // プレイヤーから少し上の位置から開始（足元の床を避ける）。
+            Vector3 startPosition = _target.position + Vector3.up * 1f;
+            Debug.DrawRay(startPosition, rayDirection.normalized * distance, Color.green);
+            // レイキャストで障害物を検出。
+            if (Physics.SphereCast(startPosition, _config.CameraCollisionRadius, rayDirection.normalized,
+                out hitInfo, distance))
+            {
+                // プレイヤー自身に当たった場合は無視。
+                if (hitInfo.collider.transform == _target || hitInfo.collider.transform.IsChildOf(_target))
+                {
+                    return cameraPosition;
+                }
+                // 障害物がある場合、カメラ位置を調整。
+                return hitInfo.point + hitInfo.normal * _config.CameraCollisionRadius;
+            }
+            else
+            {
+                return cameraPosition;
+            }
+        }
+
+        /// <summary>
+        ///    ロック対象のピッチ方向を向く回転を取得する。
+        /// </summary>
+        /// <returns></returns>
         private Quaternion LockTargetPitch()
         {
             Vector3 lookDir = _lockTarget.position - _camera.position;
@@ -116,6 +160,10 @@ namespace Mock.TPS
             return Quaternion.LookRotation(lookDir.normalized, Vector3.up);
         }
 
+        /// <summary>
+        ///   プレイヤーのピッチ方向を向く回転を取得する。
+        /// </summary>
+        /// <returns></returns>
         private Quaternion PlayerPitch()
         {
             Vector3 rotatedLookAtOffset = _currentCameraRotation * _config.CameraLookAtOffset;

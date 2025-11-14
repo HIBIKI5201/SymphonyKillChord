@@ -52,6 +52,10 @@ namespace Mock.TPS
             _mover?.OnDrawGizmos();
         }
 
+        /// <summary>
+        ///   入力イベントの登録。
+        /// </summary>
+        /// <param name="inputBuffer"></param>
         private void InputEventRegister(InputBuffer inputBuffer)
         {
             if (inputBuffer == null)
@@ -66,10 +70,12 @@ namespace Mock.TPS
 
         }
 
+        /// <summary>
+        ///    入力イベントの登録解除。
+        /// </summary>
+        /// <param name="inputBuffer"></param>
         private void InputEventUnregister(InputBuffer inputBuffer)
         {
-
-
             if (inputBuffer == null) { return; }
 
             inputBuffer.LookAction.Performed -= _mover.RotateCamera;
@@ -78,6 +84,10 @@ namespace Mock.TPS
             inputBuffer.AttackAction.Started -= HandleLockTargetChange;
         }
 
+        /// <summary>
+        ///    ロック対象変更処理。
+        /// </summary>
+        /// <param name="value"></param>
         private void HandleLockTargetChange(float value)
         {
             _lockTargetIndex++;
