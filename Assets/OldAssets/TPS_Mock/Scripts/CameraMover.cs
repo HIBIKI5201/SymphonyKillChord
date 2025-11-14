@@ -136,7 +136,7 @@ namespace Mock.TPS
                 out hitInfo, distance))
             {
                 // プレイヤー自身に当たった場合は無視。
-                if (hitInfo.collider.transform == _target)
+                if (hitInfo.collider.transform == _target || hitInfo.collider.transform.IsChildOf(_target))
                 {
                     return cameraPosition;
                 }
