@@ -19,7 +19,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 依存関係の復元
-        run: dotnet restore
+        run: dotnet restore ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.slnx
 
       - name: ビルド
         run: dotnet build --configuration Release
