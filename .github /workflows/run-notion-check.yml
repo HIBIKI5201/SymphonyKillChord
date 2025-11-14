@@ -1,0 +1,33 @@
+name: Notion Discord Bot
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # JSTの7時（UTC 22時）
+  workflow_dispatch:       # 手動実行も可能
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@v4
+
+      - name: .NETをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 依存関係の復元
+        run: dotnet restore
+
+      - name: ビルド
+        run: dotnet build --configuration Release
+
+      - name: 実行
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          NOTION_DATABASE_DATE_PROPERTY: ${{ secrets.NOTION_DATABASE_DATE_PROPERTY }}
+        run: dotnet run --project ./SinfoniaStudio.csproj --configuration Release
