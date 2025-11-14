@@ -19,10 +19,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 依存関係の復元
-        run: dotnet restore ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.slnx
+        run: dotnet restore ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
 
       - name: ビルド
-        run: dotnet build --configuration Release
+        run: dotnet build ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
 
       - name: 実行
         env:
@@ -30,4 +30,4 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           NOTION_DATABASE_DATE_PROPERTY: ${{ secrets.NOTION_DATABASE_DATE_PROPERTY }}
-        run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
+        run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
