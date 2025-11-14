@@ -19,9 +19,6 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: ファイル構造をリストアップ
-        run: ls -R
-
       - name: 依存関係の復元
         run: dotnet restore ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
 
