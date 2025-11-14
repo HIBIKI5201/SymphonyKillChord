@@ -132,11 +132,9 @@ namespace Mock.TPS
             Vector3 startPosition = _target.position + Vector3.up * 1f;
             Debug.DrawRay(startPosition, rayDirection.normalized * distance, Color.green);
             // レイキャストで障害物を検出。
-            if (Physics.SphereCast(startPosition, _config.CameraCollisionRadius, rayDirection,
+            if (Physics.SphereCast(startPosition, _config.CameraCollisionRadius, rayDirection.normalized,
                 out hitInfo, distance))
             {
-                Debug.Log($"Camera collision with {hitInfo.collider.name}");
-                Debug.Log(hitInfo.point);
                 // プレイヤー自身に当たった場合は無視。
                 if (hitInfo.collider.transform == _target)
                 {
