@@ -1,8 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "HmfkRsgbWV8=",
+  "dgSpecHash": "dt7leQaUTVI=",
   "success": true,
   "projectFilePath": "C:\\Users\\takut\\OneDrive\\ドキュメント\\Symphony Kill Chord\\ProjectCS\\SymphonyKillChordProjectCS\\SymphonyKillChordProjectCS\\SymphonyKillChordProjectCS.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\takut\\.nuget\\packages\\jsonsubtypes\\1.8.0\\jsonsubtypes.1.8.0.nupkg.sha512",
+    "C:\\Users\\takut\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\5.0.0\\microsoft.extensions.dependencyinjection.abstractions.5.0.0.nupkg.sha512",
+    "C:\\Users\\takut\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\5.0.0\\microsoft.extensions.logging.abstractions.5.0.0.nupkg.sha512",
+    "C:\\Users\\takut\\.nuget\\packages\\newtonsoft.json\\13.0.2\\newtonsoft.json.13.0.2.nupkg.sha512",
+    "C:\\Users\\takut\\.nuget\\packages\\notion.net\\4.4.0\\notion.net.4.4.0.nupkg.sha512"
+  ],
   "logs": []
 }

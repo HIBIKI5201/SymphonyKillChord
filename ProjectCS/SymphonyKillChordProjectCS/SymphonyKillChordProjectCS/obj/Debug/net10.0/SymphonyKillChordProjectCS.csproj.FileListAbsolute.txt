@@ -13,3 +13,10 @@ C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\Symphon
 C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\obj\Debug\net10.0\SymphonyKillChordProjectCS.pdb
 C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\obj\Debug\net10.0\SymphonyKillChordProjectCS.genruntimeconfig.cache
 C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\obj\Debug\net10.0\ref\SymphonyKillChordProjectCS.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\bin\Debug\net10.0\JsonSubTypes.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\bin\Debug\net10.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\bin\Debug\net10.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\bin\Debug\net10.0\Newtonsoft.Json.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\bin\Debug\net10.0\Notion.Client.dll
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\obj\Debug\net10.0\SymphonyKillChordProjectCS.csproj.AssemblyReference.cache
+C:\Users\takut\OneDrive\ドキュメント\Symphony Kill Chord\ProjectCS\SymphonyKillChordProjectCS\SymphonyKillChordProjectCS\obj\Debug\net10.0\Symphony.1EE62398.Up2Date
