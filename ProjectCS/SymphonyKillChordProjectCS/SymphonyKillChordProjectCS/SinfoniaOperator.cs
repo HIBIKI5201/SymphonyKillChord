@@ -150,7 +150,7 @@ namespace SinfoniaStudio.Master
         {
             string pageContext = await GetBlockChildrenViaHttpAsync(page.Id, notionToken);
             sb.AppendLine(new string('-', 10));
-            sb.AppendLine(pageContext);
+            sb.AppendLine(pageContext.TrimEnd());
             sb.AppendLine(new string('-', 10));
             sb.AppendLine();
         }
