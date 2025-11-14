@@ -1,5 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mock.TPS
 {
@@ -126,18 +125,28 @@ namespace Mock.TPS
         private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
         {
             var hitInfo = new RaycastHit();
+            // プレイヤーからカメラへの方向ベクトル。
             Vector3 rayDirection = cameraPosition - _target.position;
-            // 仮で100f。
+            float distance = rayDirection.magnitude;
+            // プレイヤーから少し上の位置から開始（足元の床を避ける）。
+            Vector3 startPosition = _target.position + Vector3.up * 1f;
+            Debug.DrawRay(startPosition, rayDirection.normalized * distance, Color.green);
             // レイキャストで障害物を検出。
-            if (Physics.SphereCast(_target.position, _config.CameraCollisionRadius, rayDirection,
-                out hitInfo, 100f))
+            if (Physics.SphereCast(startPosition, _config.CameraCollisionRadius, rayDirection,
+                out hitInfo, distance))
             {
+                Debug.Log($"Camera collision with {hitInfo.collider.name}");
+                Debug.Log(hitInfo.point);
+                // プレイヤー自身に当たった場合は無視。
+                if (hitInfo.collider.transform == _target)
+                {
+                    return cameraPosition;
+                }
                 // 障害物がある場合、カメラ位置を調整。
                 return hitInfo.point + hitInfo.normal * _config.CameraCollisionRadius;
             }
             else
             {
-                // 障害物がない場合、元の位置を維持。
                 return cameraPosition;
             }
         }

@@ -19,4 +19,4 @@ MonoBehaviour:
   _cameraLookAtDamping: 0.01
   _cameraRotationSpeed: 1
   _pitchRange: {x: -30, y: 60}
-  _cameraCollisionRadius: 0.3
+  _cameraCollisionRadius: 1
