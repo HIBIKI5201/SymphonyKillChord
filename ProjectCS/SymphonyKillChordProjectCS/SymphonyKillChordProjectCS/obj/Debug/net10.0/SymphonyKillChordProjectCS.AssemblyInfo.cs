@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SymphonyKillChordProjectCS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4924aff08a0dfbc209d9aafef8384fac3cadf814")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ba87cc3f81ffc1053db5dd42bd9b694ceedcde66")]
 [assembly: System.Reflection.AssemblyProductAttribute("SymphonyKillChordProjectCS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SymphonyKillChordProjectCS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

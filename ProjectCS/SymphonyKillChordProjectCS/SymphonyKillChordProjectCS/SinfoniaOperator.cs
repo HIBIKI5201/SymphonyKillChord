@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace SinfoniaStudio.Master
 {
-    internal class Program
+    internal class SinfoniaOperator
     {
         private const string DISCORD_WEBHOOK = "DISCORD_WEBHOOK";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
