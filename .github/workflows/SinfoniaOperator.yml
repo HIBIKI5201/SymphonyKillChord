@@ -8,8 +8,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    environment: 'Configure Sinfonia Operator'
-
+    environment: 'Sinfonia Operator'
 
     steps:
       - name: ソースを取得
