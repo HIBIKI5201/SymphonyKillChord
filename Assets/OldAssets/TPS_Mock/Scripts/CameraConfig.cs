@@ -19,8 +19,9 @@ namespace Mock.TPS
 
         public float CameraRotationSpeed => _cameraRotationSpeed;
 
-        public float PicthRangeMin => _picthRange.x;
-        public float PicthRangeMax => _picthRange.y;
+        public float PitchRangeMin => _pitchRange.x;
+        public float PitchRangeMax => _pitchRange.y;
+        public float CameraCollisionRadius => _cameraCollisionRadius;
 
 
         [SerializeField, Tooltip("カメラのX回転を反転")]
@@ -39,6 +40,9 @@ namespace Mock.TPS
         [SerializeField]
         private float _cameraRotationSpeed = 3f;
         [SerializeField, MinMaxRangeSlider(-90, 90)]
-        private Vector2 _picthRange = new Vector2(-30f, 60f);
+        private Vector2 _pitchRange = new Vector2(-30f, 60f);
+
+        [SerializeField]
+        private float _cameraCollisionRadius = 0.3f;
     }
 }
