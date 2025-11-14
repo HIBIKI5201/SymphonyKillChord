@@ -72,3 +72,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 Assets/AssetStoreTools/
+
+# Sinfonia Operator Bot
+/ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/obj/
+/ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/bin/
