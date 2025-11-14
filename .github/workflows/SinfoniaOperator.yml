@@ -29,4 +29,9 @@ jobs:
         run: dotnet build ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
 
       - name: 実行
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ vars.NOTION_DATABASE_ID }}
+          NOTION_DATABASE_DATE_PROPERTY: ${{ vars.NOTION_DATABASE_DATE_PROPERTY }}
         run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
