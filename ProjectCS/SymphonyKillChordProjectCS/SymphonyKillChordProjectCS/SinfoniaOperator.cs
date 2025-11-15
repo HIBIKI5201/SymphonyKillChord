@@ -88,6 +88,8 @@ namespace SinfoniaStudio.Master
                     if (start.HasValue && start.Value.Date == today)
                     {
                         startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}");
+                        startTasksSb.AppendLine($"[URL]({GetNotionPageUrl(page)})");
+
                         startTaskCount++;
 
                         // ページ本文を追加
@@ -117,6 +119,7 @@ namespace SinfoniaStudio.Master
                     if (end.HasValue && end.Value.Date == today)
                     {
                         endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}");
+                        endTasksSb.AppendLine($"[URL]({GetNotionPageUrl(page)})");
                         endTaskCount++;
 
                         // ページ本文を追加
@@ -293,6 +296,23 @@ namespace SinfoniaStudio.Master
             } while (!string.IsNullOrEmpty(startCursor));
 
             return sb.ToString();
+        }
+
+        private static string GetNotionPageUrl(Page page)
+        {
+            // page.Id は "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" のような形式
+            string rawId = page.Id.Replace("-", "");
+
+            if (rawId.Length != 32)
+                throw new InvalidOperationException("Notion Page ID が不正です。");
+
+            // ハイフンを追加して Notion URL に適した形式に変換
+            string formattedId = $"{rawId.Substring(0, 8)}-{rawId.Substring(8, 4)}-{rawId.Substring(12, 4)}-{rawId.Substring(16, 4)}-{rawId.Substring(20, 12)}";
+
+            // ワークスペースは省略可能（そのまま https://www.notion.so/<formattedId> でアクセス可能）
+            string url = $"https://www.notion.so/{formattedId}";
+
+            return url;
         }
     }
 }

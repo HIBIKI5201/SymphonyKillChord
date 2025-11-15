@@ -8,6 +8,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    environment: 'Sinfonia Operator'
 
     steps:
       - name: ソースを取得
@@ -19,15 +20,15 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 依存関係の復元
-        run: dotnet restore
+        run: dotnet restore ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
 
       - name: ビルド
-        run: dotnet build --configuration Release
+        run: dotnet build ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
 
       - name: 実行
         env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          NOTION_DATABASE_DATE_PROPERTY: ${{ secrets.NOTION_DATABASE_DATE_PROPERTY }}
-        run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ vars.NOTION_DATABASE_ID }}
+          NOTION_DATABASE_DATE_PROPERTY: ${{ vars.NOTION_DATABASE_DATE_PROPERTY }}
+        run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
