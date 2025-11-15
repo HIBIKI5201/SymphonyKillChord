@@ -1,4 +1,4 @@
 root = true
 
-[*.{cs,md}]
+[*.{cs,md,json}]
 charset = utf-8
