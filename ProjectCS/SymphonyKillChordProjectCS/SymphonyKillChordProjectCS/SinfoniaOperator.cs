@@ -2,7 +2,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class SinfoniaOperator 
     {
-        private const string DISCORD_WEBHOOK = "DISCORD_WEBHOOK";
+        private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_DATABASE_ID = "NOTION_DATABASE_ID";
         private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
@@ -10,8 +10,8 @@ namespace SinfoniaStudio.SinfoniaOperator
 
         static async Task Main()
         {
-            // --- GitHub Actions の Secrets から環境変数を取得 ---
-            string webhookUrl = Environment.GetEnvironmentVariable(DISCORD_WEBHOOK) ?? string.Empty;
+            // GitHubから環境変数を取得。
+            string discordBotToken = Environment.GetEnvironmentVariable(DISCORD_BOT_TOKEN) ?? string.Empty;
             string notionToken = Environment.GetEnvironmentVariable(NOTION_TOKEN) ?? string.Empty;
             string databaseID = Environment.GetEnvironmentVariable(NOTION_DATABASE_ID) ?? string.Empty;
             string datePropertyName = Environment.GetEnvironmentVariable(NOTION_DATABASE_DATE_PROPERTY) ?? string.Empty;
@@ -19,7 +19,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             // バリデーションチェックを行い、nullが一つでもあれば終了する。
             if (ValidateEnvironmentVariable(
-                webhookUrl,
+                discordBotToken,
                 notionToken,
                 databaseID,
                 datePropertyName,
@@ -33,7 +33,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 databaseID,
                 datePropertyName,
                 namePropertyName);
-            DiscordBotManager discordBot = new(webhookUrl);
+            DiscordBotManager discordBot = new(discordBotToken);
 
             string content = await taskReader.GetTaskContent();
             if (string.IsNullOrEmpty(content))
@@ -48,14 +48,14 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <summary>
         ///     環境変数のバリデーションチェック。
         /// </summary>
-        /// <param name="webhookUrl"></param>
+        /// 
         /// <param name="notionToken"></param>
         /// <param name="databaseID"></param>
         /// <param name="datePropertyName"></param>
         /// <param name="namePropertyName"></param>
         /// <returns>チェックで失敗があったかどうか</returns>
         private static bool ValidateEnvironmentVariable(
-            string webhookUrl,
+            string discordBotAPIKey,
             string notionToken,
             string databaseID,
             string datePropertyName,
@@ -63,9 +63,9 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             bool isNullOrWhiteSpace = false;
 
-            if (string.IsNullOrEmpty(webhookUrl))
+            if (string.IsNullOrEmpty(discordBotAPIKey))
             {
-                Console.WriteLine("環境変数 DISCORD_WEBHOOK が設定されていません。");
+                Console.WriteLine("環境変数 DISCORD_BOT_TOKEN が設定されていません。");
                 isNullOrWhiteSpace = true;
             }
             if (string.IsNullOrEmpty(notionToken))

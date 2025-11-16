@@ -1,13 +1,26 @@
-using System.Text;
-using System.Text.Json;
+using Discord;
+using Discord.WebSocket;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class DiscordBotManager
     {
-        public DiscordBotManager(string webhookUrl)
+        public DiscordBotManager(string botToken)
         {
-            _webhookUrl = webhookUrl;
+            _botToken = botToken;
+        }
+
+        public async Task Awake()
+        {
+            var config = new DiscordSocketConfig
+            {
+                GatewayIntents = GatewayIntents.All
+            };
+
+            _client = new DiscordSocketClient(config);
+
+            await _client.LoginAsync(TokenType.Bot, _botToken);
+            await _client.StartAsync();
         }
 
         /// <summary>
@@ -17,18 +30,11 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task PushTaskListAsync(string content)
         {
-            using HttpClient client = new();
 
-            var payload = new { content };
-            string json = JsonSerializer.Serialize(payload);
-            HttpResponseMessage response = await client.PostAsync(
-                _webhookUrl,
-                new StringContent(json, Encoding.UTF8, "application/json")
-            );
-
-            Console.WriteLine($"Discord送信結果: {response.StatusCode}");
         }
 
-        private readonly string _webhookUrl;
+        private readonly string _botToken;
+
+        private DiscordSocketClient _client;
     }
 }
