@@ -1,4 +1,3 @@
-using Notion.Client;
 using System.Text;
 using System.Text.Json;
 
@@ -52,7 +51,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             Console.WriteLine($"Discord送信結果: {response.StatusCode}");
         }
 
-        
+
         /// <summary>
         ///     環境変数のバリデーションチェック。
         /// </summary>
