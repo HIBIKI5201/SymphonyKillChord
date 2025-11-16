@@ -10,14 +10,14 @@
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
+  <Project Path="MusicSync_Mock.csproj" />
   <Project Path="UniGLTF.Editor.csproj" />
-  <Project Path="UniHumanoid.Editor.csproj" />
-  <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="TPS_Mock.csproj" />
+  <Project Path="UniHumanoid.Editor.csproj" />
   <Project Path="VRM10.Editor.csproj" />
   <Project Path="VrmLib.csproj" />
   <Project Path="VRM10.Tests.csproj" />
-  <Project Path="MusicSync_Mock.csproj" />
+  <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="UniGLTF.UniUnlit.csproj" />
   <Project Path="UniGLTF.UniUnlit.Editor.csproj" />
   <Project Path="VrmLibTests.csproj" />
