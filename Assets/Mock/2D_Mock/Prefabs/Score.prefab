@@ -88,8 +88,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b87e013374be8dd4dafd561cada96a62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPosition: 0
-  movePosition: 0
-  spawnPosition: 0
-  Timer: 0
-  speed: 0
