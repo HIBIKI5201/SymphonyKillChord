@@ -31,7 +31,14 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task PushTaskListAsync(string content)
         {
-            var channel = _client.GetChannel(_channelID) as IMessageChannel;
+            if (_client.GetChannel(_channelID) is not IMessageChannel channel)
+            {
+                Console.WriteLine($"id:{_channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
+                return;
+            }
+
+            await channel.SendMessageAsync(content);
+            Console.WriteLine("メッセージ送信完了");
         }
 
         private readonly string _botToken;
