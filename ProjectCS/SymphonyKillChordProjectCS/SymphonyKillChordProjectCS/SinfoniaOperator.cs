@@ -1,4 +1,4 @@
-﻿using Notion.Client;
+using Notion.Client;
 using System.Text;
 using System.Text.Json;
 
@@ -10,6 +10,7 @@ namespace SinfoniaStudio.Master
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_DATABASE_ID = "NOTION_DATABASE_ID";
         private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
+        private const string NOTION_DATABASE_NAME_PROPERTY = "NOTION_DATABASE_NAME_PROPERTY";
 
         static async Task Main()
         {
@@ -18,124 +19,82 @@ namespace SinfoniaStudio.Master
             string notionToken = Environment.GetEnvironmentVariable(NOTION_TOKEN) ?? string.Empty;
             string databaseID = Environment.GetEnvironmentVariable(NOTION_DATABASE_ID) ?? string.Empty;
             string datePropertyName = Environment.GetEnvironmentVariable(NOTION_DATABASE_DATE_PROPERTY) ?? string.Empty;
+            string namePropertyName = Environment.GetEnvironmentVariable(NOTION_DATABASE_NAME_PROPERTY) ?? string.Empty;
 
-            if (string.IsNullOrEmpty(webhookUrl))
+            // バリデーションチェックを行い、nullが一つでもあれば終了する。
+            if (ValidateEnvironmentVariable(
+                webhookUrl,
+                notionToken,
+                databaseID,
+                datePropertyName,
+                namePropertyName))
             {
-                Console.WriteLine("環境変数 DISCORD_WEBHOOK が設定されていません。");
-                return;
-            }
-            if (string.IsNullOrEmpty(notionToken))
-            {
-                Console.WriteLine("環境変数 NOTION_TOKEN が設定されていません。");
-                return;
-            }
-            if (string.IsNullOrEmpty(databaseID))
-            {
-                Console.WriteLine("環境変数 NOTION_DATABASE_ID が設定されていません。");
-                return;
-            }
-            if (string.IsNullOrEmpty(datePropertyName))
-            {
-                Console.WriteLine("環境変数 NOTION_DATABASE_DATE_PROPERTY が設定されていません。");
                 return;
             }
 
-            // --- Notion クライアント作成 ---
-            NotionClient notion = NotionClientFactory.Create(new ClientOptions
-            {
-                AuthToken = notionToken,
-            });
-
-            // --- データベースをクエリ ---
-            var query = await notion.Databases.QueryAsync(databaseID, new DatabasesQueryParameters());
-            List<IWikiDatabase> database = query.Results;
-
-            if (database.Count == 0)
-            {
-                Console.WriteLine("データベースの要素がありません。");
-                return;
-            }
+            List<IWikiDatabase> database = await GetDatabaseAsync(notionToken, databaseID);
 
             // --- 日本時間を取得 ---
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
             DateTime today = nowTime.Date;
 
             StringBuilder sb = new StringBuilder($"GitHub Actionsからの定期タスク通知です！ {nowTime:yyyy/MM/dd HH:mm:ss}");
-            int startTaskCount = 0;
-            int endTaskCount = 0;
+            int taskCount = 0;
 
-            StringBuilder startTasksSb = new();
-            StringBuilder endTasksSb = new();
+            PriorityQueue<StringBuilder, int> priorityQueue = new();
 
             // --- 開始タスク ---
             foreach (var item in database)
             {
                 if (item is not Page page) continue;
 
-                if (page.Properties.TryGetValue(datePropertyName, out var datePropertyValue) &&
-                    datePropertyValue is DatePropertyValue dateProperty)
+                // 日付プロパティを取得できる場合。
+                if (!page.Properties.TryGetValue(datePropertyName, out PropertyValue? datePropertyValue) ||
+                    datePropertyValue is not DatePropertyValue dateProperty) { continue; }
+
+                // ページ名を取得。
+                string pageName = GetPageName(page, namePropertyName);
+
+                #region 開始タスクの通知。
+                DateTime? startDate = GetDateJpnTime(dateProperty.Date.Start);
+                if (startDate.HasValue && startDate.Value.Date == today)
                 {
-                    DateTimeOffset? startOffset = dateProperty.Date?.Start;
-                    DateTime? start = startOffset?.UtcDateTime.AddHours(9);
+                    taskCount++;
+                    StringBuilder startTasksSb = new();
+                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
 
-                    string pageName = "(名称未設定)";
-                    if (page.Properties.TryGetValue("名前", out var titlePropValue) &&
-                        titlePropValue is TitlePropertyValue titleProperty)
-                    {
-                        pageName = string.Join("", titleProperty.Title.Select(t => t.PlainText));
-                    }
-
-                    if (start.HasValue && start.Value.Date == today)
-                    {
-                        startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}");
-                        startTasksSb.AppendLine($"[URL]({GetNotionPageUrl(page)})");
-
-                        startTaskCount++;
-
-                        // ページ本文を追加
-                        await AppendPageContentAsync(startTasksSb, page, notionToken);
-                    }
+                    await AppendPageContentAsync(startTasksSb, page, notionToken);
+                    priorityQueue.Enqueue(startTasksSb, 0);
+                    continue;
                 }
+                #endregion
+
+                #region 納期タスクの通知。
+                DateTime? endDate = GetDateJpnTime(dateProperty.Date.End);
+                if (endDate.HasValue && endDate.Value.Date == today)
+                {
+                    taskCount++;
+                    StringBuilder endTasksSb = new();
+
+                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
+                    await AppendPageContentAsync(endTasksSb, page, notionToken);
+                    priorityQueue.Enqueue(endTasksSb, 1);
+                    continue;
+                }
+                #endregion
             }
 
-            // --- 納期タスク ---
-            foreach (var item in database)
-            {
-                if (item is not Page page) continue;
-
-                if (page.Properties.TryGetValue(datePropertyName, out var datePropertyValue) &&
-                    datePropertyValue is DatePropertyValue dateProperty)
-                {
-                    DateTimeOffset? endOffset = dateProperty.Date?.End;
-                    DateTime? end = endOffset?.UtcDateTime.AddHours(9);
-
-                    string pageName = "(名称未設定)";
-                    if (page.Properties.TryGetValue("名前", out var titlePropValue) &&
-                        titlePropValue is TitlePropertyValue titleProperty)
-                    {
-                        pageName = string.Join("", titleProperty.Title.Select(t => t.PlainText));
-                    }
-
-                    if (end.HasValue && end.Value.Date == today)
-                    {
-                        endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}");
-                        endTasksSb.AppendLine($"[URL]({GetNotionPageUrl(page)})");
-                        endTaskCount++;
-
-                        // ページ本文を追加
-                        await AppendPageContentAsync(endTasksSb, page, notionToken);
-                    }
-                }
-            }
-
-            if (startTaskCount == 0 && endTaskCount == 0)
+            if (taskCount <= 0)
             {
                 Console.WriteLine("今日の開始タスクと納期タスクがありません。通知を送信しません。");
                 return;
             }
 
-            sb.Append(startTasksSb);
-            sb.Append(endTasksSb);
+            // 優先度順にログを並べる。
+            while (priorityQueue.TryDequeue(out StringBuilder? element, out int priority))
+            {
+                sb.AppendLine(element.ToString());
+            }
 
             // --- Discordへ送信 ---
             using var client = new HttpClient();
@@ -298,6 +257,26 @@ namespace SinfoniaStudio.Master
             return sb.ToString();
         }
 
+
+        private static async Task<List<IWikiDatabase>> GetDatabaseAsync(string notionToken, string databaseID)
+        {
+            NotionClient notion = NotionClientFactory.Create(new ClientOptions
+            {
+                AuthToken = notionToken,
+            });
+
+            DatabaseQueryResponse query = await notion.Databases.QueryAsync(databaseID, new DatabasesQueryParameters());
+            List<IWikiDatabase> database = query.Results;
+
+            if (database.Count == 0)
+            {
+                Console.WriteLine("データベースの要素がありません。");
+                return new();
+            }
+
+            return database;
+        }
+
         private static string GetNotionPageUrl(Page page)
         {
             // page.Id は "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" のような形式
@@ -313,6 +292,67 @@ namespace SinfoniaStudio.Master
             string url = $"https://www.notion.so/{formattedId}";
 
             return url;
+        }
+
+        private static string GetPageName(Page page, string namePropertyName)
+        {
+            string pageName = "(名称未設定)";
+            if (page.Properties.TryGetValue(namePropertyName, out PropertyValue? titlePropValue) &&
+                titlePropValue is TitlePropertyValue titleProperty)
+            {
+                pageName = string.Join("", titleProperty.Title.Select(t => t.PlainText));
+            }
+
+            return pageName;
+        }
+
+        private static DateTime? GetDateJpnTime(DateTimeOffset? offset) => offset?.UtcDateTime.AddHours(9);
+
+        /// <summary>
+        ///     環境変数のバリデーションチェック。
+        /// </summary>
+        /// <param name="webhookUrl"></param>
+        /// <param name="notionToken"></param>
+        /// <param name="databaseID"></param>
+        /// <param name="datePropertyName"></param>
+        /// <param name="namePropertyName"></param>
+        /// <returns></returns>
+        private static bool ValidateEnvironmentVariable(
+            string webhookUrl,
+            string notionToken,
+            string databaseID,
+            string datePropertyName,
+            string namePropertyName)
+        {
+            bool isNullOrWhiteSpace = false;
+
+            if (string.IsNullOrEmpty(webhookUrl))
+            {
+                Console.WriteLine("環境変数 DISCORD_WEBHOOK が設定されていません。");
+                isNullOrWhiteSpace = true;
+            }
+            if (string.IsNullOrEmpty(notionToken))
+            {
+                Console.WriteLine("環境変数 NOTION_TOKEN が設定されていません。");
+                isNullOrWhiteSpace = true;
+            }
+            if (string.IsNullOrEmpty(databaseID))
+            {
+                Console.WriteLine("環境変数 NOTION_DATABASE_ID が設定されていません。");
+                isNullOrWhiteSpace = true;
+            }
+            if (string.IsNullOrEmpty(datePropertyName))
+            {
+                Console.WriteLine("環境変数 NOTION_DATABASE_DATE_PROPERTY が設定されていません。");
+                isNullOrWhiteSpace = true;
+            }
+            if (!string.IsNullOrEmpty(namePropertyName))
+            {
+                Console.WriteLine("環境変数 NOTION_DATABASE_NAME_PROPERTY が設定されていません。");
+                isNullOrWhiteSpace = true;
+            }
+
+            return isNullOrWhiteSpace;
         }
     }
 }
