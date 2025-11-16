@@ -54,7 +54,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 {
                     taskCount++;
                     StringBuilder startTasksSb = new();
-                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
+                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl})");
 
                     await AppendPageContentAsync(startTasksSb, page);
                     outputTaskQueue.Enqueue(startTasksSb, 0);
@@ -71,7 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     taskCount++;
                     StringBuilder endTasksSb = new();
 
-                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
+                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({page.PublicUrl})");
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
                     continue;
@@ -286,29 +286,6 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             return database;
-        }
-
-        /// <summary>
-        ///     ページからNotionのURLを生成する。
-        /// </summary>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        private string GetNotionPageUrl(Page page)
-        {
-            // page.Id は "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" のような形式
-            string rawId = page.Id.Replace("-", "");
-
-            if (rawId.Length != 32)
-                throw new InvalidOperationException("Notion Page ID が不正です。");
-
-            // ハイフンを追加して Notion URL に適した形式に変換
-            string formattedId = $"{rawId.Substring(0, 8)}-{rawId.Substring(8, 4)}-{rawId.Substring(12, 4)}-{rawId.Substring(16, 4)}-{rawId.Substring(20, 12)}";
-
-            // ワークスペースは省略可能（そのまま https://www.notion.so/<formattedId> でアクセス可能）
-            string url = $"https://www.notion.so/{formattedId}";
-
-            return url;
         }
 
         /// <summary>
