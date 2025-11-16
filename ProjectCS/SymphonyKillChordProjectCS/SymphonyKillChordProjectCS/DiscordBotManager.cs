@@ -1,13 +1,42 @@
-using System.Text;
-using System.Text.Json;
+using Discord;
+using Discord.WebSocket;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class DiscordBotManager
     {
-        public DiscordBotManager(string webhookUrl)
+        public DiscordBotManager(string botToken, ulong channelID)
         {
-            _webhookUrl = webhookUrl;
+            _botToken = botToken;
+            _channelID = channelID;
+
+            var config = new DiscordSocketConfig
+            {
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
+            };
+            _client = new DiscordSocketClient(config);
+        }
+
+        public async Task Awake()
+        {
+            _client.Ready += () =>
+            {
+                _readyTcs.SetResult(true);
+                return Task.CompletedTask;
+            };
+
+            try
+            {
+                await _client.LoginAsync(TokenType.Bot, _botToken);
+                await _client.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Discordボットの起動に失敗しました: {ex.Message}");
+                throw;
+            }
+
+            await _readyTcs.Task;
         }
 
         /// <summary>
@@ -17,18 +46,22 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task PushTaskListAsync(string content)
         {
-            using HttpClient client = new();
+            await _readyTcs.Task;
 
-            var payload = new { content };
-            string json = JsonSerializer.Serialize(payload);
-            HttpResponseMessage response = await client.PostAsync(
-                _webhookUrl,
-                new StringContent(json, Encoding.UTF8, "application/json")
-            );
+            if (_client.GetChannel(_channelID) is not IMessageChannel channel)
+            {
+                Console.WriteLine($"id:{_channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
 
-            Console.WriteLine($"Discord送信結果: {response.StatusCode}");
+                return;
+            }
+
+            await channel.SendMessageAsync(content);
+            Console.WriteLine("メッセージ送信完了");
         }
 
-        private readonly string _webhookUrl;
+        private readonly string _botToken;
+        private readonly ulong _channelID;
+        private readonly DiscordSocketClient _client;
+        private readonly TaskCompletionSource<bool> _readyTcs = new(false);
     }
 }
