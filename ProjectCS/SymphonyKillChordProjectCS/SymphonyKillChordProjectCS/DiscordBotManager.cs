@@ -19,10 +19,22 @@ namespace SinfoniaStudio.SinfoniaOperator
 
         public async Task Awake()
         {
-            _client.Ready += async () => _readyTcs.SetResult(true);
+            _client.Ready += () =>
+            {
+                _readyTcs.SetResult(true);
+                return Task.CompletedTask;
+            };
 
-            await _client.LoginAsync(TokenType.Bot, _botToken);
-            await _client.StartAsync();
+            try
+            {
+                await _client.LoginAsync(TokenType.Bot, _botToken);
+                await _client.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Discordボットの起動に失敗しました: {ex.Message}");
+                throw;
+            }
 
             await _readyTcs.Task;
         }
