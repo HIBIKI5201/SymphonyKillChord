@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.15.2" />
     <PackageReference Include="Notion.Net" Version="4.4.0" />
   </ItemGroup>
 
