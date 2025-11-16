@@ -36,19 +36,10 @@ namespace SinfoniaStudio.SinfoniaOperator
                 databaseID,
                 datePropertyName,
                 namePropertyName);
+            DiscordBotManager discordBot = new(webhookUrl);
 
             string content = await taskReader.GetTaskContent();
-
-            // --- Discordへ送信 ---
-            using var client = new HttpClient();
-            var payload = new { content };
-            var json = JsonSerializer.Serialize(payload);
-            var response = await client.PostAsync(
-                webhookUrl,
-                new StringContent(json, Encoding.UTF8, "application/json")
-            );
-
-            Console.WriteLine($"Discord送信結果: {response.StatusCode}");
+            await discordBot.PushTaskListAsync(content);
         }
 
 
