@@ -90,6 +90,8 @@ namespace SinfoniaStudio.SinfoniaOperator
             return sb.ToString();
         }
 
+        private const string NOTION_API_VERSION = "2025-09-03";
+
         private readonly string _notionToken;
         private readonly string _databaseID;
         private readonly string _datePropertyName;
@@ -110,7 +112,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             string? startCursor = null;
             using var http = new HttpClient();
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
-            http.DefaultRequestHeaders.Add("Notion-Version", "2025-09-03");
+            http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
 
             do
             {
