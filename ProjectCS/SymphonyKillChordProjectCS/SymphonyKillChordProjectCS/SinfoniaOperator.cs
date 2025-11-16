@@ -78,7 +78,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 Console.WriteLine("環境変数 NOTION_DATABASE_DATE_PROPERTY が設定されていません。");
                 isNullOrWhiteSpace = true;
             }
-            if (!string.IsNullOrEmpty(namePropertyName))
+            if (string.IsNullOrEmpty(namePropertyName))
             {
                 Console.WriteLine("環境変数 NOTION_DATABASE_NAME_PROPERTY が設定されていません。");
                 isNullOrWhiteSpace = true;
