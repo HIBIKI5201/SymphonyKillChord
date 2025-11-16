@@ -1,4 +1,4 @@
-name: Notion Discord Bot
+name: Sinfonia Operator
 
 on:
   schedule:
@@ -31,4 +31,5 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ vars.NOTION_DATABASE_ID }}
           NOTION_DATABASE_DATE_PROPERTY: ${{ vars.NOTION_DATABASE_DATE_PROPERTY }}
+          NOTION_DATABASE_NAME_PROPERTY: ${{ vars.NOTION_DATABASE_NAME_PROPERTY }}
         run: dotnet run --project ./ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
