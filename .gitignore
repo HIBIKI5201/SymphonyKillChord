@@ -75,6 +75,7 @@ crashlytics-build.properties
 Assets/AssetStoreTools/
 
 # Sinfonia Operator Bot
+/ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/Properties/launchSettings.json
 /ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/obj/
 /ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/bin/
 

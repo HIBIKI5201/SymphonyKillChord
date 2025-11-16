@@ -1,6 +1,5 @@
 using Discord;
 using Discord.WebSocket;
-using System.Threading.Channels;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
@@ -13,15 +12,19 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             var config = new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.All
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
             };
             _client = new DiscordSocketClient(config);
         }
 
         public async Task Awake()
         {
+            _client.Ready += async () => _readyTcs.SetResult(true);
+
             await _client.LoginAsync(TokenType.Bot, _botToken);
             await _client.StartAsync();
+
+            await _readyTcs.Task;
         }
 
         /// <summary>
@@ -31,20 +34,11 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task PushTaskListAsync(string content)
         {
+            await _readyTcs.Task;
+
             if (_client.GetChannel(_channelID) is not IMessageChannel channel)
             {
                 Console.WriteLine($"id:{_channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
-
-                var ch = _client.GetChannel(_channelID);
-
-                if (ch == null)
-                {
-                    Console.WriteLine("チャンネルが存在しません。");
-                }
-                else
-                {
-                    Console.WriteLine($"Channel Type: {ch.GetType().Name}");
-                }
 
                 return;
             }
@@ -56,5 +50,6 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string _botToken;
         private readonly ulong _channelID;
         private readonly DiscordSocketClient _client;
+        private readonly TaskCompletionSource<bool> _readyTcs = new(false);
     }
 }
