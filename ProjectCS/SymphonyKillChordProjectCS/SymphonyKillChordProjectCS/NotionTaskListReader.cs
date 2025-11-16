@@ -19,11 +19,15 @@ namespace SinfoniaStudio.SinfoniaOperator
             _namePropertyName = namePropertyName;
         }
 
+        /// <summary>
+        ///     Notionのデータベースにアクセスして、タスクの状況を文字列で返します。
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> GetTaskContent()
         {
             List<IWikiDatabase> database = await GetDatabaseAsync();
 
-            // --- 日本時間を取得 ---
+            // 日本時間を取得。
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
             DateTime today = nowTime.Date;
 
@@ -45,7 +49,9 @@ namespace SinfoniaStudio.SinfoniaOperator
                 string pageName = GetPageName(page);
 
                 #region 開始タスクの通知。
-                DateTime? startDate = GetDateJSTTime(dateProperty.Date.Start);
+                DateTime? startDate = ConvertDateUtcToJst(
+                    dateProperty.Date.Start?.UtcDateTime);
+
                 if (startDate.HasValue && startDate.Value.Date == today)
                 {
                     taskCount++;
@@ -59,7 +65,9 @@ namespace SinfoniaStudio.SinfoniaOperator
                 #endregion
 
                 #region 納期タスクの通知。
-                DateTime? endDate = GetDateJSTTime(dateProperty.Date.End);
+                DateTime? endDate = ConvertDateUtcToJst(
+                    dateProperty.Date.End?.UtcDateTime);
+
                 if (endDate.HasValue && endDate.Value.Date == today)
                 {
                     taskCount++;
@@ -295,7 +303,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             return pageName;
         }
 
-        private static DateTime? GetDateJSTTime(DateTimeOffset? offset) => offset?.UtcDateTime.AddHours(9);
+        private static DateTime? ConvertDateUtcToJst(DateTime? utc) => utc?.AddHours(9);
 
     }
 }
