@@ -56,7 +56,7 @@ namespace SinfoniaStudio.Master
                 string pageName = GetPageName(page, namePropertyName);
 
                 #region 開始タスクの通知。
-                DateTime? startDate = GetDateJpnTime(dateProperty.Date.Start);
+                DateTime? startDate = GetDateJSTTime(dateProperty.Date.Start);
                 if (startDate.HasValue && startDate.Value.Date == today)
                 {
                     taskCount++;
@@ -70,7 +70,7 @@ namespace SinfoniaStudio.Master
                 #endregion
 
                 #region 納期タスクの通知。
-                DateTime? endDate = GetDateJpnTime(dateProperty.Date.End);
+                DateTime? endDate = GetDateJSTTime(dateProperty.Date.End);
                 if (endDate.HasValue && endDate.Value.Date == today)
                 {
                     taskCount++;
@@ -306,7 +306,7 @@ namespace SinfoniaStudio.Master
             return pageName;
         }
 
-        private static DateTime? GetDateJpnTime(DateTimeOffset? offset) => offset?.UtcDateTime.AddHours(9);
+        private static DateTime? GetDateJSTTime(DateTimeOffset? offset) => offset?.UtcDateTime.AddHours(9);
 
         /// <summary>
         ///     環境変数のバリデーションチェック。
