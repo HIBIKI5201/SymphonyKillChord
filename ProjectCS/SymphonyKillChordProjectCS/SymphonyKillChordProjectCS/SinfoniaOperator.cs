@@ -36,6 +36,11 @@ namespace SinfoniaStudio.SinfoniaOperator
             DiscordBotManager discordBot = new(webhookUrl);
 
             string content = await taskReader.GetTaskContent();
+            if (string.IsNullOrEmpty(content))
+            {
+                Console.WriteLine("タスクリストのコンテンツに何もないため終了");
+                return; 
+            }
             await discordBot.PushTaskListAsync(content);
         }
 
@@ -48,7 +53,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <param name="databaseID"></param>
         /// <param name="datePropertyName"></param>
         /// <param name="namePropertyName"></param>
-        /// <returns></returns>
+        /// <returns>チェックで失敗があったかどうか</returns>
         private static bool ValidateEnvironmentVariable(
             string webhookUrl,
             string notionToken,
