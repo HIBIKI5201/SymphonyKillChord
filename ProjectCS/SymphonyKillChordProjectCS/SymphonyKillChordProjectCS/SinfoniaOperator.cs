@@ -31,7 +31,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 return;
             }
-            if (!int.TryParse(dicsordChannelID, out int channelID))
+            if (!ulong.TryParse(dicsordChannelID, out ulong channelID))
             {
                 Console.WriteLine($"DISCORD_CHANNEL_IDが数値に変換できませんでした。\nvalue {dicsordChannelID}");
                 return;
