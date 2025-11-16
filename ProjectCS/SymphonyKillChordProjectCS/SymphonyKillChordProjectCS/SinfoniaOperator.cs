@@ -37,11 +37,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                 return;
             }
 
-            DiscordBotManager discordBotManager = new(discordBotToken, channelID);
-            await discordBotManager.Awake();
-            await discordBotManager.PushTaskListAsync("Botからのテスト送信");
-            return;
-
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(
                 notionToken,
