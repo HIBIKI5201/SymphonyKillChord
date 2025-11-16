@@ -13,7 +13,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             // GitHubから環境変数を取得。
             string discordBotToken = Environment.GetEnvironmentVariable(DISCORD_BOT_TOKEN) ?? string.Empty;
-            string dicsordChannelID = Environment.GetEnvironmentVariable(DISCORD_CHANNEL_ID) ?? string.Empty;
+            string discordChannelID = Environment.GetEnvironmentVariable(DISCORD_CHANNEL_ID) ?? string.Empty;
 
             string notionToken = Environment.GetEnvironmentVariable(NOTION_TOKEN) ?? string.Empty;
             string databaseID = Environment.GetEnvironmentVariable(NOTION_DATABASE_ID) ?? string.Empty;
@@ -23,7 +23,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             // バリデーションチェックを行い、nullが一つでもあれば終了する。
             if (ValidateEnvironmentVariable(
                 discordBotToken,
-                dicsordChannelID,
+                discordChannelID,
                 notionToken,
                 databaseID,
                 datePropertyName,
@@ -31,9 +31,9 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 return;
             }
-            if (!ulong.TryParse(dicsordChannelID, out ulong channelID))
+            if (!ulong.TryParse(discordChannelID, out ulong channelID))
             {
-                Console.WriteLine($"DISCORD_CHANNEL_IDが数値に変換できませんでした。\nvalue {dicsordChannelID}");
+                Console.WriteLine($"DISCORD_CHANNEL_IDが数値に変換できませんでした。\nvalue {discordChannelID}");
                 return;
             }
 
