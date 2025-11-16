@@ -2,9 +2,9 @@ using Notion.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace SinfoniaStudio.Master
+namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal class SinfoniaOperator
+    internal static class SinfoniaOperator
     {
         private const string DISCORD_WEBHOOK = "DISCORD_WEBHOOK";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
@@ -82,6 +82,8 @@ namespace SinfoniaStudio.Master
                     continue;
                 }
                 #endregion
+
+                Console.WriteLine($"{pageName}は通知しません。");
             }
 
             if (taskCount <= 0)
