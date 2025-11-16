@@ -31,12 +31,10 @@ namespace SinfoniaStudio.SinfoniaOperator
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
             DateTime today = nowTime.Date;
 
-            StringBuilder sb = new StringBuilder($"GitHub Actionsからの定期タスク通知です！ {nowTime:yyyy/MM/dd HH:mm:ss}");
             int taskCount = 0;
 
-            PriorityQueue<StringBuilder, int> priorityQueue = new();
+            PriorityQueue<StringBuilder, int> outputTaskQueue = new();
 
-            // --- 開始タスク ---
             foreach (var item in database)
             {
                 if (item is not Page page) continue;
@@ -59,7 +57,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
 
                     await AppendPageContentAsync(startTasksSb, page);
-                    priorityQueue.Enqueue(startTasksSb, 0);
+                    outputTaskQueue.Enqueue(startTasksSb, 0);
                     continue;
                 }
                 #endregion
@@ -75,7 +73,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
                     endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({GetNotionPageUrl(page)})");
                     await AppendPageContentAsync(endTasksSb, page);
-                    priorityQueue.Enqueue(endTasksSb, 1);
+                    outputTaskQueue.Enqueue(endTasksSb, 1);
                     continue;
                 }
                 #endregion
@@ -90,7 +88,9 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             // 優先度順にログを並べる。
-            while (priorityQueue.TryDequeue(out StringBuilder? element, out int priority))
+            StringBuilder sb =
+                new($"GitHub Actionsからの定期タスク通知です！ {nowTime:yyyy/MM/dd HH:mm:ss}");
+            while (outputTaskQueue.TryDequeue(out StringBuilder? element, out int priority))
             {
                 sb.AppendLine(element.ToString());
             }
@@ -105,6 +105,12 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string _datePropertyName;
         private readonly string _namePropertyName;
 
+        /// <summary>
+        ///     タスクのデータを取得する。
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         private async Task AppendPageContentAsync(StringBuilder sb, Page page)
         {
             string pageContext = await GetBlockChildrenViaHttpAsync(page.Id);
@@ -114,6 +120,11 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine();
         }
 
+        /// <summary>
+        ///     タスクの中身を再帰的に文字列にする。
+        /// </summary>
+        /// <param name="blockId"></param>
+        /// <returns></returns>
         private async Task<string> GetBlockChildrenViaHttpAsync(string blockId)
         {
             var sb = new StringBuilder();
@@ -254,7 +265,10 @@ namespace SinfoniaStudio.SinfoniaOperator
             return sb.ToString();
         }
 
-
+        /// <summary>
+        ///     Notionからデータベースの要素を取得する。
+        /// </summary>
+        /// <returns></returns>
         private async Task<List<IWikiDatabase>> GetDatabaseAsync()
         {
             NotionClient notion = NotionClientFactory.Create(new ClientOptions
@@ -274,6 +288,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             return database;
         }
 
+        /// <summary>
+        ///     ページからNotionのURLを生成する。
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private string GetNotionPageUrl(Page page)
         {
             // page.Id は "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" のような形式
@@ -291,6 +311,11 @@ namespace SinfoniaStudio.SinfoniaOperator
             return url;
         }
 
+        /// <summary>
+        ///     ページからページ名を取得する。
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
         private string GetPageName(Page page)
         {
             string pageName = "(名称未設定)";
