@@ -5,20 +5,20 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class DiscordBotManager
     {
-        public DiscordBotManager(string botToken)
+        public DiscordBotManager(string botToken, int channelID)
         {
             _botToken = botToken;
-        }
+            _channelID = channelID;
 
-        public async Task Awake()
-        {
             var config = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.All
             };
-
             _client = new DiscordSocketClient(config);
+        }
 
+        public async Task Awake()
+        {
             await _client.LoginAsync(TokenType.Bot, _botToken);
             await _client.StartAsync();
         }
@@ -34,7 +34,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         private readonly string _botToken;
-
-        private DiscordSocketClient _client;
+        private readonly int _channelID;
+        private readonly DiscordSocketClient _client;
     }
 }
