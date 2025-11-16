@@ -1,6 +1,6 @@
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal static class SinfoniaOperator
+    internal static class SinfoniaOperator 
     {
         private const string DISCORD_WEBHOOK = "DISCORD_WEBHOOK";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
