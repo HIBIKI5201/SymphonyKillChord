@@ -229,18 +229,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                                         sb.AppendLine($"> {ExtractPlainTextFromRichTextArray(quoteRt)}");
                                     break;
 
-                                case "link_preview":
-                                    if (block.TryGetProperty("link_preview", out var linkPreviewObj) &&
-                                        linkPreviewObj.TryGetProperty("url", out var urlEl))
-                                    {
-                                        string urlString = urlEl.GetString() ?? string.Empty;
-                                        if (!string.IsNullOrEmpty(urlString))
-                                        {
-                                            sb.AppendLine($"[ページリンク]({urlString})");
-                                        }
-                                    }
-                                    break;
-
                                 default:
                                     sb.AppendLine($"[未対応ブロック: {type}]");
                                     break;
