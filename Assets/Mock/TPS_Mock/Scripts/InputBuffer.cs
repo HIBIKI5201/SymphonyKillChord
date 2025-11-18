@@ -11,7 +11,7 @@ namespace Mock.TPS
     {
         public InputActionEntity<Vector2> LookAction => _lookActionEntity;
         public InputActionEntity<Vector2> MoveAction => _moveActionEntity;
-        public InputActionEntity<float> JumpAction => _jumpActionEntity;
+        public InputActionEntity<float> LockselectAction => _lockselectActionEntity;
         public InputActionEntity<float> AttackAction => _attackActionEntity;
 
         [SerializeField]
@@ -19,13 +19,13 @@ namespace Mock.TPS
         [SerializeField]
         private string _moveActionName = "Move";
         [SerializeField]
-        private string _jumpActionName = "Jump";
+        private string _lockSelectActionName = "LockSelect";
         [SerializeField]
         private string _attackActionName = "Fire";
 
         private InputActionEntity<Vector2> _lookActionEntity;
         private InputActionEntity<Vector2> _moveActionEntity;
-        private InputActionEntity<float> _jumpActionEntity;
+        private InputActionEntity<float> _lockselectActionEntity;
         private InputActionEntity<float> _attackActionEntity;
 
         public void Awake()
@@ -36,7 +36,7 @@ namespace Mock.TPS
                 playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
                 _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
                 _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-                _jumpActionEntity = new InputActionEntity<float>(playerInput.actions[_jumpActionName]);
+                _lockselectActionEntity = new InputActionEntity<float>(playerInput.actions[_lockSelectActionName]);
                 _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
             }
         }

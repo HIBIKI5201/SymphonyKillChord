@@ -14,7 +14,6 @@ namespace Mock.TPS
         {
             _inputAction = inputAction;
         }
-
         public event Action<T> Started
         {
             add
