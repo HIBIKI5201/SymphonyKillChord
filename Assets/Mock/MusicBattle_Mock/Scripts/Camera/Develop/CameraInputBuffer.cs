@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle
 {
+    [Obsolete("これは仮実装クラスです。")]
     [RequireComponent(typeof(PlayerInput))]
     public class CameraInputBuffer : MonoBehaviour, IInputBuffer
     {
