@@ -1,5 +1,8 @@
 namespace Mock.MusicBattle.Camera
 {
+    /// <summary>
+    ///     カメラのアップデートモード。
+    /// </summary>
     public enum CameraUpdateModeEnum : byte
     {
         Stop = 0,

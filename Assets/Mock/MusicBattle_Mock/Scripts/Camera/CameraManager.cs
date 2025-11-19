@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Camera
 {
+    /// <summary>
+    ///     カメラのマネージャークラス。
+    ///     カメラの各モジュールを実行する。
+    /// </summary>
     public class CameraManager : MonoBehaviour, IDisposable
     {
         /// <summary>
