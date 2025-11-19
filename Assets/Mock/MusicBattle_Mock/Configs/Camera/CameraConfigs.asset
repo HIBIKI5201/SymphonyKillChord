@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66e02b33daaa5dc4e83aa6e48eb2fdca, type: 3}
+  m_Name: CameraConfigs
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Camera.CameraConfigs
+  _isCameraFlipX: 0
+  _cameraOffset: {x: 0, y: 2, z: -4}
+  _cameraLookAtOffset: {x: 0, y: 1.5, z: 0}
+  _cameraFollowDamping: 0
+  _cameraLookAtDamping: 0
+  _cameraRotationSpeed: 3
+  _pitchRange: {x: -30, y: 60}
+  _cameraCollisionRadius: 0.3
