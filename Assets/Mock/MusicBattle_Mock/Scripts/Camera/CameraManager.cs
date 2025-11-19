@@ -20,17 +20,31 @@ namespace Mock.MusicBattle.Camera
             InputBuffer inputBuffer,
             ILockOnTargetContainer lockOnTargetContainer)
         {
-            if (inputBuffer == null) { return false; }
-            if (lockOnTargetContainer == null) { return false; }
+            #region バリデーションチェック
+            if (inputBuffer == null)
+            {
+                Debug.LogError($"{nameof(InputBuffer)} is null");
+                return false; 
+            }
+            if (lockOnTargetContainer == null) 
+            {
+                Debug.LogError($"{nameof(ILockOnTargetContainer)} is null");
+                return false;
+            }
+            if (_cameraConfigs == null)
+            {
+                Debug.LogError($"{nameof(CameraConfigs)} is null");
+                return false;
+            }
+            #endregion
+
+            CinemachineCamera cam = GetComponent<CinemachineCamera>();
 
             // イベント登録。
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
 
             inputBuffer.LockOnSelectAction.Started += HandleLockOnSelectAction;
-
-            CinemachineCamera cam = GetComponent<CinemachineCamera>();
-            if (_cameraConfigs == null) { return false; }
 
             _mover = new(_cameraConfigs, transform, cam.Follow);
 
