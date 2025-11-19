@@ -51,6 +51,9 @@ namespace Mock.MusicBattle.Camera
             }
         }
 
+        [SerializeField]
+        private CameraConfigs _cameraConfigs;
+
         private ILockOnTargetContainer _targetContainer;
         private InputBuffer _inputBuffer;
 
