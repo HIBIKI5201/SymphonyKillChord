@@ -345,7 +345,7 @@ Transform:
   m_GameObject: {fileID: 356838138}
   serializedVersion: 2
   m_LocalRotation: {x: 0.18910754, y: 0, z: 0, w: 0.9819564}
-  m_LocalPosition: {x: 3.16, y: 12, z: -3}
+  m_LocalPosition: {x: 3.16, y: 12, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -644,7 +644,7 @@ Transform:
   m_GameObject: {fileID: 1223704920}
   serializedVersion: 2
   m_LocalRotation: {x: 0.18910754, y: 0, z: 0, w: 0.9819564}
-  m_LocalPosition: {x: 3.16, y: 12, z: -3}
+  m_LocalPosition: {x: 3.16, y: 12, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5797,7 +5797,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46705ea1764409c49af801cc6876effb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.Explode
-  _loopDuration: 1
+  _loopDuration: 0.1
   _explodeRadius: 3
   _explodeForce: 500
 --- !u!4 &1602630842
