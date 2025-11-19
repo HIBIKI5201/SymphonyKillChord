@@ -16,7 +16,11 @@ MonoBehaviour:
   templateName: MusicBattle_Mock_
   description: 
   preview: {fileID: 0}
-  dependencies: []
+  dependencies:
+  - dependency: {fileID: 11400000, guid: 95c0a04a01664e345935916c531d607c, type: 2}
+    instantiationMode: 0
+  - dependency: {fileID: 2800000, guid: 57da91ef0c2a5489891995dc81537253, type: 3}
+    instantiationMode: 1
   templatePipeline: {fileID: 0}
   badge: {fileID: 0}
   addToDefaults: 0
