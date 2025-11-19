@@ -1,19 +1,22 @@
+using Mock.MusicBattle.Camera;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Camera
 {
-    public class CameraMover : MonoBehaviour
+    /// <summary>
+    ///     カメラを移動させるモジュール。
+    /// </summary>
+    public class CameraMover
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public CameraMover(CameraConfigs config, Transform camera, Transform target)
         {
-        
+            _config = config;
+            _camera = camera;
+            _target = target;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+        private CameraConfigs _config;
+        private Transform _camera;
+        private Transform _target;
     }
 }
