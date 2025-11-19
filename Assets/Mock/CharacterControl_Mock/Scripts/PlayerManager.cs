@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
@@ -26,8 +26,8 @@ namespace Mock.CharacterControl
             animeController.OnAnimatorMoveAction += OnAnimatorMove;
             animeController.OnRootMotionChanged += isRootMotion =>
             {
-                if (isRootMotion) { OnAttackStart(); }
-                else { OnAttackEnd(); }
+                if (isRootMotion) { OnRollStart(); }
+                else { OnRollEnd(); }
             };
 
             // Rigidbody取得・設定
@@ -46,19 +46,19 @@ namespace Mock.CharacterControl
             inputBuffer.MoveAction.performed += HandleMove;
             inputBuffer.MoveAction.canceled += HandleMove;
 
-            inputBuffer.AttackAction.performed += HandleAttack; // 攻撃入力
+            inputBuffer.RollAction.performed += HandleRoll; // 攻撃入力
 
             token.Register(() =>
             {
                 inputBuffer.MoveAction.performed -= HandleMove;
                 inputBuffer.MoveAction.canceled -= HandleMove;
-                inputBuffer.AttackAction.performed -= HandleAttack;
+                inputBuffer.RollAction.performed -= HandleRoll;
             });
         }
 
         public void FixedUpdate(float deltaTime)
         {
-            if (_isAttacking) return;
+            if (_isRolling) return;
 
             Vector3 velocity = GetVelocity();
             // 入力移動は Rigidbody.velocity で反映
@@ -77,7 +77,7 @@ namespace Mock.CharacterControl
         // AnimatorのRootMotion反映
         public void OnAnimatorMove()
         {
-            if (_isAttacking)
+            if (_isRolling)
             {
                 Vector3 delta = _animeController.DeltaPosition;
                 Quaternion deltaRot = _animeController.DeltaRotation;
@@ -93,7 +93,7 @@ namespace Mock.CharacterControl
         private readonly Rigidbody _rigidbody;
 
         private Vector3 _direction;
-        private bool _isAttacking = false;
+        private bool _isRolling = false;
 
         private void HandleMove(InputAction.CallbackContext context)
         {
@@ -101,22 +101,22 @@ namespace Mock.CharacterControl
             _direction = new Vector3(input.x, 0f, input.y);
         }
 
-        private void HandleAttack(InputAction.CallbackContext context)
+        private void HandleRoll(InputAction.CallbackContext context)
         {
-            if (_isAttacking)
+            if (_isRolling)
                 return;
 
-            _animeController.AttackTrigger();
+            _animeController.RollTrigger();
         }
 
-        private void OnAttackStart()
+        private void OnRollStart()
         {
-            _isAttacking = true;
+            _isRolling = true;
         }
 
-        private void OnAttackEnd()
+        private void OnRollEnd()
         {
-            _isAttacking = false;
+            _isRolling = false;
         }
 
         private Vector3 GetVelocity()
