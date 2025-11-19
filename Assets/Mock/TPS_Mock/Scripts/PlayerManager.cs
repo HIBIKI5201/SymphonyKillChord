@@ -100,7 +100,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed += HandleInputMove;
             buffer.MoveAction.Canceled += HandleInputMove;
-            buffer.LockselectAction.Started += HandleJump;
+            buffer.JumpAction.Started += HandleJump;
             buffer.AttackAction.Started += HandleInputAttack;
         }
 
@@ -110,7 +110,7 @@ namespace Mock.TPS
 
             buffer.MoveAction.Performed -= HandleInputMove;
             buffer.MoveAction.Canceled -= HandleInputMove;
-            buffer.LockselectAction.Started -= HandleJump;
+            buffer.JumpAction.Started -= HandleJump;
             buffer.AttackAction.Started -= HandleInputAttack;
         }
 
