@@ -92,6 +92,11 @@ namespace Mock.MusicBattle.Camera
             Tick(Time.deltaTime);
         }
 
+        private void OnDrawGizmos()
+        {
+            _mover?.OnDrawGizmos();
+        }
+
         /// <summary>
         ///     1フレームごとの更新を行う。
         /// </summary>
