@@ -1,10 +1,7 @@
 {
     "name": "MusicBattle_Mock",
     "rootNamespace": "Mock.MusicBattle",
-    "references": [
-        "GUID:75469ad4d38634e559750d17036d5f7c",
-        "GUID:4307f53044263cf4b835bd812fc161a4"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
