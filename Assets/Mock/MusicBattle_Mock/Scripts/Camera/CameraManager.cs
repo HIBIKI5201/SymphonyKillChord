@@ -128,7 +128,7 @@ namespace Mock.MusicBattle.Camera
         /// <param name="value"></param>
         private void HandleLookAction(Vector2 value)
         {
-
+            _mover?.RotateCamera(value);
         }
 
         /// <summary>
