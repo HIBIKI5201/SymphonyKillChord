@@ -4,8 +4,9 @@ namespace Mock.MusicBattle
 {
     public enum CameraUpdateModeEnum : byte
     {
-        Update = 0,
-        FixedUpdate = 1,
-        LateUpdate = 2,
+        Stop = 0,
+        Update = 1,
+        FixedUpdate = 2,
+        LateUpdate = 3,
     }
 }
