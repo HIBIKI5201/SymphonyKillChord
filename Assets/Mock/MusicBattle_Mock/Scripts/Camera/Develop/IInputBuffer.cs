@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Develop
 {
     public interface IInputBuffer
     {
