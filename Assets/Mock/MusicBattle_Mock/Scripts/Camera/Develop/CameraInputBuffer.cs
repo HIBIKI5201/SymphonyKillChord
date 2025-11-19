@@ -1,9 +1,8 @@
-using Mock.MusicBattle.Develop;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Develop
 {
     [Obsolete("これは仮実装クラスです。")]
     [RequireComponent(typeof(PlayerInput))]

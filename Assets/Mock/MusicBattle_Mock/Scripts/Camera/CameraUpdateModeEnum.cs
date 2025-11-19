@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Mock.MusicBattle.Camera
 {
     public enum CameraUpdateModeEnum : byte
