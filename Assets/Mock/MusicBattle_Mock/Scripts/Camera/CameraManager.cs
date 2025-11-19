@@ -137,7 +137,16 @@ namespace Mock.MusicBattle.Camera
         /// <param name="value"></param>
         private void HandleLockOnSelectAction(float value)
         {
+            Transform target = null;
 
+            // 入力が0でなければ、コンテナから選択する。
+            if (!Mathf.Approximately(value, 0f))
+            {
+                int index = Math.Sign(value);
+                target = _targetContainer[index];
+            }
+
+            _mover?.SetLockTarget(target);
         }
     }
 }
