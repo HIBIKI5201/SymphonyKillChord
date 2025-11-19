@@ -1,5 +1,5 @@
+using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Camera;
-using Mock.MusicBattle.Develop;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Develop
@@ -9,7 +9,7 @@ namespace Mock.MusicBattle.Develop
         [SerializeField]
         private CameraManager _cameraManager;
         [SerializeField]
-        private CameraInputBuffer _inputBuffer;
+        private InputBuffer _inputBuffer;
 
         void Start()
         {
