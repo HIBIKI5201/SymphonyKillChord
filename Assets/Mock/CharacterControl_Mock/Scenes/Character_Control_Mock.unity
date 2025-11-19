@@ -459,7 +459,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: CharacterControl_Mock::Mock.CharacterControl.InputBuffer
   _moveActionName: Move
-  _attackActionName: Attack
+  _attackActionName: Roll
 --- !u!1 &865023752
 GameObject:
   m_ObjectHideFlags: 0
