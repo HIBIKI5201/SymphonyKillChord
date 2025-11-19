@@ -1,6 +1,6 @@
+using Mock.MusicBattle.Basis;
 using System;
 using UnityEngine;
-using Mock.MusicBattle.Develop;
 
 namespace Mock.MusicBattle.Camera
 {
@@ -11,15 +11,17 @@ namespace Mock.MusicBattle.Camera
         /// </summary>
         /// <returns> 成功したかどうか </returns>
         public bool Init(
-            IInputBuffer inputBuffer,
+            InputBuffer inputBuffer,
             ILockOnTargetContainer lockOnTargetContainer)
         {
             if (inputBuffer == null) { return false; }
             if (lockOnTargetContainer == null) { return false; }
 
             // イベント登録。
-            inputBuffer.LookAction += HandleLookAction;
-            inputBuffer.LockOnSelectAction += HandleLockOnSelectAction;
+            inputBuffer.LookAction.Performed += HandleLookAction;
+            inputBuffer.LookAction.Canceled += HandleLookAction;
+
+            inputBuffer.LockOnSelectAction.Started += HandleLockOnSelectAction;
 
             _targetContainer = lockOnTargetContainer;
 
@@ -42,13 +44,15 @@ namespace Mock.MusicBattle.Camera
         {
             if (_inputBuffer != null)
             {
-                _inputBuffer.LookAction -= HandleLookAction;
-                _inputBuffer.LockOnSelectAction -= HandleLockOnSelectAction;
+                _inputBuffer.LookAction.Performed -= HandleLookAction;
+                _inputBuffer.LookAction.Canceled -= HandleLookAction;
+
+                _inputBuffer.LockOnSelectAction.Started -= HandleLockOnSelectAction;
             }
         }
 
         private ILockOnTargetContainer _targetContainer;
-        private IInputBuffer _inputBuffer;
+        private InputBuffer _inputBuffer;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
 
