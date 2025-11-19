@@ -50,6 +50,7 @@ namespace Mock.MusicBattle.Camera
 
             _camera = cam;
             _targetContainer = lockOnTargetContainer;
+            _inputBuffer = inputBuffer;
 
             return true;
         }
