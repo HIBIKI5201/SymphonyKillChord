@@ -23,6 +23,11 @@ namespace Mock.MusicBattle.Camera
             return true;
         }
 
+        public void ChangeUpdateMode(CameraUpdateModeEnum mode)
+        {
+
+        }
+
         private ILockOnTargetContainer _targetContainer;
 
         private void HandleLookAction(Vector2 value)
