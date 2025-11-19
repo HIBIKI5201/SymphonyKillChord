@@ -1,19 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Camera
 {
-    public class ILockOnTargetContainer : MonoBehaviour
+    public interface ILockOnTargetContainer 
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+        public IReadOnlyList<Transform> Targets { get; }
     }
 }
