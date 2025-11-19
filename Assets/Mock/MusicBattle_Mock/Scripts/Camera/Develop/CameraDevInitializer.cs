@@ -13,7 +13,10 @@ namespace Mock.MusicBattle.Develop
 
         void Start()
         {
-            _cameraManager.Init(_inputBuffer, null);
+            bool isSuccess = true;
+            isSuccess = isSuccess && _cameraManager.Init(_inputBuffer, null);
+
+            Debug.Log(isSuccess ? "初期化は正常に終了した。" : "初期化は失敗した。");
         }
     }
 }
