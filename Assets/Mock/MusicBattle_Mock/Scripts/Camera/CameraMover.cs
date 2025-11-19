@@ -131,7 +131,6 @@ namespace Mock.MusicBattle.Camera
 
             // プレイヤーから少し上の位置から開始（足元の床を避ける）。
             Vector3 startPosition = _target.position + Vector3.up * 1f;
-            Debug.DrawRay(startPosition, rayDirection.normalized * distance, Color.green);
 
             // レイキャストで障害物を検出。
             if (!Physics.SphereCast(
