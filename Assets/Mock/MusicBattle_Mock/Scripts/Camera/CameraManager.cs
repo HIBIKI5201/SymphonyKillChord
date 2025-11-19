@@ -1,19 +1,20 @@
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Camera
 {
     public class CameraManager : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        /// <summary>
+        ///     カメラを初期化する。
+        /// </summary>
+        /// <returns> 成功したかどうか </returns>
+        public bool Init(
+            IInputBuffer inputBuffer,
+            ILockOnTargetContainer lockOnTargetContainer)
         {
-        
-        }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
+
+            return true;
         }
     }
 }
