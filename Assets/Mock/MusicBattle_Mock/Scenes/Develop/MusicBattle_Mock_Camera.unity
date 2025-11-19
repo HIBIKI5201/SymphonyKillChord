@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d036e4006db5f94985322d0c4208687, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Camera.CameraManager
+  _cameraConfigs: {fileID: 11400000, guid: 126378a9356c7a745beac5b54f582177, type: 2}
 --- !u!1 &179446382
 GameObject:
   m_ObjectHideFlags: 0
