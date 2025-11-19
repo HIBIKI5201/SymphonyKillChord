@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Mock.MusicBattle_Mock.Scripts.Basis
+namespace Mock.Basis
 {
     /// <summary>
     ///     入力バッファクラス。
