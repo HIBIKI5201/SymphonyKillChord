@@ -103,7 +103,9 @@ namespace Mock.MusicBattle.Camera
         /// <param name="deltaTime"> デルタタイム </param>
         private void Tick(float deltaTime)
         {
-
+            // 移動モジュールを更新。
+            _mover?.UpdatePitch();
+            _mover?.UpdateYaw();
         }
 
         /// <summary>
