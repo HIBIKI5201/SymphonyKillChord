@@ -5,7 +5,7 @@ namespace Mock.MusicBattle
 {
     public interface IInputBuffer
     {
-        public Action<Vector2> LookAction { get; }
-        public Action<float> LockOnSelectAction { get; }
+        public event Action<Vector2> LookAction;
+        public event Action<float> LockOnSelectAction;
     }
 }
