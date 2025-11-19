@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Basis;
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Camera
@@ -8,6 +9,7 @@ namespace Mock.MusicBattle.Camera
     ///     カメラのマネージャークラス。
     ///     カメラの各モジュールを実行する。
     /// </summary>
+    [RequireComponent(typeof(CinemachineCamera))]
     public class CameraManager : MonoBehaviour, IDisposable
     {
         /// <summary>
@@ -27,6 +29,12 @@ namespace Mock.MusicBattle.Camera
 
             inputBuffer.LockOnSelectAction.Started += HandleLockOnSelectAction;
 
+            CinemachineCamera cam = GetComponent<CinemachineCamera>();
+            if (_cameraConfigs == null) { return false; }
+
+            _mover = new(_cameraConfigs, transform, cam.Follow);
+
+            _camera = cam;
             _targetContainer = lockOnTargetContainer;
 
             return true;
@@ -60,6 +68,9 @@ namespace Mock.MusicBattle.Camera
 
         private ILockOnTargetContainer _targetContainer;
         private InputBuffer _inputBuffer;
+        private CinemachineCamera _camera;
+
+        private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
 
