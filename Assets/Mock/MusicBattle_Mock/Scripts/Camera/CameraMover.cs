@@ -37,7 +37,7 @@ namespace Mock.MusicBattle.Camera
         ///     ヨー方向の更新。
         ///     カメラの横回転を制御する。
         /// </summary>
-        public void UpdateYaw()
+        public void UpdateYaw(float deltaTime)
         {
             // ロック対象がいる場合はその方向、そうでなければ現在のカメラ回転を使う。
             Quaternion rotation = IsLockOnMode() ? GetLockYaw() : _currentCameraRotation;
@@ -50,7 +50,7 @@ namespace Mock.MusicBattle.Camera
 
             // Damping補完。
             float damping = Mathf.Max(_config.CameraFollowDamping, 0.0001f);
-            float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
+            float t = 1f - Mathf.Exp(-deltaTime / damping);
             _camera.position = Vector3.Lerp(_camera.position, targetPosition, t);
         }
 
@@ -58,14 +58,14 @@ namespace Mock.MusicBattle.Camera
         ///     ピッチ方向の更新。
         ///     カメラの縦回転を制御する。
         /// </summary>
-        public void UpdatePitch()
+        public void UpdatePitch(float deltaTime)
         {
             // ロック対象がいる場合はその方向、そうでなければプレイヤー方向を使う。
             Quaternion targetRotation = IsLockOnMode() ? LockTargetPitch() : PlayerPitch();
 
             // Damping補完。
             float damping = Mathf.Max(_config.CameraLookAtDamping, 0.0001f);
-            float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
+            float t = 1f - Mathf.Exp(-deltaTime / damping);
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
         }
 

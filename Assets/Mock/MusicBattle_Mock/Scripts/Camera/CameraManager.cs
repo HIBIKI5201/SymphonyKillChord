@@ -104,8 +104,8 @@ namespace Mock.MusicBattle.Camera
         private void Tick(float deltaTime)
         {
             // 移動モジュールを更新。
-            _mover?.UpdatePitch();
-            _mover?.UpdateYaw();
+            _mover?.UpdatePitch(deltaTime);
+            _mover?.UpdateYaw(deltaTime);
         }
 
         /// <summary>
