@@ -12,9 +12,27 @@ namespace Mock.MusicBattle.Camera
             IInputBuffer inputBuffer,
             ILockOnTargetContainer lockOnTargetContainer)
         {
+            if (inputBuffer == null) { return false; }
+            if (lockOnTargetContainer == null) { return false; }
 
+            inputBuffer.LookAction += HandleLookAction;
+            inputBuffer.LockOnSelectAction += HandleLockOnSelectAction;
+
+            _targetContainer = lockOnTargetContainer;
 
             return true;
+        }
+
+        private ILockOnTargetContainer _targetContainer;
+
+        private void HandleLookAction(Vector2 value)
+        {
+
+        }
+
+        private void HandleLockOnSelectAction(float value)
+        {
+
         }
     }
 }
