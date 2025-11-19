@@ -30,22 +30,22 @@ namespace Mock.MusicBattle.Camera
         [SerializeField, Tooltip("カメラのX回転を反転")]
         private bool _isCameraFlipX;
 
-        [SerializeField]
+        [SerializeField, Tooltip("カメラの追従位置補正")]
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
-        [SerializeField]
+        [SerializeField, Tooltip("カメラの注視位置補正")]
         private Vector3 _cameraLookAtOffset = new Vector3(0f, 1.5f, 0f);
 
-        [SerializeField]
+        [SerializeField, Tooltip("カメラ追従速度の減衰率")]
         private float _cameraFollowDamping = 0f;
-        [SerializeField]
+        [SerializeField, Tooltip("カメラ注視速度の減衰率")]
         private float _cameraLookAtDamping = 0f;
 
-        [SerializeField]
+        [SerializeField, Tooltip("カメラ感度")]
         private float _cameraRotationSpeed = 3f;
-        [SerializeField, MinMaxRangeSlider(-90, 90)]
+        [SerializeField, Tooltip("ピッチ角度の範囲（オイラー角度）"), MinMaxRangeSlider(-90, 90)]
         private Vector2 _pitchRange = new Vector2(-30f, 60f);
 
-        [SerializeField]
+        [SerializeField, Tooltip("カメラの障害物回避範囲")]
         private float _cameraCollisionRadius = 0.3f;
     }
 }
