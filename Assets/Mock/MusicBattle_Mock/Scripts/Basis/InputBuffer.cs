@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Mock.Basis
+namespace Mock.MusicBattle.Basis
 {
     /// <summary>
     ///     入力バッファクラス。
@@ -21,7 +21,7 @@ namespace Mock.Basis
         [SerializeField]
         private string _lockOnSelectActionName = "LockOnSelect";
         [SerializeField]
-        private string _attackActionName = "Fire";
+        private string _attackActionName = "Attack";
 
         private InputActionEntity<Vector2> _lookActionEntity;
         private InputActionEntity<Vector2> _moveActionEntity;
