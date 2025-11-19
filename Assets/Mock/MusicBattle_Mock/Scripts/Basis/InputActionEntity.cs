@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
-namespace Mock.Basis
+namespace Mock.MusicBattle.Basis
 { 
     /// <summary>
     ///     入力アクションのイベントラッパークラス。

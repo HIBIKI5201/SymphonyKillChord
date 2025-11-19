@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mock.Basis
+namespace Mock.MusicBattle.Basis
 {
     /// <summary>ゲーム全体の管理クラス</summary>
     [DefaultExecutionOrder(-900)]
