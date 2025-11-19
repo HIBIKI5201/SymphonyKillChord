@@ -13,7 +13,7 @@ namespace Mock.Basis
         /// <summary>
         ///     InputActionEntityのコンストラクタ。
         /// </summary>
-        /// <param name="inputAction">ラップするUnityのInputAction</param>
+        /// <param name="inputAction"> ラップするUnityのInputAction</param>
         public InputActionEntity(InputAction inputAction)
         {
             _inputAction = inputAction;
