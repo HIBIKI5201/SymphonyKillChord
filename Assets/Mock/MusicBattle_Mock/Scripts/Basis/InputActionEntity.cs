@@ -7,7 +7,7 @@ namespace Mock.Basis
     /// <summary>
     ///     入力アクションのイベントラッパークラス。
     /// </summary>
-    /// <typeparam name="T">入力値の型（Vector2, float等の構造体）</typeparam>
+    /// <typeparam name="T">　入力値の型（Vector2, float等の構造体）</typeparam>
     public class InputActionEntity<T> where T : struct
     {
         /// <summary>
@@ -28,7 +28,6 @@ namespace Mock.Basis
             {
                 // CallbackContextからT型に変換するラッパーハンドラーを作成。
                 Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
-                
                 // 後でremove時に特定できるよう、元のハンドラーとラッパーを紐付けて保存。
                 _startedHandlers[value] = handler;
                 
@@ -117,7 +116,7 @@ namespace Mock.Basis
         {
             foreach (var kvp in _startedHandlers)
             {
-                kvp.Key.Invoke(value);
+                kvp.Key?.Invoke(value);
             }
         }
 
@@ -125,14 +124,13 @@ namespace Mock.Basis
         ///     登録されている全てのPerformedイベントハンドラーを手動で呼び出します。
         /// </summary>
         /// <param name="value">イベントハンドラーに渡す値</param>
-        public void InvokePerfomed(T value)
+        public void InvokePerformed(T value)
         {
             foreach (var kvp in _performedHandlers)
             {
-                kvp.Key.Invoke(value);
+                kvp.Key?.Invoke(value);
             }
         }
-
         /// <summary>
         ///     登録されている全てのCanceledイベントハンドラーを手動で呼び出します。
         /// </summary>
@@ -141,7 +139,7 @@ namespace Mock.Basis
         {
             foreach (var kvp in _canceledHandlers)
             {
-                kvp.Key.Invoke(value);
+                kvp.Key?.Invoke(value);
             }
         }
 

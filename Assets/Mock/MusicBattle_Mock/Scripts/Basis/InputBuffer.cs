@@ -11,7 +11,7 @@ namespace Mock.Basis
     {
         public InputActionEntity<Vector2> LookAction => _lookActionEntity;
         public InputActionEntity<Vector2> MoveAction => _moveActionEntity;
-        public InputActionEntity<float> LockOnSelect => _lockOnSelectEntity;
+        public InputActionEntity<float> LockOnSelectAction => _lockOnSelectActionEntity;
         public InputActionEntity<float> AttackAction => _attackActionEntity;
 
         [SerializeField]
@@ -25,7 +25,7 @@ namespace Mock.Basis
 
         private InputActionEntity<Vector2> _lookActionEntity;
         private InputActionEntity<Vector2> _moveActionEntity;
-        private InputActionEntity<float> _lockOnSelectEntity;
+        private InputActionEntity<float> _lockOnSelectActionEntity;
         private InputActionEntity<float> _attackActionEntity;
 
         public void Awake()
@@ -36,7 +36,7 @@ namespace Mock.Basis
                 playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
                 _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
                 _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-                _lockOnSelectEntity = new InputActionEntity<float>(playerInput.actions[_lockOnSelectActionName]);
+                _lockOnSelectActionEntity = new InputActionEntity<float>(playerInput.actions[_lockOnSelectActionName]);
                 _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
             }
         }
