@@ -1,10 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle.Enemy
 {
-    /// <summary>　エネミーのステータスクラス。　/summary>
+    /// <summary>　エネミーのステータスクラス。　</summary>
     [CreateAssetMenu(fileName = nameof(EnemyStatus),menuName = "Mock/MusicBattle/" + nameof(EnemyStatus), order = 0)]
     public class EnemyStatus : ScriptableObject
     {
