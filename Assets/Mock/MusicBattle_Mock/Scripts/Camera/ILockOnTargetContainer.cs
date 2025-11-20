@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Camera
 {
-    public interface ILockOnTargetContainer 
+    public interface ILockOnTargetContainer
     {
-        public Transform this[int index] => Targets[index % Targets.Count];
+        public Transform this[int index] => Targets[(index + Targets.Count) % Targets.Count];
         public IReadOnlyList<Transform> Targets { get; }
     }
 }
