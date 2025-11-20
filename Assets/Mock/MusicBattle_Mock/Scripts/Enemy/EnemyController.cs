@@ -2,13 +2,14 @@ using Mock.MusicBattle.Enemy;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Enemy
 {/// <summary>
  /// ロックオン判定と移動を行う。
  /// </summary>
-    public class EnemyLockOnController
+    public class EnemyController
     {
-        public EnemyLockOnController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
+        
+        public EnemyController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
         {
             _targetposition = target;
             _enemyposition = enemy;
@@ -41,7 +42,7 @@ namespace Mock.MusicBattle
         /// <summary>
         /// 射程内までプレイヤーに近づく。
         /// </summary>
-        private void MoveTo()
+        public void MoveTo()
         {
             if (_enemyposition == null ||_targetposition == null) return;
 
