@@ -144,10 +144,11 @@ namespace Mock.MusicBattle.Camera
             // 入力が0でなければ、コンテナから選択する。
             if (!Mathf.Approximately(value, 0f))
             {
-                target = transform
+                var bestTarget = transform
                     .GetTargetWithAxis(
                     _targetContainer.Targets.ToArray(),
                     value);
+                target = bestTarget.transform;
             }
 
             _mover?.SetLockTarget(target);
