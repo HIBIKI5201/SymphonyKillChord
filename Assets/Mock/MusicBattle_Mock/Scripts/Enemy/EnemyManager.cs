@@ -17,7 +17,7 @@ namespace Mock.MusicBattle.Enemy
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
-            _enemyMover = new EnemyMover(target, enemy, _enemyStatus, rb);
+            _enemyController = new EnemyController(target, enemy, _enemyStatus, rb);
             _lockOnController = new LockOnController();
         }
 
@@ -25,14 +25,14 @@ namespace Mock.MusicBattle.Enemy
 
         private void FixedUpdate()
         {
-            if (_enemyMover == null) return;
-            _enemyMover.MoveTo();
+            if (_enemyController == null) return;
+            _enemyController.MoveTo();
         }
 
 
         [SerializeField] private EnemyStatus _enemyStatus;
         private HealthEntity _healthEntity;
-        private EnemyMover _enemyMover;
+        private EnemyController _enemyController;
         private LockOnController _lockOnController;
     }
 }

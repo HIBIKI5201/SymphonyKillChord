@@ -6,20 +6,36 @@ namespace Mock.MusicBattle.Enemy
 {/// <summary>
  /// ロックオン判定と移動を行う。
  /// </summary>
-    public class EnemyMover
+    public class EnemyController
     {
+        public bool IsLockedOn => _isLockedOn; 
         
-        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
+        /// <summary>　ロックオン状態を設定する。</summary>
+        public EnemyController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
         {
-            _targetposition = target;
-            _enemyposition = enemy;
+            _target = target;
+            _enemy = enemy;
             _rigidbody = rigidbody;
             Init(enemyStatus);
+        }
+        public void SetLockOn(bool isLockedOn)
+        {
+            _isLockedOn = isLockedOn;
+        }
+
+        public void SetTarget(Transform target)
+        {
+            _target = target;
         }
 
         public void Init(EnemyStatus enemyStatus)
         {
             _enemystatus = enemyStatus;
+        }
+
+        public float DistanceToTarget()
+        {
+            return Vector3.Distance(_target.position, _enemy.position);
         }
         
         /// <summary>
@@ -27,13 +43,13 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public void MoveTo()
         {
-            if (_enemyposition == null ||_targetposition == null) return;
+            if (_enemy == null ||_target == null) return;
 
-            float distance = Vector3.Distance(_targetposition.position, _enemyposition.position);
+            float distance =  DistanceToTarget();
             //射程外　＝＞　近づく。
             if (distance > _enemystatus.AttackRange)
             {
-                Vector3 direction = (_targetposition.position - _enemyposition.position).normalized;
+                Vector3 direction = (_target.position - _enemy.position).normalized;
                 _rigidbody.linearVelocity = direction * _enemystatus.MoveSpeed;
             }
             //射程内＝＞止まって攻撃処理へ。
@@ -45,8 +61,8 @@ namespace Mock.MusicBattle.Enemy
         private EnemyStatus  _enemystatus;
         private Rigidbody _rigidbody;
         private bool _isLockedOn = false;
-        private Transform _targetposition;
-        private Transform _enemyposition;
+        private Transform _target;
+        private Transform _enemy;
         
        
     }
