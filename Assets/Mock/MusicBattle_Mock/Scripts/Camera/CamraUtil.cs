@@ -1,21 +1,22 @@
-using System.Linq;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Camera
 {
     public static class CamraUtil
     {
-        public static Transform GetTargetWithAxis(this Transform camera, Transform[] targets, float axis)
+        public static (Transform transform, int index) GetTargetWithAxis(this Transform camera, Transform[] targets, float axis)
         {
             if (camera == null || targets == null || targets.Length == 0)
-                return null;
+                return (null, -1);
 
             Transform best = null;
+            int index = 0;
             float bestAngle = float.MaxValue;
             axis = Mathf.Sign(axis);
 
-            foreach (var t in targets)
+            for (int i = 0; i < targets.Length; i++)
             {
+                Transform t = targets[i];
                 if (t == null) continue;
 
                 Vector3 toTarget = t.position - camera.position;
@@ -32,10 +33,11 @@ namespace Mock.MusicBattle.Camera
                 {
                     bestAngle = angle;
                     best = t;
+                    index = i;
                 }
             }
 
-            return best;
+            return (best, index);
         }
     }
 }
