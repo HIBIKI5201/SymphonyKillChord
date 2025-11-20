@@ -8,16 +8,19 @@ namespace Mock.MusicBattle
         {
             _targetposition = target;
         }
-/// <summary> プレイヤーを設定する。</summary>
+
+        /// <summary> プレイヤーを設定する。</summary>
         public void SetTarget(Transform target)
         {
             _targetposition = target;
         }
-/// <summary>　ロックオン対象にする。</summary>
+
+        /// <summary>　ロックオン対象にする。</summary>
         public void SetLockOn()
         {
             _isLockedOn = true;
         }
+
         /// <summary>
         /// 射程内までプレイヤーに近づく。
         /// </summary>
