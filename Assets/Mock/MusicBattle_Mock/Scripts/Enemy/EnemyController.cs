@@ -22,11 +22,6 @@ namespace Mock.MusicBattle.Enemy
             _enemystatus = enemyStatus;
         }
         
-        private EnemyStatus  _enemystatus;
-        private Rigidbody _rigidbody;
-        private bool _isLockedOn = false;
-        private Transform _targetposition;
-        private Transform _enemyposition;
         /// <summary>
         /// 射程内までプレイヤーに近づく。
         /// </summary>
@@ -47,6 +42,11 @@ namespace Mock.MusicBattle.Enemy
                 _rigidbody.linearVelocity = Vector3.zero;
             }
         }
+        private EnemyStatus  _enemystatus;
+        private Rigidbody _rigidbody;
+        private bool _isLockedOn = false;
+        private Transform _targetposition;
+        private Transform _enemyposition;
         
        
     }
