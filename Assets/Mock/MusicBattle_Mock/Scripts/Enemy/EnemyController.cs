@@ -16,10 +16,9 @@ namespace Mock.MusicBattle
             Init(enemyStatus);
         }
 
-        private void Init(EnemyStatus enemyStatus)
+        public void Init(EnemyStatus enemyStatus)
         {
-            _moveSpeed = enemyStatus.MoveSpeed;
-            _attackRange = enemyStatus.AttackRange;
+            _enemystatus = enemyStatus;
         }
 
         /// <summary> プレイヤーを設定する。</summary>
@@ -33,7 +32,12 @@ namespace Mock.MusicBattle
         {
             _isLockedOn = true;
         }
-
+        
+        private EnemyStatus  _enemystatus;
+        private Rigidbody _rigidbody;
+        private bool _isLockedOn = false;
+        private Transform _targetposition;
+        private Transform _enemyposition;
         /// <summary>
         /// 射程内までプレイヤーに近づく。
         /// </summary>
@@ -43,10 +47,10 @@ namespace Mock.MusicBattle
 
             float distance = Vector3.Distance(_targetposition.position, _enemyposition.position);
             //射程外　＝＞　近づく。
-            if (distance > _attackRange)
+            if (distance > _enemystatus.AttackRange)
             {
                 Vector3 direction = (_targetposition.position - _enemyposition.position).normalized;
-                _rigidbody.linearVelocity = direction * _moveSpeed;
+                _rigidbody.linearVelocity = direction * _enemystatus.MoveSpeed;
             }
             //射程内＝＞止まって攻撃処理へ。
             else
@@ -55,11 +59,6 @@ namespace Mock.MusicBattle
             }
         }
         
-        private float _moveSpeed;
-        private float _attackRange;
-        private Rigidbody _rigidbody;
-        private bool _isLockedOn = false;
-        private Transform _targetposition;
-        private Transform _enemyposition;
+       
     }
 }
