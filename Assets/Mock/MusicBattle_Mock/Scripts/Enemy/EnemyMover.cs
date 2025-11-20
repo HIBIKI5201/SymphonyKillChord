@@ -6,10 +6,10 @@ namespace Mock.MusicBattle.Enemy
 {/// <summary>
  /// ロックオン判定と移動を行う。
  /// </summary>
-    public class EnemyController
+    public class EnemyMover
     {
         
-        public EnemyController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
+        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
         {
             _targetposition = target;
             _enemyposition = enemy;
