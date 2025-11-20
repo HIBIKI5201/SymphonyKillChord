@@ -88,6 +88,7 @@ namespace Mock.MusicBattle.Camera
         private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
+        private int _lockOnTargetIndex;
 
         private void Update()
         {
@@ -143,8 +144,8 @@ namespace Mock.MusicBattle.Camera
             // 入力が0でなければ、コンテナから選択する。
             if (!Mathf.Approximately(value, 0f))
             {
-                int index = Math.Sign(value);
-                target = _targetContainer[index];
+                _lockOnTargetIndex += Math.Sign(value);
+                target = _targetContainer[_lockOnTargetIndex];
             }
 
             _mover?.SetLockTarget(target);
