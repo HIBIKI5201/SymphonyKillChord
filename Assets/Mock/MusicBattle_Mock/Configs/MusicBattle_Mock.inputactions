@@ -38,7 +38,7 @@
                     "type": "Value",
                     "id": "8ca48e12-44a1-4859-802d-72eee3ccb625",
                     "expectedControlType": "Axis",
-                    "processors": "Clamp",
+                    "processors": "Clamp(max=1)",
                     "interactions": "",
                     "initialStateCheck": true
                 }
