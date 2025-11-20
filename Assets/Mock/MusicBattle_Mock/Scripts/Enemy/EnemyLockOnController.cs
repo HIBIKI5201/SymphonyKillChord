@@ -1,3 +1,5 @@
+using Mock.MusicBattle.Enemy;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Mock.MusicBattle
@@ -6,10 +8,17 @@ namespace Mock.MusicBattle
  /// </summary>
     public class EnemyLockOnController
     {
-        public EnemyLockOnController(Transform target,Transform enemy)
+        public EnemyLockOnController(Transform target,Transform enemy,EnemyStatus enemyStatus)
         {
             _targetposition = target;
             _enemyposition = enemy;
+            Init(enemyStatus);
+        }
+
+        private void Init(EnemyStatus enemyStatus)
+        {
+            _moveSpeed = enemyStatus.MoveSpeed;
+            _attackRange = enemyStatus.AttackRange;
         }
 
         /// <summary> プレイヤーを設定する。</summary>
@@ -44,7 +53,7 @@ namespace Mock.MusicBattle
                 _rigidbody.linearVelocity = Vector3.zero;
             }
         }
-
+        
         private float _moveSpeed;
         private float _attackRange;
         private Rigidbody _rigidbody;
