@@ -21,18 +21,6 @@ namespace Mock.MusicBattle.Enemy
         {
             _enemystatus = enemyStatus;
         }
-
-        /// <summary> プレイヤーを設定する。</summary>
-        public void SetTarget(Transform target)
-        {
-            _targetposition = target;
-        }
-
-        /// <summary>　ロックオン対象にする。</summary>
-        public void SetLockOn()
-        {
-            _isLockedOn = true;
-        }
         
         private EnemyStatus  _enemystatus;
         private Rigidbody _rigidbody;
