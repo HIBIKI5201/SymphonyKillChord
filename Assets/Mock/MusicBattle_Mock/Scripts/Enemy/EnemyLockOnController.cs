@@ -8,10 +8,11 @@ namespace Mock.MusicBattle
  /// </summary>
     public class EnemyLockOnController
     {
-        public EnemyLockOnController(Transform target,Transform enemy,EnemyStatus enemyStatus)
+        public EnemyLockOnController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
         {
             _targetposition = target;
             _enemyposition = enemy;
+            _rigidbody = rigidbody;
             Init(enemyStatus);
         }
 
