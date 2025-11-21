@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Basis;
 using System;
+using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -143,8 +144,11 @@ namespace Mock.MusicBattle.Camera
             // 入力が0でなければ、コンテナから選択する。
             if (!Mathf.Approximately(value, 0f))
             {
-                int index = Math.Sign(value);
-                target = _targetContainer[index];
+                var bestTarget = transform
+                    .GetTargetWithAxis(
+                    _targetContainer.Targets.ToArray(),
+                    value);
+                target = bestTarget.transform;
             }
 
             _mover?.SetLockTarget(target);
