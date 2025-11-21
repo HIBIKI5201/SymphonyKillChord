@@ -45,7 +45,7 @@ namespace Mock.MusicBattle.Camera
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
 
-            inputBuffer.LockOnSelectAction.Started += HandleLockOnSelectAction;
+            inputBuffer.LockOnSelectAction.Performed += HandleLockOnSelectAction;
 
             _mover = new(_cameraConfigs, transform, cam.Follow);
 
