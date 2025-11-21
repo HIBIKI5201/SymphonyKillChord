@@ -17,22 +17,20 @@ namespace Mock.MusicBattle.Enemy
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
-            _enemyController = new EnemyController(target, enemy, _enemyStatus, rb);
-            _lockOnController = new LockOnController();
+            _enemyMover = new EnemyMover(target, enemy, _enemyStatus, rb);
         }
 
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
 
         private void FixedUpdate()
         {
-            if (_enemyController == null) return;
-            _enemyController.MoveTo();
+            if (_enemyMover == null) return;
+            _enemyMover.MoveTo();
         }
 
 
         [SerializeField] private EnemyStatus _enemyStatus;
         private HealthEntity _healthEntity;
-        private EnemyController _enemyController;
-        private LockOnController _lockOnController;
+        private EnemyMover _enemyMover;
     }
 }
