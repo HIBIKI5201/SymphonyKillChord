@@ -1,0 +1,102 @@
+name: AutoCreateMasterBranch
+
+on:
+  create:
+    branches:
+      - "feature/**"
+
+jobs:
+  create-master-suffix-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract original branch name
+        run: |
+          echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Validate conditions
+        id: validate
+        run: |
+          BR="${BRANCH_NAME}"
+
+          # 1. ルートが feature であるか（トリガーフィルタでほぼ保証）
+          case "$BR" in
+            feature/*) ;;
+            *) 
+              echo "Invalid: root is not feature"
+              echo "pass=false" >> $GITHUB_OUTPUT
+              exit 0
+              ;;
+          esac
+
+          # 2. ディレクトリが4層以上かどうか
+          # "/" の数を数える（3つ以上必要： feature/a/b/c/d → "/" が4つだが feature を含めると、最低3つでOK）
+          SLASH_COUNT=$(echo "$BR" | grep -o "/" | wc -l)
+          if [ "$SLASH_COUNT" -lt 3 ]; then
+            echo "Invalid: less than 4 directory levels"
+            echo "pass=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # 3. 最下層ディレクトリ名が master ではない
+          LAST=$(basename "$BR")
+          if [ "$LAST" = "master" ]; then
+            echo "Invalid: last directory name is master"
+            echo "pass=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Conditions passed"
+          echo "pass=true" >> $GITHUB_OUTPUT
+
+      - name: Stop if conditions not met
+        if: ${{ steps.validate.outputs.pass != 'true' }}
+        run: |
+          echo "Conditions not met. Skipping branch creation."
+          exit 0
+
+      - name: Build target branch name
+        run: |
+          ORG="${BRANCH_NAME}"
+          DIR_PATH=$(dirname "$ORG")
+          TARGET_BRANCH="${DIR_PATH}/master"
+          echo "TARGET_BRANCH=$TARGET_BRANCH" >> $GITHUB_ENV
+          echo "Target branch: $TARGET_BRANCH"
+
+      - name: Get latest commit SHA
+        id: sha
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = process.env.BRANCH_NAME;
+            const repo = context.repo;
+            const res = await github.rest.repos.getBranch({
+              owner: repo.owner,
+              repo: repo.repo,
+              branch: branch
+            });
+            return res.data.commit.sha;
+
+      - name: Create new branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const target = process.env.TARGET_BRANCH;
+            const sha = "${{ steps.sha.outputs.result }}";
+            const repo = context.repo;
+
+            try {
+              await github.rest.git.createRef({
+                owner: repo.owner,
+                repo: repo.repo,
+                ref: `refs/heads/${target}`,
+                sha: sha
+              });
+              console.log(`Created branch: ${target}`);
+            } catch (e) {
+              if (e.status === 422) {
+                console.log(`Branch already exists: ${target}`);
+              } else {
+                throw e;
+              }
+            }
