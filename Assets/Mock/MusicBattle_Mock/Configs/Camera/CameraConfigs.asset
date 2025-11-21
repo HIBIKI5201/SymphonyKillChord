@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e02b33daaa5dc4e83aa6e48eb2fdca, type: 3}
   m_Name: CameraConfigs
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Camera.CameraConfigs
-  _isCameraFlipX: 0
   _cameraOffset: {x: 1, y: 2, z: -6}
   _cameraLookAtOffset: {x: 1, y: 1.5, z: 0}
   _cameraFollowDamping: 0.05
   _cameraLookAtDamping: 0.01
   _cameraRotationSpeed: 3
   _pitchRange: {x: -30, y: 60}
+  _isCameraFlipX: 0
   _cameraCollisionRadius: 0.3
+  _cameraCollisionOffset: {x: 0, y: 1, z: 0}
