@@ -126,7 +126,7 @@ namespace Mock.MusicBattle.Camera
         private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
         {
             // プレイヤーからカメラへの方向ベクトル。
-            Vector3 origin = _target.position + Vector3.up * 1f;
+            Vector3 origin = _target.position + _config.CameraCollisionOffset;
             Vector3 rayDirection = cameraPosition - origin;
             float distance = rayDirection.magnitude + _config.CameraCollisionRadius;
 
