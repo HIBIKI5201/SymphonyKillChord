@@ -11,7 +11,7 @@ namespace Mock.MusicBattle.Camera
             params Transform[] ignore)
         {
             Vector3 forward = camera.forward;
-            Vector3 up = Vector3.up;
+            Vector3 up = camera.up;
 
             float minAngle = float.MaxValue;
             int index = -1;
@@ -24,10 +24,7 @@ namespace Mock.MusicBattle.Camera
 
                 float signed = Vector3.SignedAngle(forward, dir, up);
 
-                float angle;
-
-
-                angle = axis >= 0f ?
+                float angle = axis < 0f ?
                     signed >= 0 ? 360f - signed : -signed : // 右（時計回り）
                     signed >= 0 ? signed : 360f + signed; // 左（反時計回り）
 
