@@ -89,6 +89,7 @@ namespace Mock.MusicBattle.Camera
         private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
+        private int _lockingTargetIndex;
 
         private void Update()
         {
@@ -144,11 +145,10 @@ namespace Mock.MusicBattle.Camera
             // 入力が0でなければ、コンテナから選択する。
             if (!Mathf.Approximately(value, 0f))
             {
-                var bestTarget = transform
-                    .GetTargetWithAxis(
-                    _targetContainer.Targets.ToArray(),
-                    value);
-                target = bestTarget.transform;
+                (target, _lockingTargetIndex) =
+                    transform.GetTargetWithAxis(
+                    _targetContainer.Targets.ToArray(), value,
+                    _targetContainer.Targets[_lockingTargetIndex]);
             }
 
             _mover?.SetLockTarget(target);
