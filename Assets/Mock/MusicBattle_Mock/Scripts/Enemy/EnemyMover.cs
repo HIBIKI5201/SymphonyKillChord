@@ -4,35 +4,27 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Enemy
 {/// <summary>
- /// ロックオン判定と移動を行う。
+ ///    ロックオン判定と移動を行う。
  /// </summary>
-    public class EnemyController
+    public class EnemyMover
     {
-        public bool IsLockedOn => _isLockedOn; 
         
-        /// <summary>　ロックオン状態を設定する。</summary>
-        public EnemyController(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
+        /// <summary> ロックオン状態を設定する。 </summary>
+        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
         {
             _target = target;
             _enemy = enemy;
             _rigidbody = rigidbody;
             Init(enemyStatus);
         }
-        public void SetLockOn(bool isLockedOn)
-        {
-            _isLockedOn = isLockedOn;
-        }
-
-        public void SetTarget(Transform target)
-        {
-            _target = target;
-        }
-
+        
+        /// <summary> 初期化処理をする。 </summary>
         public void Init(EnemyStatus enemyStatus)
         {
             _enemystatus = enemyStatus;
         }
-
+        
+        /// <summary> ターゲットとの距離を返す。 </summary>
         public float DistanceToTarget()
         {
             return Vector3.Distance(_target.position, _enemy.position);
@@ -58,6 +50,7 @@ namespace Mock.MusicBattle.Enemy
                 _rigidbody.linearVelocity = Vector3.zero;
             }
         }
+        
         private EnemyStatus  _enemystatus;
         private Rigidbody _rigidbody;
         private bool _isLockedOn = false;
