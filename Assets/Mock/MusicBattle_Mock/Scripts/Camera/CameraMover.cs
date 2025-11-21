@@ -139,7 +139,7 @@ namespace Mock.MusicBattle.Camera
                 rayDirection.normalized,
                 out RaycastHit hitInfo, 
                 distance)
-                || hitInfo.rigidbody.transform == _target)  // プレイヤー自身に当たった場合は無視。
+                || hitInfo.rigidbody?.transform == _target)  // プレイヤー自身に当たった場合は無視。
             {
                 return cameraPosition;
             }
