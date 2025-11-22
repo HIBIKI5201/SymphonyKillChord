@@ -11,16 +11,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             string notionToken,
             string databaseID,
             string datePropertyName,
-            string namePropertyName,
-            string statusPropertyName,
-            string taskStatusDoneName)
+            string namePropertyName)
         {
             _notionToken = notionToken;
             _databaseID = databaseID;
             _datePropertyName = datePropertyName;
             _namePropertyName = namePropertyName;
-            _statusPropertyName = statusPropertyName;
-            _taskStatusDoneName = taskStatusDoneName;
         }
 
         /// <summary>
@@ -35,6 +31,8 @@ namespace SinfoniaStudio.SinfoniaOperator
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
             DateTime today = nowTime.Date;
 
+            int taskCount = 0;
+
             PriorityQueue<StringBuilder, int> outputTaskQueue = new();
 
             foreach (var item in database)
@@ -44,25 +42,19 @@ namespace SinfoniaStudio.SinfoniaOperator
                 // 日付プロパティを取得できる場合。
                 if (!page.Properties.TryGetValue(_datePropertyName, out PropertyValue? datePropertyValue) ||
                     datePropertyValue is not DatePropertyValue dateProperty) { continue; }
-                // ステータスプロパティを取得できる場合。
-                if (!page.Properties.TryGetValue(_statusPropertyName, out PropertyValue? statusPropertyValue) ||
-                        statusPropertyValue is not StatusPropertyValue statusProperty) { continue; }
-
-                // ステータスが完了済みなら終了。
-                if (statusProperty.Status.Name == _taskStatusDoneName) { continue; }
 
                 // ページ名を取得。
                 string pageName = GetPageName(page);
-                DateTime? startDate = ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime);
-                DateTime? endDate = ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime);
 
                 #region 開始タスクの通知。
-
+                DateTime? startDate = ConvertDateUtcToJst(
+                    dateProperty.Date.Start?.UtcDateTime);
 
                 if (startDate.HasValue && startDate.Value.Date == today)
                 {
+                    taskCount++;
                     StringBuilder startTasksSb = new();
-                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
+                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl})");
 
                     await AppendPageContentAsync(startTasksSb, page);
                     outputTaskQueue.Enqueue(startTasksSb, 0);
@@ -71,32 +63,25 @@ namespace SinfoniaStudio.SinfoniaOperator
                 #endregion
 
                 #region 納期タスクの通知。
+                DateTime? endDate = ConvertDateUtcToJst(
+                    dateProperty.Date.End?.UtcDateTime);
+
                 if (endDate.HasValue && endDate.Value.Date == today)
                 {
+                    taskCount++;
                     StringBuilder endTasksSb = new();
 
-                    endTasksSb.AppendLine($"\n🟡 納期タスク: {pageName}\n[確認]({page.PublicUrl}) [編集]({page.Url})");
+                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({page.PublicUrl})");
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
                     continue;
                 }
                 #endregion
 
-                #region 納期遅れタスクの通知。
-                if (endDate.HasValue && endDate.Value.Date < today)
-                {
-                    StringBuilder endTasksSb = new();
-
-                    endTasksSb.AppendLine($"\n🔴 納期遅れタスク: {pageName}\n[確認]({page.PublicUrl}) [編集]({page.Url})");
-                    await AppendPageContentAsync(endTasksSb, page);
-                    outputTaskQueue.Enqueue(endTasksSb, 2);
-                }
-                #endregion
-
                 Console.WriteLine($"{pageName}は通知しません。");
             }
 
-            if (outputTaskQueue.Count <= 0)
+            if (taskCount <= 0)
             {
                 Console.WriteLine("今日の開始タスクと納期タスクがありません。通知を送信しません。");
                 return string.Empty;
@@ -119,8 +104,6 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string _databaseID;
         private readonly string _datePropertyName;
         private readonly string _namePropertyName;
-        private readonly string _statusPropertyName;
-        private readonly string _taskStatusDoneName;
 
         /// <summary>
         ///     タスクのデータを取得する。

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Mock.CharacterControl
@@ -8,12 +8,12 @@ namespace Mock.CharacterControl
     public class InputBuffer : MonoBehaviour
     {
         public InputAction MoveAction => _playerInput.actions[_moveActionName];
-        public InputAction RollAction => _playerInput.actions[_rollActionName];
+        public InputAction AttackAction => _playerInput.actions[_attackActionName];
 
         [SerializeField]
         private string _moveActionName = "Move";
         [SerializeField]
-        private string _rollActionName = "Roll";
+        private string _attackActionName = "Attack";
 
         private PlayerInput _playerInput;
 

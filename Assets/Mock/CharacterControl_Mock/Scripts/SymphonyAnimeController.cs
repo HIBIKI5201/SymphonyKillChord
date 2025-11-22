@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Mock.CharacterControl
@@ -19,7 +19,7 @@ namespace Mock.CharacterControl
         public Vector3 DeltaPosition => _animator.deltaPosition;
         public Quaternion DeltaRotation => _animator.deltaRotation;
 
-        public void RollTrigger() => _animator?.SetTrigger(_rollTriggerHash);
+        public void AttackTrigger() => _animator?.SetTrigger(_attackTriggerHash);
         public void MoveSpeed(float value) => _animator?.SetFloat(_moveVelocityHash, value);
 
         void IRootMotionReciever.ActiveRootMotion()
@@ -34,11 +34,11 @@ namespace Mock.CharacterControl
         }
 
         [SerializeField, Delayed]
-        private string _rollTriggerName = "Roll";
+        private string _attackTriggerName = "Attack";
         [SerializeField, Delayed]
         private string _moveVelocityName = "MoveVelocity";
 
-        private int _rollTriggerHash;
+        private int _attackTriggerHash;
         private int _moveVelocityHash;
         private Animator _animator;
 
@@ -56,7 +56,7 @@ namespace Mock.CharacterControl
 
         private void OnValidate()
         {
-            _rollTriggerHash = Animator.StringToHash(_rollTriggerName);
+            _attackTriggerHash = Animator.StringToHash(_attackTriggerName);
             _moveVelocityHash = Animator.StringToHash(_moveVelocityName);
         }
     }
