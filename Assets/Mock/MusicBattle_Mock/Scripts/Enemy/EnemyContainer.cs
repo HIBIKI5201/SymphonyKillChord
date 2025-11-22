@@ -9,7 +9,7 @@ namespace Mock.MusicBattle.Enemy
     /// シーン内のエネミー(EnemyManager)を一元管理するコンテナ。
     /// 生存中の敵リストを保持し、敵の追加・死亡時の削除を行う。
     /// </summary>
-    public class EnemyContainer : MonoBehaviour
+    public class EnemyContainer 
     {
         public EnemyManager this[int index] => 0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
         
