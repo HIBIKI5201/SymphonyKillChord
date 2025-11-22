@@ -23,6 +23,8 @@ namespace Mock.MusicBattle.Enemy
         {
             _enemystatus = enemyStatus;
         }
+
+        public void SetTarget(bool isLockedOn) => _isLockedOn = isLockedOn;
         
         /// <summary> ターゲットとの距離を返す。 </summary>
         public float DistanceToTarget()
@@ -31,7 +33,7 @@ namespace Mock.MusicBattle.Enemy
         }
         
         /// <summary>
-        /// 射程内までプレイヤーに近づく。
+        ///     射程内までプレイヤーに近づく。
         /// </summary>
         public void MoveTo()
         {
@@ -48,6 +50,7 @@ namespace Mock.MusicBattle.Enemy
             else
             {
                 _rigidbody.linearVelocity = Vector3.zero;
+                
             }
         }
         
