@@ -12,7 +12,7 @@ namespace Mock.MusicBattle.Enemy
     [RequireComponent(typeof(Rigidbody))]
     public class EnemyManager : MonoBehaviour
     {
-        /// <summary>ヘルスが0になったときに通知</summary>
+        /// <summary>ヘルスが0になったときに通知。</summary>
         public event Action OnDeath
         {
             add => _healthEntity.OnDeath += value;
