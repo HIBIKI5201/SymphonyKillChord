@@ -40,11 +40,11 @@ namespace Mock.MusicBattle.Enemy
         }
 
 
-        [SerializeField]
+        [SerializeField,Tooltip("エネミーのステータス")]
         private EnemyStatus _enemyStatus;
-        [SerializeField]
+        [SerializeField,Tooltip("プレイヤーの位置")]
         private Transform _target;
-        [SerializeField]
+        [SerializeField,Tooltip("敵の位置")]
         private Transform _lockTarget;
         
         private HealthEntity _healthEntity;
