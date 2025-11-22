@@ -54,6 +54,10 @@ jobs:
         if: ${{ steps.validate.outputs.pass != 'true' }}
         run: echo "Conditions not met. Skipping branch creation." && exit 0
 
+        # ユーザーの更新が終わるまで待機する。
+      - name: Wait 1 minute
+        run: sleep 60
+
       - name: Build target branch name
         run: |
           ORG="${BRANCH_NAME}"
