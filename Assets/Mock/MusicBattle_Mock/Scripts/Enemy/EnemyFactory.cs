@@ -37,35 +37,24 @@ namespace Mock.MusicBattle.Enemy
         /// <returns> 生成または再利用された EnemyManager 。</returns>
         public EnemyManager Spawn(EnemyStatus status, Vector3 position)
         {
-            EnemyManager enemy;
+            var enemy = _enemyContainer.GetFromPool();
 
-            if (_pool.Count > 0)
-            {
-                enemy = _pool.Dequeue();
-                enemy.gameObject.SetActive(true);
-            }
-            else
+            if (enemy == null)
             {
                 enemy = Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
-                enemy.OnDeath += () =>
-                {
-                    enemy.gameObject.SetActive(false);
-                    _pool.Enqueue(enemy);
-                };
             }
-
+            
             enemy.SetTarget(_target);
             enemy.InitializeMover();
             enemy.transform.position = position;
+            
             _enemyContainer.Register(enemy);
+            enemy.gameObject.SetActive(true);
             return enemy;
         }
 
-        private readonly Queue<EnemyManager> _pool = new();
-
         [SerializeField, Tooltip("エネミーのプレファブ")]
         private GameObject _enemyPrefab;
-
         private EnemyContainer _enemyContainer;
         private Transform _target;
     }
