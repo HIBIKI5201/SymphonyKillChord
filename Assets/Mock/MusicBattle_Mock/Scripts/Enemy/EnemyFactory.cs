@@ -8,9 +8,10 @@ namespace Mock.MusicBattle.Enemy
     /// <summary>エネミー(EnemyManager)生成を一元管理するファクトリ。</summary>
     public class EnemyFactory : MonoBehaviour
     {
-        public EnemyFactory(EnemyContainer enemyContainer, EnemyManager enemyManager)
+        public void Init(EnemyContainer enemyContainer, Transform target,EnemyManager enemyManager)
         {
             _enemyContainer = enemyContainer;
+            _target = target;
             _enemyPrefab = enemyManager;
         }
 
@@ -34,7 +35,8 @@ namespace Mock.MusicBattle.Enemy
                 };
             }
 
-            enemy.Init(status);
+            enemy.SetStatus(status);
+            enemy.SetTarget(_target);
             enemy.transform.position = position;
             _enemyContainer.Register(enemy);
             return enemy;
@@ -43,5 +45,6 @@ namespace Mock.MusicBattle.Enemy
         private readonly Queue<EnemyManager> _pool = new();
         private EnemyManager _enemyPrefab;
         private EnemyContainer _enemyContainer;
+        private Transform _target;
     }
 }
