@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Mock.MusicBattle.Camera;
 
 namespace Mock.MusicBattle.Enemy
@@ -25,14 +26,9 @@ namespace Mock.MusicBattle.Enemy
         {
             get
             {
-                List<Transform> transforms = new List<Transform>(_enemies.Count);
-                foreach (var enemy in _enemies)
-                {
-                    if(enemy.gameObject.activeInHierarchy)
-                    transforms.Add(enemy.transform);
-                }
-
-                return transforms;
+                return _enemies
+                    .Select(enemy => enemy.transform)
+                    .ToList();
             }
         }
 
