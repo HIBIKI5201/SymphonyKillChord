@@ -126,27 +126,24 @@ namespace Mock.MusicBattle.Camera
         private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
         {
             // プレイヤーからカメラへの方向ベクトル。
-            Vector3 rayDirection = cameraPosition - _target.position;
-            float distance = rayDirection.magnitude;
-
-            // プレイヤーから少し上の位置から開始（足元の床を避ける）。
-            Vector3 startPosition = _target.position + Vector3.up * 1f;
+            Vector3 origin = _target.position + _config.CameraCollisionOffset;
+            Vector3 rayDirection = cameraPosition - origin;
+            float distance = rayDirection.magnitude + _config.CameraCollisionRadius;
 
             // レイキャストで障害物を検出。
             if (!Physics.SphereCast(
-                startPosition, 
-                _config.CameraCollisionRadius, 
+                origin,
+                _config.CameraCollisionRadius,
                 rayDirection.normalized,
-                out RaycastHit hitInfo, 
+                out RaycastHit hitInfo,
                 distance)
-                || hitInfo.rigidbody.transform == _target)  // プレイヤー自身に当たった場合は無視。
+                || hitInfo.rigidbody?.transform == _target)  // プレイヤー自身に当たった場合は無視。
             {
                 return cameraPosition;
             }
 
             // 障害物がある場合、カメラ位置を調整。
             return hitInfo.point + hitInfo.normal * _config.CameraCollisionRadius;
-
         }
 
         /// <summary>
@@ -160,7 +157,7 @@ namespace Mock.MusicBattle.Camera
 
             // 方向ベクトルが0の場合はforwardにする。
             if (vec.sqrMagnitude <= 0.0001f) { vec = _camera.forward; }
-            
+
             return Quaternion.LookRotation(vec.normalized, Vector3.up);
         }
 
@@ -171,10 +168,10 @@ namespace Mock.MusicBattle.Camera
         private Quaternion PlayerPitch()
         {
             // カメラの回転位置から注視位置を取得。
-            Vector3 rotatedLookAtOffset = 
+            Vector3 rotatedLookAtOffset =
                 _currentCameraRotation * _config.CameraLookAtOffset;
             Vector3 lookAtPos = _target.position + rotatedLookAtOffset;
-            
+
             return Quaternion.LookRotation(lookAtPos - _camera.position);
         }
 
