@@ -16,13 +16,13 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Attack",
+                    "name": "Roll",
                     "type": "Button",
                     "id": "8c0c1d86-44e7-4140-8742-7155fb281475",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -84,11 +84,11 @@
                 {
                     "name": "",
                     "id": "d66de37b-fd82-437c-b3e8-e1685261bf6a",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Attack",
+                    "action": "Roll",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
