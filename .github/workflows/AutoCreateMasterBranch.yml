@@ -2,12 +2,11 @@ name: AutoCreateMasterBranch
 
 on:
   create:
-    branches:
-      - "feature/**"  # feature ブランチ作成のみトリガー。
 
 jobs:
   create-master-suffix-branch:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref_name, 'feature/') # feature ブランチ作成のみトリガー。
 
     permissions:
       contents: write  # ブランチ作成に必要。
