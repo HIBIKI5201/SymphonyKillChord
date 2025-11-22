@@ -8,7 +8,7 @@ namespace Mock.MusicBattle.Basis
     [DefaultExecutionOrder(-900)]
     public class GameManager : MonoBehaviour
     {
-        [SerializeField] private EnemyRepository _enemyRepository;
+        [SerializeField] private EnemyManager _enemyManager;
         [SerializeField] private EnemyStatus _enemystatus;
         [SerializeField] private Transform _player;
         private EnemyContainer _enemyContainer;
@@ -18,7 +18,7 @@ namespace Mock.MusicBattle.Basis
         {
             _enemyContainer = new EnemyContainer();
             _factory = gameObject.AddComponent<EnemyFactory>();
-            _factory.Init(_enemyContainer, _player, _enemyRepository.EnemyPrefab);
+            _factory.Init(_enemyContainer, _player, _enemyManager);
         }
 
         private void Start()

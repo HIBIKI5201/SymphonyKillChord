@@ -937,8 +937,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94ffa45e7d4c2514ea76d4dcd156512e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Basis.GameManager
-  _target: {fileID: 1872496880}
-  _enemyManager: {fileID: 320504359464351527, guid: 05c5001712ccd064d84ee7355c0121c0, type: 3}
+  _enemyManager: {fileID: 6524801491465042354, guid: 530d7640ecc85bc46b60704ee19adfdd, type: 3}
   _enemystatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _player: {fileID: 1872496880}
 --- !u!4 &1895404203
