@@ -71,7 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     taskCount++;
                     StringBuilder endTasksSb = new();
 
-                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[URL]({page.PublicUrl})");
+                    endTasksSb.AppendLine($"\n🔴 納期タスク: {pageName}\n[確認]({page.PublicUrl}) [編集]{page.Url}");
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
                     continue;
