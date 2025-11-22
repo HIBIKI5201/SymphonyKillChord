@@ -66,6 +66,8 @@ jobs:
       - name: Get latest commit SHA
         id: sha
         uses: actions/github-script@v7
+        env:
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
         with:
           script: |
             const branch = process.env.BRANCH_NAME;
