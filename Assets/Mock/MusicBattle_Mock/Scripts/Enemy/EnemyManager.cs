@@ -1,9 +1,8 @@
+
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Mock.MusicBattle.Camera;
-using Unity.Collections;
-using UnityEngine.InputSystem.iOS;
+using Mock.MusicBattle.Character;
+
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -13,14 +12,26 @@ namespace Mock.MusicBattle.Enemy
     [RequireComponent(typeof(Rigidbody))]
     public class EnemyManager : MonoBehaviour
     {
-        public void Init(Transform target, Transform enemy)
+        /// <summary>ヘルスが0になったときに通知</summary>
+        public event Action OnDeath
         {
-            Rigidbody rb = GetComponent<Rigidbody>();
+            add => _healthEntity.OnDeath += value;
+            remove => _healthEntity.OnDeath -= value;
+        }
+        public Transform LockTarget => _lockTarget;
+        public void Awake()
+        {
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
-            _enemyMover = new EnemyMover(target, enemy, _enemyStatus, rb);
+            Rigidbody rb = GetComponent<Rigidbody>();
+            _enemyMover = new EnemyMover(_target, LockTarget, _enemyStatus, rb);
         }
 
+        public void Init(EnemyStatus status)
+        {
+            _enemyStatus =  status;
+        }
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
+        
 
         private void FixedUpdate()
         {
@@ -29,7 +40,13 @@ namespace Mock.MusicBattle.Enemy
         }
 
 
-        [SerializeField] private EnemyStatus _enemyStatus;
+        [SerializeField]
+        private EnemyStatus _enemyStatus;
+        [SerializeField]
+        private Transform _target;
+        [SerializeField]
+        private Transform _lockTarget;
+        
         private HealthEntity _healthEntity;
         private EnemyMover _enemyMover;
     }
