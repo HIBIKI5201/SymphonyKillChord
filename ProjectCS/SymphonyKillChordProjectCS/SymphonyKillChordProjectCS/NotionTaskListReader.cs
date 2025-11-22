@@ -11,12 +11,16 @@ namespace SinfoniaStudio.SinfoniaOperator
             string notionToken,
             string databaseID,
             string datePropertyName,
-            string namePropertyName)
+            string namePropertyName,
+            string statusPropertyName,
+            string taskStatusDoneName)
         {
             _notionToken = notionToken;
             _databaseID = databaseID;
             _datePropertyName = datePropertyName;
             _namePropertyName = namePropertyName;
+            _statusPropertyName = statusPropertyName;
+            _taskStatusDoneName = taskStatusDoneName;
         }
 
         /// <summary>
@@ -104,6 +108,8 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string _databaseID;
         private readonly string _datePropertyName;
         private readonly string _namePropertyName;
+        private readonly string _statusPropertyName;
+        private readonly string _taskStatusDoneName;
 
         /// <summary>
         ///     タスクのデータを取得する。
