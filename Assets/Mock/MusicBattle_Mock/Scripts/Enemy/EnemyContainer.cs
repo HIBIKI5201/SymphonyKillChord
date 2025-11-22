@@ -31,9 +31,22 @@ namespace Mock.MusicBattle.Enemy
         public void Register(EnemyManager enemy)
         {
             _enemies.Add(enemy);
-            enemy.OnDeath += () => _enemies.Remove(enemy);
+            enemy.OnDeath += () =>
+            {
+                _enemies.Remove(enemy);
+                _pool.Enqueue(enemy);
+                enemy.gameObject.SetActive(false);
+            };
+            
         }
 
+        public EnemyManager GetFromPool()
+        {
+            return _pool.Count > 0 ? _pool.Dequeue() : null;
+        }
+       
         private List<EnemyManager> _enemies = new();
+        private Queue<EnemyManager> _pool = new();
+        
     }
 }
