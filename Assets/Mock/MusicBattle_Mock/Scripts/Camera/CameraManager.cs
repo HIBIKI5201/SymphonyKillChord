@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Basis;
 using System;
+using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ namespace Mock.MusicBattle.Camera
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
 
-            inputBuffer.LockOnSelectAction.Started += HandleLockOnSelectAction;
+            inputBuffer.LockOnSelectAction.Performed += HandleLockOnSelectAction;
 
             _mover = new(_cameraConfigs, transform, cam.Follow);
 
@@ -88,6 +89,7 @@ namespace Mock.MusicBattle.Camera
         private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
+        private int _lockingTargetIndex;
 
         private void Update()
         {
@@ -143,8 +145,10 @@ namespace Mock.MusicBattle.Camera
             // 入力が0でなければ、コンテナから選択する。
             if (!Mathf.Approximately(value, 0f))
             {
-                int index = Math.Sign(value);
-                target = _targetContainer[index];
+                (target, _lockingTargetIndex) =
+                    transform.GetTargetWithAxis(
+                    _targetContainer.Targets.ToArray(), value,
+                    _targetContainer.Targets[_lockingTargetIndex]);
             }
 
             _mover?.SetLockTarget(target);
