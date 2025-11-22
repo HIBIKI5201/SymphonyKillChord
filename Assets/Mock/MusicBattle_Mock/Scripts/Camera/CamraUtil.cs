@@ -1,43 +1,43 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Camera
 {
     public static class CamraUtil
     {
-        public static (Transform transform, int index) GetTargetWithAxis(this Transform camera, Transform[] targets, float axis)
+        public static (Transform transform, int index) GetTargetWithAxis(this Transform camera,
+            Transform[] targets, float axis,
+            params Transform[] ignore)
         {
-            if (camera == null || targets == null || targets.Length == 0)
-                return (null, -1);
+            Vector3 forward = camera.forward;
+            Vector3 up = camera.up;
 
-            Transform best = null;
-            int index = 0;
-            float bestAngle = float.MaxValue;
-            axis = Mathf.Sign(axis);
+            float minAngle = float.MaxValue;
+            int index = -1;
+            Transform closest = null;
 
             for (int i = 0; i < targets.Length; i++)
             {
                 Transform t = targets[i];
-                if (t == null) continue;
+                Vector3 dir = (t.position - camera.position).normalized;
 
-                Vector3 toTarget = t.position - camera.position;
+                float signed = Vector3.SignedAngle(forward, dir, up);
 
-                // 左右判定
-                float dotRight = Vector3.Dot(camera.right, toTarget);
-                if (axis == 1 && dotRight <= 0f) continue;
-                if (axis == -1 && dotRight >= 0f) continue;
+                float angle = axis < 0f ?
+                    signed >= 0 ? 360f - signed : -signed : // 右（時計回り）
+                    signed >= 0 ? signed : 360f + signed; // 左（反時計回り）
 
-                // 前方角度（回転量）
-                float angle = Vector3.Angle(camera.forward, toTarget);
-
-                if (angle < bestAngle)
+                if (angle < minAngle &&
+                    !ignore.Contains(t)) // 除外リストに含まれていない時。
                 {
-                    bestAngle = angle;
-                    best = t;
+                    minAngle = angle;
+                    closest = t;
                     index = i;
                 }
             }
 
-            return (best, index);
+            return (closest, index);
         }
     }
 }
