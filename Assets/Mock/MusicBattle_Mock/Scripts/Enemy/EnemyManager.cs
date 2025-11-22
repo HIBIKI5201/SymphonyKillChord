@@ -12,25 +12,37 @@ namespace Mock.MusicBattle.Enemy
     public class EnemyManager : MonoBehaviour
     {
         /// <summary>ヘルスが0になったときに通知。</summary>
-        public event Action OnDeath
-        {
-            add => _healthEntity.OnDeath += value;
-            remove => _healthEntity.OnDeath -= value;
-        }
-
+        public event Action OnDeath;
         public Transform LockTarget => _lockTarget;
 
         public void Awake()
         {
-            _lockTarget = GetComponent<Transform>();
+            _lockTarget = transform;
             _rb = GetComponent<Rigidbody>();
-            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
-            _enemyMover = new EnemyMover(_target, LockTarget, _enemyStatus, _rb);
         }
 
-        public void Init(EnemyStatus status)
+        public void SetStatus(EnemyStatus status)
         {
             _enemyStatus = status;
+            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
+            _healthEntity.OnDeath += () => OnDeath?.Invoke();
+        }
+
+        public void SetTarget(Transform target)
+        {
+            _target = target;
+            InitializeMover();
+        }
+
+        private void InitializeMover()
+        {
+            if (_enemyStatus == null || _target == null)
+            {
+                Debug.Log("EnemyStatus/Target is null");
+                return;
+            }
+
+            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus, _rb);
         }
 
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
@@ -38,15 +50,18 @@ namespace Mock.MusicBattle.Enemy
 
         private void FixedUpdate()
         {
-            if (_enemyMover == null) return;
+            if (_enemyMover == null)
+            {
+                Debug.Log("EnemyMove is null");
+                return;
+            }
             _enemyMover.MoveTo();
         }
 
 
         [SerializeField, Tooltip("エネミーのステータス")]
         private EnemyStatus _enemyStatus;
-
-        [SerializeField, Tooltip("プレイヤーの位置")] private Transform _target;
+        private Transform _target;
         private Transform _lockTarget;
         private Rigidbody _rb;
         private HealthEntity _healthEntity;
