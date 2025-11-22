@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Enemy
+namespace Mock.MusicBattle.Character
 {
     public class HealthEntity
     {
