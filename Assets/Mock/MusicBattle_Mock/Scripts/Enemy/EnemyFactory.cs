@@ -1,7 +1,5 @@
-using System.Collections.Generic;
-using Codice.Client.BaseCommands;
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
+
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -19,11 +17,11 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemyContainer"> 生成した敵を登録するコンテナ。 </param>
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
-        public void Init(EnemyContainer enemyContainer, Transform target, GameObject enemy)
+        public void Init(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager)
         {
             _enemyContainer = enemyContainer;
             _target = target;
-            _enemyPrefab = enemy;
+            _enemyPrefab = enemyManager;
         }
 
         /// <summary>
@@ -37,24 +35,21 @@ namespace Mock.MusicBattle.Enemy
         /// <returns> 生成または再利用された EnemyManager 。</returns>
         public EnemyManager Spawn(EnemyStatus status, Vector3 position)
         {
-            var enemy = _enemyContainer.GetFromPool();
-
-            if (enemy == null)
+            if (!_enemyContainer.TryGetFromPool(out var enemy))
             {
                 enemy = Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
             }
-            
+
             enemy.SetTarget(_target);
             enemy.InitializeMover();
             enemy.transform.position = position;
-            
+
             _enemyContainer.Register(enemy);
             enemy.gameObject.SetActive(true);
             return enemy;
         }
 
-        [SerializeField, Tooltip("エネミーのプレファブ")]
-        private GameObject _enemyPrefab;
+        private EnemyManager _enemyPrefab;
         private EnemyContainer _enemyContainer;
         private Transform _target;
     }
