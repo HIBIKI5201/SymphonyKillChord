@@ -12,12 +12,12 @@ namespace Mock.MusicBattle.Enemy
     public class EnemyContainer : MonoBehaviour
     {
         public EnemyManager this[int index] => 0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
-        private List<EnemyManager> _enemies = new();
         
         public void Register(EnemyManager enemy)
         {
             _enemies.Add(enemy);
             enemy.OnDeath += () => _enemies.Remove(enemy);
         }
+        private List<EnemyManager> _enemies = new();
     }
 }
