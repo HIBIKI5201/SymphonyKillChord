@@ -53,9 +53,9 @@ namespace Mock.MusicBattle.Enemy
         
         private EnemyStatus  _enemystatus;
         private Rigidbody _rigidbody;
-        private bool _isLockedOn = false;
         private Transform _target;
         private Transform _enemy;
+        private bool _isLockedOn = false;
         
        
     }
