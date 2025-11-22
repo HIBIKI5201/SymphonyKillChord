@@ -12,12 +12,13 @@ namespace Mock.MusicBattle.Basis
         [SerializeField] private Transform _target;
         [SerializeField] private EnemyManager _enemyManager;
         [SerializeField] private EnemyStatus _enemystatus;
+        [SerializeField] private Transform _player;
         private EnemyFactory _factory;
         private void Awake()
         {
             _enemyContainer = new EnemyContainer();
             _factory = gameObject.AddComponent<EnemyFactory>();
-            _factory.Init(_enemyContainer,transform,_enemyManager);
+            _factory.Init(_enemyContainer,_player,_enemyManager);
         }
 
         private void Start()
