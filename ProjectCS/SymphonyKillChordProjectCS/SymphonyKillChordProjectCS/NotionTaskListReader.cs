@@ -62,7 +62,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (startDate.HasValue && startDate.Value.Date == today)
                 {
                     StringBuilder startTasksSb = new();
-                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl})");
+                    startTasksSb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
 
                     await AppendPageContentAsync(startTasksSb, page);
                     outputTaskQueue.Enqueue(startTasksSb, 0);
@@ -75,7 +75,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 {
                     StringBuilder endTasksSb = new();
 
-                    endTasksSb.AppendLine($"\n🟡 納期タスク: {pageName}\n[確認]({page.PublicUrl}) [編集]{page.Url}");
+                    endTasksSb.AppendLine($"\n🟡 納期タスク: {pageName}\n[確認]({page.PublicUrl}) [編集]({page.Url})");
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
                     continue;
@@ -87,7 +87,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 {
                     StringBuilder endTasksSb = new();
 
-                    endTasksSb.AppendLine($"\n🔴 納期遅れタスク: {pageName}\n[確認]({page.PublicUrl}) [編集]{page.Url}");
+                    endTasksSb.AppendLine($"\n🔴 納期遅れタスク: {pageName}\n[確認]({page.PublicUrl}) [編集]({page.Url})");
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 2);
                 }
