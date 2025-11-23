@@ -1,15 +1,20 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Camera;
 using System;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Mock.MusicBattle
 {
     public class PlayerManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer, GameManager gameManager)
+        public void Init(InputBuffer inputBuffer, CameraManager cameraManager)
         {
             _inputBuffer = inputBuffer;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            CinemachineCamera CinemachineCamera = GetComponent<CinemachineCamera>();
+            _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
 
