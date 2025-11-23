@@ -31,12 +31,21 @@ namespace Mock.MusicBattle
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
-        private Vector3 _moveInput;
+        private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
 
         private void OnDisable()
         {
             InputEventUnregister(_inputBuffer);
+        }
+
+        private void Update()
+        {
+            if (_playerMover != null)
+            {
+                _playerMover.SetPlayerVelocity(_velocity);
+                _playerMover.Update();
+            }
         }
 
         private void InputEventRegister(InputBuffer inputBuffer)
@@ -65,7 +74,7 @@ namespace Mock.MusicBattle
 
         private void OnInputMove(Vector2 input)
         {
-            _moveInput = _playerMover.CalcPlayerVelocityByInputDirection(input);
+            _velocity = _playerMover.CalcPlayerVelocityByInputDirection(input);
         }
 
         private void OnInputAttack(float input)

@@ -12,6 +12,11 @@ namespace Mock.MusicBattle
             _rb = rb;
         }
 
+        /// <summary>
+        ///     入力方向からプレイヤーの速度を計算する。
+        /// </summary>
+        /// <param name="inputDirection"></param>
+        /// <returns></returns>
         public Vector3 CalcPlayerVelocityByInputDirection(Vector2 inputDirection)
         {
             // カメラの向きを基準に移動方向を計算。
@@ -24,6 +29,20 @@ namespace Mock.MusicBattle
             moveDir.y = 0f;
 
             return moveDir.normalized * _status.MoveSpeed;
+        }
+
+        /// <summary>
+        ///     速度を設定する。
+        /// </summary>
+        /// <param name="velocity"></param>
+        public void SetPlayerVelocity(Vector3 velocity)
+        {
+            _velocity = velocity;
+        }
+
+        public void Update()
+        {
+
         }
 
         private readonly PlayerStatus _status;
