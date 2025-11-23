@@ -7,7 +7,7 @@ namespace Mock.MusicBattle.Camera
     public static class CamraUtil
     {
         public static (Transform transform, int index) GetTargetWithAxis(this Transform camera,
-            Transform[] targets, float axis,
+            Transform[] targets, int axis,
             params Transform[] ignore)
         {
             Vector3 forward = camera.forward;

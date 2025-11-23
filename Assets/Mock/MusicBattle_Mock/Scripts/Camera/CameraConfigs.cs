@@ -24,6 +24,7 @@ namespace Mock.MusicBattle.Camera
         public float CameraRotationSpeed => _cameraRotationSpeed;
         public float PitchRangeMin => _pitchRange.x;
         public float PitchRangeMax => _pitchRange.y;
+        public float UnlockWaitingTime => _unlockWaitingTime;
         public bool IsCameraFlipX => _isCameraFlipX;
 
         public float CameraCollisionRadius => _cameraCollisionRadius;
@@ -50,6 +51,8 @@ namespace Mock.MusicBattle.Camera
         private float _cameraRotationSpeed = 3f;
         [SerializeField, Tooltip("ピッチ角度の範囲（オイラー角度）"), MinMaxRangeSlider(-90, 90)]
         private Vector2 _pitchRange = new Vector2(-30f, 60f);
+        [SerializeField, Tooltip("ロックオン解除の操作待機時間"), Min(0)]
+        private float _unlockWaitingTime = 0.3f;
         [Space]
         [SerializeField, Tooltip("カメラのX回転を反転")]
         private bool _isCameraFlipX;
