@@ -49,7 +49,8 @@ namespace Mock.MusicBattle.Camera
             targetPosition = AdjustCameraForObstacles(targetPosition);
 
             // Damping補完。
-            float damping = Mathf.Max(_config.CameraFollowDamping, 0.0001f);
+            float dampingSpeed = IsLockOnMode() ? _config.CameraLockOnFollowDamping : _config.CameraPlayerFollowDamping;
+            float damping = Mathf.Max(dampingSpeed, 0.0001f);
             float t = 1f - Mathf.Exp(-deltaTime / damping);
             _camera.position = Vector3.Lerp(_camera.position, targetPosition, t);
         }
@@ -64,7 +65,8 @@ namespace Mock.MusicBattle.Camera
             Quaternion targetRotation = IsLockOnMode() ? LockTargetPitch() : PlayerPitch();
 
             // Damping補完。
-            float damping = Mathf.Max(_config.CameraLookAtDamping, 0.0001f);
+            float dampingSpeed = IsLockOnMode() ? _config.CameraLockOnLookAtDamping : _config.CameraPlayerLookAtDamping;
+            float damping = Mathf.Max(dampingSpeed, 0.0001f);
             float t = 1f - Mathf.Exp(-deltaTime / damping);
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
         }
