@@ -83,6 +83,7 @@ namespace Mock.MusicBattle.Camera
 
         [SerializeField]
         private CameraConfigs _cameraConfigs;
+        [SerializeField]
 
         private ILockOnTargetContainer _targetContainer;
         private InputBuffer _inputBuffer;
@@ -157,7 +158,7 @@ namespace Mock.MusicBattle.Camera
                     _targetContainer.Targets[_lockingTargetIndex]);
             }
 
-            Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")} \n入力値:{value}");
+            Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
             _mover?.SetLockTarget(target);
 
             // 同時押しでキャンセルするように。
@@ -174,10 +175,12 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        /// 0.5秒以内に左右が両方入力されるとログを出力する。
+        /// 待機時間以内に左右が両方入力されるとロックオンを解除する。
         /// </summary>
         private async void CancelLockOn(int dir)
         {
+            if (_isUnlockTarget) { return; }
+
             // 前回と逆方向か？
             bool opposite = (_lastSelectDir != 0) && (_lastSelectDir != dir);
 
@@ -206,7 +209,7 @@ namespace Mock.MusicBattle.Camera
             try
             {
                 // 待機時間まで逆方向入力が来なければリセット。
-                await Awaitable.WaitForSecondsAsync(0.2f, _lockOnCts.Token);
+                await Awaitable.WaitForSecondsAsync(_cameraConfigs.UnlockWaitingTime, _lockOnCts.Token);
             }
             catch (Exception) { return; }
 
