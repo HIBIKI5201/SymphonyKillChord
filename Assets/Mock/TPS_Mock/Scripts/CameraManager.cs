@@ -1,4 +1,4 @@
-﻿using Unity.Cinemachine;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Mock.TPS
@@ -20,6 +20,23 @@ namespace Mock.TPS
             }
 
             InputEventRegister(inputBuffer);
+        }
+
+        /// <summary>
+        ///     ターゲットをロックオンする。
+        /// </summary>
+        /// <param name="target"></param>
+        public void LockOnToTarget(Transform target)
+        {
+            _mover?.SetLockTarget(target);
+        }
+
+        /// <summary>
+        ///     ロックオンを解除する。
+        /// </summary>
+        public void ReleaseLockOn()
+        {
+            _mover?.SetLockTarget(null);
         }
 
         [SerializeField]

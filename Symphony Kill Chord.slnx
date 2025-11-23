@@ -5,6 +5,7 @@
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
+  <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
