@@ -157,7 +157,7 @@ namespace Mock.MusicBattle.Camera
                     _targetContainer.Targets[_lockingTargetIndex]);
             }
 
-            Debug.Log(target == null ? "ロックオン解除" : $"{target.name}をロックオン\n入力値:{value}");
+            Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")} \n入力値:{value}");
             _mover?.SetLockTarget(target);
 
             // 同時押しでキャンセルするように。
