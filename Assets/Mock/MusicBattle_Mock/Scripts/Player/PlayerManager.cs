@@ -24,6 +24,8 @@ namespace Mock.MusicBattle
         private PlayerConfig _config;
 
         private InputBuffer _inputBuffer;
+        private PlayerMover _playerMover;
+        private PlayerAttacker _playerAttacker;
         private HashSet<Collision> _hitGrounds = new();
 
         private void OnDisable()
