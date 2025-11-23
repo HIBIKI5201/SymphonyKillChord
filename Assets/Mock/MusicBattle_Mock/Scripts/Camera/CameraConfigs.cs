@@ -15,8 +15,11 @@ namespace Mock.MusicBattle.Camera
         public Vector3 CameraOffset => _cameraOffset;
         public Vector3 CameraLookAtOffset => _cameraLookAtOffset;
 
-        public float CameraFollowDamping => _cameraFollowDamping;
-        public float CameraLookAtDamping => _cameraLookAtDamping;
+        public float CameraPlayerFollowDamping => _cameraPlayerFollowDamping;
+        public float CameraPlayerLookAtDamping => _cameraPlayLookAtDamping;
+
+        public float CameraLockOnFollowDamping => _cameraLockOnFollowDamping;
+        public float CameraLockOnLookAtDamping => _cameraLockOnLookAtDamping;
 
         public float CameraRotationSpeed => _cameraRotationSpeed;
         public float PitchRangeMin => _pitchRange.x;
@@ -31,11 +34,16 @@ namespace Mock.MusicBattle.Camera
         private Vector3 _cameraOffset = new Vector3(0f, 2f, -4f);
         [SerializeField, Tooltip("カメラの注視位置補正")]
         private Vector3 _cameraLookAtOffset = new Vector3(0f, 1.5f, 0f);
-
-        [SerializeField, Tooltip("カメラ追従速度の減衰率")]
-        private float _cameraFollowDamping = 0f;
-        [SerializeField, Tooltip("カメラ注視速度の減衰率")]
-        private float _cameraLookAtDamping = 0f;
+        [Space]
+        [SerializeField, Tooltip("自由カメラ追従速度の減衰率")]
+        private float _cameraPlayerFollowDamping = 0f;
+        [SerializeField, Tooltip("自由カメラ注視速度の減衰率")]
+        private float _cameraPlayLookAtDamping = 0f;
+        [Space]
+        [SerializeField, Tooltip("ロックオンカメラ追従速度の減衰率")]
+        private float _cameraLockOnFollowDamping = 0f;
+        [SerializeField, Tooltip("ロックオンカメラ注視速度の減衰率")]
+        private float _cameraLockOnLookAtDamping = 0f;
 
         [Header("カメラ操作")]
         [SerializeField, Tooltip("カメラ感度")]
