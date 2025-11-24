@@ -5,6 +5,6 @@ namespace Mock.MusicBattle.Basis
     /// </summary>
     public static class EditorConstraint
     {
-
+        public const string CREATE_ASSET_PATH = "Mock/MusicBattle/";
     }
 }
