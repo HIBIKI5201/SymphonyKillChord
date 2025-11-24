@@ -1,6 +1,8 @@
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Basis;
 using System;
 using System.Linq;
+using System.Threading;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -19,15 +21,15 @@ namespace Mock.MusicBattle.Camera
         /// <returns> 成功したかどうか </returns>
         public bool Init(
             InputBuffer inputBuffer,
-            ILockOnTargetContainer lockOnTargetContainer)
+            LockOnManager lockOnManager)
         {
             #region バリデーションチェック
             if (inputBuffer == null)
             {
                 Debug.LogError($"{nameof(InputBuffer)} is null");
-                return false; 
+                return false;
             }
-            if (lockOnTargetContainer == null) 
+            if (lockOnManager == null)
             {
                 Debug.LogError($"{nameof(ILockOnTargetContainer)} is null");
                 return false;
@@ -44,13 +46,12 @@ namespace Mock.MusicBattle.Camera
             // イベント登録。
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
-
-            inputBuffer.LockOnSelectAction.Performed += HandleLockOnSelectAction;
+            lockOnManager.OnTargetLocked += HandleLockOn; 
 
             _mover = new(_cameraConfigs, transform, cam.Follow);
 
             _camera = cam;
-            _targetContainer = lockOnTargetContainer;
+            _lockOnManager = lockOnManager;
             _inputBuffer = inputBuffer;
 
             return true;
@@ -74,22 +75,20 @@ namespace Mock.MusicBattle.Camera
             {
                 _inputBuffer.LookAction.Performed -= HandleLookAction;
                 _inputBuffer.LookAction.Canceled -= HandleLookAction;
-
-                _inputBuffer.LockOnSelectAction.Started -= HandleLockOnSelectAction;
             }
         }
 
         [SerializeField]
         private CameraConfigs _cameraConfigs;
+        [SerializeField]
 
-        private ILockOnTargetContainer _targetContainer;
+        private LockOnManager _lockOnManager;
         private InputBuffer _inputBuffer;
         private CinemachineCamera _camera;
 
         private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
-        private int _lockingTargetIndex;
 
         private void Update()
         {
@@ -138,20 +137,7 @@ namespace Mock.MusicBattle.Camera
         ///     LockOnSelectアクションの入力を受ける。
         /// </summary>
         /// <param name="value"></param>
-        private void HandleLockOnSelectAction(float value)
-        {
-            Transform target = null;
-
-            // 入力が0でなければ、コンテナから選択する。
-            if (!Mathf.Approximately(value, 0f))
-            {
-                (target, _lockingTargetIndex) =
-                    transform.GetTargetWithAxis(
-                    _targetContainer.Targets.ToArray(), value,
-                    _targetContainer.Targets[_lockingTargetIndex]);
-            }
-
-            _mover?.SetLockTarget(target);
-        }
+        private void HandleLockOn(Transform target) => _mover?.SetLockTarget(target);
     }
 }
+
