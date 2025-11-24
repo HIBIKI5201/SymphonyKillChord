@@ -1,19 +1,146 @@
+using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Camera;
+using System;
+using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Battle
 {
-    public class LockOnManager : MonoBehaviour
+    public class LockOnManager : IDisposable
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public LockOnManager(
+            Transform player, ILockOnTargetContainer container,
+            InputBuffer inputBuffer, float unlockWaitingTime = 0.3f)
         {
-        
+            _player = player;
+            _targetContainer = container;
+            _unlockWaitingTime = unlockWaitingTime;
+            _inputBuffer = inputBuffer;
+
+            RegisterInput(inputBuffer);
         }
 
-        // Update is called once per frame
-        void Update()
+        public event Action<Transform> OnTargetLocked;
+
+        public void Dispose()
         {
-        
+            UnregisterInput(_inputBuffer);
+
+            _lockOnCts?.Cancel();
+            _lockOnCts.Dispose();
+        }
+
+        private readonly Transform _player;
+        private readonly ILockOnTargetContainer _targetContainer;
+        private readonly float _unlockWaitingTime;
+        private readonly InputBuffer _inputBuffer;
+
+        private int _lockingTargetIndex;
+        private bool _isUnlockTarget;
+        private CancellationTokenSource _lockOnCts;
+        private int _lastSelectDir = 0;
+
+        private void HandleLockOnSelectAction(float value)
+        {
+            Transform target = null;
+            int axis = Math.Sign(value);
+
+            // 入力が0でなければ、コンテナから選択する。
+            if (!_isUnlockTarget && !Mathf.Approximately(value, 0f))
+            {
+                (target, _lockingTargetIndex) =
+                    _player.GetTargetWithAxis(
+                    _targetContainer.Targets.ToArray(), axis,
+                    _targetContainer.Targets[_lockingTargetIndex]);
+            }
+
+            Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
+            OnTargetLocked?.Invoke(target);
+
+            // 同時押しでキャンセルするように。
+            CancelLockOn(axis);
+        }
+
+        /// <summary>
+        ///     LockOnSelectアクションのキャンセルを受ける。
+        /// </summary>
+        /// <param name="value"></param>
+        private void HandleUnlockAction(float value)
+        {
+            _isUnlockTarget = false;
+        }
+
+        private void RegisterInput(InputBuffer inputBuffer)
+        {
+            if (inputBuffer != null)
+            {
+                InputActionEntity<float> lockOnSelectAction = inputBuffer.LockOnSelectAction;
+                lockOnSelectAction.Performed += HandleLockOnSelectAction;
+                lockOnSelectAction.Canceled += HandleUnlockAction;
+            }
+        }
+
+        private void UnregisterInput(InputBuffer inputBuffer)
+        {
+            if (inputBuffer != null)
+            {
+                InputActionEntity<float> lockOnSelectAction = inputBuffer.LockOnSelectAction;
+                lockOnSelectAction.Performed -= HandleLockOnSelectAction;
+                lockOnSelectAction.Canceled -= HandleUnlockAction;
+            }
+        }
+
+        /// <summary>
+        /// 待機時間以内に左右が両方入力されるとロックオンを解除する。
+        /// </summary>
+        private async void CancelLockOn(int dir)
+        {
+            if (_isUnlockTarget) { return; }
+
+            // 前回と逆方向か？
+            bool opposite = (_lastSelectDir != 0) && (_lastSelectDir != dir);
+
+            // 反対方向が来た場合は即判定。
+            if (opposite)
+            {
+                Debug.Log($"ロックオン解除\ndir:{dir}");
+                OnTargetLocked?.Invoke(null);
+                _isUnlockTarget = true;
+
+                _lastSelectDir = 0;
+
+                // タイマーをキャンセルしておく。
+                CancelCts(_lockOnCts);
+                _lockOnCts = null;
+                return;
+            }
+
+            // 新しく方向を記録。
+            _lastSelectDir = dir;
+
+            // 新規タイマー開始。
+            CancelCts(_lockOnCts);
+            _lockOnCts = new CancellationTokenSource();
+
+            try
+            {
+                // 待機時間まで逆方向入力が来なければリセット。
+                await Awaitable.WaitForSecondsAsync(_unlockWaitingTime, _lockOnCts.Token);
+            }
+            catch (Exception) { return; }
+
+            // 待機時間内に反対方向入力がなかった。
+            _lastSelectDir = 0;
+
+            void CancelCts(CancellationTokenSource cts)
+            {
+                if (cts != null)
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                }
+            }
         }
     }
 }
