@@ -40,9 +40,19 @@ namespace Mock.MusicBattle
             _velocity = velocity;
         }
 
+        public void SetIsGround(bool isGround)
+        {
+            _isGround = isGround;
+        }
+
         public void Update()
         {
 
+        }
+
+        public void FixedUpdate()
+        {
+            
         }
 
         private readonly PlayerStatus _status;
