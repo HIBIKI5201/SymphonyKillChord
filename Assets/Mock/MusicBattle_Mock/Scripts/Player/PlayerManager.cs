@@ -6,13 +6,14 @@ using UnityEngine;
 
 namespace Mock.MusicBattle
 {
+    [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer, CameraManager cameraManager)
+        public void Init(InputBuffer inputBuffer)
         {
             _inputBuffer = inputBuffer;
             Rigidbody rb = GetComponent<Rigidbody>();
-            CinemachineCamera CinemachineCamera = GetComponent<CinemachineCamera>();
+            CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
