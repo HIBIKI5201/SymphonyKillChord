@@ -62,7 +62,7 @@ namespace Mock.MusicBattle
         private void OnCollisionEnter(Collision collision)
         {
             if (_playerMover != null)
-                if (collision.contacts.Length == 0) { return; }
+            if (collision.contacts.Length == 0) { return; }
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
             Vector3 contactNormal = collision.contacts[0].normal;
@@ -90,7 +90,7 @@ namespace Mock.MusicBattle
                 return;
             }
             inputBuffer.MoveAction.Performed += OnInputMove;
-            inputBuffer.MoveAction.Canceled += OnInputMove;
+            inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
             inputBuffer.AttackAction.Started += OnInputAttack;
         }
 
@@ -102,13 +102,18 @@ namespace Mock.MusicBattle
                 return;
             }
             inputBuffer.MoveAction.Performed -= OnInputMove;
-            inputBuffer.MoveAction.Canceled -= OnInputMove;
+            inputBuffer.MoveAction.Canceled -= OnInputMoveCancle;
             inputBuffer.AttackAction.Started -= OnInputAttack;
         }
 
         private void OnInputMove(Vector2 input)
         {
             _input = input;
+        }
+
+        private void OnInputMoveCancle(Vector2 input)
+        {
+            _input = Vector2.zero;
         }
 
         private void OnInputAttack(float input)

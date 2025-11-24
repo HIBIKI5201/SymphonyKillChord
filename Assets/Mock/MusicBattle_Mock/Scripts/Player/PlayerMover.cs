@@ -47,13 +47,26 @@ namespace Mock.MusicBattle
 
         public void Update()
         {
-            // 目標速度を設定。
-            float damping = Mathf.Max(_status.WalkAccelerationDuration, 0.0001f);
-            float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
-            // 水平方向の速度を補間。
-            Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
-            Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
-            Vector3 horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
+            if (_targetVelocity.magnitude > 0f)
+            {
+                // 目標速度を設定。
+                float damping = Mathf.Max(_status.WalkAccelerationDuration, 0.0001f);
+                float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
+                // 水平方向の速度を補間。
+                Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+                Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
+                horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
+            }
+            else
+            {
+                // 停止時の減速処理。
+                float damping = Mathf.Max(_status.StopAccelerationDuration, 0.0001f);
+                float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
+                // 水平方向の速度を補間。
+                Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+                Vector3 horizontalTarget = Vector3.zero;
+                horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
+            }
             // 現在の速度ベクトルを更新。
             _currentVelocity = new Vector3(horizontalVelocity.x, _currentVelocity.y, horizontalVelocity.z);
             // 速度ベクトルに基づいてプレイヤーの向きを更新。
@@ -83,6 +96,7 @@ namespace Mock.MusicBattle
         private readonly Rigidbody _rb;
         private Vector3 _currentVelocity;
         private Vector3 _targetVelocity;
+        private Vector3 horizontalVelocity;
         private bool _isGround;
     }
 }
