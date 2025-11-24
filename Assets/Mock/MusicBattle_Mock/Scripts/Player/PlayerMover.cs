@@ -47,12 +47,25 @@ namespace Mock.MusicBattle
 
         public void Update()
         {
-
+            // 速度ベクトルに基づいてプレイヤーの向きを更新。
+            Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
+            // 水平方向の速度成分を抽出。
+            Vector3 targetDir = new Vector3(_velocity.x, 0f, _velocity.z);
+            //  Cinemachine式Damping（値が大きいほどゆっくり回転）
+            float damping = Mathf.Max(_status.RotationDamping, 0.0001f);
+            float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
+            // 線形補間で滑らかに回転。
+            Vector3 dir = Vector3.Lerp(forward, targetDir, t);
+            if (dir.sqrMagnitude > 0.0001f)
+            {
+                _player.LookAt(_player.position + dir.normalized);
+            }
         }
 
         public void FixedUpdate()
         {
-            
+            Vector3 velocity = new Vector3(_velocity.x, _rb.linearVelocity.y, _velocity.z);
+            _rb.linearVelocity = velocity;
         }
 
         private readonly PlayerStatus _status;
