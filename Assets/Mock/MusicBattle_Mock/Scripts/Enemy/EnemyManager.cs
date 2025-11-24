@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Mock.MusicBattle.Character;
+using UnityEngine.AI;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -12,8 +13,9 @@ namespace Mock.MusicBattle.Enemy
     ///     死亡イベントの通知
     ///     など、エネミー個体に関する中核処理を提供する。
     /// </summary>
-    [RequireComponent(typeof(Rigidbody))]
-    public class EnemyManager : MonoBehaviour
+   
+    [RequireComponent(typeof(NavMeshAgent))]
+    public class EnemyManager : MonoBehaviour, ICharacter
     {
         /// <summary>
         ///     ヘルスが 0 になったときに発火するイベント。
@@ -38,7 +40,7 @@ namespace Mock.MusicBattle.Enemy
         public void Awake()
         {
             _lockTarget = transform;
-            _rb = GetComponent<Rigidbody>();
+            _agent = GetComponent<NavMeshAgent>();
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
         }
 
@@ -63,7 +65,7 @@ namespace Mock.MusicBattle.Enemy
                 return;
             }
 
-            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus, _rb);
+            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus,_agent);
         }
 
         /// <summary>
@@ -93,6 +95,7 @@ namespace Mock.MusicBattle.Enemy
         private Transform _target;
         private Transform _lockTarget;
         private Rigidbody _rb;
+        private NavMeshAgent _agent;
         private HealthEntity _healthEntity;
         private EnemyMover _enemyMover;
     }
