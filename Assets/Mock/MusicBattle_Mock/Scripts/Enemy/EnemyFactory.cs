@@ -8,7 +8,7 @@ namespace Mock.MusicBattle.Enemy
     ///     プールを用いてエネミーの生成/再利用を行う。
     ///     死亡時にプールへ戻す処理もセットアップする。
     /// </summary>
-    public class EnemyFactory : MonoBehaviour
+    public class EnemyFactory 
     {
         /// <summary>
         ///     Factory が利用するコンテナ・ターゲット・プレファブを初期化する。
@@ -17,7 +17,7 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemyContainer"> 生成した敵を登録するコンテナ。 </param>
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
-        public void Init(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager)
+        public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager)
         {
             _enemyContainer = enemyContainer;
             _target = target;
@@ -37,7 +37,7 @@ namespace Mock.MusicBattle.Enemy
         {
             if (!_enemyContainer.TryGetFromPool(out var enemy))
             {
-                enemy = Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
+                enemy = Object.Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
             }
 
             enemy.SetTarget(_target);
@@ -45,7 +45,6 @@ namespace Mock.MusicBattle.Enemy
             enemy.transform.position = position;
 
             _enemyContainer.Register(enemy);
-            enemy.gameObject.SetActive(true);
             return enemy;
         }
 
