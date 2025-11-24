@@ -5,7 +5,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Windows;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour

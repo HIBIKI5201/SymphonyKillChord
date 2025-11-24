@@ -1,9 +1,10 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.Develop;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Develop
+namespace Mock.MusicBattle.Player
 {
     public class PlayerDevInitializer : MonoBehaviour
     {
