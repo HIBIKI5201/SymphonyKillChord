@@ -17,8 +17,7 @@ namespace Mock.MusicBattle.Basis
         private void Awake()
         {
             _enemyContainer = new EnemyContainer();
-            _factory = gameObject.AddComponent<EnemyFactory>();
-            _factory.Init(_enemyContainer, _player, _enemyManager);
+            _factory = new EnemyFactory(_enemyContainer, _player, _enemyManager);
         }
 
         private void Start()
