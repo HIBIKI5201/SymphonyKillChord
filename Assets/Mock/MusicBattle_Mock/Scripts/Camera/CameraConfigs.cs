@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Basis;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace Mock.MusicBattle.Camera
     /// 
     [CreateAssetMenu(
         fileName = nameof(CameraConfigs),
-        menuName = "MusicBattle/" + nameof(CameraConfigs))]
+        menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(CameraConfigs))]
     public class CameraConfigs : ScriptableObject
     {
         public Vector3 CameraOffset => _cameraOffset;
