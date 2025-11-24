@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.PlayerStatus
   _moveSpeed: 5
   _walkAccelerationDuration: 1
-  _rotationDamping: 0.5
+  _stopAccelerationDuration: 0.1
+  _rotationDamping: 0.3
   _attackPower: 0
   _attackRange: 0
   _maxHealth: 0
