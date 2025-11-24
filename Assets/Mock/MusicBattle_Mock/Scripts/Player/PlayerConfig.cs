@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Mock.MusicBattle
 {
-    [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "Mock/Music_Battle/" + nameof(PlayerConfig))]
+    [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "MusicBattle/" + nameof(PlayerConfig))]
     public class PlayerConfig : ScriptableObject
     {
         public string IgnoreAttackTagName => _ignoreAttackTagName;

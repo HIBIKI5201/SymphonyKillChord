@@ -1,6 +1,5 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Camera;
-using System;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -58,6 +57,7 @@ namespace Mock.MusicBattle
 
         private void OnCollisionEnter(Collision collision)
         {
+            if (_playerMover != null)
             if (collision.contacts.Length == 0) { return; }
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。

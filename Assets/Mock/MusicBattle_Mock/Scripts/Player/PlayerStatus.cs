@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Mock.MusicBattle
 {
-    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = "Mock/Music_Battle/" + nameof(PlayerStatus))]
+    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = "MusicBattle/" + nameof(PlayerStatus))]
     public class PlayerStatus : ScriptableObject
     {
         public float MoveSpeed => _moveSpeed;
