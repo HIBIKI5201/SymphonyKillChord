@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Basis;
 using System;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Mock.MusicBattle.Camera
         /// <returns> 成功したかどうか </returns>
         public bool Init(
             InputBuffer inputBuffer,
-            ILockOnTargetContainer lockOnTargetContainer)
+            LockOnManager lockOnManager)
         {
             #region バリデーションチェック
             if (inputBuffer == null)
@@ -28,7 +29,7 @@ namespace Mock.MusicBattle.Camera
                 Debug.LogError($"{nameof(InputBuffer)} is null");
                 return false;
             }
-            if (lockOnTargetContainer == null)
+            if (lockOnManager == null)
             {
                 Debug.LogError($"{nameof(ILockOnTargetContainer)} is null");
                 return false;
@@ -45,14 +46,12 @@ namespace Mock.MusicBattle.Camera
             // イベント登録。
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
-
-            inputBuffer.LockOnSelectAction.Performed += HandleLockOnSelectAction;
-            inputBuffer.LockOnSelectAction.Canceled += HandleUnlockAction;
+            lockOnManager.OnTargetLocked += HandleLockOn; 
 
             _mover = new(_cameraConfigs, transform, cam.Follow);
 
             _camera = cam;
-            _targetContainer = lockOnTargetContainer;
+            _lockOnManager = lockOnManager;
             _inputBuffer = inputBuffer;
 
             return true;
@@ -76,8 +75,6 @@ namespace Mock.MusicBattle.Camera
             {
                 _inputBuffer.LookAction.Performed -= HandleLookAction;
                 _inputBuffer.LookAction.Canceled -= HandleLookAction;
-
-                _inputBuffer.LockOnSelectAction.Started -= HandleLockOnSelectAction;
             }
         }
 
@@ -85,17 +82,13 @@ namespace Mock.MusicBattle.Camera
         private CameraConfigs _cameraConfigs;
         [SerializeField]
 
-        private ILockOnTargetContainer _targetContainer;
+        private LockOnManager _lockOnManager;
         private InputBuffer _inputBuffer;
         private CinemachineCamera _camera;
 
         private CameraMover _mover;
 
         private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
-        private int _lockingTargetIndex;
-        private bool _isUnlockTarget;
-        private CancellationTokenSource _lockOnCts;
-        private int _lastSelectDir = 0;
 
         private void Update()
         {
@@ -144,87 +137,7 @@ namespace Mock.MusicBattle.Camera
         ///     LockOnSelectアクションの入力を受ける。
         /// </summary>
         /// <param name="value"></param>
-        private void HandleLockOnSelectAction(float value)
-        {
-            Transform target = null;
-            int axis = Math.Sign(value);
-
-            // 入力が0でなければ、コンテナから選択する。
-            if (!_isUnlockTarget && !Mathf.Approximately(value, 0f))
-            {
-                (target, _lockingTargetIndex) =
-                    transform.GetTargetWithAxis(
-                    _targetContainer.Targets.ToArray(), axis,
-                    _targetContainer.Targets[_lockingTargetIndex]);
-            }
-
-            Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
-            _mover?.SetLockTarget(target);
-
-            // 同時押しでキャンセルするように。
-            CancelLockOn(axis);
-        }
-
-        /// <summary>
-        ///     LockOnSelectアクションのキャンセルを受ける。
-        /// </summary>
-        /// <param name="value"></param>
-        private void HandleUnlockAction(float value)
-        {
-            _isUnlockTarget = false;
-        }
-
-        /// <summary>
-        /// 待機時間以内に左右が両方入力されるとロックオンを解除する。
-        /// </summary>
-        private async void CancelLockOn(int dir)
-        {
-            if (_isUnlockTarget) { return; }
-
-            // 前回と逆方向か？
-            bool opposite = (_lastSelectDir != 0) && (_lastSelectDir != dir);
-
-            // 反対方向が来た場合は即判定。
-            if (opposite)
-            {
-                Debug.Log($"ロックオン解除\ndir:{dir}");
-                _mover?.SetLockTarget(null);
-                _isUnlockTarget = true;
-
-                _lastSelectDir = 0;
-
-                // タイマーをキャンセルしておく。
-                CancelCts(_lockOnCts);
-                _lockOnCts = null;
-                return;
-            }
-
-            // 新しく方向を記録。
-            _lastSelectDir = dir;
-
-            // 新規タイマー開始。
-            CancelCts(_lockOnCts);
-            _lockOnCts = new CancellationTokenSource();
-
-            try
-            {
-                // 待機時間まで逆方向入力が来なければリセット。
-                await Awaitable.WaitForSecondsAsync(_cameraConfigs.UnlockWaitingTime, _lockOnCts.Token);
-            }
-            catch (Exception) { return; }
-
-            // 待機時間内に反対方向入力がなかった。
-            _lastSelectDir = 0;
-
-            void CancelCts(CancellationTokenSource cts)
-            {
-                if (cts != null)
-                {
-                    cts.Cancel();
-                    cts.Dispose();
-                }
-            }
-        }
+        private void HandleLockOn(Transform target) => _mover?.SetLockTarget(target);
     }
 }
 
