@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.Battle;
 
 namespace Mock.MusicBattle.Enemy
 {
