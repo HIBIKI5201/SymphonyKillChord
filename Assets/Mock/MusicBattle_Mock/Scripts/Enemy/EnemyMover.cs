@@ -1,5 +1,4 @@
-using Mock.MusicBattle.Enemy;
-using UnityEditorInternal;
+using UnityEngine.AI;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Enemy
@@ -10,11 +9,11 @@ namespace Mock.MusicBattle.Enemy
     {
         
         /// <summary> ロックオン状態を設定する。 </summary>
-        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,Rigidbody rigidbody)
+        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,NavMeshAgent agent)
         {
             _target = target;
             _enemy = enemy;
-            _rigidbody = rigidbody;
+            _agent = agent;
             Init(enemyStatus);
         }
         
@@ -37,27 +36,27 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public void MoveTo()
         {
-            if (_enemy == null ||_target == null) return;
+            if (_enemy == null ||_target == null || _agent ==null) return;
 
             float distance =  DistanceToTarget();
             //射程外　＝＞　近づく。
             if (distance > _enemystatus.AttackRange)
             {
-                Vector3 direction = (_target.position - _enemy.position).normalized;
-                _rigidbody.linearVelocity = direction * _enemystatus.MoveSpeed;
+                _agent.isStopped = false;
+                _agent.SetDestination(_target.position);
             }
             //射程内＝＞止まって攻撃処理へ。
             else
             {
-                _rigidbody.linearVelocity = Vector3.zero;
+                _agent.isStopped = true;
                 
             }
         }
         
         private EnemyStatus  _enemystatus;
-        private Rigidbody _rigidbody;
         private Transform _target;
         private Transform _enemy;
+        private NavMeshAgent _agent;
         private bool _isLockedOn = false;
         
        
