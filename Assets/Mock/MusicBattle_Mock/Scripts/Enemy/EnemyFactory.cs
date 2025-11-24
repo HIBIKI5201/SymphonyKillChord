@@ -45,7 +45,6 @@ namespace Mock.MusicBattle.Enemy
             enemy.transform.position = position;
 
             _enemyContainer.Register(enemy);
-            enemy.gameObject.SetActive(true);
             return enemy;
         }
 

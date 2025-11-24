@@ -41,6 +41,8 @@ namespace Mock.MusicBattle.Enemy
         public void Register(EnemyManager enemy)
         {
             _enemies.Add(enemy);
+            enemy.gameObject.SetActive(true);
+            
             enemy.OnDeath += () =>
             {
                 _enemies.Remove(enemy);
