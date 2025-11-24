@@ -15,7 +15,7 @@ namespace Mock.MusicBattle.Enemy
     /// </summary>
    
     [RequireComponent(typeof(NavMeshAgent))]
-    public class EnemyManager : MonoBehaviour
+    public class EnemyManager : MonoBehaviour, ICharacter
     {
         /// <summary>
         ///     ヘルスが 0 になったときに発火するイベント。
