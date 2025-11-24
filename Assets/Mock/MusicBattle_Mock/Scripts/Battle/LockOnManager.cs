@@ -1,5 +1,4 @@
 using Mock.MusicBattle.Basis;
-using Mock.MusicBattle.Camera;
 using System;
 using System.Linq;
 using System.Threading;
@@ -50,9 +49,9 @@ namespace Mock.MusicBattle.Battle
             if (!_isUnlockTarget && !Mathf.Approximately(value, 0f))
             {
                 (target, _lockingTargetIndex) =
-                    _player.GetTargetWithAxis(
-                    _targetContainer.Targets.ToArray(), axis,
-                    _targetContainer.Targets[_lockingTargetIndex]);
+                    GetTargetWithAxis(_player,
+                        _targetContainer.Targets.ToArray(), axis,
+                        _targetContainer.Targets[_lockingTargetIndex]);
             }
 
             Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
@@ -141,6 +140,40 @@ namespace Mock.MusicBattle.Battle
                     cts.Dispose();
                 }
             }
+        }
+
+        private (Transform transform, int index) GetTargetWithAxis(Transform camera,
+            Transform[] targets, int axis,
+            params Transform[] ignore)
+        {
+            Vector3 forward = camera.forward;
+            Vector3 up = camera.up;
+
+            float minAngle = float.MaxValue;
+            int index = -1;
+            Transform closest = null;
+
+            for (int i = 0; i < targets.Length; i++)
+            {
+                Transform t = targets[i];
+                Vector3 dir = (t.position - camera.position).normalized;
+
+                float signed = Vector3.SignedAngle(forward, dir, up);
+
+                float angle = axis < 0f ?
+                    signed >= 0 ? 360f - signed : -signed : // 右（時計回り）
+                    signed >= 0 ? signed : 360f + signed; // 左（反時計回り）
+
+                if (angle < minAngle &&
+                    !ignore.Contains(t)) // 除外リストに含まれていない時。
+                {
+                    minAngle = angle;
+                    closest = t;
+                    index = i;
+                }
+            }
+
+            return (closest, index);
         }
     }
 }
