@@ -3,6 +3,7 @@ using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Windows;
 
 namespace Mock.MusicBattle
 {
@@ -31,6 +32,7 @@ namespace Mock.MusicBattle
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
+        private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
 
@@ -43,6 +45,7 @@ namespace Mock.MusicBattle
         {
             if (_playerMover != null)
             {
+                _velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
                 _playerMover.SetPlayerVelocity(_velocity);
                 _playerMover.Update();
             }
@@ -59,7 +62,7 @@ namespace Mock.MusicBattle
         private void OnCollisionEnter(Collision collision)
         {
             if (_playerMover != null)
-            if (collision.contacts.Length == 0) { return; }
+                if (collision.contacts.Length == 0) { return; }
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
             Vector3 contactNormal = collision.contacts[0].normal;
@@ -105,7 +108,7 @@ namespace Mock.MusicBattle
 
         private void OnInputMove(Vector2 input)
         {
-            _velocity = _playerMover.CalcPlayerVelocityByInputDirection(input);
+            _input = input;
         }
 
         private void OnInputAttack(float input)
