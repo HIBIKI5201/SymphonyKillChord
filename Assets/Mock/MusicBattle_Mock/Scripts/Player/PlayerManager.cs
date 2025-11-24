@@ -3,16 +3,18 @@ using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Windows;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
+    [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer, CameraManager cameraManager)
+        public void Init(InputBuffer inputBuffer)
         {
             _inputBuffer = inputBuffer;
             Rigidbody rb = GetComponent<Rigidbody>();
-            CinemachineCamera CinemachineCamera = GetComponent<CinemachineCamera>();
+            CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
@@ -30,6 +32,7 @@ namespace Mock.MusicBattle
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
+        private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
 
@@ -42,6 +45,7 @@ namespace Mock.MusicBattle
         {
             if (_playerMover != null)
             {
+                _velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
                 _playerMover.SetPlayerVelocity(_velocity);
                 _playerMover.Update();
             }
@@ -86,7 +90,7 @@ namespace Mock.MusicBattle
                 return;
             }
             inputBuffer.MoveAction.Performed += OnInputMove;
-            inputBuffer.MoveAction.Canceled += OnInputMove;
+            inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
             inputBuffer.AttackAction.Started += OnInputAttack;
         }
 
@@ -98,13 +102,18 @@ namespace Mock.MusicBattle
                 return;
             }
             inputBuffer.MoveAction.Performed -= OnInputMove;
-            inputBuffer.MoveAction.Canceled -= OnInputMove;
+            inputBuffer.MoveAction.Canceled -= OnInputMoveCancle;
             inputBuffer.AttackAction.Started -= OnInputAttack;
         }
 
         private void OnInputMove(Vector2 input)
         {
-            _velocity = _playerMover.CalcPlayerVelocityByInputDirection(input);
+            _input = input;
+        }
+
+        private void OnInputMoveCancle(Vector2 input)
+        {
+            _input = Vector2.zero;
         }
 
         private void OnInputAttack(float input)

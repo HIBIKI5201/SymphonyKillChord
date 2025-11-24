@@ -7,6 +7,7 @@ namespace Mock.MusicBattle
     {
         public float MoveSpeed => _moveSpeed;
         public float WalkAccelerationDuration => _walkAccelerationDuration;
+        public float StopAccelerationDuration => _stopAccelerationDuration;
         public float RotationDamping => _rotationDamping;
         public float AttackPower => _attackPower;
         public float AttackRange => _attackRange;
@@ -14,6 +15,7 @@ namespace Mock.MusicBattle
         [Header("Movement Status")]
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _walkAccelerationDuration;
+        [SerializeField] private float _stopAccelerationDuration;
         [SerializeField] private float _rotationDamping;
         [Header("Battle Status")]
         [SerializeField] private float _attackPower;

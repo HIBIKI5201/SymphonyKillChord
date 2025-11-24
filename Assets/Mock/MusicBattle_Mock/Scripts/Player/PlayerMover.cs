@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
     public class PlayerMover
     {
@@ -37,7 +37,7 @@ namespace Mock.MusicBattle
         /// <param name="velocity"></param>
         public void SetPlayerVelocity(Vector3 velocity)
         {
-            _velocity = velocity;
+            _targetVelocity = velocity;
         }
 
         public void SetIsGround(bool isGround)
@@ -47,15 +47,56 @@ namespace Mock.MusicBattle
 
         public void Update()
         {
-            // 速度ベクトルに基づいてプレイヤーの向きを更新。
+            float t = CalculateAccelerationLerpT();
+            UpdateHorizontalVelocity(t);
+            UpdateRotation();
+        }
+
+        /// <summary>
+        ///     加速度補間 t の計算。
+        /// </summary>
+        /// <returns></returns>
+        private float CalculateAccelerationLerpT()
+        {
+            float acceleration = _targetVelocity.magnitude > 0f
+                ? _status.WalkAccelerationDuration
+                : _status.StopAccelerationDuration;
+
+            float damping = Mathf.Max(acceleration, 0.0001f);
+            return 1f - Mathf.Exp(-Time.deltaTime / damping);
+        }
+
+        /// <summary>
+        ///   水平方向の速度ベクトルの更新。
+        /// </summary>
+        /// <param name="t"></param>
+        private void UpdateHorizontalVelocity(float t)
+        {
+            Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+            Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
+
+            _horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
+
+            _currentVelocity = new Vector3(
+                _horizontalVelocity.x,
+                _currentVelocity.y,
+                _horizontalVelocity.z
+            );
+        }
+
+        /// <summary>
+        ///   プレイヤーの回転処理。
+        /// </summary>
+        private void UpdateRotation()
+        {
+            // 現在の向きを水平に
             Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
-            // 水平方向の速度成分を抽出。
-            Vector3 targetDir = new Vector3(_velocity.x, 0f, _velocity.z);
-            //  Cinemachine式Damping（値が大きいほどゆっくり回転）
-            float damping = Mathf.Max(_status.RotationDamping, 0.0001f);
-            float t = 1f - Mathf.Exp(-Time.deltaTime / damping);
-            // 線形補間で滑らかに回転。
-            Vector3 dir = Vector3.Lerp(forward, targetDir, t);
+            // 水平方向の速度成分
+            Vector3 targetDir = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+            // Cinemachine式 Damping
+            float rotDamping = Mathf.Max(_status.RotationDamping, 0.0001f);
+            float rotT = 1f - Mathf.Exp(-Time.deltaTime / rotDamping);
+            Vector3 dir = Vector3.Lerp(forward, targetDir, rotT);
             if (dir.sqrMagnitude > 0.0001f)
             {
                 _player.LookAt(_player.position + dir.normalized);
@@ -64,7 +105,7 @@ namespace Mock.MusicBattle
 
         public void FixedUpdate()
         {
-            Vector3 velocity = new Vector3(_velocity.x, _rb.linearVelocity.y, _velocity.z);
+            Vector3 velocity = new Vector3(_currentVelocity.x, _rb.linearVelocity.y, _currentVelocity.z);
             _rb.linearVelocity = velocity;
         }
 
@@ -72,7 +113,9 @@ namespace Mock.MusicBattle
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
-        private Vector3 _velocity;
+        private Vector3 _currentVelocity;
+        private Vector3 _targetVelocity;
+        private Vector3 _horizontalVelocity;
         private bool _isGround;
     }
 }
