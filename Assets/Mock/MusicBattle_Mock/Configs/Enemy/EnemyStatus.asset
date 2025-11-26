@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Enemy.EnemyStatus
   _moveSpeed: 10
   _attackPower: 20
-  _attackRange: 2
+  _attackRange: 6
   _maxHealth: 100
