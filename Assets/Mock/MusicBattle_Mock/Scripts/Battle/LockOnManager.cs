@@ -51,7 +51,7 @@ namespace Mock.MusicBattle.Battle
                 (target, _lockingTargetIndex) =
                     GetTargetWithAxis(_player,
                         _targetContainer.Targets.ToArray(), axis,
-                        _targetContainer.Targets[_lockingTargetIndex]);
+                        _targetContainer[_lockingTargetIndex]);
             }
 
             Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
