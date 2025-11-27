@@ -386,6 +386,7 @@ MonoBehaviour:
   _inputBuffer: {fileID: 1584562521}
   _cameraManager: {fileID: 170987201}
   _targetContainer: {fileID: 1976686213}
+  _camera: {fileID: 170987199}
 --- !u!4 &813649275
 Transform:
   m_ObjectHideFlags: 0
