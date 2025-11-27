@@ -10,11 +10,11 @@ namespace Mock.MusicBattle.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour
     {
-        public void Init(InputBuffer inputBuffer)
+        public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
         {
             _inputBuffer = inputBuffer;
             Rigidbody rb = GetComponent<Rigidbody>();
-            CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
+            //CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
@@ -62,11 +62,11 @@ namespace Mock.MusicBattle.Player
         private void OnCollisionEnter(Collision collision)
         {
             if (_playerMover != null)
-            if (collision.contacts.Length == 0) { return; }
+                if (collision.contacts.Length == 0) { return; }
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
             Vector3 contactNormal = collision.contacts[0].normal;
-            if (Vector3.Dot(contactNormal, Vector3.up) > 0.5f)
+            if (Vector3.Dot(contactNormal, Vector3.up) > _playerStatus.GroundNormalVerticalThreshold)
             {
                 _hitGrounds.Add(collision);
                 _playerMover.SetIsGround(0 < _hitGrounds.Count);

@@ -1,7 +1,7 @@
 ﻿<Solution>
   <Project Path="CriMw.CriWare.Runtime.csproj" />
-  <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="MusicBattle_Mock.csproj" />
+  <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="MusicSync_Mock.csproj" />
   <Project Path="TPS_Mock.csproj" />
