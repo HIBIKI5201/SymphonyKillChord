@@ -1,4 +1,4 @@
-using UnityEditorInternal;
+using Mock.MusicBattle.Character;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,13 +10,17 @@ namespace Mock.MusicBattle.UI
     [RequireComponent(typeof(UIDocument))]
     public class IngameHUDManager : MonoBehaviour
     {
-        /// <summary>
-        ///     ヘルスバーの割合を変更する。
-        /// </summary>
-        /// <param name="current"></param>
-        /// <param name="max"></param>
-        public void ChangeHealthBar(float current, float max) => 
-            _playerHealthBar?.ChangeHealthBar(current, max, destroyCancellationToken);
+        public void InitializePlayerHealthBar(HealthEntity healthEntity) => 
+            _playerHealthBar.Initialize(healthEntity);
+
+        public EnemyHealthBar AddEnemyHealthBar(HealthEntity healthEntity)
+        {
+            EnemyHealthBar enemyHealthBar = new EnemyHealthBar();
+            _root.Add(enemyHealthBar);
+            enemyHealthBar.Initialize(healthEntity);
+
+            return enemyHealthBar;
+        }
 
         private UIDocument _document;
         private VisualElement _root;
