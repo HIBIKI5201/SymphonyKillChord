@@ -23,8 +23,6 @@ namespace Mock.MusicBattle.Enemy
         {
             _enemystatus = enemyStatus;
         }
-
-        public void SetTarget(bool isLockedOn) => _isDead = isLockedOn;
         
         /// <summary> ターゲットとの距離を返す。 </summary>
         public float DistanceToTarget()

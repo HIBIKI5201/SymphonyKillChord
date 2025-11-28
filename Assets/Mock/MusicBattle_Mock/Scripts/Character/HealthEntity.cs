@@ -37,7 +37,7 @@ namespace Mock.MusicBattle.Character
 
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         }
-
+        ///<summary> ヘルスとisDeadをリセットする。 </summary>
         public void ResetHealth()
         {
             _currentHealth = _maxHealth;

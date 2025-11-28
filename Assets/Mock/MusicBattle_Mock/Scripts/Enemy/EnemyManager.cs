@@ -82,7 +82,7 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         private void FixedUpdate()
         {
-            if (_enemyMover == null )
+            if (_enemyMover == null)
             {
                 Debug.Log("EnemyMove is null");
                 return;
