@@ -1,9 +1,7 @@
 using Mock.MusicBattle.Basis;
-using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Windows;
 
 namespace Mock.MusicBattle.Player
 {
@@ -17,6 +15,7 @@ namespace Mock.MusicBattle.Player
             //CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
+            _playerAnimController = GetComponent<PlayerAnimationController>();
         }
 
         public void TakeDamage(float damage)
@@ -32,6 +31,7 @@ namespace Mock.MusicBattle.Player
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
+        private PlayerAnimationController _playerAnimController;
         private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
@@ -56,6 +56,7 @@ namespace Mock.MusicBattle.Player
             if (_playerMover != null)
             {
                 _playerMover.FixedUpdate();
+                _playerAnimController?.MoveVelocity(_playerMover.CurrentVelocity.magnitude);
             }
         }
 
