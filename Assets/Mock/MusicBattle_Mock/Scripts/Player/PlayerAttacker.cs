@@ -71,8 +71,8 @@ namespace Mock.MusicBattle
         private PlayerStatus _playerstatus;
         private PlayerConfig _config;
 
-        private float _heightray = 0.7f;
-        private float _gizmoRayRange = 5f;
+        private const float _heightray = 0.7f;
+        private const float _gizmoRayRange = 5f;
         private Vector3 _direction;
         private Vector3 _origin;
         private Transform _hitTransform;
