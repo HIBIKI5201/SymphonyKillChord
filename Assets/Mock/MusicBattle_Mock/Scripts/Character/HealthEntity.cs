@@ -25,20 +25,25 @@ namespace Mock.MusicBattle.Character
         /// <param name="damage"> 与えるダメージ量。 </param>
         public void TakeDamage(float damage)
         {
+            if (_isDead) return;
             _currentHealth -= damage;
+            Debug.Log($"{this} は　{damage} を受けた");
             if (_currentHealth < 0)
             {
                 _currentHealth = 0;
-                if (_isAlive)
-                {
-                    OnDeath?.Invoke();
-                    _isAlive = false;
-                }
+                OnDeath?.Invoke();
+                _isDead = true;
             }
 
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         }
-
+        ///<summary> ヘルスとisDeadをリセットする。 </summary>
+        public void ResetHealth()
+        {
+            _currentHealth = _maxHealth;
+            _isDead = false;
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        }
         /// <summary>
         ///     ヘルスを回復させる。
         ///     イベントを通知する。
@@ -55,7 +60,7 @@ namespace Mock.MusicBattle.Character
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         }
 
-        private bool _isAlive = true;
+        private bool _isDead = false;
         private readonly float _maxHealth;
         private float _currentHealth;
     }
