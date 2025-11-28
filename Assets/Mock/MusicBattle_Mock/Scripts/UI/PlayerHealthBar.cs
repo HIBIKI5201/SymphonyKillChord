@@ -29,7 +29,12 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
         }
 
-        public void Initialize(HealthEntity healthEntity, CancellationToken token = default)
+        /// <summary>
+        ///     データをバインドする。
+        /// </summary>
+        /// <param name="healthEntity"></param>
+        /// <param name="token"></param>
+        public void BindData(HealthEntity healthEntity, CancellationToken token = default)
         {
             _token = token;
 
