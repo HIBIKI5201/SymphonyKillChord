@@ -8,8 +8,9 @@ namespace Mock.MusicBattle.Enemy
     public class EnemyMover
     {
         
-        /// <summary> ロックオン状態を設定する。 </summary>
-        public EnemyMover(Transform target,Transform enemy,EnemyStatus enemyStatus,NavMeshAgent agent)
+        /// <summary> コンストラクタ。 </summary>
+        public EnemyMover(Transform target,Transform enemy,
+            EnemyStatus enemyStatus,NavMeshAgent agent)
         {
             _target = target;
             _enemy = enemy;
@@ -23,7 +24,7 @@ namespace Mock.MusicBattle.Enemy
             _enemystatus = enemyStatus;
         }
 
-        public void SetTarget(bool isLockedOn) => _isLockedOn = isLockedOn;
+        public void SetTarget(bool isLockedOn) => _isDead = isLockedOn;
         
         /// <summary> ターゲットとの距離を返す。 </summary>
         public float DistanceToTarget()
@@ -36,6 +37,7 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public void MoveTo()
         {
+            if(!_agent.isOnNavMesh) return; 
             if (_enemy == null ||_target == null || _agent ==null) return;
 
             float distance =  DistanceToTarget();
@@ -57,8 +59,7 @@ namespace Mock.MusicBattle.Enemy
         private Transform _target;
         private Transform _enemy;
         private NavMeshAgent _agent;
-        private bool _isLockedOn = false;
-        
-       
+        private bool _isDead = false;
+      
     }
 }
