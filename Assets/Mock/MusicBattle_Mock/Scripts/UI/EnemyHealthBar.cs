@@ -1,10 +1,9 @@
 using Mock.MusicBattle.Character;
-using Mock.MusicBattle.UI;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.UI
 {
     [UxmlElement]
     public partial class EnemyHealthBar : VisualElement
@@ -32,7 +31,7 @@ namespace Mock.MusicBattle
 
         public void Initialize(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
         {
-            _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);            
+            _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
             healthEntity.OnDeath += () =>
