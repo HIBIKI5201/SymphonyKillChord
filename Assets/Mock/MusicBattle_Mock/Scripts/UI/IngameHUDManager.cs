@@ -13,16 +13,26 @@ namespace Mock.MusicBattle.UI
     [RequireComponent(typeof(UIDocument))]
     public class IngameHUDManager : MonoBehaviour
     {
+        /// <summary>
+        ///     プレイヤーのヘルスバーを初期化する。
+        /// </summary>
+        /// <param name="healthEntity"></param>
         public void InitializePlayerHealthBar(HealthEntity healthEntity) => 
-            _playerHealthBar?.Initialize(healthEntity);
+            _playerHealthBar?.BindData(healthEntity);
 
+        /// <summary>
+        ///     敵のヘルスバーを追加する。
+        /// </summary>
+        /// <param name="healthEntity"></param>
+        /// <param name="transform"></param>
+        /// <returns></returns>
         public async Task<EnemyHealthBar> AddEnemyHealthBar(HealthEntity healthEntity, Transform transform)
         {
             while (_root == null) await Awaitable.NextFrameAsync();
 
             EnemyHealthBar enemyHealthBar = new EnemyHealthBar();
             _root.Add(enemyHealthBar);
-            enemyHealthBar.Initialize(healthEntity, transform);
+            enemyHealthBar.BindData(healthEntity, transform);
 
             return enemyHealthBar;
         }
