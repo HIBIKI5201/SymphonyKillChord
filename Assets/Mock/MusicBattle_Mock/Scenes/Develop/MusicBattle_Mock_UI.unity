@@ -495,7 +495,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Develop.PlayerHealthBarDebugger
   _maxHealth: 100
-  _currentHealth: 25
+  _damage: 10
 --- !u!1 &1061631174
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +806,7 @@ GameObject:
   - component: {fileID: 1801589140}
   - component: {fileID: 1801589139}
   - component: {fileID: 1801589138}
+  - component: {fileID: 1801589142}
   m_Layer: 0
   m_Name: Enemy_2
   m_TagString: Untagged
@@ -928,6 +929,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1801589136}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1801589142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801589136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7599d496eda7b6d44b6a7a524f570054, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Develop.EnemyHealthBarDebugger
+  _maxHealth: 100
+  _damage: 10
+  _hud: {fileID: 1003964600}
 --- !u!1 &1978626339
 GameObject:
   m_ObjectHideFlags: 0
@@ -990,6 +1006,7 @@ GameObject:
   - component: {fileID: 2033034991}
   - component: {fileID: 2033034990}
   - component: {fileID: 2033034993}
+  - component: {fileID: 2033034994}
   m_Layer: 0
   m_Name: Enemy_1
   m_TagString: Untagged
@@ -1112,6 +1129,21 @@ MonoBehaviour:
   m_ObjectForwardAxis: 2
   m_ObjectUpAxis: 1
   m_StartOffset: 0
+--- !u!114 &2033034994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2033034988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7599d496eda7b6d44b6a7a524f570054, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Develop.EnemyHealthBarDebugger
+  _maxHealth: 100
+  _damage: 10
+  _hud: {fileID: 1003964600}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
