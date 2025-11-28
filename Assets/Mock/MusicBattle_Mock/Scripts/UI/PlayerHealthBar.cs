@@ -22,6 +22,9 @@ namespace Mock.MusicBattle.UI
 
             _greenBar = container.Q<VisualElement>(ELEMENT_NAME_GREEN_BAR);
             _redBar = container.Q<VisualElement>(ELEMENT_NAME_RED_BAR);
+
+            Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
+            Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
         }
 
         /// <summary>
