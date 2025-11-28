@@ -1,19 +1,24 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle
 {
-    public class EnemyHealthBar : MonoBehaviour
+    [UxmlElement]
+    public partial class EnemyHealthBar : VisualElement
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public EnemyHealthBar()
         {
-        
+            VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
+            if (treeAsset == null)
+            {
+                Debug.LogError($"Failed to load UXML at path: {UXML_RESOURCES_PATH}");
+                return;
+            }
+
+            TemplateContainer container = treeAsset.Instantiate();
+            hierarchy.Add(container);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+        private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
     }
 }
