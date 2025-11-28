@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Character;
 using Mock.MusicBattle.UI;
 using UnityEngine;
 
@@ -11,19 +12,23 @@ namespace Mock.MusicBattle.Develop
     {
         [SerializeField]
         private float _maxHealth = 100f;
+
         [SerializeField]
-        private float _currentHealth = 50f;
+        private float _damage = 10;
 
         private IngameHUDManager _hud;
+        private HealthEntity _healthEntity;
         private void Awake()
         {
             _hud = GetComponent<IngameHUDManager>();
+            _healthEntity = new HealthEntity(_maxHealth);
+            _hud.InitializePlayerHealthBar(_healthEntity);
         }
 
         [ContextMenu(nameof(ApplyHealthValue))]
         private void ApplyHealthValue()
         {
-            _hud?.ChangeHealthBar(_currentHealth, _maxHealth);
+            _healthEntity.TakeDamage(_damage);
         }
     }
 }
