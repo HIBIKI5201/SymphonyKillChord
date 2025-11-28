@@ -32,8 +32,15 @@ namespace Mock.MusicBattle
 
         public void Initialize(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
         {
-            _token = token;
+            _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);            
+
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
+            healthEntity.OnDeath += () =>
+            {
+                healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
+                _disposeCTS.Cancel();
+                _disposeCTS.Dispose();
+            };
 
             Update(transform);
         }
@@ -63,21 +70,23 @@ namespace Mock.MusicBattle
 
         private readonly Vector2 _offset = new Vector2(-0.5f, 0.2f); // 左下基準。
 
-        private CancellationToken _token;
+        private CancellationTokenSource _disposeCTS;
         private VisualElement _base;
         private VisualElement _greenBar;
         private VisualElement _redBar;
 
         private async void Update(Transform transform)
         {
-            while (transform != null && !_token.IsCancellationRequested)
+            CancellationToken token = _disposeCTS.Token;
+
+            while (transform != null && !token.IsCancellationRequested)
             {
                 SetPosition(transform.position);
-                await Awaitable.NextFrameAsync(_token);
+                await Awaitable.NextFrameAsync(token);
             }
         }
 
-        private void ChangeHealthBarHandler(float current, float max) => ChangeHealthBar(current, max, _token);
+        private void ChangeHealthBarHandler(float current, float max) => ChangeHealthBar(current, max, _disposeCTS.Token);
 
         private async void ChangeHealthBar(float current, float max, CancellationToken token = default)
         {
