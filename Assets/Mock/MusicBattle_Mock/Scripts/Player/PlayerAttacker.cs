@@ -27,7 +27,7 @@ namespace Mock.MusicBattle
         public void OnDrawGizmos()
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(_origin, _origin + _direction * _gizmoRayRange);
+            Gizmos.DrawLine(_origin, _origin + _direction * GIZMO_RAY_RANGE);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Mock.MusicBattle
         /// </summary>
         public void Attack()
         {
-            _origin = _player.Player.position + Vector3.up * _heightray;
+            _origin = _player.Player.position + Vector3.up * HEIGHT_RAY;
             _direction = _camera.forward;
             _currentCharacter = FindAttackTarget();
             if (_currentCharacter == null)
@@ -71,8 +71,8 @@ namespace Mock.MusicBattle
         private PlayerStatus _playerstatus;
         private PlayerConfig _config;
 
-        private const float _heightray = 0.7f;
-        private const float _gizmoRayRange = 5f;
+        private const float HEIGHT_RAY = 0.7f;
+        private const float GIZMO_RAY_RANGE = 5f;
         private Vector3 _direction;
         private Vector3 _origin;
         private Transform _hitTransform;
