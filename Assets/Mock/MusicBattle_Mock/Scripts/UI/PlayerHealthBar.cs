@@ -38,9 +38,9 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
-            await ChangeBarAsync(_greenBar, proportion, 0.6f, token);
+            await _greenBar.ChangeBarAsync(proportion, 0.6f, token);
             await Awaitable.WaitForSecondsAsync(1f, token);
-            await ChangeBarAsync(_redBar, proportion, 0.6f, token);
+            await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }
 
         private const string UXML_RESOURCES_PATH = "PlayerHealthBar";
@@ -49,26 +49,5 @@ namespace Mock.MusicBattle.UI
 
         private VisualElement _greenBar;
         private VisualElement _redBar;
-
-        private async Task ChangeBarAsync(
-            VisualElement bar,
-            float value, float duration,
-            CancellationToken token = default)
-        {
-            float current = bar.resolvedStyle.width / bar.parent.resolvedStyle.width;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                float newValue = Mathf.Lerp(current, value, t);
-                bar.style.width = Length.Percent(newValue * 100);
-
-                await Awaitable.NextFrameAsync(token);
-            }
-
-            bar.style.width = Length.Percent(value * 100);
-        }
     }
 }
