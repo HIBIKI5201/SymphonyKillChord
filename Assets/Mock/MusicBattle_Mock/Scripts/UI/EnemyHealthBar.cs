@@ -29,7 +29,13 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
         }
 
-        public void Initialize(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
+        /// <summary>
+        ///     データをバインドする。
+        /// </summary>
+        /// <param name="healthEntity"></param>
+        /// <param name="transform"></param>
+        /// <param name="token"></param>
+        public void BindData(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
         {
             _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);
 
@@ -42,23 +48,6 @@ namespace Mock.MusicBattle.UI
             };
 
             Update(transform);
-        }
-
-        public void SetPosition(Vector3 worldPosition)
-        {
-            UnityEngine.Camera camera = UnityEngine.Camera.main;
-            Vector2 screenPosition = camera.WorldToScreenPoint(worldPosition);
-
-            Vector2 offset = new Vector2(
-                _offset.x * _base.resolvedStyle.width,
-                _offset.y * _base.resolvedStyle.height);
-
-            Vector2 uitkPosition = new Vector2(
-                screenPosition.x + offset.x,
-                Screen.height - screenPosition.y + offset.y);
-
-            _base.style.left = uitkPosition.x;
-            _base.style.top = uitkPosition.y;
         }
 
         private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
@@ -80,7 +69,7 @@ namespace Mock.MusicBattle.UI
 
             while (transform != null && !token.IsCancellationRequested)
             {
-                SetPosition(transform.position);
+                MovePosition(transform.position);
                 await Awaitable.NextFrameAsync(token);
             }
         }
@@ -94,6 +83,23 @@ namespace Mock.MusicBattle.UI
             await _greenBar.ChangeBarAsync(proportion, 0.4f, token);
             await Awaitable.WaitForSecondsAsync(0.5f, token);
             await _redBar.ChangeBarAsync(proportion, 0.4f, token);
+        }
+
+        private void MovePosition(Vector3 worldPosition)
+        {
+            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            Vector2 screenPosition = camera.WorldToScreenPoint(worldPosition);
+
+            Vector2 offset = new Vector2(
+                _offset.x * _base.resolvedStyle.width,
+                _offset.y * _base.resolvedStyle.height);
+
+            Vector2 uitkPosition = new Vector2(
+                screenPosition.x + offset.x,
+                Screen.height - screenPosition.y + offset.y);
+
+            _base.style.left = uitkPosition.x;
+            _base.style.top = uitkPosition.y;
         }
     }
 }
