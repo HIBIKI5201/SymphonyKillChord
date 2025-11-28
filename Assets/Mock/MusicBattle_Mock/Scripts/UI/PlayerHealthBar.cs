@@ -35,14 +35,14 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
-            await ChangeBarAsync(_greenBar, proportion, 0.2f, token);
+            await ChangeBarAsync(_greenBar, proportion, 0.6f, token);
             await Awaitable.WaitForSecondsAsync(1f, token);
             await ChangeBarAsync(_redBar, proportion, 0.6f, token);
         }
 
-        private const string UXML_RESOURCES_PATH = "PlayerHalthBar";
-        private const string ELEMENT_NAME_GREEN_BAR = "green-bar";
-        private const string ELEMENT_NAME_RED_BAR = "red-bar";
+        private const string UXML_RESOURCES_PATH = "PlayerHealthBar";
+        private const string ELEMENT_NAME_GREEN_BAR = "green-guage";
+        private const string ELEMENT_NAME_RED_BAR = "red-guage";
 
         private VisualElement _greenBar;
         private VisualElement _redBar;
