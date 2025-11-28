@@ -21,6 +21,10 @@ namespace Mock.MusicBattle.Develop
         private void Awake()
         {
             _hud = GetComponent<IngameHUDManager>();
+        }
+
+        private void Start()
+        {
             _healthEntity = new HealthEntity(_maxHealth);
             _hud.InitializePlayerHealthBar(_healthEntity);
         }
