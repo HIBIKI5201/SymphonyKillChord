@@ -7,6 +7,14 @@ namespace Mock.MusicBattle.UI
 {
     public static class VisualElementUtility
     {
+        /// <summary>
+        ///     VisualElementの横幅を割合で変更する非同期メソッド。
+        /// </summary>
+        /// <param name="bar"></param>
+        /// <param name="value"></param>
+        /// <param name="duration"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task ChangeBarAsync(
             this VisualElement bar,
             float value, float duration,
