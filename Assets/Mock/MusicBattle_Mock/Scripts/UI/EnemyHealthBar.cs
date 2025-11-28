@@ -30,10 +30,12 @@ namespace Mock.MusicBattle
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
         }
 
-        public void Initialize(HealthEntity healthEntity, CancellationToken token = default)
+        public void Initialize(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
         {
             _token = token;
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
+
+            Update(transform);
         }
 
         public void SetPosition(Vector3 worldPosition)
@@ -59,12 +61,21 @@ namespace Mock.MusicBattle
         private const string ELEMENT_NAME_GREEN_BAR = "green-guage";
         private const string ELEMENT_NAME_RED_BAR = "red-guage";
 
-        private readonly Vector2 _offset = new Vector2(0.5f, 0.2f); // 左下基準。
+        private readonly Vector2 _offset = new Vector2(-0.5f, 0.2f); // 左下基準。
 
         private CancellationToken _token;
         private VisualElement _base;
         private VisualElement _greenBar;
         private VisualElement _redBar;
+
+        private async void Update(Transform transform)
+        {
+            while (transform != null && !_token.IsCancellationRequested)
+            {
+                SetPosition(transform.position);
+                await Awaitable.NextFrameAsync(_token);
+            }
+        }
 
         private void ChangeHealthBarHandler(float current, float max) => ChangeHealthBar(current, max, _token);
 
