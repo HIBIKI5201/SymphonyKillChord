@@ -20,6 +20,9 @@ namespace Mock.MusicBattle.UI
             }
         }
 
-        
+        private void Start()
+        {
+            _root.Add(new PlayerHealthBar());
+        }
     }
 }
