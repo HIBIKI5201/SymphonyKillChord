@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.UI
 {
     /// <summary>
     ///     インゲームのHUDを管理するクラス。
