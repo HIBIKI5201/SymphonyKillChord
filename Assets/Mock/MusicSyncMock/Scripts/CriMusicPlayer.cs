@@ -1,4 +1,4 @@
-using CriWare;
+﻿using CriWare;
 using UnityEngine;
 
 namespace Mock.MusicSyncMock
@@ -8,28 +8,21 @@ namespace Mock.MusicSyncMock
     /// </summary>
     public class CriMusicPlayer : MonoBehaviour
     {
+        [SerializeField]
         private CriAtomSource _audioSource;
+        [SerializeField]
+        private long _bpm = 120L;
 
-        /// <summary>CriAtomSourceコンポーネント</summary>
-        public CriAtomSource Source => _audioSource;
+        private CriMusicBuffer _musicBuffer;
 
-        #region ライフサイクル
-        #endregion
-
-        /// <summary>
-        /// 初期化を行う。
-        /// </summary>
-        /// <param name="source"></param>
-        public void Init(CriAtomSource source)
+        private void Awake()
         {
-            _audioSource = source;
+            _musicBuffer = GetComponent<CriMusicBuffer>();
         }
-        /// <summary>
-        /// BGM再生を開始する。
-        /// </summary>
-        public void Play()
+
+        private void Start()
         {
-            _audioSource.Play();
+            _musicBuffer.Play(_audioSource, _bpm);
         }
     }
 }
