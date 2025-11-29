@@ -12,7 +12,6 @@ namespace Mock.MusicBattle.Player
         {
             _inputBuffer = inputBuffer;
             Rigidbody rb = GetComponent<Rigidbody>();
-            //CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
             _playerAnimController = GetComponent<PlayerAnimationController>();
@@ -63,7 +62,7 @@ namespace Mock.MusicBattle.Player
         private void OnCollisionEnter(Collision collision)
         {
             if (_playerMover != null)
-                if (collision.contacts.Length == 0) { return; }
+            if (collision.contacts.Length == 0) { return; }
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
             Vector3 contactNormal = collision.contacts[0].normal;

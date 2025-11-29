@@ -1,8 +1,10 @@
+using Mock.MusicBattle.Basis;
+using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
 
 namespace Mock.MusicBattle
 {
-    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = "Mock/MusicBattle/" + nameof(PlayerStatus))]
+    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(PlayerStatus))]
     public class PlayerStatus : ScriptableObject
     {
         public float MoveSpeed => _moveSpeed;
