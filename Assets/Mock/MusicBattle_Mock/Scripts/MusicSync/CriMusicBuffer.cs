@@ -3,40 +3,14 @@ using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
 
-namespace Mock.MusicSyncMock
+namespace Mock.MusicBattle.MusicSync
 {
     /// <summary>
     ///     Criを用いた音楽のバッファリングするクラス。
     /// </summary>
+    [DisallowMultipleComponent]
     public class CriMusicBuffer : MonoBehaviour, IMusicBuffer
     {
-        [SerializeField, ReadOnly, Tooltip("現在のBPM")]
-        private double _currentBpm;
-        [SerializeField, ReadOnly, Tooltip("再生中のソース")]
-        private CriAtomSource _source;
-        [SerializeField, ReadOnly, Tooltip("現在のビート数")]
-        private double _beat;
-        [SerializeField, ReadOnly, Tooltip("BGMの固有拍子")]
-        private double _propTimeSignature;
-        [SerializeField, Tooltip("最初小節開始時間（ミリ秒）")]
-        private long _startOffset;
-
-        /// <summary>現在のBPM</summary>
-        public double CurrentBpm => _currentBpm;
-        /// <summary>1拍毎の長さ（秒）</summary>
-        public double BeatLength => 60L / _currentBpm;
-        /// <summary>現在の拍数</summary>
-        public double CurrentBeat => _beat;
-        /// <summary>BGMの固有拍子</summary>
-        public double PropTimeSignature => _propTimeSignature;
-
-        #region ライフサイクル
-        private void Update()
-        {
-            Tick();
-        }
-        #endregion
-
         #region Publicメソッド
         /// <summary>
         /// 初期化を行う。
@@ -70,6 +44,33 @@ namespace Mock.MusicSyncMock
             Debug.Log($"拍数計算　現在小節：{currentBar}, 発火小節：{targetBar}, 発火拍数：{exeBeat}");
 
             return exeBeat;
+        }
+        #endregion
+
+        [SerializeField, ReadOnly, Tooltip("現在のBPM")]
+        private double _currentBpm;
+        [SerializeField, ReadOnly, Tooltip("再生中のソース")]
+        private CriAtomSource _source;
+        [SerializeField, ReadOnly, Tooltip("現在のビート数")]
+        private double _beat;
+        [SerializeField, ReadOnly, Tooltip("BGMの固有拍子")]
+        private double _propTimeSignature;
+        [SerializeField, Tooltip("最初小節開始時間（ミリ秒）")]
+        private long _startOffset;
+
+        /// <summary>現在のBPM</summary>
+        public double CurrentBpm => _currentBpm;
+        /// <summary>1拍毎の長さ（秒）</summary>
+        public double BeatLength => 60L / _currentBpm;
+        /// <summary>現在の拍数</summary>
+        public double CurrentBeat => _beat;
+        /// <summary>BGMの固有拍子</summary>
+        public double PropTimeSignature => _propTimeSignature;
+
+        #region ライフサイクル
+        private void Update()
+        {
+            Tick();
         }
         #endregion
 

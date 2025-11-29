@@ -1,21 +1,15 @@
 using CriWare;
 using UnityEngine;
 
-namespace Mock.MusicSyncMock
+namespace Mock.MusicBattle.MusicSync
 {
     /// <summary>
     ///     Criの音楽を再生するクラス。
     /// </summary>
+    [DisallowMultipleComponent]
     public class CriMusicPlayer : MonoBehaviour
     {
-        private CriAtomSource _audioSource;
-
-        /// <summary>CriAtomSourceコンポーネント</summary>
-        public CriAtomSource Source => _audioSource;
-
-        #region ライフサイクル
-        #endregion
-
+        #region Publicメソッド
         /// <summary>
         /// 初期化を行う。
         /// </summary>
@@ -31,5 +25,14 @@ namespace Mock.MusicSyncMock
         {
             _audioSource.Play();
         }
+        #endregion
+
+        private CriAtomSource _audioSource;
+
+        /// <summary>CriAtomSourceコンポーネント</summary>
+        public CriAtomSource Source => _audioSource;
+
+        #region ライフサイクル
+        #endregion
     }
 }
