@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Player
 {
+    [RequireComponent(typeof(Animator))]
     public class PlayerAnimationController : MonoBehaviour
     {
         /// <summary>

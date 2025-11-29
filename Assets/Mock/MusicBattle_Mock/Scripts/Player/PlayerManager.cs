@@ -1,20 +1,28 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Mock.MusicBattle.Character;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Windows;
 
 namespace Mock.MusicBattle.Player
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerManager : MonoBehaviour
+    public class PlayerManager : MonoBehaviour,ICharacter
     {
-        public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
+        public Transform Player => _player;
+        public void Init(InputBuffer inputBuffer)
         {
             _inputBuffer = inputBuffer;
+            _player = transform;
             Rigidbody rb = GetComponent<Rigidbody>();
+            CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
+            _playerAttacker = new PlayerAttacker(_playerStatus,_config,
+                this,_camera);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
-            _playerAnimController = GetComponent<PlayerAnimationController>();
         }
 
         public void TakeDamage(float damage)
@@ -26,11 +34,12 @@ namespace Mock.MusicBattle.Player
         private PlayerStatus _playerStatus;
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
-
+[SerializeField] 
+        private Transform _camera;
+        private Transform _player;
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
-        private PlayerAnimationController _playerAnimController;
         private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
@@ -48,6 +57,11 @@ namespace Mock.MusicBattle.Player
                 _playerMover.SetPlayerVelocity(_velocity);
                 _playerMover.Update();
             }
+
+            if (_playerAttacker != null)
+            {
+                _playerAttacker.Attack();
+            }
         }
 
         private void FixedUpdate()
@@ -55,7 +69,6 @@ namespace Mock.MusicBattle.Player
             if (_playerMover != null)
             {
                 _playerMover.FixedUpdate();
-                _playerAnimController?.MoveVelocity(_playerMover.CurrentVelocity.magnitude);
             }
         }
 
@@ -66,7 +79,7 @@ namespace Mock.MusicBattle.Player
 
             // 衝突面の法線ベクトルを取得して、地面との接触かどうかを判定する。
             Vector3 contactNormal = collision.contacts[0].normal;
-            if (Vector3.Dot(contactNormal, Vector3.up) > _playerStatus.GroundNormalVerticalThreshold)
+            if (Vector3.Dot(contactNormal, Vector3.up) > 0.5f)
             {
                 _hitGrounds.Add(collision);
                 _playerMover.SetIsGround(0 < _hitGrounds.Count);
@@ -81,6 +94,12 @@ namespace Mock.MusicBattle.Player
                 _playerMover.SetIsGround(0 < _hitGrounds.Count);
             }
         }
+        private void OnDrawGizmos()
+        {
+            if(_playerAttacker != null)
+           _playerAttacker.OnDrawGizmos();
+        }
+
 
         private void InputEventRegister(InputBuffer inputBuffer)
         {

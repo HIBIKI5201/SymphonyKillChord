@@ -1,11 +1,11 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
-using Mock.MusicBattle.Develop;
+using Mock.MusicBattle.Player;
 using Unity.Cinemachine;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Player
+namespace Mock.MusicBattle.Develop
 {
     public class PlayerDevInitializer : MonoBehaviour
     {

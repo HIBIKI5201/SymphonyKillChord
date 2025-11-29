@@ -5,8 +5,9 @@ namespace Mock.MusicBattle
     [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "MusicBattle/" + nameof(PlayerConfig))]
     public class PlayerConfig : ScriptableObject
     {
-        public string IgnoreAttackTagName => _ignoreAttackTagName;
+        public LayerMask IgnoreAttackLayer => _ignoreAttackLayer;
+
         [SerializeField, Tooltip("攻撃が当たらないタグ")]
-        private string _ignoreAttackTagName;
+        private LayerMask _ignoreAttackLayer;
     }
 }

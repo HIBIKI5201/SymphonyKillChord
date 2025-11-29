@@ -1,8 +1,7 @@
 using Mock.MusicBattle.Basis;
-using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
     [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(PlayerStatus))]
     public class PlayerStatus : ScriptableObject
