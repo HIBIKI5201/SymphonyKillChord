@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
     public class PlayerAnimationController : MonoBehaviour
     {
