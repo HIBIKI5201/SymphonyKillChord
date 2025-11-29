@@ -27,11 +27,12 @@ namespace Mock.MusicBattle.Enemy
             add => _healthEntity.OnDeath += value;
             remove => _healthEntity.OnDeath -= value;
         }
-
+        
         /// <summary>
         ///     敵自身の Transform（ロックオン時などに参照される）
         /// </summary>
         public Transform LockTarget => _lockTarget;
+        public HealthEntity HealthEntity => _healthEntity;
 
         /// <summary>
         ///     Rigidbody やロックオン用 Transform などの初期化を行い、
