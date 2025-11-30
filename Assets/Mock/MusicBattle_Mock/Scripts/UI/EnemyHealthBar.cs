@@ -5,6 +5,9 @@ using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     敵の体力バーの実体クラス。
+    /// </summary>
     [UxmlElement]
     public partial class EnemyHealthBar : VisualElement
     {

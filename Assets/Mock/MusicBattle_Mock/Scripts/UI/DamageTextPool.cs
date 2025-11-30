@@ -4,6 +4,9 @@ using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     ダメージテキストのプール。
+    /// </summary>
     public class DamageTextPool
     {
         public DamageTextPool(VisualElement root)
