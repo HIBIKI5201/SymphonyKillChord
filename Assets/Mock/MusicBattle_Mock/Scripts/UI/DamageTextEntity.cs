@@ -41,11 +41,6 @@ namespace Mock.MusicBattle.UI
 
             _damageText.text = damage.ToString("0.0");
 
-            UnityEngine.Camera camera = UnityEngine.Camera.main;
-            Vector2 screenPosition = camera.WorldToScreenPoint(position);
-
-            Vector2 centerPos = screenPosition;
-
             _base.RegisterCallback<GeometryChangedEvent>(MovePosition);
 
             await Awaitable.WaitForSecondsAsync(_lifetime);
@@ -54,15 +49,21 @@ namespace Mock.MusicBattle.UI
 
             void MovePosition(GeometryChangedEvent evt)
             {
-                Vector2 size = new(_base.resolvedStyle.width, _base.resolvedStyle.height);
-                Vector2 offset = size / 2;
+                _base.UnregisterCallback<GeometryChangedEvent>(MovePosition);
 
-                centerPos += new Vector2(offset.x, -offset.y);
+                UnityEngine.Camera camera = UnityEngine.Camera.main;
+                Vector2 screenPosition = camera.WorldToScreenPoint(position);
 
-                style.left = centerPos.x;
-                style.top = Screen.height - centerPos.y;
+                Vector2 offset = new Vector2(
+                    -_base.resolvedStyle.width / 2,
+                    _base.resolvedStyle.height / 2);
 
-                Debug.Log($"damage text move to {style.left} {style.top}");
+                Vector2 uitkPosition = new Vector2(
+                    screenPosition.x + offset.x,
+                    Screen.height - screenPosition.y + offset.y);
+
+                _base.style.left = uitkPosition.x;
+                _base.style.top = uitkPosition.y;
             }
         }
 
