@@ -21,7 +21,7 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
         public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager,
-            MusicSyncManager music,LockOnManager lockonmanager)
+            MusicSyncManager music, LockOnManager lockonmanager)
         {
             _musicManager = music;
             _enemyContainer = enemyContainer;
@@ -56,7 +56,7 @@ namespace Mock.MusicBattle.Enemy
             {
                 enemy.OnDeath -= oldDeathHandler;
             }
-            
+
             System.Action deathHandler = () => _lockonmanager.OnTargetLocked -= _onTargetLockedHandlers[enemy];
             _onDeathHandlers[enemy] = deathHandler;
             enemy.OnDeath += deathHandler;
@@ -70,7 +70,7 @@ namespace Mock.MusicBattle.Enemy
             _onTargetLockedHandlers[enemy] = targetHandler;
             _lockonmanager.OnTargetLocked += targetHandler;
 
-            
+
             _enemyContainer.Register(enemy);
 
             return enemy;
