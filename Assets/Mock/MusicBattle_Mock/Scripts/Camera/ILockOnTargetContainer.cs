@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Battle
+namespace Mock.MusicBattle.Camera
 {
     public interface ILockOnTargetContainer
     {

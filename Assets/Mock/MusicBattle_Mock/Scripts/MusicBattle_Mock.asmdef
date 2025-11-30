@@ -3,9 +3,7 @@
     "rootNamespace": "Mock.MusicBattle",
     "references": [
         "GUID:75469ad4d38634e559750d17036d5f7c",
-        "GUID:4307f53044263cf4b835bd812fc161a4",
-        "GUID:68a532f43eeefd5408e4e8871b769ee4",
-        "GUID:800597811bcc5d848b15e12807d6de45"
+        "GUID:4307f53044263cf4b835bd812fc161a4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

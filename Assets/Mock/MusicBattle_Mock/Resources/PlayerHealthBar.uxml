@@ -1,6 +1,0 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement style="width: 500px; height: 50px; right: 10px; position: absolute; top: 10px; background-color: rgb(80, 80, 80);">
-        <ui:VisualElement name="red-guage" style="background-color: rgb(211, 0, 17); position: absolute; width: 75%; height: 100%; right: 0;" />
-        <ui:VisualElement name="green-guage" style="background-color: rgb(97, 230, 74); position: absolute; width: 50%; height: 100%; right: 0;" />
-    </ui:VisualElement>
-</ui:UXML>

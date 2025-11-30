@@ -42,24 +42,16 @@ namespace Mock.MusicBattle.Camera
             // ロック対象がいる場合はその方向、そうでなければ現在のカメラ回転を使う。
             Quaternion rotation = IsLockOnMode() ? GetLockYaw() : _currentCameraRotation;
 
-            // ターゲットからの理想的なカメラオフセットを計算。
-            Vector3 idealCameraOffset = rotation * _config.CameraOffset;
-            Vector3 currentCameraOffset = _camera.position - _target.position;
-
-            // オフセットを円弧状に補間し、ターゲットからの新しいオフセットを計算。
-            float dampingSpeed = IsLockOnMode() ? _config.CameraLockOnFollowDamping : _config.CameraPlayerFollowDamping;
-            float damping = Mathf.Max(dampingSpeed, 0.0001f);
-            float t = 1f - Mathf.Exp(-deltaTime / damping);
-            Vector3 slerpedCameraOffset = Vector3.Slerp(currentCameraOffset, idealCameraOffset, t);
-
-            // 障害物調整前のカメラ位置を計算。
-            Vector3 preAdjustedCameraPosition = _target.position + slerpedCameraOffset;
+            // 回転を考慮して位置を計算する。
+            Vector3 targetPosition = _target.position + rotation * _config.CameraOffset;
 
             // 障害物があったら補正する。
-            Vector3 finalCameraPosition = AdjustCameraForObstacles(preAdjustedCameraPosition);
+            targetPosition = AdjustCameraForObstacles(targetPosition);
 
-            // カメラ位置を更新。
-            _camera.position = finalCameraPosition;
+            // Damping補完。
+            float damping = Mathf.Max(_config.CameraFollowDamping, 0.0001f);
+            float t = 1f - Mathf.Exp(-deltaTime / damping);
+            _camera.position = Vector3.Lerp(_camera.position, targetPosition, t);
         }
 
         /// <summary>
@@ -72,8 +64,7 @@ namespace Mock.MusicBattle.Camera
             Quaternion targetRotation = IsLockOnMode() ? LockTargetPitch() : PlayerPitch();
 
             // Damping補完。
-            float dampingSpeed = IsLockOnMode() ? _config.CameraLockOnLookAtDamping : _config.CameraPlayerLookAtDamping;
-            float damping = Mathf.Max(dampingSpeed, 0.0001f);
+            float damping = Mathf.Max(_config.CameraLookAtDamping, 0.0001f);
             float t = 1f - Mathf.Exp(-deltaTime / damping);
             _camera.rotation = Quaternion.Slerp(_camera.rotation, targetRotation, t);
         }
