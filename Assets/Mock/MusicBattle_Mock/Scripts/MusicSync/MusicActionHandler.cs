@@ -20,7 +20,7 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="barTimingInfo">小節タイミング</param>
         /// <param name="action">実行するアクション</param>
         /// <param name="cancelToken">キャンセルトークン</param>
-        public void RegisterAction(BarTimingInfo barTimingInfo, Action action, CancellationToken cancelToken)
+        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
         {
             StringBuilder debugLog = new StringBuilder();
             debugLog.AppendLine("アクション予約受付た。");
@@ -30,7 +30,7 @@ namespace Mock.MusicBattle.MusicSync
             double executeBeat = _musicBuffer.ConvertBarTimingInfoToBeat(barTimingInfo);
             debugLog.AppendLine($"予約アクション発火拍数：{executeBeat}");
 
-            ScheduledAction scheduledAction = new ScheduledAction(executeBeat, action, cancelToken);
+            ScheduledAction scheduledAction = new ScheduledAction(executeBeat, action);
             _scheduledActions.Add(scheduledAction);
             _scheduledActions.Sort((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat));
             Debug.Log(debugLog.ToString());
@@ -91,13 +91,6 @@ namespace Mock.MusicBattle.MusicSync
                     debugLog.AppendLine("アクション発火拍：" + scheduledAction.ExecuteBeat);
                     debugLog.AppendLine("最小タイミングも達していないため、繰り返し終了。");
                     break;
-                }
-                else if(scheduledAction.cancelToken.IsCancellationRequested)
-                {
-                    // 発火タイミングに達しているが、キャンセル要求済みの場合、発火せず削除
-                    debugLog.AppendLine("アクション発火拍：" + scheduledAction.ExecuteBeat);
-                    debugLog.AppendLine("キャンセル要求済み、発火しない。");
-                    actionsToRemove.Add(scheduledAction);
                 }
                 else
                 {

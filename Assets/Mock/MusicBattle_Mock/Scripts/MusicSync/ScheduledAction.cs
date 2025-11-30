@@ -13,13 +13,10 @@ namespace Mock.MusicBattle.MusicSync
         public double ExecuteBeat { get; private set; }
         /// <summary>実行アクション</summary>
         public Action Action { get; private set; }
-        /// <summary>取消トークン</summary>
-        public CancellationToken cancelToken;
-        public ScheduledAction(double executeBeat, Action action, CancellationToken token)
+        public ScheduledAction(double executeBeat, Action action)
         {
             ExecuteBeat = executeBeat;
             Action = action;
-            cancelToken = token;
         }
     }
 }
