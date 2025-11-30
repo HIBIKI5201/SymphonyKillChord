@@ -23,7 +23,7 @@ namespace Mock.MusicBattle.Enemy
         private void Awake()
         {
             _enemyContainer = new EnemyContainer();
-            _factory = new EnemyFactory(_enemyContainer, _player, _enemyManager,musicSyncManager);
+       
         }
 
         private void Start()
