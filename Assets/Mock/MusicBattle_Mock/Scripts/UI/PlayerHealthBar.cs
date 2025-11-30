@@ -1,12 +1,13 @@
 using Mock.MusicBattle.Character;
-using System;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     プレイヤーの体力バーの実体クラス。
+    /// </summary>
     [UxmlElement]
     public partial class PlayerHealthBar : VisualElement
     {
@@ -27,6 +28,11 @@ namespace Mock.MusicBattle.UI
 
             Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
+
+            if (_greenBar == null || _redBar == null) { return; }
+
+            _greenBar.style.width = Length.Percent(100);
+            _redBar.style.width = Length.Percent(100);
         }
 
         /// <summary>
