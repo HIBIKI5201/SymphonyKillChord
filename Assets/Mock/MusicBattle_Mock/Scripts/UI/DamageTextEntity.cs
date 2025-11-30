@@ -44,17 +44,26 @@ namespace Mock.MusicBattle.UI
             UnityEngine.Camera camera = UnityEngine.Camera.main;
             Vector2 screenPosition = camera.WorldToScreenPoint(position);
 
-            Vector2 size = new(_base.resolvedStyle.width, _base.resolvedStyle.height);
-            Vector2 offset = size / 2;
+            Vector2 centerPos = screenPosition;
 
-            Vector2 centerPos = screenPosition - offset;
-
-            style.left = centerPos.x;
-            style.top = Screen.height - centerPos.y;
+            _base.RegisterCallback<GeometryChangedEvent>(MovePosition);
 
             await Awaitable.WaitForSecondsAsync(_lifetime);
 
             _onRelease?.Invoke();
+
+            void MovePosition(GeometryChangedEvent evt)
+            {
+                Vector2 size = new(_base.resolvedStyle.width, _base.resolvedStyle.height);
+                Vector2 offset = size / 2;
+
+                centerPos += new Vector2(offset.x, -offset.y);
+
+                style.left = centerPos.x;
+                style.top = Screen.height - centerPos.y;
+
+                Debug.Log($"damage text move to {style.left} {style.top}");
+            }
         }
 
         private const string UXML_RESOURCES_PATH = "DamageTextEntity";
