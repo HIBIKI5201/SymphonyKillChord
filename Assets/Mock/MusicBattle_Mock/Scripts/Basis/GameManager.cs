@@ -43,9 +43,9 @@ namespace Mock.MusicBattle.Basis
         [SerializeField] private MusicSystemInitSO _musicSystemInitSO;
         [SerializeField] private CriAtomSource _source;
 
-        private float _xrange = 50f;
+        private float _xrange = 5f;
         private float _yrange = 1f;
-        private float _zrange = 50f;
+        private float _zrange = 5f;
 
         private EnemyFactory _factory;
         private LockOnManager _lockOnManager;
@@ -53,15 +53,26 @@ namespace Mock.MusicBattle.Basis
 
         private void Awake()
         {
-            EnemyInit();
-            PlayerInit();
+            Init();
         }
 
         private void Start()
         {
-            _musicSyncManager.Init(_source, _musicSystemInitSO.Bgm,_musicSystemInitSO.BgmProperTime,_musicSystemInitSO.StartOffset);
+            _musicSyncManager.Init(_source, _musicSystemInitSO.Bgm, _musicSystemInitSO.BgmProperTime, _musicSystemInitSO.StartOffset);
             StartCoroutine(SpawnLoop());
         }
+        private void Init()
+        {
+            _enemyContainer = new EnemyContainer();
+            _lockOnManager = new LockOnManager(_cameraManager.transform,
+              _enemyContainer, _inputBuffer);
+            _cameraManager.Init(_inputBuffer, _lockOnManager);
+            _playerManager.Init(_inputBuffer);
+            _factory = new EnemyFactory(_enemyContainer,
+               _playerManager.transform, _enemyManager,
+               _musicSyncManager, _lockOnManager);
+        }
+
 
         private void PlayerInit()
         {
@@ -76,22 +87,27 @@ namespace Mock.MusicBattle.Basis
             _enemyContainer = new EnemyContainer();
             _factory = new EnemyFactory(_enemyContainer,
                 _playerManager.transform, _enemyManager,
-                _musicSyncManager);
+                _musicSyncManager, _lockOnManager);
         }
         private IEnumerator SpawnLoop()
-        {
-       
+        { 
             while (true)
             {
-                
-                Vector3 RandamPos = new Vector3(
-                    Random.Range(-_xrange, _xrange),
-                    _yrange,
-                    Random.Range(-_zrange, _zrange));
+               // Debug.Log($"Enemy Count: {_enemyContainer.Targets.Count}");
+                if (_enemyContainer.Targets.Count < 3)
+                {
 
-                _factory.Spawn(_enemystatus, RandamPos);
+                    Vector3 RandamPos = new Vector3(
+                        Random.Range(-_xrange, _xrange),
+                        _yrange,
+                        Random.Range(-_zrange, _zrange));
+
+                    _factory.Spawn(_enemystatus, RandamPos);
+                }
+
 
                 yield return new WaitForSeconds(_enemySpawnTime);
+
             }
         }
     }
