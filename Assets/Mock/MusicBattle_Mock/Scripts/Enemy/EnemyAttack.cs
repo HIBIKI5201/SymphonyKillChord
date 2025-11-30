@@ -26,10 +26,14 @@ namespace Mock.MusicBattle
             _encount = encount;
             _battale = battle;
 
-            enemy.OnAttack -= OnAttackHandler;
-            enemy.OnOutOfRange -= CancelScheduled;
             _enemyManager.OnAttack += OnAttackHandler;
             _enemyManager.OnOutOfRange += CancelScheduled;
+        }
+
+        public void Dispose()
+        {
+            _enemyManager.OnAttack -= OnAttackHandler;
+            _enemyManager.OnOutOfRange -= CancelScheduled;
         }
 
         /// <summary>
@@ -37,6 +41,7 @@ namespace Mock.MusicBattle
         /// </summary>
         public void OnAttackHandler()
         {
+            Debug.Log("攻撃予約可能");
             ScheduledEncount();
         }
 
@@ -45,13 +50,14 @@ namespace Mock.MusicBattle
         /// </summary>
         private void ScheduledBattale()
         {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-            }
+            Debug.Log("バトルフェーズ攻撃予約");
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
+            _musicSyncManager.RegisterAction(barTimingInfo, () =>
+            {
+                _isBattlePhase = false;
+                Attack(_cancellationTokenSource.Token);
+            });
         }
 
         /// <summary>
@@ -59,10 +65,7 @@ namespace Mock.MusicBattle
         /// </summary>
         private void ScheduledEncount()
         {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-            }
+            Debug.Log("エンカウント攻撃予約");
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
             _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
@@ -84,16 +87,24 @@ namespace Mock.MusicBattle
         private CancellationTokenSource _cancellationTokenSource;
         private EnemyManager _enemyManager;
         private MusicSyncManager _musicSyncManager;
+        private bool _isBattlePhase = false;
 
         /// <summary>
         ///     攻撃実行処理。実行後、次のバトルフェーズ攻撃を予約する。
         /// </summary>
         private void Attack(CancellationToken token)
         {
-            Debug.Log("Attack!");
-            ScheduledBattale();
+            if (token.IsCancellationRequested)
+            {
+                Debug.Log("敵側：予約アクションキャンセル済み、何もしない");
+                _isBattlePhase = false;
+                return;
+            }
+            if (!_isBattlePhase)
+            {
+                _isBattlePhase = true;
+                ScheduledBattale();
+            }
         }
-
-
     }
 }
