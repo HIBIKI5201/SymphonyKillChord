@@ -11,12 +11,13 @@ namespace Mock.MusicBattle.Enemy
 
         /// <summary> コンストラクタ。 </summary>
         public EnemyMover(Transform target, Transform enemy,
-            EnemyStatus enemyStatus, NavMeshAgent agent)
+            EnemyStatus enemyStatus, NavMeshAgent agent, EnemyManager enemyManager)
         {
             _target = target;
             _enemy = enemy;
             _agent = agent;
             Init(enemyStatus);
+            _enemyManager = enemyManager;
         }
         public event Action OnAttack;
         public event Action OnOutOfRange;
@@ -57,7 +58,7 @@ namespace Mock.MusicBattle.Enemy
             //射程内＝＞止まって攻撃処理へ。
             else
             {
-                if (_inRange)
+                if (_inRange && _enemyManager.IsLockOn)
                 {
                     OnAttack?.Invoke();
                     _inRange = false;
@@ -67,6 +68,7 @@ namespace Mock.MusicBattle.Enemy
             }
         }
 
+        private EnemyManager _enemyManager;
         private EnemyStatus _enemystatus;
         private Transform _target;
         private Transform _enemy;
