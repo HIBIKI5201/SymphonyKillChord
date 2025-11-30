@@ -1,13 +1,15 @@
 
 using System;
 using System.Collections;
-using UnityEngine;using Mock.MusicBattle.Basis;
+using UnityEngine;
+using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
 using Mock.MusicBattle.Develop;
 using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.Player;
 using Random = UnityEngine.Random;
+using Unity.Cinemachine;
 
 namespace Mock.MusicBattle.Basis
 {
@@ -16,27 +18,29 @@ namespace Mock.MusicBattle.Basis
     public class GameManager : MonoBehaviour
     {
         [Header("Player")]
-        [SerializeField] 
+        [SerializeField]
         private PlayerManager _playerManager;
-        [SerializeField] 
+        [SerializeField]
+        private CinemachineCamera _camera;
+        [SerializeField]
         private InputBuffer _inputBuffer;
         [SerializeField]
         private CameraManager _cameraManager;
-        
+
         [Header("Enemy")]
-        [SerializeField] 
+        [SerializeField]
         private EnemyManager _enemyManager;
         [SerializeField]
         private EnemyStatus _enemystatus;
-        [SerializeField] 
+        [SerializeField]
         private Transform _player;
         [SerializeField]
         private float _enemySpawnTime = 1f;
-        
+
         private float _xrange = 50f;
         private float _yrange = 1f;
         private float _zrange = 50f;
-        
+
         private EnemyFactory _factory;
         private LockOnManager _lockOnManager;
         private EnemyContainer _enemyContainer;
@@ -56,8 +60,8 @@ namespace Mock.MusicBattle.Basis
         {
             _lockOnManager = new LockOnManager(_cameraManager.transform,
                 _enemyContainer, _inputBuffer);
-            _cameraManager.Init(_inputBuffer,_lockOnManager);
-            _playerManager.Init(_inputBuffer);
+            _cameraManager.Init(_inputBuffer, _lockOnManager);
+            _playerManager.Init(_inputBuffer, _camera);
         }
 
         private void EnemyInit()
@@ -74,8 +78,8 @@ namespace Mock.MusicBattle.Basis
                     Random.Range(-_xrange, _xrange),
                     _yrange,
                     Random.Range(-_zrange, _zrange));
-                
-                _factory.Spawn(_enemystatus,RandamPos);
+
+                _factory.Spawn(_enemystatus, RandamPos);
 
                 yield return new WaitForSeconds(_enemySpawnTime);
             }
