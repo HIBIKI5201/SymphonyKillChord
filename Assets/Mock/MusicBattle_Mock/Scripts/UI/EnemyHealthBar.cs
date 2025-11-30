@@ -27,6 +27,10 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_base != null, $"Failed to find element: {ELEMENT_NAME_BASE}");
             Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
+
+            if (_base == null || _greenBar == null || _redBar == null) { return; }
+            _greenBar.style.width = Length.Percent(100);
+            _redBar.style.width = Length.Percent(100);
         }
 
         /// <summary>
