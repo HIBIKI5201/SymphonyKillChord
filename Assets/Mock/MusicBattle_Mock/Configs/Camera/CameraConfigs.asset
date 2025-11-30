@@ -14,10 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Camera.CameraConfigs
   _cameraOffset: {x: 1, y: 2, z: -6}
   _cameraLookAtOffset: {x: 1, y: 1.5, z: 0}
-  _cameraFollowDamping: 0.05
-  _cameraLookAtDamping: 0.01
-  _cameraRotationSpeed: 3
+  _cameraPlayerFollowDamping: 0.03
+  _cameraPlayLookAtDamping: 0.01
+  _cameraLockOnFollowDamping: 0.08
+  _cameraLockOnLookAtDamping: 0.05
+  _cameraRotationSpeed: 1
   _pitchRange: {x: -30, y: 60}
+  _unlockWaitingTime: 0.3
   _isCameraFlipX: 0
   _cameraCollisionRadius: 0.3
   _cameraCollisionOffset: {x: 0, y: 1, z: 0}
