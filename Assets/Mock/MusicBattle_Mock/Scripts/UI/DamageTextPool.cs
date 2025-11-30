@@ -21,6 +21,7 @@ namespace Mock.MusicBattle.UI
 
         public void ShowDamageText(float damage, Vector3 position)
         {
+            // プールから取得して表示する。
             DamageTextEntity entity = _pool.Get();
             entity.Show(damage, position);
         }

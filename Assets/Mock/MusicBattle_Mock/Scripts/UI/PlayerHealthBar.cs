@@ -13,6 +13,7 @@ namespace Mock.MusicBattle.UI
     {
         public PlayerHealthBar()
         {
+            // UXMLを読み込んで初期化する。
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
             {
@@ -31,6 +32,7 @@ namespace Mock.MusicBattle.UI
 
             if (_greenBar == null || _redBar == null) { return; }
 
+            // 初期状態では満タンにしておく。
             _greenBar.style.width = Length.Percent(100);
             _redBar.style.width = Length.Percent(100);
         }
@@ -47,6 +49,7 @@ namespace Mock.MusicBattle.UI
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
             healthEntity.OnDeath += () =>
             {
+                // 死亡時にはイベントを解放する。
                 healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
             };
         }
@@ -77,7 +80,10 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
+            // 緑バーを先に変更。
             await _greenBar.ChangeBarAsync(proportion, 0.6f, token);
+
+            // 少し待ってから赤バーを変更。
             await Awaitable.WaitForSecondsAsync(1f, token);
             await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }

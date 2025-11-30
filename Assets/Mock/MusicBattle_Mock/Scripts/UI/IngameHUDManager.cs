@@ -30,6 +30,7 @@ namespace Mock.MusicBattle.UI
         {
             while (_root == null) await Awaitable.NextFrameAsync();
 
+            // 敵のヘルスバーを生成して初期化する。
             EnemyHealthBar enemyHealthBar = new EnemyHealthBar();
             _root.Add(enemyHealthBar);
             enemyHealthBar.BindData(healthEntity, transform);
@@ -37,6 +38,11 @@ namespace Mock.MusicBattle.UI
             return enemyHealthBar;
         }
 
+        /// <summary>
+        ///     ダメージテキストを表示する。
+        /// </summary>
+        /// <param name="damage"></param>
+        /// <param name="position"></param>
         public void ShowDamageText(float damage, Vector3 position)
         {
             _damageTextPool.ShowDamageText(damage, position);
@@ -60,10 +66,9 @@ namespace Mock.MusicBattle.UI
                     return;
                 }
 
+                _damageTextPool = new(_root);
                 _playerHealthBar = new PlayerHealthBar();
                 _root.Add(_playerHealthBar);
-
-                _damageTextPool = new(_root);
             }
         }
     }
