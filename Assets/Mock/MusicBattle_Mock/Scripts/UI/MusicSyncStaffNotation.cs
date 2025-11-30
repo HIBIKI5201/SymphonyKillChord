@@ -12,6 +12,10 @@ namespace Mock.MusicBattle.UI
     {
         public MusicSyncStaffNotation()
         {
+            style.position = Position.Absolute;
+            style.width = Length.Percent(100);
+            style.height = Length.Percent(100);
+
             // UXMLを読み込んで要素を取得する。
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
@@ -20,12 +24,11 @@ namespace Mock.MusicBattle.UI
                 return;
             }
 
-            TemplateContainer container = treeAsset.Instantiate();
-            hierarchy.Add(container);
+            treeAsset.CloneTree(this);
 
-            VisualElement lines = container.Q<VisualElement>(ELEMENT_NAME_STAFF_LINE_CONTAINER);
+            VisualElement lines = this.Q<VisualElement>(ELEMENT_NAME_STAFF_LINE_CONTAINER);
             _staffLines = lines.Children().ToArray();
-            _noteContainer = container.Q<VisualElement>(ELEMENT_NAME_NOTE_CONTAINER);
+            _noteContainer = this.Q<VisualElement>(ELEMENT_NAME_NOTE_CONTAINER);
 
             Debug.Assert(_staffLines != null, $"Failed to find element: {ELEMENT_NAME_STAFF_LINE_CONTAINER}");
             Debug.Assert(_noteContainer != null, $"Failed to find element: {ELEMENT_NAME_NOTE_CONTAINER}");

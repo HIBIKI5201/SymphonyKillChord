@@ -13,6 +13,8 @@ namespace Mock.MusicBattle.UI
     {
         public EnemyHealthBar()
         {
+            style.visibility = Visibility.Hidden;
+
             // UXMLを読み込んで要素を取得する。
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
@@ -21,13 +23,11 @@ namespace Mock.MusicBattle.UI
                 return;
             }
 
-            TemplateContainer container = treeAsset.Instantiate();
-            style.visibility = Visibility.Hidden;
-            hierarchy.Add(container);
+            treeAsset.CloneTree(this);
 
-            _base = container.Q<VisualElement>(ELEMENT_NAME_BASE);
-            _greenBar = container.Q<VisualElement>(ELEMENT_NAME_GREEN_BAR);
-            _redBar = container.Q<VisualElement>(ELEMENT_NAME_RED_BAR);
+            _base = this.Q<VisualElement>(ELEMENT_NAME_BASE);
+            _greenBar = this.Q<VisualElement>(ELEMENT_NAME_GREEN_BAR);
+            _redBar = this.Q<VisualElement>(ELEMENT_NAME_RED_BAR);
 
             Debug.Assert(_base != null, $"Failed to find element: {ELEMENT_NAME_BASE}");
             Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
