@@ -1,3 +1,4 @@
+using Mock.MusicBattle.MusicSync;
 using UnityEngine;
 
 
@@ -17,11 +18,14 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemyContainer"> 生成した敵を登録するコンテナ。 </param>
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
-        public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager)
+        public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager,
+            MusicSyncManager music)
         {
+            _musicManager = music;
             _enemyContainer = enemyContainer;
             _target = target;
             _enemyPrefab = enemyManager;
+            _musicManager = music;
         }
 
         /// <summary>
@@ -39,10 +43,12 @@ namespace Mock.MusicBattle.Enemy
             {
                 enemy = Object.Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
             }
+            Debug.Log($"_enemyPrefab: {(_enemyPrefab == null ? "NULL" : "OK")}");
 
             enemy.HealthEntity.ResetHealth();
             enemy.SetTarget(_target);
             enemy.InitializeMover();
+            enemy.InitMusic(_musicManager);
             enemy.transform.position = position;
 
             _enemyContainer.Register(enemy);
@@ -52,5 +58,6 @@ namespace Mock.MusicBattle.Enemy
         private EnemyManager _enemyPrefab;
         private EnemyContainer _enemyContainer;
         private Transform _target;
+        private MusicSyncManager _musicManager;
     }
 }
