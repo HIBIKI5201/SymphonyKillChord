@@ -23,13 +23,14 @@ namespace Mock.MusicBattle.Develop
         private void Start()
         {
             _healthEntity = new HealthEntity(_maxHealth);
-            _hud.AddEnemyHealthBar(_healthEntity, transform);
+            _ = _hud.AddEnemyHealthBar(_healthEntity, transform);
         }
 
         [ContextMenu(nameof(ApplyHealthValue))]
         private void ApplyHealthValue()
         {
             _healthEntity.TakeDamage(_damage);
+            _hud.ShowDamageText(_damage, transform.position);
         }
     }
 }

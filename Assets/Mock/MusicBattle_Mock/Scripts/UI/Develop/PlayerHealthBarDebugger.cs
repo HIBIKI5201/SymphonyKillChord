@@ -7,7 +7,6 @@ namespace Mock.MusicBattle.Develop
     /// <summary>
     ///     ヘルスバーのデバッグ用コンポーネント。
     /// </summary>
-    [RequireComponent(typeof(IngameHUDManager))]
     public class PlayerHealthBarDebugger : MonoBehaviour
     {
         [SerializeField]
@@ -20,7 +19,7 @@ namespace Mock.MusicBattle.Develop
         private HealthEntity _healthEntity;
         private void Awake()
         {
-            _hud = GetComponent<IngameHUDManager>();
+            _hud = FindAnyObjectByType<IngameHUDManager>();
         }
 
         private void Start()

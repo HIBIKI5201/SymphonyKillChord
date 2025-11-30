@@ -1,17 +1,19 @@
 using Mock.MusicBattle.Character;
-using System;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     プレイヤーの体力バーの実体クラス。
+    /// </summary>
     [UxmlElement]
     public partial class PlayerHealthBar : VisualElement
     {
         public PlayerHealthBar()
         {
+            // UXMLを読み込んで初期化する。
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
             {
@@ -27,6 +29,12 @@ namespace Mock.MusicBattle.UI
 
             Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
+
+            if (_greenBar == null || _redBar == null) { return; }
+
+            // 初期状態では満タンにしておく。
+            _greenBar.style.width = Length.Percent(100);
+            _redBar.style.width = Length.Percent(100);
         }
 
         /// <summary>
@@ -41,6 +49,7 @@ namespace Mock.MusicBattle.UI
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
             healthEntity.OnDeath += () =>
             {
+                // 死亡時にはイベントを解放する。
                 healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
             };
         }
@@ -71,7 +80,10 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
+            // 緑バーを先に変更。
             await _greenBar.ChangeBarAsync(proportion, 0.6f, token);
+
+            // 少し待ってから赤バーを変更。
             await Awaitable.WaitForSecondsAsync(1f, token);
             await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }
