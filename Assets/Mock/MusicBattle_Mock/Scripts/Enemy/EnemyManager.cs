@@ -3,6 +3,7 @@ using UnityEngine;
 using Mock.MusicBattle.Character;
 using UnityEngine.AI;
 using Mock.MusicBattle.MusicSync;
+using System.Runtime.InteropServices;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -45,16 +46,16 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public Transform LockTarget => _lockTarget;
         public HealthEntity HealthEntity => _healthEntity;
+        public bool IsLockOn => _isLockOn;
 
         /// <summary>
         ///     Rigidbody やロックオン用 Transform などの初期化を行い、
         ///     初期のヘルスを設定する。
         /// </summary>
-        public void Awake()
+        public void SetLockOn(Transform lockon)
         {
-            _lockTarget = transform;
-            _agent = GetComponent<NavMeshAgent>();
-            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
+            _isLockOn = _lockTarget == lockon;
+            Debug.Log($"{gameObject.name} ロックオン対象: {(_isLockOn ? "ロックオン中" : "ロックオン解除")}");
         }
 
         /// <summary>
@@ -65,6 +66,8 @@ namespace Mock.MusicBattle.Enemy
         {
             _target = target;
         }
+
+        /// <summary> 音楽関係を使うクラスを初期化する。 </summary>
         public void InitMusic(MusicSyncManager music)
         {
             _musicSyncManager = music;
@@ -84,7 +87,7 @@ namespace Mock.MusicBattle.Enemy
                 return;
             }
 
-            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus,_agent);
+            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus,_agent,this);
         }
 
         /// <summary>
@@ -124,5 +127,13 @@ namespace Mock.MusicBattle.Enemy
         private HealthEntity _healthEntity;
         private EnemyMover _enemyMover;
         private EnemyAttack _enemyAttack;
+        private bool _isLockOn = false;
+
+        private void Awake()
+        {
+            _lockTarget = transform;
+            _agent = GetComponent<NavMeshAgent>();
+            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
+        }
     }
 }
