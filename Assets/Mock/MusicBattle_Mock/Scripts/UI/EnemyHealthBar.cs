@@ -18,6 +18,7 @@ namespace Mock.MusicBattle.UI
             }
 
             TemplateContainer container = treeAsset.Instantiate();
+            style.visibility = Visibility.Hidden;
             hierarchy.Add(container);
 
             _base = container.Q<VisualElement>(ELEMENT_NAME_BASE);
@@ -52,6 +53,7 @@ namespace Mock.MusicBattle.UI
             };
 
             Update(transform);
+            style.visibility = Visibility.Visible;
         }
 
         private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
