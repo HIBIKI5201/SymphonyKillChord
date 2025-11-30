@@ -1,4 +1,5 @@
 using Mock.MusicBattle.MusicSync;
+using Mock.MusicBattle.UI;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Develop
@@ -10,5 +11,11 @@ namespace Mock.MusicBattle.Develop
         public double BeatLength => 60 / CurrentBpm;
 
         public double CurrentBeat => Time.time / BeatLength;
+
+        private void Awake()
+        {
+            IngameHUDManager hud = FindAnyObjectByType<IngameHUDManager>();
+            hud.Initialize(this);
+        }
     }
 }
