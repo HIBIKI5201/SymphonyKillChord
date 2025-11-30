@@ -25,6 +25,9 @@ namespace Mock.MusicBattle
             _musicSyncManager = music;
             _encount = encount;
             _battale = battle;
+
+            enemy.OnAttack -= OnAttackHandler;
+            enemy.OnOutOfRange -= CancelScheduled;
             _enemyManager.OnAttack += OnAttackHandler;
             _enemyManager.OnOutOfRange += CancelScheduled;
         }
@@ -42,6 +45,10 @@ namespace Mock.MusicBattle
         /// </summary>
         private void ScheduledBattale()
         {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+            }
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
             _musicSyncManager.RegisterAction(barTimingInfo, Attack, _cancellationTokenSource.Token);
@@ -52,6 +59,10 @@ namespace Mock.MusicBattle
         /// </summary>
         private void ScheduledEncount()
         {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+            }
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
             _musicSyncManager.RegisterAction(barTimingInfo, Attack, _cancellationTokenSource.Token);
@@ -62,7 +73,10 @@ namespace Mock.MusicBattle
         /// </summary>
         private void CancelScheduled()
         {
-            _cancellationTokenSource.Cancel();
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+            }
         }
 
         private EnemyMusicSO _encount;
