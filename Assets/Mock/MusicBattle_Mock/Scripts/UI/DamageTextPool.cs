@@ -9,7 +9,7 @@ namespace Mock.MusicBattle.UI
         public void ShowDamageText(float damage, Vector3 position)
         {
             DamageTextEntity entity = _pool.Get();
-            entity.BindData(damage, position);
+            entity.Show(damage, position);
         }
 
         private ObjectPool<DamageTextEntity> _pool = new(
@@ -21,7 +21,7 @@ namespace Mock.MusicBattle.UI
         private static DamageTextEntity Create()
         {
             DamageTextEntity entity = new();
-            entity.Initialize(() => Release(entity));
+            entity.Initialize(() => Release(entity), 2);
             return entity;
         }
 

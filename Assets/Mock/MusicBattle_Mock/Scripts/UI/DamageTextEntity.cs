@@ -22,15 +22,44 @@ namespace Mock.MusicBattle.UI
             hierarchy.Add(container);
         }
 
-        public void Initialize(Action action) => _onRelease = action;
-
-        public void BindData(float damage, Vector3 position)
+        public void Initialize(Action action, float lifetime)
         {
+            _onRelease = action;
+            _lifetime = lifetime;
+        }
 
+        public async void Show(float damage, Vector3 position)
+        {
+            if (_base == null)
+            {
+                Debug.LogError("DamageTextEntity is not properly initialized.");
+                return;
+            }
+
+            _damageText.text = damage.ToString("0.0");
+
+            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            Vector2 screenPosition = camera.WorldToScreenPoint(position);
+
+            Vector2 size = new(_base.resolvedStyle.width, _base.resolvedStyle.height);
+            Vector2 offset = size / 2;
+
+            Vector2 centerPos = screenPosition - offset;
+
+            style.left = centerPos.x;
+            style.top = centerPos.y;
+
+            await Awaitable.WaitForSecondsAsync(_lifetime);
+
+            _onRelease?.Invoke();
         }
 
         private const string UXML_RESOURCES_PATH = "DamageTextEntity";
 
         private Action _onRelease;
+        private float _lifetime;
+
+        private VisualElement _base;
+        private Label _damageText;
     }
 }
