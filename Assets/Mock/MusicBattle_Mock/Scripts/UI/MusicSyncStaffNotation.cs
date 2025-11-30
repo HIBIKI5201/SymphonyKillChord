@@ -49,7 +49,7 @@ namespace Mock.MusicBattle.UI
 
         private void MoveStaffLines(float currentMeasure)
         {
-            float measure = currentMeasure % 4;
+            float measure = currentMeasure % _staffLines.Length;
             for (int i = 0; i < _staffLines.Length; i++)
             {
                 VisualElement line = _staffLines[i];
