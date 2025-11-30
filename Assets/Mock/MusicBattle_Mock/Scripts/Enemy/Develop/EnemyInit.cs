@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using Mock.MusicBattle.MusicSync;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -17,12 +18,12 @@ namespace Mock.MusicBattle.Enemy
         private float _yrange = 1f;
         private float _zrange = 50f;
         private EnemyFactory _factory;
-        
+        private MusicSyncManager musicSyncManager;
 
         private void Awake()
         {
             _enemyContainer = new EnemyContainer();
-            _factory = new EnemyFactory(_enemyContainer, _player, _enemyManager);
+            _factory = new EnemyFactory(_enemyContainer, _player, _enemyManager,musicSyncManager);
         }
 
         private void Start()
