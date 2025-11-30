@@ -154,6 +154,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Enemy.EnemyManager
   _enemyStatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
+  _battaleSo: {fileID: 11400000, guid: 9234d8bc500ef4f409d42f51fe29adbc, type: 2}
+  _encountSo: {fileID: 11400000, guid: afd4f63fe273cad44b2a8f89aff011a7, type: 2}
+  _musicSyncManager: {fileID: 0}
 --- !u!195 &2280656541417241638
 NavMeshAgent:
   m_ObjectHideFlags: 0
