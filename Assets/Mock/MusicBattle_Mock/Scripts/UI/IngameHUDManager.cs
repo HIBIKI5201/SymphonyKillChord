@@ -37,11 +37,17 @@ namespace Mock.MusicBattle.UI
             return enemyHealthBar;
         }
 
+        public void ShowDamageText(float damage, Vector3 position)
+        {
+            _damageTextPool.ShowDamageText(damage, position);
+        }
+
         private UIDocument _document;
         private VisualElement _root;
 
         private PlayerHealthBar _playerHealthBar;
         private List<EnemyHealthBar> _enemyHealthBars = new();
+        private DamageTextPool _damageTextPool = new();
 
         private void Start()
         {
