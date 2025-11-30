@@ -5,6 +5,9 @@ using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     UITKの便利クラス。
+    /// </summary>
     public static class VisualElementUtility
     {
         /// <summary>

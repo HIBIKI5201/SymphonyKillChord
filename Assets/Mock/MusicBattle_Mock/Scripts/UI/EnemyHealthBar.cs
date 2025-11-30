@@ -5,6 +5,9 @@ using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
+    /// <summary>
+    ///     敵の体力バーの実体クラス。
+    /// </summary>
     [UxmlElement]
     public partial class EnemyHealthBar : VisualElement
     {
@@ -18,6 +21,7 @@ namespace Mock.MusicBattle.UI
             }
 
             TemplateContainer container = treeAsset.Instantiate();
+            style.visibility = Visibility.Hidden;
             hierarchy.Add(container);
 
             _base = container.Q<VisualElement>(ELEMENT_NAME_BASE);
@@ -27,6 +31,10 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_base != null, $"Failed to find element: {ELEMENT_NAME_BASE}");
             Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
             Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
+
+            if (_base == null || _greenBar == null || _redBar == null) { return; }
+            _greenBar.style.width = Length.Percent(100);
+            _redBar.style.width = Length.Percent(100);
         }
 
         /// <summary>
@@ -48,6 +56,7 @@ namespace Mock.MusicBattle.UI
             };
 
             Update(transform);
+            style.visibility = Visibility.Visible;
         }
 
         private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
