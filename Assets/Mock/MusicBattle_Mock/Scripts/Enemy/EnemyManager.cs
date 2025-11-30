@@ -135,5 +135,11 @@ namespace Mock.MusicBattle.Enemy
             _agent = GetComponent<NavMeshAgent>();
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
         }
+
+        private void OnDisable()
+        {
+            _enemyAttack?.Dispose();
+            _enemyAttack = null;
+        }
     }
 }

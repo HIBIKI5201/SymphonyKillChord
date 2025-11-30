@@ -51,7 +51,7 @@ namespace Mock.MusicBattle
             }
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, Attack, _cancellationTokenSource.Token);
+            _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Mock.MusicBattle
             }
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, Attack, _cancellationTokenSource.Token);
+            _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Mock.MusicBattle
         /// <summary>
         ///     攻撃実行処理。実行後、次のバトルフェーズ攻撃を予約する。
         /// </summary>
-        private void Attack()
+        private void Attack(CancellationToken token)
         {
             Debug.Log("Attack!");
             ScheduledBattale();
