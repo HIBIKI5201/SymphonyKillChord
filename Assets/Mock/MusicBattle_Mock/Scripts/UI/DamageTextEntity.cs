@@ -50,7 +50,7 @@ namespace Mock.MusicBattle.UI
             Vector2 centerPos = screenPosition - offset;
 
             style.left = centerPos.x;
-            style.top = centerPos.y;
+            style.top = Screen.height - centerPos.y;
 
             await Awaitable.WaitForSecondsAsync(_lifetime);
 
