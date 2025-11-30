@@ -15,7 +15,7 @@ namespace Mock.MusicBattle.Player
             _inputBuffer = inputBuffer;
             _player = transform;
             Rigidbody rb = GetComponent<Rigidbody>();
-            CinemachineCamera = GetComponent<CinemachineCamera>();
+            _cinemachineCamera = CinemachineCamera;
             _playerAttacker = new PlayerAttacker(_playerStatus,_config,
                 this,_camera);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
@@ -37,6 +37,7 @@ namespace Mock.MusicBattle.Player
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
+        private CinemachineCamera _cinemachineCamera;
         private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
