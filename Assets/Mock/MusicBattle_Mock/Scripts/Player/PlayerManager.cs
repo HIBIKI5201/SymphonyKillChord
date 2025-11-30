@@ -1,11 +1,8 @@
 using Mock.MusicBattle.Basis;
-using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Mock.MusicBattle.Character;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Windows;
 
 namespace Mock.MusicBattle.Player
 {
@@ -13,12 +10,12 @@ namespace Mock.MusicBattle.Player
     public class PlayerManager : MonoBehaviour,ICharacter
     {
         public Transform Player => _player;
-        public void Init(InputBuffer inputBuffer)
+        public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
         {
             _inputBuffer = inputBuffer;
             _player = transform;
             Rigidbody rb = GetComponent<Rigidbody>();
-            CinemachineCamera CinemachineCamera = FindAnyObjectByType<CinemachineCamera>();
+            CinemachineCamera = GetComponent<CinemachineCamera>();
             _playerAttacker = new PlayerAttacker(_playerStatus,_config,
                 this,_camera);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
@@ -34,7 +31,7 @@ namespace Mock.MusicBattle.Player
         private PlayerStatus _playerStatus;
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
-[SerializeField] 
+
         private Transform _camera;
         private Transform _player;
         private InputBuffer _inputBuffer;
