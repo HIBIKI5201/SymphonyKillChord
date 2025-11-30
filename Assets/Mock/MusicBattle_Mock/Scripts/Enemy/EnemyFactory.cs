@@ -8,7 +8,7 @@ namespace Mock.MusicBattle.Enemy
     ///     プールを用いてエネミーの生成/再利用を行う。
     ///     死亡時にプールへ戻す処理もセットアップする。
     /// </summary>
-    public class EnemyFactory 
+    public class EnemyFactory
     {
         /// <summary>
         ///     Factory が利用するコンテナ・ターゲット・プレファブを初期化する。
@@ -40,6 +40,7 @@ namespace Mock.MusicBattle.Enemy
                 enemy = Object.Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
             }
 
+            enemy.HealthEntity.ResetHealth();
             enemy.SetTarget(_target);
             enemy.InitializeMover();
             enemy.transform.position = position;

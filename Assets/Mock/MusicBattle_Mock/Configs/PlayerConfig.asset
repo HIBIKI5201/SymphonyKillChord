@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b54f192aca6f2ed43bd40fbf5b3c48f0, type: 3}
   m_Name: PlayerConfig
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.PlayerConfig
-  _ignoreAttackTagName: 
+  _ignoreAttackLayer:
+    serializedVersion: 2
+    m_Bits: 16
