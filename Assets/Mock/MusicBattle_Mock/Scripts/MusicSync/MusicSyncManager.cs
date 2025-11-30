@@ -42,9 +42,9 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="barTimingInfo">小節タイミング情報</param>
         /// <param name="action">実行アクション</param>
         /// <param name="token">キャンセルトークン</param>
-        public void RegisterAction(BarTimingInfo barTimingInfo, Action action, CancellationToken token)
+        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
         {
-            _actionHandler.RegisterAction(barTimingInfo, action, token);
+            _actionHandler.RegisterAction(barTimingInfo, action);
         }
         #endregion
 

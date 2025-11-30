@@ -44,14 +44,23 @@ namespace Mock.MusicBattle.MusicSync
             StringBuilder debugLog = new StringBuilder();
             BarTimingInfo barTimingInfo = new BarTimingInfo(_barFlg, _timeSignature, _targetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, TestScheduledAction, _cancellationTokenSource.Token);
+            _musicSyncManager.RegisterAction(barTimingInfo, () => TestScheduledAction(_cancellationTokenSource.Token)); // ここの呼び出し方に注意
 
             transform.localScale = Vector3.one * 0.75f;
             _image.color = Color.red;
         }
 
-        private void TestScheduledAction()
+        private void TestScheduledAction(CancellationToken token)
         {
+            if(token.IsCancellationRequested)
+            {
+                // こうすると、キャンセルしたかにかかわらず、このメソッドが呼び出されるから、
+                // アクションがキャンセルされてもここで何かやることが可能になる。
+                // 例えばフラグ制御、ステート変更など
+                Debug.Log("敵側：予約アクションキャンセル済み、何もしない");
+                return;
+            }
+            Debug.Log("敵側：アクション発火");
             transform.localScale = Vector3.one * 1.5f;
             _image.color = Color.white;
         }
