@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be8a4a66f6e92b74593bead9092ba870, type: 3}
   m_Name: MusicSystemInitSO
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSystemInitSO
-  _source: {fileID: 0}
-  _bpm: 0
-  _bgmProperTime: 0
-  _startOffset: 0
+  Bgm: 0
+  BgmProperTime: 0
+  StartOffset: 0

@@ -443,10 +443,8 @@ MonoBehaviour:
   _player: {fileID: 1241348093}
   _enemySpawnTime: 1
   _musicSyncManager: {fileID: 1027255975}
+  _musicSystemInitSO: {fileID: 11400000, guid: ba830224c83144847bdf89271db7fbc1, type: 2}
   _source: {fileID: 1027255976}
-  _bpm: 105
-  _bgmProperTime: 4
-  _startOffset: 0
 --- !u!4 &762449977
 Transform:
   m_ObjectHideFlags: 0
@@ -698,6 +696,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 620953097201545478, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: _volume
+      value: 0.15
+      objectReference: {fileID: 0}
     - target: {fileID: 3009702457590381082, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.11666
