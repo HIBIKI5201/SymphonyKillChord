@@ -27,6 +27,7 @@ namespace Mock.MusicBattle.Enemy
             get
             {
                 return _enemies
+                    .Where(enemy => enemy != null && enemy.gameObject.activeInHierarchy)
                     .Select(enemy => enemy.transform)
                     .ToList();
             }
@@ -40,21 +41,28 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemy"> 登録するエネミー。 </param>
         public void Register(EnemyManager enemy)
         {
+            if (_enemies.Contains(enemy)) return;
             _enemies.Add(enemy);
             enemy.gameObject.SetActive(true);
-            
-            enemy.OnDeath += () =>
+            if (_deathHandlers.TryGetValue(enemy, out var oldHandler))
+            {
+                enemy.OnDeath -= oldHandler;
+            }
+            System.Action handler = () =>
             {
                 _enemies.Remove(enemy);
                 _pool.Enqueue(enemy);
                 enemy.gameObject.SetActive(false);
             };
+            _deathHandlers[enemy] = handler;
+            enemy.OnDeath += handler;
         }
 
         public EnemyManager GetFromPool()
         {
             return _pool.Count > 0 ? _pool.Dequeue() : null;
         }
+
 
         /// <summary>
         ///     プールからEnemyManagerを安全に取得する。
@@ -79,5 +87,8 @@ namespace Mock.MusicBattle.Enemy
 
         private List<EnemyManager> _enemies = new();
         private Queue<EnemyManager> _pool = new();
+        private Dictionary<EnemyManager, System.Action> _deathHandlers = new();
+
+
     }
 }
