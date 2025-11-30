@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c234106ef0ff3343a837108da607e44, type: 3}
+  m_Name: EncountMusic
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.EnemyMusicSO
+  _barFlg: 1
+  _timeSignature: 4
+  _targetBeat: 2
