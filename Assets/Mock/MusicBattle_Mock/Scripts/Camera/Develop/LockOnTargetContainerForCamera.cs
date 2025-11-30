@@ -1,4 +1,4 @@
-using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.Camera;
 using System.Collections.Generic;
 using UnityEngine;
 
