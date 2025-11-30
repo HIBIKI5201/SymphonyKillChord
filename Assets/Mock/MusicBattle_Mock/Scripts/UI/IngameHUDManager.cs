@@ -47,7 +47,7 @@ namespace Mock.MusicBattle.UI
 
         private PlayerHealthBar _playerHealthBar;
         private List<EnemyHealthBar> _enemyHealthBars = new();
-        private DamageTextPool _damageTextPool = new();
+        private DamageTextPool _damageTextPool;
 
         private void Start()
         {
@@ -62,6 +62,8 @@ namespace Mock.MusicBattle.UI
 
                 _playerHealthBar = new PlayerHealthBar();
                 _root.Add(_playerHealthBar);
+
+                _damageTextPool = new(_root);
             }
         }
     }
