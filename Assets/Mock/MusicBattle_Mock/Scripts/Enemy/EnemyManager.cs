@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Mock.MusicBattle.Character;
 using UnityEngine.AI;
+using Mock.MusicBattle.MusicSync;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -27,7 +28,18 @@ namespace Mock.MusicBattle.Enemy
             add => _healthEntity.OnDeath += value;
             remove => _healthEntity.OnDeath -= value;
         }
-        
+        public event Action OnAttack
+        {
+            add => _enemyMover.OnAttack += value;
+            remove => _enemyMover.OnAttack -= value;
+        }
+        public event Action OnOutOfRange
+        {
+            add => _enemyMover.OnOutOfRange += value;
+            remove => _enemyMover.OnOutOfRange -= value;
+        }
+
+
         /// <summary>
         ///     敵自身の Transform（ロックオン時などに参照される）
         /// </summary>
@@ -53,7 +65,13 @@ namespace Mock.MusicBattle.Enemy
         {
             _target = target;
         }
-
+        public void InitMusic(MusicSyncManager music)
+        {
+            _musicSyncManager = music;
+            _enemyAttack = new EnemyAttack(this, _musicSyncManager,
+                _encountSo,_battaleSo);
+        }
+       
         /// <summary>
         ///     エネミーの移動処理を担当する EnemyMover を初期化する。
         ///     必要なデータ（ステータス、ターゲット、Rigidbody）が揃っていない場合は初期化を中断する。
@@ -93,11 +111,18 @@ namespace Mock.MusicBattle.Enemy
         [SerializeField, Tooltip("エネミーのステータス")]
         private EnemyStatus _enemyStatus;
 
+        [SerializeField, Tooltip("エネミーの音楽情報")]
+        private EnemyMusicSO _battaleSo;
+
+        [SerializeField, Tooltip("エネミーの音楽情報(接敵時)")]
+        private EnemyMusicSO _encountSo;
+
+        private MusicSyncManager _musicSyncManager;
         private Transform _target;
         private Transform _lockTarget;
-        private Rigidbody _rb;
         private NavMeshAgent _agent;
         private HealthEntity _healthEntity;
         private EnemyMover _enemyMover;
+        private EnemyAttack _enemyAttack;
     }
 }
