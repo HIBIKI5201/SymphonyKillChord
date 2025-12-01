@@ -1,11 +1,10 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
-using Mock.MusicBattle.Player;
-using Unity.Cinemachine;
+using Mock.MusicBattle.Develop;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Develop
+namespace Mock.MusicBattle.Player
 {
     public class PlayerDevInitializer : MonoBehaviour
     {
@@ -13,7 +12,6 @@ namespace Mock.MusicBattle.Develop
         [SerializeField] private InputBuffer _inputBuffer;
         [SerializeField] private CameraManager _cameraManager;
         [SerializeField] private LockOnTargetContainerForCamera _targetContainer;
-        [SerializeField] private CinemachineCamera _camera;
 
         void Awake()
         {
@@ -21,7 +19,7 @@ namespace Mock.MusicBattle.Develop
             bool isSuccess = true;
             isSuccess = isSuccess && _cameraManager.Init(_inputBuffer, lockOnManager);
             Debug.Log(isSuccess ? "初期化は正常に終了した。" : "初期化は失敗した。");
-            _playerManager.Init(_inputBuffer, _camera);
+            _playerManager.Init(_inputBuffer);
         }
     }
 }

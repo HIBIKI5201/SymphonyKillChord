@@ -13,7 +13,7 @@ namespace Mock.MusicBattle.Player
     public class PlayerManager : MonoBehaviour,ICharacter
     {
         public Transform Player => _player;
-        public void Init(InputBuffer inputBuffer, CinemachineCamera camera)
+        public void Init(InputBuffer inputBuffer)
         {
             _inputBuffer = inputBuffer;
             _player = transform;
