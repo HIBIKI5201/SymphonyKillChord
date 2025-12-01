@@ -3,7 +3,7 @@ using Mock.MusicBattle.MusicSync;
 using System.Threading;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Enemy
 {
     /// <summary>
     ///     敵の攻撃を音楽同期で管理するクラス。
@@ -51,6 +51,7 @@ namespace Mock.MusicBattle
         private void ScheduledBattale()
         {
             Debug.Log("バトルフェーズ攻撃予約");
+            CancelScheduled();
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
             _musicSyncManager.RegisterAction(barTimingInfo, () =>
@@ -66,6 +67,7 @@ namespace Mock.MusicBattle
         private void ScheduledEncount()
         {
             Debug.Log("エンカウント攻撃予約");
+            CancelScheduled();
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
             _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
@@ -76,10 +78,7 @@ namespace Mock.MusicBattle
         /// </summary>
         private void CancelScheduled()
         {
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-            }
+           _cancellationTokenSource?.Cancel();
         }
 
         private EnemyMusicSO _encount;

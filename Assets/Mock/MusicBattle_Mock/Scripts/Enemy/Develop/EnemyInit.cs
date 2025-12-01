@@ -18,7 +18,7 @@ namespace Mock.MusicBattle.Enemy
         private float _yrange = 1f;
         private float _zrange = 50f;
         private EnemyFactory _factory;
-        private MusicSyncManager musicSyncManager;
+        private MusicSyncManager _musicSyncManager;
 
         private void Awake()
         {
