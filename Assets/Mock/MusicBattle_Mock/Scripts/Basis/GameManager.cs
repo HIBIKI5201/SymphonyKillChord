@@ -1,5 +1,8 @@
 
 using CriWare;
+using System;
+using System.Collections;
+using UnityEngine;
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
@@ -7,10 +10,8 @@ using Mock.MusicBattle.Develop;
 using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
-using System;
-using System.Collections;
-using UnityEngine;
 using Random = UnityEngine.Random;
+using Unity.Cinemachine;
 
 namespace Mock.MusicBattle.Basis
 {
@@ -22,6 +23,9 @@ namespace Mock.MusicBattle.Basis
         [SerializeField]
         private PlayerManager _playerManager;
         [SerializeField]
+        private CinemachineCamera _camera;
+        [SerializeField]
+
         private InputBuffer _inputBuffer;
         [SerializeField]
         private CameraManager _cameraManager;
@@ -36,16 +40,15 @@ namespace Mock.MusicBattle.Basis
         [SerializeField]
         private float _enemySpawnTime = 1f;
 
-        [Header("MusicSync")]
         [SerializeField, Tooltip("音楽同期マネージャー")]
         private MusicSyncManager _musicSyncManager;
-        [Header("音楽同期システム初期化パラメータ")]
         [SerializeField] private MusicSystemInitSO _musicSystemInitSO;
         [SerializeField] private CriAtomSource _source;
 
-        private float _xrange = 5f;
+        private float _xrange = 50f;
         private float _yrange = 1f;
-        private float _zrange = 5f;
+        private float _zrange = 50f;
+
 
         private EnemyFactory _factory;
         private LockOnManager _lockOnManager;
@@ -67,7 +70,7 @@ namespace Mock.MusicBattle.Basis
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
             _cameraManager.Init(_inputBuffer, _lockOnManager);
-            _playerManager.Init(_inputBuffer);
+            _playerManager.Init(_inputBuffer, _camera);
             _factory = new EnemyFactory(_enemyContainer,
                _playerManager.transform, _enemyManager,
                _musicSyncManager, _lockOnManager);
@@ -79,7 +82,8 @@ namespace Mock.MusicBattle.Basis
             _lockOnManager = new LockOnManager(_cameraManager.transform,
                 _enemyContainer, _inputBuffer);
             _cameraManager.Init(_inputBuffer, _lockOnManager);
-            _playerManager.Init(_inputBuffer);
+            _playerManager.Init(_inputBuffer, _camera);
+
         }
 
         private void EnemyInit()
@@ -90,21 +94,15 @@ namespace Mock.MusicBattle.Basis
                 _musicSyncManager, _lockOnManager);
         }
         private IEnumerator SpawnLoop()
-        { 
+        {
             while (true)
             {
-               // Debug.Log($"Enemy Count: {_enemyContainer.Targets.Count}");
-                if (_enemyContainer.Targets.Count < 3)
-                {
+                Vector3 RandamPos = new Vector3(
+                    Random.Range(-_xrange, _xrange),
+                    _yrange,
+                    Random.Range(-_zrange, _zrange));
 
-                    Vector3 RandamPos = new Vector3(
-                        Random.Range(-_xrange, _xrange),
-                        _yrange,
-                        Random.Range(-_zrange, _zrange));
-
-                    _factory.Spawn(_enemystatus, RandamPos);
-                }
-
+                _factory.Spawn(_enemystatus, RandamPos);
 
                 yield return new WaitForSeconds(_enemySpawnTime);
 
