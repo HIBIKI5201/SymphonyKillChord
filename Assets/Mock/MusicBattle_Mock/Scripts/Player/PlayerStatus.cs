@@ -1,9 +1,8 @@
-using Mock.MusicBattle.Basis;
 using UnityEngine;
 
-namespace Mock.MusicBattle.Player
+namespace Mock.MusicBattle
 {
-    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(PlayerStatus))]
+    [CreateAssetMenu(fileName = nameof(PlayerStatus), menuName = "MusicBattle/" + nameof(PlayerStatus))]
     public class PlayerStatus : ScriptableObject
     {
         public float MoveSpeed => _moveSpeed;
@@ -13,7 +12,6 @@ namespace Mock.MusicBattle.Player
         public float AttackPower => _attackPower;
         public float AttackRange => _attackRange;
         public float MaxHealth => _maxHealth;
-        public float GroundNormalVerticalThreshold => _groundNormalVerticalThreshold;
         [Header("Movement Status")]
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _walkAccelerationDuration;
@@ -23,7 +21,5 @@ namespace Mock.MusicBattle.Player
         [SerializeField] private float _attackPower;
         [SerializeField] private float _attackRange;
         [SerializeField] private float _maxHealth;
-        [Header("Ground Check")]
-        [SerializeField, Range(0, 1)] private float _groundNormalVerticalThreshold = 0.5f;
     }
 }
