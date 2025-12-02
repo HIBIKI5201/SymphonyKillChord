@@ -4,8 +4,13 @@
   <Project Path="VRM10.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniHumanoid.csproj" />
+<<<<<<< HEAD
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
+=======
+  <Project Path="VRM10.MToon10.Editor.csproj" />
+  <Project Path="MusicBattle_Mock.csproj" />
+>>>>>>> 7066e4ab875b252220109f002e3f7e3e6328d933
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
