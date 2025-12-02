@@ -16,6 +16,6 @@ MonoBehaviour:
   _walkAccelerationDuration: 1
   _stopAccelerationDuration: 0
   _rotationDamping: 0.5
-  _attackPower: 100
+  _attackPower: 0.1
   _attackRange: 0
   _maxHealth: 0

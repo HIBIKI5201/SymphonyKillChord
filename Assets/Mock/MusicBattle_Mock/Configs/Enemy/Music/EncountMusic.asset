@@ -9,10 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8902a30d5f2064c891e0b3760cecb2, type: 3}
-  m_Name: EnemyStatus
-  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Enemy.EnemyStatus
-  _moveSpeed: 10
-  _attackPower: 20
-  _attackRange: 3
-  _maxHealth: 100
+  m_Script: {fileID: 11500000, guid: 0c234106ef0ff3343a837108da607e44, type: 3}
+  m_Name: EncountMusic
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.EnemyMusicSO
+  _barFlg: 1
+  _timeSignature: 4
+  _targetBeat: 2

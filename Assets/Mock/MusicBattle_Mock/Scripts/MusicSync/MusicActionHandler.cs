@@ -22,30 +22,36 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="cancelToken">キャンセルトークン</param>
         public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
         {
-            StringBuilder debugLog = new StringBuilder();
-            debugLog.AppendLine("アクション予約受付た。");
-            debugLog.AppendLine($"小節フラグ：{barTimingInfo.BarFlg}, 拍子スケール：{barTimingInfo.TimeSignature}, 拍数：{barTimingInfo.TargetBeat}");
-            debugLog.AppendLine($"現在拍数：{_musicBuffer.CurrentBeat}");
+            _debugLog.Clear();
+            _debugLog.AppendLine("アクション予約受付た。");
+            _debugLog.AppendLine($"小節フラグ：{barTimingInfo.BarFlg}, 拍子スケール：{barTimingInfo.TimeSignature}, 拍数：{barTimingInfo.TargetBeat}");
+            _debugLog.AppendLine($"現在拍数：{_musicBuffer.CurrentBeat}");
 
             double executeBeat = _musicBuffer.ConvertBarTimingInfoToBeat(barTimingInfo);
-            debugLog.AppendLine($"予約アクション発火拍数：{executeBeat}");
+            _debugLog.AppendLine($"予約アクション発火拍数：{executeBeat}");
 
             ScheduledAction scheduledAction = new ScheduledAction(executeBeat, action);
-            _scheduledActions.Add(scheduledAction);
-            _scheduledActions.Sort((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat));
-            Debug.Log(debugLog.ToString());
+            _scheduledActions.Enqueue(scheduledAction);
+            Debug.Log(_debugLog.ToString());
         }
         #endregion
 
-        [SerializeField]
-        private CriMusicBuffer _musicBuffer;
-        private List<ScheduledAction> _scheduledActions = new List<ScheduledAction>();
+        [SerializeField] private CriMusicBuffer _musicBuffer;
+
+        /// <summary>予約アクションのキュー</summary>
+        private PriorityQueue<ScheduledAction> _scheduledActions = new PriorityQueue<ScheduledAction>(
+            Comparer<ScheduledAction>.Create((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat))
+            );
+
+        private StringBuilder _debugLog = new StringBuilder();
 
         [Header("デバッグ用")]
         [SerializeField, Tooltip("定期アクションを起こす単位拍数")]
         private double _onBeatUnit = 1d;
         [SerializeField, ReadOnly, Tooltip("定期アクションを起こす次の拍数")]
         private double _targetBeat = 0;
+
+
         public event Action OnBeat;
 
         #region ライフサイクル
@@ -79,31 +85,27 @@ namespace Mock.MusicBattle.MusicSync
         {
             // 現在拍数
             double currentBeat = _musicBuffer.CurrentBeat;
-            // 削除待ちアクションリスト
-            List<ScheduledAction> actionsToRemove = new List<ScheduledAction>();
-            // デバッグログ出力用
-            foreach (var scheduledAction in _scheduledActions)
+            while(_scheduledActions.Count > 0)
             {
-                StringBuilder debugLog = new StringBuilder();
-                if (scheduledAction.ExecuteBeat > currentBeat)
+                ScheduledAction item = _scheduledActions.Peek();
+                _debugLog.Clear();
+                if (item != null && item.ExecuteBeat > currentBeat)
                 {
                     // 予約アクションの中、発火タイミングの最小値も達していない場合、繰り返し終了
-                    debugLog.AppendLine("アクション発火拍：" + scheduledAction.ExecuteBeat);
-                    debugLog.AppendLine("最小タイミングも達していないため、繰り返し終了。");
+                    _debugLog.AppendLine("アクション発火拍：" + item.ExecuteBeat);
+                    _debugLog.AppendLine("発火できるアクション無し、ループ終了。");
                     break;
                 }
                 else
                 {
                     // 発火タイミングに達している場合、アクション発火
-                    debugLog.AppendLine("アクション発火拍：" + scheduledAction.ExecuteBeat);
-                    debugLog.AppendLine("アクション発火。");
-                    scheduledAction.Action?.Invoke();
-                    actionsToRemove.Add(scheduledAction);
+                    _debugLog.AppendLine("アクション発火拍：" + item.ExecuteBeat);
+                    _debugLog.AppendLine("アクション発火。");
+                    item.Action?.Invoke();
+                    _scheduledActions.Dequeue();
                 }
-                Debug.Log(debugLog.ToString());
+                Debug.Log(_debugLog.ToString());
             }
-            // 発火済み、キャンセル済みアクションを削除
-            _scheduledActions.RemoveAll(action => actionsToRemove.Contains(action));
         }
         #endregion
     }

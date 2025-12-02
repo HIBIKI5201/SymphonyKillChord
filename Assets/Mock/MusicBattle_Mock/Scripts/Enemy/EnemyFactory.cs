@@ -1,3 +1,6 @@
+using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.MusicSync;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -17,11 +20,15 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemyContainer"> 生成した敵を登録するコンテナ。 </param>
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
-        public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager)
+        public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager,
+            MusicSyncManager music, LockOnManager lockonmanager)
         {
+            _musicManager = music;
             _enemyContainer = enemyContainer;
             _target = target;
             _enemyPrefab = enemyManager;
+            _musicManager = music;
+            _lockonmanager = lockonmanager;
         }
 
         /// <summary>
@@ -43,14 +50,38 @@ namespace Mock.MusicBattle.Enemy
             enemy.HealthEntity.ResetHealth();
             enemy.SetTarget(_target);
             enemy.InitializeMover();
+            enemy.InitMusic(_musicManager);
             enemy.transform.position = position;
+            if (_onDeathHandlers.TryGetValue(enemy, out var oldDeathHandler))
+            {
+                enemy.OnDeath -= oldDeathHandler;
+            }
+
+            System.Action deathHandler = () => _lockonmanager.OnTargetLocked -= _onTargetLockedHandlers[enemy];
+            _onDeathHandlers[enemy] = deathHandler;
+            enemy.OnDeath += deathHandler;
+
+            //  OnTargetLockedイベントの多重登録防止 
+            if (_onTargetLockedHandlers.TryGetValue(enemy, out var oldTargetHandler))
+            {
+                _lockonmanager.OnTargetLocked -= oldTargetHandler;
+            }
+            System.Action<Transform> targetHandler = enemy.SetLockOn;
+            _onTargetLockedHandlers[enemy] = targetHandler;
+            _lockonmanager.OnTargetLocked += targetHandler;
+
 
             _enemyContainer.Register(enemy);
+
             return enemy;
         }
 
         private EnemyManager _enemyPrefab;
         private EnemyContainer _enemyContainer;
         private Transform _target;
+        private MusicSyncManager _musicManager;
+        private LockOnManager _lockonmanager;
+        private Dictionary<EnemyManager, System.Action> _onDeathHandlers = new();
+        private Dictionary<EnemyManager, System.Action<Transform>> _onTargetLockedHandlers = new();
     }
 }
