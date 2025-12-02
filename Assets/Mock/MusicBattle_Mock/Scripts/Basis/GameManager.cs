@@ -45,9 +45,7 @@ namespace Mock.MusicBattle.Basis
         [SerializeField] private MusicSystemInitSO _musicSystemInitSO;
         [SerializeField] private CriAtomSource _source;
 
-        private float _xrange = 50f;
-        private float _yrange = 1f;
-        private float _zrange = 50f;
+        [SerializeField]private EnemySpawnSO _enemySpawnSO;
 
 
         private EnemyFactory _factory;
@@ -97,12 +95,16 @@ namespace Mock.MusicBattle.Basis
         {
             while (true)
             {
-                Vector3 RandamPos = new Vector3(
-                    Random.Range(-_xrange, _xrange),
-                    _yrange,
-                    Random.Range(-_zrange, _zrange));
+                if (_enemyContainer.Targets.Count < 3)
+                {
 
-                _factory.Spawn(_enemystatus, RandamPos);
+                    Vector3 RandamPos = new Vector3(
+                        Random.Range(-_enemySpawnSO.XRange, _enemySpawnSO.XRange),
+                        -_enemySpawnSO.YRange,
+                        Random.Range(-_enemySpawnSO.ZRange, _enemySpawnSO.ZRange));
+
+                    _factory.Spawn(_enemystatus, RandamPos);
+                }
 
                 yield return new WaitForSeconds(_enemySpawnTime);
 
