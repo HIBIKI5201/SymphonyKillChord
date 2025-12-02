@@ -17,7 +17,7 @@ namespace Mock.MusicBattle.Player
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _playerAttacker = new PlayerAttacker(_playerStatus, _config,
-                this, _camera);
+                this, CinemachineCamera.transform);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
@@ -32,7 +32,6 @@ namespace Mock.MusicBattle.Player
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
 
-        private Transform _camera;
         private Transform _player;
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
