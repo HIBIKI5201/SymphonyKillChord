@@ -19,11 +19,11 @@ namespace Mock.MusicBattle.UI
                 Debug.LogError($"Failed to load UXML at path: {UXML_RESOURCES_PATH}");
                 return;
             }
-            TemplateContainer container = treeAsset.Instantiate();
-            hierarchy.Add(container);
 
-            _base = container.Q<VisualElement>(ELEMENT_NAME_BASE);
-            _damageText = container.Q<Label>(ELEMENT_NAME_TEXT);
+            treeAsset.CloneTree(this);
+
+            _base = this.Q<VisualElement>(ELEMENT_NAME_BASE);
+            _damageText = this.Q<Label>(ELEMENT_NAME_TEXT);
         }
 
         /// <summary>
