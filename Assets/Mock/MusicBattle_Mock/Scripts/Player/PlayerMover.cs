@@ -12,6 +12,9 @@ namespace Mock.MusicBattle.Player
             _rb = rb;
         }
 
+        // 現在の速度。
+        public Vector3 CurrentVelocity {  get; private set; }
+
         /// <summary>
         ///     入力方向からプレイヤーの速度を計算する。
         /// </summary>
@@ -72,14 +75,14 @@ namespace Mock.MusicBattle.Player
         /// <param name="t"></param>
         private void UpdateHorizontalVelocity(float t)
         {
-            Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+            Vector3 horizontalCurrent = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
             Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
 
             _horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
 
-            _currentVelocity = new Vector3(
+            CurrentVelocity = new Vector3(
                 _horizontalVelocity.x,
-                _currentVelocity.y,
+                CurrentVelocity.y,
                 _horizontalVelocity.z
             );
         }
@@ -92,7 +95,7 @@ namespace Mock.MusicBattle.Player
             // 現在の向きを水平に
             Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
             // 水平方向の速度成分
-            Vector3 targetDir = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
+            Vector3 targetDir = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
             // Cinemachine式 Damping
             float rotDamping = Mathf.Max(_status.RotationDamping, 0.0001f);
             float rotT = 1f - Mathf.Exp(-Time.deltaTime / rotDamping);
@@ -105,16 +108,18 @@ namespace Mock.MusicBattle.Player
 
         public void FixedUpdate()
         {
-            Vector3 velocity = new Vector3(_currentVelocity.x, _rb.linearVelocity.y, _currentVelocity.z);
-            _rb.linearVelocity = velocity;
+            _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
+            //CurrentVelocity = _rb.linearVelocity;
+            Debug.Log(_horizontalVelocity.magnitude);
         }
 
         private readonly PlayerStatus _status;
         private readonly Transform _player;
         private readonly Transform _camera;
         private readonly Rigidbody _rb;
-        private Vector3 _currentVelocity;
+        // 目標の速度。
         private Vector3 _targetVelocity;
+        // 水平方向の速度。
         private Vector3 _horizontalVelocity;
         private bool _isGround;
     }
