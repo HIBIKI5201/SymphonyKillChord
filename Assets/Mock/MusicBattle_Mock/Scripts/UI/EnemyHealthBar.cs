@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Character;
+using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -57,6 +58,8 @@ namespace Mock.MusicBattle.UI
                 healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
                 _disposeCTS.Cancel();
                 _disposeCTS.Dispose();
+
+                hierarchy.Remove(this);
             };
 
             Update(transform);
@@ -85,7 +88,15 @@ namespace Mock.MusicBattle.UI
             while (transform != null && !token.IsCancellationRequested)
             {
                 MovePosition(transform.position);
-                await Awaitable.NextFrameAsync(token);
+                try
+                {
+                    await Awaitable.NextFrameAsync(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // キャンセルされた場合はループを抜ける。
+                    break;
+                }
             }
         }
 
