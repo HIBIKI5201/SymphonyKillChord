@@ -1,19 +1,29 @@
+using Mock.MusicBattle.Enemy;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Basis
 {
-    public class EnemySpawnUtility : MonoBehaviour
+    /// <summary>Enemyのスポーン処理を行うユーティリティクラス</summary>
+    public static class EnemySpawnUtility
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        /// <summary>スポーン位置を生成する</summary>
+        public static Vector3 CreateSpawnPos(EnemySpawnSO spawnSO)
         {
-        
+            return new Vector3(
+                Random.Range(-spawnSO.XRange, spawnSO.XRange),
+                        -spawnSO.YRange,
+                        Random.Range(-spawnSO.ZRange, spawnSO.ZRange)
+            );
         }
 
-        // Update is called once per frame
-        void Update()
+        /// <summary>Enemyをスポーンする。</summary>
+        public static void SpawnEnemy(
+            EnemyFactory factory,
+            EnemyStatus status,
+            Vector3 pos
+            )
         {
-        
+            factory.Spawn(status, pos);
         }
     }
 }
