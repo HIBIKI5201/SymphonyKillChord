@@ -27,7 +27,7 @@ namespace Mock.MusicBattle
         public void OnDrawGizmos()
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(_origin, _origin + _direction * GIZMO_RAY_RANGE);
+            Gizmos.DrawLine(_origin, _origin + _direction * _playerstatus.AttackRange);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Mock.MusicBattle
         {
             _origin = _player.Player.position + Vector3.up * HEIGHT_RAY;
             _direction = _camera.forward;
-            if (!TryFindAttackTarget(out ICharacter target))
+            if (!TryFindAttackTarget(_origin, _direction, out ICharacter target))
             {
                 Debug.Log("currentCharacter is null");
                 return;
@@ -51,9 +51,9 @@ namespace Mock.MusicBattle
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        public bool TryFindAttackTarget(out ICharacter character)
+        public bool TryFindAttackTarget(Vector3 origin, Vector3 direction, out ICharacter character)
         {
-            character = FindAttackTarget();
+            character = FindAttackTarget(origin, direction);
             return character != null;
         }
 
@@ -61,12 +61,12 @@ namespace Mock.MusicBattle
         ///     敵を探して見つけたら返す。
         /// </summary>
         /// <returns> 敵の情報 </returns>
-        public ICharacter FindAttackTarget()
+        public ICharacter FindAttackTarget(Vector3 origin, Vector3 direction)
         {
             ICharacter character = null;
-            if (Physics.Raycast(_origin, _direction,
+            if (Physics.Raycast(origin, direction,
                     out RaycastHit hitInfo,
-                    _playerstatus.AttackRange,  _config.IgnoreAttackLayer))
+                    _playerstatus.AttackRange, _config.IgnoreAttackLayer))
             {
                 Rigidbody rb = hitInfo.collider.attachedRigidbody;
                 Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
@@ -84,7 +84,6 @@ namespace Mock.MusicBattle
         private PlayerConfig _config;
 
         private const float HEIGHT_RAY = 0.7f;
-        private const float GIZMO_RAY_RANGE = 5f;
         private Vector3 _direction;
         private Vector3 _origin;
     }
