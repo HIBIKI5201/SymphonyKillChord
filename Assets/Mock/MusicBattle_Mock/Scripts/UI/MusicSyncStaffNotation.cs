@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,14 +18,14 @@ namespace Mock.MusicBattle.UI
             style.height = Length.Percent(100);
 
             // UXMLを読み込んで要素を取得する。
-            VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
-            if (treeAsset == null)
+            VisualTreeAsset notationAsset = Resources.Load<VisualTreeAsset>(NOTATION_UXML_RESOURCES_PATH);
+            if (notationAsset == null)
             {
-                Debug.LogError($"Failed to load UXML at path: {UXML_RESOURCES_PATH}");
+                Debug.LogError($"Failed to load UXML at path: {NOTATION_UXML_RESOURCES_PATH}");
                 return;
             }
 
-            treeAsset.CloneTree(this);
+            notationAsset.CloneTree(this);
 
             VisualElement lines = this.Q<VisualElement>(ELEMENT_NAME_STAFF_LINE_CONTAINER);
             _staffLines = lines.Children().ToArray();
@@ -32,14 +33,19 @@ namespace Mock.MusicBattle.UI
 
             Debug.Assert(_staffLines != null, $"Failed to find element: {ELEMENT_NAME_STAFF_LINE_CONTAINER}");
             Debug.Assert(_noteContainer != null, $"Failed to find element: {ELEMENT_NAME_NOTE_CONTAINER}");
+
+            _noteAsset = Resources.Load<VisualTreeAsset>(NOTE_UXML_RESOURCES_PATH);
+            Debug.Assert(_noteAsset != null, $"Failed to load UXML at path: {NOTE_UXML_RESOURCES_PATH}");
         }
 
-        public void Update(float currentMeasure)
+        public void Update(float deltaTime, float currentMeasure)
         {
             MoveStaffLines(currentMeasure);
+            MoveNotes(deltaTime);
         }
 
-        private const string UXML_RESOURCES_PATH = "MusicSyncStaffNotation";
+        private const string NOTATION_UXML_RESOURCES_PATH = "MusicSyncStaffNotation";
+        private const string NOTE_UXML_RESOURCES_PATH = "MusicSyncNote";
 
         private const string ELEMENT_NAME_STAFF_LINE_CONTAINER = "staff-line-container";
         private const string ELEMENT_NAME_NOTE_CONTAINER = "note-container";
@@ -48,6 +54,9 @@ namespace Mock.MusicBattle.UI
 
         private VisualElement[] _staffLines;
         private VisualElement _noteContainer;
+
+        private VisualTreeAsset _noteAsset;
+        private List<VisualElement> _activeNotes = new();
 
         private void MoveStaffLines(float currentMeasure)
         {
@@ -70,6 +79,11 @@ namespace Mock.MusicBattle.UI
 
                 _staffLines[i].style.left = new Length(x, LengthUnit.Percent);
             }
+        }
+
+        private void MoveNotes(float deltaTime)
+        {
+            if (_activeNotes.Count == 0) { return; }
         }
     }
 }
