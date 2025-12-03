@@ -1,19 +1,24 @@
-using UnityEngine;
+using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.Player;
+using Unity.Cinemachine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Basis
 {
-    public class PlayerInitUtility : MonoBehaviour
+    /// <summary>プレイヤーの初期化ユーティリティクラス</summary>
+    public static class PlayerInitUtility
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        /// <summary>プレイヤーの初期化をする。</summary>
+        public static void InitPlayer(
+            PlayerManager playerManager,
+            InputBuffer inputBuffer,
+            CameraManager cameraManager,
+            CinemachineCamera cinemachineCamera,
+            LockOnManager lockOnManager
+            )
         {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        
+            cameraManager.Init(inputBuffer, lockOnManager);
+            playerManager.Init(inputBuffer, cinemachineCamera);
         }
     }
 }
