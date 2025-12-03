@@ -58,14 +58,9 @@ namespace Mock.MusicBattle.Battle
 
             if (target != null)
             {
-                if (target.TryGetComponent<EnemyManager>(out var enemy))
+                if (target.TryGetComponent<EnemyManager>(out _currentEnemy ))
                 {
-                    _currentEnemy = enemy;
                     _currentEnemy.SetLockOn(target);
-                }
-                else
-                {
-                    _currentEnemy = null;
                 }
             }
 
