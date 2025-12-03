@@ -55,17 +55,18 @@ namespace Mock.MusicBattle.Battle
                         _targetContainer.Targets.ToArray(), axis,
                         _targetContainer[_lockingTargetIndex]);
             }
-            if (_currentEnemy != null)
-            {
-                _currentEnemy.SetLockOn(null);
-                _currentEnemy = null;
-            }
 
             if (target != null)
             {
-                _currentEnemy = target.GetComponent<EnemyManager>();
-
-                _currentEnemy?.SetLockOn(target);
+                if (target.TryGetComponent<EnemyManager>(out var enemy))
+                {
+                    _currentEnemy = enemy;
+                    _currentEnemy.SetLockOn(target);
+                }
+                else
+                {
+                    _currentEnemy = null;
+                }
             }
 
 
