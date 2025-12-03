@@ -436,15 +436,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Basis.GameManager
   _playerManager: {fileID: 1241348094}
+  _camera: {fileID: 170987199}
   _inputBuffer: {fileID: 1584562521}
   _cameraManager: {fileID: 170987201}
   _enemyManager: {fileID: 6524801491465042354, guid: 530d7640ecc85bc46b60704ee19adfdd, type: 3}
   _enemystatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _player: {fileID: 1241348093}
-  _enemySpawnTime: 1
+  _enemySpawnTime: 3
   _musicSyncManager: {fileID: 1027255975}
   _musicSystemInitSO: {fileID: 11400000, guid: ba830224c83144847bdf89271db7fbc1, type: 2}
   _source: {fileID: 1027255976}
+  _enemySpawnSO: {fileID: 11400000, guid: 382d8b9707fb9d54490fe3fe2e5aeb75, type: 2}
 --- !u!4 &762449977
 Transform:
   m_ObjectHideFlags: 0
@@ -882,7 +884,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Player.PlayerManager
   _playerStatus: {fileID: 11400000, guid: ad763209e5e2c3a489ee08ac6503640d, type: 2}
   _config: {fileID: 11400000, guid: 61915a6c2cf23f64f90e0dcf7523c198, type: 2}
-  _camera: {fileID: 1478568362}
 --- !u!54 &1241348095
 Rigidbody:
   m_ObjectHideFlags: 0
