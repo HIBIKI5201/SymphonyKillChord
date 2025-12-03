@@ -13,10 +13,9 @@ namespace Mock.MusicBattle
         public static void AddEnemyHealthBar(
         IngameHUDManager hud,
         Transform enemyTransform,
-        float maxHealth)
+        HealthEntity _health)
         {
-            var health = new HealthEntity(maxHealth);
-            _ = hud.AddEnemyHealthBar(health, enemyTransform);
+            _ = hud.AddEnemyHealthBar(_health, enemyTransform);
            
         }
 

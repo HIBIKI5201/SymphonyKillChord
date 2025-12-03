@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.MusicSync;
+using Mock.MusicBattle.UI;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="target"> 敵が追従・攻撃する対象。 </param>
         /// <param name="enemy"> 生成元となるエネミーのプレファブ。 </param>
         public EnemyFactory(EnemyContainer enemyContainer, Transform target, EnemyManager enemyManager,
-            MusicSyncManager music, LockOnManager lockonmanager)
+            MusicSyncManager music, LockOnManager lockonmanager,IngameHUDManager hud)
         {
             _musicManager = music;
             _enemyContainer = enemyContainer;
@@ -29,6 +30,7 @@ namespace Mock.MusicBattle.Enemy
             _enemyPrefab = enemyManager;
             _musicManager = music;
             _lockonmanager = lockonmanager;
+            _hudManager = hud;
         }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace Mock.MusicBattle.Enemy
             }
 
             enemy.HealthEntity.ResetHealth();
+            HudUtility.AddEnemyHealthBar(_hudManager, enemy.transform,enemy.HealthEntity);
             enemy.SetTarget(_target);
             enemy.InitializeMover();
             enemy.InitMusic(_musicManager);
@@ -76,6 +79,7 @@ namespace Mock.MusicBattle.Enemy
             return enemy;
         }
 
+        private IngameHUDManager _hudManager;
         private EnemyManager _enemyPrefab;
         private EnemyContainer _enemyContainer;
         private Transform _target;
