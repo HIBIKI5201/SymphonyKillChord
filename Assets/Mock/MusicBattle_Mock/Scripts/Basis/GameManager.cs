@@ -1,17 +1,16 @@
 
+using Codice.Utils;
 using CriWare;
-using System;
-using System.Collections;
-using UnityEngine;
-using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
-using Mock.MusicBattle.Develop;
+using Mock.MusicBattle.Character;
 using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
-using Random = UnityEngine.Random;
+using Mock.MusicBattle.UI;
+using System.Threading;
 using Unity.Cinemachine;
+using UnityEngine;
 
 namespace Mock.MusicBattle.Basis
 {
@@ -44,10 +43,12 @@ namespace Mock.MusicBattle.Basis
         private MusicSyncManager _musicSyncManager;
         [SerializeField] private MusicSystemInitSO _musicSystemInitSO;
         [SerializeField] private CriAtomSource _source;
+        [SerializeField] private CriMusicBuffer _criMusicBuffer;
 
         [SerializeField] private EnemySpawnSO _enemySpawnSO;
 
 
+        private IngameHUDManager _hud;
         private EnemyFactory _factory;
         private LockOnManager _lockOnManager;
         private EnemyContainer _enemyContainer;
@@ -73,7 +74,10 @@ namespace Mock.MusicBattle.Basis
             _enemyContainer = new EnemyContainer();
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
-
+            _hud = FindAnyObjectByType<IngameHUDManager>();
+            HudUtility.Init(_hud, _playerManager,
+                _criMusicBuffer, _inputBuffer,this.destroyCancellationToken);
+      
             PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
                 _cameraManager, _camera, _lockOnManager);
 
