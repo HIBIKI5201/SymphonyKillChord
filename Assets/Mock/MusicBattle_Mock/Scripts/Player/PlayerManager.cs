@@ -16,22 +16,22 @@ namespace Mock.MusicBattle.Player
             _player = transform;
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
+            _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config,
                 this, CinemachineCamera.transform);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
 
-        public void TakeDamage(float damage)
-        {
-            // HelthEntityが未実装のため、仮実装
-        }
+        public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
+
 
         [SerializeField, Tooltip("プレイヤーのステータス")]
         private PlayerStatus _playerStatus;
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
 
+        private HealthEntity _healthEntity;
         private Transform _player;
         private InputBuffer _inputBuffer;
         private PlayerMover _playerMover;
