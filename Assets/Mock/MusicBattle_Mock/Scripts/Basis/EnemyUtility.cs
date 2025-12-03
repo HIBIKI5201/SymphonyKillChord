@@ -21,9 +21,9 @@ namespace Mock.MusicBattle.Basis
                 if (enemyContainer.Targets.Count < spawnSO.MaxEnemyCount)
                 {
                     Vector3 randomPos = new Vector3(
-                        Random.Range(-spawnSO.XRange, spawnSO.XRange),
-                        spawnSO.YRange,
-                        Random.Range(-spawnSO.ZRange, spawnSO.ZRange));
+                        Random.Range(-spawnSO.RangeX, spawnSO.RangeX),
+                        spawnSO.RangeY,
+                        Random.Range(-spawnSO.RangeZ, spawnSO.RangeZ));
 
                     factory.Spawn(status, randomPos);
                 }

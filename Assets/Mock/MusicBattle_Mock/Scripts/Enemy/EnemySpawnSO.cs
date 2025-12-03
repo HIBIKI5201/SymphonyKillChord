@@ -6,13 +6,13 @@ namespace Mock.MusicBattle.Enemy
     public class EnemySpawnSO : ScriptableObject
     {
         /// <summary> スポーン範囲 X </summary>
-        public float XRange => _spawnRange.x;
+        public float RangeX => _spawnRange.x;
 
         /// <summary> スポーン範囲 Y </summary>
-        public float YRange => _spawnRange.y;
+        public float RangeY => _spawnRange.y;
 
         /// <summary> スポーン範囲 Z </summary>
-        public float ZRange => _spawnRange.z;
+        public float RangeZ => _spawnRange.z;
 
         /// <summary> 最大出現数 </summary>
         public int MaxEnemyCount => _maxEnemyCount;
