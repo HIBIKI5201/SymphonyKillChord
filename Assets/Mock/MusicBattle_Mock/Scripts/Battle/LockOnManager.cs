@@ -35,7 +35,7 @@ namespace Mock.MusicBattle.Battle
         private readonly ILockOnTargetContainer _targetContainer;
         private readonly float _unlockWaitingTime;
         private readonly InputBuffer _inputBuffer;
-        private EnemyManager _currentEnemy; 
+        private EnemyManager _currentEnemy;
 
         private int _lockingTargetIndex;
         private bool _isUnlockTarget;
@@ -58,7 +58,7 @@ namespace Mock.MusicBattle.Battle
 
             if (target != null)
             {
-                if (target.TryGetComponent<EnemyManager>(out _currentEnemy ))
+                if (target.TryGetComponent<EnemyManager>(out _currentEnemy))
                 {
                     _currentEnemy.SetLockOn(target);
                 }
