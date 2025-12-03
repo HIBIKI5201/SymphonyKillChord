@@ -85,7 +85,7 @@ namespace Mock.MusicBattle.UI
         {
             if (_musicBuffer == null || _musicSyncStaffNotation == null) { return; }
 
-            _musicSyncStaffNotation.Update((float)(_musicBuffer.CurrentBeat / 4d));
+            _musicSyncStaffNotation.Update(Time.deltaTime, (float)(_musicBuffer.CurrentBeat / 4d));
         }
     }
 }
