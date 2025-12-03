@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.Player
     public class PlayerManager : MonoBehaviour, ICharacter
     {
         public Transform Player => _player;
+        /// <summary>   inputBufferとCinemachineCameraの初期化。  </summary>
         public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
         {
             _inputBuffer = inputBuffer;
@@ -24,7 +25,6 @@ namespace Mock.MusicBattle.Player
         }
 
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
-
 
         [SerializeField, Tooltip("プレイヤーのステータス")]
         private PlayerStatus _playerStatus;
@@ -43,6 +43,7 @@ namespace Mock.MusicBattle.Player
 
         private void OnDisable()
         {
+            if(_inputBuffer != null)
             InputEventUnregister(_inputBuffer);
         }
 
@@ -55,11 +56,6 @@ namespace Mock.MusicBattle.Player
                 _playerMover.SetPlayerVelocity(_velocity);
                 _playerMover.Update();
             }
-
-            if (_playerAttacker != null)
-            {
-                _playerAttacker.Attack();
-            }
         }
 
         private void FixedUpdate()
@@ -67,7 +63,6 @@ namespace Mock.MusicBattle.Player
             if (_playerMover != null)
             {
                 _playerMover.FixedUpdate();
-
             }
         }
 
@@ -110,18 +105,15 @@ namespace Mock.MusicBattle.Player
             inputBuffer.MoveAction.Performed += OnInputMove;
             inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
             inputBuffer.AttackAction.Started += OnInputAttack;
+            _healthEntity.OnDeath += OnDeathAction;
         }
 
         private void InputEventUnregister(InputBuffer inputBuffer)
         {
-            if (inputBuffer == null)
-            {
-                Debug.LogError($"{nameof(InputBuffer)} is null");
-                return;
-            }
             inputBuffer.MoveAction.Performed -= OnInputMove;
             inputBuffer.MoveAction.Canceled -= OnInputMoveCancle;
             inputBuffer.AttackAction.Started -= OnInputAttack;
+            _healthEntity.OnDeath -= OnDeathAction;
         }
 
         private void OnInputMove(Vector2 input)
@@ -136,7 +128,15 @@ namespace Mock.MusicBattle.Player
 
         private void OnInputAttack(float input)
         {
+            if (_playerAttacker != null)
+            {
+                _playerAttacker.Attack();
+            }
+        }
 
+        private void OnDeathAction()
+        {
+            Debug.Log("Player Dead");
         }
     }
 }
