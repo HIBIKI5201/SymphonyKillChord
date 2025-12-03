@@ -54,6 +54,9 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public void SetLockOn(Transform lockon)
         {
+            if (lockon == null || lockon.gameObject == null)
+                return;
+
             _isLockOn = _lockTarget == lockon;
             Debug.Log($"{gameObject.name} ロックオン対象: {(_isLockOn ? "ロックオン中" : "ロックオン解除")}");
         }
