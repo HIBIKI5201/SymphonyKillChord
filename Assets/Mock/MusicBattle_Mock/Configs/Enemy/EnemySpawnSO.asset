@@ -12,7 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fec09ea2b076f484b8fd628dd7846d5b, type: 3}
   m_Name: EnemySpawnSO
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Enemy.EnemySpawnSO
-  XRange: 0
-  YRange: 0
-  ZRange: 0
-  MaxEnemyCount: 3
+  _spawnRange: {x: 2, y: 1, z: 2}
+  _maxEnemyCount: 3
