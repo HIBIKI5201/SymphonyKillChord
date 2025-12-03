@@ -9,6 +9,6 @@ namespace Mock.MusicBattle.Enemy
         public float XRange;
         public float YRange;
         public float ZRange;
+        public int MaxEnemyCount;
     }
-    
 }

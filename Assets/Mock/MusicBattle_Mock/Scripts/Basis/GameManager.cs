@@ -45,7 +45,7 @@ namespace Mock.MusicBattle.Basis
         [SerializeField] private MusicSystemInitSO _musicSystemInitSO;
         [SerializeField] private CriAtomSource _source;
 
-        [SerializeField]private EnemySpawnSO _enemySpawnSO;
+        [SerializeField] private EnemySpawnSO _enemySpawnSO;
 
 
         private EnemyFactory _factory;
@@ -60,55 +60,27 @@ namespace Mock.MusicBattle.Basis
         private void Start()
         {
             _musicSyncManager.Init(_source, _musicSystemInitSO.Bgm, _musicSystemInitSO.BgmProperTime, _musicSystemInitSO.StartOffset);
-            StartCoroutine(SpawnLoop());
+            StartCoroutine(EnemyUtility.SpawnLoop(
+                _enemyContainer,
+                _enemySpawnSO,
+                _factory,
+                _enemystatus,
+                _enemySpawnTime));
         }
+
         private void Init()
         {
             _enemyContainer = new EnemyContainer();
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
-            _cameraManager.Init(_inputBuffer, _lockOnManager);
-            _playerManager.Init(_inputBuffer, _camera);
-            _factory = new EnemyFactory(_enemyContainer,
-               _playerManager.transform, _enemyManager,
-               _musicSyncManager, _lockOnManager);
-        }
 
+            PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
+                _cameraManager, _camera, _lockOnManager);
 
-        private void PlayerInit()
-        {
-            _lockOnManager = new LockOnManager(_cameraManager.transform,
-                _enemyContainer, _inputBuffer);
-            _cameraManager.Init(_inputBuffer, _lockOnManager);
-            _playerManager.Init(_inputBuffer, _camera);
-
-        }
-
-        private void EnemyInit()
-        {
-            _enemyContainer = new EnemyContainer();
-            _factory = new EnemyFactory(_enemyContainer,
-                _playerManager.transform, _enemyManager,
-                _musicSyncManager, _lockOnManager);
-        }
-        private IEnumerator SpawnLoop()
-        {
-            while (true)
-            {
-                if (_enemyContainer.Targets.Count < 3)
-                {
-
-                    Vector3 RandamPos = new Vector3(
-                        Random.Range(-_enemySpawnSO.XRange, _enemySpawnSO.XRange),
-                        -_enemySpawnSO.YRange,
-                        Random.Range(-_enemySpawnSO.ZRange, _enemySpawnSO.ZRange));
-
-                    _factory.Spawn(_enemystatus, RandamPos);
-                }
-
-                yield return new WaitForSeconds(_enemySpawnTime);
-
-            }
+            _factory = new EnemyFactory(
+                _enemyContainer, _player,
+                _enemyManager, _musicSyncManager,
+                _lockOnManager);
         }
     }
 }

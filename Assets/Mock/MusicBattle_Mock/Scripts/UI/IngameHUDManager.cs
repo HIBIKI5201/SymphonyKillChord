@@ -1,6 +1,5 @@
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -54,6 +53,11 @@ namespace Mock.MusicBattle.UI
             _damageTextPool.ShowDamageText(damage, position);
         }
 
+        public void CreateNote(float measure)
+        {
+            _musicSyncStaffNotation.CreateNotes(measure);
+        }
+
         private UIDocument _document;
         private VisualElement _root;
 
@@ -85,7 +89,7 @@ namespace Mock.MusicBattle.UI
         {
             if (_musicBuffer == null || _musicSyncStaffNotation == null) { return; }
 
-            _musicSyncStaffNotation.Update((float)(_musicBuffer.CurrentBeat / 4d));
+            _musicSyncStaffNotation.Update(Time.deltaTime, (float)(_musicBuffer.CurrentBeat / 4d));
         }
     }
 }
