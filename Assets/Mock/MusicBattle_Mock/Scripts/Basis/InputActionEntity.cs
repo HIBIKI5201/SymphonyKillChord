@@ -1,14 +1,14 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle.Basis
-{ 
+{
     /// <summary>
     ///     入力アクションのイベントラッパークラス。
     /// </summary>
     /// <typeparam name="T">　入力値の型（Vector2, float等の構造体）</typeparam>
-    public class InputActionEntity<T> where T : struct
+    public class InputActionEntity<T> : IDisposable
+        where T : struct
     {
         /// <summary>
         ///     InputActionEntityのコンストラクタ。
@@ -17,107 +17,31 @@ namespace Mock.MusicBattle.Basis
         public InputActionEntity(InputAction inputAction)
         {
             _inputAction = inputAction;
+            inputAction.started += StartedHandler;
+            inputAction.performed += PerformedHandler;
+            inputAction.canceled += CanceledHandler;
         }
 
         /// <summary>
         ///     入力が開始された時のイベント。
         /// </summary>
-        public event Action<T> Started
-        {
-            add
-            {
-                // CallbackContextからT型に変換するラッパーハンドラーを作成。
-                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
-                // 後でremove時に特定できるよう、元のハンドラーとラッパーを紐付けて保存。
-                _startedHandlers[value] = handler;
-                
-                // 実際のInputActionにラッパーハンドラーを登録。
-                _inputAction.started += handler;
-            }
-            remove
-            {
-                // Dictionaryから対応するラッパーハンドラーを取得。
-                if (_startedHandlers.TryGetValue(value, out var handler))
-                {
-                    // InputActionからラッパーハンドラーを解除。
-                    _inputAction.started -= handler;
-                    
-                    // Dictionaryからも削除してメモリリークを防止。
-                    _startedHandlers.Remove(value);
-                }
-            }
-        }
+        public event Action<T> Started;
 
         /// <summary>
         ///     入力が実行された時のイベント。
         /// </summary>
-        public event Action<T> Performed
-        {
-            add
-            {
-                // CallbackContextからT型に変換するラッパーハンドラーを作成。
-                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
-                
-                // 後でremove時に特定できるよう、元のハンドラーとラッパーを紐付けて保存。
-                _performedHandlers[value] = handler;
-                
-                // 実際のInputActionにラッパーハンドラーを登録。
-                _inputAction.performed += handler;
-            }
-            remove
-            {
-                // Dictionaryから対応するラッパーハンドラーを取得。
-                if (_performedHandlers.TryGetValue(value, out var handler))
-                {
-                    // InputActionからラッパーハンドラーを解除。
-                    _inputAction.performed -= handler;
-                    
-                    // Dictionaryからも削除してメモリリークを防止。
-                    _performedHandlers.Remove(value);
-                }
-            }
-        }
-
+        public event Action<T> Performed;
         /// <summary>
         ///     入力がキャンセルされた時のイベント。
         /// </summary>
-        public event Action<T> Canceled
-        {
-            add
-            {
-                // CallbackContextからT型に変換するラッパーハンドラーを作成。
-                Action<InputAction.CallbackContext> handler = ctx => value(ctx.ReadValue<T>());
-                
-                // 後でremove時に特定できるよう、元のハンドラーとラッパーを紐付けて保存。
-                _canceledHandlers[value] = handler;
-                
-                // 実際のInputActionにラッパーハンドラーを登録。
-                _inputAction.canceled += handler;
-            }
-            remove
-            {
-                // Dictionaryから対応するラッパーハンドラーを取得。
-                if (_canceledHandlers.TryGetValue(value, out var handler))
-                {
-                    // InputActionからラッパーハンドラーを解除。
-                    _inputAction.canceled -= handler;
-                    
-                    // Dictionaryからも削除してメモリリークを防止。
-                    _canceledHandlers.Remove(value);
-                }
-            }
-        }
-
+        public event Action<T> Canceled;
         /// <summary>
         ///     登録されている全てのStartedイベントハンドラーを手動で呼び出します。
         /// </summary>
         /// <param name="value">イベントハンドラーに渡す値</param>
         public void InvokeStarted(T value)
         {
-            foreach (var kvp in _startedHandlers)
-            {
-                kvp.Key?.Invoke(value);
-            }
+            Started?.Invoke(value);
         }
 
         /// <summary>
@@ -126,10 +50,7 @@ namespace Mock.MusicBattle.Basis
         /// <param name="value">イベントハンドラーに渡す値</param>
         public void InvokePerformed(T value)
         {
-            foreach (var kvp in _performedHandlers)
-            {
-                kvp.Key?.Invoke(value);
-            }
+            Performed?.Invoke(value);
         }
         /// <summary>
         ///     登録されている全てのCanceledイベントハンドラーを手動で呼び出します。
@@ -137,20 +58,35 @@ namespace Mock.MusicBattle.Basis
         /// <param name="value">イベントハンドラーに渡す値</param>
         public void InvokeCanceled(T value)
         {
-            foreach (var kvp in _canceledHandlers)
-            {
-                kvp.Key?.Invoke(value);
-            }
+            Canceled?.Invoke(value);
+        }
+
+        public void Dispose()
+        {
+            _inputAction.started -= StartedHandler;
+            _inputAction.performed -= PerformedHandler;
+            _inputAction.canceled -= CanceledHandler;
         }
 
         // ラップ対象のUnity InputAction。
         private readonly InputAction _inputAction;
 
-        // 各イベントごとにラムダを保持するDictionary。
-        // キー: 外部から登録されたAction<T>ハンドラー。
-        // 値: CallbackContextをT型に変換するラッパーハンドラー。
-        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _startedHandlers = new();
-        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _performedHandlers = new();
-        private readonly Dictionary<Action<T>, Action<InputAction.CallbackContext>> _canceledHandlers = new();
+        private void StartedHandler(InputAction.CallbackContext ctx)
+        {
+            T value = ctx.ReadValue<T>();
+            InvokeStarted(value);
+        }
+
+        private void PerformedHandler(InputAction.CallbackContext ctx)
+        {
+            T value = ctx.ReadValue<T>();
+            InvokePerformed(value);
+        }
+
+        private void CanceledHandler(InputAction.CallbackContext ctx)
+        {
+            T value = ctx.ReadValue<T>();
+            InvokeCanceled(value);
+        }
     }
 }
