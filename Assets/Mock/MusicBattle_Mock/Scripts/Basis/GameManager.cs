@@ -48,7 +48,7 @@ namespace Mock.MusicBattle.Basis
         [SerializeField] private EnemySpawnSO _enemySpawnSO;
 
 
-        private IngameHUDManager _hud;
+        private IngameHUDManager _hudManager;
         private EnemyFactory _factory;
         private LockOnManager _lockOnManager;
         private EnemyContainer _enemyContainer;
@@ -74,8 +74,8 @@ namespace Mock.MusicBattle.Basis
             _enemyContainer = new EnemyContainer();
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
-            _hud = FindAnyObjectByType<IngameHUDManager>();
-            HudUtility.Init(_hud, _playerManager,
+            _hudManager = FindAnyObjectByType<IngameHUDManager>();
+            HudUtility.Init(_hudManager, _playerManager,
                 _criMusicBuffer, _inputBuffer,this.destroyCancellationToken);
       
             PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
@@ -84,7 +84,7 @@ namespace Mock.MusicBattle.Basis
             _factory = new EnemyFactory(
                 _enemyContainer, _player,
                 _enemyManager, _musicSyncManager,
-                _lockOnManager);
+                _lockOnManager,_hudManager);
         }
     }
 }

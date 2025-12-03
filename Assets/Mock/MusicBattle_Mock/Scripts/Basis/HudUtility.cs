@@ -1,16 +1,34 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Mock.MusicBattle.UI;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.HID;
 
 namespace Mock.MusicBattle
 {
     public static class HudUtility
     {
+        public static void AddEnemyHealthBar(
+        IngameHUDManager hud,
+        Transform enemyTransform,
+        float maxHealth)
+        {
+            var health = new HealthEntity(maxHealth);
+            _ = hud.AddEnemyHealthBar(health, enemyTransform);
+           
+        }
+
+        public static void ApplyDamage(
+            IngameHUDManager hud,
+            HealthEntity health,
+            Transform enemyTransform,
+            float damage)
+        {
+            health.TakeDamage(damage);
+            hud.ShowDamageText(damage, enemyTransform.position);
+        }
         public static void Init(IngameHUDManager hud, PlayerManager player,
                         CriMusicBuffer musicBuffer, InputBuffer inputBuffer
             , CancellationToken destroyToken)
@@ -26,6 +44,6 @@ namespace Mock.MusicBattle
                 hud.CreateNote((float)(musicBuffer.CurrentBeat / 4d));
             }
         }
-     
+
     }
 }
