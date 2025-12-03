@@ -1,3 +1,5 @@
+using Mock.MusicBattle.MusicSync;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -38,10 +40,20 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_noteAsset != null, $"Failed to load UXML at path: {NOTE_UXML_RESOURCES_PATH}");
         }
 
+        /// <summary>
+        ///     ノーツを生成する。
+        /// </summary>
+        /// <param name="measure"></param>
+        public void CreateNotes(float measure)
+        {
+            NoteEntity noteEntity = new NoteEntity(measure, _noteAsset.Instantiate());
+            _activeNotes.Add(noteEntity);
+        }
+
         public void Update(float deltaTime, float currentMeasure)
         {
             MoveStaffLines(currentMeasure);
-            MoveNotes(deltaTime);
+            MoveNotes(deltaTime, currentMeasure);
         }
 
         private const string NOTATION_UXML_RESOURCES_PATH = "MusicSyncStaffNotation";
@@ -56,7 +68,29 @@ namespace Mock.MusicBattle.UI
         private VisualElement _noteContainer;
 
         private VisualTreeAsset _noteAsset;
-        private List<VisualElement> _activeNotes = new();
+        private List<NoteEntity> _activeNotes = new();
+
+        private struct NoteEntity : IComparable<NoteEntity>, IDisposable
+        {
+            public NoteEntity(float measure, VisualElement element)
+            {
+                _measure = measure;
+                _element = element;
+            }
+
+            public float Measure => _measure;
+            public VisualElement Element => _element;
+
+            public void Dispose()
+            {
+                _element.RemoveFromHierarchy();
+            }
+
+            public int CompareTo(NoteEntity other) => _measure.CompareTo(other._measure);
+
+            private readonly float _measure;
+            private readonly VisualElement _element;
+        }
 
         private void MoveStaffLines(float currentMeasure)
         {
@@ -81,9 +115,26 @@ namespace Mock.MusicBattle.UI
             }
         }
 
-        private void MoveNotes(float deltaTime)
+        private void MoveNotes(float deltaTime, float currentMeasure)
         {
-            if (_activeNotes.Count == 0) { return; }
+            if (_activeNotes.Count <= 0) { return; }
+
+            for (int i = 0; i < _activeNotes.Count; i++)
+            {
+                NoteEntity note = _activeNotes[i];
+
+                // ノートの位置を更新する。
+                float diff = currentMeasure - note.Measure;
+                float x = diff / STAFF_LINE_MOVE_CYCLE_MEASURES * 100;
+                note.Element.style.left = new StyleLength(new Length(x, LengthUnit.Percent));
+
+                // 一定小節数を超えたノートは削除する。
+                if (STAFF_LINE_MOVE_CYCLE_MEASURES < diff)
+                {
+                    _activeNotes.RemoveAt(i);
+                    i--;
+                }
+            }
         }
     }
 }
