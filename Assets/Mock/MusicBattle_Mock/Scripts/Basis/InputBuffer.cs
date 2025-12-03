@@ -40,5 +40,13 @@ namespace Mock.MusicBattle.Basis
                 _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
             }
         }
+
+        public void OnDestroy()
+        {
+            _lookActionEntity.Dispose();
+            _moveActionEntity.Dispose();
+            _lockOnSelectActionEntity.Dispose();
+            _attackActionEntity.Dispose();
+        }
     }
 }
