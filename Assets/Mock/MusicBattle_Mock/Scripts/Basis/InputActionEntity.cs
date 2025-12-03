@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle.Basis
-{ 
+{
     /// <summary>
     ///     入力アクションのイベントラッパークラス。
     /// </summary>
