@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.Player
     public class PlayerManager : MonoBehaviour, ICharacter
     {
         public Transform Player => _player;
+        public HealthEntity HealthEntity => _healthEntity;
         /// <summary>   inputBufferとCinemachineCameraの初期化。  </summary>
         public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
         {
