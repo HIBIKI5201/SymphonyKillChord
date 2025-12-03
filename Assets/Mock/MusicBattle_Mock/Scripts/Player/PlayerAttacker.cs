@@ -37,14 +37,24 @@ namespace Mock.MusicBattle
         {
             _origin = _player.Player.position + Vector3.up * HEIGHT_RAY;
             _direction = _camera.forward;
-            _currentCharacter = FindAttackTarget();
-            if (_currentCharacter == null)
+            if (!TryFindAttackTarget(out ICharacter target))
             {
                 Debug.Log("currentCharacter is null");
                 return;
             }
 
-            _currentCharacter.TakeDamage(_playerstatus.AttackPower);
+            target.TakeDamage(_playerstatus.AttackPower);
+        }
+
+        /// <summary>
+        ///     敵を探して発見したか返す。
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        public bool TryFindAttackTarget(out ICharacter character)
+        {
+            character = FindAttackTarget();
+            return character != null;
         }
 
         /// <summary>
@@ -53,16 +63,17 @@ namespace Mock.MusicBattle
         /// <returns> 敵の情報 </returns>
         public ICharacter FindAttackTarget()
         {
+            ICharacter character = null;
             if (Physics.Raycast(_origin, _direction,
                     out RaycastHit hitInfo, _config.IgnoreAttackLayer))
             {
-                _hitTransform = hitInfo.rigidbody?.transform;
-                Debug.Log($"Hit: {hitInfo.rigidbody?.name}");
+                Rigidbody rb = hitInfo.collider.attachedRigidbody;
+                Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
 
-                _character = _hitTransform?.GetComponent<ICharacter>();
+                character = rb?.GetComponent<ICharacter>();
             }
 
-            return _character != null ? _character : null;
+            return character;
         }
 
 
@@ -75,8 +86,5 @@ namespace Mock.MusicBattle
         private const float GIZMO_RAY_RANGE = 5f;
         private Vector3 _direction;
         private Vector3 _origin;
-        private Transform _hitTransform;
-        private ICharacter _character;
-        private ICharacter _currentCharacter;
     }
 }
