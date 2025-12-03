@@ -6,23 +6,23 @@ namespace Mock.MusicBattle.Enemy
     public class EnemySpawnSO : ScriptableObject
     {
         /// <summary> スポーン範囲 X </summary>
-        public float XVector3 => xVector3;
+        public float XRange => _xRange;
 
         /// <summary> スポーン範囲 Y </summary>
-        public float YVector3 => yVector3;
+        public float YRange => _yRange;
 
         /// <summary> スポーン範囲 Z </summary>
-        public float ZVector3 => zVector3;
+        public float ZRange => _zRange;
 
         /// <summary> 最大出現数 </summary>
-        public int MaxEnemyCount => maxEnemyCount;
+        public int MaxEnemyCount => _maxEnemyCount;
 
         [Header("スポーン範囲（Vector3 の各軸に相当）")]
-        [SerializeField] private float xVector3;
-        [SerializeField] private float yVector3;
-        [SerializeField] private float zVector3;
+        [SerializeField] private float _xRange;
+        [SerializeField] private float _yRange;
+        [SerializeField] private float _zRange;
 
         [Header("最大同時スポーン数")]
-        [SerializeField] private int maxEnemyCount = 3;
+        [SerializeField] private int _maxEnemyCount = 3;
     }
 }
