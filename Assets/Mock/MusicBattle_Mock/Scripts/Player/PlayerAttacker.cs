@@ -15,7 +15,7 @@ namespace Mock.MusicBattle
         public PlayerAttacker(PlayerStatus status, PlayerConfig Config,
             PlayerManager player, Transform camera)
         {
-            _playerstatus = status;
+            _status = status;
             _config = Config;
             _player = player;
             _camera = camera;
@@ -27,7 +27,7 @@ namespace Mock.MusicBattle
         public void OnDrawGizmos()
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(_origin, _origin + _direction * _playerstatus.AttackRange);
+            Gizmos.DrawLine(_origin, _origin + _direction * _status.AttackRange);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Mock.MusicBattle
                 return;
             }
 
-            target.TakeDamage(_playerstatus.AttackPower);
+            target.TakeDamage(_status.AttackPower);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Mock.MusicBattle
             ICharacter character = null;
             if (Physics.Raycast(origin, direction,
                     out RaycastHit hitInfo,
-                    _playerstatus.AttackRange, _config.IgnoreAttackLayer))
+                    _status.AttackRange, _config.IgnoreAttackLayer))
             {
                 Rigidbody rb = hitInfo.collider.attachedRigidbody;
                 Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
@@ -80,7 +80,7 @@ namespace Mock.MusicBattle
 
         private PlayerManager _player;
         private Transform _camera;
-        private PlayerStatus _playerstatus;
+        private PlayerStatus _status;
         private PlayerConfig _config;
 
         private const float HEIGHT_RAY = 0.7f;
