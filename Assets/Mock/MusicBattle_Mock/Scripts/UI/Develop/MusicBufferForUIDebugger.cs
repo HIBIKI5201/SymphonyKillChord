@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle.Develop
 {
+    /// <summary>
+    ///     音楽バッファのモック実装。UIデバッガー用。
+    /// </summary>
+    [RequireComponent(typeof(PlayerInput))]
     public class MusicBufferForUIDebugger : MonoBehaviour, IMusicBuffer
     {
         public double CurrentBpm => 120;
