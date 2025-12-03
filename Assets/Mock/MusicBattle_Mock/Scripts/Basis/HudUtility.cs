@@ -1,12 +1,9 @@
-using Mock.MusicBattle.Basis;
-using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Mock.MusicBattle.UI;
 using System.Threading;
-using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Basis
 {
     public static class HudUtility
     {
