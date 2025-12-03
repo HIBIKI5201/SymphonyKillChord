@@ -109,8 +109,6 @@ namespace Mock.MusicBattle.Player
         public void FixedUpdate()
         {
             _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
-            //CurrentVelocity = _rb.linearVelocity;
-            Debug.Log(_horizontalVelocity.magnitude);
         }
 
         private readonly PlayerStatus _status;
