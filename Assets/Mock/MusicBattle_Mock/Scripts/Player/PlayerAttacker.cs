@@ -46,12 +46,21 @@ namespace Mock.MusicBattle
             target.TakeDamage(_status.AttackPower);
         }
 
+        private PlayerManager _player;
+        private Transform _camera;
+        private PlayerStatus _status;
+        private PlayerConfig _config;
+
+        private const float HEIGHT_RAY = 0.7f;
+        private Vector3 _direction;
+        private Vector3 _origin;
+
         /// <summary>
         ///     敵を探して発見したか返す。
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        public bool TryFindAttackTarget(Vector3 origin, Vector3 direction, out ICharacter character)
+        private bool TryFindAttackTarget(Vector3 origin, Vector3 direction, out ICharacter character)
         {
             character = FindAttackTarget(origin, direction);
             return character != null;
@@ -61,7 +70,7 @@ namespace Mock.MusicBattle
         ///     敵を探して見つけたら返す。
         /// </summary>
         /// <returns> 敵の情報 </returns>
-        public ICharacter FindAttackTarget(Vector3 origin, Vector3 direction)
+        private ICharacter FindAttackTarget(Vector3 origin, Vector3 direction)
         {
             ICharacter character = null;
             if (Physics.Raycast(origin, direction,
@@ -76,15 +85,5 @@ namespace Mock.MusicBattle
 
             return character;
         }
-
-
-        private PlayerManager _player;
-        private Transform _camera;
-        private PlayerStatus _status;
-        private PlayerConfig _config;
-
-        private const float HEIGHT_RAY = 0.7f;
-        private Vector3 _direction;
-        private Vector3 _origin;
     }
 }
