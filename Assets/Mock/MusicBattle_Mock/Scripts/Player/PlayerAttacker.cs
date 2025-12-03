@@ -46,12 +46,13 @@ namespace Mock.MusicBattle
             target.TakeDamage(_status.AttackPower);
         }
 
-        private PlayerManager _player;
-        private Transform _camera;
-        private PlayerStatus _status;
-        private PlayerConfig _config;
-
         private const float HEIGHT_RAY = 0.7f;
+
+        private readonly PlayerManager _player;
+        private readonly Transform _camera;
+        private readonly PlayerStatus _status;
+        private readonly PlayerConfig _config;
+
         private Vector3 _direction;
         private Vector3 _origin;
 
