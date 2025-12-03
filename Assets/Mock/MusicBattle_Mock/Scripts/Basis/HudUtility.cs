@@ -11,7 +11,7 @@ namespace Mock.MusicBattle.Basis
                         CriMusicBuffer musicBuffer, InputBuffer inputBuffer
             , CancellationToken destroyToken)
         {
-            hud.InitializePlayerHealthBar(player.HealthEntityPlayer);
+            hud.InitializePlayerHealthBar(player.HealthEntity);
             hud.Initialize(musicBuffer);
             inputBuffer.AttackAction.Started += Action_started;
 
