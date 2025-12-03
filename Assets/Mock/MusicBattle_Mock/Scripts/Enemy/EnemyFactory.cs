@@ -50,7 +50,7 @@ namespace Mock.MusicBattle.Enemy
             }
 
             enemy.HealthEntity.ResetHealth();
-            HudUtility.AddEnemyHealthBar(_hudManager, enemy.transform,enemy.HealthEntity);
+             _ = _hudManager.AddEnemyHealthBar(enemy.HealthEntity, enemy.transform);
             enemy.SetTarget(_target);
             enemy.InitializeMover();
             enemy.InitMusic(_musicManager);
