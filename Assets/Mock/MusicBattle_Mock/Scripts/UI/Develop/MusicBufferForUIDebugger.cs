@@ -1,6 +1,7 @@
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Mock.MusicBattle.Develop
 {
@@ -12,10 +13,24 @@ namespace Mock.MusicBattle.Develop
 
         public double CurrentBeat => Time.time / BeatLength;
 
+        [SerializeField]
+        private string _createNotesActionName = "Attack";
+
         private void Awake()
         {
+            PlayerInput playerInput = GetComponent<PlayerInput>();
+            InputAction action = playerInput.actions[_createNotesActionName];
+
             IngameHUDManager hud = FindAnyObjectByType<IngameHUDManager>();
             hud.Initialize(this);
+            action.started += Action_started;
+
+            destroyCancellationToken.Register(() => action.started -= Action_started);
+
+            void Action_started(InputAction.CallbackContext obj)
+            {
+                hud.CreateNote((float)(CurrentBeat / 4d));
+            }
         }
     }
 }
