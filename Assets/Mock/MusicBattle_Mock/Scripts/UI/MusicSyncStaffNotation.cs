@@ -1,4 +1,3 @@
-using Mock.MusicBattle.MusicSync;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,14 +28,15 @@ namespace Mock.MusicBattle.UI
 
             notationAsset.CloneTree(this);
 
+            // 拍子線要素を取得する。
             VisualElement lines = this.Q<VisualElement>(ELEMENT_NAME_STAFF_LINE_CONTAINER);
             _staffLines = lines.Children().ToArray();
-            _noteContainer = this.Q<VisualElement>(ELEMENT_NAME_NOTE_CONTAINER);
-
             Debug.Assert(_staffLines != null, $"Failed to find element: {ELEMENT_NAME_STAFF_LINE_CONTAINER}");
-            Debug.Assert(_noteContainer != null, $"Failed to find element: {ELEMENT_NAME_NOTE_CONTAINER}");
 
+            // ノーツコンテナ要素を取得する。
             _noteAsset = Resources.Load<VisualTreeAsset>(NOTE_UXML_RESOURCES_PATH);
+            _noteContainer = this.Q<VisualElement>(ELEMENT_NAME_NOTE_CONTAINER);
+            Debug.Assert(_noteContainer != null, $"Failed to find element: {ELEMENT_NAME_NOTE_CONTAINER}");
             Debug.Assert(_noteAsset != null, $"Failed to load UXML at path: {NOTE_UXML_RESOURCES_PATH}");
         }
 
@@ -46,7 +46,13 @@ namespace Mock.MusicBattle.UI
         /// <param name="measure"></param>
         public void CreateNotes(float measure)
         {
-            NoteEntity noteEntity = new NoteEntity(measure, _noteAsset.Instantiate());
+            // ノーツ要素を生成して配置する。
+            VisualElement noteElement = _noteAsset.Instantiate();
+            noteElement.style.position = Position.Absolute;
+            _noteContainer.Add(noteElement);
+
+            // ノーツエンティティを作成して管理リストに追加する。
+            NoteEntity noteEntity = new NoteEntity(measure, noteElement);
             _activeNotes.Add(noteEntity);
         }
 
@@ -126,7 +132,8 @@ namespace Mock.MusicBattle.UI
                 // ノートの位置を更新する。
                 float diff = currentMeasure - note.Measure;
                 float x = diff / STAFF_LINE_MOVE_CYCLE_MEASURES * 100;
-                note.Element.style.left = new StyleLength(new Length(x, LengthUnit.Percent));
+                // 右端から左端へ移動するので right プロパティを更新する。
+                note.Element.style.right = new StyleLength(new Length(x, LengthUnit.Percent));
 
                 // 一定小節数を超えたノートは削除する。
                 if (STAFF_LINE_MOVE_CYCLE_MEASURES < diff)
