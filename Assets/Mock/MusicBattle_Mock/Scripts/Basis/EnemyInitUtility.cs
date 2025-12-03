@@ -1,19 +1,29 @@
+using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.Enemy;
+using Mock.MusicBattle.MusicSync;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Basis
 {
-    public class EnemyInitUtility : MonoBehaviour
+    /// <summary>Enemyの初期化ユーティリティクラス</summary>
+    public static class EnemyInitUtility
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        /// <summary>敵の初期化をする。</summary>
+        public static EnemyFactory InitEnemy(
+            EnemyContainer enemyContainer,
+            Transform playerTransform,
+            EnemyManager enemyManager,
+            MusicSyncManager musicSyncManager,
+            LockOnManager lockOnManager
+            )
         {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        
+            return new EnemyFactory(
+                enemyContainer,
+                playerTransform,
+                enemyManager,
+                musicSyncManager,
+                lockOnManager
+                );
         }
     }
 }
