@@ -65,7 +65,8 @@ namespace Mock.MusicBattle
         {
             ICharacter character = null;
             if (Physics.Raycast(_origin, _direction,
-                    out RaycastHit hitInfo, _config.IgnoreAttackLayer))
+                    out RaycastHit hitInfo,
+                    _playerstatus.AttackRange,  _config.IgnoreAttackLayer))
             {
                 Rigidbody rb = hitInfo.collider.attachedRigidbody;
                 Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
