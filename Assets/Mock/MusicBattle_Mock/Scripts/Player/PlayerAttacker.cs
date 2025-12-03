@@ -35,7 +35,7 @@ namespace Mock.MusicBattle
         /// </summary>
         public void Attack()
         {
-            _origin = _player.Player.position + Vector3.up * HEIGHT_RAY;
+            _origin = _player.transform.position + Vector3.up * HEIGHT_RAY;
             _direction = _camera.forward;
             if (!TryFindAttackTarget(_origin, _direction, out ICharacter target))
             {
@@ -66,7 +66,7 @@ namespace Mock.MusicBattle
             ICharacter character = null;
             if (Physics.Raycast(origin, direction,
                     out RaycastHit hitInfo,
-                    _status.AttackRange, _config.IgnoreAttackLayer))
+                    _status.AttackRange, ~_config.IgnoreAttackLayer))
             {
                 Rigidbody rb = hitInfo.collider.attachedRigidbody;
                 Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
