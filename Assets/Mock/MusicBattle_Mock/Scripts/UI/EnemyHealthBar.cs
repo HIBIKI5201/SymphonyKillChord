@@ -59,7 +59,7 @@ namespace Mock.MusicBattle.UI
                 _disposeCTS.Cancel();
                 _disposeCTS.Dispose();
 
-                hierarchy.Remove(this);
+                RemoveFromHierarchy();
             };
 
             Update(transform);
