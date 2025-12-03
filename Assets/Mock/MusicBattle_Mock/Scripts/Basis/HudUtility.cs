@@ -10,24 +10,6 @@ namespace Mock.MusicBattle
 {
     public static class HudUtility
     {
-        public static void AddEnemyHealthBar(
-        IngameHUDManager hud,
-        Transform enemyTransform,
-        HealthEntity _health)
-        {
-            _ = hud.AddEnemyHealthBar(_health, enemyTransform);
-           
-        }
-
-        public static void ApplyDamage(
-            IngameHUDManager hud,
-            HealthEntity health,
-            Transform enemyTransform,
-            float damage)
-        {
-            health.TakeDamage(damage);
-            hud.ShowDamageText(damage, enemyTransform.position);
-        }
         public static void Init(IngameHUDManager hud, PlayerManager player,
                         CriMusicBuffer musicBuffer, InputBuffer inputBuffer
             , CancellationToken destroyToken)
