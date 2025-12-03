@@ -64,7 +64,6 @@ namespace Mock.MusicBattle.Battle
                 }
             }
 
-
             Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
             OnTargetLocked?.Invoke(target);
 
