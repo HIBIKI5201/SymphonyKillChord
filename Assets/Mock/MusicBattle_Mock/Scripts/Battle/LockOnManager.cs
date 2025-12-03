@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Enemy;
 using System;
 using System.Linq;
 using System.Threading;
@@ -34,6 +35,7 @@ namespace Mock.MusicBattle.Battle
         private readonly ILockOnTargetContainer _targetContainer;
         private readonly float _unlockWaitingTime;
         private readonly InputBuffer _inputBuffer;
+        private EnemyManager _currentEnemy;
 
         private int _lockingTargetIndex;
         private bool _isUnlockTarget;
@@ -52,6 +54,14 @@ namespace Mock.MusicBattle.Battle
                     GetTargetWithAxis(_player,
                         _targetContainer.Targets.ToArray(), axis,
                         _targetContainer[_lockingTargetIndex]);
+            }
+
+            if (target != null)
+            {
+                if (target.TryGetComponent<EnemyManager>(out _currentEnemy))
+                {
+                    _currentEnemy.SetLockOn(target);
+                }
             }
 
             Debug.Log($"{(target == null ? "ロックオン解除" : $"{target.name}をロックオン")}\n入力値:{value}");
