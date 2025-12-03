@@ -56,10 +56,10 @@ namespace Mock.MusicBattle
             if (Physics.Raycast(_origin, _direction,
                     out RaycastHit hitInfo, _config.IgnoreAttackLayer))
             {
-                _hitTransform = hitInfo.rigidbody.transform;
-                Debug.Log($"Hit: {hitInfo.collider.gameObject.name}");
+                _hitTransform = hitInfo.rigidbody?.transform;
+                Debug.Log($"Hit: {hitInfo.rigidbody?.name}");
 
-                _character = _hitTransform.GetComponent<ICharacter>();
+                _character = _hitTransform?.GetComponent<ICharacter>();
             }
 
             return _character != null ? _character : null;
