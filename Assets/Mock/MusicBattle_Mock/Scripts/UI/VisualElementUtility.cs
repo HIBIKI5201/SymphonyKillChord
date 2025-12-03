@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -33,8 +34,11 @@ namespace Mock.MusicBattle.UI
                 float t = Mathf.Clamp01(elapsed / duration);
                 float newValue = Mathf.Lerp(current, value, t);
                 bar.style.width = Length.Percent(newValue * 100); // パーセンテージで指定。
-
-                await Awaitable.NextFrameAsync(token);
+                try
+                {
+                    await Awaitable.NextFrameAsync(token);
+                }
+                catch (OperationCanceledException) { break; }
             }
 
             // 最終的な値を設定。
