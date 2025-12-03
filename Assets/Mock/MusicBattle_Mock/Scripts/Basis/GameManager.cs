@@ -60,7 +60,12 @@ namespace Mock.MusicBattle.Basis
         private void Start()
         {
             _musicSyncManager.Init(_source, _musicSystemInitSO.Bgm, _musicSystemInitSO.BgmProperTime, _musicSystemInitSO.StartOffset);
-            StartCoroutine(SpawnLoop());
+            StartCoroutine(EnemyUtility.SpawnLoop(
+                _enemyContainer,
+                _enemySpawnSO,
+                _factory,
+                _enemystatus,
+                _enemySpawnTime));
         }
 
         private void Init()
@@ -72,23 +77,10 @@ namespace Mock.MusicBattle.Basis
             PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
                 _cameraManager, _camera, _lockOnManager);
 
-            _factory = EnemyInitUtility.InitEnemy(_enemyContainer,
-                _playerManager.transform, _enemyManager,
-                _musicSyncManager, _lockOnManager);
-        }
-
-        private IEnumerator SpawnLoop()
-        {
-            while (true)
-            {
-                if (_enemyContainer.Targets.Count < 3)
-                {
-                    Vector3 pos = EnemySpawnUtility.CreateSpawnPos(_enemySpawnSO);
-                    EnemySpawnUtility.SpawnEnemy(_factory, _enemystatus, pos);
-                }
-
-                yield return new WaitForSeconds(_enemySpawnTime);
-            }
+            _factory = new EnemyFactory(
+                _enemyContainer, _player,
+                _enemyManager, _musicSyncManager,
+                _lockOnManager);
         }
     }
 }
