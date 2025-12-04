@@ -1135,6 +1135,7 @@ MonoBehaviour:
   _source: {fileID: 913491949}
   _criMusicBuffer: {fileID: 913491954}
   _enemySpawnSO: {fileID: 11400000, guid: 382d8b9707fb9d54490fe3fe2e5aeb75, type: 2}
+  _hudManager: {fileID: 8451694022253436589}
 --- !u!1 &1661210706540582388
 GameObject:
   m_ObjectHideFlags: 0
