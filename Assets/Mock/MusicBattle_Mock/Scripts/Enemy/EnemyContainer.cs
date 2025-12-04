@@ -52,6 +52,7 @@ namespace Mock.MusicBattle.Enemy
             {
                 _enemies.Remove(enemy);
                 _pool.Enqueue(enemy);
+                enemy.SetLockOn(null);
                 enemy.gameObject.SetActive(false);
             };
             _deathHandlers[enemy] = handler;
