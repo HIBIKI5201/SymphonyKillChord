@@ -52,15 +52,20 @@ namespace Mock.MusicBattle.UI
             _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             healthEntity.OnHealthChanged += ChangeHealthBarHandler;
-            healthEntity.OnDeath += () =>
+
+            Action deathAction = null;
+            deathAction = () =>
             {
                 // ヘルスバーの更新処理を止めて非同期タスクをキャンセルする。
                 healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
+                healthEntity.OnDeath -= deathAction;
                 _disposeCTS.Cancel();
                 _disposeCTS.Dispose();
 
                 RemoveFromHierarchy();
             };
+
+            healthEntity.OnDeath += deathAction;
 
             Update(transform);
             style.visibility = Visibility.Visible;
@@ -105,11 +110,18 @@ namespace Mock.MusicBattle.UI
         private async void ChangeHealthBar(float current, float max, CancellationToken token = default)
         {
             float proportion = Mathf.Clamp01(current / max);
+            try
+            {
 
-            await _greenBar.ChangeBarAsync(proportion, 0.4f, token);
+                await _greenBar.ChangeBarAsync(proportion, 0.4f, token);
 
-            await Awaitable.WaitForSecondsAsync(0.5f, token);
-            await _redBar.ChangeBarAsync(proportion, 0.4f, token);
+                await Awaitable.WaitForSecondsAsync(0.5f, token);
+                await _redBar.ChangeBarAsync(proportion, 0.4f, token);
+            }
+            catch (OperationCanceledException)
+            {
+                // キャンセルされた場合は何もしない。
+            }
         }
 
         private void MovePosition(Vector3 worldPosition)
