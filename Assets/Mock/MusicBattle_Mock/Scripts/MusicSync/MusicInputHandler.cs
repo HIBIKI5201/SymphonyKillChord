@@ -20,6 +20,7 @@ namespace Mock.MusicBattle.MusicSync
         public void Init(float[] timeSignatures)
         {
             _timeSignatures = timeSignatures;
+            _longestSignatureIndex = GetLongestSignatureIndex();
         }
         /// <summary>
         /// 入力されたタイミングを基いて、なりえる最も近い拍子を取得する。
@@ -47,7 +48,7 @@ namespace Mock.MusicBattle.MusicSync
                 // 最も近い拍子を検出する。
                 detectedTimeSignatureIndex = FindNearestTimeSignature(betweenBeat);
                 // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
-                quantizedBeat = lastBeat + GetBeatLength(detectedTimeSignatureIndex);
+                quantizedBeat = CalcQuantizedBeat(lastBeat, detectedTimeSignatureIndex);
 
                 _debugLog.AppendLine($"Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
@@ -60,7 +61,7 @@ namespace Mock.MusicBattle.MusicSync
                 // 最も近い拍子を検出する。
                 detectedTimeSignatureIndex = FindNearestTimeSignature(currentBeat);
                 // 最も近い拍子の拍の長さを取得して、最後の入力との合計を計算する。
-                quantizedBeat = GetBeatLength(detectedTimeSignatureIndex);
+                quantizedBeat = CalcQuantizedBeat(0, detectedTimeSignatureIndex);
 
                 _debugLog.AppendLine($"First Input Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
                 _debugLog.AppendLine($"First Input Quantized Beat: {quantizedBeat:F3}");
@@ -89,6 +90,7 @@ namespace Mock.MusicBattle.MusicSync
         private bool _enableQuantize = true; // クオンタイズ機能の有効/無効
 
         private Queue<double> _inputedTimingList = new();
+        private int _longestSignatureIndex;
         private StringBuilder _debugLog = new StringBuilder(); // デバッグログ用
 
         #region ライフサイクル
@@ -140,6 +142,70 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="value">値</param>
         /// <returns>絶対値</returns>
         private double Abs(double value) => value < 0 ? -value : value;
+
+        /// <summary>
+        /// 1拍が最も長い拍子のIndexを取得する
+        /// </summary>
+        /// <returns>拍子リストのIndex</returns>
+        private int GetLongestSignatureIndex()
+        {
+            return _timeSignatures[0] > _timeSignatures[_timeSignatures.Length - 1] ?
+                _timeSignatures.Length - 1 : 0;
+        }
+
+        /// <summary>
+        ///     入力の標準拍タイミングを算出する
+        ///     前回入力からの間隔が最も長い拍子のを超えている場合、補正計算を行い、
+        ///     BGMの固有拍子に基づき、直近の標準拍タイミングを計算結果とする
+        /// </summary>
+        /// <param name="lastBeat">前回入力タイミング</param>
+        /// <param name="signatureIndex">最も近い拍子のリストIndex/param>
+        /// <returns>BGM再生開始から今回入力直近までの長さ</returns>
+        private double CalcQuantizedBeat(double lastBeat, int signatureIndex)
+        {
+            // 前回入力からの間隔が最長拍未満の場合、前回入力 + 検出拍子長さとする
+            double beatLength = GetBeatLength(signatureIndex);
+            if (signatureIndex != _longestSignatureIndex) {
+                return lastBeat + beatLength;
+            }
+
+            // 前回入力からの間隔が最長拍以上の場合、補正計算を行う
+            double ret = lastBeat;
+            bool loopEndFlg = false;
+            while (!loopEndFlg)
+            {
+                // 前回入力タイミングから、最長拍子の拍長を1回ずつ、超えない所まで加算する
+                if(ret + beatLength < _musicBuffer.CurrentBeat)
+                {
+                    ret += beatLength;
+                }
+                else
+                {
+                    // そしてBGM固有拍子の拍長を1拍分ずつ加算し、入力時間直前の標準拍タイミングを算出する
+                    while (!loopEndFlg)
+                    {
+                        if(ret + 1d < _musicBuffer.CurrentBeat)
+                        {
+                            ret += 1d;
+                        }
+                        else
+                        {
+                            loopEndFlg = true;
+                        }
+                    }
+                }
+            }
+            // 最後に、入力ずれを補正する。入力が次の拍に近い場合、結果を次の拍とする
+            // 多分、補正のやり方にはまだ検討する必要がある
+            StringBuilder logStr = new StringBuilder();
+            logStr.AppendLine($"最後の入力ズレ補正。補正前の結果：{ret}、現在拍：{_musicBuffer.CurrentBeat}");
+
+            ret += _musicBuffer.CurrentBeat - ret > 0.8d ? 1d : 0d;
+
+            logStr.AppendLine($"補正後の結果：{ret}");
+            Debug.Log(logStr.ToString());
+            return ret;
+        }
         #endregion
     }
 }
