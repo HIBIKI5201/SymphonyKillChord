@@ -107,6 +107,7 @@ namespace Mock.MusicBattle.Player
             inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
             inputBuffer.AttackAction.Started += OnInputAttack;
             _healthEntity.OnDeath += OnDeathAction;
+            _healthEntity.OnDeath += () => gameObject.SetActive(false);
         }
 
         private void InputEventUnregister(InputBuffer inputBuffer)
