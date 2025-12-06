@@ -1,5 +1,7 @@
+using Mock.MusicBattle.Character;
 using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
+using Mock.MusicBattle.Player;
 using System.Threading;
 using UnityEngine;
 
@@ -15,7 +17,9 @@ namespace Mock.MusicBattle.Enemy
         ///     コンストラクタ。必要なマネージャーや設定データを受け取り、イベント登録を行う。
         /// </summary>
         public EnemyAttack(EnemyManager enemy, MusicSyncManager music,
-            EnemyMusicSO encount, EnemyMusicSO battle)
+            EnemyMusicSO encount, EnemyMusicSO battle,ICharacter player,
+            EnemyStatus enemyStatus)
+            
         {
             if (music == null) Debug.LogError("music is NULL!");
             if (encount == null) Debug.LogError("encount is NULL!");
@@ -25,6 +29,8 @@ namespace Mock.MusicBattle.Enemy
             _musicSyncManager = music;
             _encount = encount;
             _battale = battle;
+            _player = player;
+            _enemyStatus = enemyStatus;
 
             _enemyManager.OnAttack += OnAttackHandler;
             _enemyManager.OnOutOfRange += CancelScheduled;
@@ -42,6 +48,7 @@ namespace Mock.MusicBattle.Enemy
         public void OnAttackHandler()
         {
             Debug.Log("攻撃予約可能");
+            _player.TakeDamage(_enemyStatus.AttackPower);
             ScheduledEncount();
         }
 
@@ -86,6 +93,8 @@ namespace Mock.MusicBattle.Enemy
         private CancellationTokenSource _cancellationTokenSource;
         private EnemyManager _enemyManager;
         private MusicSyncManager _musicSyncManager;
+        private ICharacter _player;
+        private EnemyStatus _enemyStatus;
         private bool _isBattlePhase = false;
 
         /// <summary>
