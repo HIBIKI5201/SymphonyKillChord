@@ -46,6 +46,7 @@ namespace Mock.MusicBattle.Enemy
         ///     敵自身の Transform（ロックオン時などに参照される）
         /// </summary>
         public Transform LockTarget => _lockTarget;
+        public Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         public bool IsLockOn => _isLockOn;
 
@@ -123,6 +124,8 @@ namespace Mock.MusicBattle.Enemy
 
         [SerializeField, Tooltip("エネミーの音楽情報(接敵時)")]
         private EnemyMusicSO _encountSo;
+        [SerializeField, Tooltip("エネミーのピボット位置")]
+        private Transform _pivotTransform;
 
         private ICharacter _player;
         private MusicSyncManager _musicSyncManager;

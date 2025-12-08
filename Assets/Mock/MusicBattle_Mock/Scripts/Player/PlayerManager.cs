@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.Player
     public class PlayerManager : MonoBehaviour, ICharacter
     {
         public Transform Player => _player;
+        public  Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         /// <summary>   inputBufferとCinemachineCameraの初期化。  </summary>
         public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
@@ -31,6 +32,8 @@ namespace Mock.MusicBattle.Player
         private PlayerStatus _playerStatus;
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
+        [SerializeField, Tooltip("プレイヤーのピボット位置")]
+        private Transform _pivotTransform;
 
         private HealthEntity _healthEntity;
         private Transform _player;
