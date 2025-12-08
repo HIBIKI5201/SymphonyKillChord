@@ -5962,7 +5962,7 @@ MonoBehaviour:
   _camera: {fileID: 860659355}
   _inputBuffer: {fileID: 2061805456903156511}
   _cameraManager: {fileID: 860659354}
-  _enemyManager: {fileID: 3563889796228440939, guid: abb20ffc9ad24c54ea5ad90fb105036e, type: 3}
+  _enemyManager: {fileID: 3008961866854422918, guid: abb20ffc9ad24c54ea5ad90fb105036e, type: 3}
   _enemystatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _player: {fileID: 419768526}
   _enemySpawnTime: 1
