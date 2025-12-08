@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Character;
 using Mock.MusicBattle.Enemy;
 using System;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace Mock.MusicBattle.Battle
         }
 
         public event Action<Transform> OnTargetLocked;
+
+        public ICharacter LockOnTarget => _currentEnemy;
 
         public void Dispose()
         {
