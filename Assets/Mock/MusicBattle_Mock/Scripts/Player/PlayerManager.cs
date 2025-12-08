@@ -138,6 +138,7 @@ namespace Mock.MusicBattle.Player
         private void OnDeathAction()
         {
             Debug.Log("Player Dead");
+            gameObject.SetActive(false);
         }
     }
 }
