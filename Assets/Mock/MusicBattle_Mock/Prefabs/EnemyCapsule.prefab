@@ -161,6 +161,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7373699615469386517, guid: 05c5001712ccd064d84ee7355c0121c0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8125776687380743205, guid: 05c5001712ccd064d84ee7355c0121c0, type: 3}
       propertyPath: m_Name
       value: EnemyCapsule
@@ -202,3 +206,4 @@ MonoBehaviour:
   _enemyStatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _battaleSo: {fileID: 11400000, guid: 9234d8bc500ef4f409d42f51fe29adbc, type: 2}
   _encountSo: {fileID: 11400000, guid: afd4f63fe273cad44b2a8f89aff011a7, type: 2}
+  _pivotTransform: {fileID: 0}
