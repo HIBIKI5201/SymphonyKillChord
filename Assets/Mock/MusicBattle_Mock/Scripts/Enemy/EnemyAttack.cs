@@ -18,9 +18,9 @@ namespace Mock.MusicBattle.Enemy
         ///     コンストラクタ。必要なマネージャーや設定データを受け取り、イベント登録を行う。
         /// </summary>
         public EnemyAttack(EnemyManager enemy, MusicSyncManager music,
-            EnemyMusicSO encount, EnemyMusicSO battle,ICharacter player,
+            EnemyMusicSO encount, EnemyMusicSO battle, ICharacter player,
             EnemyStatus enemyStatus)
-            
+
         {
             if (music == null) Debug.LogError("music is NULL!");
             if (encount == null) Debug.LogError("encount is NULL!");
@@ -55,12 +55,10 @@ namespace Mock.MusicBattle.Enemy
         ///     バトルフェーズの攻撃タイミングを音楽同期アクションとして予約する。
         /// </summary>
         private void ScheduledBattale()
-        { 
+        {
             CancelScheduled();
-            ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
-            _cancellationTokenSource = new CancellationTokenSource();
-            _player.TakeDamage(_enemyStatus.AttackPower);
+            _cancellationTokenSource = new CancellationTokenSource(); ;
             _musicSyncManager.RegisterAction(barTimingInfo, () =>
             {
                 _isBattlePhase = false;
@@ -74,10 +72,8 @@ namespace Mock.MusicBattle.Enemy
         private void ScheduledEncount()
         {
             CancelScheduled();
-            ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _player.TakeDamage(_enemyStatus.AttackPower);
             _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
         }
 
@@ -86,7 +82,7 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         private void CancelScheduled()
         {
-           _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Cancel();
         }
 
         private EnemyMusicSO _encount;
@@ -111,8 +107,10 @@ namespace Mock.MusicBattle.Enemy
             }
             if (!_isBattlePhase)
             {
-                _isBattlePhase = true;
+                ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
+                _player.TakeDamage(_enemyStatus.AttackPower);
                 ScheduledBattale();
+                _isBattlePhase = true;
             }
         }
     }
