@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
@@ -47,8 +48,6 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         public void OnAttackHandler()
         {
-            Debug.Log("攻撃予約可能");
-            _player.TakeDamage(_enemyStatus.AttackPower);
             ScheduledEncount();
         }
 
@@ -56,11 +55,12 @@ namespace Mock.MusicBattle.Enemy
         ///     バトルフェーズの攻撃タイミングを音楽同期アクションとして予約する。
         /// </summary>
         private void ScheduledBattale()
-        {
-            Debug.Log("バトルフェーズ攻撃予約");
+        { 
             CancelScheduled();
+            ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battale.BarFlg, _battale.TimeSignature, _battale.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
+            _player.TakeDamage(_enemyStatus.AttackPower);
             _musicSyncManager.RegisterAction(barTimingInfo, () =>
             {
                 _isBattlePhase = false;
@@ -73,10 +73,11 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         private void ScheduledEncount()
         {
-            Debug.Log("エンカウント攻撃予約");
             CancelScheduled();
+            ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
+            _player.TakeDamage(_enemyStatus.AttackPower);
             _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
         }
 
