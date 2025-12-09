@@ -80,9 +80,7 @@ namespace Mock.MusicBattle.Basis
                 _enemyContainer, _player,
                 _enemyManager, _musicSyncManager,
                 _lockOnManager, _hudManager);
-            _enemyContainer.SetCharacter(_playerManager);
-            _enemyContainer.SetCamera(_cameraManager);
-            _enemyContainer.SetLockOnManager(_lockOnManager);
+            EnemyUtility.EnemyContainerInit(_enemyContainer, _playerManager, _cameraManager, _lockOnManager);
         }
     }
 }
