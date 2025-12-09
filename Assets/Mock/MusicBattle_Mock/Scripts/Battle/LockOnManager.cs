@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 namespace Mock.MusicBattle.Battle
 {
@@ -55,7 +56,7 @@ namespace Mock.MusicBattle.Battle
             {
                 (target, _lockingTargetIndex) =
                     GetTargetWithAxis(_player,
-                        _targetContainer.Targets.ToArray(), axis,
+                        _targetContainer.NearerTargets.ToArray(), axis,
                         _targetContainer[_lockingTargetIndex]);
             }
 
@@ -72,6 +73,18 @@ namespace Mock.MusicBattle.Battle
 
             // 同時押しでキャンセルするように。
             CancelLockOn(axis);
+        }
+        public void ChangeCurrentEnemy(EnemyManager enemy)
+        {
+            if (enemy == null)
+            {
+                _lockingTargetIndex = 0;
+                OnTargetLocked?.Invoke(null);
+                _currentEnemy = null;
+                return;
+            }
+            _currentEnemy = enemy;
+            OnTargetLocked?.Invoke(enemy.transform);
         }
 
         /// <summary>

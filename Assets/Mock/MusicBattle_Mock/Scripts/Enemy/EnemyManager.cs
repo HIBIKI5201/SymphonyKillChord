@@ -49,7 +49,17 @@ namespace Mock.MusicBattle.Enemy
         public Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         public bool IsLockOn => _isLockOn;
-
+        ///<summary>　
+        ///　エネミーの初期化をまとめた関数 
+        ///</summary>
+        public void Init(Transform target, MusicSyncManager musicMg, Vector3 position)
+        {
+            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
+            SetTarget(target);
+            InitializeMover();
+            InitMusic(musicMg);
+            transform.position = position;
+        }
         /// <summary>
         ///     Rigidbody やロックオン用 Transform などの初期化を行い、
         ///     初期のヘルスを設定する。

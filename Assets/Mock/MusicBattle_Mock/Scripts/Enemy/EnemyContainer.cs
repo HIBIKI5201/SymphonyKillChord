@@ -1,7 +1,9 @@
-using UnityEngine;
+using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.Character;
 using System.Collections.Generic;
 using System.Linq;
-using Mock.MusicBattle.Battle;
+using UnityEngine;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -32,6 +34,18 @@ namespace Mock.MusicBattle.Enemy
                     .ToList();
             }
         }
+        public IReadOnlyList<Transform> NearerTargets
+        {
+            get
+            {
+                return _enemies
+                    .Where(e => e != null && e.gameObject.activeInHierarchy)
+                    .OrderBy(e => Vector3.SqrMagnitude(e.transform.position - _player.Pivot))
+                    .Select(e => e.transform)
+                    .ToList();
+            }
+        }
+
 
         /// <summary>
         ///     敵をコンテナに登録する。
@@ -52,7 +66,8 @@ namespace Mock.MusicBattle.Enemy
             {
                 _enemies.Remove(enemy);
                 _pool.Enqueue(enemy);
-                enemy.SetLockOn(null);
+                var nearestEnemy = GetNearestEnemy(_player.Pivot);
+                _lockOnManager.ChangeCurrentEnemy(nearestEnemy);
                 enemy.gameObject.SetActive(false);
             };
             _deathHandlers[enemy] = handler;
@@ -63,8 +78,10 @@ namespace Mock.MusicBattle.Enemy
         {
             return _pool.Count > 0 ? _pool.Dequeue() : null;
         }
-
-
+        //  　参照をもらう方法でほかに方法ないかな　現在ゲームマネージャーから受け取っている。
+        public void SetLockOnManager(LockOnManager manager) { _lockOnManager = manager; }
+        public void SetCharacter(ICharacter player) => _player = player;
+        public void SetCamera(CameraManager camera) => _cameraManager = camera;
         /// <summary>
         ///     プールからEnemyManagerを安全に取得する。
         ///     プールに敵が存在すればdequeueして返し、trueを返す。
@@ -85,7 +102,25 @@ namespace Mock.MusicBattle.Enemy
                 return false;
             }
         }
+        public EnemyManager GetNearestEnemy(Vector3 playerPosition)
+        {
+            EnemyManager nearestEnemy = _enemies
+                .Where(e => e != null && e.gameObject.activeInHierarchy)
+                .OrderBy(e => (e.transform.position - playerPosition).sqrMagnitude)
+                .FirstOrDefault();
 
+            if (nearestEnemy == null)
+            {
+                return (null);
+            }
+
+            return (nearestEnemy);
+        }
+
+
+        private CameraManager _cameraManager;
+        private LockOnManager _lockOnManager;
+        private ICharacter _player;
         private List<EnemyManager> _enemies = new();
         private Queue<EnemyManager> _pool = new();
         private Dictionary<EnemyManager, System.Action> _deathHandlers = new();

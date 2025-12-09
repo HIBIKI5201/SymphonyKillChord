@@ -55,6 +55,7 @@ namespace Mock.MusicBattle.Basis
 
         private void Start()
         {
+            
             _musicSyncManager.Init(_source, _musicSystemInitSO.Bgm, _musicSystemInitSO.BgmProperTime, _musicSystemInitSO.StartOffset);
             StartCoroutine(EnemyUtility.SpawnLoop(
                 _enemyContainer,
@@ -79,6 +80,7 @@ namespace Mock.MusicBattle.Basis
                 _enemyContainer, _player,
                 _enemyManager, _musicSyncManager,
                 _lockOnManager, _hudManager);
+            EnemyUtility.EnemyContainerInit(_enemyContainer, _playerManager, _cameraManager, _lockOnManager);
         }
     }
 }
