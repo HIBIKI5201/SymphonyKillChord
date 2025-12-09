@@ -56,7 +56,7 @@ namespace Mock.MusicBattle.Battle
             {
                 (target, _lockingTargetIndex) =
                     GetTargetWithAxis(_player,
-                        _targetContainer.Targets.ToArray(), axis,
+                        _targetContainer.NearerTargets.ToArray(), axis,
                         _targetContainer[_lockingTargetIndex]);
             }
 
