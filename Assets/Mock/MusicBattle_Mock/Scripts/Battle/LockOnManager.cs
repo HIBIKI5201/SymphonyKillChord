@@ -73,6 +73,11 @@ namespace Mock.MusicBattle.Battle
             // 同時押しでキャンセルするように。
             CancelLockOn(axis);
         }
+        public void ChangeCurrentEnemy(EnemyManager enemy,Transform enemytf)
+        {
+            _currentEnemy = enemy;
+            OnTargetLocked?.Invoke(enemytf);
+        }
 
         /// <summary>
         ///     LockOnSelectアクションのキャンセルを受ける。
