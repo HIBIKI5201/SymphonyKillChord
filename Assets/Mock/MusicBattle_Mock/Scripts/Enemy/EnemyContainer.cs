@@ -2,10 +2,8 @@ using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
 using Mock.MusicBattle.Character;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -27,6 +25,16 @@ namespace Mock.MusicBattle.Enemy
             0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
 
         public IReadOnlyList<Transform> Targets
+        {
+            get
+            {
+                return _enemies
+                    .Where(enemy => enemy != null && enemy.gameObject.activeInHierarchy)
+                    .Select(enemy => enemy.transform)
+                    .ToList();
+            }
+        }
+        public IReadOnlyList<Transform> NearerTargets
         {
             get
             {
@@ -58,9 +66,8 @@ namespace Mock.MusicBattle.Enemy
             {
                 _enemies.Remove(enemy);
                 _pool.Enqueue(enemy);
-                var (nearestEnemy, nearestTransform) = GetNearestEnemy(_player.Pivot);
-                _lockOnManager.ChangeCurrentEnemy(nearestEnemy, nearestTransform);
-
+                var nearestEnemy = GetNearestEnemy(_player.Pivot);
+                _lockOnManager.ChangeCurrentEnemy(nearestEnemy);
                 enemy.gameObject.SetActive(false);
             };
             _deathHandlers[enemy] = handler;
@@ -95,7 +102,7 @@ namespace Mock.MusicBattle.Enemy
                 return false;
             }
         }
-        public (EnemyManager enemy, Transform target) GetNearestEnemy(Vector3 playerPosition)
+        public EnemyManager GetNearestEnemy(Vector3 playerPosition)
         {
             EnemyManager nearestEnemy = _enemies
                 .Where(e => e != null && e.gameObject.activeInHierarchy)
@@ -104,13 +111,13 @@ namespace Mock.MusicBattle.Enemy
 
             if (nearestEnemy == null)
             {
-                return (null, null);
+                return (null);
             }
 
-            return (nearestEnemy, nearestEnemy.transform);
+            return (nearestEnemy);
         }
-        
-        
+
+
         private CameraManager _cameraManager;
         private LockOnManager _lockOnManager;
         private ICharacter _player;
