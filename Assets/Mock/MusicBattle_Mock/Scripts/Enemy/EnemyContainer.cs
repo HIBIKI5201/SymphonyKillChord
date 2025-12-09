@@ -59,8 +59,7 @@ namespace Mock.MusicBattle.Enemy
                 _enemies.Remove(enemy);
                 _pool.Enqueue(enemy);
                 var (nearestEnemy, nearestTransform) = GetNearestEnemy(_player.Pivot);
-                _lockOnManager.ChangeCurrentEnemy(nearestEnemy);
-                _cameraManager.HandleLockOn(nearestTransform);
+                _lockOnManager.ChangeCurrentEnemy(nearestEnemy, nearestTransform);
 
                 enemy.gameObject.SetActive(false);
             };
