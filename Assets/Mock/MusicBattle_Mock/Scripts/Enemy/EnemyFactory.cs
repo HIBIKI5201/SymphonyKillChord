@@ -49,12 +49,9 @@ namespace Mock.MusicBattle.Enemy
                 enemy = Object.Instantiate(_enemyPrefab).GetComponent<EnemyManager>();
             }
 
-            enemy.HealthEntity.ResetHealth();
+            
+             enemy.Init(_target,_musicManager,position);
              _ = _hudManager.AddEnemyHealthBar(enemy.HealthEntity, enemy.transform);
-            enemy.SetTarget(_target);
-            enemy.InitializeMover();
-            enemy.InitMusic(_musicManager);
-            enemy.transform.position = position;
             if (_onDeathHandlers.TryGetValue(enemy, out var oldDeathHandler))
             {
                 enemy.OnDeath -= oldDeathHandler;
