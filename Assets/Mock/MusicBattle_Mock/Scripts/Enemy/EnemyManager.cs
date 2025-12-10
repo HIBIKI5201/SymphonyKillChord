@@ -1,9 +1,10 @@
+using Mock.MusicBattle.Character;
+using Mock.MusicBattle.MusicSync;
+using Mock.MusicBattle.Player;
 using System;
 using UnityEngine;
-using Mock.MusicBattle.Character;
 using UnityEngine.AI;
-using Mock.MusicBattle.MusicSync;
-using System.Runtime.InteropServices;
+using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -15,7 +16,7 @@ namespace Mock.MusicBattle.Enemy
     ///     死亡イベントの通知
     ///     など、エネミー個体に関する中核処理を提供する。
     /// </summary>
-   
+
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyManager : MonoBehaviour, ICharacter
     {
@@ -45,9 +46,20 @@ namespace Mock.MusicBattle.Enemy
         ///     敵自身の Transform（ロックオン時などに参照される）
         /// </summary>
         public Transform LockTarget => _lockTarget;
+        public Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         public bool IsLockOn => _isLockOn;
-
+        ///<summary>　
+        ///　エネミーの初期化をまとめた関数 
+        ///</summary>
+        public void Init(Transform target, MusicSyncManager musicMg, Vector3 position)
+        {
+            _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
+            SetTarget(target);
+            InitializeMover();
+            InitMusic(musicMg);
+            transform.position = position;
+        }
         /// <summary>
         ///     Rigidbody やロックオン用 Transform などの初期化を行い、
         ///     初期のヘルスを設定する。
@@ -56,7 +68,6 @@ namespace Mock.MusicBattle.Enemy
         {
             if (lockon == null || lockon.gameObject == null)
                 return;
-
             _isLockOn = _lockTarget == lockon;
             Debug.Log($"{gameObject.name} ロックオン対象: {(_isLockOn ? "ロックオン中" : "ロックオン解除")}");
         }
@@ -68,6 +79,7 @@ namespace Mock.MusicBattle.Enemy
         public void SetTarget(Transform target)
         {
             _target = target;
+            _player = target.GetComponent<ICharacter>();
         }
 
         /// <summary> 音楽関係を使うクラスを初期化する。 </summary>
@@ -75,9 +87,9 @@ namespace Mock.MusicBattle.Enemy
         {
             _musicSyncManager = music;
             _enemyAttack = new EnemyAttack(this, _musicSyncManager,
-                _encountSo,_battaleSo);
+                _encountSo, _battaleSo,_player,_enemyStatus);
         }
-       
+
         /// <summary>
         ///     エネミーの移動処理を担当する EnemyMover を初期化する。
         ///     必要なデータ（ステータス、ターゲット、Rigidbody）が揃っていない場合は初期化を中断する。
@@ -90,7 +102,7 @@ namespace Mock.MusicBattle.Enemy
                 return;
             }
 
-            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus,_agent,this);
+            _enemyMover = new EnemyMover(_target, _lockTarget, _enemyStatus, _agent, this);
         }
 
         /// <summary>
@@ -122,7 +134,10 @@ namespace Mock.MusicBattle.Enemy
 
         [SerializeField, Tooltip("エネミーの音楽情報(接敵時)")]
         private EnemyMusicSO _encountSo;
+        [SerializeField, Tooltip("エネミーのピボット位置")]
+        private Transform _pivotTransform;
 
+        private ICharacter _player;
         private MusicSyncManager _musicSyncManager;
         private Transform _target;
         private Transform _lockTarget;

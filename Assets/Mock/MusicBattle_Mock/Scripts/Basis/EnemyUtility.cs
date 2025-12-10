@@ -1,4 +1,7 @@
+using Mock.MusicBattle.Battle;
+using Mock.MusicBattle.Camera;
 using Mock.MusicBattle.Enemy;
+using Mock.MusicBattle.Player;
 using System.Collections;
 using UnityEngine;
 
@@ -30,6 +33,14 @@ namespace Mock.MusicBattle.Basis
 
                 yield return new WaitForSeconds(enemySpawnTime);
             }
+        }
+
+        public static void EnemyContainerInit(EnemyContainer container
+            ,PlayerManager player,CameraManager camera,LockOnManager lockon)
+        {
+            container.SetCharacter(player);
+            container.SetCamera(camera);
+            container.SetLockOnManager(lockon);
         }
     }
 }

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dbb5a65a01a1de4ebfe0c4a1352cc1a, type: 3}
   m_Name: CriAtomWindowPrefs
   m_EditorClassIdentifier: CriMw.CriWare.Editor::CriWare.CriAtomWindowPrefs
-  searchPath: "C:/Users/takut/OneDrive/\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8/Symphony
-    Kill Chord/Assets/StreamingAssets"
+  searchPath: C:/Users/takut/GameProject/SymphonyKillChord/Assets/StreamingAssets
   outputAssetsRoot: 
   showPrivateCue: 0

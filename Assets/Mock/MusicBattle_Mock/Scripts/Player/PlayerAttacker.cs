@@ -13,12 +13,11 @@ namespace Mock.MusicBattle
         ///    コンストラクタ。
         /// </summary>
         public PlayerAttacker(PlayerStatus status, PlayerConfig Config,
-            PlayerManager player, Transform camera)
+            PlayerManager player)
         {
             _status = status;
             _config = Config;
             _player = player;
-            _camera = camera;
         }
 
         /// <summary>
@@ -33,11 +32,18 @@ namespace Mock.MusicBattle
         /// <summary>
         ///     プレイヤーの前にいる敵にアタック処理を行う。
         /// </summary>
-        public void Attack()
+        public void Attack(ICharacter target)
         {
-            _origin = _player.transform.position + Vector3.up * HEIGHT_RAY;
-            _direction = _camera.forward;
-            if (!TryFindAttackTarget(_origin, _direction, out ICharacter target))
+            if (target == null) { return; }
+
+            Vector3 origin = _player.transform.position + Vector3.up * HEIGHT_RAY;
+
+            #region デバッグ用
+            _origin = origin;
+            _direction = (target.Pivot - _origin).normalized;
+            #endregion
+
+            if (!CanAttackTarget(origin, target))
             {
                 Debug.Log("currentCharacter is null");
                 return;
@@ -49,12 +55,13 @@ namespace Mock.MusicBattle
         private const float HEIGHT_RAY = 0.7f;
 
         private readonly PlayerManager _player;
-        private readonly Transform _camera;
         private readonly PlayerStatus _status;
         private readonly PlayerConfig _config;
 
+        #region デバッグ用
         private Vector3 _direction;
         private Vector3 _origin;
+        #endregion
 
         /// <summary>
         ///     敵を探して発見したか返す。
@@ -85,6 +92,21 @@ namespace Mock.MusicBattle
             }
 
             return character;
+        }
+
+        private bool CanAttackTarget(Vector3 origin, ICharacter target)
+        {
+            if (Physics.Raycast(origin, (target.Pivot - origin).normalized,
+                    out RaycastHit hitInfo,
+                    _status.AttackRange, ~_config.IgnoreAttackLayer))
+            {
+                Rigidbody rb = hitInfo.collider.attachedRigidbody;
+                Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
+
+                return (rb?.GetComponent<ICharacter>() ?? null) == target;
+            }
+
+            return false;
         }
     }
 }

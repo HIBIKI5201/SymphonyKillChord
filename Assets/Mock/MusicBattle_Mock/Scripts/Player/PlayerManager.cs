@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using Mock.MusicBattle.Character;
 using Unity.Cinemachine;
 using UnityEngine;
+using Mock.MusicBattle.Battle;
 
 namespace Mock.MusicBattle.Player
 {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour, ICharacter
     {
-        public Transform Player => _player;
+        public  Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         /// <summary>   inputBufferとCinemachineCameraの初期化。  </summary>
-        public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera)
+        public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera,
+            LockOnManager lockOnManager)
         {
             _inputBuffer = inputBuffer;
-            _player = transform;
+            _lockOnManager = lockOnManager;
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
-            _playerAttacker = new PlayerAttacker(_playerStatus, _config,
-                this, CinemachineCamera.transform);
+            _playerAttacker = new PlayerAttacker(_playerStatus, _config, this);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
             InputEventRegister(_inputBuffer);
         }
@@ -31,10 +32,12 @@ namespace Mock.MusicBattle.Player
         private PlayerStatus _playerStatus;
         [SerializeField, Tooltip("コンフィグ")]
         private PlayerConfig _config;
+        [SerializeField, Tooltip("プレイヤーのピボット位置")]
+        private Transform _pivotTransform;
 
         private HealthEntity _healthEntity;
-        private Transform _player;
         private InputBuffer _inputBuffer;
+        private LockOnManager _lockOnManager;
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
         private PlayerAnimationController _animController;
@@ -131,13 +134,15 @@ namespace Mock.MusicBattle.Player
         {
             if (_playerAttacker != null)
             {
-                _playerAttacker.Attack();
+                ICharacter target = _lockOnManager.LockOnTarget;
+                _playerAttacker.Attack(target);
             }
         }
 
         private void OnDeathAction()
         {
             Debug.Log("Player Dead");
+            gameObject.SetActive(false);
         }
     }
 }

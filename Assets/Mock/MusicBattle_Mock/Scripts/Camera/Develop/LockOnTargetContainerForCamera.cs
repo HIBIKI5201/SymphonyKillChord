@@ -11,6 +11,7 @@ namespace Mock.MusicBattle.Develop
     {
         public IReadOnlyList<Transform> Targets => _targets;
 
+        public IReadOnlyList<Transform> NearerTargets { get; }
         [SerializeField]
         private List<Transform> _targets = new();
     }

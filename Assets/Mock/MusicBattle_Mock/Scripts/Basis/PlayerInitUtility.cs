@@ -18,7 +18,7 @@ namespace Mock.MusicBattle.Basis
             )
         {
             cameraManager.Init(inputBuffer, lockOnManager);
-            playerManager.Init(inputBuffer, cinemachineCamera);
+            playerManager.Init(inputBuffer, cinemachineCamera, lockOnManager);
         }
     }
 }

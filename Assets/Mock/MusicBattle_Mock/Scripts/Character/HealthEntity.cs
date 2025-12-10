@@ -28,7 +28,7 @@ namespace Mock.MusicBattle.Character
             if (_isDead) return;
             _currentHealth -= damage;
             Debug.Log($"{this} は　{damage} を受けた");
-            if (_currentHealth < 0)
+            if (_currentHealth <= 0)
             {
                 _currentHealth = 0;
                 OnDeath?.Invoke();
