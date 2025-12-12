@@ -229,7 +229,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.TestSystem
   _musicSyncManager: {fileID: 1898387078}
   _source: {fileID: 1898387073}
-  _bpm: 105
+  _bpm: 104.9
   _bgmProperTime: 4
   _startOffset: 0
 --- !u!4 &393266874
@@ -1083,23 +1083,23 @@ MonoBehaviour:
   _musicSyncManager: {fileID: 1898387078}
   _musicUI: {fileID: 1847886713}
   _timeSignatures:
-  - 16
-  - 12
-  - 8
-  - 6
-  - 4
-  - 3
-  - 2
   - 1
+  - 2
+  - 3
+  - 4
+  - 6
+  - 8
+  - 12
+  - 16
   _noteColor:
-  - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 1, g: 0.6470588, b: 0, a: 1}
-  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 0, g: 1, b: 1, a: 1}
-  - {r: 0, g: 0, b: 1, a: 1}
-  - {r: 0.627451, g: 0.1254902, b: 0.9411765, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0.627451, g: 0.1254902, b: 0.9411765, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 1, g: 0.6470588, b: 0, a: 1}
+  - {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &1898387073 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 620953097201545478, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
@@ -1222,7 +1222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.BeatIndicatorController
   _musicActionHandler: {fileID: 1898387074}
-  zoomSpeed: 0.032
+  zoomSpeed: 0.033
 --- !u!1001 &1994677627144750575
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1274,6 +1274,38 @@ PrefabInstance:
     - target: {fileID: 4173495234667238227, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
       propertyPath: m_Name
       value: ==MusicSync==
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[1]'
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[2]'
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[3]'
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[4]'
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[5]'
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[6]'
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: '_timeSignatures.Array.data[7]'
+      value: 16
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

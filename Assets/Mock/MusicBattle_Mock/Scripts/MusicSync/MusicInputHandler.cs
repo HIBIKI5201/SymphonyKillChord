@@ -98,7 +98,7 @@ namespace Mock.MusicBattle.MusicSync
             for (int i = 0; i < _timeSignatures.Length; i++)
             {
                 double beatLength = GetBeatLength(i);
-                double diff = Abs(timeDifference - beatLength);
+                double diff = Math.Abs(timeDifference - beatLength);
 
                 _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
 
@@ -123,13 +123,6 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="timeSignatureIndex">拍子インデックス</param>
         /// <returns>拍の長さ</returns>
         private double GetBeatLength(int timeSignatureIndex) => _musicBuffer.PropTimeSignature / _timeSignatures[timeSignatureIndex];
-
-        /// <summary>
-        ///     指定された値の絶対値を取得する
-        /// </summary>
-        /// <param name="value">値</param>
-        /// <returns>絶対値</returns>
-        private static double Abs(double value) => value < 0 ? -value : value;
 
         /// <summary>
         ///     1拍が最も長い拍子のIndexを取得する
