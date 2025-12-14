@@ -33,7 +33,7 @@ namespace Mock.MusicBattle.Develop
 
             void Action_started(InputAction.CallbackContext obj)
             {
-                hud.CreateNote((float)(CurrentBeat / 4d));
+                hud.CreateNote((float)(CurrentBeat / 4d), 4);
             }
         }
     }

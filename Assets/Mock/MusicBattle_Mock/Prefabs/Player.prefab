@@ -956,6 +956,7 @@ MonoBehaviour:
   _playerStatus: {fileID: 11400000, guid: ad763209e5e2c3a489ee08ac6503640d, type: 2}
   _config: {fileID: 11400000, guid: 61915a6c2cf23f64f90e0dcf7523c198, type: 2}
   _pivotTransform: {fileID: 7252400935441454637}
+  _gunSoundSource: {fileID: 8523454837323722002}
 --- !u!114 &60009445536760728
 MonoBehaviour:
   m_ObjectHideFlags: 0

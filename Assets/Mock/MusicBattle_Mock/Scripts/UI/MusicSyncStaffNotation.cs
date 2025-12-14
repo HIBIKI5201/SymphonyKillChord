@@ -44,11 +44,14 @@ namespace Mock.MusicBattle.UI
         ///     ノーツを生成する。
         /// </summary>
         /// <param name="measure"></param>
-        public void CreateNotes(float measure)
+        public void CreateNotes(float measure, Color color)
         {
+            Debug.Log(color);
+
             // ノーツ要素を生成して配置する。
             VisualElement noteElement = _noteAsset.Instantiate();
             noteElement.style.position = Position.Absolute;
+            noteElement.Q<VisualElement>("note").style.backgroundColor = color;
             _noteContainer.Add(noteElement);
 
             // ノーツエンティティを作成して管理リストに追加する。

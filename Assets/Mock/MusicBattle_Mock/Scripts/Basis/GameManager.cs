@@ -74,7 +74,7 @@ namespace Mock.MusicBattle.Basis
                 _criMusicBuffer, _inputBuffer, this.destroyCancellationToken);
 
             PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
-                _cameraManager, _camera, _lockOnManager);
+                _cameraManager, _camera, _lockOnManager, _musicSyncManager);
 
             _factory = new EnemyFactory(
                 _enemyContainer, _player,

@@ -21,7 +21,7 @@ namespace Mock.MusicBattle.Develop
             bool isSuccess = true;
             isSuccess = isSuccess && _cameraManager.Init(_inputBuffer, lockOnManager);
             Debug.Log(isSuccess ? "初期化は正常に終了した。" : "初期化は失敗した。");
-            _playerManager.Init(_inputBuffer, _camera, lockOnManager);
+            _playerManager.Init(_inputBuffer, _camera, lockOnManager, null);
         }
     }
 }

@@ -53,9 +53,24 @@ namespace Mock.MusicBattle.UI
             _damageTextPool.ShowDamageText(damage, position);
         }
 
-        public void CreateNote(float measure)
+        public void CreateNote(float measure, float signature)
         {
-            _musicSyncStaffNotation.CreateNotes(measure);
+            int s = Mathf.RoundToInt(signature);
+            Color color = s switch
+            {
+                1 => Color.white,
+                2 => Color.magenta,
+                3 => Color.purple,
+                4 => Color.blue,
+                6 => Color.cyan,
+                8 => Color.green,
+                12 => Color.yellow,
+                16 => Color.orangeRed,
+                32 => Color.red,
+                _ => Color.black
+            };
+
+            _musicSyncStaffNotation.CreateNotes(measure, color);
         }
 
         private UIDocument _document;

@@ -13,13 +13,13 @@ namespace Mock.MusicBattle.Basis
         {
             hud.InitializePlayerHealthBar(player.HealthEntity);
             hud.Initialize(musicBuffer);
-            inputBuffer.AttackAction.Started += Action_started;
+            player.OnAttacked += Action_started;
 
-            destroyToken.Register(() => inputBuffer.AttackAction.Started -= Action_started);
+            destroyToken.Register(() => player.OnAttacked -= Action_started);
 
-            void Action_started(float a)
+            void Action_started(float signature)
             {
-                hud.CreateNote((float)(musicBuffer.CurrentBeat / 4d));
+                hud.CreateNote((float)(musicBuffer.CurrentBeat / 4d), signature);
             }
         }
 
