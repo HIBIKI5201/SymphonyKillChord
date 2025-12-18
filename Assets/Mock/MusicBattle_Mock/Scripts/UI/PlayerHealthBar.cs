@@ -84,10 +84,10 @@ namespace Mock.MusicBattle.UI
             float proportion = Mathf.Clamp01(current / max);
 
             // 緑バーを先に変更。
-            await _greenBar.ChangeBarAsync(proportion, 0.6f, token);
+            await _greenBar.ChangeBarAsync(proportion, 0.3f, token);
 
             // 少し待ってから赤バーを変更。
-            await Awaitable.WaitForSecondsAsync(1f, token);
+            await Awaitable.WaitForSecondsAsync(0.8f, token);
             await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }
     }

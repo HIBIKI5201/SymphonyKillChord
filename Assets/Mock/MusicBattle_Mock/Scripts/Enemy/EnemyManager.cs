@@ -1,10 +1,8 @@
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
-using Mock.MusicBattle.Player;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
-using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -87,7 +85,7 @@ namespace Mock.MusicBattle.Enemy
         {
             _musicSyncManager = music;
             _enemyAttack = new EnemyAttack(this, _musicSyncManager,
-                _encountSo, _battaleSo,_player,_enemyStatus);
+                _encountSo, _battaleSo, _player, _enemyStatus);
         }
 
         /// <summary>

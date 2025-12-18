@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Unity.Cinemachine;
 
@@ -14,11 +15,12 @@ namespace Mock.MusicBattle.Basis
             InputBuffer inputBuffer,
             CameraManager cameraManager,
             CinemachineCamera cinemachineCamera,
-            LockOnManager lockOnManager
+            LockOnManager lockOnManager,
+            MusicSyncManager musicSyncManager
             )
         {
             cameraManager.Init(inputBuffer, lockOnManager);
-            playerManager.Init(inputBuffer, cinemachineCamera, lockOnManager);
+            playerManager.Init(inputBuffer, cinemachineCamera, lockOnManager, musicSyncManager);
         }
     }
 }

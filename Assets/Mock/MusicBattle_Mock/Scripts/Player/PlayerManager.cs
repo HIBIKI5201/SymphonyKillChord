@@ -4,17 +4,22 @@ using Mock.MusicBattle.Character;
 using Unity.Cinemachine;
 using UnityEngine;
 using Mock.MusicBattle.Battle;
+using CriWare;
+using System;
+using Mock.MusicBattle.MusicSync;
 
 namespace Mock.MusicBattle.Player
 {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour, ICharacter
     {
+        public event Action<float> OnAttacked;
+
         public  Vector3 Pivot => _pivotTransform.position;
         public HealthEntity HealthEntity => _healthEntity;
         /// <summary>   inputBufferとCinemachineCameraの初期化。  </summary>
         public void Init(InputBuffer inputBuffer, CinemachineCamera CinemachineCamera,
-            LockOnManager lockOnManager)
+            LockOnManager lockOnManager, MusicSyncManager musicSync)
         {
             _inputBuffer = inputBuffer;
             _lockOnManager = lockOnManager;
@@ -23,6 +28,7 @@ namespace Mock.MusicBattle.Player
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, this);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, CinemachineCamera.transform);
+            _musicSyncManager = musicSync;
             InputEventRegister(_inputBuffer);
         }
 
@@ -34,6 +40,8 @@ namespace Mock.MusicBattle.Player
         private PlayerConfig _config;
         [SerializeField, Tooltip("プレイヤーのピボット位置")]
         private Transform _pivotTransform;
+        [SerializeField, Tooltip("銃声ソース")]
+        private CriAtomSource _gunSoundSource;
 
         private HealthEntity _healthEntity;
         private InputBuffer _inputBuffer;
@@ -41,6 +49,7 @@ namespace Mock.MusicBattle.Player
         private PlayerMover _playerMover;
         private PlayerAttacker _playerAttacker;
         private PlayerAnimationController _animController;
+        private MusicSyncManager _musicSyncManager;
         private Vector2 _input;
         private Vector3 _velocity;
         private HashSet<Collision> _hitGrounds = new();
@@ -135,7 +144,10 @@ namespace Mock.MusicBattle.Player
             if (_playerAttacker != null)
             {
                 ICharacter target = _lockOnManager.LockOnTarget;
-                _playerAttacker.Attack(target);
+                float signature = _musicSyncManager.GetInputTimeSignature();
+                _playerAttacker.Attack(target, signature);
+                _gunSoundSource?.Play();
+                OnAttacked?.Invoke(signature);
             }
         }
 

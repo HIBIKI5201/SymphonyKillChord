@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Mock.MusicBattle.UI;
@@ -8,18 +9,20 @@ namespace Mock.MusicBattle.Basis
     public static class HudUtility
     {
         public static void Init(IngameHUDManager hud, PlayerManager player,
-                        CriMusicBuffer musicBuffer, InputBuffer inputBuffer
-            , CancellationToken destroyToken)
+                        CriMusicBuffer musicBuffer, InputBuffer inputBuffer,
+                        LockOnManager lockOnManager,
+                        CancellationToken destroyToken)
         {
             hud.InitializePlayerHealthBar(player.HealthEntity);
+            hud.InitializeLockOnCursor(lockOnManager);
             hud.Initialize(musicBuffer);
-            inputBuffer.AttackAction.Started += Action_started;
+            player.OnAttacked += Action_started;
 
-            destroyToken.Register(() => inputBuffer.AttackAction.Started -= Action_started);
+            destroyToken.Register(() => player.OnAttacked -= Action_started);
 
-            void Action_started(float a)
+            void Action_started(float signature)
             {
-                hud.CreateNote((float)(musicBuffer.CurrentBeat / 4d));
+                hud.CreateNote((float)(musicBuffer.CurrentBeat / 4d), signature);
             }
         }
 
