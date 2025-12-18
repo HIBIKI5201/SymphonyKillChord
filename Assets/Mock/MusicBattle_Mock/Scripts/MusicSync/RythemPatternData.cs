@@ -2,7 +2,7 @@ using Mock.MusicBattle.Basis;
 using System;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.MusicSync
 {
     [CreateAssetMenu(fileName = nameof(RythemPatternData), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(RythemPatternData))]
     public class RythemPatternData : ScriptableObject

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Enemy
 {
     [CreateAssetMenu(fileName = "EnemyMusicSO", menuName = "Mock/MusicBattle/Enemy/EnemyMusicSO")]
     public class EnemyMusicSO : ScriptableObject

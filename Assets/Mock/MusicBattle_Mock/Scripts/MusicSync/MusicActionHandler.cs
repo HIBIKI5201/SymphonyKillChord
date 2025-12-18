@@ -2,7 +2,7 @@ using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
+using Mock.MusicBattle.Utility;
 using UnityEngine;
 
 namespace Mock.MusicBattle.MusicSync
@@ -85,7 +85,7 @@ namespace Mock.MusicBattle.MusicSync
         {
             // 現在拍数
             double currentBeat = _musicBuffer.CurrentBeat;
-            while(_scheduledActions.Count > 0)
+            while (_scheduledActions.Count > 0)
             {
                 ScheduledAction item = _scheduledActions.Peek();
                 _debugLog.Clear();

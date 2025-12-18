@@ -2,7 +2,7 @@ using Mock.MusicBattle.Character;
 using Mock.MusicBattle.Player;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
     /// <summary>
     ///    プレイヤーの攻撃処理をする。

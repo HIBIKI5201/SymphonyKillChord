@@ -1,9 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Utility
 {
     /// <summary>
     /// 優先順位付きキュー。<br></br>

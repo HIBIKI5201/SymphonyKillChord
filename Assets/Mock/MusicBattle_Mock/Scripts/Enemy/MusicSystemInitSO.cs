@@ -1,10 +1,9 @@
-using CriWare;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.MusicSync
 {
     [CreateAssetMenu(fileName = "MusicSystemInitSO", menuName = "Mock/MusicBattle/MusicSystemInitSO")]
-    public class MusicSystemInitSO :ScriptableObject
+    public class MusicSystemInitSO : ScriptableObject
     {
         [Header("音楽同期システム初期化パラメータ")]
         public double Bgm;

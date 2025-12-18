@@ -1,8 +1,9 @@
+using Mock.MusicBattle.Basis;
 using UnityEngine;
 
-namespace Mock.MusicBattle
+namespace Mock.MusicBattle.Player
 {
-    [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "MusicBattle/" + nameof(PlayerConfig))]
+    [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(PlayerConfig))]
     public class PlayerConfig : ScriptableObject
     {
         public LayerMask IgnoreAttackLayer => _ignoreAttackLayer;
