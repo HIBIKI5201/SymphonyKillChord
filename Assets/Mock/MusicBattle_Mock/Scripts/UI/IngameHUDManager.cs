@@ -1,3 +1,4 @@
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
 using System;
@@ -42,6 +43,11 @@ namespace Mock.MusicBattle.UI
             enemyHealthBar.BindData(healthEntity, transform);
 
             return enemyHealthBar;
+        }
+
+        public void InitializeLockOnCursor(LockOnManager lockOnManager)
+        {
+            
         }
 
         /// <summary>
