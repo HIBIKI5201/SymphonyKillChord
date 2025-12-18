@@ -6186,6 +6186,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70f6906c4324fad428833b42c7774c2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.IngameHUDManager
+  _measureColorDatas:
+  - _measure: 1
+    _color: {r: 1, g: 1, b: 1, a: 1}
+  - _measure: 2
+    _color: {r: 1, g: 0, b: 0.7631607, a: 1}
+  - _measure: 3
+    _color: {r: 0.80417824, g: 0, b: 1, a: 1}
+  - _measure: 4
+    _color: {r: 0, g: 0.13070297, b: 1, a: 1}
+  - _measure: 6
+    _color: {r: 0, g: 0.9401531, b: 1, a: 1}
+  - _measure: 8
+    _color: {r: 0, g: 1, b: 0.035032272, a: 1}
+  - _measure: 12
+    _color: {r: 1, g: 0.60691696, b: 0, a: 1}
+  - _measure: 16
+    _color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!4 &8952042596382340163
 Transform:
   m_ObjectHideFlags: 0

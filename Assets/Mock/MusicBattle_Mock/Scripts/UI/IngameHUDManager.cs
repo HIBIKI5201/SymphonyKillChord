@@ -1,5 +1,6 @@
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -55,24 +56,14 @@ namespace Mock.MusicBattle.UI
 
         public void CreateNote(float measure, float signature)
         {
-            int s = Mathf.RoundToInt(signature);
-            Color color = s switch
-            {
-                1 => Color.white,
-                2 => Color.magenta,
-                3 => Color.purple,
-                4 => Color.blue,
-                6 => Color.cyan,
-                8 => Color.green,
-                12 => Color.yellow,
-                16 => Color.orangeRed,
-                32 => Color.red,
-                _ => Color.black
-            };
-
+            Color color = GetMeasureColor(signature);
             _musicSyncStaffNotation.CreateNotes(measure, color);
         }
 
+        [SerializeField]
+        private SignetureColorData[] _measureColorDatas;
+
+            
         private UIDocument _document;
         private VisualElement _root;
 
@@ -80,6 +71,18 @@ namespace Mock.MusicBattle.UI
         private DamageTextPool _damageTextPool;
         private MusicSyncStaffNotation _musicSyncStaffNotation;
         private IMusicBuffer _musicBuffer;
+
+        [Serializable]
+        private struct SignetureColorData
+        {
+            public float Signeture => _measure;
+            public Color Color => _color;
+
+            [SerializeField]
+            private float _measure;
+            [SerializeField]
+            private Color _color;
+        }
 
         private void Start()
         {
@@ -105,6 +108,21 @@ namespace Mock.MusicBattle.UI
             if (_musicBuffer == null || _musicSyncStaffNotation == null) { return; }
 
             _musicSyncStaffNotation.Update(Time.deltaTime, (float)(_musicBuffer.CurrentBeat / 4d));
+        }
+
+        private Color GetMeasureColor(float signature)
+        {
+            int s = Mathf.RoundToInt(signature);
+
+            foreach (var data in _measureColorDatas)
+            {
+                if (data.Signeture == s)
+                {
+                    return data.Color;
+                }
+            }
+
+            return Color.black;
         }
     }
 }
