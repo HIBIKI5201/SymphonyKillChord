@@ -113,10 +113,10 @@ namespace Mock.MusicBattle.UI
             try
             {
 
-                await _greenBar.ChangeBarAsync(proportion, 0.4f, token);
+                await _greenBar.ChangeBarAsync(proportion, 0.1f, token);
 
-                await Awaitable.WaitForSecondsAsync(0.5f, token);
-                await _redBar.ChangeBarAsync(proportion, 0.4f, token);
+                await Awaitable.WaitForSecondsAsync(0.3f, token);
+                await _redBar.ChangeBarAsync(proportion, 0.2f, token);
             }
             catch (OperationCanceledException)
             {
