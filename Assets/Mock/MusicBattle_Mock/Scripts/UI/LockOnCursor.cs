@@ -19,10 +19,17 @@ namespace Mock.MusicBattle
             treeAsset.CloneTree(this);
 
             _cursor = this.Q<VisualElement>(ELEMENT_CURSOR_NAME);
+            style.visibility = Visibility.Hidden;
         }
 
-        public void RegisterTarget(Transform target) => _target = target;
+        public void RegisterTarget(Transform target)
+        {
+            _target = target;
 
+            // ターゲットの状態による可視状態を確認。
+            Visibility visibility = target != null ? Visibility.Visible : Visibility.Hidden;
+            if (style.visibility != visibility) { style.visibility = visibility; }
+        }
         public void UpdatePosition()
         {
             if (_target == null) { return; }
