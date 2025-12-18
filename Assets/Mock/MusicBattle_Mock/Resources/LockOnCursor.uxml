@@ -1,0 +1,3 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="cursor" style="width: 20px; height: 20px; background-image: url(&quot;project://database/Assets/Arts/Models/Symphony/Textures/_03.png?fileID=-198626605138038083&amp;guid=f20d651b40c0546449ef8d59abc9a506&amp;type=3#_03_4&quot;); translate: -50% -50%; position: absolute;" />
+</ui:UXML>
