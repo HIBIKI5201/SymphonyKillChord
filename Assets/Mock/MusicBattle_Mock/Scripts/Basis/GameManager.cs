@@ -70,11 +70,14 @@ namespace Mock.MusicBattle.Basis
             _enemyContainer = new EnemyContainer();
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
-            HudUtility.Init(_hudManager, _playerManager,
-                _criMusicBuffer, _inputBuffer, this.destroyCancellationToken);
 
             PlayerInitUtility.InitPlayer(_playerManager, _inputBuffer,
                 _cameraManager, _camera, _lockOnManager, _musicSyncManager);
+
+            HudUtility.Init(_hudManager, _playerManager,
+                _criMusicBuffer, _inputBuffer,
+                _lockOnManager,
+                this.destroyCancellationToken);
 
             _factory = new EnemyFactory(
                 _enemyContainer, _player,
