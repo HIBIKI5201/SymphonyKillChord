@@ -24,8 +24,11 @@ namespace Mock.MusicBattle.UI
         ///     プレイヤーのヘルスバーを初期化する。
         /// </summary>
         /// <param name="healthEntity"></param>
-        public void InitializePlayerHealthBar(HealthEntity healthEntity) =>
+        public async void InitializePlayerHealthBar(HealthEntity healthEntity)
+        {
+            try { while (!_isInitialized) { await Awaitable.NextFrameAsync(destroyCancellationToken); } } catch { }
             _playerHealthBar?.BindData(healthEntity);
+        }
 
         /// <summary>
         ///     敵のヘルスバーを追加する。
@@ -45,9 +48,11 @@ namespace Mock.MusicBattle.UI
             return enemyHealthBar;
         }
 
-        public void InitializeLockOnCursor(LockOnManager lockOnManager)
+        public async void InitializeLockOnCursor(LockOnManager lockOnManager)
         {
-            
+            try { while (!_isInitialized) { await Awaitable.NextFrameAsync(destroyCancellationToken); } } catch { }
+
+            lockOnManager.OnTargetLocked += _lockOnCursor.RegisterTarget;
         }
 
         /// <summary>
@@ -75,8 +80,11 @@ namespace Mock.MusicBattle.UI
 
         private PlayerHealthBar _playerHealthBar;
         private DamageTextPool _damageTextPool;
+        private LockOnCursor _lockOnCursor;
         private MusicSyncStaffNotation _musicSyncStaffNotation;
         private IMusicBuffer _musicBuffer;
+
+        private bool _isInitialized = false;
 
         [Serializable]
         private struct SignetureColorData
@@ -103,9 +111,13 @@ namespace Mock.MusicBattle.UI
 
                 _playerHealthBar = new PlayerHealthBar();
                 _musicSyncStaffNotation = new MusicSyncStaffNotation();
+                _lockOnCursor = new LockOnCursor();
                 _damageTextPool = new(_root);
                 _root.Add(_playerHealthBar);
                 _root.Add(_musicSyncStaffNotation);
+                _root.Add(_lockOnCursor);
+
+                _isInitialized = true;
             }
         }
 
@@ -114,6 +126,7 @@ namespace Mock.MusicBattle.UI
             if (_musicBuffer == null || _musicSyncStaffNotation == null) { return; }
 
             _musicSyncStaffNotation.Update(Time.deltaTime, (float)(_musicBuffer.CurrentBeat / 4d));
+            _lockOnCursor?.UpdatePosition();
         }
 
         private Color GetMeasureColor(float signature)
