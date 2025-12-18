@@ -32,7 +32,7 @@ namespace Mock.MusicBattle
         /// <summary>
         ///     プレイヤーの前にいる敵にアタック処理を行う。
         /// </summary>
-        public void Attack(ICharacter target)
+        public void Attack(ICharacter target, float signature)
         {
             if (target == null) { return; }
 
@@ -49,7 +49,8 @@ namespace Mock.MusicBattle
                 return;
             }
 
-            target.TakeDamage(_status.AttackPower);
+            float attackPower = _status.AttackPower * 4 / signature;
+            target.TakeDamage(attackPower);
         }
 
         private const float HEIGHT_RAY = 0.7f;

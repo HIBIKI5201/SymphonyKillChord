@@ -144,10 +144,10 @@ namespace Mock.MusicBattle.Player
             if (_playerAttacker != null)
             {
                 ICharacter target = _lockOnManager.LockOnTarget;
-                float time = _musicSyncManager.GetInputTimeSignature();
-                _playerAttacker.Attack(target);
+                float signature = _musicSyncManager.GetInputTimeSignature();
+                _playerAttacker.Attack(target, signature);
                 _gunSoundSource?.Play();
-                OnAttacked?.Invoke(time);
+                OnAttacked?.Invoke(signature);
             }
         }
 
