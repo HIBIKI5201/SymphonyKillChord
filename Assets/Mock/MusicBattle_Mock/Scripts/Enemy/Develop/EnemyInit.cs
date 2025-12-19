@@ -11,17 +11,6 @@ namespace Mock.MusicBattle.Enemy
     [DefaultExecutionOrder(-800)]
     public class EnemyInit : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> エネミーマネージャーの参照。 </summary>
         [SerializeField, Tooltip("エネミーマネージャーの参照。")]
@@ -76,8 +65,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     敵を定期的にスポーンさせるコルーチン。
@@ -99,8 +86,5 @@ namespace Mock.MusicBattle.Enemy
             }
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

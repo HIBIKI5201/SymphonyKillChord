@@ -9,17 +9,6 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class MusicUI : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> ノーツの親Transform。 </summary>
         [SerializeField, Tooltip("ノーツの親Transform。")]
@@ -54,8 +43,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Publicメソッド
         /// <summary>
         ///     指定された色でノーツを生成し、表示します。
@@ -110,8 +97,5 @@ namespace Mock.MusicBattle.MusicSync
             }
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

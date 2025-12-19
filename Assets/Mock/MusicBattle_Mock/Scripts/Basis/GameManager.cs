@@ -16,17 +16,6 @@ namespace Mock.MusicBattle.Basis
     [DefaultExecutionOrder(-900)]
     public class GameManager : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> プレイヤーマネージャーの参照。 </summary>
         [SerializeField, Tooltip("プレイヤーマネージャーの参照。")]
@@ -107,8 +96,6 @@ namespace Mock.MusicBattle.Basis
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     ゲームの主要なコンポーネントを初期化します。
@@ -134,8 +121,5 @@ namespace Mock.MusicBattle.Basis
             EnemyUtility.EnemyContainerInit(_enemyContainer, _playerManager, _cameraManager, _lockOnManager);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

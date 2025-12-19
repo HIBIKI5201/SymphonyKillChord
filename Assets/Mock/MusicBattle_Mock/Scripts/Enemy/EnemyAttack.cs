@@ -39,11 +39,6 @@ namespace Mock.MusicBattle.Enemy
             _enemyManager.OnOutOfRange += CancelScheduled;
         }
 
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
         #region パブリックインターフェースメソッド
         /// <summary>
         ///     このインスタンスによって使用されているリソースを解放します。
@@ -57,11 +52,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> 遭遇フェーズの音楽SO。 </summary>
         private readonly EnemyMusicSO _encount;
@@ -81,7 +71,6 @@ namespace Mock.MusicBattle.Enemy
         private bool _isBattlePhase = false;
         #endregion
 
-        // UNITY_LIFECYCLE_METHODS
         #region イベントハンドラメソッド
         /// <summary>
         ///     敵が攻撃可能になった際に呼ばれ、遭遇フェーズの攻撃スケジュールを開始します。
@@ -92,7 +81,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     バトルフェーズの攻撃タイミングを音楽同期アクションとして予約します。
@@ -150,8 +138,5 @@ namespace Mock.MusicBattle.Enemy
             }
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

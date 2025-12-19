@@ -30,10 +30,6 @@ namespace Mock.MusicBattle.UI
             _damageText = this.Q<Label>(ELEMENT_NAME_TEXT);
         }
 
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     ダメージテキストエンティティを初期化します。
@@ -100,10 +96,6 @@ namespace Mock.MusicBattle.UI
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "DamageTextEntity";
@@ -113,7 +105,6 @@ namespace Mock.MusicBattle.UI
         private const string ELEMENT_NAME_TEXT = "text";
         #endregion
 
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> リリース時に呼び出されるアクション。 </summary>
         private Action _onRelease;
@@ -124,13 +115,5 @@ namespace Mock.MusicBattle.UI
         /// <summary> ダメージテキストを表示するLabel。 </summary>
         private Label _damageText;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

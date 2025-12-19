@@ -35,10 +35,6 @@ namespace Mock.MusicBattle.Enemy
             _hudManager = hudManager;
         }
 
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     エネミーを生成、またはプールから再利用して返します。
@@ -82,12 +78,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> HUDマネージャーの参照。 </summary>
         private IngameHUDManager _hudManager;
@@ -106,13 +96,5 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> ロックオンターゲット変更イベントハンドラを格納するDictionary。 </summary>
         private readonly Dictionary<EnemyManager, System.Action<Transform>> _onTargetLockedHandlers = new();
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

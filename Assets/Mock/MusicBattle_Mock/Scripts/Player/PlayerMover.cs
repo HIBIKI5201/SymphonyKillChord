@@ -22,14 +22,11 @@ namespace Mock.MusicBattle.Player
             _rb = rb;
         }
 
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
         public Vector3 CurrentVelocity {  get; private set; }
         #endregion
 
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     入力方向からプレイヤーの速度を計算します。
@@ -79,12 +76,6 @@ namespace Mock.MusicBattle.Player
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> プレイヤーのステータス。 </summary>
         private readonly PlayerStatus _status;
@@ -113,8 +104,6 @@ namespace Mock.MusicBattle.Player
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     加速度補間t値を計算します。
@@ -167,8 +156,5 @@ namespace Mock.MusicBattle.Player
             }
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

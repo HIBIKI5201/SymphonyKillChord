@@ -34,9 +34,6 @@ namespace Mock.MusicBattle.Enemy
         public event Action OnOutOfRange;
         #endregion
 
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     初期化処理を行います。
@@ -92,12 +89,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> 敵マネージャーの参照。 </summary>
         private readonly EnemyManager _enemyManager;
@@ -114,13 +105,5 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> 敵が攻撃範囲内にいるかどうかを示すフラグ。 </summary>
         private bool _inRange = false;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

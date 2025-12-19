@@ -13,8 +13,6 @@ namespace Mock.MusicBattle.Enemy
     /// </summary>
     public class EnemyContainer : ILockOnTargetContainer
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> すべてのロックオン可能なターゲットの読み取り専用リストを取得します。 </summary>
         public IReadOnlyList<Transform> Targets
@@ -41,8 +39,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     管理中のエネミーをインデックスで取得します。
@@ -149,12 +145,6 @@ namespace Mock.MusicBattle.Enemy
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS (ILockOnTargetContainer のプロパティは#region パブリックプロパティ に移動)
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> カメラマネージャーの参照。 </summary>
         private CameraManager _cameraManager;
@@ -169,13 +159,5 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> 敵の死亡イベントハンドラを格納するDictionary。 </summary>
         private readonly Dictionary<EnemyManager, System.Action> _deathHandlers = new();
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

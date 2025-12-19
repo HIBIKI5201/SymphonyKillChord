@@ -9,17 +9,6 @@ namespace Mock.MusicBattle.Develop
     /// </summary>
     public class EnemyHealthBarDebugger : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> 最大ヘルス量。 </summary>
         [SerializeField, Tooltip("最大ヘルス量。")]
@@ -49,8 +38,6 @@ namespace Mock.MusicBattle.Develop
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     コンテキストメニューからヘルス値を適用します。
@@ -63,8 +50,5 @@ namespace Mock.MusicBattle.Develop
             _hud.ShowDamageText(_damage, transform.position);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

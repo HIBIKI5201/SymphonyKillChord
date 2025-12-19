@@ -42,8 +42,6 @@ namespace Mock.MusicBattle.Battle
         public ICharacter LockOnTarget => _currentEnemy;
         #endregion
 
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     現在のロックオンターゲットを変更します。
@@ -76,11 +74,6 @@ namespace Mock.MusicBattle.Battle
         }
         #endregion
 
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> プレイヤーのTransform。 </summary>
         private readonly Transform _player;
@@ -102,7 +95,6 @@ namespace Mock.MusicBattle.Battle
         private int _lastSelectDir = 0;
         #endregion
 
-        // UNITY_LIFECYCLE_METHODS
         #region イベントハンドラメソッド
         /// <summary>
         ///     ロックオン選択アクションの入力時に呼び出されます。
@@ -147,7 +139,6 @@ namespace Mock.MusicBattle.Battle
         }
         #endregion
 
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     入力イベントを登録します。
@@ -272,8 +263,5 @@ namespace Mock.MusicBattle.Battle
             return (closest, index);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

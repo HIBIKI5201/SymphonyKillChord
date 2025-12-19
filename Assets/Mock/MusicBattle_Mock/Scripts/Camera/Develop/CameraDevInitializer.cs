@@ -22,7 +22,6 @@ namespace Mock.MusicBattle.Develop
         private InputBuffer _inputBuffer;
         #endregion
 
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     最初のフレームアップデートの前に呼び出されます。
@@ -38,7 +37,5 @@ namespace Mock.MusicBattle.Develop
             Debug.Log(isSuccess ? "初期化は正常に終了しました。" : "初期化は失敗しました。");
         }
         #endregion
-
-        // PRIVATE_METHODS
     }
 }

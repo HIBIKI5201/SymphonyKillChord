@@ -12,8 +12,6 @@ namespace Mock.MusicBattle.Camera
         menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(CameraConfigs))]
     public class CameraConfigs : ScriptableObject
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> カメラの追従位置補正を取得します。 </summary>
         public Vector3 CameraOffset => _cameraOffset;
@@ -43,14 +41,6 @@ namespace Mock.MusicBattle.Camera
         public Vector3 CameraCollisionOffset => _cameraCollisionOffset;
         #endregion
 
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> カメラの追従位置補正。 </summary>
         [SerializeField, Tooltip("カメラの追従位置補正。")]
@@ -89,14 +79,5 @@ namespace Mock.MusicBattle.Camera
         [SerializeField, Tooltip("カメラの障害物回避の位置補正。")]
         private Vector3 _cameraCollisionOffset = new Vector3(0f, 1f, 0f);
         #endregion
-
-        // PRIVATE_FIELDS
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

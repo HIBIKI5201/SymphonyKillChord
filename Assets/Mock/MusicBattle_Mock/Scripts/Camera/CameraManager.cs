@@ -1,8 +1,6 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Basis;
 using System;
-using System.Linq; // 不要なusingを削除
-using System.Threading; // 不要なusingを削除
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -15,11 +13,6 @@ namespace Mock.MusicBattle.Camera
     [RequireComponent(typeof(CinemachineCamera))]
     public class CameraManager : MonoBehaviour, IDisposable
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     カメラを初期化します。
@@ -90,10 +83,6 @@ namespace Mock.MusicBattle.Camera
         }
         #endregion
 
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> カメラの設定データ。 </summary>
         [SerializeField, Tooltip("カメラの設定データ。")]
@@ -168,7 +157,6 @@ namespace Mock.MusicBattle.Camera
         private void HandleLockOn(Transform target) => _mover?.SetLockTarget(target);
         #endregion
 
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     1フレームごとの更新を行います。
@@ -181,9 +169,6 @@ namespace Mock.MusicBattle.Camera
             _mover?.UpdateYaw(deltaTime);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
 

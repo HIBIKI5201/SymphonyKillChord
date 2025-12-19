@@ -8,17 +8,6 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class TestPlayer : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
-        // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> 音楽同期マネージャーの参照。 </summary>
         [SerializeField, Tooltip("音楽同期マネージャーの参照。")]
@@ -34,7 +23,6 @@ namespace Mock.MusicBattle.MusicSync
         private Color[] _noteColor = { Color.red, Color.orange, Color.yellow, Color.green, Color.cyan, Color.blue, Color.purple, Color.white };
         #endregion
 
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     フレームごとに呼び出されます。
@@ -61,12 +49,5 @@ namespace Mock.MusicBattle.MusicSync
             }
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

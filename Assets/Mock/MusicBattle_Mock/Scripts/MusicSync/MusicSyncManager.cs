@@ -1,6 +1,5 @@
 using CriWare;
 using System;
-using System.Threading; // 不要なusingを削除
 using UnityEngine;
 
 namespace Mock.MusicBattle.MusicSync
@@ -11,11 +10,6 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicSyncManager : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     初期化処理を行います。
@@ -52,11 +46,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> 入力によって検出されうる拍子の配列。 </summary>
         [SerializeField, Tooltip("入力によって検出されうる拍子の配列。")]
@@ -75,10 +64,6 @@ namespace Mock.MusicBattle.MusicSync
         private MusicActionHandler _actionHandler;
         #endregion
 
-        // PRIVATE_FIELDS
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     BGMの再生を開始します。
@@ -88,8 +73,5 @@ namespace Mock.MusicBattle.MusicSync
             _musicPlayer.Play();
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
