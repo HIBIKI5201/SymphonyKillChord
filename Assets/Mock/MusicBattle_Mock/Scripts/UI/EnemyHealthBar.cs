@@ -1,6 +1,7 @@
 using Mock.MusicBattle.Character;
 using System;
 using System.Threading;
+using System.Threading.Tasks; // Taskを使用するため追加
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,6 +13,9 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class EnemyHealthBar : VisualElement
     {
+        /// <summary>
+        ///     <see cref="EnemyHealthBar"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
         public EnemyHealthBar()
         {
             style.visibility = Visibility.Hidden;
@@ -20,7 +24,7 @@ namespace Mock.MusicBattle.UI
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
             {
-                Debug.LogError($"Failed to load UXML at path: {UXML_RESOURCES_PATH}");
+                Debug.LogError($"UXMLパス: {UXML_RESOURCES_PATH} の読み込みに失敗しました。");
                 return;
             }
 
@@ -30,9 +34,9 @@ namespace Mock.MusicBattle.UI
             _greenBar = this.Q<VisualElement>(ELEMENT_NAME_GREEN_BAR);
             _redBar = this.Q<VisualElement>(ELEMENT_NAME_RED_BAR);
 
-            Debug.Assert(_base != null, $"Failed to find element: {ELEMENT_NAME_BASE}");
-            Debug.Assert(_greenBar != null, $"Failed to find element: {ELEMENT_NAME_GREEN_BAR}");
-            Debug.Assert(_redBar != null, $"Failed to find element: {ELEMENT_NAME_RED_BAR}");
+            Debug.Assert(_base != null, $"要素: {ELEMENT_NAME_BASE} の検索に失敗しました。");
+            Debug.Assert(_greenBar != null, $"要素: {ELEMENT_NAME_GREEN_BAR} の検索に失敗しました。");
+            Debug.Assert(_redBar != null, $"要素: {ELEMENT_NAME_RED_BAR} の検索に失敗しました。");
 
             if (_greenBar == null || _redBar == null) { return; }
 
@@ -41,12 +45,17 @@ namespace Mock.MusicBattle.UI
             _redBar.style.width = Length.Percent(100);
         }
 
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        #region Publicメソッド
         /// <summary>
-        ///     データをバインドする。
+        ///     敵の体力バーのデータをバインドし、表示位置の追跡を開始します。
         /// </summary>
-        /// <param name="healthEntity"></param>
-        /// <param name="transform"></param>
-        /// <param name="token"></param>
+        /// <param name="healthEntity">敵のHealthEntity。</param>
+        /// <param name="transform">敵のTransform。</param>
+        /// <param name="token">非同期処理のキャンセルトークン。</param>
         public void BindData(HealthEntity healthEntity, Transform transform, CancellationToken token = default)
         {
             _disposeCTS = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -67,25 +76,49 @@ namespace Mock.MusicBattle.UI
 
             healthEntity.OnDeath += deathAction;
 
-            Update(transform);
+            UpdatePosition(transform);
             style.visibility = Visibility.Visible;
         }
+        #endregion
 
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        #region 定数
+        /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
-
+        /// <summary> ベース要素のUXML名。 </summary>
         private const string ELEMENT_NAME_BASE = "base";
+        /// <summary> 緑色のゲージ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_GREEN_BAR = "green-guage";
+        /// <summary> 赤色のゲージ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_RED_BAR = "red-guage";
+        #endregion
 
-        /// <summary> 左下基準で位置を大きさの割合で調整する。 </summary>
-        private readonly Vector2 _offset = new Vector2(-0.5f, 0.2f);
-
+        // INSPECTOR_FIELDS
+        #region プライベートフィールド
+        /// <summary> CancellationTokenSource。 </summary>
         private CancellationTokenSource _disposeCTS;
+        /// <summary> ヘルスバーのベース要素。 </summary>
         private VisualElement _base;
+        /// <summary> 緑色のヘルスバー要素。 </summary>
         private VisualElement _greenBar;
+        /// <summary> 赤色のヘルスバー要素（ダメージ表現用）。 </summary>
         private VisualElement _redBar;
+        /// <summary> 左下基準で位置を大きさの割合で調整するオフセット。 </summary>
+        private readonly Vector2 _offset = new Vector2(-0.5f, 0.2f);
+        #endregion
 
-        private async void Update(Transform transform)
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        #region Privateメソッド
+        /// <summary>
+        ///     敵のTransformを追跡し、体力バーの位置を毎フレーム更新します。
+        /// </summary>
+        /// <param name="transform">追跡する敵のTransform。</param>
+        private async void UpdatePosition(Transform transform)
         {
             CancellationToken token = _disposeCTS.Token;
 
@@ -93,37 +126,39 @@ namespace Mock.MusicBattle.UI
             while (transform != null && !token.IsCancellationRequested)
             {
                 MovePosition(transform.position);
-                try
-                {
-                    await Awaitable.NextFrameAsync(token);
-                }
-                catch (OperationCanceledException)
-                {
-                    // キャンセルされた場合はループを抜ける。
-                    break;
-                }
+                // OperationCanceledException は意図的に発生させ、呼び出し側で処理することが多いため、
+                // ここではtry-catchせずに次のフレームを待機する。
+                await Awaitable.NextFrameAsync(token);
             }
         }
 
+        /// <summary>
+        ///     ヘルス変更イベントに応じてヘルスバーを更新するハンドラー。
+        /// </summary>
+        /// <param name="current">現在の体力。</param>
+        /// <param name="max">最大体力。</param>
         private void ChangeHealthBarHandler(float current, float max) => ChangeHealthBar(current, max, _disposeCTS.Token);
 
+        /// <summary>
+        ///     ヘルスバーの割合を変更します。
+        /// </summary>
+        /// <param name="current">現在の体力。</param>
+        /// <param name="max">最大体力。</param>
+        /// <param name="token">非同期処理のキャンセルトークン。</param>
         private async void ChangeHealthBar(float current, float max, CancellationToken token = default)
         {
             float proportion = Mathf.Clamp01(current / max);
-            try
-            {
 
-                await _greenBar.ChangeBarAsync(proportion, 0.1f, token);
+            await _greenBar.ChangeBarAsync(proportion, 0.1f, token);
 
-                await Awaitable.WaitForSecondsAsync(0.3f, token);
-                await _redBar.ChangeBarAsync(proportion, 0.2f, token);
-            }
-            catch (OperationCanceledException)
-            {
-                // キャンセルされた場合は何もしない。
-            }
+            await Awaitable.WaitForSecondsAsync(0.3f, token);
+            await _redBar.ChangeBarAsync(proportion, 0.2f, token);
         }
 
+        /// <summary>
+        ///     体力バーの位置をワールド座標に基づいて移動させます。
+        /// </summary>
+        /// <param name="worldPosition">体力バーを配置するワールド座標。</param>
         private void MovePosition(Vector3 worldPosition)
         {
             // カメラからワールド座標をスクリーン座標に変換する。
@@ -143,5 +178,9 @@ namespace Mock.MusicBattle.UI
             _base.style.left = uitkPosition.x;
             _base.style.top = uitkPosition.y;
         }
+        #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

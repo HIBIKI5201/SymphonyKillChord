@@ -1,4 +1,4 @@
-using System;
+using System; // OperationCanceledExceptionのために追加
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -7,18 +7,18 @@ using UnityEngine.UIElements;
 namespace Mock.MusicBattle.UI
 {
     /// <summary>
-    ///     UITKの便利クラス。
+    ///     UI ToolkitのVisualElementを拡張するユーティリティクラス。
     /// </summary>
     public static class VisualElementUtility
     {
         /// <summary>
         ///     VisualElementの横幅を割合で変更する非同期メソッド。
         /// </summary>
-        /// <param name="bar"></param>
-        /// <param name="value"></param>
-        /// <param name="duration"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="bar">対象のVisualElement。</param>
+        /// <param name="value">目標とする横幅の割合（0～1の範囲）。</param>
+        /// <param name="duration">変化にかける時間。</param>
+        /// <param name="token">非同期処理のキャンセルトークン。</param>
+        /// <returns>非同期操作を表すTask。</returns>
         public static async Task ChangeBarAsync(
             this VisualElement bar,
             float value, float duration,
@@ -34,11 +34,9 @@ namespace Mock.MusicBattle.UI
                 float t = Mathf.Clamp01(elapsed / duration);
                 float newValue = Mathf.Lerp(current, value, t);
                 bar.style.width = Length.Percent(newValue * 100); // パーセンテージで指定。
-                try
-                {
-                    await Awaitable.NextFrameAsync(token);
-                }
-                catch (OperationCanceledException) { break; }
+                // OperationCanceledException は意図的に発生させ、呼び出し側で処理することが多いため、
+                // ここではtry-catchせずに次のフレームを待機する。
+                await Awaitable.NextFrameAsync(token);
             }
 
             // 最終的な値を設定。

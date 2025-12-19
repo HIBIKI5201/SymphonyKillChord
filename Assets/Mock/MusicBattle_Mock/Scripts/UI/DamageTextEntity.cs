@@ -1,22 +1,26 @@
 using System;
+using System.Threading.Tasks; // Awaitable.WaitForSecondsAsyncを使用するため追加
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mock.MusicBattle.UI
 {
     /// <summary>
-    ///     ダメージテキストの実体クラス。
+    ///     ダメージテキストの表示を管理するUI ToolkitのカスタムVisualElement。
     /// </summary>
     [UxmlElement]
     public partial class DamageTextEntity : VisualElement
     {
+        /// <summary>
+        ///     <see cref="DamageTextEntity"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
         public DamageTextEntity()
         {
             // UXMLを読み込んで要素を取得する。
             VisualTreeAsset treeAsset = Resources.Load<VisualTreeAsset>(UXML_RESOURCES_PATH);
             if (treeAsset == null)
             {
-                Debug.LogError($"Failed to load UXML at path: {UXML_RESOURCES_PATH}");
+                Debug.LogError($"UXMLパス: {UXML_RESOURCES_PATH} の読み込みに失敗しました。");
                 return;
             }
 
@@ -26,11 +30,16 @@ namespace Mock.MusicBattle.UI
             _damageText = this.Q<Label>(ELEMENT_NAME_TEXT);
         }
 
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        #region Publicメソッド
         /// <summary>
-        ///     インスタンス生成時に初期化する。
+        ///     ダメージテキストエンティティを初期化します。
         /// </summary>
-        /// <param name="action"></param>
-        /// <param name="lifetime"></param>
+        /// <param name="action">リリース時に呼び出されるアクション。</param>
+        /// <param name="lifetime">ダメージテキストの表示時間。</param>
         public void Initialize(Action action, float lifetime)
         {
             _onRelease = action;
@@ -38,15 +47,15 @@ namespace Mock.MusicBattle.UI
         }
 
         /// <summary>
-        ///     ダメージテキストを表示する。
+        ///     ダメージテキストを表示します。
         /// </summary>
-        /// <param name="damage"></param>
-        /// <param name="position"></param>
+        /// <param name="damage">表示するダメージ量。</param>
+        /// <param name="position">ダメージテキストを表示するワールド座標。</param>
         public async void Show(float damage, Vector3 position)
         {
             if (_base == null || _damageText == null)
             {
-                Debug.LogError("DamageTextEntity is not properly initialized.");
+                Debug.LogError("DamageTextEntityが正しく初期化されていません。");
                 return;
             }
 
@@ -61,7 +70,10 @@ namespace Mock.MusicBattle.UI
             // リリース処理を呼び出す。
             _onRelease?.Invoke();
 
-            // 位置を更新するローカル関数。
+            /// <summary>
+            ///     ダメージテキストの位置を更新するローカル関数。
+            /// </summary>
+            /// <param name="evt">GeometryChangedEvent。</param>
             void MovePosition(GeometryChangedEvent evt)
             {
                 // イベントが重複しないように解約。
@@ -86,15 +98,39 @@ namespace Mock.MusicBattle.UI
                 _base.style.top = uitkPosition.y;
             }
         }
+        #endregion
 
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        #region 定数
+        /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "DamageTextEntity";
+        /// <summary> ベース要素のUXML名。 </summary>
         private const string ELEMENT_NAME_BASE = "base";
+        /// <summary> テキスト要素のUXML名。 </summary>
         private const string ELEMENT_NAME_TEXT = "text";
+        #endregion
 
+        // INSPECTOR_FIELDS
+        #region プライベートフィールド
+        /// <summary> リリース時に呼び出されるアクション。 </summary>
         private Action _onRelease;
+        /// <summary> ダメージテキストの表示時間。 </summary>
         private float _lifetime;
-
+        /// <summary> ダメージテキストのベースVisualElement。 </summary>
         private VisualElement _base;
+        /// <summary> ダメージテキストを表示するLabel。 </summary>
         private Label _damageText;
+        #endregion
+
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        // PRIVATE_METHODS
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

@@ -7,6 +7,12 @@ namespace Mock.MusicBattle.Camera
     /// </summary>
     public class CameraMover
     {
+        /// <summary>
+        ///     <see cref="CameraMover"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="config">カメラの設定。</param>
+        /// <param name="camera">操作するカメラのTransform。</param>
+        /// <param name="target">カメラの追跡対象となるターゲットのTransform。</param>
         public CameraMover(CameraConfigs config, Transform camera, Transform target)
         {
             _config = config;
@@ -14,10 +20,15 @@ namespace Mock.MusicBattle.Camera
             _target = target;
         }
 
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        #region Publicメソッド
         /// <summary>
-        ///     カメラの回転入力で更新する。
+        ///     カメラの回転入力で更新します。
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="input">入力ベクトル。</param>
         public void RotateCamera(Vector2 input)
         {
             // ロックオンモード中は実行しない。
@@ -34,9 +45,9 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///     ヨー方向の更新。
-        ///     カメラの横回転を制御する。
+        ///     カメラのヨー（横）方向の回転を更新します。
         /// </summary>
+        /// <param name="deltaTime">前回のフレームからの経過時間。</param>
         public void UpdateYaw(float deltaTime)
         {
             // ロック対象がいる場合はその方向、そうでなければ現在のカメラ回転を使う。
@@ -46,7 +57,7 @@ namespace Mock.MusicBattle.Camera
             Vector3 idealCameraOffset = rotation * _config.CameraOffset;
             Vector3 currentCameraOffset = _camera.position - _target.position;
 
-            // オフセットを円弧状に補間し、ターゲットからの新しいオフセットを計算。
+            // オフセットを線形補間し、ターゲットからの新しいオフセットを計算。
             float dampingSpeed = IsLockOnMode() ? _config.CameraLockOnFollowDamping : _config.CameraPlayerFollowDamping;
             float damping = Mathf.Max(dampingSpeed, 0.0001f);
             float t = 1f - Mathf.Exp(-deltaTime / damping);
@@ -63,9 +74,9 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///     ピッチ方向の更新。
-        ///     カメラの縦回転を制御する。
+        ///     カメラのピッチ（縦）方向の回転を更新します。
         /// </summary>
+        /// <param name="deltaTime">前回のフレームからの経過時間。</param>
         public void UpdatePitch(float deltaTime)
         {
             // ロック対象がいる場合はその方向、そうでなければプレイヤー方向を使う。
@@ -79,7 +90,7 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///    ギズモの描画。
+        ///    ギズモの描画を行います（デバッグ用）。
         /// </summary>
         public void OnDrawGizmos()
         {
@@ -93,26 +104,46 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///     ロック対象を設定する。
+        ///     ロック対象を設定します。
         /// </summary>
-        /// <param name="lockTarget"></param>
+        /// <param name="lockTarget">ロック対象のTransform。</param>
         public void SetLockTarget(Transform lockTarget) => _lockTarget = lockTarget;
+        #endregion
 
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        #region 定数
+        // 定数なし
+        #endregion
+
+        // INSPECTOR_FIELDS
+        #region プライベートフィールド
+        /// <summary> カメラの設定。 </summary>
         private readonly CameraConfigs _config;
+        /// <summary> 操作するカメラのTransform。 </summary>
         private readonly Transform _camera;
+        /// <summary> カメラの追跡対象となるターゲットのTransform。 </summary>
         private readonly Transform _target;
-
+        /// <summary> 現在ロックオン中のターゲット。 </summary>
         private Transform _lockTarget;
-
+        /// <summary> 現在のカメラのヨー角。 </summary>
         private float _currentYaw;
+        /// <summary> 現在のカメラのピッチ角。 </summary>
         private float _currentPitch;
+        /// <summary> 現在のカメラの回転。 </summary>
         private Quaternion _currentCameraRotation = Quaternion.identity;
+        #endregion
 
-
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        #region Privateメソッド
         /// <summary>
-        ///    ロック対象の方向を向くためのヨー回転を取得する。
+        ///    ロック対象の方向を向くためのヨー回転を取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ロック対象の方向を向くQuaternion。</returns>
         private Quaternion GetLockYaw()
         {
             Vector3 vec = _lockTarget.position - _target.position;
@@ -129,9 +160,10 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///    カメラとプレイヤーの間に障害物があるかを確認。
-        ///    障害物があればカメラ位置を調整する。
+        ///    カメラとターゲットの間に障害物があるかを確認し、障害物があればカメラ位置を調整します。
         /// </summary>
+        /// <param name="cameraPosition">調整前のカメラの位置。</param>
+        /// <returns>調整後のカメラの位置。</returns>
         private Vector3 AdjustCameraForObstacles(Vector3 cameraPosition)
         {
             // プレイヤーからカメラへの方向ベクトル。
@@ -156,9 +188,9 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///    ロック対象のピッチ方向を向く回転を取得する。
+        ///    ロック対象のピッチ方向を向く回転を取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ロック対象のピッチ方向を向くQuaternion。</returns>
         private Quaternion LockTargetPitch()
         {
             // ロックターゲットの方向を取得。
@@ -171,9 +203,9 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///   プレイヤーのピッチ方向を向く回転を取得する。
+        ///   ターゲットのピッチ方向を向く回転を取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ターゲットのピッチ方向を向くQuaternion。</returns>
         private Quaternion PlayerPitch()
         {
             // カメラの回転位置から注視位置を取得。
@@ -185,9 +217,13 @@ namespace Mock.MusicBattle.Camera
         }
 
         /// <summary>
-        ///     ロックオンモードかどうか。
+        ///     現在ロックオンモードかどうかを返します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ロックオンモードの場合はtrue、それ以外はfalse。</returns>
         private bool IsLockOnMode() => _lockTarget != null;
+        #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

@@ -1,6 +1,6 @@
 using CriWare;
 using System;
-using System.Threading;
+using System.Threading; // 不要なusingを削除
 using UnityEngine;
 
 namespace Mock.MusicBattle.MusicSync
@@ -11,61 +11,85 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicSyncManager : MonoBehaviour
     {
+        // CONSTRUCTOR
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
-        /// 初期化処理を行う。
+        ///     初期化処理を行います。
         /// </summary>
-        /// <param name="source">再生するBGM</param>
-        /// <param name="bpm">BGMのBPM</param>
-        /// <param name="bgmProperTime">BGM固有の拍子</param>
-        /// <param name="startOffset">最初小節の開始時間（ミリ秒）</param>
-        public void Init(CriAtomSource source, double bpm, double bgmProperTime, long startOffset)
+        /// <param name="source">再生するBGMのCriAtomSource。</param>
+        /// <param name="bpm">BGMのBPM。</param>
+        /// <param name="timeSignature">BGM固有の拍子。</param>
+        /// <param name="startOffset">最初の小節の開始時間（ミリ秒）。</param>
+        public void Init(CriAtomSource source, double bpm, double timeSignature, long startOffset)
         {
             _musicPlayer.Init(source);
-            _musicBuffer.Init(source, bpm, bgmProperTime, startOffset);
+            _musicBuffer.Init(source, bpm, timeSignature, startOffset);
             _inputHandler.Init(_timeSignatures);
             PlayBgm();
         }
 
         /// <summary>
-        /// 入力によって成り立つ拍子を取得する。
+        ///     入力によって成り立つ拍子を取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>入力によって成り立つ拍子。</returns>
         public float GetInputTimeSignature()
         {
             return _inputHandler.GetInputTimeSignature();
         }
 
         /// <summary>
-        /// アクション予約を行う。
+        ///     アクション予約を行います。
         /// </summary>
-        /// <param name="barTimingInfo">小節タイミング情報</param>
-        /// <param name="action">実行アクション</param>
-        /// <param name="token">キャンセルトークン</param>
+        /// <param name="barTimingInfo">小節タイミング情報。</param>
+        /// <param name="action">実行アクション。</param>
         public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
         {
             _actionHandler.RegisterAction(barTimingInfo, action);
         }
         #endregion
 
-        [SerializeField] private float[] _timeSignatures = { 1f, 2f, 3f, 4f, 6f, 8f, 12f, 16f };
-        [SerializeField] CriMusicBuffer _musicBuffer;
-        [SerializeField] CriMusicPlayer _musicPlayer;
-        [SerializeField] MusicInputHandler _inputHandler;
-        [SerializeField] MusicActionHandler _actionHandler;
-
-        #region ライフサイクル
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        // CONSTANTS
+        #region インスペクター表示フィールド
+        /// <summary> 入力によって検出されうる拍子の配列。 </summary>
+        [SerializeField, Tooltip("入力によって検出されうる拍子の配列。")]
+        private float[] _timeSignatures = { 1f, 2f, 3f, 4f, 6f, 8f, 12f, 16f };
+        /// <summary> 音楽バッファの参照。 </summary>
+        [SerializeField, Tooltip("音楽バッファの参照。")]
+        private CriMusicBuffer _musicBuffer;
+        /// <summary> 音楽プレイヤーの参照。 </summary>
+        [SerializeField, Tooltip("音楽プレイヤーの参照。")]
+        private CriMusicPlayer _musicPlayer;
+        /// <summary> 音楽入力ハンドラの参照。 </summary>
+        [SerializeField, Tooltip("音楽入力ハンドラの参照。")]
+        private MusicInputHandler _inputHandler;
+        /// <summary> 音楽アクションハンドラの参照。 </summary>
+        [SerializeField, Tooltip("音楽アクションハンドラの参照。")]
+        private MusicActionHandler _actionHandler;
         #endregion
 
+        // PRIVATE_FIELDS
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
-
         /// <summary>
-        /// BGMを再生する。
+        ///     BGMの再生を開始します。
         /// </summary>
         private void PlayBgm()
         {
             _musicPlayer.Play();
         }
         #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

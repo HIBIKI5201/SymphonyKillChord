@@ -13,13 +13,21 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicActionHandler : MonoBehaviour
     {
+        // CONSTRUCTOR
+        #region Publicイベント
+        /// <summary> 単位拍数ごとに発火するイベント。 </summary>
+        public event Action OnBeat;
+        #endregion
+
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
-        /// 予約アクションを登録する。
+        ///     予約アクションを登録する。
         /// </summary>
         /// <param name="barTimingInfo">小節タイミング</param>
         /// <param name="action">実行するアクション</param>
-        /// <param name="cancelToken">キャンセルトークン</param>
         public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
         {
             _debugLog.Clear();
@@ -36,38 +44,50 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        [SerializeField] private CriMusicBuffer _musicBuffer;
-
-        /// <summary>予約アクションのキュー</summary>
-        private PriorityQueue<ScheduledAction> _scheduledActions = new PriorityQueue<ScheduledAction>(
-            Comparer<ScheduledAction>.Create((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat))
-            );
-
-        private StringBuilder _debugLog = new StringBuilder();
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        // CONSTANTS
+        #region インスペクター表示フィールド
+        /// <summary> CRI ADXの音楽バッファを管理するクラスの参照。 </summary>
+        [SerializeField, Tooltip("CRI ADXの音楽バッファを管理するクラスの参照。")]
+        private CriMusicBuffer _musicBuffer;
 
         [Header("デバッグ用")]
+        /// <summary> 定期アクションを起こす単位拍数。 </summary>
         [SerializeField, Tooltip("定期アクションを起こす単位拍数")]
         private double _onBeatUnit = 1d;
+        /// <summary> 定期アクションを起こす次の拍数。 </summary>
         [SerializeField, ReadOnly, Tooltip("定期アクションを起こす次の拍数")]
         private double _targetBeat = 0;
+        #endregion
 
+        #region プライベートフィールド
+        /// <summary> 予約アクションのキュー。 </summary>
+        private readonly PriorityQueue<ScheduledAction> _scheduledActions = new PriorityQueue<ScheduledAction>(
+            Comparer<ScheduledAction>.Create((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat))
+            );
+        /// <summary> デバッグログ情報を構築するためのStringBuilder。 </summary>
+        private readonly StringBuilder _debugLog = new StringBuilder();
+        #endregion
 
-        public event Action OnBeat;
-
-        #region ライフサイクル
-
-        void Update()
+        #region Unityライフサイクルメソッド
+        /// <summary>
+        ///     フレームごとに呼び出されます。
+        /// </summary>
+        private void Update()
         {
             CheckOnBeat();
             TriggerRegistedActions();
         }
-
         #endregion
 
-
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
-        /// 単位拍数ごとにイベントを発火する。
+        ///     単位拍数ごとにイベントを発火する。
         /// </summary>
         private void CheckOnBeat()
         {
@@ -78,8 +98,9 @@ namespace Mock.MusicBattle.MusicSync
                 _targetBeat += _onBeatUnit;
             }
         }
+
         /// <summary>
-        /// 拍数判定して、予約されたアクションを発火する。
+        ///     拍数判定して、予約されたアクションを発火する。
         /// </summary>
         private void TriggerRegistedActions()
         {
@@ -108,5 +129,9 @@ namespace Mock.MusicBattle.MusicSync
             }
         }
         #endregion
+
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

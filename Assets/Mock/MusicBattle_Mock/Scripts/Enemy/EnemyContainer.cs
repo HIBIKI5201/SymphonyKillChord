@@ -9,21 +9,14 @@ namespace Mock.MusicBattle.Enemy
 {
     /// <summary>
     ///     シーン内のエネミー(EnemyManager)を一元管理するコンテナ。
-    ///     現在生存している敵をリストで管理。
-    ///     敵の追加、死亡時の自動削除を担当する。
+    ///     現在生存している敵をリストで管理し、敵の追加、死亡時の自動削除を担当する。
     /// </summary>
     public class EnemyContainer : ILockOnTargetContainer
     {
-        /// <summary>
-        ///     管理中のエネミーをインデックスで取得する。
-        ///     インデックスがリスト範囲を超える場合は modulo（循環アクセス）で参照する。
-        ///     敵が 0 体の場合は null を返す。
-        /// </summary>
-        /// <param name="index"> 取得したいエネミーのインデックス。 </param>
-        /// <returns> EnemyManager または null。 </returns>
-        public EnemyManager this[int index] =>
-            0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
-
+        // CONSTRUCTOR
+        // PUBLIC_EVENTS
+        #region パブリックプロパティ
+        /// <summary> すべてのロックオン可能なターゲットの読み取り専用リストを取得します。 </summary>
         public IReadOnlyList<Transform> Targets
         {
             get
@@ -34,6 +27,7 @@ namespace Mock.MusicBattle.Enemy
                     .ToList();
             }
         }
+        /// <summary> 近い順にソートされたロックオン可能なターゲットの読み取り専用リストを取得します。 </summary>
         public IReadOnlyList<Transform> NearerTargets
         {
             get
@@ -45,14 +39,26 @@ namespace Mock.MusicBattle.Enemy
                     .ToList();
             }
         }
+        #endregion
 
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        #region Publicメソッド
+        /// <summary>
+        ///     管理中のエネミーをインデックスで取得します。
+        ///     インデックスがリスト範囲を超える場合は modulo（循環アクセス）で参照します。
+        ///     敵が 0 体の場合は null を返します。
+        /// </summary>
+        /// <param name="index">取得したいエネミーのインデックス。</param>
+        /// <returns>EnemyManagerのインスタンス、またはnull。</returns>
+        public EnemyManager this[int index] =>
+            0 < _enemies.Count ? _enemies[index % _enemies.Count] : null;
 
         /// <summary>
-        ///     敵をコンテナに登録する。
-        ///     生存中リストに追加。
-        ///     死亡イベントを購読し、死亡時に自動でリストから削除する。
+        ///     敵をコンテナに登録します。
+        ///     生存中リストに追加し、死亡イベントを購読して、死亡時に自動でリストから削除します。
         /// </summary>
-        /// <param name="enemy"> 登録するエネミー。 </param>
+        /// <param name="enemy">登録するエネミー。</param>
         public void Register(EnemyManager enemy)
         {
             if (_enemies.Contains(enemy)) return;
@@ -74,21 +80,40 @@ namespace Mock.MusicBattle.Enemy
             enemy.OnDeath += handler;
         }
 
+        /// <summary>
+        ///     プールからEnemyManagerを取得します。
+        /// </summary>
+        /// <returns>プール内のEnemyManager、またはnull。</returns>
         public EnemyManager GetFromPool()
         {
             return _pool.Count > 0 ? _pool.Dequeue() : null;
         }
-        //  　参照をもらう方法でほかに方法ないかな　現在ゲームマネージャーから受け取っている。
-        public void SetLockOnManager(LockOnManager manager) { _lockOnManager = manager; }
-        public void SetCharacter(ICharacter player) => _player = player;
-        public void SetCamera(CameraManager camera) => _cameraManager = camera;
+
         /// <summary>
-        ///     プールからEnemyManagerを安全に取得する。
-        ///     プールに敵が存在すればdequeueして返し、trueを返す。
-        ///     プールが空の場合はenemyにnullをセットして、falseを返す。
+        ///     ロックオンマネージャーを設定します。
         /// </summary>
-        /// <param name="enemy"> 取得したEnemyManagerが格納される </param>
-        /// <returns> プールから取得できた場合は true、取得でいなかった場合 false </returns>
+        /// <param name="manager">設定するLockOnManager。</param>
+        public void SetLockOnManager(LockOnManager manager) { _lockOnManager = manager; }
+
+        /// <summary>
+        ///     プレイヤーキャラクターを設定します。
+        /// </summary>
+        /// <param name="player">設定するICharacter。</param>
+        public void SetCharacter(ICharacter player) => _player = player;
+
+        /// <summary>
+        ///     カメラマネージャーを設定します。
+        /// </summary>
+        /// <param name="camera">設定するCameraManager。</param>
+        public void SetCamera(CameraManager camera) => _cameraManager = camera;
+
+        /// <summary>
+        ///     プールからEnemyManagerを安全に取得します。
+        ///     プールに敵が存在すればdequeueして返し、trueを返します。
+        ///     プールが空の場合はenemyにnullをセットして、falseを返します。
+        /// </summary>
+        /// <param name="enemy">取得したEnemyManagerが格納される。</param>
+        /// <returns>プールから取得できた場合は true、取得できなかった場合 false。</returns>
         public bool TryGetFromPool(out EnemyManager enemy)
         {
             if (_pool.Count > 0)
@@ -102,6 +127,12 @@ namespace Mock.MusicBattle.Enemy
                 return false;
             }
         }
+
+        /// <summary>
+        ///     プレイヤーに最も近い敵を取得します。
+        /// </summary>
+        /// <param name="playerPosition">プレイヤーの現在位置。</param>
+        /// <returns>最も近い敵のEnemyManager、またはnull。</returns>
         public EnemyManager GetNearestEnemy(Vector3 playerPosition)
         {
             EnemyManager nearestEnemy = _enemies
@@ -111,20 +142,40 @@ namespace Mock.MusicBattle.Enemy
 
             if (nearestEnemy == null)
             {
-                return (null);
+                return null;
             }
 
-            return (nearestEnemy);
+            return nearestEnemy;
         }
+        #endregion
 
-
+        // PUBLIC_INTERFACE_METHODS (ILockOnTargetContainer のプロパティは#region パブリックプロパティ に移動)
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        // CONSTANTS
+        // INSPECTOR_FIELDS
+        #region プライベートフィールド
+        /// <summary> カメラマネージャーの参照。 </summary>
         private CameraManager _cameraManager;
+        /// <summary> ロックオンマネージャーの参照。 </summary>
         private LockOnManager _lockOnManager;
+        /// <summary> プレイヤーキャラクターの参照。 </summary>
         private ICharacter _player;
-        private List<EnemyManager> _enemies = new();
-        private Queue<EnemyManager> _pool = new();
-        private Dictionary<EnemyManager, System.Action> _deathHandlers = new();
+        /// <summary> 現在アクティブなエネミーのリスト。 </summary>
+        private readonly List<EnemyManager> _enemies = new();
+        /// <summary> 死亡したエネミーを再利用するためのプール。 </summary>
+        private readonly Queue<EnemyManager> _pool = new();
+        /// <summary> 敵の死亡イベントハンドラを格納するDictionary。 </summary>
+        private readonly Dictionary<EnemyManager, System.Action> _deathHandlers = new();
+        #endregion
 
-
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        // PRIVATE_METHODS
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

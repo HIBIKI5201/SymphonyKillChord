@@ -4,22 +4,63 @@ using UnityEngine.UI;
 
 namespace Mock.MusicBattle.MusicSync
 {
+    /// <summary>
+    ///     音楽UIの表示を制御するクラス（開発用）。
+    /// </summary>
     public class MusicUI : MonoBehaviour
     {
-        [SerializeField]
+        // CONSTRUCTOR
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        // PUBLIC_METHODS
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        // CONSTANTS
+        #region インスペクター表示フィールド
+        /// <summary> ノーツの親Transform。 </summary>
+        [SerializeField, Tooltip("ノーツの親Transform。")]
         private RectTransform _notesParent;
-        [SerializeField]
+        /// <summary> ノーツの初期位置。 </summary>
+        [SerializeField, Tooltip("ノーツの初期位置。")]
         private RectTransform _originPos;
-        [SerializeField]
+        /// <summary> ノーツの終点位置。 </summary>
+        [SerializeField, Tooltip("ノーツの終点位置。")]
         private RectTransform _noteEndPos;
-        [SerializeField]
+        /// <summary> ノーツの移動速度。 </summary>
+        [SerializeField, Tooltip("ノーツの移動速度。")]
         private float _noteSpeed;
-
-        [SerializeField]
+        /// <summary> ノーツのプレファブ。 </summary>
+        [SerializeField, Tooltip("ノーツのプレファブ。")]
         private Image _notePrefab;
+        #endregion
 
-        private List<Image> _notes = new();
+        #region プライベートフィールド
+        /// <summary> アクティブなノーツのリスト。 </summary>
+        private readonly List<Image> _notes = new();
+        #endregion
 
+        #region Unityライフサイクルメソッド
+        /// <summary>
+        ///     フレームごとに呼び出されます。
+        ///     ノーツの移動処理を行います。
+        /// </summary>
+        private void Update()
+        {
+            MoveNotes();
+        }
+        #endregion
+
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        #region Publicメソッド
+        /// <summary>
+        ///     指定された色でノーツを生成し、表示します。
+        /// </summary>
+        /// <param name="color">ノーツの色。</param>
         public void CreateNote(Color color)
         {
             Image note = Instantiate(_notePrefab);
@@ -29,12 +70,12 @@ namespace Mock.MusicBattle.MusicSync
 
             _notes.Add(note);
         }
+        #endregion
 
-        private void Update()
-        {
-            MoveNotes();
-        }
-
+        #region Privateメソッド
+        /// <summary>
+        ///     ノーツを移動させ、終点に到達したノーツを削除します。
+        /// </summary>
         private void MoveNotes()
         {
             if (_notes.Count < 1) return;
@@ -68,5 +109,9 @@ namespace Mock.MusicBattle.MusicSync
                 note.rectTransform.anchoredPosition += dir * deltaSpeed;
             }
         }
+        #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

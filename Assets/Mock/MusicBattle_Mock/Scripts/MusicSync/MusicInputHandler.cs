@@ -23,6 +23,7 @@ namespace Mock.MusicBattle.MusicSync
             _timeSignatures = timeSignatures.OrderBy(n => n).ToArray();
             _longestSignatureIndex = GetLongestSignatureIndex();
         }
+
         /// <summary>
         ///     入力されたタイミングを基いて、なりえる最も近い拍子を取得する。
         /// </summary>
@@ -43,7 +44,7 @@ namespace Mock.MusicBattle.MusicSync
             int detectedTimeSignatureIndex = FindNearestTimeSignature(betweenBeat);
             // 最も近い標準拍タイミング（単位：拍数）
             double quantizedBeat = CalcQuantizedBeat(lastBeat, detectedTimeSignatureIndex);
-            
+
             _debugLog.AppendLine($"Input Beat: {currentBeat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
             _debugLog.AppendLine($"Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
             _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
@@ -53,7 +54,7 @@ namespace Mock.MusicBattle.MusicSync
             // 古い入力を削除する
             DequeueOldInput(currentBeat, _inputHistoryBarLimit);
 
-            _debugLog.AppendLine($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}");
+            _debugLog.AppendLine($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}"); // 表示フォーマットは小数点以下3桁
 
             // すべてのデバッグ情報を一括で出力
             Debug.Log(_debugLog.ToString());
@@ -61,22 +62,38 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        [SerializeField]
+        #region インスペクター表示フィールド
+        /// <summary> CRI ADXの音楽バッファを管理するクラスの参照。 </summary>
+        [SerializeField, Tooltip("CRI ADXの音楽バッファを管理するクラスの参照。")]
         private CriMusicBuffer _musicBuffer;
-        [SerializeField, ReadOnly]
-        private float[] _timeSignatures; // 拍子リスト
-        [SerializeField]
-        private bool _enableQuantize = true; // クオンタイズ機能の有効/無効
-        [SerializeField, Range(0.5f, 1.0f)]
-        private double _inputFixThreshold = 0.8d; // 入力タイミング追いかけ処理の補正閾値
-        [SerializeField]
-        int _inputHistoryBarLimit = 4; // 入力記録を最大何小節保持するか
+        /// <summary> 入力によって検出されうる拍子のリスト。昇順でソートされている。 </summary>
+        [SerializeField, ReadOnly, Tooltip("入力によって検出されうる拍子のリスト。")]
+        private float[] _timeSignatures;
+        /// <summary> クオンタイズ機能の有効/無効を切り替えるフラグ。 </summary>
+        [SerializeField, Tooltip("クオンタイズ機能の有効/無効を切り替えるフラグ。")]
+        private bool _enableQuantize = true;
+        /// <summary> 入力タイミングの追いかけ処理における補正の閾値。この閾値を超えると次の拍として扱われる。 </summary>
+        [SerializeField, Range(0.5f, 1.0f), Tooltip("入力タイミングの追いかけ処理における補正の閾値。")]
+        private double _inputFixThreshold = 0.8d;
+        /// <summary> 入力履歴を最大何小節保持するか。これをバー制限として古い入力は破棄される。 </summary>
+        [SerializeField, Tooltip("入力履歴を最大何小節保持するか。")]
+        int _inputHistoryBarLimit = 4;
+        #endregion
 
+        #region プライベートフィールド
+        /// <summary> 入力された標準拍のタイミングを記録するキュー。 </summary>
         private Queue<double> _inputedTimingList = new();
+        /// <summary> 設定された拍子リストの中で、最も1拍の時間が長い拍子のインデックス。 </summary>
         private int _longestSignatureIndex;
-        private StringBuilder _debugLog = new StringBuilder(); // デバッグログ用
+        /// <summary> デバッグログ情報を構築するためのStringBuilder。 </summary>
+        private readonly StringBuilder _debugLog = new StringBuilder();
+        #endregion
 
-        #region ライフサイクル
+        #region Unityライフサイクルメソッド
+        /// <summary>
+        ///     オブジェクトが有効になったときに一度だけ呼び出されます。
+        ///     ビートベースのクオンタイズ設定で音楽入力が初期化されたことをログに出力します。
+        /// </summary>
         private void Start()
         {
             Debug.Log("Music Input initialized with beat-based quantization");
@@ -84,7 +101,6 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region Privateメソッド
-
         /// <summary>
         ///     指定された時間差に最も近い拍子のインデックスを取得する
         /// </summary>
@@ -130,6 +146,9 @@ namespace Mock.MusicBattle.MusicSync
         /// <returns>拍子リストのIndex</returns>
         private int GetLongestSignatureIndex()
         {
+            // _timeSignaturesは昇順でソートされているため、インデックス0が最も小さい拍子値（短い拍長）、
+            // 最後のインデックスが最も大きい拍子値（長い拍長）となる。
+            // ここでは最も「長い」拍の長さを持つ拍子を取得するため、拍子値が最も小さいもののインデックスを返す。
             return _timeSignatures[0] > _timeSignatures[_timeSignatures.Length - 1] ?
                 _timeSignatures.Length - 1 : 0;
         }
@@ -140,13 +159,15 @@ namespace Mock.MusicBattle.MusicSync
         ///     BGMの固有拍子に基づき、直近の標準拍タイミングを計算結果とする
         /// </summary>
         /// <param name="lastBeat">前回入力タイミング</param>
-        /// <param name="signatureIndex">最も近い拍子のリストIndex/param>
+        /// <param name="signatureIndex">最も近い拍子のリストIndex</param>
         /// <returns>BGM再生開始から今回入力直近までの長さ</returns>
         private double CalcQuantizedBeat(double lastBeat, int signatureIndex)
         {
             // 前回入力からの間隔が最長拍未満の場合、前回入力 + 検出拍子長さとする
+            // 検出された拍子の長さ（拍数単位）
             double beatLength = GetBeatLength(signatureIndex);
-            if (signatureIndex != _longestSignatureIndex) {
+            if (signatureIndex != _longestSignatureIndex)
+            {
                 return lastBeat + beatLength;
             }
 
@@ -156,7 +177,7 @@ namespace Mock.MusicBattle.MusicSync
             while (!loopEndFlg)
             {
                 // 前回入力タイミングから、最長拍子の拍長を1回ずつ、超えない所まで加算する
-                if(ret + beatLength < _musicBuffer.CurrentBeat)
+                if (ret + beatLength < _musicBuffer.CurrentBeat)
                 {
                     ret += beatLength;
                 }
@@ -165,7 +186,7 @@ namespace Mock.MusicBattle.MusicSync
                     // そしてBGM固有拍子の拍長を1拍分ずつ加算し、入力時間直前の標準拍タイミングを算出する
                     while (!loopEndFlg)
                     {
-                        if(ret + 1d < _musicBuffer.CurrentBeat)
+                        if (ret + 1d < _musicBuffer.CurrentBeat)
                         {
                             ret += 1d;
                         }

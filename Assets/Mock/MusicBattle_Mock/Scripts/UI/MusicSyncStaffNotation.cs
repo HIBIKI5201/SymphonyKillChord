@@ -8,10 +8,14 @@ namespace Mock.MusicBattle.UI
 {
     /// <summary>
     ///     音楽同期システムの五線譜表記UI要素。
+    ///     UXMLからインスタンス化できます。
     /// </summary>
     [UxmlElement]
     public partial class MusicSyncStaffNotation : VisualElement
     {
+        /// <summary>
+        ///     <see cref="MusicSyncStaffNotation"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
         public MusicSyncStaffNotation()
         {
             style.position = Position.Absolute;
@@ -22,7 +26,7 @@ namespace Mock.MusicBattle.UI
             VisualTreeAsset notationAsset = Resources.Load<VisualTreeAsset>(NOTATION_UXML_RESOURCES_PATH);
             if (notationAsset == null)
             {
-                Debug.LogError($"Failed to load UXML at path: {NOTATION_UXML_RESOURCES_PATH}");
+                Debug.LogError($"UXMLパス: {NOTATION_UXML_RESOURCES_PATH} の読み込みに失敗しました。");
                 return;
             }
 
@@ -31,22 +35,28 @@ namespace Mock.MusicBattle.UI
             // 拍子線要素を取得する。
             VisualElement lines = this.Q<VisualElement>(ELEMENT_NAME_STAFF_LINE_CONTAINER);
             _staffLines = lines.Children().ToArray();
-            Debug.Assert(_staffLines != null, $"Failed to find element: {ELEMENT_NAME_STAFF_LINE_CONTAINER}");
+            Debug.Assert(_staffLines != null, $"要素: {ELEMENT_NAME_STAFF_LINE_CONTAINER} の検索に失敗しました。");
 
             // ノーツコンテナ要素を取得する。
             _noteAsset = Resources.Load<VisualTreeAsset>(NOTE_UXML_RESOURCES_PATH);
             _noteContainer = this.Q<VisualElement>(ELEMENT_NAME_NOTE_CONTAINER);
-            Debug.Assert(_noteContainer != null, $"Failed to find element: {ELEMENT_NAME_NOTE_CONTAINER}");
-            Debug.Assert(_noteAsset != null, $"Failed to load UXML at path: {NOTE_UXML_RESOURCES_PATH}");
+            Debug.Assert(_noteContainer != null, $"要素: {ELEMENT_NAME_NOTE_CONTAINER} の検索に失敗しました。");
+            Debug.Assert(_noteAsset != null, $"UXMLパス: {NOTE_UXML_RESOURCES_PATH} の読み込みに失敗しました。");
         }
 
+        // PUBLIC_EVENTS
+        // PUBLIC_PROPERTIES
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
+        #region Publicメソッド
         /// <summary>
-        ///     ノーツを生成する。
+        ///     指定された拍と色でノーツを生成し、表示します。
         /// </summary>
-        /// <param name="measure"></param>
+        /// <param name="measure">ノーツを表示する拍。</param>
+        /// <param name="color">ノーツの色。</param>
         public void CreateNotes(float measure, Color color)
         {
-            Debug.Log(color);
+            Debug.Log($"ノートを作成: {measure}拍, 色: {color}");
 
             // ノーツ要素を生成して配置する。
             VisualElement noteElement = _noteAsset.Instantiate();
@@ -59,48 +69,55 @@ namespace Mock.MusicBattle.UI
             _activeNotes.Add(noteEntity);
         }
 
+        /// <summary>
+        ///     五線譜とノーツの表示位置を更新します。
+        /// </summary>
+        /// <param name="deltaTime">前回のフレームからの経過時間。</param>
+        /// <param name="currentMeasure">現在の拍。</param>
         public void Update(float deltaTime, float currentMeasure)
         {
             MoveStaffLines(currentMeasure);
             MoveNotes(deltaTime, currentMeasure);
         }
+        #endregion
 
+        // PUBLIC_INTERFACE_METHODS
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        #region 定数
+        /// <summary> 五線譜UXMLアセットのリソースパス。 </summary>
         private const string NOTATION_UXML_RESOURCES_PATH = "MusicSyncStaffNotation";
+        /// <summary> ノーツUXMLアセットのリソースパス。 </summary>
         private const string NOTE_UXML_RESOURCES_PATH = "MusicSyncNote";
-
+        /// <summary> 拍子線コンテナ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_STAFF_LINE_CONTAINER = "staff-line-container";
+        /// <summary> ノーツコンテナ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_NOTE_CONTAINER = "note-container";
-
+        /// <summary> 拍子線の移動サイクルの小節数。 </summary>
         private const float STAFF_LINE_MOVE_CYCLE_MEASURES = 4f;
+        #endregion
 
+        // INSPECTOR_FIELDS
+        #region プライベートフィールド
+        /// <summary> 五線譜のライン要素配列。 </summary>
         private VisualElement[] _staffLines;
+        /// <summary> ノーツを格納するコンテナ要素。 </summary>
         private VisualElement _noteContainer;
-
+        /// <summary> ノーツのVisualTreeAsset。 </summary>
         private VisualTreeAsset _noteAsset;
-        private List<NoteEntity> _activeNotes = new();
+        /// <summary> アクティブなノーツエンティティのリスト。 </summary>
+        private readonly List<NoteEntity> _activeNotes = new();
+        #endregion
 
-        private struct NoteEntity : IComparable<NoteEntity>, IDisposable
-        {
-            public NoteEntity(float measure, VisualElement element)
-            {
-                _measure = measure;
-                _element = element;
-            }
-
-            public float Measure => _measure;
-            public VisualElement Element => _element;
-
-            public void Dispose()
-            {
-                _element.RemoveFromHierarchy();
-            }
-
-            public int CompareTo(NoteEntity other) => _measure.CompareTo(other._measure);
-
-            private readonly float _measure;
-            private readonly VisualElement _element;
-        }
-
+        // UNITY_LIFECYCLE_METHODS
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
+        #region プライベートメソッド
+        /// <summary>
+        ///     拍子線の位置を現在の拍に基づいて移動させます。
+        /// </summary>
+        /// <param name="currentMeasure">現在の拍。</param>
         private void MoveStaffLines(float currentMeasure)
         {
             if (_staffLines == null || _staffLines.Length == 0) return;
@@ -124,6 +141,11 @@ namespace Mock.MusicBattle.UI
             }
         }
 
+        /// <summary>
+        ///     ノーツの位置を更新し、一定小節数を超えたノーツを削除します。
+        /// </summary>
+        /// <param name="deltaTime">前回のフレームからの経過時間。</param>
+        /// <param name="currentMeasure">現在の拍。</param>
         private void MoveNotes(float deltaTime, float currentMeasure)
         {
             if (_activeNotes.Count <= 0) { return; }
@@ -146,5 +168,52 @@ namespace Mock.MusicBattle.UI
                 }
             }
         }
+        #endregion
+
+        #region プライベートStruct定義
+        /// <summary>
+        ///     五線譜上に表示されるノーツのエンティティ。
+        /// </summary>
+        private struct NoteEntity : IComparable<NoteEntity>, IDisposable
+        {
+            /// <summary>
+            ///     <see cref="NoteEntity"/>構造体の新しいインスタンスを初期化します。
+            /// </summary>
+            /// <param name="measure">ノーツが表示される拍。</param>
+            /// <param name="element">ノーツのVisualElement。</param>
+            public NoteEntity(float measure, VisualElement element)
+            {
+                _measure = measure;
+                _element = element;
+            }
+
+            /// <summary> ノーツが表示される拍を取得します。 </summary>
+            public float Measure => _measure;
+            /// <summary> ノーツのVisualElementを取得します。 </summary>
+            public VisualElement Element => _element;
+
+            /// <summary>
+            ///     リソースを解放します。
+            /// </summary>
+            public void Dispose()
+            {
+                _element.RemoveFromHierarchy();
+            }
+
+            /// <summary>
+            ///     他の<see cref="NoteEntity"/>と比較します。
+            /// </summary>
+            /// <param name="other">比較対象の<see cref="NoteEntity"/>。</param>
+            /// <returns>比較結果。</returns>
+            public int CompareTo(NoteEntity other) => _measure.CompareTo(other._measure);
+
+            /// <summary> ノーツが表示される拍。 </summary>
+            private readonly float _measure;
+            /// <summary> ノーツのVisualElement。 </summary>
+            private readonly VisualElement _element;
+        }
+        #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
     }
 }

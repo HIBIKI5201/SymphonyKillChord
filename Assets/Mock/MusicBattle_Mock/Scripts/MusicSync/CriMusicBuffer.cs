@@ -11,13 +11,28 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class CriMusicBuffer : MonoBehaviour, IMusicBuffer
     {
+        // CONSTRUCTOR
+        // PUBLIC_EVENTS
+        #region パブリックプロパティ
+        /// <summary> 現在のBPM。 </summary>
+        public double CurrentBpm => _currentBpm;
+        /// <summary> 1拍毎の長さ（秒）。 </summary>
+        public double BeatLength => 60L / _currentBpm;
+        /// <summary> 現在の拍数。 </summary>
+        public double CurrentBeat => _beat;
+        /// <summary> BGMの固有拍子。 </summary>
+        public double PropTimeSignature => _propTimeSignature;
+        #endregion
+
+        // INTERFACE_PROPERTIES
+        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
-        /// 初期化を行う。
+        ///     初期化を行う。
         /// </summary>
         /// <param name="source">再生BGM</param>
         /// <param name="bpm">BGMのBPM</param>
-        /// <param propTimeSignature="bpm">BGMのの固有拍子</param>
+        /// <param name="propTimeSignature">BGMのの固有拍子</param>
         /// <param name="startOffset">最初小節の開始時間(ミリ秒)</param>
         public void Init(CriAtomSource source, double bpm, double propTimeSignature, long startOffset)
         {
@@ -26,9 +41,11 @@ namespace Mock.MusicBattle.MusicSync
             _propTimeSignature = propTimeSignature;
             _startOffset = startOffset;
         }
+        #endregion
 
+        #region パブリックインターフェースメソッド
         /// <summary>
-        /// 小節タイミング情報を基いて、全体拍数を算出する。
+        ///     小節タイミング情報を基いて、全体拍数を算出する。
         /// </summary>
         /// <param name="barTimingInfo">小節タイミング情報</param>
         /// <returns>全体拍数</returns>
@@ -47,6 +64,11 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
+        // PUBLIC_ENUM_DEFINITIONS
+        // PUBLIC_CLASS_DEFINITIONS
+        // PUBLIC_STRUCT_DEFINITIONS
+        // CONSTANTS
+        #region インスペクター表示フィールド
         [SerializeField, ReadOnly, Tooltip("現在のBPM")]
         private double _currentBpm;
         [SerializeField, ReadOnly, Tooltip("再生中のソース")]
@@ -57,24 +79,25 @@ namespace Mock.MusicBattle.MusicSync
         private double _propTimeSignature;
         [SerializeField, Tooltip("最初小節開始時間（ミリ秒）")]
         private long _startOffset;
+        #endregion
 
-        /// <summary>現在のBPM</summary>
-        public double CurrentBpm => _currentBpm;
-        /// <summary>1拍毎の長さ（秒）</summary>
-        public double BeatLength => 60L / _currentBpm;
-        /// <summary>現在の拍数</summary>
-        public double CurrentBeat => _beat;
-        /// <summary>BGMの固有拍子</summary>
-        public double PropTimeSignature => _propTimeSignature;
-
-        #region ライフサイクル
+        // PRIVATE_FIELDS
+        #region Unityライフサイクルメソッド
+        /// <summary>
+        ///     フレームごとに呼び出されます。
+        /// </summary>
         private void Update()
         {
             Tick();
         }
         #endregion
 
+        // EVENT_HANDLER_METHODS
+        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
+        /// <summary>
+        ///     デバッグ用に現在の時間を表示します。
+        /// </summary>
         private void OnGUI()
         {
             if (_source == null) return;
@@ -83,12 +106,15 @@ namespace Mock.MusicBattle.MusicSync
         }
 
         /// <summary>
-        /// 現在の拍数を更新する。
+        ///     現在の拍数を更新する。
         /// </summary>
         private void Tick()
         {
-            _beat = (_source.time - _startOffset ) / 1000d  / BeatLength;
+            _beat = (_source.time - _startOffset) / 1000d / BeatLength;
         }
         #endregion
+        // PRIVATE_ENUM_DEFINITIONS
+        // PRIVATE_CLASS_DEFINITIONS
+        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
