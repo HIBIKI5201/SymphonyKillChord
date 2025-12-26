@@ -47,9 +47,9 @@ namespace Mock.MusicBattle.Camera
             // イベント登録。
             inputBuffer.LookAction.Performed += HandleLookAction;
             inputBuffer.LookAction.Canceled += HandleLookAction;
-            lockOnManager.OnTargetLocked += HandleLockOn; 
+            lockOnManager.OnTargetLocked += HandleLockOn;
 
-            _mover = new(_cameraConfigs, transform, cam.transform); // cam.Followをcam.transformに修正
+            _mover = new(_cameraConfigs, transform, cam.Follow);
 
             _lockOnManager = lockOnManager;
             _inputBuffer = inputBuffer;
@@ -79,7 +79,6 @@ namespace Mock.MusicBattle.Camera
                 _inputBuffer.LookAction.Performed -= HandleLookAction;
                 _inputBuffer.LookAction.Canceled -= HandleLookAction;
             }
-            // _lockOnManager.OnTargetLocked -= HandleLockOn; // LockOnManagerはIDisposableで管理されるため、ここでは解除しない。
         }
         #endregion
 
@@ -171,4 +170,3 @@ namespace Mock.MusicBattle.Camera
         #endregion
     }
 }
-
