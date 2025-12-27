@@ -17,7 +17,7 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary>
         ///     初期化を行う。
         /// </summary>
-        /// <param name="timeSignatures">入力によってなりえる拍子</param>
+        /// <param name="timeSignatures"> 入力によってなりえる拍子。 </param>
         public void Init(float[] timeSignatures)
         {
             _timeSignatures = timeSignatures.OrderBy(n => n).ToArray();
@@ -27,8 +27,8 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary>
         ///     入力されたタイミングを基いて、なりえる最も近い拍子を取得する。
         /// </summary>
-        /// <param name="currentBeat">入力時点の全体拍数</param>
-        /// <returns>最も近い拍子</returns>
+        /// <param name="currentBeat"> 入力時点の全体拍数。 </param>
+        /// <returns> 最も近い拍子。 </returns>
         public float GetInputTimeSignature()
         {
             _debugLog.Clear(); // デバッグログをクリア
@@ -56,9 +56,26 @@ namespace Mock.MusicBattle.MusicSync
 
             _debugLog.AppendLine($"Inputed Timing List: {string.Join(", ", _inputedTimingList.Select(b => b.ToString("F3")))}"); // 表示フォーマットは小数点以下3桁
 
+            // 検出された拍子を履歴に追加し、古いものを削除する
+            _signatureHistory.Enqueue(_timeSignatures[detectedTimeSignatureIndex]);
+            while (_signatureHistory.Count > _inputSignatureHistoryLimit)
+            {
+                _signatureHistory.Dequeue();
+            }
+            _debugLog.AppendLine($"Signature History: {string.Join(", ", _signatureHistory.Select(s => s.ToString("F0")))}");
+
             // すべてのデバッグ情報を一括で出力
             Debug.Log(_debugLog.ToString());
             return _timeSignatures[detectedTimeSignatureIndex];
+        }
+
+        /// <summary>
+        ///     入力された拍子の履歴を取得します。
+        /// </summary>
+        /// <returns>入力された拍子の履歴。</returns>
+        public float[] GetSignatureHistory()
+        {
+            return _signatureHistory.ToArray();
         }
         #endregion
 
@@ -78,11 +95,16 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary> 入力履歴を最大何小節保持するか。これをバー制限として古い入力は破棄される。 </summary>
         [SerializeField, Tooltip("入力履歴を最大何小節保持するか。")]
         int _inputHistoryBarLimit = 4;
+        /// <summary> 入力された拍子の履歴を最大何個保持するか。 </summary>
+        [SerializeField, Tooltip("入力された拍子の履歴を最大何個保持するか。")]
+        private int _inputSignatureHistoryLimit = 4;
         #endregion
 
         #region プライベートフィールド
         /// <summary> 入力された標準拍のタイミングを記録するキュー。 </summary>
         private Queue<double> _inputedTimingList = new();
+        /// <summary> 入力された拍子の履歴を記録するキュー。 </summary>
+        private Queue<float> _signatureHistory = new();
         /// <summary> 設定された拍子リストの中で、最も1拍の時間が長い拍子のインデックス。 </summary>
         private int _longestSignatureIndex;
         /// <summary> デバッグログ情報を構築するためのStringBuilder。 </summary>
@@ -118,7 +140,7 @@ namespace Mock.MusicBattle.MusicSync
 
                 _debugLog.AppendLine($"TimeSignature {i}: {_timeSignatures[i]}拍子, BeatLength: {beatLength:F3}, Diff: {diff:F3}");
 
-                // 入力時間差と拍子の1拍長さの差が増え始めたら結果が既に確定しているため、ループ終了
+                // 入力時間差と拍子の1拍長さの差が増え始めたら結果が既に確定しているため、ループ終了。
                 if(diff > mostNearTimingValue)
                 {
                     break;
@@ -134,16 +156,16 @@ namespace Mock.MusicBattle.MusicSync
         }
 
         /// <summary>
-        ///     指定された拍子インデックスの拍の長さを取得する
+        ///     指定された拍子インデックスの拍の長さを取得する。
         /// </summary>
-        /// <param name="timeSignatureIndex">拍子インデックス</param>
+        /// <param name="timeSignatureIndex"> 拍子インデックス。 </param>
         /// <returns>拍の長さ</returns>
         private double GetBeatLength(int timeSignatureIndex) => _musicBuffer.PropTimeSignature / _timeSignatures[timeSignatureIndex];
 
         /// <summary>
-        ///     1拍が最も長い拍子のIndexを取得する
+        ///     1拍が最も長い拍子のIndexを取得する。
         /// </summary>
-        /// <returns>拍子リストのIndex</returns>
+        /// <returns> 拍子リストのIndex。 </returns>
         private int GetLongestSignatureIndex()
         {
             // _timeSignaturesは昇順でソートされているため、インデックス0が最も小さい拍子値（短い拍長）、
@@ -163,7 +185,7 @@ namespace Mock.MusicBattle.MusicSync
         /// <returns>BGM再生開始から今回入力直近までの長さ</returns>
         private double CalcQuantizedBeat(double lastBeat, int signatureIndex)
         {
-            // 前回入力からの間隔が最長拍未満の場合、前回入力 + 検出拍子長さとする
+            // 前回入力からの間隔が最長拍未満の場合、前回入力 + 検出拍子長さとする。
             // 検出された拍子の長さ（拍数単位）
             double beatLength = GetBeatLength(signatureIndex);
             if (signatureIndex != _longestSignatureIndex)
@@ -171,19 +193,19 @@ namespace Mock.MusicBattle.MusicSync
                 return lastBeat + beatLength;
             }
 
-            // 前回入力からの間隔が最長拍以上の場合、追いかけ処理を行う
+            // 前回入力からの間隔が最長拍以上の場合、追いかけ処理を行う。
             double ret = lastBeat;
             bool loopEndFlg = false;
             while (!loopEndFlg)
             {
-                // 前回入力タイミングから、最長拍子の拍長を1回ずつ、超えない所まで加算する
+                // 前回入力タイミングから、最長拍子の拍長を1回ずつ、超えない所まで加算する。
                 if (ret + beatLength < _musicBuffer.CurrentBeat)
                 {
                     ret += beatLength;
                 }
                 else
                 {
-                    // そしてBGM固有拍子の拍長を1拍分ずつ加算し、入力時間直前の標準拍タイミングを算出する
+                    // そしてBGM固有拍子の拍長を1拍分ずつ加算し、入力時間直前の標準拍タイミングを算出する。
                     while (!loopEndFlg)
                     {
                         if (ret + 1d < _musicBuffer.CurrentBeat)
@@ -197,10 +219,10 @@ namespace Mock.MusicBattle.MusicSync
                     }
                 }
             }
-            // 最後に、入力ずれを補正する。入力が次の拍に近い場合、結果を次の拍とする
+            // 最後に、入力ずれを補正する。入力が次の拍に近い場合、結果を次の拍とする。
             StringBuilder logStr = new StringBuilder($"最後の入力ズレ補正。補正前の結果：{ret}、現在拍：{_musicBuffer.CurrentBeat}");
 
-            // 前の標準拍から入力までの長さが補正閾値を超えている場合、次の標準拍とする
+            // 前の標準拍から入力までの長さが補正閾値を超えている場合、次の標準拍とする。
             ret += _musicBuffer.CurrentBeat - ret > _inputFixThreshold ? 1d : 0d;
 
             logStr.AppendLine($"補正後の結果：{ret}");
@@ -209,19 +231,19 @@ namespace Mock.MusicBattle.MusicSync
         }
 
         /// <summary>
-        ///     入力キューから古い入力を削除する
+        ///     入力キューから古い入力を削除する。
         /// </summary>
         /// <param name="currentBeat">現在拍</param>
         /// <param name="barLimit">最大保持小節数</param>
         private void DequeueOldInput(double currentBeat, double barLimit)
         {
-            // 残すか判定用の最小タイミング
+            // 残すか判定用の最小タイミング。
             double dequeueThreshold = currentBeat - (currentBeat % _musicBuffer.PropTimeSignature) - _musicBuffer.PropTimeSignature * barLimit;
-            // 記録された入力タイミング
+            // 記録された入力タイミング。
             double inputedBeat;
             while (_inputedTimingList.TryPeek(out inputedBeat))
             {
-                // 最小拍数より古い入力を削除し、最小拍数以降の入力まで削除したらループ終了
+                // 最小拍数より古い入力を削除し、最小拍数以降の入力まで削除したらループ終了。
                 if(inputedBeat < dequeueThreshold)
                 {
                     _inputedTimingList.Dequeue();
