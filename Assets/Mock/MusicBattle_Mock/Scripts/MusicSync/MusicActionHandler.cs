@@ -13,15 +13,11 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicActionHandler : MonoBehaviour
     {
-        // CONSTRUCTOR
         #region Publicイベント
         /// <summary> 単位拍数ごとに発火するイベント。 </summary>
         public event Action OnBeat;
         #endregion
 
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     予約アクションを登録する。
@@ -44,11 +40,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> CRI ADXの音楽バッファを管理するクラスの参照。 </summary>
         [SerializeField, Tooltip("CRI ADXの音楽バッファを管理するクラスの参照。")]
@@ -83,8 +74,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     単位拍数ごとにイベントを発火する。
@@ -129,9 +118,5 @@ namespace Mock.MusicBattle.MusicSync
             }
         }
         #endregion
-
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
