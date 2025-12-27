@@ -47,7 +47,7 @@ namespace Mock.MusicBattle.Player
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
-            _playerAttacker = new PlayerAttacker(_playerStatus, _config, this);
+            _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform);
             _musicSyncManager = musicSync;
             InputEventRegister(_inputBuffer);
