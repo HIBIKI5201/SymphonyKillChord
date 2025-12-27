@@ -1,7 +1,6 @@
 using Mock.MusicBattle.Character;
 using System;
 using System.Threading;
-using System.Threading.Tasks; // Taskを使用するため追加
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -45,10 +44,6 @@ namespace Mock.MusicBattle.UI
             _redBar.style.width = Length.Percent(100);
         }
 
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     敵の体力バーのデータをバインドし、表示位置の追跡を開始します。
@@ -81,10 +76,6 @@ namespace Mock.MusicBattle.UI
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "EnemyHealthBar";
@@ -96,7 +87,6 @@ namespace Mock.MusicBattle.UI
         private const string ELEMENT_NAME_RED_BAR = "red-guage";
         #endregion
 
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> CancellationTokenSource。 </summary>
         private CancellationTokenSource _disposeCTS;
@@ -110,9 +100,6 @@ namespace Mock.MusicBattle.UI
         private readonly Vector2 _offset = new Vector2(-0.5f, 0.2f);
         #endregion
 
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     敵のTransformを追跡し、体力バーの位置を毎フレーム更新します。
@@ -126,9 +113,13 @@ namespace Mock.MusicBattle.UI
             while (transform != null && !token.IsCancellationRequested)
             {
                 MovePosition(transform.position);
-                // OperationCanceledException は意図的に発生させ、呼び出し側で処理することが多いため、
-                // ここではtry-catchせずに次のフレームを待機する。
-                await Awaitable.NextFrameAsync(token);
+
+                try
+                {
+                    await Awaitable.NextFrameAsync(token);
+                }
+                // キャンセルされた場合はループを抜ける。
+                catch (OperationCanceledException) { break; }
             }
         }
 
@@ -179,8 +170,5 @@ namespace Mock.MusicBattle.UI
             _base.style.top = uitkPosition.y;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
