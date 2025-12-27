@@ -29,3 +29,4 @@ namespace Mock.MusicBattle.MusicSync
         private float[] _signaturePattern;
     }
 }
+

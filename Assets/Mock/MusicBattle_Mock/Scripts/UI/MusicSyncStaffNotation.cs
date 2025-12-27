@@ -43,11 +43,6 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_noteContainer != null, $"要素: {ELEMENT_NAME_NOTE_CONTAINER} の検索に失敗しました。");
             Debug.Assert(_noteAsset != null, $"UXMLパス: {NOTE_UXML_RESOURCES_PATH} の読み込みに失敗しました。");
         }
-
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     指定された拍と色でノーツを生成し、表示します。
@@ -80,11 +75,6 @@ namespace Mock.MusicBattle.UI
             MoveNotes(deltaTime, currentMeasure);
         }
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> 五線譜UXMLアセットのリソースパス。 </summary>
         private const string NOTATION_UXML_RESOURCES_PATH = "MusicSyncStaffNotation";
@@ -97,8 +87,6 @@ namespace Mock.MusicBattle.UI
         /// <summary> 拍子線の移動サイクルの小節数。 </summary>
         private const float STAFF_LINE_MOVE_CYCLE_MEASURES = 4f;
         #endregion
-
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> 五線譜のライン要素配列。 </summary>
         private VisualElement[] _staffLines;
@@ -109,10 +97,6 @@ namespace Mock.MusicBattle.UI
         /// <summary> アクティブなノーツエンティティのリスト。 </summary>
         private readonly List<NoteEntity> _activeNotes = new();
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region プライベートメソッド
         /// <summary>
         ///     拍子線の位置を現在の拍に基づいて移動させます。
@@ -213,7 +197,6 @@ namespace Mock.MusicBattle.UI
             private readonly VisualElement _element;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
     }
 }
+

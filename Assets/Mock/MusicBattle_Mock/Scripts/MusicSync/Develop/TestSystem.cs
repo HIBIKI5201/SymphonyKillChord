@@ -8,17 +8,7 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class TestSystem : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> 音楽同期マネージャー。 </summary>
         [Tooltip("音楽同期マネージャー。"), SerializeField]
@@ -36,8 +26,6 @@ namespace Mock.MusicBattle.MusicSync
         [Tooltip("再生開始オフセット（ミリ秒）。"), SerializeField]
         private long _startOffset;
         #endregion
-
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     最初のフレームアップデートの前に呼び出されます。
@@ -48,12 +36,6 @@ namespace Mock.MusicBattle.MusicSync
             _musicSyncManager.Init(_source, _bpm, _bgmProperTime, _startOffset);
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

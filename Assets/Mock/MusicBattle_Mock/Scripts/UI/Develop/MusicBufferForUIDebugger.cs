@@ -11,8 +11,6 @@ namespace Mock.MusicBattle.Develop
     [RequireComponent(typeof(PlayerInput))]
     public class MusicBufferForUIDebugger : MonoBehaviour, IMusicBuffer
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> 現在のBPM。 </summary>
         public double CurrentBpm => 120;
@@ -23,22 +21,12 @@ namespace Mock.MusicBattle.Develop
         /// <summary> BGMの固有拍子（デバッグ用のため固定値）。 </summary>
         public double PropTimeSignature => 4; // デバッグ用のため固定値
         #endregion
-
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> ノーツを生成するアクション名。 </summary>
         [SerializeField, Tooltip("ノーツを生成するアクション名。")]
         private string _createNotesActionName = "Attack";
         #endregion
-
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     スクリプトインスタンスがロードされたときに呼び出されます。
@@ -62,10 +50,6 @@ namespace Mock.MusicBattle.Develop
             }
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
         #region パブリックインターフェースメソッド
         /// <summary>
         ///     小節タイミング情報を基いて、全体拍数を算出する（デバッグ用のため簡略化）。
@@ -79,8 +63,6 @@ namespace Mock.MusicBattle.Develop
             return CurrentBeat + barTimingInfo.TargetBeat;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

@@ -42,11 +42,6 @@ namespace Mock.MusicBattle.UI
             _greenBar.style.width = Length.Percent(100);
             _redBar.style.width = Length.Percent(100);
         }
-
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     データをバインドします。
@@ -65,11 +60,6 @@ namespace Mock.MusicBattle.UI
             };
         }
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "PlayerHealthBar";
@@ -78,8 +68,6 @@ namespace Mock.MusicBattle.UI
         /// <summary> 赤色のゲージ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_RED_BAR = "red-guage";
         #endregion
-
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> 非同期処理のキャンセルトークン。 </summary>
         private CancellationToken _token;
@@ -88,10 +76,6 @@ namespace Mock.MusicBattle.UI
         /// <summary> 赤色のゲージバー（ダメージ表現用）。 </summary>
         private VisualElement _redBar;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     ヘルス変更イベントに応じてヘルスバーを更新するハンドラー。
@@ -118,8 +102,6 @@ namespace Mock.MusicBattle.UI
             await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

@@ -33,3 +33,4 @@ namespace Mock.MusicBattle.Enemy
         private float _maxHealth = 100f;
     }
 }
+

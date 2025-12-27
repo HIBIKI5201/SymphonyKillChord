@@ -28,11 +28,6 @@ namespace Mock.MusicBattle.UI
             _cursor = this.Q<VisualElement>(ELEMENT_CURSOR_NAME);
             style.visibility = Visibility.Hidden;
         }
-
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     カーソルの追跡対象となるターゲットを登録します。
@@ -72,11 +67,6 @@ namespace Mock.MusicBattle.UI
             _cursor.style.top = uitkPosition.y;
         }
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "LockOnCursor";
@@ -85,21 +75,12 @@ namespace Mock.MusicBattle.UI
         /// <summary> カーソル位置のオフセット。 </summary>
         private readonly Vector3 OFFSET = new Vector2(0, 1);
         #endregion
-
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> カーソルのVisualElement。 </summary>
         private readonly VisualElement _cursor;
         /// <summary> 追跡対象のTransform。 </summary>
         private Transform _target;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

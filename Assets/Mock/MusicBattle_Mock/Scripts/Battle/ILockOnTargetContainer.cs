@@ -27,3 +27,4 @@ namespace Mock.MusicBattle.Battle
         public IReadOnlyList<Transform> NearerTargets { get; }
     }
 }
+

@@ -51,3 +51,4 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
     }
 }
+

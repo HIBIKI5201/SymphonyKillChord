@@ -19,11 +19,6 @@ namespace Mock.MusicBattle.Camera
             _camera = camera;
             _target = target;
         }
-
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     カメラの回転入力で更新します。
@@ -109,16 +104,9 @@ namespace Mock.MusicBattle.Camera
         /// <param name="lockTarget">ロック対象のTransform。</param>
         public void SetLockTarget(Transform lockTarget) => _lockTarget = lockTarget;
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         // 定数なし
         #endregion
-
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> カメラの設定。 </summary>
         private readonly CameraConfigs _config;
@@ -135,10 +123,6 @@ namespace Mock.MusicBattle.Camera
         /// <summary> 現在のカメラの回転。 </summary>
         private Quaternion _currentCameraRotation = Quaternion.identity;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///    ロック対象の方向を向くためのヨー回転を取得します。
@@ -222,8 +206,6 @@ namespace Mock.MusicBattle.Camera
         /// <returns>ロックオンモードの場合はtrue、それ以外はfalse。</returns>
         private bool IsLockOnMode() => _lockTarget != null;
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

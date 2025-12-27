@@ -81,3 +81,4 @@ namespace Mock.MusicBattle.Camera
         #endregion
     }
 }
+

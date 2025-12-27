@@ -54,3 +54,4 @@ namespace Mock.MusicBattle.Player
         private float _groundNormalVerticalThreshold = 0.5f;
     }
 }
+

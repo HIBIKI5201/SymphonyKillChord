@@ -29,8 +29,6 @@ namespace Mock.MusicBattle.Develop
         [SerializeField, Tooltip("Cinemachineカメラの参照。")]
         private CinemachineCamera _camera;
         #endregion
-
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     スクリプトインスタンスがロードされたときに呼び出されます。
@@ -46,8 +44,7 @@ namespace Mock.MusicBattle.Develop
             _playerManager.Init(_inputBuffer, _camera, lockOnManager, null); 
         }
         #endregion
-
-        // PRIVATE_METHODS
     }
 }
+
 

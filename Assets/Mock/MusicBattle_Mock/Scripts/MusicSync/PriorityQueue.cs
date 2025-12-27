@@ -17,15 +17,10 @@ namespace Mock.MusicBattle.Utility
         {
             _comparer = comparer;
         }
-
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> キューに含まれる要素の数を取得します。 </summary>
         public int Count => _heap.Count;
         #endregion
-
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     キューに要素を追加します。
@@ -68,23 +63,12 @@ namespace Mock.MusicBattle.Utility
             return _heap[0];
         }
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> ヒープ構造を保持するリスト。 </summary>
         private readonly List<T> _heap = new List<T>();
         /// <summary> 要素の比較に使用する比較子。 </summary>
         private readonly IComparer<T> _comparer;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     指定されたインデックスからヒープを上方向に再構築します。
@@ -143,8 +127,6 @@ namespace Mock.MusicBattle.Utility
             _heap[b] = tmp;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

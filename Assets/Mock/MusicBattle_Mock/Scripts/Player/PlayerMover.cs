@@ -158,3 +158,4 @@ namespace Mock.MusicBattle.Player
         #endregion
     }
 }
+

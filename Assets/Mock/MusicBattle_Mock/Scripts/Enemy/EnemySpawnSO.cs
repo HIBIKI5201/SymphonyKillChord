@@ -26,3 +26,4 @@ namespace Mock.MusicBattle.Enemy
         private int _maxEnemyCount = 3;
     }
 }
+

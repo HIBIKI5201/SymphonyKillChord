@@ -265,3 +265,4 @@ namespace Mock.MusicBattle.Battle
         #endregion
     }
 }
+

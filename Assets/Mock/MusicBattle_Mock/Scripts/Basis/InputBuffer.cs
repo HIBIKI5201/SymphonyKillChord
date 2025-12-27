@@ -10,8 +10,6 @@ namespace Mock.MusicBattle.Basis
     [RequireComponent(typeof(PlayerInput)), DefaultExecutionOrder(-1000)]
     public class InputBuffer : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> ルックアクションのInputActionEntity。 </summary>
         public InputActionEntity<Vector2> LookAction => _lookActionEntity;
@@ -22,15 +20,7 @@ namespace Mock.MusicBattle.Basis
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         public InputActionEntity<float> AttackAction => _attackActionEntity;
         #endregion
-
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         // PUBLIC_METHODS
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> ルックアクションの名前。 </summary>
         [SerializeField, Tooltip("ルックアクションの名前。")]
@@ -87,12 +77,5 @@ namespace Mock.MusicBattle.Basis
             _attackActionEntity.Dispose();
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

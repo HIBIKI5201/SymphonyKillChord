@@ -15,3 +15,4 @@ namespace Mock.MusicBattle.Camera
         LateUpdate = 3,
     }
 }
+

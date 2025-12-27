@@ -117,3 +117,4 @@ namespace Mock.MusicBattle.UI
         #endregion
     }
 }
+

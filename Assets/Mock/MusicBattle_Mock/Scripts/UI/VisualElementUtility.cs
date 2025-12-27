@@ -44,3 +44,4 @@ namespace Mock.MusicBattle.UI
         }
     }
 }
+

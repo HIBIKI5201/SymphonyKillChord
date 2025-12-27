@@ -19,3 +19,4 @@ namespace Mock.MusicBattle.Enemy
         public long TargetBeat = 2;
     }
 }
+

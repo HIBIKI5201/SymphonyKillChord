@@ -16,7 +16,7 @@ namespace Mock.MusicBattle.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour, ICharacter
     {
-        // CONSTRUCTOR
+        
         #region Publicイベント
         /// <summary> プレイヤーが攻撃を行ったときに発火するイベント。 </summary>
         public event Action<float> OnAttacked;
@@ -28,9 +28,6 @@ namespace Mock.MusicBattle.Player
         /// <summary> プレイヤーのHealthEntityを取得します。 </summary>
         public HealthEntity HealthEntity => _healthEntity;
         #endregion
-
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     プレイヤーマネージャーを初期化します。
@@ -59,12 +56,6 @@ namespace Mock.MusicBattle.Player
         /// <param name="damage">与えるダメージ量。</param>
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> プレイヤーのステータス。 </summary>
         [SerializeField, Tooltip("プレイヤーのステータス。")]
@@ -183,9 +174,6 @@ namespace Mock.MusicBattle.Player
                 _playerAttacker.OnDrawGizmos();
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     入力イベントを登録します。
@@ -259,8 +247,7 @@ namespace Mock.MusicBattle.Player
             gameObject.SetActive(false);
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+
+

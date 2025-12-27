@@ -15,3 +15,4 @@ namespace Mock.MusicBattle.Enemy
         private GameObject _enemyPrefab;
     }
 }
+

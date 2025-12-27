@@ -38,10 +38,6 @@ namespace Mock.MusicBattle.Basis
         /// </summary>
         public event Action<T> Canceled;
         #endregion
-
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     登録されている全てのStartedイベントハンドラーを手動で呼び出します。
@@ -82,18 +78,10 @@ namespace Mock.MusicBattle.Basis
             _inputAction.canceled -= CanceledHandler;
         }
         #endregion
-
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> ラップ対象のUnity InputAction。 </summary>
         private readonly InputAction _inputAction;
         #endregion
-
-        // UNITY_LIFECYCLE_METHODS
         #region イベントハンドラメソッド
         /// <summary>
         ///     InputActionのstartedイベントのハンドラー。
@@ -125,11 +113,5 @@ namespace Mock.MusicBattle.Basis
             InvokeCanceled(value);
         }
         #endregion
-
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }

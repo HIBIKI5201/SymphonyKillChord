@@ -19,3 +19,4 @@ namespace Mock.MusicBattle.MusicSync
         public long StartOffset = 0;
     }
 }
+

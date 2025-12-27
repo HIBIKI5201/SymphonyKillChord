@@ -14,7 +14,6 @@ namespace Mock.MusicBattle.Enemy
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyManager : MonoBehaviour, ICharacter
     {
-        // CONSTRUCTOR
         #region Publicイベント
         /// <summary>
         ///     ヘルスが0になったときに発火するイベント。
@@ -51,9 +50,6 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> 敵がロックオンされているかどうか。 </summary>
         public bool IsLockOn => _isLockOn;
         #endregion
-
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     敵の初期化をまとめた関数。
@@ -125,12 +121,6 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="damage">与えるダメージ量。</param>
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
         #endregion
-
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> エネミーのステータス。 </summary>
         [SerializeField, Tooltip("エネミーのステータス。")]
@@ -203,12 +193,6 @@ namespace Mock.MusicBattle.Enemy
             _enemyMover.MoveTo();
         }
         #endregion
-
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
-        // PRIVATE_METHODS
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
+

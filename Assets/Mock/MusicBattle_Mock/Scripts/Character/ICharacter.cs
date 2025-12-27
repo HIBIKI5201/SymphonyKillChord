@@ -19,3 +19,4 @@ namespace Mock.MusicBattle.Character
         public void TakeDamage(float damage);
     }
 }
+

@@ -43,3 +43,4 @@ namespace Mock.MusicBattle.Basis
         }
     }
 }
+

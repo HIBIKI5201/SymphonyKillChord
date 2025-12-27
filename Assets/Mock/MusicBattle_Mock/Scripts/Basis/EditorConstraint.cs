@@ -9,3 +9,4 @@ namespace Mock.MusicBattle.Basis
         public const string CREATE_ASSET_PATH = "Mock/MusicBattle/";
     }
 }
+

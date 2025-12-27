@@ -17,3 +17,4 @@ namespace Mock.MusicBattle.Player
         private LayerMask _ignoreAttackLayer;
     }
 }
+

@@ -161,3 +161,4 @@ namespace Mock.MusicBattle.Enemy
         #endregion
     }
 }
+
