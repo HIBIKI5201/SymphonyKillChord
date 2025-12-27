@@ -15,11 +15,6 @@ namespace Mock.MusicBattle.UI
     [RequireComponent(typeof(UIDocument))]
     public class IngameHUDManager : MonoBehaviour
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     HUDマネージャーを初期化します。
@@ -91,11 +86,6 @@ namespace Mock.MusicBattle.UI
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         /// <summary> 拍子と色の対応データ配列。 </summary>
         [SerializeField, Tooltip("拍子と色の対応データ配列。")]
@@ -183,8 +173,6 @@ namespace Mock.MusicBattle.UI
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     指定された拍子に対応する色を取得します。
@@ -206,7 +194,5 @@ namespace Mock.MusicBattle.UI
             return Color.black;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
     }
 }
