@@ -73,9 +73,9 @@ namespace Mock.MusicBattle.MusicSync
         ///     入力された拍子の履歴を取得します。
         /// </summary>
         /// <returns>入力された拍子の履歴。</returns>
-        public float[] GetSignatureHistory()
+        public ReadOnlySpan<float> GetSignatureHistory()
         {
-            return _signatureHistory.ToArray();
+            return new ReadOnlySpan<float>(_signatureHistory.ToArray());
         }
         #endregion
 

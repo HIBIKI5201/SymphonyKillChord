@@ -32,24 +32,24 @@ namespace Mock.MusicBattle.MusicSync
         /// <returns>入力によって成り立つ拍子。</returns>
         public bool IsMatchInputTimeSignature(float[] pattern)
         {
-            float[] signatureHistory = _inputHandler.GetSignatureHistory();
-            if (signatureHistory.Length >= pattern.Length)
-            {
-                bool match = true;
-                for (int i = 0; i < pattern.Length; i++)
-                {
-                    // 履歴の最新部分とパターンを比較
-                    if (signatureHistory[signatureHistory.Length - pattern.Length + i] != pattern[i])
-                    {
-                        match = false;
-                        break;
-                    }
-                }
+            ReadOnlySpan<float> signatureHistory = _inputHandler.GetSignatureHistory();
 
-                return match;
+            // パターンより履歴が短ければ非マッチ。
+            if (signatureHistory.Length < pattern.Length) { return false; }
+
+            bool match = true;
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                // 履歴の最新部分とパターンを比較。
+                if (signatureHistory[signatureHistory.Length - pattern.Length + i] != pattern[i])
+                {
+                    match = false;
+                    break;
+                }
             }
 
-            return false;
+            return match;
+
         }
 
         /// <summary>
