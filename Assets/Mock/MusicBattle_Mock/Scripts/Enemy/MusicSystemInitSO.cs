@@ -10,12 +10,12 @@ namespace Mock.MusicBattle.MusicSync
     {
         /// <summary> BGMのBPM（Beats Per Minute）。 </summary>
         [Tooltip("BGMのBPM（Beats Per Minute）。")]
-        public double Bpm;
+        public double Bpm = 120;
         /// <summary> BGMの拍子。 </summary>
         [Tooltip("BGMの拍子。")]
-        public double TimeSignature;
+        public double TimeSignature = 4;
         /// <summary> 最初の小節の開始オフセット（ミリ秒）。 </summary>
         [Tooltip("最初の小節の開始オフセット（ミリ秒）。")]
-        public long StartOffset;
+        public long StartOffset = 0;
     }
 }
