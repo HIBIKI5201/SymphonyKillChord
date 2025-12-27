@@ -11,8 +11,6 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class CriMusicBuffer : MonoBehaviour, IMusicBuffer
     {
-        // CONSTRUCTOR
-        // PUBLIC_EVENTS
         #region パブリックプロパティ
         /// <summary> 現在のBPM。 </summary>
         public double CurrentBpm => _currentBpm;
@@ -24,8 +22,6 @@ namespace Mock.MusicBattle.MusicSync
         public double PropTimeSignature => _propTimeSignature;
         #endregion
 
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     初期化を行う。
@@ -64,10 +60,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
-        // CONSTANTS
         #region インスペクター表示フィールド
         [SerializeField, ReadOnly, Tooltip("現在のBPM")]
         private double _currentBpm;
@@ -81,7 +73,6 @@ namespace Mock.MusicBattle.MusicSync
         private long _startOffset;
         #endregion
 
-        // PRIVATE_FIELDS
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     フレームごとに呼び出されます。
@@ -92,8 +83,6 @@ namespace Mock.MusicBattle.MusicSync
         }
         #endregion
 
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     デバッグ用に現在の時間を表示します。
@@ -113,8 +102,5 @@ namespace Mock.MusicBattle.MusicSync
             _beat = (_source.time - _startOffset) / 1000d / BeatLength;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
