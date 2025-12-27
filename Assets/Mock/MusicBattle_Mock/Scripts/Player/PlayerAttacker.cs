@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Character;
+using Mock.MusicBattle.MusicSync;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -11,17 +12,14 @@ namespace Mock.MusicBattle.Player
         /// <summary>
         ///    コンストラクタ。
         /// </summary>
-        public PlayerAttacker(PlayerStatus status, PlayerConfig config, PlayerManager player)
+        public PlayerAttacker(PlayerStatus status, PlayerConfig config, PlayerManager player, MusicSyncManager musicSyncManager)
         {
             _status = status;
             _config = config;
             _player = player;
+            _musicSyncManager = musicSyncManager;
         }
 
-        // PUBLIC_EVENTS
-        // PUBLIC_PROPERTIES
-        // INTERFACE_PROPERTIES
-        // PUBLIC_CONSTANTS
         #region Publicメソッド
         /// <summary>
         ///     ギズモを描画して、レイキャストの方向を視覚化します（デバッグ用）。
@@ -56,19 +54,21 @@ namespace Mock.MusicBattle.Player
 
             float attackPower = _status.AttackPower * 4 / signature;
             target.TakeDamage(attackPower);
+
+            // MusicSyncのSignature履歴を取得し、特定のパターンと一致するかチェックする。
+            float[] pattern = { 4f, 4f, 3f, 3f }; // ユーザーが指定したパターン。
+            if (_musicSyncManager.IsMatchInputTimeSignature(pattern))
+            {
+                Debug.Log("MusicSync Signature Pattern Matched! Pattern: {4, 4, 3, 3}");
+            }
         }
         #endregion
 
-        // PUBLIC_INTERFACE_METHODS
-        // PUBLIC_ENUM_DEFINITIONS
-        // PUBLIC_CLASS_DEFINITIONS
-        // PUBLIC_STRUCT_DEFINITIONS
         #region 定数
         /// <summary> レイキャストの高さオフセット。 </summary>
         private const float HEIGHT_RAY = 0.7f;
         #endregion
 
-        // INSPECTOR_FIELDS
         #region プライベートフィールド
         /// <summary> プレイヤーのマネージャクラス。 </summary>
         private readonly PlayerManager _player;
@@ -76,6 +76,8 @@ namespace Mock.MusicBattle.Player
         private readonly PlayerStatus _status;
         /// <summary> プレイヤーの設定。 </summary>
         private readonly PlayerConfig _config;
+        /// <summary> 音楽同期システムのマネージャ。 </summary>
+        private readonly MusicSyncManager _musicSyncManager;
         #endregion
 
         #region デバッグ用プライベートフィールド
@@ -85,9 +87,6 @@ namespace Mock.MusicBattle.Player
         private Vector3 _origin;
         #endregion
 
-        // UNITY_LIFECYCLE_METHODS
-        // EVENT_HANDLER_METHODS
-        // PROTECTED_INTERFACE_VIRTUAL_METHODS
         #region Privateメソッド
         /// <summary>
         ///     指定された方向の攻撃対象を見つけ、その成否を返します。
@@ -145,8 +144,5 @@ namespace Mock.MusicBattle.Player
             return false;
         }
         #endregion
-        // PRIVATE_ENUM_DEFINITIONS
-        // PRIVATE_CLASS_DEFINITIONS
-        // PRIVATE_STRUCT_DEFINITIONS
     }
 }
