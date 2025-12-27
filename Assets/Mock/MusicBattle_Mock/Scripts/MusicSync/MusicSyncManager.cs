@@ -44,6 +44,15 @@ namespace Mock.MusicBattle.MusicSync
         {
             _actionHandler.RegisterAction(barTimingInfo, action);
         }
+
+        /// <summary>
+        ///     入力された拍子の履歴を取得します。
+        /// </summary>
+        /// <returns>入力された拍子の履歴。</returns>
+        public float[] GetSignatureHistory()
+        {
+            return _inputHandler.GetSignatureHistory();
+        }
         #endregion
 
         #region インスペクター表示フィールド
