@@ -89,7 +89,7 @@ namespace Mock.MusicBattle.UI
         #region インスペクター表示フィールド
         /// <summary> 拍子と色の対応データ配列。 </summary>
         [SerializeField, Tooltip("拍子と色の対応データ配列。")]
-        private SignetureColorData[] _measureColorDatas;
+        private SignetureColorData[] _signetureColorDatas;
         #endregion
 
         #region プライベートフィールド
@@ -119,13 +119,13 @@ namespace Mock.MusicBattle.UI
         private struct SignetureColorData
         {
             /// <summary> 拍子を取得します。 </summary>
-            public float Signeture => _measure;
+            public float Signeture => _signeture;
             /// <summary> 色を取得します。 </summary>
             public Color Color => _color;
 
             /// <summary> 拍子。 </summary>
             [SerializeField]
-            private float _measure;
+            private float _signeture;
             /// <summary> 色。 </summary>
             [SerializeField]
             private Color _color;
@@ -183,7 +183,7 @@ namespace Mock.MusicBattle.UI
         {
             int s = Mathf.RoundToInt(signature);
 
-            foreach (var data in _measureColorDatas)
+            foreach (var data in _signetureColorDatas)
             {
                 if (data.Signeture == s)
                 {
