@@ -30,6 +30,25 @@ namespace Mock.MusicBattle.MusicSync
         ///     入力によって成り立つ拍子を取得します。
         /// </summary>
         /// <returns>入力によって成り立つ拍子。</returns>
+        public float GetInputTimeSignature()
+        {
+            return _inputHandler.GetInputTimeSignature();
+        }
+
+        /// <summary>
+        ///     アクション予約を行います。
+        /// </summary>
+        /// <param name="barTimingInfo">小節タイミング情報。</param>
+        /// <param name="action">実行アクション。</param>
+        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
+        {
+            _actionHandler.RegisterAction(barTimingInfo, action);
+        }
+
+        /// <summary>
+        ///     入力された拍子の履歴を取得します。
+        /// </summary>
+        /// <returns>入力された拍子の履歴。</returns>
         public bool IsMatchInputTimeSignature(float[] pattern)
         {
             ReadOnlySpan<float> signatureHistory = _inputHandler.GetSignatureHistory();
@@ -49,26 +68,6 @@ namespace Mock.MusicBattle.MusicSync
             }
 
             return match;
-
-        }
-
-        /// <summary>
-        ///     アクション予約を行います。
-        /// </summary>
-        /// <param name="barTimingInfo">小節タイミング情報。</param>
-        /// <param name="action">実行アクション。</param>
-        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
-        {
-            _actionHandler.RegisterAction(barTimingInfo, action);
-        }
-
-        /// <summary>
-        ///     入力された拍子の履歴を取得します。
-        /// </summary>
-        /// <returns>入力された拍子の履歴。</returns>
-        public float[] GetSignatureHistory()
-        {
-            return _inputHandler.GetSignatureHistory();
         }
         #endregion
 
