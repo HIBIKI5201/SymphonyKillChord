@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.MusicSync
     [CreateAssetMenu(fileName = nameof(RythemPatternData), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(RythemPatternData))]
     public class RythemPatternData : ScriptableObject
     {
+        public float this[int index] => _signaturePattern[index];
         public ReadOnlySpan<float> SignaturePattern => _signaturePattern;
 
         /// <summary>
