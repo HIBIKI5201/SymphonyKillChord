@@ -21,6 +21,7 @@ namespace Mock.MusicBattle.MusicSync
         public bool IsMatch(ReadOnlySpan<float> input)
         {
             if (_signaturePattern.Length < 1) { return false; }
+            if (input.Length < _signaturePattern.Length) { return false; }
 
             // 直近の入力からパターンを取得。
             ReadOnlySpan<float> pattern = input.Slice(0, _signaturePattern.Length);
