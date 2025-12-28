@@ -22,6 +22,11 @@ namespace Mock.MusicBattle.Basis
             inputAction.canceled += CanceledHandler;
         }
 
+        ~InputActionEntity()
+        {
+            Dispose();
+        }
+
         #region Publicイベント
         /// <summary>
         ///     入力が開始された時のイベント。
@@ -38,6 +43,7 @@ namespace Mock.MusicBattle.Basis
         /// </summary>
         public event Action<T> Canceled;
         #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     登録されている全てのStartedイベントハンドラーを手動で呼び出します。
@@ -78,10 +84,12 @@ namespace Mock.MusicBattle.Basis
             _inputAction.canceled -= CanceledHandler;
         }
         #endregion
+
         #region プライベートフィールド
         /// <summary> ラップ対象のUnity InputAction。 </summary>
         private readonly InputAction _inputAction;
         #endregion
+
         #region イベントハンドラメソッド
         /// <summary>
         ///     InputActionのstartedイベントのハンドラー。
