@@ -140,10 +140,15 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
-            await _greenBar.ChangeBarAsync(proportion, 0.1f, token);
+            try
+            {
+                await _greenBar.ChangeBarAsync(proportion, 0.1f, token);
 
-            await Awaitable.WaitForSecondsAsync(0.3f, token);
-            await _redBar.ChangeBarAsync(proportion, 0.2f, token);
+                await Awaitable.WaitForSecondsAsync(0.3f, token);
+                await _redBar.ChangeBarAsync(proportion, 0.2f, token);
+            }
+            // キャンセルされた場合は何もしない。
+            catch (OperationCanceledException) { }
         }
 
         /// <summary>
