@@ -62,6 +62,15 @@ namespace Mock.MusicBattle.Utility
             if (_heap.Count == 0) return default;
             return _heap[0];
         }
+
+        /// <summary>
+        ///     キュー内の指定された要素を削除します。
+        /// </summary>
+        /// <param name="element"></param>
+        public void Remove(T element)
+        {
+            _heap.Remove(element);
+        }
         #endregion
         #region プライベートフィールド
         /// <summary> ヒープ構造を保持するリスト。 </summary>
