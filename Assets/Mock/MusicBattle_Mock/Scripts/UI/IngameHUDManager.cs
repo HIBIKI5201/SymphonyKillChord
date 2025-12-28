@@ -1,6 +1,7 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
+using SymphonyFrameWork.Utility;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -31,7 +32,7 @@ namespace Mock.MusicBattle.UI
         /// <param name="healthEntity">プレイヤーのHealthEntity。</param>
         public async void InitializePlayerHealthBar(HealthEntity healthEntity)
         {
-            while (!_isInitialized) { await Awaitable.NextFrameAsync(destroyCancellationToken); }
+            await SymphonyTask.WaitUntil(() => _isInitialized, destroyCancellationToken);
             _playerHealthBar?.BindData(healthEntity);
         }
 
@@ -43,7 +44,7 @@ namespace Mock.MusicBattle.UI
         /// <returns>追加されたEnemyHealthBarインスタンス。</returns>
         public async Task<EnemyHealthBar> AddEnemyHealthBar(HealthEntity healthEntity, Transform transform)
         {
-            while (_root == null) await Awaitable.NextFrameAsync();
+            await SymphonyTask.WaitUntil(() => _root != null, destroyCancellationToken);
 
             // 敵のヘルスバーを生成して初期化する。
             EnemyHealthBar enemyHealthBar = new EnemyHealthBar();
@@ -59,9 +60,11 @@ namespace Mock.MusicBattle.UI
         /// <param name="lockOnManager">ロックオンマネージャー。</param>
         public async void InitializeLockOnCursor(LockOnManager lockOnManager)
         {
-            while (!_isInitialized) { await Awaitable.NextFrameAsync(destroyCancellationToken); }
+            await SymphonyTask.WaitUntil(() => _isInitialized, destroyCancellationToken);
 
             lockOnManager.OnTargetLocked += _lockOnCursor.RegisterTarget;
+            _lockOnCursor.RegisterCallback<DetachFromPanelEvent>(
+                evt => lockOnManager.OnTargetLocked -= _lockOnCursor.RegisterTarget);
         }
 
         /// <summary>
