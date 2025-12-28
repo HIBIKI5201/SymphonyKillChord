@@ -3,59 +3,79 @@ using UnityEngine;
 using System;
 
 namespace Mock.MusicBattle.Enemy
-{/// <summary>
- ///    ロックオン判定と移動を行う。
- /// </summary>
+{
+    /// <summary>
+    ///     敵のロックオン判定と移動を行うクラス。
+    /// </summary>
     public class EnemyMover
     {
-
-        /// <summary> コンストラクタ。 </summary>
-        public EnemyMover(Transform target, Transform enemy,
+        /// <summary>
+        ///     <see cref="EnemyMover"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="target">追跡対象のTransform。</param>
+        /// <param name="enemyTransform">敵自身のTransform。</param>
+        /// <param name="enemyStatus">敵のステータス。</param>
+        /// <param name="agent">敵のNavMeshAgent。</param>
+        /// <param name="enemyManager">敵マネージャーの参照。</param>
+        public EnemyMover(Transform target, Transform enemyTransform,
             EnemyStatus enemyStatus, NavMeshAgent agent, EnemyManager enemyManager)
         {
             _target = target;
-            _enemy = enemy;
+            _enemyTransform = enemyTransform;
             _agent = agent;
             Init(enemyStatus);
             _enemyManager = enemyManager;
         }
-        public event Action OnAttack;
-        public event Action OnOutOfRange;
 
-        /// <summary> 初期化処理をする。 </summary>
+        #region Publicイベント
+        /// <summary> 敵が攻撃を行ったときに発火するイベント。 </summary>
+        public event Action OnAttack;
+        /// <summary> 敵が射程外に出たときに発火するイベント。 </summary>
+        public event Action OnOutOfRange;
+        #endregion
+
+        #region Publicメソッド
+        /// <summary>
+        ///     初期化処理を行います。
+        /// </summary>
+        /// <param name="enemyStatus">敵のステータス。</param>
         public void Init(EnemyStatus enemyStatus)
         {
             _enemystatus = enemyStatus;
         }
 
-        /// <summary> ターゲットとの距離を返す。 </summary>
+        /// <summary>
+        ///     ターゲットとの距離を返します。
+        /// </summary>
+        /// <returns>ターゲットとの距離。</returns>
         public float DistanceToTarget()
         {
-            return Vector3.Distance(_target.position, _enemy.position);
+            return Vector3.Distance(_target.position, _enemyTransform.position);
         }
 
         /// <summary>
-        ///     射程内までプレイヤーに近づく。
+        ///     ターゲットへの移動を処理します。
+        ///     射程外であればターゲットに近づき、射程内であれば停止して攻撃処理へ移行します。
         /// </summary>
         public void MoveTo()
         {
             if (!_agent.isOnNavMesh) return;
-            if (_enemy == null || _target == null || _agent == null) return;
+            if (_enemyTransform == null || _target == null || _agent == null) return;
 
             float distance = DistanceToTarget();
-            //射程外　＝＞　近づく。
+            // 射程外であればターゲットに近づく。
             if (distance > _enemystatus.AttackRange)
             {
-                if (_encount && !_inRange)
+                if (_isEncountered && !_inRange)
                 {
                     OnOutOfRange?.Invoke();
                 }
-                _encount = false;
+                _isEncountered = false;
                 _inRange = true;
                 _agent.isStopped = false;
                 _agent.SetDestination(_target.position);
             }
-            //射程内＝＞止まって攻撃処理へ。
+            // 射程内であれば停止して攻撃処理へ移行する。
             else
             {
                 if (_inRange && _enemyManager.IsLockOn)
@@ -64,17 +84,26 @@ namespace Mock.MusicBattle.Enemy
                     _inRange = false;
                 }
                 _agent.isStopped = true;
-                _encount = true;
+                _isEncountered = true;
             }
         }
+        #endregion
 
-        private EnemyManager _enemyManager;
+        #region プライベートフィールド
+        /// <summary> 敵マネージャーの参照。 </summary>
+        private readonly EnemyManager _enemyManager;
+        /// <summary> 敵のステータス。 </summary>
         private EnemyStatus _enemystatus;
-        private Transform _target;
-        private Transform _enemy;
-        private NavMeshAgent _agent;
-        private bool _encount = false;
+        /// <summary> 追跡対象のTransform。 </summary>
+        private readonly Transform _target;
+        /// <summary> 敵自身のTransform。 </summary>
+        private readonly Transform _enemyTransform;
+        /// <summary> 敵のNavMeshAgent。 </summary>
+        private readonly NavMeshAgent _agent;
+        /// <summary> 敵がターゲットと遭遇したかどうかを示すフラグ。 </summary>
+        private bool _isEncountered = false;
+        /// <summary> 敵が攻撃範囲内にいるかどうかを示すフラグ。 </summary>
         private bool _inRange = false;
-
+        #endregion
     }
 }

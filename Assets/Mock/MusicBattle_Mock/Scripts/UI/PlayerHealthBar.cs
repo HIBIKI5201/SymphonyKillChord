@@ -11,6 +11,9 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class PlayerHealthBar : VisualElement
     {
+        /// <summary>
+        ///     <see cref="PlayerHealthBar"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
         public PlayerHealthBar()
         {
             style.position = Position.Absolute;
@@ -39,12 +42,12 @@ namespace Mock.MusicBattle.UI
             _greenBar.style.width = Length.Percent(100);
             _redBar.style.width = Length.Percent(100);
         }
-
+        #region Publicメソッド
         /// <summary>
-        ///     データをバインドする。
+        ///     データをバインドします。
         /// </summary>
-        /// <param name="healthEntity"></param>
-        /// <param name="token"></param>
+        /// <param name="healthEntity">バインドするHealthEntity。</param>
+        /// <param name="token">非同期処理のキャンセルトークン。</param>
         public void BindData(HealthEntity healthEntity, CancellationToken token = default)
         {
             _token = token;
@@ -56,29 +59,37 @@ namespace Mock.MusicBattle.UI
                 healthEntity.OnHealthChanged -= ChangeHealthBarHandler;
             };
         }
-
+        #endregion
+        #region 定数
+        /// <summary> UXMLアセットのリソースパス。 </summary>
         private const string UXML_RESOURCES_PATH = "PlayerHealthBar";
+        /// <summary> 緑色のゲージ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_GREEN_BAR = "green-guage";
+        /// <summary> 赤色のゲージ要素のUXML名。 </summary>
         private const string ELEMENT_NAME_RED_BAR = "red-guage";
-
+        #endregion
+        #region プライベートフィールド
+        /// <summary> 非同期処理のキャンセルトークン。 </summary>
         private CancellationToken _token;
+        /// <summary> 緑色のゲージバー。 </summary>
         private VisualElement _greenBar;
+        /// <summary> 赤色のゲージバー（ダメージ表現用）。 </summary>
         private VisualElement _redBar;
-
+        #endregion
+        #region Privateメソッド
         /// <summary>
-        ///     イベント登録用のヘルスバー変更ハンドラー。
+        ///     ヘルス変更イベントに応じてヘルスバーを更新するハンドラー。
         /// </summary>
-        /// <param name="current"></param>
-        /// <param name="max"></param>
+        /// <param name="current">現在の体力。</param>
+        /// <param name="max">最大体力。</param>
         private void ChangeHealthBarHandler(float current, float max) => ChangeHealthBar(current, max, _token);
 
         /// <summary>
-        ///     ヘルスバーの割合を変更する。
+        ///     ヘルスバーの表示を指定された値にアニメーション付きで変更します。
         /// </summary>
-        /// <param name="current"></param>
-        /// <param name="max"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="current">現在の体力。</param>
+        /// <param name="max">最大体力。</param>
+        /// <param name="token">非同期処理のキャンセルトークン。</param>
         private async void ChangeHealthBar(float current, float max, CancellationToken token = default)
         {
             float proportion = Mathf.Clamp01(current / max);
@@ -90,5 +101,7 @@ namespace Mock.MusicBattle.UI
             await Awaitable.WaitForSecondsAsync(0.8f, token);
             await _redBar.ChangeBarAsync(proportion, 0.6f, token);
         }
+        #endregion
     }
 }
+

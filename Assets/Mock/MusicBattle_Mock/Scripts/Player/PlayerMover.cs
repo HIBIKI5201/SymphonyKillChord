@@ -2,8 +2,18 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動処理を管理するクラス。
+    /// </summary>
     public class PlayerMover
     {
+        /// <summary>
+        ///     <see cref="PlayerMover"/>クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="status">プレイヤーのステータス。</param>
+        /// <param name="rb">プレイヤーのRigidbody。</param>
+        /// <param name="player">プレイヤーのTransform。</param>
+        /// <param name="camera">カメラのTransform。</param>
         public PlayerMover(PlayerStatus status, Rigidbody rb, Transform player, Transform camera)
         {
             _status = status;
@@ -12,14 +22,17 @@ namespace Mock.MusicBattle.Player
             _rb = rb;
         }
 
-        // 現在の速度。
+        #region パブリックプロパティ
+        /// <summary> 現在の速度。 </summary>
         public Vector3 CurrentVelocity {  get; private set; }
+        #endregion
 
+        #region Publicメソッド
         /// <summary>
-        ///     入力方向からプレイヤーの速度を計算する。
+        ///     入力方向からプレイヤーの速度を計算します。
         /// </summary>
-        /// <param name="inputDirection"></param>
-        /// <returns></returns>
+        /// <param name="inputDirection">入力方向のVector2。</param>
+        /// <returns>計算されたプレイヤーの速度ベクトル。</returns>
         public Vector3 CalcPlayerVelocityByInputDirection(Vector2 inputDirection)
         {
             // カメラの向きを基準に移動方向を計算。
@@ -35,30 +48,67 @@ namespace Mock.MusicBattle.Player
         }
 
         /// <summary>
-        ///     速度を設定する。
+        ///     プレイヤーの目標速度を設定します。
         /// </summary>
-        /// <param name="velocity"></param>
+        /// <param name="velocity">設定する目標速度。</param>
         public void SetPlayerVelocity(Vector3 velocity)
         {
             _targetVelocity = velocity;
         }
 
+        /// <summary>
+        ///     プレイヤーが地面に接地している状態を設定します。
+        /// </summary>
+        /// <param name="isGround">地面に接地している場合はtrue、それ以外はfalse。</param>
         public void SetIsGround(bool isGround)
         {
             _isGround = isGround;
         }
 
+        /// <summary>
+        ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
+        /// </summary>
         public void Update()
         {
             float t = CalculateAccelerationLerpT();
             UpdateHorizontalVelocity(t);
             UpdateRotation();
         }
+        #endregion
 
+        #region プライベートフィールド
+        /// <summary> プレイヤーのステータス。 </summary>
+        private readonly PlayerStatus _status;
+        /// <summary> プレイヤーのTransform。 </summary>
+        private readonly Transform _player;
+        /// <summary> カメラのTransform。 </summary>
+        private readonly Transform _camera;
+        /// <summary> プレイヤーのRigidbody。 </summary>
+        private readonly Rigidbody _rb;
+        /// <summary> 目標の速度。 </summary>
+        private Vector3 _targetVelocity;
+        /// <summary> 水平方向の速度。 </summary>
+        private Vector3 _horizontalVelocity;
+        /// <summary> 地面に接地しているかどうか。 </summary>
+        private bool _isGround;
+        #endregion
+
+        #region Unityライフサイクルメソッド
         /// <summary>
-        ///     加速度補間 t の計算。
+        ///     固定フレームレートで呼び出されます。
+        ///     Rigidbodyの線形速度を更新します。
         /// </summary>
-        /// <returns></returns>
+        public void FixedUpdate()
+        {
+            _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
+        }
+        #endregion
+
+        #region Privateメソッド
+        /// <summary>
+        ///     加速度補間t値を計算します。
+        /// </summary>
+        /// <returns>加速度補間t値。</returns>
         private float CalculateAccelerationLerpT()
         {
             float acceleration = _targetVelocity.magnitude > 0f
@@ -70,9 +120,9 @@ namespace Mock.MusicBattle.Player
         }
 
         /// <summary>
-        ///   水平方向の速度ベクトルの更新。
+        ///   水平方向の速度ベクトルを更新します。
         /// </summary>
-        /// <param name="t"></param>
+        /// <param name="t">補間係数。</param>
         private void UpdateHorizontalVelocity(float t)
         {
             Vector3 horizontalCurrent = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
@@ -88,7 +138,7 @@ namespace Mock.MusicBattle.Player
         }
 
         /// <summary>
-        ///   プレイヤーの回転処理。
+        ///   プレイヤーの回転を更新します。
         /// </summary>
         private void UpdateRotation()
         {
@@ -105,20 +155,7 @@ namespace Mock.MusicBattle.Player
                 _player.LookAt(_player.position + dir.normalized);
             }
         }
-
-        public void FixedUpdate()
-        {
-            _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
-        }
-
-        private readonly PlayerStatus _status;
-        private readonly Transform _player;
-        private readonly Transform _camera;
-        private readonly Rigidbody _rb;
-        // 目標の速度。
-        private Vector3 _targetVelocity;
-        // 水平方向の速度。
-        private Vector3 _horizontalVelocity;
-        private bool _isGround;
+        #endregion
     }
 }
+

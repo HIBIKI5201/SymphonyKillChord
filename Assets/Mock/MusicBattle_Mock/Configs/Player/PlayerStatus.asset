@@ -19,4 +19,6 @@ MonoBehaviour:
   _attackPower: 50
   _attackRange: 10
   _maxHealth: 1000
+  _specialAttackPatterns:
+  - {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
   _groundNormalVerticalThreshold: 0.5
