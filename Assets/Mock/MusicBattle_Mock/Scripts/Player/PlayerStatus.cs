@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.MusicSync;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -23,6 +24,8 @@ namespace Mock.MusicBattle.Player
         public float AttackRange => _attackRange;
         /// <summary> 最大ヘルス。 </summary>
         public float MaxHealth => _maxHealth;
+        /// <summary> スペシャルアタックパターン群。 </summary>
+        public RythemPatternData[] SpecialAttackPatterns => _specialAttackPatterns;
         /// <summary> 地面判定における法線の垂直閾値。 </summary>
         public float GroundNormalVerticalThreshold => _groundNormalVerticalThreshold;
 
@@ -48,6 +51,8 @@ namespace Mock.MusicBattle.Player
         /// <summary> 最大ヘルス。 </summary>
         [SerializeField, Tooltip("最大ヘルス。")]
         private float _maxHealth;
+        [SerializeField, Tooltip("スペシャルアタックパターン群。")]
+        private RythemPatternData[] _specialAttackPatterns;
 
         /// <summary> 地面判定における法線の垂直閾値。 </summary>
         [SerializeField, Range(0, 1), Tooltip("地面判定における法線の垂直閾値。")]
