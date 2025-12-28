@@ -66,18 +66,20 @@ namespace Mock.MusicBattle.Utility
         /// <summary>
         ///     キュー内の指定された要素を削除します。
         /// </summary>
-        /// <param name="element"></param>
+        /// <param name="element">削除する要素。</param>
         public void Remove(T element)
         {
             _heap.Remove(element);
         }
         #endregion
+
         #region プライベートフィールド
         /// <summary> ヒープ構造を保持するリスト。 </summary>
         private readonly List<T> _heap = new List<T>();
         /// <summary> 要素の比較に使用する比較子。 </summary>
         private readonly IComparer<T> _comparer;
         #endregion
+
         #region Privateメソッド
         /// <summary>
         ///     指定されたインデックスからヒープを上方向に再構築します。
@@ -111,13 +113,12 @@ namespace Mock.MusicBattle.Utility
                 int smallest = index;
 
                 if (left <= last && _comparer.Compare(_heap[left], _heap[smallest]) < 0)
-                    smallest = left;
+                    { smallest = left; }
 
                 if (right <= last && _comparer.Compare(_heap[right], _heap[smallest]) < 0)
-                    smallest = right;
+                    { smallest = right; }
 
-                if (smallest == index)
-                    break;
+                if (smallest == index) { break; }
 
                 Swap(index, smallest);
                 index = smallest;
@@ -129,12 +130,7 @@ namespace Mock.MusicBattle.Utility
         /// </summary>
         /// <param name="a">交換する最初の要素のインデックス。</param>
         /// <param name="b">交換する2番目の要素のインデックス。</param>
-        private void Swap(int a, int b)
-        {
-            T tmp = _heap[a];
-            _heap[a] = _heap[b];
-            _heap[b] = tmp;
-        }
+        private void Swap(int a, int b) => (_heap[a], _heap[b]) = (_heap[b], _heap[a]);
         #endregion
     }
 }
