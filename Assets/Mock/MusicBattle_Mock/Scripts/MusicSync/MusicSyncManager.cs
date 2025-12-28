@@ -50,23 +50,10 @@ namespace Mock.MusicBattle.MusicSync
         ///     入力された拍子の履歴を取得します。
         /// </summary>
         /// <returns>入力された拍子の履歴。</returns>
-        public bool IsMatchInputTimeSignature(ReadOnlySpan<float> pattern)
+        public bool IsMatchInputTimeSignature(RythemPatternData pattern)
         {
             ReadOnlySpan<float> signatureHistory = _inputHandler.GetSignatureHistory();
-
-            // パターンより履歴が短ければ非マッチ。
-            if (signatureHistory.Length < pattern.Length) { return false; }
-
-            bool match = true;
-            for (int i = 0; i < pattern.Length; i++)
-            {
-                // 履歴の最新部分とパターンを比較。
-                if (signatureHistory[signatureHistory.Length - pattern.Length + i] != pattern[i])
-                {
-                    match = false;
-                    break;
-                }
-            }
+            bool match = pattern.IsMatch(signatureHistory);
 
             return match;
         }
