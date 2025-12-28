@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Character;
+using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -94,12 +95,17 @@ namespace Mock.MusicBattle.UI
         {
             float proportion = Mathf.Clamp01(current / max);
 
-            // 緑バーを先に変更。
-            await _greenBar.ChangeBarAsync(proportion, 0.3f, token);
+            try
+            {
+                // 緑バーを先に変更。
+                await _greenBar.ChangeBarAsync(proportion, 0.3f, token);
 
-            // 少し待ってから赤バーを変更。
-            await Awaitable.WaitForSecondsAsync(0.8f, token);
-            await _redBar.ChangeBarAsync(proportion, 0.6f, token);
+                // 少し待ってから赤バーを変更。
+                await Awaitable.WaitForSecondsAsync(0.8f, token);
+                await _redBar.ChangeBarAsync(proportion, 0.6f, token);
+            }
+            // キャンセルされた場合は何もしない。
+            catch (OperationCanceledException) { }
         }
         #endregion
     }
