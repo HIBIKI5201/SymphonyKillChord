@@ -34,9 +34,13 @@ namespace Mock.MusicBattle.UI
                 float t = Mathf.Clamp01(elapsed / duration);
                 float newValue = Mathf.Lerp(current, value, t);
                 bar.style.width = Length.Percent(newValue * 100); // パーセンテージで指定。
-                // OperationCanceledException は意図的に発生させ、呼び出し側で処理することが多いため、
-                // ここではtry-catchせずに次のフレームを待機する。
-                await Awaitable.NextFrameAsync(token);
+
+                try
+                {
+                    await Awaitable.NextFrameAsync(token);
+                }
+                // キャンセルされた場合はループを抜ける。
+                catch (OperationCanceledException) { break; }
             }
 
             // 最終的な値を設定。
