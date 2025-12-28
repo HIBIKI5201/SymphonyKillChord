@@ -1,6 +1,5 @@
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
-using System;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -59,10 +58,10 @@ namespace Mock.MusicBattle.Player
             // MusicSyncのSignature履歴を取得し、特定のパターンと一致するかチェックする。
             for (int i = 0; i < _status.SpecialAttackPatterns.Length; i++)
             {
-                ReadOnlySpan<float> pattern = _status.SpecialAttackPatterns[i].SignaturePattern;
-                if (_musicSyncManager.IsMatchInputTimeSignature(pattern))
+                RythemPatternData data = _status.SpecialAttackPatterns[i];
+                if (_musicSyncManager.IsMatchInputTimeSignature(data))
                 {
-                    Debug.Log("MusicSync Signature Pattern Matched! Pattern: {4, 4, 3, 3}");
+                    Debug.Log($"MusicSync Signature Pattern Matched! Pattern: {string.Join(", ", data.SignaturePattern.ToArray())}");
                 }
             }
         }
