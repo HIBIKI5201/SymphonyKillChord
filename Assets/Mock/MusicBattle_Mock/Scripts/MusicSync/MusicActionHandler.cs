@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Mock.MusicBattle.Utility;
 using UnityEngine;
+using System.Threading;
 
 namespace Mock.MusicBattle.MusicSync
 {
@@ -24,7 +25,7 @@ namespace Mock.MusicBattle.MusicSync
         /// </summary>
         /// <param name="barTimingInfo">小節タイミング</param>
         /// <param name="action">実行するアクション</param>
-        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
+        public void RegisterAction(BarTimingInfo barTimingInfo, Action action, CancellationToken token)
         {
             _debugLog.Clear();
             _debugLog.AppendLine("アクション予約受付た。");
@@ -36,6 +37,7 @@ namespace Mock.MusicBattle.MusicSync
 
             ScheduledAction scheduledAction = new ScheduledAction(executeBeat, action);
             _scheduledActions.Enqueue(scheduledAction);
+            token.Register(() => _scheduledActions.Remove(scheduledAction)); // キャンセル時にキューから削除する処理を登録。
             Debug.Log(_debugLog.ToString());
         }
         #endregion

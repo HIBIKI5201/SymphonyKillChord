@@ -1,5 +1,6 @@
 using CriWare;
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace Mock.MusicBattle.MusicSync
@@ -40,9 +41,9 @@ namespace Mock.MusicBattle.MusicSync
         /// </summary>
         /// <param name="barTimingInfo">小節タイミング情報。</param>
         /// <param name="action">実行アクション。</param>
-        public void RegisterAction(BarTimingInfo barTimingInfo, Action action)
+        public void RegisterAction(BarTimingInfo barTimingInfo, Action action, CancellationToken token)
         {
-            _actionHandler.RegisterAction(barTimingInfo, action);
+            _actionHandler.RegisterAction(barTimingInfo, action, token);
         }
 
         /// <summary>
