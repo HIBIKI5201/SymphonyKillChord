@@ -22,11 +22,6 @@ namespace Mock.MusicBattle.Basis
             inputAction.canceled += CanceledHandler;
         }
 
-        ~InputActionEntity()
-        {
-            Dispose();
-        }
-
         #region Publicイベント
         /// <summary>
         ///     入力が開始された時のイベント。
