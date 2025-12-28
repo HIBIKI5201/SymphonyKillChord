@@ -39,7 +39,7 @@ namespace Mock.MusicBattle.Utility
         /// <returns>キューの先頭にある最小の要素。</returns>
         public T Dequeue()
         {
-            if (_heap.Count == 0) return default;
+            if (_heap.Count == 0) { return default; }
 
             T root = _heap[0];
             int last = _heap.Count - 1;
@@ -47,8 +47,7 @@ namespace Mock.MusicBattle.Utility
             _heap[0] = _heap[last];
             _heap.RemoveAt(last);
 
-            if (_heap.Count > 0)
-                HeapifyDown(0);
+            if (_heap.Count > 0) { HeapifyDown(0); }
 
             return root;
         }
