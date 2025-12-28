@@ -85,7 +85,7 @@ namespace Mock.MusicBattle.Enemy
         /// <summary>
         ///     バトルフェーズの攻撃タイミングを音楽同期アクションとして予約します。
         /// </summary>
-        private void ScheduledBattle() // メソッド名を修正
+        private void ScheduledBattle()
         {
             CancelScheduled();
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battle.BarFlg, _battle.TimeSignature, _battle.TargetBeat);
@@ -94,7 +94,7 @@ namespace Mock.MusicBattle.Enemy
             {
                 _isBattlePhase = false;
                 Attack(_cancellationTokenSource.Token);
-            });
+            }, _cancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Mock.MusicBattle.Enemy
             CancelScheduled();
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token));
+            _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -113,8 +113,11 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         private void CancelScheduled()
         {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose(); // CancellationTokenSourceを破棄
+            if (_cancellationTokenSource == null) { return; }
+
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose(); // CancellationTokenSourceを破棄。
+            _cancellationTokenSource = null;
         }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace Mock.MusicBattle.Enemy
             {
                 ParticleController.Instance.PlayParticle(_enemyManager.transform.position);
                 _player.TakeDamage(_enemyStatus.AttackPower);
-                ScheduledBattle(); // メソッド名を修正
+                ScheduledBattle();
                 _isBattlePhase = true;
             }
         }

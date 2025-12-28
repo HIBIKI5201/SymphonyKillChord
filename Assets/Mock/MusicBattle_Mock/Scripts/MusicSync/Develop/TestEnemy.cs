@@ -75,7 +75,8 @@ namespace Mock.MusicBattle.MusicSync
         {
             BarTimingInfo barTimingInfo = new BarTimingInfo(_barFlg, _timeSignature, _targetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
-            _musicSyncManager.RegisterAction(barTimingInfo, () => TestScheduledAction(_cancellationTokenSource.Token));
+            _musicSyncManager.RegisterAction(barTimingInfo, () => TestScheduledAction(_cancellationTokenSource.Token),
+                _cancellationTokenSource.Token);
 
             transform.localScale = Vector3.one * 0.75f;
             _image.color = Color.red;
