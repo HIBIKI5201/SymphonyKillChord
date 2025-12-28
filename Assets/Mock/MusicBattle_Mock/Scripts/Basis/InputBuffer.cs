@@ -20,7 +20,7 @@ namespace Mock.MusicBattle.Basis
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         public InputActionEntity<float> AttackAction => _attackActionEntity;
         #endregion
-        // PUBLIC_METHODS
+
         #region インスペクター表示フィールド
         /// <summary> ルックアクションの名前。 </summary>
         [SerializeField, Tooltip("ルックアクションの名前。")]
@@ -71,10 +71,10 @@ namespace Mock.MusicBattle.Basis
         /// </summary>
         public void OnDestroy()
         {
-            _lookActionEntity.Dispose();
-            _moveActionEntity.Dispose();
-            _lockOnSelectActionEntity.Dispose();
-            _attackActionEntity.Dispose();
+            _lookActionEntity?.Dispose();
+            _moveActionEntity?.Dispose();
+            _lockOnSelectActionEntity?.Dispose();
+            _attackActionEntity?.Dispose();
         }
         #endregion
     }
