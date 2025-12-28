@@ -299,7 +299,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1776514727778308457, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.78471
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1776514727778308457, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: m_LocalPosition.y
@@ -307,7 +307,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1776514727778308457, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.91488
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1776514727778308457, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: m_LocalRotation.w
@@ -340,6 +340,18 @@ PrefabInstance:
     - target: {fileID: 4312983832674706339, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: m_Name
       value: CRIWARE
+      objectReference: {fileID: 0}
+    - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: cueSheets.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: cueSheets.Array.data[1].name
+      value: GunSound
+      objectReference: {fileID: 0}
+    - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: cueSheets.Array.data[1].acbFile
+      value: GunSound.acb
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -810,7 +822,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 620953097201545478, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
       propertyPath: _volume
-      value: 0
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 3009702457590381082, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -974,9 +986,9 @@ ParticleSystem:
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
-  looping: 1
+  looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -1149,7 +1161,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 0, b: 0.9374089, a: 1}
+      maxColor: {r: 1, g: 0, b: 0.9504018, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -5691,7 +5703,7 @@ Transform:
   m_GameObject: {fileID: 1547503843}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -2.64814, y: 0.96251, z: 4.39356}
+  m_LocalPosition: {x: 0, y: 2, z: -0.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5808,6 +5820,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1658755275}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1682959854
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1682959856}
+  - component: {fileID: 1682959855}
+  m_Layer: 0
+  m_Name: ParticleController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1682959855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682959854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd7312d068c43184b8a2225630cb0087, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Basis.ParticleController
+  _hitEffect: {fileID: 1547503845}
+--- !u!4 &1682959856
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682959854}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.96074, y: -0, z: 1.48597}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1995872057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5858,6 +5915,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3337225036644969533, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8523454837323722002, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
+      propertyPath: _volume
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8523454837323722002, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
+      propertyPath: _use3dPositioning
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -5962,7 +6027,7 @@ MonoBehaviour:
   _camera: {fileID: 860659355}
   _inputBuffer: {fileID: 2061805456903156511}
   _cameraManager: {fileID: 860659354}
-  _enemyManager: {fileID: 3563889796228440939, guid: abb20ffc9ad24c54ea5ad90fb105036e, type: 3}
+  _enemyManager: {fileID: 3008961866854422918, guid: abb20ffc9ad24c54ea5ad90fb105036e, type: 3}
   _enemystatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _player: {fileID: 419768526}
   _enemySpawnTime: 1
@@ -6121,6 +6186,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70f6906c4324fad428833b42c7774c2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.IngameHUDManager
+  _signetureColorDatas:
+  - _signeture: 16
+    _color: {r: 1, g: 1, b: 1, a: 1}
+  - _signeture: 12
+    _color: {r: 1, g: 0, b: 0.7631607, a: 1}
+  - _signeture: 8
+    _color: {r: 0.80417824, g: 0, b: 1, a: 1}
+  - _signeture: 6
+    _color: {r: 0, g: 0.13070297, b: 1, a: 1}
+  - _signeture: 4
+    _color: {r: 0, g: 0.9401531, b: 1, a: 1}
+  - _signeture: 3
+    _color: {r: 0, g: 1, b: 0.035032272, a: 1}
+  - _signeture: 2
+    _color: {r: 1, g: 0.60691696, b: 0, a: 1}
+  - _signeture: 1
+    _color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!4 &8952042596382340163
 Transform:
   m_ObjectHideFlags: 0
@@ -6130,7 +6212,7 @@ Transform:
   m_GameObject: {fileID: 4665211673084953882}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.04539, y: 1.1671, z: -0.85106}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6150,3 +6232,4 @@ SceneRoots:
   - {fileID: 8952042596382340163}
   - {fileID: 240741083}
   - {fileID: 1547503846}
+  - {fileID: 1682959856}

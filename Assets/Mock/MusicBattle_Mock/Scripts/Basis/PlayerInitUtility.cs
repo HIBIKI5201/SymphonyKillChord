@@ -1,24 +1,31 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Unity.Cinemachine;
 
 namespace Mock.MusicBattle.Basis
 {
-    /// <summary>プレイヤーの初期化ユーティリティクラス</summary>
+    /// <summary>
+    ///     プレイヤーの初期化ユーティリティクラス。
+    /// </summary>
     public static class PlayerInitUtility
     {
-        /// <summary>プレイヤーの初期化をする。</summary>
+        /// <summary>
+        ///     プレイヤーの初期化をする。
+        /// </summary>
         public static void InitPlayer(
             PlayerManager playerManager,
             InputBuffer inputBuffer,
             CameraManager cameraManager,
             CinemachineCamera cinemachineCamera,
-            LockOnManager lockOnManager
+            LockOnManager lockOnManager,
+            MusicSyncManager musicSyncManager
             )
         {
             cameraManager.Init(inputBuffer, lockOnManager);
-            playerManager.Init(inputBuffer, cinemachineCamera);
+            playerManager.Init(inputBuffer, cinemachineCamera, lockOnManager, musicSyncManager);
         }
     }
 }
+

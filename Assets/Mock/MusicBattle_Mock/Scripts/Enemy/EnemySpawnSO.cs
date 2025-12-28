@@ -2,25 +2,28 @@ using UnityEngine;
 
 namespace Mock.MusicBattle.Enemy
 {
+    /// <summary>
+    ///     敵のスポーン設定を保持するScriptableObject。
+    /// </summary>
     [CreateAssetMenu(fileName = "EnemySpawnSO", menuName = "Mock/MusicBattle/Enemy/EnemySpawnSO")]
     public class EnemySpawnSO : ScriptableObject
     {
-        /// <summary> スポーン範囲 X </summary>
+        /// <summary> スポーン範囲のX座標。 </summary>
         public float RangeX => _spawnRange.x;
-
-        /// <summary> スポーン範囲 Y </summary>
+        /// <summary> スポーン範囲のY座標。 </summary>
         public float RangeY => _spawnRange.y;
-
-        /// <summary> スポーン範囲 Z </summary>
+        /// <summary> スポーン範囲のZ座標。 </summary>
         public float RangeZ => _spawnRange.z;
-
-        /// <summary> 最大出現数 </summary>
+        /// <summary> 最大同時出現数。 </summary>
         public int MaxEnemyCount => _maxEnemyCount;
 
-        [Header("スポーン範囲（Vector3 の各軸に相当）")]
-        [SerializeField] private Vector3 _spawnRange = new Vector3(2f, 0f, 2f);
+        /// <summary> スポーン範囲（Vector3 の各軸に相当）。 </summary>
+        [SerializeField, Tooltip("スポーン範囲（Vector3 の各軸に相当）。")]
+        private Vector3 _spawnRange = new Vector3(2f, 0f, 2f);
 
-        [Header("最大同時スポーン数")]
-        [SerializeField] private int _maxEnemyCount = 3;
+        /// <summary> 最大同時スポーン数。 </summary>
+        [SerializeField, Tooltip("最大同時スポーン数。")]
+        private int _maxEnemyCount = 3;
     }
 }
+
