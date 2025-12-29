@@ -1,4 +1,5 @@
 using CriWare;
+using SymphonyFrameWork.Debugger;
 using System;
 using System.Threading;
 using UnityEngine;

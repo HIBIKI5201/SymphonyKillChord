@@ -92,7 +92,7 @@ namespace Mock.MusicBattle.UI
         #region インスペクター表示フィールド
         /// <summary> 拍子と色の対応データ配列。 </summary>
         [SerializeField, Tooltip("拍子と色の対応データ配列。")]
-        private SignetureColorData[] _signetureColorDatas;
+        private SignatureColorData[] _signatureColorDatas;
         #endregion
 
         #region プライベートフィールド
@@ -112,27 +112,6 @@ namespace Mock.MusicBattle.UI
         private IMusicBuffer _musicBuffer;
         /// <summary> 初期化が完了したかどうかを示すフラグ。 </summary>
         private bool _isInitialized = false;
-        #endregion
-
-        #region プライベートStruct定義
-        /// <summary>
-        ///     拍子と色の関連付けデータ。
-        /// </summary>
-        [Serializable]
-        private struct SignetureColorData
-        {
-            /// <summary> 拍子を取得します。 </summary>
-            public float Signeture => _signeture;
-            /// <summary> 色を取得します。 </summary>
-            public Color Color => _color;
-
-            /// <summary> 拍子。 </summary>
-            [SerializeField]
-            private float _signeture;
-            /// <summary> 色。 </summary>
-            [SerializeField]
-            private Color _color;
-        }
         #endregion
 
         #region Unityライフサイクルメソッド
@@ -176,6 +155,28 @@ namespace Mock.MusicBattle.UI
         }
         #endregion
 
+        #region プライベートStruct定義
+        /// <summary>
+        ///     拍子と色の関連付けデータ。
+        /// </summary>
+        [Serializable]
+        private struct SignatureColorData
+        {
+            /// <summary> 拍子を取得します。 </summary>
+            public float Signature => _signature;
+            /// <summary> 色を取得します。 </summary>
+            /// <summary> 色を取得します。 </summary>
+            public Color Color => _color;
+
+            /// <summary> 拍子。 </summary>
+            [SerializeField, Tooltip("拍子。")]
+            private float _signature;
+            /// <summary> 色。 </summary>
+            [SerializeField, Tooltip("色。")]
+            private Color _color;
+        }
+        #endregion
+
         #region Privateメソッド
         /// <summary>
         ///     指定された拍子に対応する色を取得します。
@@ -186,9 +187,9 @@ namespace Mock.MusicBattle.UI
         {
             int s = Mathf.RoundToInt(signature);
 
-            foreach (var data in _signetureColorDatas)
+            foreach (var data in _signatureColorDatas)
             {
-                if (data.Signeture == s)
+                if (data.Signature == s)
                 {
                     return data.Color;
                 }

@@ -86,9 +86,6 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary> 入力によって検出されうる拍子のリスト。昇順でソートされている。 </summary>
         [SerializeField, ReadOnly, Tooltip("入力によって検出されうる拍子のリスト。")]
         private float[] _timeSignatures;
-        /// <summary> クオンタイズ機能の有効/無効を切り替えるフラグ。 </summary>
-        [SerializeField, Tooltip("クオンタイズ機能の有効/無効を切り替えるフラグ。")]
-        private bool _enableQuantize = true;
         /// <summary> 入力タイミングの追いかけ処理における補正の閾値。この閾値を超えると次の拍として扱われる。 </summary>
         [SerializeField, Range(0.5f, 1.0f), Tooltip("入力タイミングの追いかけ処理における補正の閾値。")]
         private double _inputFixThreshold = 0.8d;

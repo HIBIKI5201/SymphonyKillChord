@@ -9,6 +9,7 @@ namespace Mock.MusicBattle.Player
     /// </summary>
     public class PlayerAttacker
     {
+        #region コンストラクタ
         /// <summary>
         ///    コンストラクタ。
         /// </summary>
@@ -19,6 +20,7 @@ namespace Mock.MusicBattle.Player
             _player = player;
             _musicSyncManager = musicSyncManager;
         }
+        #endregion
 
         #region Publicメソッド
         /// <summary>

@@ -8,6 +8,7 @@ namespace Mock.MusicBattle.Character
     /// </summary>
     public class HealthEntity
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="HealthEntity"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -17,6 +18,7 @@ namespace Mock.MusicBattle.Character
             _maxHealth = maxHealth;
             _currentHealth = maxHealth;
         }
+        #endregion
 
         #region Publicイベント
         /// <summary> ヘルスが変更されたときに発火するイベント。 </summary>

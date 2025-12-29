@@ -17,7 +17,7 @@ namespace Mock.MusicBattle.Enemy
         private EnemyManager _enemyManager;
         /// <summary> エネミーのステータス。 </summary>
         [SerializeField, Tooltip("エネミーのステータス。")]
-        private EnemyStatus _enemystatus;
+        private EnemyStatus _enemyStatus;
         /// <summary> プレイヤーのTransform。 </summary>
         [SerializeField, Tooltip("プレイヤーのTransform。")]
         private Transform _player;
@@ -51,8 +51,11 @@ namespace Mock.MusicBattle.Enemy
         /// </summary>
         private void Awake()
         {
+            _musicSyncManager = FindAnyObjectByType<MusicSyncManager>();
             _enemyContainer = new EnemyContainer();
-       
+            // Factoryを初期化する
+            // EnemyFactoryのコンストラクタは LockOnManager と IngameHUDManager を引数に取るが、ここでは null を渡す。
+            _factory = new EnemyFactory(_enemyContainer, _player, _enemyManager, _musicSyncManager, null, null);
         }
 
         /// <summary>
@@ -80,7 +83,7 @@ namespace Mock.MusicBattle.Enemy
                     Random.Range(-_zrange, _zrange));
                 
                 // 敵をスポーンさせる。
-                _factory.Spawn(_enemystatus, randomPos);
+                _factory.Spawn(_enemyStatus, randomPos);
 
                 yield return new WaitForSeconds(_enemySpawnTime);
             }

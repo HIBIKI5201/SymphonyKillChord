@@ -11,6 +11,7 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class DamageTextEntity : VisualElement
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="DamageTextEntity"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -29,6 +30,7 @@ namespace Mock.MusicBattle.UI
             _base = this.Q<VisualElement>(ELEMENT_NAME_BASE);
             _damageText = this.Q<Label>(ELEMENT_NAME_TEXT);
         }
+        #endregion
 
         #region Publicメソッド
         /// <summary>

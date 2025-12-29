@@ -9,12 +9,16 @@ namespace Mock.MusicBattle.Player
     [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = EditorConstraint.CREATE_ASSET_PATH + nameof(PlayerConfig))]
     public class PlayerConfig : ScriptableObject
     {
+        #region パブリックプロパティ
         /// <summary> 攻撃時に無視するレイヤーマスクを取得します。 </summary>
         public LayerMask IgnoreAttackLayer => _ignoreAttackLayer;
+        #endregion
 
+        #region インスペクター表示フィールド
         /// <summary> 攻撃が当たらないレイヤーマスク。 </summary>
         [SerializeField, Tooltip("攻撃が当たらないレイヤーマスク。")]
         private LayerMask _ignoreAttackLayer;
+        #endregion
     }
 }
 

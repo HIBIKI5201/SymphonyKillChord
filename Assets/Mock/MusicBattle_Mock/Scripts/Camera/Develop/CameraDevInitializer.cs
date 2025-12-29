@@ -27,7 +27,7 @@ namespace Mock.MusicBattle.Develop
         ///     最初のフレームアップデートの前に呼び出されます。
         ///     カメラの初期化を行います。
         /// </summary>
-        void Start()
+        private void Start()
         {
             LockOnManager lockOnManager = new(_cameraManager.transform, _targetContainer, _inputBuffer);
 

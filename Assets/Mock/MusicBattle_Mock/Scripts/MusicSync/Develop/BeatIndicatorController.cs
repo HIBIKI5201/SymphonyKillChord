@@ -7,21 +7,21 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class BeatIndicatorController : MonoBehaviour
     {
-        // PUBLIC_METHODS
+
         #region インスペクター表示フィールド
         /// <summary> 音楽アクションハンドラーの参照。 </summary>
         [SerializeField, Tooltip("音楽アクションハンドラーの参照。")]
         private MusicActionHandler _musicActionHandler;
         /// <summary> インジケーターのズーム速度。 </summary>
         [SerializeField, Tooltip("インジケーターのズーム速度。")]
-        private float zoomSpeed = 0.016f;
+        private float _zoomSpeed = 0.016f;
         #endregion
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     最初のフレームアップデートの前に呼び出されます。
         ///     音楽アクションハンドラーのイベントを購読します。
         /// </summary>
-        void Start()
+        private void Start()
         {
             _musicActionHandler.OnBeat += BeatAction;
         }
@@ -32,7 +32,7 @@ namespace Mock.MusicBattle.MusicSync
         /// </summary>
         private void FixedUpdate()
         {
-            transform.localScale -= Vector3.one * zoomSpeed;
+            transform.localScale -= Vector3.one * _zoomSpeed;
             if (transform.localScale.x < 0f)
             {
                 transform.localScale = Vector3.zero;

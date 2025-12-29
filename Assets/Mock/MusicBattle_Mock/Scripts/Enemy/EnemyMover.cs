@@ -9,6 +9,7 @@ namespace Mock.MusicBattle.Enemy
     /// </summary>
     public class EnemyMover
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="EnemyMover"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -26,6 +27,7 @@ namespace Mock.MusicBattle.Enemy
             Init(enemyStatus);
             _enemyManager = enemyManager;
         }
+        #endregion
 
         #region Publicイベント
         /// <summary> 敵が攻撃を行ったときに発火するイベント。 </summary>
@@ -41,7 +43,7 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="enemyStatus">敵のステータス。</param>
         public void Init(EnemyStatus enemyStatus)
         {
-            _enemystatus = enemyStatus;
+            _enemyStatus = enemyStatus;
         }
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace Mock.MusicBattle.Enemy
 
             float distance = DistanceToTarget();
             // 射程外であればターゲットに近づく。
-            if (distance > _enemystatus.AttackRange)
+            if (distance > _enemyStatus.AttackRange)
             {
                 if (_isEncountered && !_inRange)
                 {
@@ -93,7 +95,7 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> 敵マネージャーの参照。 </summary>
         private readonly EnemyManager _enemyManager;
         /// <summary> 敵のステータス。 </summary>
-        private EnemyStatus _enemystatus;
+        private EnemyStatus _enemyStatus;
         /// <summary> 追跡対象のTransform。 </summary>
         private readonly Transform _target;
         /// <summary> 敵自身のTransform。 </summary>

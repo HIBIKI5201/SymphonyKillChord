@@ -7,13 +7,6 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public readonly struct BarTimingInfo
     {
-        /// <summary> 小節フラグ。現在小節は0、次の小節は1。 </summary>
-        public long BarFlg { get; }
-        /// <summary> 拍子スケール。 </summary>
-        public long TimeSignature { get; }
-        /// <summary> 小節中のターゲット拍数。 </summary>
-        public long TargetBeat { get; }
-
         /// <summary>
         ///     <see cref="BarTimingInfo"/>構造体の新しいインスタンスを初期化します。
         /// </summary>
@@ -22,10 +15,21 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="targetBeat">小節中のターゲット拍数。</param>
         public BarTimingInfo(long barFlg, long timeSignature, long targetBeat)
         {
-            BarFlg = barFlg;
-            TimeSignature = timeSignature;
-            TargetBeat = targetBeat;
+            _barFlg = barFlg;
+            _timeSignature = timeSignature;
+            _targetBeat = targetBeat;
         }
+
+        /// <summary> 小節フラグ。現在小節は0、次の小節は1。 </summary>
+        public long BarFlg => _barFlg;
+        /// <summary> 拍子スケール。 </summary>
+        public long TimeSignature => _timeSignature;
+        /// <summary> 小節中のターゲット拍数。 </summary>
+        public long TargetBeat => _targetBeat;
+
+        private readonly long _barFlg;
+        private readonly long _timeSignature;
+        private readonly long _targetBeat;
     }
 }
 

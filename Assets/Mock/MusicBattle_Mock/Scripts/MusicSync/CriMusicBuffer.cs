@@ -61,7 +61,7 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region インスペクター表示フィールド
-        [SerializeField, ReadOnly, Tooltip("現在のBPM")]
+        [SerializeField, ReadOnly, Tooltip("現在のBPM。")]
         private double _currentBpm;
         [SerializeField, ReadOnly, Tooltip("再生中のソース")]
         private CriAtomSource _source;

@@ -9,6 +9,7 @@ namespace Mock.MusicBattle.Utility
     /// <typeparam name="T">キューに格納する要素の型。</typeparam>
     public class PriorityQueue<T>
     {
+        #region コンストラクタ
         /// <summary>
         ///     指定された比較子を使用して、<see cref="PriorityQueue{T}"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -17,6 +18,8 @@ namespace Mock.MusicBattle.Utility
         {
             _comparer = comparer;
         }
+        #endregion
+
         #region パブリックプロパティ
         /// <summary> キューに含まれる要素の数を取得します。 </summary>
         public int Count => _heap.Count;

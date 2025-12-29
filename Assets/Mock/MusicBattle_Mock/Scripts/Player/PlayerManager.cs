@@ -16,7 +16,6 @@ namespace Mock.MusicBattle.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour, ICharacter
     {
-        
         #region Publicイベント
         /// <summary> プレイヤーが攻撃を行ったときに発火するイベント。 </summary>
         public event Action<float> OnAttacked;
@@ -187,7 +186,7 @@ namespace Mock.MusicBattle.Player
                 return;
             }
             inputBuffer.MoveAction.Performed += OnInputMove;
-            inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
+            inputBuffer.MoveAction.Canceled += OnInputMoveCancel;
             inputBuffer.AttackAction.Started += OnInputAttack;
             _healthEntity.OnDeath += OnDeathAction;
         }
@@ -199,7 +198,7 @@ namespace Mock.MusicBattle.Player
         private void InputEventUnregister(InputBuffer inputBuffer)
         {
             inputBuffer.MoveAction.Performed -= OnInputMove;
-            inputBuffer.MoveAction.Canceled -= OnInputMoveCancle;
+            inputBuffer.MoveAction.Canceled -= OnInputMoveCancel;
             inputBuffer.AttackAction.Started -= OnInputAttack;
             _healthEntity.OnDeath -= OnDeathAction;
         }
@@ -217,7 +216,7 @@ namespace Mock.MusicBattle.Player
         ///     移動入力がキャンセルされたときに呼び出されます。
         /// </summary>
         /// <param name="input">入力ベクトル。</param>
-        private void OnInputMoveCancle(Vector2 input)
+        private void OnInputMoveCancel(Vector2 input)
         {
             _input = Vector2.zero;
         }

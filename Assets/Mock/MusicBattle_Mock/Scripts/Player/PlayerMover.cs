@@ -7,6 +7,7 @@ namespace Mock.MusicBattle.Player
     /// </summary>
     public class PlayerMover
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="PlayerMover"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -21,6 +22,7 @@ namespace Mock.MusicBattle.Player
             _camera = camera;
             _rb = rb;
         }
+        #endregion
 
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
