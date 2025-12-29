@@ -19,7 +19,7 @@ namespace Mock.MusicBattle.Camera
         public Vector3 CameraLookAtOffset => _cameraLookAtOffset;
         /// <summary> 自由カメラの追従速度の減衰率を取得します。 </summary>
         public float CameraPlayerFollowDamping => _cameraPlayerFollowDamping;
-        /// <summary> 自由カメラの注視速度の減衰率を取得します。 </summary>
+        /// <summary> 自由カメラの注視速度の減衰率。 </summary>
         public float CameraPlayerLookAtDamping => _cameraPlayLookAtDamping;
         /// <summary> ロックオンカメラの追従速度の減衰率を取得します。 </summary>
         public float CameraLockOnFollowDamping => _cameraLockOnFollowDamping;
