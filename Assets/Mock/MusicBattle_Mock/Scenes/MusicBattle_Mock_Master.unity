@@ -625,17 +625,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3205de5f98f5fbd479cb3d81c3a30c9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicSyncManager
---- !u!114 &913491954 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 758891480087472081, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
-  m_PrefabInstance: {fileID: 1409373509}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57359b08f259c3b40aff8f5718c844b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.CriMusicBuffer
 --- !u!1 &1044067863
 GameObject:
   m_ObjectHideFlags: 0
@@ -864,7 +853,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: ==MusicSync==
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+      propertyPath: _configs
+      value: 
+      objectReference: {fileID: 11400000, guid: 0687d01daac27324fae43dce6926bb52, type: 2}
+    m_RemovedComponents:
+    - {fileID: 758891480087472081, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+    - {fileID: 6226676604781277393, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
+    - {fileID: 9044767190899246616, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -6030,7 +6026,6 @@ MonoBehaviour:
   _musicSyncManager: {fileID: 913491950}
   _musicSystemInitSO: {fileID: 11400000, guid: ba830224c83144847bdf89271db7fbc1, type: 2}
   _source: {fileID: 913491949}
-  _criMusicBuffer: {fileID: 913491954}
   _enemySpawnSO: {fileID: 11400000, guid: 382d8b9707fb9d54490fe3fe2e5aeb75, type: 2}
   _hudManager: {fileID: 8451694022253436589}
 --- !u!1 &1661210706540582388
