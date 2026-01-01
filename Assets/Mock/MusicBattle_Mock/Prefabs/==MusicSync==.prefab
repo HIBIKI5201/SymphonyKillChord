@@ -55,7 +55,7 @@ MonoBehaviour:
   _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
-  _volume: 1
+  _volume: 0.4
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
   need_to_player_update_all: 1
@@ -82,15 +82,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3205de5f98f5fbd479cb3d81c3a30c9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicSyncManager
-  _timeSignatures:
-  - 16
-  - 12
-  - 8
-  - 6
-  - 4
-  - 3
-  - 2
-  - 1
+  _timeSignatures: {fileID: 11400000, guid: ebd79329e911f5d4aa46c7a225d64f3a, type: 2}
   _musicBuffer: {fileID: 758891480087472081}
   _musicPlayer: {fileID: 6226676604781277393}
   _inputHandler: {fileID: 9044767190899246616}
@@ -138,7 +130,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicInputHandler
   _musicBuffer: {fileID: 758891480087472081}
   _timeSignatures: []
-  _enableQuantize: 1
+  _inputFixThreshold: 0.8
+  _inputHistoryBarLimit: 4
+  _inputSignatureHistoryLimit: 4
 --- !u!114 &6561865455815979478
 MonoBehaviour:
   m_ObjectHideFlags: 0
