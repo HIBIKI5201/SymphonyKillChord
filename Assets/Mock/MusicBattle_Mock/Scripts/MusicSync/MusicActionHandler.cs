@@ -20,6 +20,11 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region Publicメソッド
+        public void Init(CriMusicBuffer buffer)
+        {
+            _musicBuffer = buffer;
+        }
+
         /// <summary>
         ///     予約アクションを登録する。
         /// </summary>
@@ -43,10 +48,6 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region インスペクター表示フィールド
-        /// <summary> CRI ADXの音楽バッファを管理するクラスの参照。 </summary>
-        [SerializeField, Tooltip("CRI ADXの音楽バッファを管理するクラスの参照。")]
-        private CriMusicBuffer _musicBuffer;
-
         [Header("デバッグ用")]
         /// <summary> 定期アクションを起こす単位拍数。 </summary>
         [SerializeField, Tooltip("定期アクションを起こす単位拍数")]
@@ -57,6 +58,9 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region プライベートフィールド
+        /// <summary> CRI ADXの音楽バッファを管理するクラスの参照。 </summary>
+        private CriMusicBuffer _musicBuffer;
+
         /// <summary> 予約アクションのキュー。 </summary>
         private readonly PriorityQueue<ScheduledAction> _scheduledActions = new PriorityQueue<ScheduledAction>(
             Comparer<ScheduledAction>.Create((a, b) => a.ExecuteBeat.CompareTo(b.ExecuteBeat))
