@@ -8,9 +8,25 @@ namespace Mock.MusicBattle.MusicSync
     /// <summary>
     ///     Criを用いた音楽のバッファリングするクラス。
     /// </summary>
-    [DisallowMultipleComponent]
-    public class CriMusicBuffer : MonoBehaviour, IMusicBuffer
+    public class CriMusicBuffer : IMusicBuffer
     {
+        #region コンストラクタ
+        /// <summary>
+        ///     初期化を行う。
+        /// </summary>
+        /// <param name="source">再生BGM</param>
+        /// <param name="bpm">BGMのBPM</param>
+        /// <param name="propTimeSignature">BGMのの固有拍子</param>
+        /// <param name="startOffset">最初小節の開始時間(ミリ秒)</param>
+        public CriMusicBuffer(CriMusicPlayer player, double bpm, double propTimeSignature, long startOffset)
+        {
+            _player = player;
+            _currentBpm = bpm;
+            _propTimeSignature = propTimeSignature;
+            _startOffset = startOffset;
+        }
+        #endregion
+
         #region パブリックプロパティ
         /// <summary> 現在のBPM。 </summary>
         public double CurrentBpm => _currentBpm;
@@ -24,18 +40,11 @@ namespace Mock.MusicBattle.MusicSync
 
         #region Publicメソッド
         /// <summary>
-        ///     初期化を行う。
+        ///     現在の拍数を更新する。
         /// </summary>
-        /// <param name="source">再生BGM</param>
-        /// <param name="bpm">BGMのBPM</param>
-        /// <param name="propTimeSignature">BGMのの固有拍子</param>
-        /// <param name="startOffset">最初小節の開始時間(ミリ秒)</param>
-        public void Init(CriAtomSource source, double bpm, double propTimeSignature, long startOffset)
+        public void Tick()
         {
-            _source = source;
-            _currentBpm = bpm;
-            _propTimeSignature = propTimeSignature;
-            _startOffset = startOffset;
+            _beat = (_player.Time - _startOffset) / 1000d / BeatLength;
         }
         #endregion
 
@@ -61,45 +70,27 @@ namespace Mock.MusicBattle.MusicSync
         #endregion
 
         #region インスペクター表示フィールド
-        [SerializeField, ReadOnly, Tooltip("現在のBPM。")]
+        /// <summary> 現在のBPM。 </summary>
         private double _currentBpm;
-        [SerializeField, ReadOnly, Tooltip("再生中のソース")]
-        private CriAtomSource _source;
-        [SerializeField, ReadOnly, Tooltip("現在のビート数")]
+        /// <summary> 再生BGMソース。 </summary>
+        private CriMusicPlayer _player;
+        /// <summary> 現在のビート数。 </summary>
         private double _beat;
-        [SerializeField, ReadOnly, Tooltip("BGMの固有拍子")]
+        /// <summary> BGMの固有拍子。 </summary>
         private double _propTimeSignature;
-        [SerializeField, Tooltip("最初小節開始時間（ミリ秒）")]
+        /// <summary> 最初小節の開始時間(ミリ秒)。 </summary>
         private long _startOffset;
         #endregion
 
-        #region Unityライフサイクルメソッド
-        /// <summary>
-        ///     フレームごとに呼び出されます。
-        /// </summary>
-        private void Update()
-        {
-            Tick();
-        }
-        #endregion
-
-        #region Privateメソッド
+        #region デバッグ機能
         /// <summary>
         ///     デバッグ用に現在の時間を表示します。
         /// </summary>
-        private void OnGUI()
+        public void OnGUI()
         {
-            if (_source == null) return;
+            if (_player == null) return;
 
             GUILayout.Label($"Time: {_beat}");
-        }
-
-        /// <summary>
-        ///     現在の拍数を更新する。
-        /// </summary>
-        private void Tick()
-        {
-            _beat = (_source.time - _startOffset) / 1000d / BeatLength;
         }
         #endregion
     }
