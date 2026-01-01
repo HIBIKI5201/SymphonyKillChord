@@ -63,7 +63,7 @@ namespace Mock.MusicBattle.MusicSync
         #region インスペクター表示フィールド
         /// <summary> 入力によって検出されうる拍子の配列。 </summary>
         [SerializeField, Tooltip("入力によって検出されうる拍子の配列。")]
-        private float[] _timeSignatures = { 1f, 2f, 3f, 4f, 6f, 8f, 12f, 16f };
+        private SignatureDatabase _timeSignatures;
         /// <summary> 音楽バッファの参照。 </summary>
         [SerializeField, Tooltip("音楽バッファの参照。")]
         private CriMusicBuffer _musicBuffer;

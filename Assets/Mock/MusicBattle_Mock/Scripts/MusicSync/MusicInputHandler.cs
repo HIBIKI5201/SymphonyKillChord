@@ -18,9 +18,9 @@ namespace Mock.MusicBattle.MusicSync
         ///     初期化を行う。
         /// </summary>
         /// <param name="timeSignatures"> 入力によってなりえる拍子。 </param>
-        public void Init(float[] timeSignatures)
+        public void Init(SignatureDatabase timeSignatures)
         {
-            _timeSignatures = timeSignatures.OrderBy(n => n).ToArray();
+            _timeSignatures = timeSignatures.SignatureDataSpan.Select(e => e.Signature).OrderBy(n => n).ToArray();
             _longestSignatureIndex = GetLongestSignatureIndex();
         }
 
