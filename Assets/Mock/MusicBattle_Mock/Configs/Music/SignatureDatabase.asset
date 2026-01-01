@@ -12,3 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1df4b5d3bbf4c364db2d2c850ff64761, type: 3}
   m_Name: SignatureDatabase
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.SignatureDatabase
+  _signatureDataArray:
+  - _signature: 1
+    _color: {r: 1, g: 0, b: 0, a: 1}
+  - _signature: 2
+    _color: {r: 0, g: 0.18690658, b: 1, a: 1}
+  - _signature: 3
+    _color: {r: 0, g: 1, b: 0.8857155, a: 1}
+  - _signature: 4
+    _color: {r: 0, g: 1, b: 0.020580053, a: 1}
