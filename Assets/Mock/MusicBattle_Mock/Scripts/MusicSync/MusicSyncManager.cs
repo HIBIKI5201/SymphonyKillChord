@@ -1,5 +1,4 @@
 using CriWare;
-using SymphonyFrameWork.Debugger;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -22,10 +21,11 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="startOffset">最初の小節の開始時間（ミリ秒）。</param>
         public void Init(CriAtomSource source, double bpm, double timeSignature, long startOffset)
         {
-            _musicPlayer.Init(source);
-            _musicBuffer.Init(source, bpm, timeSignature, startOffset);
-            _inputHandler.Init(_timeSignatures);
+            _musicPlayer = new(source);
+            _musicBuffer = new(_musicPlayer, bpm, timeSignature, startOffset);
+            _inputHandler = new(_musicBuffer, _configs, _timeSignatures);
             PlayBgm();
+            _actionHandler.Init(_musicBuffer);
         }
 
         /// <summary>
@@ -64,18 +64,27 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary> 入力によって検出されうる拍子の配列。 </summary>
         [SerializeField, Tooltip("入力によって検出されうる拍子の配列。")]
         private SignatureDatabase _timeSignatures;
-        /// <summary> 音楽バッファの参照。 </summary>
-        [SerializeField, Tooltip("音楽バッファの参照。")]
-        private CriMusicBuffer _musicBuffer;
-        /// <summary> 音楽プレイヤーの参照。 </summary>
-        [SerializeField, Tooltip("音楽プレイヤーの参照。")]
-        private CriMusicPlayer _musicPlayer;
-        /// <summary> 音楽入力ハンドラの参照。 </summary>
-        [SerializeField, Tooltip("音楽入力ハンドラの参照。")]
-        private MusicInputHandler _inputHandler;
+        [SerializeField, Tooltip("コンフィグ")]
+        private MusicSyncConfigs _configs;
         /// <summary> 音楽アクションハンドラの参照。 </summary>
         [SerializeField, Tooltip("音楽アクションハンドラの参照。")]
         private MusicActionHandler _actionHandler;
+        #endregion
+
+        #region プライベートフィールド
+        /// <summary> 音楽バッファの参照。 </summary>
+        private CriMusicBuffer _musicBuffer;
+        /// <summary> 音楽プレイヤーの参照。 </summary>
+        private CriMusicPlayer _musicPlayer;
+        /// <summary> 音楽入力ハンドラの参照。 </summary>
+        private MusicInputHandler _inputHandler;
+        #endregion
+
+        #region Unityイベントメソッド
+        private void Update()
+        {
+            _musicBuffer.Tick();
+        }
         #endregion
 
         #region Privateメソッド
@@ -85,6 +94,13 @@ namespace Mock.MusicBattle.MusicSync
         private void PlayBgm()
         {
             _musicPlayer.Play();
+        }
+        #endregion
+
+        #region デバッグ機能
+        private void OnGUI()
+        {
+            _musicBuffer?.OnGUI();
         }
         #endregion
     }
