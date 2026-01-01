@@ -11,6 +11,10 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicSyncManager : MonoBehaviour
     {
+        #region Publicプロパティ
+        public CriMusicBuffer MusicBuffer => _musicBuffer;
+        #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     初期化処理を行います。
