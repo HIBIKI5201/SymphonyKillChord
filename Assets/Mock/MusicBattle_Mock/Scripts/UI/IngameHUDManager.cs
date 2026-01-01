@@ -92,7 +92,7 @@ namespace Mock.MusicBattle.UI
         #region インスペクター表示フィールド
         /// <summary> 拍子と色の対応データ配列。 </summary>
         [SerializeField, Tooltip("拍子と色の対応データ配列。")]
-        private SignatureColorData[] _signatureColorDatas;
+        private SignatureDatabase _signatureDatabase;
         #endregion
 
         #region プライベートフィールド
@@ -186,16 +186,7 @@ namespace Mock.MusicBattle.UI
         private Color GetMeasureColor(float signature)
         {
             int s = Mathf.RoundToInt(signature);
-
-            foreach (var data in _signatureColorDatas)
-            {
-                if (data.Signature == s)
-                {
-                    return data.Color;
-                }
-            }
-
-            return Color.black;
+            return _signatureDatabase.GetColorBySignature(s);
         }
         #endregion
     }
