@@ -653,15 +653,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.0186191
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.00000047683716
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 8.64
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalRotation.w
@@ -955,6 +955,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Player.PlayerManager
   _playerStatus: {fileID: 11400000, guid: ad763209e5e2c3a489ee08ac6503640d, type: 2}
   _config: {fileID: 11400000, guid: 61915a6c2cf23f64f90e0dcf7523c198, type: 2}
+  _signatureDatabase: {fileID: 11400000, guid: ebd79329e911f5d4aa46c7a225d64f3a, type: 2}
   _pivotTransform: {fileID: 7252400935441454637}
   _gunSoundSource: {fileID: 8523454837323722002}
 --- !u!114 &60009445536760728
@@ -1030,10 +1031,10 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
-  _volume: 1
+  _volume: 0.5
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
   need_to_player_update_all: 1

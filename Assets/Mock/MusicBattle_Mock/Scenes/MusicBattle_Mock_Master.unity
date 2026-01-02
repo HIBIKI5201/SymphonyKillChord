@@ -853,10 +853,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ==MusicSync==
       objectReference: {fileID: 0}
-    - target: {fileID: 4704647488657844847, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
-      propertyPath: _configs
-      value: 
-      objectReference: {fileID: 11400000, guid: 0687d01daac27324fae43dce6926bb52, type: 2}
     m_RemovedComponents:
     - {fileID: 758891480087472081, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
     - {fileID: 6226676604781277393, guid: f30c70807eed42748a5d129c87d292f0, type: 3}
@@ -5907,14 +5903,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3337225036644969533, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8523454837323722002, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
-      propertyPath: _volume
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8523454837323722002, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
-      propertyPath: _use3dPositioning
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
