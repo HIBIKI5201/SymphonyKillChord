@@ -27,6 +27,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> プレイヤーのHealthEntityを取得します。 </summary>
         public HealthEntity HealthEntity => _healthEntity;
         #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     プレイヤーマネージャーを初期化します。
@@ -55,13 +56,18 @@ namespace Mock.MusicBattle.Player
         /// <param name="damage">与えるダメージ量。</param>
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
         #endregion
+
         #region インスペクター表示フィールド
+        [Header("データ")]
         /// <summary> プレイヤーのステータス。 </summary>
         [SerializeField, Tooltip("プレイヤーのステータス。")]
         private PlayerStatus _playerStatus;
         /// <summary> プレイヤーの設定。 </summary>
         [SerializeField, Tooltip("プレイヤーの設定。")]
         private PlayerConfig _config;
+        [SerializeField, Tooltip("拍子情報")]
+        private SignatureDatabase _signatureDatabase;
+        [Header("オブジェクト情報")]
         /// <summary> プレイヤーのピボット位置。 </summary>
         [SerializeField, Tooltip("プレイヤーのピボット位置。")]
         private Transform _pivotTransform;
@@ -173,6 +179,7 @@ namespace Mock.MusicBattle.Player
                 _playerAttacker.OnDrawGizmos();
         }
         #endregion
+
         #region Privateメソッド
         /// <summary>
         ///     入力イベントを登録します。
@@ -232,7 +239,12 @@ namespace Mock.MusicBattle.Player
                 ICharacter target = _lockOnManager.LockOnTarget;
                 float signature = _musicSyncManager.GetInputTimeSignature();
                 _playerAttacker.Attack(target, signature);
-                _gunSoundSource?.Play();
+                if (_gunSoundSource != null)
+                {
+                    _gunSoundSource.cueName = _signatureDatabase.GetSeCueNameBySignature(signature);
+                    _gunSoundSource.Play();
+                }
+
                 OnAttacked?.Invoke(signature);
             }
         }
