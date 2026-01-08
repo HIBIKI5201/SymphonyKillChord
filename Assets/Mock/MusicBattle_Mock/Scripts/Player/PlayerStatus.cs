@@ -31,26 +31,6 @@ namespace Mock.MusicBattle.Player
         public RythemPatternData[] SpecialAttackPatterns => _specialAttackPatterns;
         #endregion
 
-        public void Assert()
-        {
-            // 移動。
-            Debug.Assert(0 < _moveSpeed, "移動速度が設定されていません。", this);
-            Debug.Assert(0 < _walkAccelerationDuration, "歩行時の加速時間が設定されていません。", this);
-            Debug.Assert(0 < _stopAccelerationDuration, "停止時の加速時間が設定されていません。", this);
-            Debug.Assert(0 < _rotationDamping, "回転減衰が設定されていません。", this);
-
-            // 攻撃。
-            Debug.Assert(0 < _attackPower, "攻撃力が設定されていません。", this);
-            Debug.Assert(0 < _attackRange, "攻撃範囲が設定されていません。", this);
-            Debug.Assert(0 < _postAttackMoveLockDuration, "攻撃時の硬直時間が設定されていません。", this);
-
-            // 防御
-            Debug.Assert(0 < _maxHealth, "体力が設定されていません。", this);
-
-            // 音楽同期。
-            Debug.Assert(0 < _specialAttackPatterns.Length, "スペシャルアタックパターン群が空です。", this);
-        }
-
         #region インスペクター表示フィールド
         [Header("移動")]
         /// <summary> 移動速度。 </summary>
@@ -85,6 +65,33 @@ namespace Mock.MusicBattle.Player
         /// <summary> スペシャルアタックパターン群。 </summary>
         [SerializeField, Tooltip("スペシャルアタックパターン群。")]
         private RythemPatternData[] _specialAttackPatterns;
+        #endregion
+
+        #region デバッグ
+        public void Assert()
+        {
+            // 移動。
+            Debug.Assert(0 < _moveSpeed, "移動速度が設定されていません。", this);
+            Debug.Assert(0 < _walkAccelerationDuration, "歩行時の加速時間が設定されていません。", this);
+            Debug.Assert(0 < _stopAccelerationDuration, "停止時の加速時間が設定されていません。", this);
+            Debug.Assert(0 < _rotationDamping, "回転減衰が設定されていません。", this);
+
+            // 攻撃。
+            Debug.Assert(0 < _attackPower, "攻撃力が設定されていません。", this);
+            Debug.Assert(0 < _attackRange, "攻撃範囲が設定されていません。", this);
+            Debug.Assert(0 < _postAttackMoveLockDuration, "攻撃時の硬直時間が設定されていません。", this);
+
+            // 防御
+            Debug.Assert(0 < _maxHealth, "体力が設定されていません。", this);
+
+            // 音楽同期。
+            Debug.Assert(0 < _specialAttackPatterns.Length, "スペシャルアタックパターン群が空です。", this);
+        }
+
+        private void OnValidate()
+        {
+            Assert();
+        }
         #endregion
     }
 }

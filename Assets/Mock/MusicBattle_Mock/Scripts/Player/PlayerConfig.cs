@@ -25,7 +25,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> 攻撃が当たらないレイヤーマスク。 </summary>
         [SerializeField, Tooltip("攻撃が当たらないレイヤーマスク。")]
         private LayerMask _ignoreAttackLayer;
-
+        
         /// <summary> 地面判定における法線の垂直閾値。 </summary>
         [SerializeField, Range(0, 1), Tooltip("地面判定における法線の垂直閾値。")]
         private float _groundNormalVerticalThreshold = DEFAULT_GROUND_NORMAL_VERTICAL_THRESHOLD;
