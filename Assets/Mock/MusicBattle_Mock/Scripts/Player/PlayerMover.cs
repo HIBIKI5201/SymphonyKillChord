@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -67,11 +68,20 @@ namespace Mock.MusicBattle.Player
             _isGround = isGround;
         }
 
+        public async void OnAttack(Task moveLockTask)
+        {
+            _moveLock = true;
+            await moveLockTask;
+            _moveLock = false;
+        }
+
         /// <summary>
         ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
         /// </summary>
         public void Update()
         {
+            if (_moveLock) { return; }
+
             float t = CalculateAccelerationLerpT();
             UpdateHorizontalVelocity(t);
             UpdateRotation();
@@ -93,6 +103,8 @@ namespace Mock.MusicBattle.Player
         private Vector3 _horizontalVelocity;
         /// <summary> 地面に接地しているかどうか。 </summary>
         private bool _isGround;
+        /// <summary> 移動がロックされているか。 </summary>
+        private bool _moveLock;
         #endregion
 
         #region Unityライフサイクルメソッド
