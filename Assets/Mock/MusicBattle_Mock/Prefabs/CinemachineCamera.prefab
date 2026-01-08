@@ -89,3 +89,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.Camera.CameraManager
   _cameraConfigs: {fileID: 11400000, guid: 126378a9356c7a745beac5b54f582177, type: 2}
+  _mode: 2
