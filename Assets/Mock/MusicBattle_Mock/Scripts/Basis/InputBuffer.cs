@@ -87,6 +87,11 @@ namespace Mock.MusicBattle.Basis
                 input.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
                 input.uiInputModule = gameObject.AddOrGetComponent<InputSystemUIInputModule>();
             }
+
+            Debug.Assert(!string.IsNullOrEmpty(_lookActionName), $"{nameof(_lookActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_moveActionName), $"{nameof(_moveActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_lockOnSelectActionName), $"{nameof(_lockOnSelectActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_attackActionName), $"{nameof(_attackActionName)} is null");
         }
         #endregion
     }
