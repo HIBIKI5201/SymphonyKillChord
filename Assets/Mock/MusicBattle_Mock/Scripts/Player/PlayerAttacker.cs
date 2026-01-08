@@ -58,18 +58,26 @@ namespace Mock.MusicBattle.Player
             float attackPower = _status.AttackPower * 4 / signature;
             target.TakeDamage(attackPower);
 
-            // MusicSyncのSignature履歴を取得し、特定のパターンと一致するかチェックする。
+            _moveLockTask = PostAttackMoveLockAsync();
+            return true;
+        }
+
+        public bool CheckPatternMatch(out float index)
+        {
             for (int i = 0; i < _status.SpecialAttackPatterns.Length; i++)
             {
-                RythemPatternData data = _status.SpecialAttackPatterns[i];
+                RythemPatternData data = _status.SpecialAttackPatterns[i].RythemPattern;
                 if (_musicSyncManager.IsMatchInputTimeSignature(data))
                 {
                     Debug.Log($"MusicSync Signature Pattern Matched! Pattern: {string.Join(", ", data.SignaturePattern.ToArray())}");
+
+                    index = i;
+                    return true;
                 }
             }
 
-            _moveLockTask = PostAttackMoveLockAsync();
-            return true;
+            index = -1;
+            return false;
         }
         #endregion
 
