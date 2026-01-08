@@ -237,6 +237,7 @@ namespace Mock.MusicBattle.Player
                 }
 
                 OnAttacked?.Invoke(signature);
+                _playerMover.OnAttack(_playerAttacker.MoveLockTask);
             }
         }
 
