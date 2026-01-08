@@ -1,5 +1,7 @@
+using Mock.MusicBattle.Utility;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 namespace Mock.MusicBattle.Basis
 {
@@ -57,11 +59,10 @@ namespace Mock.MusicBattle.Basis
             PlayerInput playerInput = GetComponent<PlayerInput>();
             if (playerInput != null)
             {
-                playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
-                _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
-                _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-                _lockOnSelectActionEntity = new InputActionEntity<float>(playerInput.actions[_lockOnSelectActionName]);
-                _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
+                _lookActionEntity = new(playerInput.actions[_lookActionName]);
+                _moveActionEntity = new(playerInput.actions[_moveActionName]);
+                _lockOnSelectActionEntity = new(playerInput.actions[_lockOnSelectActionName]);
+                _attackActionEntity = new(playerInput.actions[_attackActionName]);
             }
         }
 
@@ -75,6 +76,17 @@ namespace Mock.MusicBattle.Basis
             _moveActionEntity?.Dispose();
             _lockOnSelectActionEntity?.Dispose();
             _attackActionEntity?.Dispose();
+        }
+        #endregion
+
+        #region デバッグ
+        private void OnValidate()
+        {
+            if (TryGetComponent(out PlayerInput input))
+            {
+                input.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+                input.uiInputModule = gameObject.AddOrGetComponent<InputSystemUIInputModule>();
+            }
         }
         #endregion
     }
