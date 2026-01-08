@@ -1,5 +1,4 @@
 using Mock.MusicBattle.Basis;
-using Mock.MusicBattle.MusicSync;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -86,6 +85,7 @@ namespace Mock.MusicBattle.Player
 
             // 音楽同期。
             Debug.Assert(0 < _specialAttackDatas.Length, "スペシャルアタックパターン群が空です。", this);
+            foreach (SpecialAttackData data in _specialAttackDatas) { data.Assert(this); }
         }
 
         private void OnValidate()
