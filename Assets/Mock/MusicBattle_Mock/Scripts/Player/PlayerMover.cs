@@ -27,7 +27,7 @@ namespace Mock.MusicBattle.Player
 
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
-        public Vector3 CurrentVelocity {  get; private set; }
+        public Vector3 CurrentVelocity => _currentVelocity;
         #endregion
 
         #region Publicメソッド
@@ -73,6 +73,7 @@ namespace Mock.MusicBattle.Player
             if (moveLockTask  == null) { return; }
 
             _moveLock = true;
+            VelocityReset();
             await moveLockTask;
             _moveLock = false;
         }
@@ -99,6 +100,8 @@ namespace Mock.MusicBattle.Player
         private readonly Transform _camera;
         /// <summary> プレイヤーのRigidbody。 </summary>
         private readonly Rigidbody _rb;
+        /// <summary> 現在の速度。 </summary>
+        private Vector3 _currentVelocity;
         /// <summary> 目標の速度。 </summary>
         private Vector3 _targetVelocity;
         /// <summary> 水平方向の速度。 </summary>
@@ -116,7 +119,7 @@ namespace Mock.MusicBattle.Player
         /// </summary>
         public void FixedUpdate()
         {
-            _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
+            _rb.linearVelocity = new Vector3(_currentVelocity.x, _rb.linearVelocity.y, _currentVelocity.z);
         }
         #endregion
 
@@ -141,14 +144,14 @@ namespace Mock.MusicBattle.Player
         /// <param name="t">補間係数。</param>
         private void UpdateHorizontalVelocity(float t)
         {
-            Vector3 horizontalCurrent = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
+            Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
             Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
 
             _horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
 
-            CurrentVelocity = new Vector3(
+            _currentVelocity = new Vector3(
                 _horizontalVelocity.x,
-                CurrentVelocity.y,
+                _currentVelocity.y,
                 _horizontalVelocity.z
             );
         }
@@ -161,7 +164,7 @@ namespace Mock.MusicBattle.Player
             // 現在の向きを水平に
             Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
             // 水平方向の速度成分
-            Vector3 targetDir = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
+            Vector3 targetDir = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
             // Cinemachine式 Damping
             float rotDamping = Mathf.Max(_status.RotationDamping, 0.0001f);
             float rotT = 1f - Mathf.Exp(-Time.deltaTime / rotDamping);
@@ -170,6 +173,11 @@ namespace Mock.MusicBattle.Player
             {
                 _player.LookAt(_player.position + dir.normalized);
             }
+        }
+
+        private void VelocityReset()
+        {
+            _currentVelocity = Vector3.zero;
         }
         #endregion
     }
