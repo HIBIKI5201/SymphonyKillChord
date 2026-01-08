@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Utility
@@ -12,7 +11,7 @@ namespace Mock.MusicBattle.Utility
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static T AddOrGetComponent<T>(this GameObject obj) where T : Component
+        public static T AddOrGetComponent<T>(this GameObject obj) where T : Object
         {
             if (obj.TryGetComponent(out T component))
             {
