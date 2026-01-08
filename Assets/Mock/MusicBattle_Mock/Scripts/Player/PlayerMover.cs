@@ -70,6 +70,8 @@ namespace Mock.MusicBattle.Player
 
         public async void OnAttack(Task moveLockTask)
         {
+            if (moveLockTask  == null) { return; }
+
             _moveLock = true;
             await moveLockTask;
             _moveLock = false;
