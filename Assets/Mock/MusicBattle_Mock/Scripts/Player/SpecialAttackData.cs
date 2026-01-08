@@ -11,6 +11,14 @@ namespace Mock.MusicBattle.Player
         public RythemPatternData RythemPattern => _rythemPattern;
         public ISpecialAttackModule[] Modules => _modules;
 
+        public void Excute()
+        {
+            foreach (ISpecialAttackModule module in _modules)
+            {
+                module?.Execute();
+            }
+        }
+
         [SerializeField]
         private RythemPatternData _rythemPattern;
         [SerializeReference, SubclassSelector]
