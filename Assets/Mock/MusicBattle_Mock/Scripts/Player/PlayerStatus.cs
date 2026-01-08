@@ -28,7 +28,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> 最大ヘルス。 </summary>
         public float MaxHealth => _maxHealth;
         /// <summary> スペシャルアタックパターン群。 </summary>
-        public RythemPatternData[] SpecialAttackPatterns => _specialAttackPatterns;
+        public SpecialAttackData[] SpecialAttackDatas => _specialAttackDatas;
         #endregion
 
         #region インスペクター表示フィールド
@@ -64,7 +64,7 @@ namespace Mock.MusicBattle.Player
         [Header("音楽同期")]
         /// <summary> スペシャルアタックパターン群。 </summary>
         [SerializeField, Tooltip("スペシャルアタックパターン群。")]
-        private RythemPatternData[] _specialAttackPatterns;
+        private SpecialAttackData[] _specialAttackDatas;
         #endregion
 
         #region デバッグ
@@ -85,7 +85,7 @@ namespace Mock.MusicBattle.Player
             Debug.Assert(0 < _maxHealth, "体力が設定されていません。", this);
 
             // 音楽同期。
-            Debug.Assert(0 < _specialAttackPatterns.Length, "スペシャルアタックパターン群が空です。", this);
+            Debug.Assert(0 < _specialAttackDatas.Length, "スペシャルアタックパターン群が空です。", this);
         }
 
         private void OnValidate()
