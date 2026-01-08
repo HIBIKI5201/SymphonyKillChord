@@ -1,5 +1,8 @@
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -22,15 +25,23 @@ namespace Mock.MusicBattle.Player
         }
         #endregion
 
+        #region プロパティ
+        public Task MoveLockTask => _moveLockTask;
+        /// <summary> 攻撃硬直が有効かどうか </summary>
+        public bool IsMoveLock =>
+            _moveLockTask != null && !_moveLockTask.IsCompleted;
+        #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     指定されたターゲットに攻撃を行います。
         /// </summary>
         /// <param name="target">攻撃対象。</param>
         /// <param name="signature">攻撃の威力を決定する拍子。</param>
-        public void Attack(ICharacter target, float signature)
+        /// <returns> 攻撃が成功したかどうか。 </returns>
+        public bool Attack(ICharacter target, float signature)
         {
-            if (target == null) { return; }
+            if (target == null) { return false; }
 
             Vector3 origin = _player.transform.position + Vector3.up * HEIGHT_RAY;
 
@@ -41,7 +52,7 @@ namespace Mock.MusicBattle.Player
             if (!CanAttackTarget(origin, target))
             {
                 Debug.Log("Attack target not found or not reachable.");
-                return;
+                return false;
             }
 
             float attackPower = _status.AttackPower * 4 / signature;
@@ -56,6 +67,9 @@ namespace Mock.MusicBattle.Player
                     Debug.Log($"MusicSync Signature Pattern Matched! Pattern: {string.Join(", ", data.SignaturePattern.ToArray())}");
                 }
             }
+
+            _moveLockTask = PostAttackMoveLockAsync();
+            return true;
         }
         #endregion
 
@@ -73,6 +87,8 @@ namespace Mock.MusicBattle.Player
         private readonly PlayerConfig _config;
         /// <summary> 音楽同期システムのマネージャ。 </summary>
         private readonly MusicSyncManager _musicSyncManager;
+
+        private Task _moveLockTask;
         #endregion
 
         #region Privateメソッド
@@ -95,6 +111,17 @@ namespace Mock.MusicBattle.Player
             }
 
             return false;
+        }
+
+        private async Task PostAttackMoveLockAsync()
+        {
+            try
+            {
+                float d = _status.PostAttackMoveLockDuration;
+                CancellationToken token = _player.destroyCancellationToken;
+                await Awaitable.WaitForSecondsAsync(d, token);
+            }
+            catch (OperationCanceledException) { return; }
         }
         #endregion
 
