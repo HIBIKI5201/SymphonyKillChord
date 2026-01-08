@@ -235,8 +235,11 @@ namespace Mock.MusicBattle.Player
                     _gunSoundSource.cueName = _signatureDatabase.GetSeCueNameBySignature(signature);
                     _gunSoundSource.Play();
                 }
-
-                _playerAttacker.CheckPatternMatch(out float _);
+                
+                if (_playerAttacker.CheckPatternMatch(out int index))
+                {
+                    _playerStatus.SpecialAttackDatas[index].Excute();
+                }
 
                 OnAttacked?.Invoke(signature);
                 _playerMover.OnAttack(_playerAttacker.MoveLockTask);
