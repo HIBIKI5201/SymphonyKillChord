@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a770d9a23627aeb4592524beee178d4a, type: 3}
   m_Name: PlayerStatus
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.PlayerStatus
-  _moveSpeed: 10
-  _walkAccelerationDuration: 1
-  _stopAccelerationDuration: 0
+  _moveSpeed: 8
+  _walkAccelerationDuration: 0.1
+  _stopAccelerationDuration: 0.1
   _rotationDamping: 0.5
   _attackPower: 50
   _attackRange: 10
+  _postAttackMoveLockDuration: 0.2
   _maxHealth: 1000
   _specialAttackPatterns:
   - {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
-  _groundNormalVerticalThreshold: 0.5
