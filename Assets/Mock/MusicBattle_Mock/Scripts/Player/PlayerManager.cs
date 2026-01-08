@@ -250,6 +250,14 @@ namespace Mock.MusicBattle.Player
             gameObject.SetActive(false);
         }
         #endregion
+
+        #region デバッグ
+        private void OnValidate()
+        {
+            Debug.Assert(_playerStatus != null, "プレイヤーステータスがありません。", this);
+            Debug.Assert(_config != null, "プレイヤーのコンフィグがありません。", this);
+        }
+        #endregion
     }
 }
 
