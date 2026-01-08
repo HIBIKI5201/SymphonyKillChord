@@ -236,6 +236,8 @@ namespace Mock.MusicBattle.Player
                     _gunSoundSource.Play();
                 }
 
+                _playerAttacker.CheckPatternMatch(out float _);
+
                 OnAttacked?.Invoke(signature);
                 _playerMover.OnAttack(_playerAttacker.MoveLockTask);
             }
