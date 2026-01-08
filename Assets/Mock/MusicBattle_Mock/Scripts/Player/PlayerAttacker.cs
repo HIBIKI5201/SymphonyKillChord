@@ -62,11 +62,11 @@ namespace Mock.MusicBattle.Player
             return true;
         }
 
-        public bool CheckPatternMatch(out float index)
+        public bool CheckPatternMatch(out int index)
         {
-            for (int i = 0; i < _status.SpecialAttackPatterns.Length; i++)
+            for (int i = 0; i < _status.SpecialAttackDatas.Length; i++)
             {
-                RythemPatternData data = _status.SpecialAttackPatterns[i].RythemPattern;
+                RythemPatternData data = _status.SpecialAttackDatas[i].RythemPattern;
                 if (_musicSyncManager.IsMatchInputTimeSignature(data))
                 {
                     Debug.Log($"MusicSync Signature Pattern Matched! Pattern: {string.Join(", ", data.SignaturePattern.ToArray())}");
