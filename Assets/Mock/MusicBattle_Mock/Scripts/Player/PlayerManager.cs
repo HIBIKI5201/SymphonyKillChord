@@ -169,15 +169,6 @@ namespace Mock.MusicBattle.Player
                 _playerMover.SetIsGround(0 < _hitGrounds.Count);
             }
         }
-
-        /// <summary>
-        ///     ギズモを描画します（デバッグ用）。
-        /// </summary>
-        private void OnDrawGizmos()
-        {
-            if (_playerAttacker != null)
-                _playerAttacker.OnDrawGizmos();
-        }
         #endregion
 
         #region Privateメソッド
