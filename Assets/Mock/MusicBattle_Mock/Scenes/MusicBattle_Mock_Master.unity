@@ -341,6 +341,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CRIWARE
       objectReference: {fileID: 0}
+    - target: {fileID: 4312983832674706339, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: cueSheets.Array.size
       value: 2
@@ -496,7 +500,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 103883751535302790, guid: 128c81b2dcdb85542b909b20cefb548f, type: 3}
       propertyPath: m_Name
-      value: CinemachineCamera_1
+      value: PlayerCamera
       objectReference: {fileID: 0}
     - target: {fileID: 4346061343955670688, guid: 128c81b2dcdb85542b909b20cefb548f, type: 3}
       propertyPath: Target.TrackingTarget
@@ -6031,7 +6035,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!114 &1986948518813851823
 MonoBehaviour:
