@@ -20,5 +20,21 @@ MonoBehaviour:
   _attackRange: 10
   _postAttackMoveLockDuration: 0.2
   _maxHealth: 1000
-  _specialAttackPatterns:
-  - {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
+  _specialAttackDatas:
+  - _rythemPattern: {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
+    _modules:
+    - rid: 4257077226536436014
+  - _rythemPattern: {fileID: 11400000, guid: 9c6b7ab83b084b34f8fc82388989a480, type: 2}
+    _modules:
+    - rid: 4257077226536436019
+  references:
+    version: 2
+    RefIds:
+    - rid: 4257077226536436014
+      type: {class: SpecialAttackLog, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _text: "4\u62CD\u5B50\u30D1\u30BF\u30FC\u30F3\u306E\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483"
+    - rid: 4257077226536436019
+      type: {class: SpecialAttackLog, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _text: "3\u62CD\u5B50\u30D1\u30BF\u30FC\u30F3\u306E\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483"
