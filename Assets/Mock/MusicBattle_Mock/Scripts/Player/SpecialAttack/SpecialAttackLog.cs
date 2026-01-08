@@ -6,7 +6,10 @@ namespace Mock.MusicBattle.Player
     {
         public void Execute()
         {
-
+            Debug.Log(_text);
         }
+
+        [SerializeField]
+        private string _text;
     }
 }
