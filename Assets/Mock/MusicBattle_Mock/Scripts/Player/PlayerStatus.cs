@@ -64,7 +64,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> 攻撃範囲。 </summary>
         [SerializeField, Tooltip("攻撃範囲。"), Min(0)]
         private float _attackRange = 10;
-        [SerializeField, Tooltip("攻撃時の硬直時間"), Min(0)]
+        [SerializeField, Tooltip("攻撃時の硬直時間")]
         private BeatLength _postAttackMoveLockDuration = new(4, 1);
 
         [Header("防御")]

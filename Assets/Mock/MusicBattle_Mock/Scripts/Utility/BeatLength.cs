@@ -24,9 +24,9 @@ namespace Mock.MusicBattle.Utility
         }
         public double GetLength(IMusicBuffer buffer) => GetLength(buffer.CurrentBpm);
 
-        [SerializeField, Tooltip("拍子")]
+        [SerializeField, Tooltip("拍子"), Min(0)]
         private float _signature;
-        [SerializeField, Tooltip("数")]
+        [SerializeField, Tooltip("数"), Min(0)]
         private float _count;
 
         public void Assert(UnityEngine.Object context = null)
