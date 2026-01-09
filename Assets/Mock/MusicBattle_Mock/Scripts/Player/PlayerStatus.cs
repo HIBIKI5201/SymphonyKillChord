@@ -1,4 +1,5 @@
 using Mock.MusicBattle.Basis;
+using Mock.MusicBattle.Utility;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -27,7 +28,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> 攻撃範囲。 </summary>
         public float AttackRange => _attackRange;
         /// <summary> 攻撃時の硬直時間。 </summary>
-        public float PostAttackMoveLockDuration => _postAttackMoveLockDuration;
+        public BeatLength PostAttackMoveLockDuration => _postAttackMoveLockDuration;
         /// <summary> 最大ヘルス。 </summary>
         public float MaxHealth => _maxHealth;
         /// <summary> スペシャルアタックパターン群。 </summary>
@@ -64,7 +65,7 @@ namespace Mock.MusicBattle.Player
         [SerializeField, Tooltip("攻撃範囲。"), Min(0)]
         private float _attackRange = 10;
         [SerializeField, Tooltip("攻撃時の硬直時間"), Min(0)]
-        private float _postAttackMoveLockDuration = 1;
+        private BeatLength _postAttackMoveLockDuration = new(4, 1);
 
         [Header("防御")]
         /// <summary> 体力。 </summary>

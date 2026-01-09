@@ -107,7 +107,7 @@ namespace Mock.MusicBattle.Player
         {
             try
             {
-                float d = _status.PostAttackMoveLockDuration;
+                float d = (float)_status.PostAttackMoveLockDuration.GetLength(_musicSyncManager.MusicBuffer);
                 CancellationToken token = _player.destroyCancellationToken;
                 await Awaitable.WaitForSecondsAsync(d, token);
             }
