@@ -24,9 +24,11 @@ MonoBehaviour:
   - _rythemPattern: {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
     _modules:
     - rid: 4257077234884673633
+    - rid: 4257077234884673641
   - _rythemPattern: {fileID: 11400000, guid: 9c6b7ab83b084b34f8fc82388989a480, type: 2}
     _modules:
     - rid: 4257077234884673634
+    - rid: 4257077234884673645
   references:
     version: 2
     RefIds:
@@ -38,3 +40,11 @@ MonoBehaviour:
       type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
       data:
         _text: "3-3\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
+    - rid: 4257077234884673641
+      type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _queueName: Slash
+    - rid: 4257077234884673645
+      type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _queueName: Slash
