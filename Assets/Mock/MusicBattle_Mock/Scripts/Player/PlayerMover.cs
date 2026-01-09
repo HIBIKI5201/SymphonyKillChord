@@ -68,7 +68,7 @@ namespace Mock.MusicBattle.Player
             _isGround = isGround;
         }
 
-        public async void OnAttack(Task moveLockTask)
+        public async void MoveLock(Task moveLockTask)
         {
             if (moveLockTask  == null) { return; }
 
@@ -81,11 +81,11 @@ namespace Mock.MusicBattle.Player
         /// <summary>
         ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
         /// </summary>
-        public void Update()
+        public void Update(float delta)
         {
             if (_moveLock) { return; }
 
-            float t = CalculateAccelerationLerpT();
+            float t = CalculateAccelerationLerpT(delta);
             UpdateHorizontalVelocity(t);
             UpdateRotation();
         }
@@ -128,14 +128,14 @@ namespace Mock.MusicBattle.Player
         ///     加速度補間t値を計算します。
         /// </summary>
         /// <returns>加速度補間t値。</returns>
-        private float CalculateAccelerationLerpT()
+        private float CalculateAccelerationLerpT(float delta)
         {
             float acceleration = _targetVelocity.magnitude > 0f
                 ? _status.WalkAccelerationDuration
                 : _status.StopAccelerationDuration;
 
             float damping = Mathf.Max(acceleration, 0.0001f);
-            return 1f - Mathf.Exp(-Time.deltaTime / damping);
+            return 1f - Mathf.Exp(-delta / damping);
         }
 
         /// <summary>

@@ -98,8 +98,6 @@ namespace Mock.MusicBattle.Player
         private MusicSyncManager _musicSyncManager;
         /// <summary> 現在の入力ベクトル。 </summary>
         private Vector2 _input;
-        /// <summary> 現在の速度ベクトル。 </summary>
-        private Vector3 _velocity;
         /// <summary> 地面に接触しているコリジョンを管理するハッシュセット。 </summary>
         private readonly HashSet<Collision> _hitGrounds = new();
         #endregion
@@ -123,10 +121,10 @@ namespace Mock.MusicBattle.Player
         {
             if (_playerMover != null)
             {
-                _velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
-                _animController?.MoveVelocity(_velocity.magnitude);
-                _playerMover.SetPlayerVelocity(_velocity);
-                _playerMover.Update();
+                Vector2　velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
+                _animController?.MoveVelocity(velocity.magnitude);
+                _playerMover.SetPlayerVelocity(velocity);
+                _playerMover.Update(Time.deltaTime);
             }
         }
 
@@ -247,7 +245,7 @@ namespace Mock.MusicBattle.Player
                 }
 
                 OnAttacked?.Invoke(signature);
-                _playerMover.OnAttack(_playerAttacker.MoveLockTask);
+                _playerMover.MoveLock(_playerAttacker.MoveLockTask);
             }
         }
 
