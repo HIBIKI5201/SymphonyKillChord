@@ -21,6 +21,8 @@ namespace Mock.MusicBattle.Basis
         public InputActionEntity<float> LockOnSelectAction => _lockOnSelectActionEntity;
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         public InputActionEntity<float> AttackAction => _attackActionEntity;
+        /// <summary> 回避アクションのInputActionEntity。 </summary>
+        public InputActionEntity<float> DodgeAction => _dodgeActionEntity;
         #endregion
 
         #region インスペクター表示フィールド
@@ -36,6 +38,8 @@ namespace Mock.MusicBattle.Basis
         /// <summary> 攻撃アクションの名前。 </summary>
         [SerializeField, Tooltip("攻撃アクションの名前。")]
         private string _attackActionName = "Attack";
+        [SerializeField, Tooltip("回避アクションの名前")]
+        private string _dodgeActionName = "Dodge";
         #endregion
 
         #region プライベートフィールド
@@ -47,6 +51,8 @@ namespace Mock.MusicBattle.Basis
         private InputActionEntity<float> _lockOnSelectActionEntity;
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         private InputActionEntity<float> _attackActionEntity;
+        /// <summary> 回避アクションのInputActionEntity。 </summary>
+        private InputActionEntity<float> _dodgeActionEntity;
         #endregion
 
         #region Unityライフサイクルメソッド
@@ -63,6 +69,7 @@ namespace Mock.MusicBattle.Basis
                 _moveActionEntity = new(playerInput.actions[_moveActionName]);
                 _lockOnSelectActionEntity = new(playerInput.actions[_lockOnSelectActionName]);
                 _attackActionEntity = new(playerInput.actions[_attackActionName]);
+                _dodgeActionEntity = new(playerInput.actions[_dodgeActionName]);
             }
         }
 
