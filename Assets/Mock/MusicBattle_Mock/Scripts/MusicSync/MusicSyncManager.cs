@@ -58,7 +58,15 @@ namespace Mock.MusicBattle.MusicSync
         public bool IsMatchInputTimeSignature(RythemPatternData pattern)
         {
             ReadOnlySpan<float> signatureHistory = _inputHandler.GetSignatureHistory();
-            bool match = pattern.IsMatch(signatureHistory);
+
+            // ヒストリーはQueueでインデックスが高い方が最新なので、順番を逆転する
+            Span<float> reveartedHistory = stackalloc float[signatureHistory.Length];
+            for (int i = 0; i < signatureHistory.Length; i++)
+            {
+                reveartedHistory[i] = signatureHistory[^(i + 1)];
+            }
+
+            bool match = pattern.IsMatch(reveartedHistory);
 
             return match;
         }
