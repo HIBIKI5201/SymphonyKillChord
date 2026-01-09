@@ -18,6 +18,10 @@ namespace Mock.MusicBattle.Player
         public float StopAccelerationDuration => _stopAccelerationDuration;
         /// <summary> 回転減衰。 </summary>
         public float RotationDamping => _rotationDamping;
+        /// <summary> 回転減衰。 </summary>
+        public float DodgeDuration => _dodgeDuration;
+        /// <summary> 回転減衰。 </summary>
+        public float DodgeSpeed => _dodgeSpeed;
         /// <summary> 攻撃力。 </summary>
         public float AttackPower => _attackPower;
         /// <summary> 攻撃範囲。 </summary>
@@ -44,6 +48,13 @@ namespace Mock.MusicBattle.Player
         /// <summary> 回転減衰。 </summary>
         [SerializeField, Tooltip("回転減衰。"), Min(0)]
         private float _rotationDamping = 0.01f;
+
+        [Space]
+
+        [SerializeField, Tooltip("回避時間"), Min(0)]
+        private float _dodgeDuration = 1;
+        [SerializeField, Tooltip("回避速度"), Min(0)]
+        private float _dodgeSpeed = 1;
 
         [Header("攻撃")]
         /// <summary> 攻撃力。 </summary>
@@ -74,6 +85,9 @@ namespace Mock.MusicBattle.Player
             Debug.Assert(0 < _walkAccelerationDuration, "歩行時の加速時間が設定されていません。", this);
             Debug.Assert(0 < _stopAccelerationDuration, "停止時の加速時間が設定されていません。", this);
             Debug.Assert(0 < _rotationDamping, "回転減衰が設定されていません。", this);
+
+            Debug.Assert(0 < _dodgeDuration, "回避時間が設定されていません。", this);
+            Debug.Assert(0 < _dodgeSpeed, "回避速度が設定されていません。", this);
 
             // 攻撃。
             Debug.Assert(0 < _attackPower, "攻撃力が設定されていません。", this);
