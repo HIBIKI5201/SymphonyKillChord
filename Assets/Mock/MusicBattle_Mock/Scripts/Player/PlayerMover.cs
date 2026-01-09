@@ -77,11 +77,16 @@ namespace Mock.MusicBattle.Player
 
             Vector3 dir = _targetVelocity.normalized;
             Vector3 cul = _currentVelocity;
-            _currentVelocity = dir * _status.DodgeSpeed;
+            Vector3 tar = _targetVelocity;
+
+            Vector3 vel = dir * _status.DodgeSpeed;
+            _currentVelocity = vel;
+            _targetVelocity = vel;
 
             await Awaitable.WaitForSecondsAsync(_status.DodgeDuration, toknen);
 
             _currentVelocity = cul;
+            _targetVelocity = tar;
         }
 
         public async void InputLock(Task moveLockTask)
@@ -192,6 +197,7 @@ namespace Mock.MusicBattle.Player
         private void VelocityReset()
         {
             _currentVelocity = Vector3.zero;
+            _targetVelocity = Vector3.zero;
         }
         #endregion
     }
