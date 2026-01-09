@@ -123,7 +123,6 @@ namespace Mock.MusicBattle.Player
             if (_playerMover != null)
             {
                 Vector3　velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
-                Debug.Log($"{_input} {velocity}");
                 _animController?.MoveVelocity(velocity.magnitude);
                 _playerMover.SetPlayerVelocity(velocity);
                 _playerMover.Update(Time.deltaTime);
