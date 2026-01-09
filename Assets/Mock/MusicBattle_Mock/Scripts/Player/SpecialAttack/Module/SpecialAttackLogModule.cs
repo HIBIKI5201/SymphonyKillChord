@@ -4,7 +4,7 @@ namespace Mock.MusicBattle.Player
 {
     public class SpecialAttackLogModule : ISpecialAttackModule
     {
-        public void Execute()
+        public void Execute(SpecialAttackDTO dto)
         {
             string log = _text;
 
@@ -13,7 +13,7 @@ namespace Mock.MusicBattle.Player
                 log = "empty";
             }
 
-            Debug.Log(log);
+            Debug.Log(log, dto.Player);
         }
 
         [SerializeField]
