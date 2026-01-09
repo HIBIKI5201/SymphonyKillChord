@@ -1,8 +1,10 @@
 using Mock.MusicBattle.MusicSync;
+using System;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Utility
 {
+    [Serializable]
     public struct BeatLength
     {
         public BeatLength(float signature, float count)
@@ -27,7 +29,7 @@ namespace Mock.MusicBattle.Utility
         [SerializeField, Tooltip("数")]
         private float _count;
 
-        public void Assert(Object context = null)
+        public void Assert(UnityEngine.Object context = null)
         {
             Debug.Assert(0 < _signature, "拍子パラメータが設定されていません", context);
             Debug.Assert(0 < _count, "数パラメータが設定されていません", context);
