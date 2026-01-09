@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -29,6 +30,8 @@ namespace Mock.MusicBattle.Player
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
         public Vector3 CurrentVelocity => _currentVelocity;
+        /// <summary> 入力ロックが有効か。 </summary>
+        public bool IsInputLock => 0 < _inputLockTasks.Count;
         #endregion
 
         #region Publicメソッド
@@ -57,7 +60,7 @@ namespace Mock.MusicBattle.Player
         /// <param name="velocity">設定する目標速度。</param>
         public void SetPlayerVelocity(Vector3 velocity)
         {
-            if (_inputLock) { return; }
+            if (IsInputLock) { return; }
 
             _targetVelocity = velocity;
         }
@@ -75,7 +78,7 @@ namespace Mock.MusicBattle.Player
         {
             if (!_isGround) { return; }
 
-            Vector3 dir = _targetVelocity.normalized;
+            Vector3 dir = _player.transform.forward;
             Vector3 cul = _currentVelocity;
             Vector3 tar = _targetVelocity;
 
@@ -93,10 +96,10 @@ namespace Mock.MusicBattle.Player
         {
             if (moveLockTask  == null) { return; }
 
-            _inputLock = true;
             VelocityReset();
+            _inputLockTasks.AddLast(moveLockTask);
             await moveLockTask;
-            _inputLock = false;
+            _inputLockTasks.Remove(moveLockTask);
         }
 
         /// <summary>
@@ -127,8 +130,7 @@ namespace Mock.MusicBattle.Player
         private Vector3 _horizontalVelocity;
         /// <summary> 地面に接地しているかどうか。 </summary>
         private bool _isGround;
-        /// <summary> 移動がロックされているか。 </summary>
-        private bool _inputLock;
+        private LinkedList<Task> _inputLockTasks = new();
         #endregion
 
         #region Unityライフサイクルメソッド
