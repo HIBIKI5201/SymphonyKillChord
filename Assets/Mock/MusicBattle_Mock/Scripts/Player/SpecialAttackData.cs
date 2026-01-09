@@ -1,7 +1,6 @@
 using Mock.MusicBattle.MusicSync;
 using SymphonyFrameWork.Attribute;
 using System;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -39,7 +38,7 @@ namespace Mock.MusicBattle.Player
             for (int i = 0; i < _modules.Length; i++)
             {
                 ISpecialAttackModule module = _modules[i];
-                Debug.Assert(module != null, $"{i}番目のモジュールがnullです。",context);
+                Debug.Assert(module != null, $"{i}番目のモジュールがnullです。", context);
             }
         }
         #endregion
