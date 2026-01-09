@@ -46,6 +46,7 @@ namespace Mock.MusicBattle.Player
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform);
+            _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _gunSoundSource);
             _musicSyncManager = musicSync;
             InputEventRegister(_inputBuffer);
         }
@@ -87,6 +88,8 @@ namespace Mock.MusicBattle.Player
         private PlayerMover _playerMover;
         /// <summary> プレイヤーの攻撃処理。 </summary>
         private PlayerAttacker _playerAttacker;
+        /// <summary> スペシャル攻撃の処理。 </summary>
+        private SpecialAttacker _specialAttacker;
         /// <summary> プレイヤーのアニメーションコントローラー。 </summary>
         private PlayerAnimationController _animController;
         /// <summary> 音楽同期マネージャー。 </summary>
@@ -236,9 +239,9 @@ namespace Mock.MusicBattle.Player
                     _gunSoundSource.Play();
                 }
                 
-                if (_playerAttacker.CheckPatternMatch(out int index))
+                if (_specialAttacker.CheckPatternMatch(out int index))
                 {
-                    _playerStatus.SpecialAttackDatas[index].Excute();
+                    _specialAttacker.Execute(index);
                 }
 
                 OnAttacked?.Invoke(signature);
