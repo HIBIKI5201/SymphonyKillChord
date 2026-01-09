@@ -27,3 +27,14 @@
 ## 4. 考慮事項
 *   攻撃終了の正確なタイミング (`_isAttacking = false;` にするタイミング) が重要です。アニメーションシステムとの連携が必須になります。
 *   `PlayerManager` で `PlayerAttacker` と `PlayerMover` の依存関係を適切に解決する必要があります。
+
+## 5. 実装評価
+
+本計画は以下の実装によって実現されています。
+
+*   **PlayerAttacker.cs**: `_isAttacking` の代わりに `IsMoveLock` プロパティと `_moveLockTask` を使用し、非同期タスク (`PostAttackMoveLockAsync()`) によって移動ロック期間を管理しています。これにより、攻撃終了タイミングのアニメーションシステム連携がより自然に扱われています。
+*   **PlayerMover.cs**: `PlayerAttacker` のインスタンスを直接参照するのではなく、`PlayerAttacker.MoveLockTask` を `OnAttack` メソッドで受け取り、内部の `_moveLock` フラグと `VelocityReset()` を制御することで移動制限を行っています。
+*   **PlayerManager.cs**: `PlayerAttacker` と `PlayerMover` の初期化順序は計画通りですが、`PlayerAttacker` のインスタンスを`PlayerMover`のコンストラクタに渡すのではなく、`_playerMover.OnAttack(_playerAttacker.MoveLockTask);` という形で、攻撃処理後に`PlayerAttacker`の移動ロックタスクを`PlayerMover`に渡すことで依存関係を解決しています。
+
+**総括**:
+実装は計画書で提示されたアプローチとは一部異なるものの、機能要件「プレイヤーが攻撃中に移動できないようにする」を効果的に満たしています。特に、`Task`を用いた非同期処理による移動ロック期間の管理は、責務の分離、非同期イベントへの対応、および将来的な機能拡張においてより優れた設計と言えます。これにより、`PlayerMover`は具体的な`PlayerAttacker`の内部状態ではなく、抽象的な「移動ロックが必要な期間」に集中でき、より堅牢で保守性の高いシステムが構築されています。
