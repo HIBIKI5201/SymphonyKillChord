@@ -93,7 +93,7 @@ namespace Mock.MusicBattle.Player
             // 攻撃。
             Debug.Assert(0 < _attackPower, "攻撃力が設定されていません。", this);
             Debug.Assert(0 < _attackRange, "攻撃範囲が設定されていません。", this);
-            Debug.Assert(0 < _postAttackMoveLockDuration, "攻撃時の硬直時間が設定されていません。", this);
+            _postAttackMoveLockDuration.Assert(this);
 
             // 防御
             Debug.Assert(0 < _maxHealth, "体力が設定されていません。", this);

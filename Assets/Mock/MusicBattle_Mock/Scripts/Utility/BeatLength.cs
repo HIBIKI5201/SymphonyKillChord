@@ -26,5 +26,11 @@ namespace Mock.MusicBattle.Utility
         private float _signature;
         [SerializeField, Tooltip("数")]
         private float _count;
+
+        public void Assert(Object context = null)
+        {
+            Debug.Assert(0 < _signature, "拍子パラメータが設定されていません", context);
+            Debug.Assert(0 < _count, "数パラメータが設定されていません", context);
+        }
     }
 }
