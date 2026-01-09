@@ -1,4 +1,5 @@
 using CriWare;
+using System.Threading;
 using UnityEngine;
 
 namespace Mock.MusicBattle
@@ -7,13 +8,16 @@ namespace Mock.MusicBattle
     {
         public SpecialAttackDTO(
             GameObject playerObj,
-            CriAtomSource source)
+            CriAtomSource source,
+            CancellationToken destroyToken)
         {
             Player = playerObj;
             Source = source;
+            DestroyToken = destroyToken;
         }
 
         public readonly GameObject Player;
         public readonly CriAtomSource Source;
+        public readonly CancellationToken DestroyToken;
     }
 }

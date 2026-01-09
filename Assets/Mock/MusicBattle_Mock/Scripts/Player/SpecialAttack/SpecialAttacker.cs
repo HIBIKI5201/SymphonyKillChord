@@ -1,5 +1,6 @@
 using CriWare;
 using Mock.MusicBattle.MusicSync;
+using System.Threading;
 using Unity.Plastic.Antlr3.Runtime;
 using UnityEngine;
 
@@ -11,12 +12,14 @@ namespace Mock.MusicBattle.Player
             GameObject player,
             PlayerStatus status,
             MusicSyncManager musicSyncManager,
-            CriAtomSource source) 
+            CriAtomSource source, 
+            CancellationToken destroyCancellationToken) 
         { 
             _player = player;
             _status = status;
             _musicSyncManager = musicSyncManager;
             _source = source;
+            _destroyCancellationToken = destroyCancellationToken;
         }
 
         public bool CheckPatternMatch(out int index)
@@ -41,7 +44,8 @@ namespace Mock.MusicBattle.Player
         {
             SpecialAttackDTO dto = new(
                 _player,
-                _source
+                _source,
+                _destroyCancellationToken
                 );
 
             _status.SpecialAttackDatas[index].Execute(dto);
@@ -51,5 +55,6 @@ namespace Mock.MusicBattle.Player
         private readonly PlayerStatus _status;
         private readonly MusicSyncManager _musicSyncManager;
         private readonly CriAtomSource _source;
+        private readonly CancellationToken _destroyCancellationToken;
     }
 }
