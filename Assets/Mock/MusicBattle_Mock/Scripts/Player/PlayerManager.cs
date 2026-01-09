@@ -7,6 +7,7 @@ using Mock.MusicBattle.Battle;
 using CriWare;
 using System;
 using Mock.MusicBattle.MusicSync;
+using System.Threading.Tasks;
 
 namespace Mock.MusicBattle.Player
 {
@@ -189,6 +190,7 @@ namespace Mock.MusicBattle.Player
             inputBuffer.MoveAction.Performed += OnInputMove;
             inputBuffer.MoveAction.Canceled += OnInputMoveCancel;
             inputBuffer.AttackAction.Started += OnInputAttack;
+            inputBuffer.DodgeAction.Started += OnInputDodge;
             _healthEntity.OnDeath += OnDeathAction;
         }
 
@@ -201,6 +203,7 @@ namespace Mock.MusicBattle.Player
             inputBuffer.MoveAction.Performed -= OnInputMove;
             inputBuffer.MoveAction.Canceled -= OnInputMoveCancel;
             inputBuffer.AttackAction.Started -= OnInputAttack;
+            inputBuffer.DodgeAction.Started -= OnInputDodge;
             _healthEntity.OnDeath -= OnDeathAction;
         }
 
@@ -247,6 +250,16 @@ namespace Mock.MusicBattle.Player
                 OnAttacked?.Invoke(signature);
                 _playerMover.MoveLock(_playerAttacker.MoveLockTask);
             }
+        }
+
+        /// <summary>
+        ///     回避入力があった時に呼ばれます。
+        /// </summary>
+        /// <param name="input"></param>
+        private void OnInputDodge(float input)
+        {
+            Task task = _playerMover.Dodge(destroyCancellationToken);
+            _playerMover.MoveLock(task);
         }
 
         /// <summary>
