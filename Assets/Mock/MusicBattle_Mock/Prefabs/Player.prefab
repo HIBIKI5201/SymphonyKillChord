@@ -653,15 +653,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.0186191
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.00000047683716
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 8.64
       objectReference: {fileID: 0}
     - target: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
       propertyPath: m_LocalRotation.w
@@ -908,6 +908,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8523454837323722002}
+    - targetCorrespondingSourceObject: {fileID: -1728013695380148634, guid: d91034d52857be0498686f7803764974, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3514206925098008025}
   m_SourcePrefab: {fileID: -3956505258223990651, guid: d91034d52857be0498686f7803764974, type: 3}
 --- !u!1 &129569542850711083 stripped
 GameObject:
@@ -931,6 +934,7 @@ MonoBehaviour:
   _signatureDatabase: {fileID: 11400000, guid: ebd79329e911f5d4aa46c7a225d64f3a, type: 2}
   _pivotTransform: {fileID: 7252400935441454637}
   _gunSoundSource: {fileID: 8523454837323722002}
+  _specialAttackSource: {fileID: 3514206925098008025}
 --- !u!114 &60009445536760728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1047,8 +1051,41 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot
+  _cueName: 
   _cueSheet: GunSound
+--- !u!114 &3514206925098008025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129569542850711083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 0
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: 
+  _cueSheet: SpecialAttack
 --- !u!4 &3337225036644969533 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}

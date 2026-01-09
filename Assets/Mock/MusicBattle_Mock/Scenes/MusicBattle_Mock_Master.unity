@@ -347,15 +347,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: cueSheets.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: cueSheets.Array.data[1].name
       value: GunSound
       objectReference: {fileID: 0}
     - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: cueSheets.Array.data[2].name
+      value: SpecialAttack
+      objectReference: {fileID: 0}
+    - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
       propertyPath: cueSheets.Array.data[1].acbFile
       value: GunSound.acb
+      objectReference: {fileID: 0}
+    - target: {fileID: 7642897963079809262, guid: 18d60802a19bfeb4580b2a4562c0d3de, type: 3}
+      propertyPath: cueSheets.Array.data[2].acbFile
+      value: SpecialAttack.acb
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
