@@ -39,6 +39,7 @@ namespace Mock.MusicBattle.Player
             {
                 ISpecialAttackModule module = _modules[i];
                 Debug.Assert(module != null, $"{i}番目のモジュールがnullです。", context);
+                module?.Assert(context);
             }
         }
         #endregion
