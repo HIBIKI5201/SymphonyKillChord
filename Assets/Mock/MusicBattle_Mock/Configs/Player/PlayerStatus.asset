@@ -25,10 +25,12 @@ MonoBehaviour:
     _modules:
     - rid: 4257077234884673633
     - rid: 4257077234884673641
+    - rid: 4257077234884673649
   - _rythemPattern: {fileID: 11400000, guid: 9c6b7ab83b084b34f8fc82388989a480, type: 2}
     _modules:
     - rid: 4257077234884673634
     - rid: 4257077234884673645
+    - rid: 4257077234884673650
   references:
     version: 2
     RefIds:
@@ -48,3 +50,13 @@ MonoBehaviour:
       type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
       data:
         _queueName: Slash
+    - rid: 4257077234884673649
+      type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
+      data:
+        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _offset: {x: 0, y: 1, z: 0}
+    - rid: 4257077234884673650
+      type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
+      data:
+        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _offset: {x: 0, y: 2, z: 0}
