@@ -57,6 +57,8 @@ namespace Mock.MusicBattle.Player
         /// <param name="velocity">設定する目標速度。</param>
         public void SetPlayerVelocity(Vector3 velocity)
         {
+            if (_inputLock) { return; }
+
             _targetVelocity = velocity;
         }
 
@@ -82,23 +84,21 @@ namespace Mock.MusicBattle.Player
             _currentVelocity = cul;
         }
 
-        public async void MoveLock(Task moveLockTask)
+        public async void InputLock(Task moveLockTask)
         {
             if (moveLockTask  == null) { return; }
 
-            _moveLock = true;
+            _inputLock = true;
             VelocityReset();
             await moveLockTask;
-            _moveLock = false;
+            _inputLock = false;
         }
 
         /// <summary>
         ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
         /// </summary>
         public void Update(float delta)
-        {
-            if (_moveLock) { return; }
-
+        { 
             float t = CalculateAccelerationLerpT(delta);
             UpdateHorizontalVelocity(t);
             UpdateRotation();
@@ -123,7 +123,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> 地面に接地しているかどうか。 </summary>
         private bool _isGround;
         /// <summary> 移動がロックされているか。 </summary>
-        private bool _moveLock;
+        private bool _inputLock;
         #endregion
 
         #region Unityライフサイクルメソッド

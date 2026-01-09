@@ -249,7 +249,7 @@ namespace Mock.MusicBattle.Player
                 }
 
                 OnAttacked?.Invoke(signature);
-                _playerMover.MoveLock(_playerAttacker.MoveLockTask);
+                _playerMover.InputLock(_playerAttacker.MoveLockTask);
             }
         }
 
@@ -260,7 +260,7 @@ namespace Mock.MusicBattle.Player
         private void OnInputDodge(float input)
         {
             Task task = _playerMover.Dodge(destroyCancellationToken);
-            _playerMover.MoveLock(task);
+            _playerMover.InputLock(task);
         }
 
         /// <summary>
