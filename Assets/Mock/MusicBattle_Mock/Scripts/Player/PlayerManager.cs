@@ -46,7 +46,7 @@ namespace Mock.MusicBattle.Player
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
             _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform);
-            _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _specialAttackSource);
+            _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _specialAttackSource, destroyCancellationToken);
             _musicSyncManager = musicSync;
             InputEventRegister(_inputBuffer);
         }
