@@ -61,24 +61,6 @@ namespace Mock.MusicBattle.Player
             _moveLockTask = PostAttackMoveLockAsync();
             return true;
         }
-
-        public bool CheckPatternMatch(out int index)
-        {
-            for (int i = 0; i < _status.SpecialAttackDatas.Length; i++)
-            {
-                RythemPatternData data = _status.SpecialAttackDatas[i].RythemPattern;
-                if (_musicSyncManager.IsMatchInputTimeSignature(data))
-                {
-                    Debug.Log($"MusicSync Signature Pattern Matched! Pattern: {string.Join(", ", data.SignaturePattern.ToArray())}");
-
-                    index = i;
-                    return true;
-                }
-            }
-
-            index = -1;
-            return false;
-        }
         #endregion
 
         #region 定数
