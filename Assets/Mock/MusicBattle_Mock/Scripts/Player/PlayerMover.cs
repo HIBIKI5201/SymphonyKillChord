@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -66,6 +67,19 @@ namespace Mock.MusicBattle.Player
         public void SetIsGround(bool isGround)
         {
             _isGround = isGround;
+        }
+
+        public async Task Dodge(CancellationToken toknen = default)
+        {
+            if (!_isGround) { return; }
+
+            Vector3 dir = _targetVelocity.normalized;
+            Vector3 cul = _currentVelocity;
+            _currentVelocity = dir * _status.DodgeSpeed;
+
+            await Awaitable.WaitForSecondsAsync(_status.DodgeDuration, toknen);
+
+            _currentVelocity = cul;
         }
 
         public async void MoveLock(Task moveLockTask)
