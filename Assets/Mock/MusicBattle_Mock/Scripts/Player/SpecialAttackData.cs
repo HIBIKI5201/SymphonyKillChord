@@ -15,11 +15,11 @@ namespace Mock.MusicBattle.Player
         #endregion
 
         #region Publicメソッド
-        public void Excute()
+        public void Execute(SpecialAttackDTO dto)
         {
             foreach (ISpecialAttackModule module in _modules)
             {
-                module?.Execute();
+                module?.Execute(dto);
             }
         }
         #endregion
