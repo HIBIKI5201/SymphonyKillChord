@@ -1,7 +1,6 @@
 using CriWare;
 using Mock.MusicBattle.MusicSync;
 using System.Threading;
-using Unity.Plastic.Antlr3.Runtime;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
