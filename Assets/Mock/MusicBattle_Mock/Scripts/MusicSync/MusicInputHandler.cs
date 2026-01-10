@@ -47,6 +47,7 @@ namespace Mock.MusicBattle.MusicSync
             // 最も近い標準拍タイミング（単位：拍数）
             double quantizedBeat = CalcQuantizedBeat(lastBeat, detectedTimeSignatureIndex);
 
+            _debugLog.AppendLine($"bpm:{_musicBuffer.CurrentBpm}, beat:{_musicBuffer.CurrentBeat}");
             _debugLog.AppendLine($"Input Beat: {currentBeat:F3}, Last Beat: {lastBeat:F3}, Between: {betweenBeat:F3}");
             _debugLog.AppendLine($"Detected Beat Length: {GetBeatLength(detectedTimeSignatureIndex):F3} ({_timeSignatures[detectedTimeSignatureIndex]}拍子)");
             _debugLog.AppendLine($"Quantized Beat: {quantizedBeat:F3}");
