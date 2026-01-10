@@ -45,7 +45,7 @@ namespace Mock.MusicBattle
             // 解放処理を予約。
             token.Register(() =>
             {
-                if (vfx.gameObject != null)
+                if (vfx?.gameObject != null)
                 {
                     Object.Destroy(vfx.gameObject);
                 }
