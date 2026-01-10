@@ -41,9 +41,15 @@ namespace Mock.MusicBattle
         {
             VisualEffect vfx = Object.Instantiate(_vfxPrefab);
             _vfxInstance = vfx;
+
+            // 解放処理を予約。
             token.Register(() =>
             {
-                Object.Destroy(vfx.gameObject);
+                if (vfx.gameObject != null)
+                {
+                    Object.Destroy(vfx.gameObject);
+                }
+
                 _vfxInstance = null;
             });
 
