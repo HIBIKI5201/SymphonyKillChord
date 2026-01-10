@@ -11,7 +11,7 @@ namespace Mock.MusicBattle.Utility
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static T AddOrGetComponent<T>(this GameObject obj) where T : Object
+        public static T AddOrGetComponent<T>(this GameObject obj) where T : Component
         {
             if (obj.TryGetComponent(out T component))
             {
@@ -19,7 +19,7 @@ namespace Mock.MusicBattle.Utility
             }
             else
             {
-                return obj.AddOrGetComponent<T>();
+                return obj.AddComponent<T>();
             }
         }
     }
