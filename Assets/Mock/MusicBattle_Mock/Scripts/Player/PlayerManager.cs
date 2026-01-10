@@ -1,13 +1,13 @@
+using CriWare;
 using Mock.MusicBattle.Basis;
-using System.Collections.Generic;
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Character;
+using Mock.MusicBattle.MusicSync;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
-using Mock.MusicBattle.Battle;
-using CriWare;
-using System;
-using Mock.MusicBattle.MusicSync;
-using System.Threading.Tasks;
 
 namespace Mock.MusicBattle.Player
 {
@@ -42,13 +42,13 @@ namespace Mock.MusicBattle.Player
         {
             _inputBuffer = inputBuffer;
             _lockOnManager = lockOnManager;
+            _musicSyncManager = musicSync;
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
             _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
-            _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform);
+            _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform, musicSync);
             _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _specialAttackSource, destroyCancellationToken);
-            _musicSyncManager = musicSync;
             InputEventRegister(_inputBuffer);
         }
 
@@ -110,8 +110,8 @@ namespace Mock.MusicBattle.Player
         /// </summary>
         private void OnDisable()
         {
-            if(_inputBuffer != null)
-            InputEventUnregister(_inputBuffer);
+            if (_inputBuffer != null)
+                InputEventUnregister(_inputBuffer);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Mock.MusicBattle.Player
         {
             if (_playerMover != null)
             {
-                Vector3　velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
+                Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
                 _animController?.MoveVelocity(velocity.magnitude);
                 _playerMover.SetPlayerVelocity(velocity);
                 _playerMover.Update(Time.deltaTime);
@@ -231,25 +231,29 @@ namespace Mock.MusicBattle.Player
         /// <param name="input">入力値（未使用）。</param>
         private void OnInputAttack(float input)
         {
-            if (_playerAttacker != null)
-            {
-                ICharacter target = _lockOnManager.LockOnTarget;
-                float signature = _musicSyncManager.GetInputTimeSignature();
-                _playerAttacker.Attack(target, signature);
-                if (_gunSoundSource != null)
-                {
-                    _gunSoundSource.cueName = _signatureDatabase.GetSeCueNameBySignature(signature);
-                    _gunSoundSource.Play();
-                }
-                
-                if (_specialAttacker.CheckPatternMatch(out int index))
-                {
-                    _specialAttacker.Execute(index);
-                }
+            if (_playerAttacker == null) { return; }
+            if (_playerMover == null) { return; }
+            if (_specialAttacker == null) { return; }
+            if (_playerMover.IsDodging) { return; } // 回避中は攻撃不可。
 
-                OnAttacked?.Invoke(signature);
-                _playerMover.InputLock(_playerAttacker.MoveLockTask);
+            ICharacter target = _lockOnManager.LockOnTarget;
+            float signature = _musicSyncManager.GetInputTimeSignature();
+            _playerAttacker.Attack(target, signature);
+
+            if (_gunSoundSource != null)
+            {
+                _gunSoundSource.cueName = _signatureDatabase.GetSeCueNameBySignature(signature);
+                _gunSoundSource.Play();
             }
+
+            if (_specialAttacker.CheckPatternMatch(out int index))
+            {
+                _specialAttacker.Execute(index);
+            }
+
+            OnAttacked?.Invoke(signature);
+            _playerMover.InputLock(_playerAttacker.MoveLockTask);
+            _playerMover.VelocityReset();
         }
 
         /// <summary>
