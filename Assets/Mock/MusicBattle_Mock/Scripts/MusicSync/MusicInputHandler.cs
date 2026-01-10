@@ -168,7 +168,6 @@ namespace Mock.MusicBattle.MusicSync
 
         /// <summary>
         ///     入力の標準拍タイミングを算出する
-        ///     前回入力からの間隔が最も長い拍子のを超えている場合、補正計算を行い、
         ///     BGMの固有拍子に基づき、直近の標準拍タイミングを計算結果とする
         /// </summary>
         /// <param name="lastBeat">前回入力タイミング</param>
@@ -176,49 +175,14 @@ namespace Mock.MusicBattle.MusicSync
         /// <returns>BGM再生開始から今回入力直近までの長さ</returns>
         private double CalcQuantizedBeat(double lastBeat, int signatureIndex)
         {
-            // 前回入力からの間隔が最長拍未満の場合、前回入力 + 検出拍子長さとする。
             // 検出された拍子の長さ（拍数単位）
             double beatLength = GetBeatLength(signatureIndex);
-            if (signatureIndex != _longestSignatureIndex)
-            {
-                return lastBeat + beatLength;
-            }
 
-            // 前回入力からの間隔が最長拍以上の場合、追いかけ処理を行う。
-            double ret = lastBeat;
-            bool loopEndFlg = false;
-            while (!loopEndFlg)
-            {
-                // 前回入力タイミングから、最長拍子の拍長を1回ずつ、超えない所まで加算する。
-                if (ret + beatLength < _musicBuffer.CurrentBeat)
-                {
-                    ret += beatLength;
-                }
-                else
-                {
-                    // そしてBGM固有拍子の拍長を1拍分ずつ加算し、入力時間直前の標準拍タイミングを算出する。
-                    while (!loopEndFlg)
-                    {
-                        if (ret + 1d < _musicBuffer.CurrentBeat)
-                        {
-                            ret += 1d;
-                        }
-                        else
-                        {
-                            loopEndFlg = true;
-                        }
-                    }
-                }
-            }
-            // 最後に、入力ずれを補正する。入力が次の拍に近い場合、結果を次の拍とする。
-            StringBuilder logStr = new StringBuilder($"最後の入力ズレ補正。補正前の結果：{ret}、現在拍：{_musicBuffer.CurrentBeat}");
+            // 現在の拍（CurrentBeat）を、検出された拍の長さ（beatLength）で割り、
+            // 最も近い整数倍の拍を計算することで、音楽のグリッドにスナップさせる。
+            double quantizedBeat = Math.Round(_musicBuffer.CurrentBeat / beatLength) * beatLength;
 
-            // 前の標準拍から入力までの長さが補正閾値を超えている場合、次の標準拍とする。
-            ret += _musicBuffer.CurrentBeat - ret > _configs.InputFixThreshold ? 1d : 0d;
-
-            logStr.AppendLine($"補正後の結果：{ret}");
-            Debug.Log(logStr.ToString());
-            return ret;
+            return quantizedBeat;
         }
 
         /// <summary>
