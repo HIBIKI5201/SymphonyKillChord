@@ -1,3 +1,4 @@
+using Mock.MusicBattle.MusicSync;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,18 +19,23 @@ namespace Mock.MusicBattle.Player
         /// <param name="rb">プレイヤーのRigidbody。</param>
         /// <param name="player">プレイヤーのTransform。</param>
         /// <param name="camera">カメラのTransform。</param>
-        public PlayerMover(PlayerStatus status, Rigidbody rb, Transform player, Transform camera)
+        public PlayerMover(PlayerStatus status,
+            Rigidbody rb, Transform player, Transform camera,
+            MusicSyncManager musicSyncManager)
         {
             _status = status;
             _player = player;
             _camera = camera;
             _rb = rb;
+            _musicSync = musicSyncManager;
         }
         #endregion
 
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
         public Vector3 CurrentVelocity => _currentVelocity;
+        /// <summary> 回避中かどうか。 </summary>
+        public bool IsDodging => _isDodging;
         /// <summary> 入力ロックが有効か。 </summary>
         public bool IsInputLock => 0 < _inputLockTasks.Count;
         #endregion
@@ -65,6 +71,12 @@ namespace Mock.MusicBattle.Player
             _targetVelocity = velocity;
         }
 
+        public void VelocityReset()
+        {
+            _currentVelocity = Vector3.zero;
+            _targetVelocity = Vector3.zero;
+        }
+
         /// <summary>
         ///     プレイヤーが地面に接地している状態を設定します。
         /// </summary>
@@ -86,7 +98,12 @@ namespace Mock.MusicBattle.Player
             _currentVelocity = vel;
             _targetVelocity = vel;
 
-            await Awaitable.WaitForSecondsAsync(_status.DodgeDuration, toknen);
+            _isDodging = true;
+
+            await Awaitable.WaitForSecondsAsync(
+                (float)_status.DodgeDuration.GetLength(_musicSync.MusicBuffer), toknen);
+
+            _isDodging = false;
 
             _currentVelocity = cul;
             _targetVelocity = tar;
@@ -96,7 +113,6 @@ namespace Mock.MusicBattle.Player
         {
             if (moveLockTask  == null) { return; }
 
-            VelocityReset();
             _inputLockTasks.AddLast(moveLockTask);
             await moveLockTask;
             _inputLockTasks.Remove(moveLockTask);
@@ -122,6 +138,8 @@ namespace Mock.MusicBattle.Player
         private readonly Transform _camera;
         /// <summary> プレイヤーのRigidbody。 </summary>
         private readonly Rigidbody _rb;
+        /// <summary> 音楽同期システム。 </summary>
+        private readonly MusicSyncManager _musicSync;
         /// <summary> 現在の速度。 </summary>
         private Vector3 _currentVelocity;
         /// <summary> 目標の速度。 </summary>
@@ -130,6 +148,9 @@ namespace Mock.MusicBattle.Player
         private Vector3 _horizontalVelocity;
         /// <summary> 地面に接地しているかどうか。 </summary>
         private bool _isGround;
+        /// <summary> 回避中かどうか。 </summary>
+        private bool _isDodging;
+        /// <summary> 入力ロックされているかどうか。 </summary>
         private LinkedList<Task> _inputLockTasks = new();
         #endregion
 
@@ -194,12 +215,6 @@ namespace Mock.MusicBattle.Player
             {
                 _player.LookAt(_player.position + dir.normalized);
             }
-        }
-
-        private void VelocityReset()
-        {
-            _currentVelocity = Vector3.zero;
-            _targetVelocity = Vector3.zero;
         }
         #endregion
     }
