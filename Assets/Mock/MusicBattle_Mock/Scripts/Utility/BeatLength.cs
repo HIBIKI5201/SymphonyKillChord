@@ -29,10 +29,12 @@ namespace Mock.MusicBattle.Utility
         [SerializeField, Tooltip("数"), Min(0)]
         private float _count;
 
+        #region デバッグ
         public void Assert(UnityEngine.Object context = null)
         {
             Debug.Assert(0 < _signature, "拍子パラメータが設定されていません", context);
             Debug.Assert(0 < _count, "数パラメータが設定されていません", context);
         }
+        #endregion
     }
 }

@@ -16,9 +16,11 @@ MonoBehaviour:
   _walkAccelerationDuration: 0.1
   _stopAccelerationDuration: 0.1
   _rotationDamping: 0.5
+  _dodgeDuration: 1
+  _dodgeSpeed: 15
   _attackPower: 50
   _attackRange: 10
-  _postAttackMoveLockDuration: 0.2
+  _postAttackMoveLockDuration: 0.57
   _maxHealth: 1000
   _specialAttackDatas:
   - _rythemPattern: {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
