@@ -16,11 +16,15 @@ MonoBehaviour:
   _walkAccelerationDuration: 0.1
   _stopAccelerationDuration: 0.1
   _rotationDamping: 0.5
-  _dodgeDuration: 1
+  _dodgeDuration:
+    _signature: 4
+    _count: 1
   _dodgeSpeed: 15
   _attackPower: 50
   _attackRange: 10
-  _postAttackMoveLockDuration: 0.57
+  _postAttackMoveLockDuration:
+    _signature: 4
+    _count: 1
   _maxHealth: 1000
   _specialAttackDatas:
   - _rythemPattern: {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
@@ -33,17 +37,27 @@ MonoBehaviour:
     - rid: 4257077234884673634
     - rid: 4257077234884673645
     - rid: 4257077234884673650
+  - _rythemPattern: {fileID: 11400000, guid: af921b3da9556d44193e22c922706bdb, type: 2}
+    _modules:
+    - rid: 4257077256254390480
+    - rid: 4257077256254390481
+    - rid: 4257077256254390482
+  - _rythemPattern: {fileID: 11400000, guid: 504736c0dab22b84c8980b84531f6db4, type: 2}
+    _modules:
+    - rid: 4257077256254390483
+    - rid: 4257077256254390484
+    - rid: 4257077256254390485
   references:
     version: 2
     RefIds:
     - rid: 4257077234884673633
       type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
       data:
-        _text: "4-4\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
+        _text: "4\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
     - rid: 4257077234884673634
       type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
       data:
-        _text: "3-3\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
+        _text: "3\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
     - rid: 4257077234884673641
       type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
       data:
@@ -61,4 +75,30 @@ MonoBehaviour:
       type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
       data:
         _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
-        _offset: {x: 0, y: 2, z: 0}
+        _offset: {x: 0, y: 1, z: 0}
+    - rid: 4257077256254390480
+      type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _text: "6\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
+    - rid: 4257077256254390481
+      type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _queueName: Slash
+    - rid: 4257077256254390482
+      type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
+      data:
+        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _offset: {x: 0, y: 1, z: 0}
+    - rid: 4257077256254390483
+      type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _text: "8\u30B9\u30DA\u30B7\u30E3\u30EB\u653B\u6483\u304C\u767A\u52D5"
+    - rid: 4257077256254390484
+      type: {class: SpecialAttackSoundModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
+      data:
+        _queueName: Slash
+    - rid: 4257077256254390485
+      type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
+      data:
+        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _offset: {x: 0, y: 0, z: 0}
