@@ -139,6 +139,7 @@ MonoBehaviour:
   _battaleSo: {fileID: 11400000, guid: 9234d8bc500ef4f409d42f51fe29adbc, type: 2}
   _encountSo: {fileID: 11400000, guid: afd4f63fe273cad44b2a8f89aff011a7, type: 2}
   _pivotTransform: {fileID: 7373699615469386517}
+  _attackDecal: {fileID: 7254779290812256810}
 --- !u!195 &2280656541417241638
 NavMeshAgent:
   m_ObjectHideFlags: 0
