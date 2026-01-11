@@ -3,6 +3,7 @@ using Mock.MusicBattle.MusicSync;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering.Universal;
 
 namespace Mock.MusicBattle.Enemy
 {
@@ -50,6 +51,7 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> 敵がロックオンされているかどうか。 </summary>
         public bool IsLockOn => _isLockOn;
         #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     敵の初期化をまとめた関数。
@@ -63,6 +65,7 @@ namespace Mock.MusicBattle.Enemy
             SetTarget(target);
             InitializeMover();
             InitMusic(musicMg);
+            _attackIndicater = new(_attackDecal);
             transform.position = position;
         }
 
@@ -121,6 +124,7 @@ namespace Mock.MusicBattle.Enemy
         /// <param name="damage">与えるダメージ量。</param>
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
         #endregion
+
         #region インスペクター表示フィールド
         /// <summary> エネミーのステータス。 </summary>
         [SerializeField, Tooltip("エネミーのステータス。")]
@@ -134,6 +138,8 @@ namespace Mock.MusicBattle.Enemy
         /// <summary> エネミーのピボット位置。 </summary>
         [SerializeField, Tooltip("エネミーのピボット位置。")]
         private Transform _pivotTransform;
+        [SerializeField, Tooltip("敵の攻撃インジケーター")]
+        private DecalProjector _attackDecal;
         #endregion
 
         #region プライベートフィールド
@@ -153,6 +159,8 @@ namespace Mock.MusicBattle.Enemy
         private EnemyMover _enemyMover;
         /// <summary> エネミーの攻撃処理。 </summary>
         private EnemyAttack _enemyAttack;
+        /// <summary> 攻撃インジケーター。 </summary>
+        private AttackIndicater _attackIndicater;
         /// <summary> ロックオン状態かどうかを示すフラグ。 </summary>
         private bool _isLockOn = false;
         #endregion
