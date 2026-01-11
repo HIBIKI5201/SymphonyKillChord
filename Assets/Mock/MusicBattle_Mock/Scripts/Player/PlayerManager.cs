@@ -19,7 +19,7 @@ namespace Mock.MusicBattle.Player
     {
         #region Publicイベント
         /// <summary> プレイヤーが攻撃を行ったときに発火するイベント。 </summary>
-        public event Action<float> OnAttacked;
+        public event Action<float> OnMusicSyncInputed;
         #endregion
 
         #region パブリックプロパティ
@@ -251,7 +251,7 @@ namespace Mock.MusicBattle.Player
                 _specialAttacker.Execute(index);
             }
 
-            OnAttacked?.Invoke(signature);
+            OnMusicSyncInputed?.Invoke(signature);
             _playerMover.InputLock(_playerAttacker.MoveLockTask);
             _playerMover.VelocityReset();
         }
@@ -262,6 +262,8 @@ namespace Mock.MusicBattle.Player
         /// <param name="input"></param>
         private void OnInputDodge(float input)
         {
+            float signature = _musicSyncManager.GetInputTimeSignature(); // ノーツを記録。
+            OnMusicSyncInputed?.Invoke(signature);
             Task task = _playerMover.Dodge(destroyCancellationToken);
             _playerMover.InputLock(task);
         }
