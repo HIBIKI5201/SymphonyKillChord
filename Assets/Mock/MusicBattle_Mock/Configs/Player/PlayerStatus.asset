@@ -24,7 +24,7 @@ MonoBehaviour:
   _attackRange: 10
   _postAttackMoveLockDuration:
     _signature: 4
-    _count: 1
+    _count: 0.8
   _maxHealth: 1000
   _specialAttackDatas:
   - _rythemPattern: {fileID: 11400000, guid: ffd2bd68e778ed846b9285048014a81c, type: 2}
