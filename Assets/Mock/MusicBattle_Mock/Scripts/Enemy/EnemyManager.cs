@@ -64,8 +64,8 @@ namespace Mock.MusicBattle.Enemy
             _healthEntity = new HealthEntity(_enemyStatus.MaxHealth);
             SetTarget(target);
             InitializeMover();
-            InitMusic(musicMg);
             _attackIndicater = new(_attackDecal);
+            InitMusic(musicMg);
             transform.position = position;
         }
 
@@ -99,7 +99,7 @@ namespace Mock.MusicBattle.Enemy
         {
             _musicSyncManager = music;
             _enemyAttack = new EnemyAttack(this, _musicSyncManager,
-                _encountSo, _battaleSo, _player, _enemyStatus);
+                _encountSo, _battaleSo, _player, _enemyStatus, _attackIndicater);
         }
 
         /// <summary>
