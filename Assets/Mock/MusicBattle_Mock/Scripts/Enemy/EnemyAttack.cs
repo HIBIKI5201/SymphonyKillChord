@@ -1,8 +1,6 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Character;
-using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
-using Mock.MusicBattle.Player;
 using System;
 using System.Threading;
 using UnityEngine;
