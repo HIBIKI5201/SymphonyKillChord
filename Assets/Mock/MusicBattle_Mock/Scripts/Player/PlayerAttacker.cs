@@ -16,12 +16,11 @@ namespace Mock.MusicBattle.Player
         /// <summary>
         ///    コンストラクタ。
         /// </summary>
-        public PlayerAttacker(PlayerStatus status, PlayerConfig config, PlayerManager player, MusicSyncManager musicSyncManager)
+        public PlayerAttacker(PlayerStatusTransfer status, PlayerConfig config, PlayerManager player, MusicSyncManager musicSyncManager)
         {
             _status = status;
             _config = config;
             _player = player;
-            _musicSyncManager = musicSyncManager;
         }
         #endregion
 
@@ -55,7 +54,7 @@ namespace Mock.MusicBattle.Player
                 return false;
             }
 
-            float attackPower = _status.AttackPower * 4 / signature;
+            float attackPower = _status.Value.AttackPower * 4 / signature;
             target.TakeDamage(attackPower);
 
             _moveLockTask = PostAttackMoveLockAsync();
@@ -72,11 +71,9 @@ namespace Mock.MusicBattle.Player
         /// <summary> プレイヤーのマネージャクラス。 </summary>
         private readonly PlayerManager _player;
         /// <summary> プレイヤーのステータス。 </summary>
-        private readonly PlayerStatus _status;
+        private readonly PlayerStatusTransfer _status;
         /// <summary> プレイヤーの設定。 </summary>
         private readonly PlayerConfig _config;
-        /// <summary> 音楽同期システムのマネージャ。 </summary>
-        private readonly MusicSyncManager _musicSyncManager;
 
         private Task _moveLockTask;
         #endregion
@@ -92,7 +89,7 @@ namespace Mock.MusicBattle.Player
         {
             if (Physics.Raycast(origin, (target.Pivot - origin).normalized,
                     out RaycastHit hitInfo,
-                    _status.AttackRange, ~_config.IgnoreAttackLayer))
+                    _status.Value.AttackRange, ~_config.IgnoreAttackLayer))
             {
                 Rigidbody rb = hitInfo.collider.attachedRigidbody;
                 Debug.Log($"Hit: {hitInfo.collider.name} {rb?.name}");
@@ -107,7 +104,7 @@ namespace Mock.MusicBattle.Player
         {
             try
             {
-                float d = (float)_status.PostAttackMoveLockDuration.GetLength(_musicSyncManager.MusicBuffer);
+                float d = (float)_status.PostAttackMoveLockDuration;
                 CancellationToken token = _player.destroyCancellationToken;
                 await Awaitable.WaitForSecondsAsync(d, token);
             }
@@ -119,7 +116,7 @@ namespace Mock.MusicBattle.Player
         private void AttackGizmoLine(Vector3 origin, Vector3 direction)
         {
             Vector3 s = origin;
-            Vector3 e = origin + direction * _status.AttackRange;
+            Vector3 e = origin + direction * _status.Value.AttackRange;
             Debug.DrawLine(s, e, Color.red, 2);
         }
         #endregion

@@ -1,4 +1,3 @@
-using Mock.MusicBattle.MusicSync;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,15 +18,13 @@ namespace Mock.MusicBattle.Player
         /// <param name="rb">プレイヤーのRigidbody。</param>
         /// <param name="player">プレイヤーのTransform。</param>
         /// <param name="camera">カメラのTransform。</param>
-        public PlayerMover(PlayerStatus status,
-            Rigidbody rb, Transform player, Transform camera,
-            MusicSyncManager musicSyncManager)
+        public PlayerMover(PlayerStatusTransfer status,
+            Rigidbody rb, Transform player, Transform camera)
         {
             _status = status;
             _player = player;
             _camera = camera;
             _rb = rb;
-            _musicSync = musicSyncManager;
         }
         #endregion
 
@@ -57,7 +54,7 @@ namespace Mock.MusicBattle.Player
             Vector3 moveDir = cameraForward * inputDirection.y + cameraRight * inputDirection.x;
             moveDir.y = 0f;
 
-            return moveDir.normalized * _status.MoveSpeed;
+            return moveDir.normalized * _status.Value.MoveSpeed;
         }
 
         /// <summary>
@@ -94,14 +91,14 @@ namespace Mock.MusicBattle.Player
             Vector3 cul = _currentVelocity;
             Vector3 tar = _targetVelocity;
 
-            Vector3 vel = dir * _status.DodgeSpeed;
+            Vector3 vel = dir * _status.Value.DodgeSpeed;
             _currentVelocity = vel;
             _targetVelocity = vel;
 
             _isDodging = true;
 
             await Awaitable.WaitForSecondsAsync(
-                (float)_status.DodgeDuration.GetLength(_musicSync.MusicBuffer), toknen);
+                (float)_status.DodgeDuration, toknen);
 
             _isDodging = false;
 
@@ -111,7 +108,7 @@ namespace Mock.MusicBattle.Player
 
         public async void InputLock(Task moveLockTask)
         {
-            if (moveLockTask  == null) { return; }
+            if (moveLockTask == null) { return; }
 
             _inputLockTasks.AddLast(moveLockTask);
             await moveLockTask;
@@ -122,7 +119,7 @@ namespace Mock.MusicBattle.Player
         ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
         /// </summary>
         public void Update(float delta)
-        { 
+        {
             float t = CalculateAccelerationLerpT(delta);
             UpdateHorizontalVelocity(t);
             UpdateRotation();
@@ -131,15 +128,13 @@ namespace Mock.MusicBattle.Player
 
         #region プライベートフィールド
         /// <summary> プレイヤーのステータス。 </summary>
-        private readonly PlayerStatus _status;
+        private readonly PlayerStatusTransfer _status;
         /// <summary> プレイヤーのTransform。 </summary>
         private readonly Transform _player;
         /// <summary> カメラのTransform。 </summary>
         private readonly Transform _camera;
         /// <summary> プレイヤーのRigidbody。 </summary>
         private readonly Rigidbody _rb;
-        /// <summary> 音楽同期システム。 </summary>
-        private readonly MusicSyncManager _musicSync;
         /// <summary> 現在の速度。 </summary>
         private Vector3 _currentVelocity;
         /// <summary> 目標の速度。 </summary>
@@ -173,8 +168,8 @@ namespace Mock.MusicBattle.Player
         private float CalculateAccelerationLerpT(float delta)
         {
             float acceleration = _targetVelocity.magnitude > 0f
-                ? _status.WalkAccelerationDuration
-                : _status.StopAccelerationDuration;
+                ? _status.Value.WalkAccelerationDuration
+                : _status.Value.StopAccelerationDuration;
 
             float damping = Mathf.Max(acceleration, 0.0001f);
             return 1f - Mathf.Exp(-delta / damping);
@@ -208,7 +203,7 @@ namespace Mock.MusicBattle.Player
             // 水平方向の速度成分
             Vector3 targetDir = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
             // Cinemachine式 Damping
-            float rotDamping = Mathf.Max(_status.RotationDamping, 0.0001f);
+            float rotDamping = Mathf.Max(_status.Value.RotationDamping, 0.0001f);
             float rotT = 1f - Mathf.Exp(-Time.deltaTime / rotDamping);
             Vector3 dir = Vector3.Lerp(forward, targetDir, rotT);
             if (dir.sqrMagnitude > 0.0001f)
