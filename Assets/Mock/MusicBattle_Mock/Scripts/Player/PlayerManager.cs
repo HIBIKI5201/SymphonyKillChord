@@ -40,14 +40,15 @@ namespace Mock.MusicBattle.Player
         public void Init(InputBuffer inputBuffer, CinemachineCamera cinemachineCamera,
             LockOnManager lockOnManager, MusicSyncManager musicSync)
         {
+            PlayerStatusTransfer pst = new(_playerStatus, musicSync.MusicBuffer);
             _inputBuffer = inputBuffer;
             _lockOnManager = lockOnManager;
             _musicSyncManager = musicSync;
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
-            _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
-            _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform, musicSync);
+            _playerAttacker = new PlayerAttacker(pst, _config, this, musicSync);
+            _playerMover = new PlayerMover(pst, rb, transform, cinemachineCamera.transform);
             _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _specialAttackSource, destroyCancellationToken);
             InputEventRegister(_inputBuffer);
         }
@@ -262,10 +263,16 @@ namespace Mock.MusicBattle.Player
         /// <param name="input"></param>
         private void OnInputDodge(float input)
         {
-            float signature = _musicSyncManager.GetInputTimeSignature(); // ノーツを記録。
-            OnMusicSyncInputed?.Invoke(signature);
             Task task = _playerMover.Dodge(destroyCancellationToken);
             _playerMover.InputLock(task);
+
+            float signature = _musicSyncManager.GetInputTimeSignature(); // ノーツを記録。
+            OnMusicSyncInputed?.Invoke(signature);
+
+            if (_specialAttacker.CheckPatternMatch(out int index))
+            {
+                _specialAttacker.Execute(index);
+            }
         }
 
         /// <summary>
