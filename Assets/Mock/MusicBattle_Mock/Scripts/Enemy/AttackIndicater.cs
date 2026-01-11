@@ -9,6 +9,18 @@ namespace Mock.MusicBattle.Enemy
         {
             _decal = decal;
             _transform = _decal.transform;
+
+            _decal.fadeFactor = 0;
+        }
+
+        public bool Visible
+        {
+            set
+            {
+                _visible = value;
+                _decal.fadeFactor = value ? 1 : 0;
+            }
+            get => _visible;
         }
 
         public void Move(float range)
@@ -24,5 +36,7 @@ namespace Mock.MusicBattle.Enemy
 
         private readonly DecalProjector _decal;
         private readonly Transform _transform;
+
+        private bool _visible;
     }
 }
