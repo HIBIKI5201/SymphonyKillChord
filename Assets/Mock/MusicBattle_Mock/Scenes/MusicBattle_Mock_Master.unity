@@ -244,7 +244,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
+  CustomBlends: {fileID: 11400000, guid: c0e5e04f40e627c4297f3caced9f829d, type: 2}
 --- !u!114 &186525455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,7 +433,7 @@ MeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 4d72ca8f463fa3d489031f7199483f7f, type: 2}
@@ -5881,6 +5881,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 779129856584690820, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3337225036644969533, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.0186191
@@ -5920,6 +5924,14 @@ PrefabInstance:
     - target: {fileID: 3337225036644969533, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698874011128143444, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6427212237363410713, guid: 6e0de9f6e66de0e4ca0842b70e29bddb, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6023,7 +6035,7 @@ MonoBehaviour:
   _camera: {fileID: 860659355}
   _inputBuffer: {fileID: 2061805456903156511}
   _cameraManager: {fileID: 860659354}
-  _enemyManager: {fileID: 3008961866854422918, guid: abb20ffc9ad24c54ea5ad90fb105036e, type: 3}
+  _enemyManager: {fileID: 8435145398063711092, guid: 1b510a01f793c2e4b9a3dec4dd352f6b, type: 3}
   _enemystatus: {fileID: 11400000, guid: 38d8af1105ee0b542a3cb4ab5708b122, type: 2}
   _player: {fileID: 419768526}
   _enemySpawnTime: 1
