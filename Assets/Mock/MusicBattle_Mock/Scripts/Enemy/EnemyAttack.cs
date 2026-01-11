@@ -94,6 +94,7 @@ namespace Mock.MusicBattle.Enemy
             _indicater.Visible = true;
             BarTimingInfo barTimingInfo = new BarTimingInfo(_battle.BarFlg, _battle.TimeSignature, _battle.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource.Token.Register(() => _indicater.Visible = false);
             _musicSyncManager.RegisterAction(barTimingInfo, () =>
             {
                 _isBattlePhase = false;
@@ -111,6 +112,7 @@ namespace Mock.MusicBattle.Enemy
             _indicater.Visible = true;
             BarTimingInfo barTimingInfo = new BarTimingInfo(_encount.BarFlg, _encount.TimeSignature, _encount.TargetBeat);
             _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource.Token.Register(() => _indicater.Visible = false);
             _musicSyncManager.RegisterAction(barTimingInfo, () => Attack(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
 
