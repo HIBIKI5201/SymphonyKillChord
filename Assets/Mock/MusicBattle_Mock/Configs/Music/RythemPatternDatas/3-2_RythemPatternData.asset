@@ -10,9 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3eae078eb6d09ef4aa0a68fa288759f3, type: 3}
-  m_Name: 3-3_RythemPatternData
+  m_Name: 3-2_RythemPatternData
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.RythemPatternData
   _signaturePattern:
-  - 3
   - 3
   - 3

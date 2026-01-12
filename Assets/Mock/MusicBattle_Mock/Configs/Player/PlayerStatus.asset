@@ -69,12 +69,12 @@ MonoBehaviour:
     - rid: 4257077234884673649
       type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
       data:
-        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _vfxPrefab: {fileID: 2779716728102781635, guid: 9fd39229584879c41aa6a264c0712c55, type: 3}
         _offset: {x: 0, y: 1, z: 0}
     - rid: 4257077234884673650
       type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
       data:
-        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _vfxPrefab: {fileID: 131596871903767163, guid: 20db98106041bad40b34e834349f72c1, type: 3}
         _offset: {x: 0, y: 1, z: 0}
     - rid: 4257077256254390480
       type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
@@ -87,7 +87,7 @@ MonoBehaviour:
     - rid: 4257077256254390482
       type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
       data:
-        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
+        _vfxPrefab: {fileID: 7641885711520266605, guid: 06219fe31a89c5340ae618f25380001a, type: 3}
         _offset: {x: 0, y: 1, z: 0}
     - rid: 4257077256254390483
       type: {class: SpecialAttackLogModule, ns: Mock.MusicBattle.Player, asm: MusicBattle_Mock}
@@ -100,5 +100,5 @@ MonoBehaviour:
     - rid: 4257077256254390485
       type: {class: SpecialAttackVFXModule, ns: Mock.MusicBattle, asm: MusicBattle_Mock}
       data:
-        _vfxPrefab: {fileID: 7792245882993380873, guid: 85140f11f5e396c4fbdbeaf1c4e18bce, type: 3}
-        _offset: {x: 0, y: 0, z: 0}
+        _vfxPrefab: {fileID: 7897302652452812673, guid: 2f34736f4ea0ce74da37ebf21611e2f8, type: 3}
+        _offset: {x: 0, y: 1, z: 0}
