@@ -27,22 +27,6 @@ namespace Mock.MusicBattle.MusicSync
         private Image _notePrefab;
         #endregion
 
-        #region プライベートフィールド
-        /// <summary> アクティブなノーツのリスト。 </summary>
-        private readonly List<Image> _notes = new();
-        #endregion
-
-        #region Unityライフサイクルメソッド
-        /// <summary>
-        ///     フレームごとに呼び出されます。
-        ///     ノーツの移動処理を行います。
-        /// </summary>
-        private void Update()
-        {
-            MoveNotes();
-        }
-        #endregion
-
         #region Publicメソッド
         /// <summary>
         ///     指定された色でノーツを生成し、表示します。
@@ -56,6 +40,22 @@ namespace Mock.MusicBattle.MusicSync
             note.color = color;
 
             _notes.Add(note);
+        }
+        #endregion
+
+        #region プライベートフィールド
+        /// <summary> アクティブなノーツのリスト。 </summary>
+        private readonly List<Image> _notes = new();
+        #endregion
+
+        #region Unityライフサイクルメソッド
+        /// <summary>
+        ///     フレームごとに呼び出されます。
+        ///     ノーツの移動処理を行います。
+        /// </summary>
+        private void Update()
+        {
+            MoveNotes();
         }
         #endregion
 

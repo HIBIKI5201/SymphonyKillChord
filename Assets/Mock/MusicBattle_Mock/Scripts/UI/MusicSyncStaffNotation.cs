@@ -13,6 +13,7 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class MusicSyncStaffNotation : VisualElement
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="MusicSyncStaffNotation"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -43,6 +44,8 @@ namespace Mock.MusicBattle.UI
             Debug.Assert(_noteContainer != null, $"要素: {ELEMENT_NAME_NOTE_CONTAINER} の検索に失敗しました。");
             Debug.Assert(_noteAsset != null, $"UXMLパス: {NOTE_UXML_RESOURCES_PATH} の読み込みに失敗しました。");
         }
+        #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     指定された拍と色でノーツを生成し、表示します。

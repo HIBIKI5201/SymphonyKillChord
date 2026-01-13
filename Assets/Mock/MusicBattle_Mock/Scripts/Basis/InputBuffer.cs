@@ -1,5 +1,7 @@
+using Mock.MusicBattle.Utility;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 namespace Mock.MusicBattle.Basis
 {
@@ -19,6 +21,8 @@ namespace Mock.MusicBattle.Basis
         public InputActionEntity<float> LockOnSelectAction => _lockOnSelectActionEntity;
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         public InputActionEntity<float> AttackAction => _attackActionEntity;
+        /// <summary> 回避アクションのInputActionEntity。 </summary>
+        public InputActionEntity<float> DodgeAction => _dodgeActionEntity;
         #endregion
 
         #region インスペクター表示フィールド
@@ -34,6 +38,8 @@ namespace Mock.MusicBattle.Basis
         /// <summary> 攻撃アクションの名前。 </summary>
         [SerializeField, Tooltip("攻撃アクションの名前。")]
         private string _attackActionName = "Attack";
+        [SerializeField, Tooltip("回避アクションの名前")]
+        private string _dodgeActionName = "Dodge";
         #endregion
 
         #region プライベートフィールド
@@ -45,6 +51,8 @@ namespace Mock.MusicBattle.Basis
         private InputActionEntity<float> _lockOnSelectActionEntity;
         /// <summary> 攻撃アクションのInputActionEntity。 </summary>
         private InputActionEntity<float> _attackActionEntity;
+        /// <summary> 回避アクションのInputActionEntity。 </summary>
+        private InputActionEntity<float> _dodgeActionEntity;
         #endregion
 
         #region Unityライフサイクルメソッド
@@ -57,11 +65,11 @@ namespace Mock.MusicBattle.Basis
             PlayerInput playerInput = GetComponent<PlayerInput>();
             if (playerInput != null)
             {
-                playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
-                _lookActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_lookActionName]);
-                _moveActionEntity = new InputActionEntity<Vector2>(playerInput.actions[_moveActionName]);
-                _lockOnSelectActionEntity = new InputActionEntity<float>(playerInput.actions[_lockOnSelectActionName]);
-                _attackActionEntity = new InputActionEntity<float>(playerInput.actions[_attackActionName]);
+                _lookActionEntity = new(playerInput.actions[_lookActionName]);
+                _moveActionEntity = new(playerInput.actions[_moveActionName]);
+                _lockOnSelectActionEntity = new(playerInput.actions[_lockOnSelectActionName]);
+                _attackActionEntity = new(playerInput.actions[_attackActionName]);
+                _dodgeActionEntity = new(playerInput.actions[_dodgeActionName]);
             }
         }
 
@@ -75,6 +83,22 @@ namespace Mock.MusicBattle.Basis
             _moveActionEntity?.Dispose();
             _lockOnSelectActionEntity?.Dispose();
             _attackActionEntity?.Dispose();
+        }
+        #endregion
+
+        #region デバッグ
+        private void OnValidate()
+        {
+            if (TryGetComponent(out PlayerInput input))
+            {
+                input.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+                input.uiInputModule = gameObject.AddOrGetComponent<InputSystemUIInputModule>();
+            }
+
+            Debug.Assert(!string.IsNullOrEmpty(_lookActionName), $"{nameof(_lookActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_moveActionName), $"{nameof(_moveActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_lockOnSelectActionName), $"{nameof(_lockOnSelectActionName)} is null");
+            Debug.Assert(!string.IsNullOrEmpty(_attackActionName), $"{nameof(_attackActionName)} is null");
         }
         #endregion
     }

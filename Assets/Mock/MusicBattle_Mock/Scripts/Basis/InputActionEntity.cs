@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.Basis
     public class InputActionEntity<T> : IDisposable
         where T : struct
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="InputActionEntity{T}"/>の新しいインスタンスを初期化します。
         /// </summary>
@@ -21,6 +22,7 @@ namespace Mock.MusicBattle.Basis
             inputAction.performed += PerformedHandler;
             inputAction.canceled += CanceledHandler;
         }
+        #endregion
 
         #region Publicイベント
         /// <summary>

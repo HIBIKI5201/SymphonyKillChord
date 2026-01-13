@@ -12,6 +12,7 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class EnemyHealthBar : VisualElement
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="EnemyHealthBar"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -43,6 +44,7 @@ namespace Mock.MusicBattle.UI
             _greenBar.style.width = Length.Percent(100);
             _redBar.style.width = Length.Percent(100);
         }
+        #endregion
 
         #region Publicメソッド
         /// <summary>

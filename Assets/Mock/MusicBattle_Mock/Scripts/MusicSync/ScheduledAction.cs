@@ -9,11 +9,7 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class ScheduledAction
     {
-        /// <summary> アクションが発火する拍のタイミング。 </summary>
-        public double ExecuteBeat { get; private set; }
-        /// <summary> 実行されるアクション。 </summary>
-        public Action Action { get; private set; }
-
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="ScheduledAction"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -24,6 +20,14 @@ namespace Mock.MusicBattle.MusicSync
             ExecuteBeat = executeBeat;
             Action = action;
         }
+        #endregion
+
+        #region パブリックプロパティ
+        /// <summary> アクションが発火する拍のタイミング。 </summary>
+        public double ExecuteBeat { get; private set; }
+        /// <summary> 実行されるアクション。 </summary>
+        public Action Action { get; private set; }
+        #endregion
     }
 }
 

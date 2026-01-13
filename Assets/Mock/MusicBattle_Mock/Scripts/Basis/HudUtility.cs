@@ -28,9 +28,9 @@ namespace Mock.MusicBattle.Basis
             hud.InitializePlayerHealthBar(player.HealthEntity);
             hud.InitializeLockOnCursor(lockOnManager);
             hud.Initialize(musicBuffer);
-            player.OnAttacked += Action_started;
+            player.OnMusicSyncInputed += Action_started;
 
-            destroyToken.Register(() => player.OnAttacked -= Action_started);
+            destroyToken.Register(() => player.OnMusicSyncInputed -= Action_started);
 
             /// <summary>
             ///     攻撃アクションが開始されたときにHUDにノーツを作成するローカル関数。

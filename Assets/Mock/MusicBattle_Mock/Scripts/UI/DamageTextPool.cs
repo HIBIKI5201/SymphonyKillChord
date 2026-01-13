@@ -9,6 +9,7 @@ namespace Mock.MusicBattle.UI
     /// </summary>
     public class DamageTextPool
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="DamageTextPool"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -22,6 +23,7 @@ namespace Mock.MusicBattle.UI
             actionOnRelease: Release
         );
         }
+        #endregion
 
         #region Publicメソッド
         /// <summary>

@@ -1,0 +1,41 @@
+# 機能計画: リズムパターン判定
+
+## 1. 概要
+特定の拍子の並び（リズムパターン）を検出した場合に、イベントを発火させる。
+
+## 2. 変更箇所と必要な工程
+
+### 2.1. MusicSyncManager.cs (またはリズム情報を管理するクラス)
+1.  **拍子履歴の保持**: `MusicSyncManager` 内で、過去に入力された拍子（`signature`）の履歴を一定期間または一定数保持するリスト (`List<float>` など) を追加します。
+2.  **パターン定義の追加**: 判定対象となるリズムパターンを定義するデータ構造（例: `ScriptableObject` で `RythmPatternData` を定義し、`List<float> SignaturePattern` を持つ）を追加します。
+3.  **パターン判定ロジック**: `IsMatchInputTimeSignature(RythmPatternData data)` のようなメソッドを実装します。このメソッドは、現在の拍子履歴と定義されたリズムパターンを比較し、一致するかどうかを判定します。
+    *   比較時には、パターンが履歴のどこかに連続して存在するかをチェックする必要があります。
+    *   時間的な正確さ（拍子の入力タイミングの誤差許容範囲）も考慮に入れる必要があります。
+
+### 2.2. PlayerAttacker.cs (またはパターン判定を発火させるクラス)
+1.  **パターンリストの保持**: `PlayerStatus` または `PlayerAttacker` に、利用可能なリズムパターン (`RythmPatternData` のリスト) を保持するフィールドを追加します。
+2.  **判定呼び出し**: 攻撃時 (`Attack` メソッド内) など、拍子入力が発生するタイミングで `MusicSyncManager.IsMatchInputTimeSignature()` を呼び出し、パターンが一致したかどうかを判定します。
+
+## 3. テスト項目
+*   定義されたリズムパターン通りに拍子を入力した際に、パターン判定が成功することを確認。
+*   パターンが一部異なる場合や、意図しない拍子を入力した際に、パターン判定が失敗することを確認。
+*   時間的な誤差の許容範囲が適切に機能していることを確認。
+*   複数のリズムパターンを定義し、それぞれが正しく判定されることを確認。
+
+## 4. 考慮事項
+*   リズムパターンの定義方法（静的データ、動的生成など）。
+*   パターン判定のパフォーマンス（特に履歴が長い場合）。
+*   拍子入力の誤差許容範囲の設定。
+*   将来的な拡張性（新たなパターン追加、複雑なパターン判定など）。
+
+## 5. 実装評価
+
+本計画は以下の実装によって実現されています。
+
+*   **MusicSyncManager.cs**: `IsMatchInputTimeSignature(RythemPatternData pattern)` メソッドでパターン判定ロジックを実装し、`_inputHandler.GetSignatureHistory()` で拍子履歴を取得しています。
+*   **RythemPatternData.cs**: `ScriptableObject` としてリズムパターンを定義し、`IsMatch` メソッドでパターン比較ロジックを実装しています。
+*   **SpecialAttacker.cs**: `CheckPatternMatch` メソッドで `PlayerStatus` 経由で取得した `RythmPatternData` のリストを繰り返し処理し、`MusicSyncManager.IsMatchInputTimeSignature()` を呼び出してパターンが一致するかを判定しています。
+*   **PlayerStatus.cs**: `SpecialAttackData[] SpecialAttackDatas` を持ち、その `SpecialAttackData` が `RythmPatternData` を保持しています。
+
+**総括**:
+計画書の内容は、実装によってほぼ完全に、かつ堅牢に実現されています。特に `RythemPatternData` を `ScriptableObject` として定義し、`SpecialAttacker` が `PlayerStatus` 経由でパターンを管理する構造は、データ駆動で柔軟なリズムパターン管理を可能にしています。`MusicSyncManager` がパターン判定の中核ロジックを持ち、`SpecialAttacker` がその判定結果を利用するという責務の分離も適切です。設計としては非常に優れています。

@@ -13,6 +13,7 @@ namespace Mock.MusicBattle.Battle
     /// </summary>
     public class LockOnManager : IDisposable
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="LockOnManager"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -31,6 +32,7 @@ namespace Mock.MusicBattle.Battle
 
             RegisterInput(inputBuffer);
         }
+        #endregion
 
         #region Publicイベント
         /// <summary> ロックオンターゲットが変更されたときに発火するイベント。 </summary>

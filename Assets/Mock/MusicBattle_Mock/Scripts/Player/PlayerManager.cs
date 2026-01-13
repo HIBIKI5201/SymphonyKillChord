@@ -1,12 +1,13 @@
+using CriWare;
 using Mock.MusicBattle.Basis;
-using System.Collections.Generic;
+using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Character;
+using Mock.MusicBattle.MusicSync;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
-using Mock.MusicBattle.Battle;
-using CriWare;
-using System;
-using Mock.MusicBattle.MusicSync;
 
 namespace Mock.MusicBattle.Player
 {
@@ -16,10 +17,9 @@ namespace Mock.MusicBattle.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerManager : MonoBehaviour, ICharacter
     {
-        
         #region Publicイベント
         /// <summary> プレイヤーが攻撃を行ったときに発火するイベント。 </summary>
-        public event Action<float> OnAttacked;
+        public event Action<float> OnMusicSyncInputed;
         #endregion
 
         #region パブリックプロパティ
@@ -28,6 +28,7 @@ namespace Mock.MusicBattle.Player
         /// <summary> プレイヤーのHealthEntityを取得します。 </summary>
         public HealthEntity HealthEntity => _healthEntity;
         #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     プレイヤーマネージャーを初期化します。
@@ -39,14 +40,16 @@ namespace Mock.MusicBattle.Player
         public void Init(InputBuffer inputBuffer, CinemachineCamera cinemachineCamera,
             LockOnManager lockOnManager, MusicSyncManager musicSync)
         {
+            PlayerStatusTransfer pst = new(_playerStatus, musicSync.MusicBuffer);
             _inputBuffer = inputBuffer;
             _lockOnManager = lockOnManager;
+            _musicSyncManager = musicSync;
             Rigidbody rb = GetComponent<Rigidbody>();
             _animController = GetComponent<PlayerAnimationController>();
             _healthEntity = new HealthEntity(_playerStatus.MaxHealth);
-            _playerAttacker = new PlayerAttacker(_playerStatus, _config, this, musicSync);
-            _playerMover = new PlayerMover(_playerStatus, rb, transform, cinemachineCamera.transform);
-            _musicSyncManager = musicSync;
+            _playerAttacker = new PlayerAttacker(pst, _config, this, musicSync);
+            _playerMover = new PlayerMover(pst, rb, transform, cinemachineCamera.transform);
+            _specialAttacker = new SpecialAttacker(gameObject, _playerStatus, musicSync, _specialAttackSource, destroyCancellationToken);
             InputEventRegister(_inputBuffer);
         }
 
@@ -56,19 +59,26 @@ namespace Mock.MusicBattle.Player
         /// <param name="damage">与えるダメージ量。</param>
         public void TakeDamage(float damage) => _healthEntity.TakeDamage(damage);
         #endregion
+
         #region インスペクター表示フィールド
+        [Header("データ")]
         /// <summary> プレイヤーのステータス。 </summary>
         [SerializeField, Tooltip("プレイヤーのステータス。")]
         private PlayerStatus _playerStatus;
         /// <summary> プレイヤーの設定。 </summary>
         [SerializeField, Tooltip("プレイヤーの設定。")]
         private PlayerConfig _config;
+        [SerializeField, Tooltip("拍子情報")]
+        private SignatureDatabase _signatureDatabase;
+        [Header("オブジェクト情報")]
         /// <summary> プレイヤーのピボット位置。 </summary>
         [SerializeField, Tooltip("プレイヤーのピボット位置。")]
         private Transform _pivotTransform;
         /// <summary> 銃声のCriAtomSource。 </summary>
         [SerializeField, Tooltip("銃声のCriAtomSource。")]
         private CriAtomSource _gunSoundSource;
+        [SerializeField, Tooltip("スペシャル攻撃のCriAtomSource")]
+        private CriAtomSource _specialAttackSource;
         #endregion
 
         #region プライベートフィールド
@@ -82,14 +92,14 @@ namespace Mock.MusicBattle.Player
         private PlayerMover _playerMover;
         /// <summary> プレイヤーの攻撃処理。 </summary>
         private PlayerAttacker _playerAttacker;
+        /// <summary> スペシャル攻撃の処理。 </summary>
+        private SpecialAttacker _specialAttacker;
         /// <summary> プレイヤーのアニメーションコントローラー。 </summary>
         private PlayerAnimationController _animController;
         /// <summary> 音楽同期マネージャー。 </summary>
         private MusicSyncManager _musicSyncManager;
         /// <summary> 現在の入力ベクトル。 </summary>
         private Vector2 _input;
-        /// <summary> 現在の速度ベクトル。 </summary>
-        private Vector3 _velocity;
         /// <summary> 地面に接触しているコリジョンを管理するハッシュセット。 </summary>
         private readonly HashSet<Collision> _hitGrounds = new();
         #endregion
@@ -101,8 +111,8 @@ namespace Mock.MusicBattle.Player
         /// </summary>
         private void OnDisable()
         {
-            if(_inputBuffer != null)
-            InputEventUnregister(_inputBuffer);
+            if (_inputBuffer != null)
+                InputEventUnregister(_inputBuffer);
         }
 
         /// <summary>
@@ -113,10 +123,10 @@ namespace Mock.MusicBattle.Player
         {
             if (_playerMover != null)
             {
-                _velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
-                _animController?.MoveVelocity(_velocity.magnitude);
-                _playerMover.SetPlayerVelocity(_velocity);
-                _playerMover.Update();
+                Vector3 velocity = _playerMover.CalcPlayerVelocityByInputDirection(_input);
+                _animController?.MoveVelocity(velocity.magnitude);
+                _playerMover.SetPlayerVelocity(velocity);
+                _playerMover.Update(Time.deltaTime);
             }
         }
 
@@ -164,16 +174,8 @@ namespace Mock.MusicBattle.Player
                 _playerMover.SetIsGround(0 < _hitGrounds.Count);
             }
         }
-
-        /// <summary>
-        ///     ギズモを描画します（デバッグ用）。
-        /// </summary>
-        private void OnDrawGizmos()
-        {
-            if (_playerAttacker != null)
-                _playerAttacker.OnDrawGizmos();
-        }
         #endregion
+
         #region Privateメソッド
         /// <summary>
         ///     入力イベントを登録します。
@@ -187,8 +189,9 @@ namespace Mock.MusicBattle.Player
                 return;
             }
             inputBuffer.MoveAction.Performed += OnInputMove;
-            inputBuffer.MoveAction.Canceled += OnInputMoveCancle;
+            inputBuffer.MoveAction.Canceled += OnInputMoveCancel;
             inputBuffer.AttackAction.Started += OnInputAttack;
+            inputBuffer.DodgeAction.Started += OnInputDodge;
             _healthEntity.OnDeath += OnDeathAction;
         }
 
@@ -199,8 +202,9 @@ namespace Mock.MusicBattle.Player
         private void InputEventUnregister(InputBuffer inputBuffer)
         {
             inputBuffer.MoveAction.Performed -= OnInputMove;
-            inputBuffer.MoveAction.Canceled -= OnInputMoveCancle;
+            inputBuffer.MoveAction.Canceled -= OnInputMoveCancel;
             inputBuffer.AttackAction.Started -= OnInputAttack;
+            inputBuffer.DodgeAction.Started -= OnInputDodge;
             _healthEntity.OnDeath -= OnDeathAction;
         }
 
@@ -217,7 +221,7 @@ namespace Mock.MusicBattle.Player
         ///     移動入力がキャンセルされたときに呼び出されます。
         /// </summary>
         /// <param name="input">入力ベクトル。</param>
-        private void OnInputMoveCancle(Vector2 input)
+        private void OnInputMoveCancel(Vector2 input)
         {
             _input = Vector2.zero;
         }
@@ -228,13 +232,46 @@ namespace Mock.MusicBattle.Player
         /// <param name="input">入力値（未使用）。</param>
         private void OnInputAttack(float input)
         {
-            if (_playerAttacker != null)
+            if (_playerAttacker == null) { return; }
+            if (_playerMover == null) { return; }
+            if (_specialAttacker == null) { return; }
+            if (_playerMover.IsDodging) { return; } // 回避中は攻撃不可。
+
+            ICharacter target = _lockOnManager.LockOnTarget;
+            float signature = _musicSyncManager.GetInputTimeSignature();
+            _playerAttacker.Attack(target, signature);
+
+            if (_gunSoundSource != null)
             {
-                ICharacter target = _lockOnManager.LockOnTarget;
-                float signature = _musicSyncManager.GetInputTimeSignature();
-                _playerAttacker.Attack(target, signature);
-                _gunSoundSource?.Play();
-                OnAttacked?.Invoke(signature);
+                _gunSoundSource.cueName = _signatureDatabase.GetSeCueNameBySignature(signature);
+                _gunSoundSource.Play();
+            }
+
+            if (_specialAttacker.CheckPatternMatch(out int index))
+            {
+                _specialAttacker.Execute(index);
+            }
+
+            OnMusicSyncInputed?.Invoke(signature);
+            _playerMover.InputLock(_playerAttacker.MoveLockTask);
+            _playerMover.VelocityReset();
+        }
+
+        /// <summary>
+        ///     回避入力があった時に呼ばれます。
+        /// </summary>
+        /// <param name="input"></param>
+        private void OnInputDodge(float input)
+        {
+            Task task = _playerMover.Dodge(destroyCancellationToken);
+            _playerMover.InputLock(task);
+
+            float signature = _musicSyncManager.GetInputTimeSignature(); // ノーツを記録。
+            OnMusicSyncInputed?.Invoke(signature);
+
+            if (_specialAttacker.CheckPatternMatch(out int index))
+            {
+                _specialAttacker.Execute(index);
             }
         }
 
@@ -245,6 +282,14 @@ namespace Mock.MusicBattle.Player
         {
             Debug.Log("Player Dead");
             gameObject.SetActive(false);
+        }
+        #endregion
+
+        #region デバッグ
+        private void OnValidate()
+        {
+            Debug.Assert(_playerStatus != null, "プレイヤーステータスがありません。", this);
+            Debug.Assert(_config != null, "プレイヤーのコンフィグがありません。", this);
         }
         #endregion
     }

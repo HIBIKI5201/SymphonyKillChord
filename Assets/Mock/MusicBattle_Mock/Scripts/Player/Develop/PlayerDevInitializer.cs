@@ -1,6 +1,7 @@
 using Mock.MusicBattle.Basis;
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Camera;
+using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -29,21 +30,27 @@ namespace Mock.MusicBattle.Develop
         [SerializeField, Tooltip("Cinemachineカメラの参照。")]
         private CinemachineCamera _camera;
         #endregion
+
+        #region 定数
+        /// <summary> デバッグ用のMusicSyncManager。 </summary>
+        private static readonly MusicSyncManager DEBUG_MUSIC_SYNC_MANAGER = null;
+        #endregion
+
         #region Unityライフサイクルメソッド
         /// <summary>
         ///     スクリプトインスタンスがロードされたときに呼び出されます。
         ///     プレイヤーとカメラの初期化を行います。
         /// </summary>
-        void Awake()
+        private void Awake()
         {
             LockOnManager lockOnManager = new(_cameraManager.transform, _targetContainer, _inputBuffer);
             bool isSuccess = true;
             isSuccess = isSuccess && _cameraManager.Init(_inputBuffer, lockOnManager);
             Debug.Log(isSuccess ? "初期化は正常に終了しました。" : "初期化は失敗しました。");
             // デバッグ用のためMusicSyncManagerはnullを渡す。
-            _playerManager.Init(_inputBuffer, _camera, lockOnManager, null); 
+            _playerManager.Init(_inputBuffer, _camera, lockOnManager, DEBUG_MUSIC_SYNC_MANAGER);
         }
-        #endregion
+        #endregion    }
     }
 }
 

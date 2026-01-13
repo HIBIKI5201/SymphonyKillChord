@@ -15,6 +15,9 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary> 音楽UIの参照。 </summary>
         [SerializeField, Tooltip("音楽UIの参照。")]
         private MusicUI _musicUI;
+        #endregion
+
+        #region 定数
         /// <summary> 拍子リスト。 </summary>
         [SerializeField, Tooltip("拍子リスト。")]
         private float[] _timeSignatures = {16f, 12f, 8f, 6f, 4f, 3f, 2f, 1f};
@@ -28,7 +31,7 @@ namespace Mock.MusicBattle.MusicSync
         ///     フレームごとに呼び出されます。
         ///     スペースキーの入力に応じてノーツを生成します。
         /// </summary>
-        void Update()
+        private void Update()
         {
             if(Input.GetKeyDown(KeyCode.Space))
             {

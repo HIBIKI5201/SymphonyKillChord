@@ -11,9 +11,6 @@ GameObject:
   - component: {fileID: 3009702457590381082}
   - component: {fileID: 620953097201545478}
   - component: {fileID: 4704647488657844847}
-  - component: {fileID: 758891480087472081}
-  - component: {fileID: 6226676604781277393}
-  - component: {fileID: 9044767190899246616}
   - component: {fileID: 6561865455815979478}
   m_Layer: 0
   m_Name: ==MusicSync==
@@ -55,7 +52,7 @@ MonoBehaviour:
   _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
-  _volume: 1
+  _volume: 0.4
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
   need_to_player_update_all: 1
@@ -82,63 +79,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3205de5f98f5fbd479cb3d81c3a30c9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicSyncManager
-  _timeSignatures:
-  - 16
-  - 12
-  - 8
-  - 6
-  - 4
-  - 3
-  - 2
-  - 1
-  _musicBuffer: {fileID: 758891480087472081}
-  _musicPlayer: {fileID: 6226676604781277393}
-  _inputHandler: {fileID: 9044767190899246616}
+  _timeSignatures: {fileID: 11400000, guid: ebd79329e911f5d4aa46c7a225d64f3a, type: 2}
+  _configs: {fileID: 11400000, guid: 0687d01daac27324fae43dce6926bb52, type: 2}
   _actionHandler: {fileID: 6561865455815979478}
---- !u!114 &758891480087472081
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4173495234667238227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57359b08f259c3b40aff8f5718c844b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.CriMusicBuffer
-  _currentBpm: 0
-  _source: {fileID: 0}
-  _beat: 0
-  _propTimeSignature: 0
-  _startOffset: 0
---- !u!114 &6226676604781277393
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4173495234667238227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa9fc290f6fde4a468b9333460129540, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.CriMusicPlayer
---- !u!114 &9044767190899246616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4173495234667238227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d56d119fa0fdc845a70054b4c54a2da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicInputHandler
-  _musicBuffer: {fileID: 758891480087472081}
-  _timeSignatures: []
-  _enableQuantize: 1
 --- !u!114 &6561865455815979478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,6 +94,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b043a2f7599e7914298c02d5eadfdc4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MusicBattle_Mock::Mock.MusicBattle.MusicSync.MusicActionHandler
-  _musicBuffer: {fileID: 758891480087472081}
   _onBeatUnit: 1
   _targetBeat: 0

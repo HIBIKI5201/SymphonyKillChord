@@ -7,6 +7,7 @@ namespace Mock.MusicBattle.Camera
     /// </summary>
     public class CameraMover
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="CameraMover"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -19,6 +20,7 @@ namespace Mock.MusicBattle.Camera
             _camera = camera;
             _target = target;
         }
+        #endregion
         #region Publicメソッド
         /// <summary>
         ///     カメラの回転入力で更新します。

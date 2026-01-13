@@ -8,7 +8,7 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class TestSystem : MonoBehaviour
     {
-        // PUBLIC_METHODS
+
         #region インスペクター表示フィールド
         /// <summary> 音楽同期マネージャー。 </summary>
         [Tooltip("音楽同期マネージャー。"), SerializeField]
@@ -31,7 +31,7 @@ namespace Mock.MusicBattle.MusicSync
         ///     最初のフレームアップデートの前に呼び出されます。
         ///     音楽同期マネージャーの初期化を行います。
         /// </summary>
-        void Start()
+        private void Start()
         {
             _musicSyncManager.Init(_source, _bpm, _bgmProperTime, _startOffset);
         }

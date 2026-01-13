@@ -11,6 +11,10 @@ namespace Mock.MusicBattle.MusicSync
     [DisallowMultipleComponent]
     public class MusicSyncManager : MonoBehaviour
     {
+        #region Publicプロパティ
+        public CriMusicBuffer MusicBuffer => _musicBuffer;
+        #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     初期化処理を行います。
@@ -21,10 +25,11 @@ namespace Mock.MusicBattle.MusicSync
         /// <param name="startOffset">最初の小節の開始時間（ミリ秒）。</param>
         public void Init(CriAtomSource source, double bpm, double timeSignature, long startOffset)
         {
-            _musicPlayer.Init(source);
-            _musicBuffer.Init(source, bpm, timeSignature, startOffset);
-            _inputHandler.Init(_timeSignatures);
+            _musicPlayer = new(source);
+            _musicBuffer = new(_musicPlayer, bpm, timeSignature, startOffset);
+            _inputHandler = new(_musicBuffer, _configs, _timeSignatures);
             PlayBgm();
+            _actionHandler.Init(_musicBuffer);
         }
 
         /// <summary>
@@ -53,7 +58,15 @@ namespace Mock.MusicBattle.MusicSync
         public bool IsMatchInputTimeSignature(RythemPatternData pattern)
         {
             ReadOnlySpan<float> signatureHistory = _inputHandler.GetSignatureHistory();
-            bool match = pattern.IsMatch(signatureHistory);
+
+            // ヒストリーはQueueでインデックスが高い方が最新なので、順番を逆転する
+            Span<float> reveartedHistory = stackalloc float[signatureHistory.Length];
+            for (int i = 0; i < signatureHistory.Length; i++)
+            {
+                reveartedHistory[i] = signatureHistory[^(i + 1)];
+            }
+
+            bool match = pattern.IsMatch(reveartedHistory);
 
             return match;
         }
@@ -62,19 +75,28 @@ namespace Mock.MusicBattle.MusicSync
         #region インスペクター表示フィールド
         /// <summary> 入力によって検出されうる拍子の配列。 </summary>
         [SerializeField, Tooltip("入力によって検出されうる拍子の配列。")]
-        private float[] _timeSignatures = { 1f, 2f, 3f, 4f, 6f, 8f, 12f, 16f };
-        /// <summary> 音楽バッファの参照。 </summary>
-        [SerializeField, Tooltip("音楽バッファの参照。")]
-        private CriMusicBuffer _musicBuffer;
-        /// <summary> 音楽プレイヤーの参照。 </summary>
-        [SerializeField, Tooltip("音楽プレイヤーの参照。")]
-        private CriMusicPlayer _musicPlayer;
-        /// <summary> 音楽入力ハンドラの参照。 </summary>
-        [SerializeField, Tooltip("音楽入力ハンドラの参照。")]
-        private MusicInputHandler _inputHandler;
+        private SignatureDatabase _timeSignatures;
+        [SerializeField, Tooltip("コンフィグ")]
+        private MusicSyncConfigs _configs;
         /// <summary> 音楽アクションハンドラの参照。 </summary>
         [SerializeField, Tooltip("音楽アクションハンドラの参照。")]
         private MusicActionHandler _actionHandler;
+        #endregion
+
+        #region プライベートフィールド
+        /// <summary> 音楽バッファの参照。 </summary>
+        private CriMusicBuffer _musicBuffer;
+        /// <summary> 音楽プレイヤーの参照。 </summary>
+        private CriMusicPlayer _musicPlayer;
+        /// <summary> 音楽入力ハンドラの参照。 </summary>
+        private MusicInputHandler _inputHandler;
+        #endregion
+
+        #region Unityイベントメソッド
+        private void Update()
+        {
+            _musicBuffer.Tick();
+        }
         #endregion
 
         #region Privateメソッド
@@ -84,6 +106,13 @@ namespace Mock.MusicBattle.MusicSync
         private void PlayBgm()
         {
             _musicPlayer.Play();
+        }
+        #endregion
+
+        #region デバッグ機能
+        private void OnGUI()
+        {
+            _musicBuffer?.OnGUI();
         }
         #endregion
     }

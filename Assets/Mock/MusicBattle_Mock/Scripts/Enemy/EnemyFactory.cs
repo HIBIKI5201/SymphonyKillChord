@@ -13,6 +13,7 @@ namespace Mock.MusicBattle.Enemy
     /// </summary>
     public class EnemyFactory
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="EnemyFactory"/>クラスの新しいインスタンスを初期化します。
         ///     Factory が利用するコンテナ・ターゲット・プレファブを初期化します。
@@ -34,6 +35,7 @@ namespace Mock.MusicBattle.Enemy
             _lockOnManager = lockOnManager;
             _hudManager = hudManager;
         }
+        #endregion
 
         #region Publicメソッド
         /// <summary>

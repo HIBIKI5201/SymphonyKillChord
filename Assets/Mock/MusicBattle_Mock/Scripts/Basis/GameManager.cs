@@ -5,6 +5,7 @@ using Mock.MusicBattle.Enemy;
 using Mock.MusicBattle.MusicSync;
 using Mock.MusicBattle.Player;
 using Mock.MusicBattle.UI;
+using System.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -51,8 +52,6 @@ namespace Mock.MusicBattle.Basis
         [SerializeField, Tooltip("CRI Atom Sourceの参照。")]
         private CriAtomSource _source;
         /// <summary> CRI Music Bufferの参照。 </summary>
-        [SerializeField, Tooltip("CRI Music Bufferの参照。")]
-        private CriMusicBuffer _criMusicBuffer;
         /// <summary> 敵のスポーン情報ScriptableObject。 </summary>
         [SerializeField, Tooltip("敵のスポーン情報ScriptableObject。")]
         private EnemySpawnSO _enemySpawnSO;
@@ -75,24 +74,9 @@ namespace Mock.MusicBattle.Basis
         ///     スクリプトインスタンスがロードされたときに呼び出されます。
         ///     ゲームの初期化を行います。
         /// </summary>
-        private void Awake()
-        {
-            Init();
-        }
-
-        /// <summary>
-        ///     最初のフレームアップデートの前に呼び出されます。
-        ///     音楽同期の初期化と敵のスポーンループを開始します。
-        /// </summary>
         private void Start()
         {
-            _musicSyncManager.Init(_source, _musicSystemInitSO.Bpm, _musicSystemInitSO.TimeSignature, _musicSystemInitSO.StartOffset);
-            StartCoroutine(EnemyUtility.SpawnLoop(
-                _enemyContainer,
-                _enemySpawnSO,
-                _factory,
-                _enemystatus,
-                _enemySpawnTime));
+            Init();
         }
         #endregion
 
@@ -102,6 +86,8 @@ namespace Mock.MusicBattle.Basis
         /// </summary>
         private void Init()
         {
+            _musicSyncManager.Init(_source, _musicSystemInitSO.Bpm, _musicSystemInitSO.TimeSignature, _musicSystemInitSO.StartOffset);
+
             _enemyContainer = new EnemyContainer();
             _lockOnManager = new LockOnManager(_cameraManager.transform,
               _enemyContainer, _inputBuffer);
@@ -110,7 +96,7 @@ namespace Mock.MusicBattle.Basis
                 _cameraManager, _camera, _lockOnManager, _musicSyncManager);
 
             HudUtility.Init(_hudManager, _playerManager,
-                _criMusicBuffer, _inputBuffer,
+                _musicSyncManager.MusicBuffer, _inputBuffer,
                 _lockOnManager,
                 this.destroyCancellationToken);
 
@@ -119,6 +105,13 @@ namespace Mock.MusicBattle.Basis
                 _enemyManager, _musicSyncManager,
                 _lockOnManager, _hudManager);
             EnemyUtility.EnemyContainerInit(_enemyContainer, _playerManager, _cameraManager, _lockOnManager);
+
+            StartCoroutine(EnemyUtility.SpawnLoop(
+                _enemyContainer,
+                _enemySpawnSO,
+                _factory,
+                _enemystatus,
+                _enemySpawnTime));
         }
         #endregion
     }

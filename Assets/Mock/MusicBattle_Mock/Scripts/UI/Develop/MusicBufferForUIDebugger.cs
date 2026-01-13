@@ -21,7 +21,19 @@ namespace Mock.MusicBattle.Develop
         /// <summary> BGMの固有拍子（デバッグ用のため固定値）。 </summary>
         public double PropTimeSignature => 4; // デバッグ用のため固定値
         #endregion
-        // PUBLIC_METHODS
+        #region パブリックインターフェースメソッド
+        /// <summary>
+        ///     小節タイミング情報を基いて、全体拍数を算出する（デバッグ用のため簡略化）。
+        /// </summary>
+        /// <param name="barTimingInfo">小節タイミング情報。</param>
+        /// <returns>全体拍数。</returns>
+        public double ConvertBarTimingInfoToBeat(BarTimingInfo barTimingInfo)
+        {
+            // デバッグ用のため、簡略化した計算。
+            // 実際のCriMusicBufferのロジックとは異なる。
+            return CurrentBeat + barTimingInfo.TargetBeat;
+        }
+        #endregion
         #region インスペクター表示フィールド
         /// <summary> ノーツを生成するアクション名。 </summary>
         [SerializeField, Tooltip("ノーツを生成するアクション名。")]
@@ -48,19 +60,6 @@ namespace Mock.MusicBattle.Develop
             {
                 hud.CreateNote((float)(CurrentBeat / 4d), 4);
             }
-        }
-        #endregion
-        #region パブリックインターフェースメソッド
-        /// <summary>
-        ///     小節タイミング情報を基いて、全体拍数を算出する（デバッグ用のため簡略化）。
-        /// </summary>
-        /// <param name="barTimingInfo">小節タイミング情報。</param>
-        /// <returns>全体拍数。</returns>
-        public double ConvertBarTimingInfoToBeat(BarTimingInfo barTimingInfo)
-        {
-            // デバッグ用のため、簡略化した計算。
-            // 実際のCriMusicBufferのロジックとは異なる。
-            return CurrentBeat + barTimingInfo.TargetBeat;
         }
         #endregion
     }

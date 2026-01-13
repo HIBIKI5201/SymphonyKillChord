@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mock.MusicBattle.Player
@@ -7,6 +10,7 @@ namespace Mock.MusicBattle.Player
     /// </summary>
     public class PlayerMover
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="PlayerMover"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -14,17 +18,23 @@ namespace Mock.MusicBattle.Player
         /// <param name="rb">プレイヤーのRigidbody。</param>
         /// <param name="player">プレイヤーのTransform。</param>
         /// <param name="camera">カメラのTransform。</param>
-        public PlayerMover(PlayerStatus status, Rigidbody rb, Transform player, Transform camera)
+        public PlayerMover(PlayerStatusTransfer status,
+            Rigidbody rb, Transform player, Transform camera)
         {
             _status = status;
             _player = player;
             _camera = camera;
             _rb = rb;
         }
+        #endregion
 
         #region パブリックプロパティ
         /// <summary> 現在の速度。 </summary>
-        public Vector3 CurrentVelocity {  get; private set; }
+        public Vector3 CurrentVelocity => _currentVelocity;
+        /// <summary> 回避中かどうか。 </summary>
+        public bool IsDodging => _isDodging;
+        /// <summary> 入力ロックが有効か。 </summary>
+        public bool IsInputLock => 0 < _inputLockTasks.Count;
         #endregion
 
         #region Publicメソッド
@@ -44,7 +54,7 @@ namespace Mock.MusicBattle.Player
             Vector3 moveDir = cameraForward * inputDirection.y + cameraRight * inputDirection.x;
             moveDir.y = 0f;
 
-            return moveDir.normalized * _status.MoveSpeed;
+            return moveDir.normalized * _status.Value.MoveSpeed;
         }
 
         /// <summary>
@@ -53,7 +63,15 @@ namespace Mock.MusicBattle.Player
         /// <param name="velocity">設定する目標速度。</param>
         public void SetPlayerVelocity(Vector3 velocity)
         {
+            if (IsInputLock) { return; }
+
             _targetVelocity = velocity;
+        }
+
+        public void VelocityReset()
+        {
+            _currentVelocity = Vector3.zero;
+            _targetVelocity = Vector3.zero;
         }
 
         /// <summary>
@@ -65,12 +83,44 @@ namespace Mock.MusicBattle.Player
             _isGround = isGround;
         }
 
+        public async Task Dodge(CancellationToken toknen = default)
+        {
+            if (!_isGround) { return; }
+
+            Vector3 dir = _player.transform.forward;
+            Vector3 cul = _currentVelocity;
+            Vector3 tar = _targetVelocity;
+
+            Vector3 vel = dir * _status.Value.DodgeSpeed;
+            _currentVelocity = vel;
+            _targetVelocity = vel;
+
+            _isDodging = true;
+
+            await Awaitable.WaitForSecondsAsync(
+                (float)_status.DodgeDuration, toknen);
+
+            _isDodging = false;
+
+            _currentVelocity = cul;
+            _targetVelocity = tar;
+        }
+
+        public async void InputLock(Task moveLockTask)
+        {
+            if (moveLockTask == null) { return; }
+
+            _inputLockTasks.AddLast(moveLockTask);
+            await moveLockTask;
+            _inputLockTasks.Remove(moveLockTask);
+        }
+
         /// <summary>
         ///     プレイヤーの移動を更新します（Updateフェーズで呼び出し）。
         /// </summary>
-        public void Update()
+        public void Update(float delta)
         {
-            float t = CalculateAccelerationLerpT();
+            float t = CalculateAccelerationLerpT(delta);
             UpdateHorizontalVelocity(t);
             UpdateRotation();
         }
@@ -78,19 +128,25 @@ namespace Mock.MusicBattle.Player
 
         #region プライベートフィールド
         /// <summary> プレイヤーのステータス。 </summary>
-        private readonly PlayerStatus _status;
+        private readonly PlayerStatusTransfer _status;
         /// <summary> プレイヤーのTransform。 </summary>
         private readonly Transform _player;
         /// <summary> カメラのTransform。 </summary>
         private readonly Transform _camera;
         /// <summary> プレイヤーのRigidbody。 </summary>
         private readonly Rigidbody _rb;
+        /// <summary> 現在の速度。 </summary>
+        private Vector3 _currentVelocity;
         /// <summary> 目標の速度。 </summary>
         private Vector3 _targetVelocity;
         /// <summary> 水平方向の速度。 </summary>
         private Vector3 _horizontalVelocity;
         /// <summary> 地面に接地しているかどうか。 </summary>
         private bool _isGround;
+        /// <summary> 回避中かどうか。 </summary>
+        private bool _isDodging;
+        /// <summary> 入力ロックされているかどうか。 </summary>
+        private LinkedList<Task> _inputLockTasks = new();
         #endregion
 
         #region Unityライフサイクルメソッド
@@ -100,7 +156,7 @@ namespace Mock.MusicBattle.Player
         /// </summary>
         public void FixedUpdate()
         {
-            _rb.linearVelocity = new Vector3(CurrentVelocity.x, _rb.linearVelocity.y, CurrentVelocity.z);
+            _rb.linearVelocity = new Vector3(_currentVelocity.x, _rb.linearVelocity.y, _currentVelocity.z);
         }
         #endregion
 
@@ -109,14 +165,14 @@ namespace Mock.MusicBattle.Player
         ///     加速度補間t値を計算します。
         /// </summary>
         /// <returns>加速度補間t値。</returns>
-        private float CalculateAccelerationLerpT()
+        private float CalculateAccelerationLerpT(float delta)
         {
             float acceleration = _targetVelocity.magnitude > 0f
-                ? _status.WalkAccelerationDuration
-                : _status.StopAccelerationDuration;
+                ? _status.Value.WalkAccelerationDuration
+                : _status.Value.StopAccelerationDuration;
 
             float damping = Mathf.Max(acceleration, 0.0001f);
-            return 1f - Mathf.Exp(-Time.deltaTime / damping);
+            return 1f - Mathf.Exp(-delta / damping);
         }
 
         /// <summary>
@@ -125,14 +181,14 @@ namespace Mock.MusicBattle.Player
         /// <param name="t">補間係数。</param>
         private void UpdateHorizontalVelocity(float t)
         {
-            Vector3 horizontalCurrent = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
+            Vector3 horizontalCurrent = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
             Vector3 horizontalTarget = new Vector3(_targetVelocity.x, 0f, _targetVelocity.z);
 
             _horizontalVelocity = Vector3.Lerp(horizontalCurrent, horizontalTarget, t);
 
-            CurrentVelocity = new Vector3(
+            _currentVelocity = new Vector3(
                 _horizontalVelocity.x,
-                CurrentVelocity.y,
+                _currentVelocity.y,
                 _horizontalVelocity.z
             );
         }
@@ -145,9 +201,9 @@ namespace Mock.MusicBattle.Player
             // 現在の向きを水平に
             Vector3 forward = _player.forward - new Vector3(0f, _player.forward.y, 0f);
             // 水平方向の速度成分
-            Vector3 targetDir = new Vector3(CurrentVelocity.x, 0f, CurrentVelocity.z);
+            Vector3 targetDir = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
             // Cinemachine式 Damping
-            float rotDamping = Mathf.Max(_status.RotationDamping, 0.0001f);
+            float rotDamping = Mathf.Max(_status.Value.RotationDamping, 0.0001f);
             float rotT = 1f - Mathf.Exp(-Time.deltaTime / rotDamping);
             Vector3 dir = Vector3.Lerp(forward, targetDir, rotT);
             if (dir.sqrMagnitude > 0.0001f)

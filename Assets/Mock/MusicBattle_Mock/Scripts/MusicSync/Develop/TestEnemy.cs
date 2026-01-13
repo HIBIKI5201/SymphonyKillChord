@@ -11,7 +11,7 @@ namespace Mock.MusicBattle.MusicSync
     /// </summary>
     public class TestEnemy : MonoBehaviour
     {
-        // PUBLIC_METHODS
+
         #region インスペクター表示フィールド
         /// <summary> 音楽同期マネージャーの参照。 </summary>
         [SerializeField, Tooltip("音楽同期マネージャーの参照。")]
@@ -43,7 +43,7 @@ namespace Mock.MusicBattle.MusicSync
         /// <summary>
         ///     最初のフレームアップデートの前に呼び出されます。
         /// </summary>
-        void Start()
+        private void Start()
         {
         }
 
@@ -51,7 +51,7 @@ namespace Mock.MusicBattle.MusicSync
         ///     フレームごとに呼び出されます。
         ///     ズームエフェクトと入力によるアクションの登録・キャンセルを処理します。
         /// </summary>
-        void Update()
+        private void Update()
         {
             if(transform.localScale.x > 1f)
             {

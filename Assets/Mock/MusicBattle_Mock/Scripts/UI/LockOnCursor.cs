@@ -10,6 +10,7 @@ namespace Mock.MusicBattle.UI
     [UxmlElement]
     public partial class LockOnCursor : VisualElement
     {
+        #region コンストラクタ
         /// <summary>
         ///     <see cref="LockOnCursor"/>クラスの新しいインスタンスを初期化します。
         /// </summary>
@@ -28,6 +29,8 @@ namespace Mock.MusicBattle.UI
             _cursor = this.Q<VisualElement>(ELEMENT_CURSOR_NAME);
             style.visibility = Visibility.Hidden;
         }
+        #endregion
+
         #region Publicメソッド
         /// <summary>
         ///     カーソルの追跡対象となるターゲットを登録します。

@@ -86,6 +86,9 @@ namespace Mock.MusicBattle.Camera
         /// <summary> カメラの設定データ。 </summary>
         [SerializeField, Tooltip("カメラの設定データ。")]
         private CameraConfigs _cameraConfigs;
+        /// <summary> カメラの更新モード。 </summary>
+        [SerializeField, Tooltip("カメラのアップデート頻度")]
+        private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
         #endregion
 
         #region プライベートフィールド
@@ -95,8 +98,6 @@ namespace Mock.MusicBattle.Camera
         private InputBuffer _inputBuffer;
         /// <summary> カメラの移動処理。 </summary>
         private CameraMover _mover;
-        /// <summary> カメラの更新モード。 </summary>
-        private CameraUpdateModeEnum _mode = CameraUpdateModeEnum.Update;
         #endregion
 
         #region Unityライフサイクルメソッド
