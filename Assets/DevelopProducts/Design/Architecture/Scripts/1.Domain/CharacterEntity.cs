@@ -37,9 +37,9 @@ namespace DevelopProducts.Architecture.Domain
         ///     ダメージを受ける。
         /// </summary>
         /// <param name="damage"> ダメージ量。 </param>
-        public void TakeDamage(float damage)
+        public void TakeDamage(DamageContext damage)
         {
-            _currentHealth = Mathf.Max(_currentHealth - damage, 0);
+            _currentHealth = Mathf.Max(_currentHealth - damage.Value, 0);
             OnHealthChanged?.Invoke(_currentHealth);
         }
 
