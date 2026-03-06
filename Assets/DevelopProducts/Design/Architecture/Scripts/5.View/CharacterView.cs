@@ -5,6 +5,9 @@ using DevelopProducts.Architecture.Domain;
 
 namespace DevelopProducts.Architecture.View
 {
+    /// <summary>
+    ///     キャラクターの描画と物理挙動を担当するビュークラス。
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class CharacterView : MonoBehaviour, ICharacterView
     {

@@ -8,6 +8,9 @@ using CharacterController = DevelopProducts.Architecture.Adaptor.CharacterContro
 
 namespace DevelopProducts.Architecture.Composition
 {
+    /// <summary>
+    ///     キャラクター固有の依存関係を構築し、初期化を行うクラス。
+    /// </summary>
     [RequireComponent(typeof(CharacterView))]
     public class CharacterInitializer : MonoBehaviour
     {

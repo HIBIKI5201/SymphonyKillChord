@@ -3,8 +3,16 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.Adaptor
 {
+    /// <summary>
+    ///     ドメインモデルとビューの仲介を行うプレゼンタークラス。
+    /// </summary>
     public class CharacterPresenter
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="entity"> キャラクターエンティティ。 </param>
+        /// <param name="view"> ビューインターフェース。 </param>
         public CharacterPresenter(CharacterEntity entity, ICharacterView view)
         {
             _entity = entity;

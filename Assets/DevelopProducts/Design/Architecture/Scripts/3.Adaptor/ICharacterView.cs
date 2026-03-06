@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.Adaptor
 {
+    /// <summary>
+    ///     キャラクターのビューを抽象化するインターフェース。
+    /// </summary>
     public interface ICharacterView
     {
         /// <summary>

@@ -3,6 +3,9 @@ using CharacterController = DevelopProducts.Architecture.Adaptor.CharacterContro
 
 namespace DevelopProducts.Architecture.View
 {
+    /// <summary>
+    ///     プレイヤーの入力を保持し、コントローラーに仲介するバッファクラス。
+    /// </summary>
     public class InputBuffer : MonoBehaviour
     {
         /// <summary>

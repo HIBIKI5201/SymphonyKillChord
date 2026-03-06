@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.Composition
 {
+    /// <summary>
+    ///     シーン全体のエントリーポイントとして、各コンポーネントの初期化を統括するクラス。
+    /// </summary>
     public class Initializer : MonoBehaviour
     {
         /// <summary>
