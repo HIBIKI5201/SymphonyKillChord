@@ -21,7 +21,7 @@ namespace DevelopProducts.Architecture.Application
             return damage;
         }
 
-        [SerializeField, ToolTip("軽減するダメージの固定値。")]
+        [SerializeField, Tooltip("軽減するダメージの固定値。")]
         private float _armorValue = 10f;
     }
 }

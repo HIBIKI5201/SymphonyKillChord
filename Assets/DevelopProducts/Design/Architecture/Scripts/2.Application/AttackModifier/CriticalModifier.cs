@@ -22,10 +22,10 @@ namespace DevelopProducts.Architecture.Application
             return damage;
         }
 
-        [SerializeField, Range(0, 1), ToolTip("クリティカルが発生する確率(0-1)。")]
+        [SerializeField, Range(0, 1), Tooltip("クリティカルが発生する確率(0-1)。")]
         private float _criticalChance = 0.25f;
 
-        [SerializeField, Min(1), ToolTip("クリティカル時のダメージ倍率。")]
+        [SerializeField, Min(1), Tooltip("クリティカル時のダメージ倍率。")]
         private float _criticalDamage = 2f;
     }
 }

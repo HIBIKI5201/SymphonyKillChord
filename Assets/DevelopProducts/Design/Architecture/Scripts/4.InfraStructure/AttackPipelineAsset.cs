@@ -21,7 +21,7 @@ namespace DevelopProducts.Architecture.InfraStructure
             return new AttackPipeline(_attackModifiers);
         }
 
-        [SerializeReference, SubclassSelector, ToolTip("適用する攻撃修飾子のリスト。")]
+        [SerializeReference, SubclassSelector, Tooltip("適用する攻撃修飾子のリスト。")]
         private IAttackModifier[] _attackModifiers;
     }
 }
