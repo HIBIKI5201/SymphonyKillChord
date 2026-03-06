@@ -20,10 +20,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 依存関係の復元
-        run: dotnet restore ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
+        run: dotnet restore ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj
         
       - name: ビルド
-        run: dotnet build ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
+        run: dotnet build ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj --configuration Release
 
       - name: 実行
         env: # 使用する環境変数を呼び出す。
@@ -35,4 +35,4 @@ jobs:
           NOTION_DATABASE_NAME_PROPERTY: ${{ vars.NOTION_DATABASE_NAME_PROPERTY }}
           NOTION_DATABASE_STATUS_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_PROPERTY }}
           NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY }}
-        run: dotnet run --project ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
+        run: dotnet run --project ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj --configuration Release
