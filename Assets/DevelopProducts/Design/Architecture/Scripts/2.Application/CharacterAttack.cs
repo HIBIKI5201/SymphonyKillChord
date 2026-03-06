@@ -10,9 +10,13 @@ namespace DevelopProducts.Architecture.Application
             _entity = entity;
         }
 
+        /// <summary>
+        ///     対象にダメージを与える。
+        /// </summary>
+        /// <param name="target"> ダメージを受ける対象。 </param>
         public void AddDamage(CharacterEntity target)
         {
-
+            target.TakeDamage(_entity.AttackPower);
         }
 
         private readonly CharacterEntity _entity;
