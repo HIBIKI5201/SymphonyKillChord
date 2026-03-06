@@ -10,12 +10,15 @@ namespace DevelopProducts.Architecture.InfraStructure
         public string Name => _name;
         public float Health => _health;
         public float Speed => _speed;
+        public float AttackPower => _attackPower;
 
-        [SerializeField]
+        [SerializeField, Tooltip("キャラクターの名前。")]
         private string _name = "Character Name";
-        [SerializeField, Min(0)]
+        [SerializeField, Min(0), Tooltip("キャラクターの最大体力。")]
         private float _health = 100;
-        [SerializeField]
+        [SerializeField, Min(0), Tooltip("キャラクターの移動速度。")]
         private float _speed = 1;
+        [SerializeField, Min(0), Tooltip("キャラクターの攻撃力。")]
+        private float _attackPower = 10;
     }
 }
