@@ -17,7 +17,7 @@ namespace DevelopProducts.Architecture.Domain
         /// <param name="attackPower"> 攻撃力。 </param>
         public CharacterEntity(string name, float health, float speed, float attackPower)
         {
-            if (health <= 0) { throw new Exception($"{health}. Health must be greater than zero."); }
+            if (float.IsNaN(health) || health <= 0) { throw new Exception($"{health}. Health must be greater than zero."); }
 
             _name = name;
             _maxHealth = health;
