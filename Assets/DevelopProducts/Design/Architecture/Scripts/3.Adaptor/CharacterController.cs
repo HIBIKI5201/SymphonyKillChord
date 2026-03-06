@@ -12,18 +12,28 @@ namespace DevelopProducts.Architecture.Adaptor
             _presenter = presenter;
         }
 
+        /// <summary> 現在のプレゼンター。 </summary>
+        public CharacterPresenter Presenter => _presenter;
+
+        /// <summary>
+        ///     対象にダメージを与える。
+        /// </summary>
+        /// <param name="target"> ダメージを与える対象のプレゼンター。 </param>
         public void AddDamage(CharacterPresenter target)
         {
-            _attacker.AddDamage(target);
+            _attacker.AddDamage(target.Entity);
         }
 
+        /// <summary>
+        ///     キャラクターを移動させる。
+        /// </summary>
+        /// <param name="dir"> 移動方向。 </param>
         public void Move(Vector2 dir)
         {
-            Debug.Log($"Move: {dir}");
             _presenter.Move(dir);
         }
 
-        private CharacterPresenter _presenter;
-        private CharacterAttack _attacker;
+        private readonly CharacterPresenter _presenter;
+        private readonly CharacterAttack _attacker;
     }
 }
