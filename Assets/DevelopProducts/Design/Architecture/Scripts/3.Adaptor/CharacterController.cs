@@ -4,8 +4,16 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.Adaptor
 {
+    /// <summary>
+    ///     キャラクターの操作を制御するコントローラークラス。
+    /// </summary>
     public class CharacterController
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="attacker"> 攻撃ロジック。 </param>
+        /// <param name="presenter"> プレゼンター。 </param>
         public CharacterController(CharacterAttack attacker, CharacterPresenter presenter)
         {
             _attacker = attacker;

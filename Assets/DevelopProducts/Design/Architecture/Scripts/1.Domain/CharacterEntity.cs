@@ -3,8 +3,18 @@ using System;
 
 namespace DevelopProducts.Architecture.Domain
 {
+    /// <summary>
+    ///     キャラクターのドメインモデルを表すエンティティ。
+    /// </summary>
     public class CharacterEntity
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="name"> 名前。 </param>
+        /// <param name="health"> 初期体力。 </param>
+        /// <param name="speed"> 移動速度。 </param>
+        /// <param name="attackPower"> 攻撃力。 </param>
         public CharacterEntity(string name, float health, float speed, float attackPower)
         {
             if (health <= 0) { throw new Exception($"{health}. Health must be greater than zero."); }
