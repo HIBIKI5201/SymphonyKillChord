@@ -9,10 +9,13 @@ namespace DevelopProducts.Architecture.InfraStructure
     {
         public string Name => _name;
         public float Health => _health;
+        public float Speed => _speed;
 
         [SerializeField]
         private string _name = "Character Name";
         [SerializeField, Min(0)]
         private float _health = 100;
+        [SerializeField]
+        private float _speed = 1;
     }
 }
