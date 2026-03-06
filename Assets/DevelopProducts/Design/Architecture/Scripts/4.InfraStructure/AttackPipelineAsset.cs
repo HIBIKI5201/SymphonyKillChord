@@ -1,19 +1,20 @@
+using DevelopProducts.Architecture.Application;
+using DevelopProducts.Architecture.Utility;
+using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
-namespace DevelopProducts.Architecture.
+namespace DevelopProducts.Architecture.InfraStructure
 {
-    public class AttackPipelineAsset : MonoBehaviour
+    [CreateAssetMenu(fileName = nameof(AttackPipelineAsset),
+        menuName = Const.CREATE_ASSET_PATH + nameof(AttackPipelineAsset))]
+    public class AttackPipelineAsset : ScriptableObject
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public AttackPipeline Create()
         {
-        
+            return new AttackPipeline(_attackModifiers);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+        [SerializeReference, SubclassSelector]
+        private IAttackModifier[] _attackModifiers;
     }
 }
