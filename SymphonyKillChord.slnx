@@ -17,6 +17,7 @@
   <Project Path="UniGLTF.UniUnlit.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
+  <Project Path="DevelopProducts-Architecture.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="VrmLibTests.csproj" />
   <Project Path="VrmLib.csproj" />
