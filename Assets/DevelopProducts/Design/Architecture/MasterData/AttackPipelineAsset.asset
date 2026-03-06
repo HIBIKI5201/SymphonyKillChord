@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d69bf063cb3b3df4da2f68a6f66d31c0, type: 3}
+  m_Name: AttackPipelineAsset
+  m_EditorClassIdentifier: DevelopProducts-Architecture::DevelopProducts.Architecture.InfraStructure.AttackPipelineAsset
+  _attackModifiers:
+  - rid: 9167029907498991938
+  - rid: 9167029907498991939
+  references:
+    version: 2
+    RefIds:
+    - rid: 9167029907498991938
+      type: {class: ArmorModifier, ns: DevelopProducts.Architecture.Application, asm: DevelopProducts-Architecture}
+      data:
+        _armorValue: 10
+    - rid: 9167029907498991939
+      type: {class: CriticalModifier, ns: DevelopProducts.Architecture.Application, asm: DevelopProducts-Architecture}
+      data:
+        _criticalChance: 0.25

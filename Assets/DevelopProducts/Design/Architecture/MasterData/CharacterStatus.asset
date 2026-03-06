@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: DevelopProducts-Architecture::DevelopProducts.Architecture.InfraStructure.CharacterStatus
   _name: Character Name
   _health: 100
+  _speed: 1
