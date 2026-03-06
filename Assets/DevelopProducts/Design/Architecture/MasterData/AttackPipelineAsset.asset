@@ -21,8 +21,9 @@ MonoBehaviour:
     - rid: 9167029907498991938
       type: {class: ArmorModifier, ns: DevelopProducts.Architecture.Application, asm: DevelopProducts-Architecture}
       data:
-        _armorValue: 10
+        _armorValue: 2
     - rid: 9167029907498991939
       type: {class: CriticalModifier, ns: DevelopProducts.Architecture.Application, asm: DevelopProducts-Architecture}
       data:
         _criticalChance: 0.25
+        _criticalDamage: 5
