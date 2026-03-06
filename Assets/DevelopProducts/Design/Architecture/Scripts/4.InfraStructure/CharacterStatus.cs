@@ -1,9 +1,10 @@
+using DevelopProducts.Architecture.Utility;
 using UnityEngine;
 
 namespace DevelopProducts.Architecture.InfraStructure
 {
     [CreateAssetMenu(fileName = nameof(CharacterStatus),
-        menuName = "DevelopProducts/" + nameof(CharacterStatus), order = 1)]
+        menuName = Const.CREATE_ASSET_PATH + nameof(CharacterStatus), order = 1)]
     public class CharacterStatus : ScriptableObject
     {
         public string Name => _name;
