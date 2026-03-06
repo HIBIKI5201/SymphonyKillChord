@@ -13,6 +13,7 @@ namespace DevelopProducts.Architecture.Domain
         /// <param name="value"> 初期ダメージ量。 </param>
         public DamageContext(float value)
         {
+            if (value < 0) { value = 0; }
             _value = value;
         }
 
