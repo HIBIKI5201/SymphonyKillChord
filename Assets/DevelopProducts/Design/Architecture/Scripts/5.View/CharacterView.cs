@@ -1,10 +1,16 @@
 using UnityEngine;
+using DevelopProducts.Architecture.Adaptor;
+using CharacterController = DevelopProducts.Architecture.Adaptor.CharacterController;
 
 namespace DevelopProducts.Architecture.View
 {
     public class CharacterView : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        public void SetController(CharacterController controller)
+        {
+            _controller = controller;
+        }
+
         void Start()
         {
         
@@ -15,5 +21,7 @@ namespace DevelopProducts.Architecture.View
         {
         
         }
+
+        private CharacterController _controller;
     }
 }
