@@ -11,27 +11,34 @@ namespace DevelopProducts.Architecture.Composition
     [RequireComponent(typeof(CharacterView))]
     public class CharacterInitializer : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
         public void Initialize()
         {
             CharacterView view = GetComponent<CharacterView>();
 
-            CharacterEntity entity = new(_characterStatus.Name, _characterStatus.Health, _characterStatus.Speed);
+            CharacterEntity entity = new(_characterStatus.Name, _characterStatus.Health, _characterStatus.Speed, _characterStatus.AttackPower);
             CharacterAttack characterAttack = new(entity);
             CharacterPresenter presenter = new(entity, view);
-            CharacterController controller = new(characterAttack, presenter);
+            DevelopProducts.Architecture.Adaptor.CharacterController controller = new(characterAttack, presenter);
             view.SetController(controller);
 
             _controller = controller;
         }
 
+        /// <summary>
+        ///     入力バッファをバインドする。
+        /// </summary>
+        /// <param name="buffer"> バインドする入力バッファ。 </param>
         public void BindInputBuffer(InputBuffer buffer)
         {
             buffer.SetController(_controller);
         }
 
-        [SerializeField]
+        [SerializeField, Tooltip("キャラクターのステータスデータ。")]
         private CharacterStatus _characterStatus;
 
-        private CharacterController _controller;
+        private DevelopProducts.Architecture.Adaptor.CharacterController _controller;
     }
 }

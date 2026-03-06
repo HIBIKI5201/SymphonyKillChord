@@ -5,6 +5,9 @@ namespace DevelopProducts.Architecture.Composition
 {
     public class Initializer : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
         public void Awake()
         {
             foreach (CharacterInitializer chara in FindObjectsByType<CharacterInitializer>(FindObjectsSortMode.None))
@@ -15,9 +18,9 @@ namespace DevelopProducts.Architecture.Composition
             _controlCharacter.BindInputBuffer(_buffer);
         }
 
-        [SerializeField]
+        [SerializeField, Tooltip("操作するキャラクターの初期化クラス。")]
         private CharacterInitializer _controlCharacter;
-        [SerializeField]
+        [SerializeField, Tooltip("入力バッファ。")]
         private InputBuffer _buffer;
     }
 }
