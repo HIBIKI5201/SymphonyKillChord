@@ -1,0 +1,38 @@
+name: Sinfonia Operator
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # JSTの7時（UTC 22時）
+  workflow_dispatch:       # 手動実行も可能。
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: 'Sinfonia Operator' # 専用環境を構築。
+
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@v4
+
+      - name: .NETをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 依存関係の復元
+        run: dotnet restore ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
+        
+      - name: ビルド
+        run: dotnet build ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release
+
+      - name: 実行
+        env: # 使用する環境変数を呼び出す。
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ vars.DISCORD_CHANNEL_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ vars.NOTION_DATABASE_ID }}
+          NOTION_DATABASE_DATE_PROPERTY: ${{ vars.NOTION_DATABASE_DATE_PROPERTY }}
+          NOTION_DATABASE_NAME_PROPERTY: ${{ vars.NOTION_DATABASE_NAME_PROPERTY }}
+          NOTION_DATABASE_STATUS_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_PROPERTY }}
+          NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY }}
+        run: dotnet run --project ./SinfoniaOperator/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj --configuration Release

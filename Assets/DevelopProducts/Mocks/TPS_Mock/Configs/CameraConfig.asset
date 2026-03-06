@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a35570784e70ac4fb79341f20c905c4, type: 3}
+  m_Name: CameraConfig
+  m_EditorClassIdentifier: TPS_Mock::Mock.TPS.CameraConfig
+  _isCameraFlipX: 0
+  _cameraOffset: {x: 1, y: 2, z: -6}
+  _cameraLookAtOffset: {x: 1, y: 1.5, z: 0}
+  _cameraFollowDamping: 0.005
+  _cameraLookAtDamping: 0.01
+  _cameraRotationSpeed: 1
+  _pitchRange: {x: -30, y: 60}
+  _cameraCollisionRadius: 1

@@ -1,0 +1,11 @@
+{
+  "tools": {
+    "autoAccept": false
+  },
+  "context": {
+    "fileName": "GEMINI.md"
+  },
+  "ui": {
+    "theme": "GitHub"
+  }
+}

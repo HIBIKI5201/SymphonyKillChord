@@ -1,4 +1,4 @@
 root = true
 
-[*.cs]
-charset = utf-8-bom
+[*.{cs,md,json,yml}]
+charset = utf-8
