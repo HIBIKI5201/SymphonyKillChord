@@ -37,7 +37,7 @@ namespace DevelopProducts.Architecture.Composition
         }
 
         [SerializeField, Tooltip("キャラクターのステータスデータ。")]
-        private CharacterStatus _characterStatus;
+        private CharacterStatusAsset _characterStatus;
 
         private DevelopProducts.Architecture.Adaptor.CharacterController _controller;
     }

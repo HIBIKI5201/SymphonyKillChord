@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.InfraStructure
 {
-    [CreateAssetMenu(fileName = nameof(CharacterStatus),
-        menuName = Const.CREATE_ASSET_PATH + nameof(CharacterStatus), order = 1)]
-    public class CharacterStatus : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(CharacterStatusAsset),
+        menuName = Const.CREATE_ASSET_PATH + nameof(CharacterStatusAsset), order = 1)]
+    public class CharacterStatusAsset : ScriptableObject
     {
         public string Name => _name;
         public float Health => _health;
