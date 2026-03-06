@@ -3,8 +3,16 @@ using UnityEngine;
 
 namespace DevelopProducts.Architecture.Application
 {
+    /// <summary>
+    ///     キャラクターの攻撃処理を担当するアプリケーションサービス。
+    /// </summary>
     public class CharacterAttack
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="entity"> 攻撃を行うエンティティ。 </param>
+        /// <param name="pipeline"> 使用する攻撃パイプライン。 </param>
         public CharacterAttack(CharacterEntity entity, AttackPipeline pipeline)
         {
             _entity = entity;
