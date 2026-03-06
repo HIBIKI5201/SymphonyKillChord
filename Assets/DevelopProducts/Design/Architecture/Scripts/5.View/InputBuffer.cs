@@ -14,6 +14,12 @@ namespace DevelopProducts.Architecture.View
         /// <param name="controller"> セットするコントローラー。 </param>
         public void SetController(CharacterController controller)
         {
+            if (controller == null) 
+            {
+                Debug.LogError("InputBuffer: SetController: controller is null.");
+                return; 
+            }
+
             _controller = controller;
         }
 
@@ -22,6 +28,8 @@ namespace DevelopProducts.Architecture.View
         /// </summary>
         private void Update()
         {
+            if (_controller == null) { return; }
+
             bool pressedW = Input.GetKey(KeyCode.W);
             bool pressedA = Input.GetKey(KeyCode.A);
             bool pressedS = Input.GetKey(KeyCode.S);
