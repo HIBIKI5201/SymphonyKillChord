@@ -14,12 +14,12 @@ namespace DevelopProducts.Architecture.Composition
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize()
+        public void Initialize(AttackPipelineAsset attackPipeline)
         {
             CharacterView view = GetComponent<CharacterView>();
 
             CharacterEntity entity = new(_characterStatus.Name, _characterStatus.Health, _characterStatus.Speed, _characterStatus.AttackPower);
-            CharacterAttack characterAttack = new(entity);
+            CharacterAttack characterAttack = new(entity, attackPipeline.Create());
             CharacterPresenter presenter = new(entity, view);
             DevelopProducts.Architecture.Adaptor.CharacterController controller = new(characterAttack, presenter);
             view.SetController(controller);

@@ -1,3 +1,4 @@
+using DevelopProducts.Architecture.InfraStructure;
 using DevelopProducts.Architecture.View;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace DevelopProducts.Architecture.Composition
         {
             foreach (CharacterInitializer chara in FindObjectsByType<CharacterInitializer>(FindObjectsSortMode.None))
             {
-                chara.Initialize();
+                chara.Initialize(_attackPipeline);
             }
 
             _controlCharacter.BindInputBuffer(_buffer);
@@ -22,5 +23,7 @@ namespace DevelopProducts.Architecture.Composition
         private CharacterInitializer _controlCharacter;
         [SerializeField, Tooltip("入力バッファ。")]
         private InputBuffer _buffer;
+        [SerializeField]
+        private AttackPipelineAsset _attackPipeline;
     }
 }
