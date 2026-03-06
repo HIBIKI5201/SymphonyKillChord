@@ -10,6 +10,11 @@ namespace DevelopProducts.Architecture.Application
             _entity = entity;
         }
 
+        public void AddDamage(CharacterEntity target)
+        {
+
+        }
+
         private readonly CharacterEntity _entity;
     }
 }
