@@ -1,6 +1,6 @@
 {
-    "name": "DevelopProducts-ToonShader",
-    "rootNamespace": "DevelopProducts.ToonShader.",
+    "name": "DevelopProducts-Architecture",
+    "rootNamespace": "DevelopProducts.Architecture.",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
