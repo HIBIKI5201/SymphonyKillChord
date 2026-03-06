@@ -5,9 +5,10 @@ namespace DevelopProducts.Architecture.Application
 {
     public class CharacterAttack
     {
-        public CharacterAttack(CharacterEntity entity)
+        public CharacterAttack(CharacterEntity entity, AttackPipeline pipeline)
         {
             _entity = entity;
+            _pipeline = pipeline;
         }
 
         /// <summary>
@@ -16,9 +17,13 @@ namespace DevelopProducts.Architecture.Application
         /// <param name="target"> ダメージを受ける対象。 </param>
         public void AddDamage(CharacterEntity target)
         {
-            target.TakeDamage(_entity.AttackPower);
+
+            DamageContext damage = new(_entity.AttackPower);
+            damage = _pipeline.Process(damage);
+            target.TakeDamage(damage);
         }
 
         private readonly CharacterEntity _entity;
+        private readonly AttackPipeline _pipeline;
     }
 }
