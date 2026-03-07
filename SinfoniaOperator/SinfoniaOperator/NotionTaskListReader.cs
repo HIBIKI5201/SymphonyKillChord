@@ -7,20 +7,14 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class NotionTaskListReader
     {
-        public NotionTaskListReader(
-            string notionToken,
-            string databaseID,
-            string datePropertyName,
-            string namePropertyName,
-            string statusPropertyName,
-            string taskStatusDoneName)
+        public NotionTaskListReader(NotionEnvironment env)
         {
-            _notionToken = notionToken;
-            _databaseID = databaseID;
-            _datePropertyName = datePropertyName;
-            _namePropertyName = namePropertyName;
-            _statusPropertyName = statusPropertyName;
-            _taskStatusDoneName = taskStatusDoneName;
+            _notionToken = env.NotionToken;
+            _databaseID = env.DatabaseID;
+            _datePropertyName = env.DatePropertyName;
+            _namePropertyName = env.NamePropertyName;
+            _statusPropertyName = env.StatusPropertyName;
+            _taskStatusDoneName = env.TaskDoneStatusNam;
         }
 
         /// <summary>
