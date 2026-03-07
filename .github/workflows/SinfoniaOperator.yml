@@ -9,6 +9,8 @@ jobs:
   run:
     runs-on: ubuntu-latest
     environment: 'Sinfonia Operator' # 専用環境を構築。
+    env:
+      PROJECT_PATH: './SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj'
 
     steps:
       - name: ソースを取得
@@ -20,10 +22,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 依存関係の復元
-        run: dotnet restore ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj
+        run: dotnet restore ${{ env.PROJECT_PATH }}
         
       - name: ビルド
-        run: dotnet build ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj --configuration Release
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release
 
       - name: 実行
         env: # 使用する環境変数を呼び出す。
@@ -35,4 +37,4 @@ jobs:
           NOTION_DATABASE_NAME_PROPERTY: ${{ vars.NOTION_DATABASE_NAME_PROPERTY }}
           NOTION_DATABASE_STATUS_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_PROPERTY }}
           NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY }}
-        run: dotnet run --project ./SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj --configuration Release
+        run: dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release
