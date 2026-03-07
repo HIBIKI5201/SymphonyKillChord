@@ -9,7 +9,7 @@ namespace DevelopProducts.Architecture.View
     ///     キャラクターの描画と物理挙動を担当するビュークラス。
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    public class CharacterView : MonoBehaviour, ICharacterView
+    public class CharacterView : MonoBehaviour, ICharacterViewModel
     {
         /// <summary> 管理しているコントローラー。 </summary>
         public CharacterController Controller => _controller;
@@ -27,7 +27,7 @@ namespace DevelopProducts.Architecture.View
         ///     キャラクターを移動させる。
         /// </summary>
         /// <param name="vel"> 速度ベクトル。 </param>
-        void ICharacterView.Move(Vector2 vel)
+        void ICharacterViewModel.Move(Vector2 vel)
         {
             _rb.AddForce(new Vector3(vel.x, 0, vel.y), ForceMode.Impulse);
         }
@@ -37,7 +37,7 @@ namespace DevelopProducts.Architecture.View
         /// </summary>
         /// <param name="currentHealth"> 現在の体力。 </param>
         /// <param name="maxHealth"> 最大体力。 </param>
-        void ICharacterView.UpdateHealth(float currentHealth, float maxHealth)
+        void ICharacterViewModel.UpdateHealth(float currentHealth, float maxHealth)
         {
             Debug.Log($"{name} Health: {currentHealth} / {maxHealth}");
         }
