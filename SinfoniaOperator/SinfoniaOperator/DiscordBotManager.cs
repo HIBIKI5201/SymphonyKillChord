@@ -1,14 +1,16 @@
 using Discord;
 using Discord.WebSocket;
+using System;
+using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class DiscordBotManager
     {
-        public DiscordBotManager(string botToken, ulong channelID)
+        public DiscordBotManager(DiscordEnvironment env)
         {
-            _botToken = botToken;
-            _channelID = channelID;
+            _botToken = env.DiscordBotToken;
+            _channelID = env.DiscordChannelID;
 
             var config = new DiscordSocketConfig
             {

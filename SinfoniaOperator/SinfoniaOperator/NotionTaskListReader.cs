@@ -2,25 +2,24 @@ using Notion.Client;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal class NotionTaskListReader
     {
-        public NotionTaskListReader(
-            string notionToken,
-            string databaseID,
-            string datePropertyName,
-            string namePropertyName,
-            string statusPropertyName,
-            string taskStatusDoneName)
+        public NotionTaskListReader(NotionEnvironment env)
         {
-            _notionToken = notionToken;
-            _databaseID = databaseID;
-            _datePropertyName = datePropertyName;
-            _namePropertyName = namePropertyName;
-            _statusPropertyName = statusPropertyName;
-            _taskStatusDoneName = taskStatusDoneName;
+            _notionToken = env.NotionToken;
+            _databaseID = env.DatabaseID;
+            _datePropertyName = env.DatePropertyName;
+            _namePropertyName = env.NamePropertyName;
+            _statusPropertyName = env.StatusPropertyName;
+            _taskStatusDoneName = env.TaskDoneStatusName;
         }
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             PriorityQueue<StringBuilder, int> outputTaskQueue = new();
 
-            foreach (var item in database)
+            foreach (IWikiDatabase item in database)
             {
                 if (item is not Page page) continue;
 
@@ -144,9 +143,9 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         private async Task<string> GetBlockChildrenViaHttpAsync(string blockId)
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new();
             string? startCursor = null;
-            using var http = new HttpClient();
+            using HttpClient http = new();
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
             http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
 
@@ -154,27 +153,27 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 try
                 {
-                    var url = new StringBuilder($"https://api.notion.com/v1/blocks/{blockId}/children?page_size=100");
+                    StringBuilder url = new($"https://api.notion.com/v1/blocks/{blockId}/children?page_size=100");
                     if (!string.IsNullOrEmpty(startCursor))
                         url.Append($"&start_cursor={Uri.EscapeDataString(startCursor)}");
 
-                    var resp = await http.GetAsync(url.ToString());
+                    HttpResponseMessage resp = await http.GetAsync(url.ToString());
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine($"Notion API エラー: {resp.StatusCode} (BlockId: {blockId})");
                         break;
                     }
 
-                    using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-                    var root = doc.RootElement;
+                    using JsonDocument doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+                    JsonElement root = doc.RootElement;
 
-                    if (!root.TryGetProperty("results", out var results))
+                    if (!root.TryGetProperty("results", out JsonElement results))
                     {
                         Console.WriteLine($"Notion API レスポンスに results がありません (BlockId: {blockId})");
                         break;
                     }
 
-                    foreach (var block in results.EnumerateArray())
+                    foreach (JsonElement block in results.EnumerateArray())
                     {
                         try
                         {
@@ -182,11 +181,11 @@ namespace SinfoniaStudio.SinfoniaOperator
 
                             static string ExtractPlainTextFromRichTextArray(JsonElement richTextArray)
                             {
-                                var sb = new StringBuilder();
+                                StringBuilder sb = new();
                                 if (richTextArray.ValueKind != JsonValueKind.Array) return string.Empty;
-                                foreach (var rt in richTextArray.EnumerateArray())
+                                foreach (JsonElement rt in richTextArray.EnumerateArray())
                                 {
-                                    if (rt.TryGetProperty("plain_text", out var plainTextEl))
+                                    if (rt.TryGetProperty("plain_text", out JsonElement plainTextEl))
                                         sb.Append(plainTextEl.GetString());
                                 }
                                 return sb.ToString();
