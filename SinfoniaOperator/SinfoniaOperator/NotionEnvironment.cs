@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace SinfoniaStudio.SinfoniaOperator
@@ -26,7 +27,9 @@ namespace SinfoniaStudio.SinfoniaOperator
                 namePropertyName,
                 statusPropertyName,
                 taskDoneStatusName]))
-            { return; }
+            {
+                throw new ArgumentException("必要な環境変数が見つかりませんでした。");
+            }
 
             NotionToken = notionToken.Value;
             DatabaseID = databaseID.Value;
