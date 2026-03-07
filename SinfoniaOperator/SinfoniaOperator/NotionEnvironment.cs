@@ -17,7 +17,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             EnvironmentVariable datePropertyName = new(datePropertyNameKey);
             EnvironmentVariable namePropertyName = new(namePropertyNameKey);
             EnvironmentVariable statusPropertyName = new(statusPropertyNameKey);
-            EnvironmentVariable taskDoneStatusNam = new(taskDoneStatusNameKey);
+            EnvironmentVariable taskDoneStatusName = new(taskDoneStatusNameKey);
 
             if (EnvironmentValidator.Validate([
                 notionToken,
@@ -25,7 +25,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 datePropertyName,
                 namePropertyName,
                 statusPropertyName,
-                taskDoneStatusNam]))
+                taskDoneStatusName]))
             { return; }
 
             NotionToken = notionToken.Value;
@@ -33,7 +33,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             DatePropertyName = datePropertyName.Value;
             NamePropertyName = namePropertyName.Value;
             StatusPropertyName = statusPropertyName.Value;
-            TaskDoneStatusNam = taskDoneStatusNam.Value;
+            TaskDoneStatusName = taskDoneStatusName.Value;
         }
 
         public readonly string NotionToken;
@@ -41,7 +41,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         public readonly string DatePropertyName;
         public readonly string NamePropertyName;
         public readonly string StatusPropertyName;
-        public readonly string TaskDoneStatusNam;
+        public readonly string TaskDoneStatusName;
 
         public override string ToString()
         {
@@ -51,7 +51,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine($"DatePropertyName: {DatePropertyName}");
             sb.AppendLine($"NamePropertyName: {NamePropertyName}");
             sb.AppendLine($"StatusPropertyName: {StatusPropertyName}");
-            sb.AppendLine($"TaskDoneStatusNam: {TaskDoneStatusNam}");
+            sb.AppendLine($"TaskDoneStatusName: {TaskDoneStatusName}");
             return sb.ToString();
         }
     }

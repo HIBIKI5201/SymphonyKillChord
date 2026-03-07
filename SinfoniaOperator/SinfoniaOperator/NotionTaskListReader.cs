@@ -19,7 +19,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             _datePropertyName = env.DatePropertyName;
             _namePropertyName = env.NamePropertyName;
             _statusPropertyName = env.StatusPropertyName;
-            _taskStatusDoneName = env.TaskDoneStatusNam;
+            _taskStatusDoneName = env.TaskDoneStatusName;
         }
 
         /// <summary>
