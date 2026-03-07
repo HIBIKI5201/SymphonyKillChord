@@ -31,8 +31,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                 $"discord env {discordEnv}\n" +
                 $"notion env {notionEnv}");
 
-            return;
-
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(notionEnv);
             DiscordBotManager discordBot = new(discordEnv);
