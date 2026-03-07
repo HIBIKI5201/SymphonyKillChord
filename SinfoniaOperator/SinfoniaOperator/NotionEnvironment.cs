@@ -4,12 +4,13 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal readonly struct NotionEnvironment
     {
-        public NotionEnvironment(string notionTokenKey,
-                string databaseIDKey,
-                string datePropertyNameKey,
-                string namePropertyNameKey,
-                string statusPropertyNameKey,
-                string taskDoneStatusNameKey)
+        public NotionEnvironment(
+            string notionTokenKey,
+            string databaseIDKey,
+            string datePropertyNameKey,
+            string namePropertyNameKey,
+            string statusPropertyNameKey,
+            string taskDoneStatusNameKey)
         {
             EnvironmentVariable notionToken = new(notionTokenKey);
             EnvironmentVariable databaseID = new(databaseIDKey);
@@ -25,7 +26,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 namePropertyName,
                 statusPropertyName,
                 taskDoneStatusNam]))
-                { return; }
+            { return; }
 
             NotionToken = notionToken.Value;
             DatabaseID = databaseID.Value;

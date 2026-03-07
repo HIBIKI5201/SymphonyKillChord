@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace SinfoniaStudio.SinfoniaOperator
@@ -31,7 +30,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             StringBuilder sb = new();
             sb.AppendLine($"DiscordBotToken: {(string.IsNullOrEmpty(DiscordBotToken) ? "null or empty" : "set")}, ");
             sb.AppendLine($"DiscordChannelID: {DiscordChannelID}");
-            return sb.ToString();                ;
+            return sb.ToString();
         }
     }
 }

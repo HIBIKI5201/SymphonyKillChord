@@ -1,3 +1,5 @@
+using System;
+
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class EnvironmentValidator
