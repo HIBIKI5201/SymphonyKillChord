@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal static class SinfoniaOperator 
+    internal static class SinfoniaOperator
     {
         private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
         private const string DISCORD_CHANNEL_ID = "DISCORD_CHANNEL_ID";
