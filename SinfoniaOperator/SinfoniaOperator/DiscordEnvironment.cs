@@ -19,12 +19,8 @@ namespace SinfoniaStudio.SinfoniaOperator
                 throw new ArgumentException("必要な環境変数が見つかりませんでした。");
             }
 
-            DiscordBotToken = discordBotToken.Value;
-
-            if (!ulong.TryParse(discordChannelID.Value, out DiscordChannelID))
-            {
-                Console.WriteLine($"DISCORD_CHANNEL_IDが数値に変換できませんでした。\nvalue {discordChannelID.Value}");
-            }
+            DiscordBotToken = discordBotToken;
+            DiscordChannelID = discordChannelID;
         }
 
         public readonly string DiscordBotToken;

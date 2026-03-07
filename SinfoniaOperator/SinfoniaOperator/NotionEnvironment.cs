@@ -31,12 +31,12 @@ namespace SinfoniaStudio.SinfoniaOperator
                 throw new ArgumentException("必要な環境変数が見つかりませんでした。");
             }
 
-            NotionToken = notionToken.Value;
-            DatabaseID = databaseID.Value;
-            DatePropertyName = datePropertyName.Value;
-            NamePropertyName = namePropertyName.Value;
-            StatusPropertyName = statusPropertyName.Value;
-            TaskDoneStatusName = taskDoneStatusName.Value;
+            NotionToken = notionToken;
+            DatabaseID = databaseID;
+            DatePropertyName = datePropertyName;
+            NamePropertyName = namePropertyName;
+            StatusPropertyName = statusPropertyName;
+            TaskDoneStatusName = taskDoneStatusName;
         }
 
         public readonly string NotionToken;
