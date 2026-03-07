@@ -5,7 +5,7 @@ namespace DevelopProducts.Architecture.Adaptor
     /// <summary>
     ///     キャラクターのビューを抽象化するインターフェース。
     /// </summary>
-    public interface ICharacterView
+    public interface ICharacterViewModel
     {
         /// <summary>
         ///     キャラクターを移動させる。
