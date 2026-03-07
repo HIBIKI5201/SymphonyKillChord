@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class SinfoniaOperator 
@@ -11,7 +14,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const string NOTION_DATABASE_STATUS_PROPERTY = "NOTION_DATABASE_STATUS_PROPERTY";
         private const string NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY = "NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY";
 
-        static async void Main()
+        static async Task Main()
         {
             // GitHubから環境変数を取得。
             string discordBotToken = Environment.GetEnvironmentVariable(DISCORD_BOT_TOKEN) ?? string.Empty;
