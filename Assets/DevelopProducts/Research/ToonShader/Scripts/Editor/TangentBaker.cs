@@ -46,9 +46,11 @@ public static class TangentBaker
 
         CalcVectorToTangetToUV(mesh, smoothNormals, ref uv);
 
-        mesh.uv4 = uv; // ← channel1に書き込み
+        mesh.uv4 = uv;
 
         Debug.Log($"[SmoothNormal] Baked: {mesh.name}", mesh);
+
+        smoothNormals.Dispose();
     }
     private static void CalcSmoothNormals(Mesh mesh, ref NativeArray<Vector3> smoothNormals)
     {

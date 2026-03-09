@@ -22,7 +22,7 @@ public class OutLineInjector : MonoBehaviour
                     break;
                 }
             }
-            if (!hasOutline)
+            if (hasOutline)
                 continue;
             var newMaterials = new Material[materials.Length + 1];
             for (int i = 0; i < materials.Length; i++)
@@ -30,6 +30,7 @@ public class OutLineInjector : MonoBehaviour
                 newMaterials[i] = materials[i];
             }
             newMaterials[^1] = _outline;
+            component.sharedMaterials = newMaterials;
         }
     }
 }
