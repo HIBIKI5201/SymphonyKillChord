@@ -47,6 +47,7 @@ public static class TangentBaker
         CalcVectorToTangetToUV(mesh, smoothNormals, ref uv);
 
         mesh.uv4 = uv;
+        EditorUtility.SetDirty(mesh);
 
         Debug.Log($"[SmoothNormal] Baked: {mesh.name}", mesh);
 
