@@ -23,6 +23,12 @@ namespace DevelopProducts.Architecture.View
 
         public void BindViewModel(CharacterViewModel vm)
         {
+            if (vm == _vm)
+            {
+                Debug.LogWarning("同じViewModelが既にバインドされています。");
+                return;
+            }
+
             vm.OnMove += Move;
             vm.OnUpdateHealth += UpdateHealth;
             _vm = vm;
