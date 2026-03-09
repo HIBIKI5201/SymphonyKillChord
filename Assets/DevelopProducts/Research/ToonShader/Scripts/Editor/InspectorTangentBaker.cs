@@ -24,7 +24,7 @@ namespace DevelopProducts.ToonShader.EditorExtension
                         TangentBaker.BakeMesh(item.sharedMesh);
                     }
 
-                    var array2 = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    var array2 = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                     foreach (var item in array2)
                     {
                         TangentBaker.BakeMesh(item.sharedMesh);
