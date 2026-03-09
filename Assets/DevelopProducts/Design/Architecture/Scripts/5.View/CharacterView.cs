@@ -23,6 +23,12 @@ namespace DevelopProducts.Architecture.View
 
         public void BindViewModel(CharacterViewModel vm)
         {
+            if (vm == _vm)
+            {
+                Debug.LogWarning($"このViewModelは既に登録されています。");
+                return;
+            }
+
             vm.OnMove += Move;
             vm.OnUpdateHealth += UpdateHealth;
             _vm = vm;
