@@ -1,9 +1,7 @@
 {
-    "name": "DevelopProducts-ToonShader",
-    "rootNamespace": "DevelopProducts.ToonShader.",
-    "references": [
-        "GUID:c8a23a053cdb72f4c9c0fe6b76b389aa"
-    ],
+    "name": "DevelopProductsUtility",
+    "rootNamespace": "DevelopProducts.Utility",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

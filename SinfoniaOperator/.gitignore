@@ -1,3 +1,6 @@
 /SinfoniaOperator/Properties/launchSettings.json
 /SinfoniaOperator/obj/
 /SinfoniaOperator/bin/
+
+# Exception for specific project file
+!/SinfoniaOperator/SinfoniaOperator.csproj
