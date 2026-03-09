@@ -21,7 +21,7 @@ View
 InfraStructure
 Composition
 に分ける。
-下層への参照を行いたい場合は、自層にintarfaceを追加し、下層がそれを実装してCompositionがDI注入する。
+下層への参照を行いたい場合は、自層にinterfaceを追加し、下層がそれを実装してCompositionがDI注入する。
 各レイヤーの説明
 ## Domain
 データ層。ピュアクラス。 参照レイヤーはなし。

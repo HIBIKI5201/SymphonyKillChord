@@ -26,8 +26,8 @@ namespace DevelopProducts.Architecture.Composition
             CharacterAttack characterAttack = new(entity, attackPipeline.Create());
             CharacterPresenter presenter = new(entity, vm);
             CharacterController controller = new(characterAttack, presenter);
-            view.SetController(controller);
             view.BindViewModel(vm);
+            view.SetController(controller);
 
             _controller = controller;
         }
