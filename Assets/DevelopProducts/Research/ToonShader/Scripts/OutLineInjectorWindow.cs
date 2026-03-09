@@ -1,16 +1,20 @@
+using UnityEditor;
 using UnityEngine;
 
-public class OutLineInjectorWindow : MonoBehaviour
+namespace DevelopProducts.ToonShader.Editor
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class OutLineInjectorWindow : EditorWindow
     {
-        
-    }
+        public static void Open()
+        {
+            OutLineInjectorWindow window = GetWindow<OutLineInjectorWindow>();
+            window.titleContent = new GUIContent("Outline Injector");
+            window.Show();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private void OnGUI()
+        {
+            
+        }
     }
 }
