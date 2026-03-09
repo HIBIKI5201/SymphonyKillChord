@@ -7,6 +7,12 @@ public class OutLineInjector : MonoBehaviour
     [ContextMenu("Inject")]
     private void Inject()
     {
+        if (_outline == null)
+        {
+            Debug.LogError("Outline material is not assigned.", this);
+            return;
+        }
+
         var components = GetComponentsInChildren<SkinnedMeshRenderer>();
         foreach (var component in components)
         {
