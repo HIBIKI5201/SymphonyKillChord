@@ -11,7 +11,7 @@ public class OutLineInjector : MonoBehaviour
         foreach (var component in components)
         {
             TangentBaker.BakeMesh(component.GetComponent<SkinnedMeshRenderer>().sharedMesh);
-            var materials = component.materials;
+            var materials = component.sharedMaterials;
 
             bool hasOutline = false;
             foreach (var item in materials)
