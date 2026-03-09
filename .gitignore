@@ -74,7 +74,4 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 Assets/AssetStoreTools/
 
-# Exception for specific project file
-!/ProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS/SymphonyKillChordProjectCS.csproj
-
 ExportedPackages/
