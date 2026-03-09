@@ -9,9 +9,9 @@ namespace DevelopProducts.ToonShader.EditorExtension
     {
         static InspectorTangentBaker()
         {
-            Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
+            UnityEditor.Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
         }
-        private static void OnPostHeaderGUI(Editor editor)
+        private static void OnPostHeaderGUI(UnityEditor.Editor editor)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
