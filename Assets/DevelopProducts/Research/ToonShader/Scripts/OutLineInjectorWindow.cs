@@ -1,13 +1,12 @@
-using DevelopProducts.Utility;
+using DevelopProducts.ToonShader.Utility;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DevelopProducts.ToonShader.Editor
 {
     public class OutLineInjectorWindow : EditorWindow
     {
-        [MenuItem(DevelopProductsConst.DEVELOP_PRODUCTS_WINDOW_PATH + nameof(OutLineInjectorWindow))]
+        [MenuItem(Const.WINDOW_PATH + nameof(OutLineInjectorWindow))]
         public static void Open()
         {
             OutLineInjectorWindow window = GetWindow<OutLineInjectorWindow>();
