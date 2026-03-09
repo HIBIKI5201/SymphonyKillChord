@@ -44,6 +44,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ForFace: 1
+    - _SmoothNormal: 1
     m_Colors:
     - _Color: {r: 0.5, g: 0.4, b: 0.35, a: 1}
   m_BuildTextureStacks: []
