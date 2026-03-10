@@ -1,6 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
@@ -23,7 +24,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             _client.Ready += () =>
             {
-                _readyTcs.SetResult(true);
+                _readyTcs.SetResult(default);
                 return Task.CompletedTask;
             };
 
@@ -53,7 +54,6 @@ namespace SinfoniaStudio.SinfoniaOperator
             if (_client.GetChannel(_channelID) is not IMessageChannel channel)
             {
                 Console.WriteLine($"id:{_channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
-
                 return;
             }
 
@@ -64,6 +64,8 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string _botToken;
         private readonly ulong _channelID;
         private readonly DiscordSocketClient _client;
-        private readonly TaskCompletionSource<bool> _readyTcs = new(false);
+        private readonly TaskCompletionSource<Void> _readyTcs = new();
+
+        private struct Void { }
     }
 }
