@@ -130,7 +130,6 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const string BLOCK_TYPE_QUOTE = "quote";
         private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
 
-
         private readonly string? _notionToken;
         private const string NOTION_API_VERSION = "2025-09-03";
 
