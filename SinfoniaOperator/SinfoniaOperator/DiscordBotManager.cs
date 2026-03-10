@@ -1,7 +1,6 @@
 using Discord;
 using Discord.WebSocket;
 using System;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
