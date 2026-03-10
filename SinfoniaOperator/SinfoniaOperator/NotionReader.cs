@@ -36,7 +36,9 @@ namespace SinfoniaStudio.SinfoniaOperator
                 {
                     StringBuilder url = new($"https://api.notion.com/v1/blocks/{blockId}/children?page_size=100");
                     if (!string.IsNullOrEmpty(startCursor))
+                    {
                         url.Append($"&start_cursor={Uri.EscapeDataString(startCursor)}");
+                    }
 
                     HttpResponseMessage resp = await http.GetAsync(url.ToString());
                     if (!resp.IsSuccessStatusCode)
@@ -60,96 +62,17 @@ namespace SinfoniaStudio.SinfoniaOperator
                         {
                             string type = block.GetProperty("type").GetString() ?? "unknown";
 
-                            static string ExtractPlainTextFromRichTextArray(JsonElement richTextArray)
+                            ConvertBlock(sb, type, block);
+
+                            if (block.TryGetProperty("has_children", out JsonElement hasChildrenProp) && hasChildrenProp.ValueKind == JsonValueKind.True)
                             {
-                                StringBuilder sb = new();
-                                if (richTextArray.ValueKind != JsonValueKind.Array) return string.Empty;
-                                foreach (JsonElement rt in richTextArray.EnumerateArray())
+                                if (block.TryGetProperty("id", out JsonElement childIdEl))
                                 {
-                                    if (rt.TryGetProperty("plain_text", out JsonElement plainTextEl))
-                                        sb.Append(plainTextEl.GetString());
-                                }
-                                return sb.ToString();
-                            }
-
-                            switch (type)
-                            {
-                                case "paragraph":
-                                    if (block.TryGetProperty("paragraph", out var paragraphObj) &&
-                                        paragraphObj.TryGetProperty("rich_text", out var pRt))
-                                        sb.AppendLine(ExtractPlainTextFromRichTextArray(pRt));
-                                    break;
-
-                                case "heading_1":
-                                    if (block.TryGetProperty("heading_1", out var h1) &&
-                                        h1.TryGetProperty("rich_text", out var h1Rt))
-                                        sb.AppendLine($"# {ExtractPlainTextFromRichTextArray(h1Rt)}");
-                                    break;
-
-                                case "heading_2":
-                                    if (block.TryGetProperty("heading_2", out var h2) &&
-                                        h2.TryGetProperty("rich_text", out var h2Rt))
-                                        sb.AppendLine($"## {ExtractPlainTextFromRichTextArray(h2Rt)}");
-                                    break;
-
-                                case "heading_3":
-                                    if (block.TryGetProperty("heading_3", out var h3) &&
-                                        h3.TryGetProperty("rich_text", out var h3Rt))
-                                        sb.AppendLine($"### {ExtractPlainTextFromRichTextArray(h3Rt)}");
-                                    break;
-
-                                case "to_do":
-                                    if (block.TryGetProperty("to_do", out var todo) &&
-                                        todo.TryGetProperty("rich_text", out var todoRt))
-                                    {
-                                        bool isChecked = todo.TryGetProperty("checked", out var checkedEl) && checkedEl.ValueKind == JsonValueKind.True;
-                                        string checkbox = isChecked ? "[x]" : "[ ]";
-                                        sb.AppendLine($"{checkbox} {ExtractPlainTextFromRichTextArray(todoRt)}");
-                                    }
-                                    break;
-
-                                case "bulleted_list_item":
-                                    if (block.TryGetProperty("bulleted_list_item", out var bullet) &&
-                                        bullet.TryGetProperty("rich_text", out var bulletRt))
-                                        sb.AppendLine($"・{ExtractPlainTextFromRichTextArray(bulletRt)}");
-                                    break;
-
-                                case "numbered_list_item":
-                                    if (block.TryGetProperty("numbered_list_item", out var num) &&
-                                        num.TryGetProperty("rich_text", out var numRt))
-                                        sb.AppendLine($"- {ExtractPlainTextFromRichTextArray(numRt)}");
-                                    break;
-
-                                case "quote":
-                                    if (block.TryGetProperty("quote", out var quote) &&
-                                        quote.TryGetProperty("rich_text", out var quoteRt))
-                                        sb.AppendLine($"> {ExtractPlainTextFromRichTextArray(quoteRt)}");
-                                    break;
-
-                                case "link_preview":
-                                    if (block.TryGetProperty("link_preview", out var linkPreviewObj) &&
-                                        linkPreviewObj.TryGetProperty("url", out var urlEl))
-                                    {
-                                        string urlString = urlEl.GetString() ?? string.Empty;
-                                        if (!string.IsNullOrEmpty(urlString))
-                                        {
-                                            sb.AppendLine($"[ページリンク]({urlString})");
-                                        }
-                                    }
-                                    break;
-
-                                default:
-                                    sb.AppendLine($"[未対応ブロック: {type}]");
-                                    break;
-                            }
-
-                            if (block.TryGetProperty("has_children", out var hasChildrenProp) && hasChildrenProp.ValueKind == JsonValueKind.True)
-                            {
-                                if (block.TryGetProperty("id", out var childIdEl))
-                                {
-                                    var childId = childIdEl.GetString();
+                                    string? childId = childIdEl.GetString();
                                     if (!string.IsNullOrEmpty(childId))
-                                        sb.AppendLine(await GetBlockChildrenViaHttpAsync(childId));
+                                    { 
+                                        sb.AppendLine(await GetBlockChildrenViaHttpAsync(childId)); 
+                                    }
                                 }
                             }
                         }
@@ -197,6 +120,17 @@ namespace SinfoniaStudio.SinfoniaOperator
             return database;
         }
 
+        private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
+        private const string BLOCK_TYPE_HEADING_1 = "heading_1";
+        private const string BLOCK_TYPE_HEADING_2 = "heading_2";
+        private const string BLOCK_TYPE_HEADING_3 = "heading_3";
+        private const string BLOCK_TYPE_TO_DO = "to_do";
+        private const string BLOCK_TYPE_BULLETED_LIST_ITEM = "bulleted_list_item";
+        private const string BLOCK_TYPE_NUMBERED_LIST_ITEM = "numbered_list_item";
+        private const string BLOCK_TYPE_QUOTE = "quote";
+        private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
+
+
         private readonly string? _notionToken;
         private const string NOTION_API_VERSION = "2025-09-03";
 
@@ -215,6 +149,126 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             return pageName;
+        }
+
+        private static void ConvertBlock(StringBuilder sb, string type, JsonElement block)
+        {
+            string? text = type switch
+            {
+                BLOCK_TYPE_PARAGRAPH => ConvertBlockParagraph(block),
+                BLOCK_TYPE_HEADING_1 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_1),
+                BLOCK_TYPE_HEADING_2 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_2),
+                BLOCK_TYPE_HEADING_3 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_3),
+                BLOCK_TYPE_TO_DO => ConvertBlockToDo(block),
+                BLOCK_TYPE_BULLETED_LIST_ITEM => ConvertBlockBulletedListItem(block),
+                BLOCK_TYPE_NUMBERED_LIST_ITEM => ConvertBlockNumberedListItem(block),
+                BLOCK_TYPE_QUOTE => ConvertBlockQuote(block),
+                BLOCK_TYPE_LINK_PREVIEW => ConvertBlockLinkPreview(block),
+                _ => null
+            };
+
+            if (text == null)
+            {
+                Console.WriteLine($"未対応のブロックタイプ: {type} (BlockId: {block.GetProperty("id").GetString()})");
+                return;
+            }
+
+            sb.AppendLine(text);
+        }
+
+        private static string ExtractPlainTextFromRichTextArray(JsonElement richTextArray)
+        {
+            StringBuilder sb = new();
+            if (richTextArray.ValueKind != JsonValueKind.Array) return string.Empty;
+            foreach (JsonElement rt in richTextArray.EnumerateArray())
+            {
+                if (rt.TryGetProperty("plain_text", out JsonElement plainTextEl))
+                    sb.Append(plainTextEl.GetString());
+            }
+            return sb.ToString();
+        }
+
+        private static string ConvertBlockParagraph(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_PARAGRAPH, out var paragraphObj) &&
+                paragraphObj.TryGetProperty("rich_text", out var pRt))
+            {
+                return ExtractPlainTextFromRichTextArray(pRt);
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockHeading(JsonElement block, string headingType)
+        {
+            if (block.TryGetProperty(headingType, out var headingObj) &&
+                headingObj.TryGetProperty("rich_text", out var hRt))
+            {
+                string prefix = headingType switch
+                {
+                    BLOCK_TYPE_HEADING_1 => "# ",
+                    BLOCK_TYPE_HEADING_2 => "## ",
+                    BLOCK_TYPE_HEADING_3 => "### ",
+                    _ => string.Empty
+                };
+                return $"{prefix}{ExtractPlainTextFromRichTextArray(hRt)}";
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockToDo(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_TO_DO, out var todo) &&
+                todo.TryGetProperty("rich_text", out var todoRt))
+            {
+                bool isChecked = todo.TryGetProperty("checked", out var checkedEl) && checkedEl.ValueKind == JsonValueKind.True;
+                string checkbox = isChecked ? "[x]" : "[ ]";
+                return $"{checkbox} {ExtractPlainTextFromRichTextArray(todoRt)}";
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockBulletedListItem(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_BULLETED_LIST_ITEM, out var bullet) &&
+                bullet.TryGetProperty("rich_text", out var bulletRt))
+            {
+                return $"・{ExtractPlainTextFromRichTextArray(bulletRt)}";
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockNumberedListItem(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_NUMBERED_LIST_ITEM, out var num) &&
+                num.TryGetProperty("rich_text", out var numRt))
+            {
+                return $"- {ExtractPlainTextFromRichTextArray(numRt)}";
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockQuote(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_QUOTE, out var quote) &&
+                quote.TryGetProperty("rich_text", out var quoteRt))
+            {
+                return $"> {ExtractPlainTextFromRichTextArray(quoteRt)}";
+            }
+            return string.Empty;
+        }
+
+        private static string ConvertBlockLinkPreview(JsonElement block)
+        {
+            if (block.TryGetProperty(BLOCK_TYPE_LINK_PREVIEW, out var linkPreviewObj) &&
+                linkPreviewObj.TryGetProperty("url", out var urlEl))
+            {
+                string urlString = urlEl.GetString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(urlString))
+                {
+                    return $"[ページリンク]({urlString})";
+                }
+            }
+            return string.Empty;
         }
     }
 }
