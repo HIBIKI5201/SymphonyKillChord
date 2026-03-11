@@ -6,6 +6,10 @@ using UnityEngine.SceneManagement;
 
 namespace DevelopProducts.Persistent.Adaptor
 {
+    /// <summary>
+    ///     シーン遷移サービスの実装。
+    ///     シーンのロードとアンロードを管理し、シーン遷移を実現する。
+    /// </summary>
     public class SceneTransitionService : ISceneTransitionService
     {
         public async Task<bool> ChangeSceneAsync(string fromSceneName,
