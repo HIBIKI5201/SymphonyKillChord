@@ -10,7 +10,7 @@ namespace DevelopProducts.Persistent.Adaptor
     {
         public async Task<bool> ChangeSceneAsync(string fromSceneName,
             string toSceneName,
-            CancellationTokenSource cancellationTokenSource)
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(toSceneName))
             {
@@ -23,8 +23,7 @@ namespace DevelopProducts.Persistent.Adaptor
                 bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
                     null,
                     LoadSceneMode.Additive,
-                    cancellationTokenSource.Token);
-
+                    cancellationToken);
                 if (!loadSuccess)
                 {
                     Debug.LogError($"シーンのロードに失敗 : {toSceneName}");
@@ -38,7 +37,7 @@ namespace DevelopProducts.Persistent.Adaptor
             {
                 bool unloadSuccess = await SceneLoader.UnloadScene(fromSceneName,
                     null,
-                    cancellationTokenSource.Token);
+                    cancellationToken);
                 if (!unloadSuccess)
                 {
                     Debug.LogError($"シーンのアンロードに失敗 : {fromSceneName}");
