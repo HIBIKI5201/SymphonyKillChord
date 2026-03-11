@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface ISceneTransitionService
 {
-    Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName, CancellationTokenSource cancellationTokenSource);
+    Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName, CancellationToken cancellationToken);
 }
