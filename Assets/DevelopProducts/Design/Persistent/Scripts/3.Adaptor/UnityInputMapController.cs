@@ -33,7 +33,7 @@ namespace DevelopProducts.Persistent.Adaptor
         ///     CommonのInputActionMapを有効化し、さらに引数で指定されたInputActionMapも有効化する。
         /// </summary>
         /// <param name="inputMapId"></param>
-        public void EnableCommonWith(InputMapId inputMapId)
+        public void EnableCommonWith(string inputMapId)
         {
             DisableAll();
             _commonMap.Enable();
@@ -49,7 +49,7 @@ namespace DevelopProducts.Persistent.Adaptor
         ///     指定したInputActionMapのみを有効化する。
         /// </summary>
         /// <param name="inputMapId"></param>
-        public void EnableOnly(InputMapId inputMapId)
+        public void EnableOnly(string inputMapId)
         {
             DisableAll();
 
@@ -69,22 +69,15 @@ namespace DevelopProducts.Persistent.Adaptor
         /// </summary>
         /// <param name="inputMapId"></param>
         /// <returns></returns>
-        private InputActionMap GetInputMap(InputMapId inputMapId)
+        private InputActionMap GetInputMap(string inputMapId)
         {
-            if (inputMapId == InputMapIds.Common)
+            return inputMapId switch
             {
-                return _commonMap;
-            }
-            else if (inputMapId == InputMapIds.InGame)
-            {
-                return _inGameMap;
-            }
-            else if (inputMapId == InputMapIds.OutGame)
-            {
-                return _outGameMap;
-            }
-
-            return null;
+                InputMapNames.Common => _commonMap,
+                InputMapNames.InGame => _inGameMap,
+                InputMapNames.OutGame => _outGameMap,
+                _ => null
+            };
         }
     }
 }
