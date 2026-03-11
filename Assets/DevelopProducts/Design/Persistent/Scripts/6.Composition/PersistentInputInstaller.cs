@@ -16,6 +16,9 @@ namespace DevelopProducts.Persistent.Composition
         public IInputBufferReader InputBufferReader => _inputStore;
         public IInputBufferWriter InputBufferWriter => _inputStore;
         public SwichInputMapUseCase SwichInputMapUseCase => _swichInputMapUseCase;
+        public BufferButtonInputUsecase BufferButtonInputUsecase => _bufferButtonInputUsecase;
+        public BufferMoveInputUsecase BufferMoveInputUsecase => _bufferInputActionUsecase;
+        public InputTimestampProvider TimestampProvider => _timestampProvider;
 
         [SerializeField] private PlayerInput _playerInput;
 
