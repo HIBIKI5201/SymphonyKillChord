@@ -1,5 +1,4 @@
-using UnityEngine;
-using DevelopProducts.Persistent.Domain.Input;
+using DevelopProducts.Persistent.Adaptor;
 
 namespace DevelopProducts.Persistent.Application
 {
@@ -16,12 +15,12 @@ namespace DevelopProducts.Persistent.Application
 
         public void ToInGame()
         {
-            _inputMapController.EnableCommonWith(InputMapIds.InGame);
+            _inputMapController.EnableCommonWith(InputMapNames.InGame);
         }
 
         public void ToOutGame()
         {
-            _inputMapController.EnableCommonWith(InputMapIds.OutGame);
+            _inputMapController.EnableCommonWith(InputMapNames.OutGame);
         }
 
         public void DisableAll()
