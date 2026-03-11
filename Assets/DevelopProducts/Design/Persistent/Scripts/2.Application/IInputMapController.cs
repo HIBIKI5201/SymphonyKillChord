@@ -8,8 +8,8 @@ namespace DevelopProducts.Persistent.Application
     /// </summary>
     public interface IInputMapController
     {
-        void EnableOnly(InputMapId inputMapId);
-        void EnableCommonWith(InputMapId inputMapId);
+        void EnableOnly(string inputMapId);
+        void EnableCommonWith(string inputMapId);
          void DisableAll();
     }
 }
