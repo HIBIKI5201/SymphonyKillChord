@@ -71,6 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     AppendTaskSummry(endTasksSb, pageName, page, startDate, endDate);
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
+                    Console.WriteLine($"{pageName}は納期タスク");
                     continue;
                 }
                 #endregion
@@ -83,6 +84,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     AppendTaskSummry(startTasksSb, pageName, page, startDate, endDate);
                     await AppendPageContentAsync(startTasksSb, page);
                     outputTaskQueue.Enqueue(startTasksSb, 0);
+                    Console.WriteLine($"{pageName}は開始タスク");
                     continue;
                 }
                 #endregion
@@ -94,6 +96,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     AppendTaskSummry(endTasksSb, pageName, page, startDate, endDate);
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 2);
+                    Console.WriteLine($"{pageName}は納期遅れタスク");
                 }
                 #endregion
 
