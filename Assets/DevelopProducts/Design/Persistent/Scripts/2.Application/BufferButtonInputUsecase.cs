@@ -17,7 +17,7 @@ namespace DevelopProducts.Persistent.Application
             InputPheseId pheseId,
             float timestamp)
         {
-            BufferedInput input = new BufferedInput(actionId, pheseId, timestamp);
+            BufferedInput input = new BufferedInput(actionId, pheseId, timestamp, 0f, 0f);
             _inputBufferWriter.Push(input);
         }
 
