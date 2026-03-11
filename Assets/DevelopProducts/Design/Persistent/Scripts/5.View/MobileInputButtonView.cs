@@ -1,16 +1,40 @@
+using DevelopProducts.Persistent.Application;
+using DevelopProducts.Persistent.Domain.Input;
 using UnityEngine;
 
-public class MobileInputButtonView : MonoBehaviour
+namespace DevelopProducts.Persistent.View
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    ///     UI Buttonにアタッチして使用する、モバイル向けの入力ボタンのView。
+    ///     ボタンが押されたときに、BufferButtonInputUsecaseを呼び出して入力をバッファに記録する。
+    /// </summary>
+    public class MobileInputButtonView : MonoBehaviour
     {
-        
-    }
+        public void Initialize(
+            BufferButtonInputUsecase bufferButtonInputUsecase,
+            InputTimestampProvider inputTimestampProvider)
+        {
+            _bufferButtonInputUsecase = bufferButtonInputUsecase;
+            _inputTimestampProvider = inputTimestampProvider;
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        /// <summary>
+        ///     UI ButtonのOnClickから呼び出す。
+        /// </summary>
+        public void OnButtonDown()
+        {
+            InputActionId actionId = new InputActionId(_actionIdValue);
+
+            _bufferButtonInputUsecase.Execute(
+                actionId,
+                InputPheseIds.Performed,
+                _inputTimestampProvider.GetTimestamp()
+                );
+        }
+
+        [SerializeField] private int _actionIdValue;
+
+        private BufferButtonInputUsecase _bufferButtonInputUsecase;
+        private InputTimestampProvider _inputTimestampProvider;
     }
 }
