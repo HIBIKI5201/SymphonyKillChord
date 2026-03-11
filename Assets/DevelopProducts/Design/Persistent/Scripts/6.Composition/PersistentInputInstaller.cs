@@ -29,7 +29,7 @@ namespace DevelopProducts.Persistent.Composition
         private BufferdInputStore _inputStore;
         private InputTimestampProvider _timestampProvider;
 
-        private BufferInputActionUsecase _bufferInputActionUsecase;
+        private BufferMoveInputUsecase _bufferInputActionUsecase;
         private BufferButtonInputUsecase _bufferButtonInputUsecase;
         private SwichInputMapUseCase _swichInputMapUseCase;
 
@@ -41,7 +41,7 @@ namespace DevelopProducts.Persistent.Composition
 
             // Usecaseの生成
             _bufferButtonInputUsecase = new BufferButtonInputUsecase(_inputStore);
-            _bufferInputActionUsecase = new BufferInputActionUsecase(_inputStore);
+            _bufferInputActionUsecase = new BufferMoveInputUsecase(_inputStore);
 
             // ActionMapの取得
             InputActionMap commonMap = _playerInput.actions.FindActionMap(InputMapNames.Common);
@@ -71,6 +71,15 @@ namespace DevelopProducts.Persistent.Composition
                 {
                     mobileInputButtonView.Initialize(_bufferButtonInputUsecase, _timestampProvider);
                 }
+            }
+
+            if (_initializeToOutGame)
+            {
+                _swichInputMapUseCase.ToOutGame();
+            }
+            else
+            {
+                _swichInputMapUseCase.DisableAll();
             }
         }
 
