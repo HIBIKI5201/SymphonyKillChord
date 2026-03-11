@@ -32,6 +32,8 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             PriorityQueue<StringBuilder, int> outputTaskQueue = new();
 
+            Console.WriteLine($"{new string('-', 5)}タスクリスト ログ{new string('-', 5)}");
+
             foreach (IWikiDatabase item in database)
             {
                 if (item is not Page page) { continue; }
@@ -112,6 +114,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 sb.AppendLine(element.ToString());
             }
 
+            Console.WriteLine($"{new string('-', 10)}");
             return sb.ToString();
         }
 
