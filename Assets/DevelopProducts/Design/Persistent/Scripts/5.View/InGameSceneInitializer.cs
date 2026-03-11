@@ -1,16 +1,25 @@
+using DevelopProducts.Persistent.Composition;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class InGameSceneInitializer : MonoBehaviour
+namespace DevelopProducts.Persistent.View
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class InGameSceneInitializer : MonoBehaviour
     {
-        
-    }
+        private void Start()
+        {
+            PersistentInputInstaller installer = FindFirstObjectByType<PersistentInputInstaller>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            if (installer == null)
+            {
+                Debug.LogError("PersistentInputInstaller が見つかりません。");
+                return;
+            }
+
+            installer.SwichInputMapUseCase.ToInGame();
+            installer.InputBufferWriter.Clear();
+
+            Debug.Log("InGameSceneInitializer: ToInGame 実行");
+        }
     }
 }
