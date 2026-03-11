@@ -9,8 +9,11 @@ namespace DevelopProducts.Persistent.View
     ///     UI Buttonにアタッチして使用する、モバイル向けの移動入力ボタンのView。
     ///     ボタンが押されたときに、BufferMoveInputUsecaseを呼び出して入力をバッファに記録する。
     /// </summary>
-    public class MobileMoveButtonView : MonoBehaviour
+    public class MobileMoveButtonView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
+        public bool IsPressed => _isPressed;
+        public Vector2 Direction => _direction;
+
         public void Initialize(
             BufferMoveInputUsecase moveInputUseCase,
             InputTimestampProvider timestampProvider)
@@ -21,15 +24,21 @@ namespace DevelopProducts.Persistent.View
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            _isPressed = true;
+
             _moveInputUseCase.Execute(
                 _direction.x,
                 _direction.y,
                 InputPheseIds.Performed,
                 _timestampProvider.GetTimestamp());
+
+            Debug.Log($"MobileMoveButtonView: OnPointerDown - Direction: {_direction}, Timestamp: {_timestampProvider.GetTimestamp()}");
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            _isPressed = false;
+
             _moveInputUseCase.Execute(
                 0f,
                 0f,
@@ -41,6 +50,6 @@ namespace DevelopProducts.Persistent.View
 
         private BufferMoveInputUsecase _moveInputUseCase;
         private InputTimestampProvider _timestampProvider;
-
+        private bool _isPressed;
     }
 }
