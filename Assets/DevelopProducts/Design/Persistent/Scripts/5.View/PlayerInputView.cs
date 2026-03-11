@@ -12,7 +12,7 @@ namespace DevelopProducts.Persistent.View
     {
         public void Initialize(
             BufferButtonInputUsecase bufferButtonInputUsecase,
-            BufferInputActionUsecase bufferInputActionUsecase,
+            BufferMoveInputUsecase bufferInputActionUsecase,
             InputTimestampProvider timestampProvider)
         {
             _bufferButtonInputUsecase = bufferButtonInputUsecase;
@@ -20,13 +20,28 @@ namespace DevelopProducts.Persistent.View
             _timestampProvider = timestampProvider;
         }
 
+        public void OnOption(InputAction.CallbackContext context)
+        {
+            HandleButton(InputActionIds.Option, context);
+        }
+
         public void OnMove(InputAction.CallbackContext context)
         {
-            InputActionId inputActionId = new InputActionId(1);
-
+            Vector2 move = context.ReadValue<Vector2>();
             InputPheseId pheseId = ConvertPhese(context);
+
             float timestamp = _timestampProvider.GetTimestamp();
-            _bufferInputActionUsecase.Execute(inputActionId, pheseId, timestamp);
+            _bufferInputActionUsecase.Execute(move.x, move.y, pheseId, timestamp);
+        }
+
+        public void OnSubmit(InputAction.CallbackContext context)
+        {
+            HandleButton(InputActionIds.Submit, context);
+        }
+
+        public void OnCancel(InputAction.CallbackContext context)
+        {
+            HandleButton(InputActionIds.Cancel, context);
         }
 
         private static InputPheseId ConvertPhese(InputAction.CallbackContext context)
@@ -37,8 +52,15 @@ namespace DevelopProducts.Persistent.View
             return new InputPheseId(0);
         }
 
+        private void HandleButton(InputActionId inputActionId, InputAction.CallbackContext context)
+        {
+            InputPheseId pheseId = ConvertPhese(context);
+            float timestamp = _timestampProvider.GetTimestamp();
+            _bufferButtonInputUsecase.Execute(inputActionId, pheseId, timestamp);
+        }
+
         private BufferButtonInputUsecase _bufferButtonInputUsecase;
-        private BufferInputActionUsecase _bufferInputActionUsecase;
+        private BufferMoveInputUsecase _bufferInputActionUsecase;
         private InputTimestampProvider _timestampProvider;
     }
 }
