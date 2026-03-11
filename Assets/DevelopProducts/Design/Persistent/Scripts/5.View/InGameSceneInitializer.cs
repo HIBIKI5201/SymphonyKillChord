@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace DevelopProducts.Persistent.View
 {
+    /// <summary>
+    ///     InGameSceneの初期化を行うクラス。
+    /// </summary>
     public class InGameSceneInitializer : MonoBehaviour
     {
         private void Start()
