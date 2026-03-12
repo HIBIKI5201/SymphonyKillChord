@@ -103,21 +103,40 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task<List<IWikiDatabase>> GetDatabaseAsync(string databaseID)
         {
-            NotionClient notion = NotionClientFactory.Create(new ClientOptions
+            try
             {
-                AuthToken = _notionToken,
-            });
+                NotionClient notion = NotionClientFactory.Create(new ClientOptions
+                {
+                    AuthToken = _notionToken,
+                });
 
-            DatabaseQueryResponse query = await notion.Databases.QueryAsync(databaseID, new DatabasesQueryParameters());
-            List<IWikiDatabase> database = query.Results;
+                List<IWikiDatabase> allResults = new();
+                string? nextCursor = null;
 
-            if (database.Count == 0)
-            {
-                Console.WriteLine("データベースの要素がありません。");
-                return new();
+                do
+                {
+                    DatabaseQueryResponse query = await notion.Databases.QueryAsync(
+                        databaseID,
+                        new DatabasesQueryParameters { StartCursor = nextCursor }
+                    );
+
+                    allResults.AddRange(query.Results);
+                    nextCursor = query.HasMore ? query.NextCursor : null;
+
+                } while (!string.IsNullOrEmpty(nextCursor));
+
+                if (allResults.Count == 0)
+                {
+                    Console.WriteLine("データベースの要素がありません。");
+                }
+
+                return allResults;
             }
-
-            return database;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"データベース取得中にエラーが発生しました: {ex.Message}");
+                return new List<IWikiDatabase>();
+            }
         }
 
         private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
