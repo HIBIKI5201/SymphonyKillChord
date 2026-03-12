@@ -68,7 +68,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (endDate.Date == today)
                 {
                     StringBuilder endTasksSb = new();
-                    AppendTaskSummry(endTasksSb, pageName, page, startDate, endDate);
+                    AppendTaskSummry(endTasksSb, "🟡納期タスク", pageName, page, startDate, endDate);
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 1);
                     Console.WriteLine($"{pageName}は納期タスク");
@@ -81,7 +81,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (startDate.Date == today)
                 {
                     StringBuilder startTasksSb = new();
-                    AppendTaskSummry(startTasksSb, pageName, page, startDate, endDate);
+                    AppendTaskSummry(startTasksSb, "🟢開始タスク", pageName, page, startDate, endDate);
                     await AppendPageContentAsync(startTasksSb, page);
                     outputTaskQueue.Enqueue(startTasksSb, 0);
                     Console.WriteLine($"{pageName}は開始タスク");
@@ -93,7 +93,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (endDate.Date < today)
                 {
                     StringBuilder endTasksSb = new();
-                    AppendTaskSummry(endTasksSb, pageName, page, startDate, endDate);
+                    AppendTaskSummry(endTasksSb, "🔴納期遅れタスク", pageName, page, startDate, endDate);
                     await AppendPageContentAsync(endTasksSb, page);
                     outputTaskQueue.Enqueue(endTasksSb, 2);
                     Console.WriteLine($"{pageName}は納期遅れタスク");
@@ -143,9 +143,9 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine();
         }
 
-        private static void AppendTaskSummry(StringBuilder sb, string pageName, Page page, DateTime startDate, DateTime endDate)
+        private static void AppendTaskSummry(StringBuilder sb, string title, string pageName, Page page, DateTime startDate, DateTime endDate)
         {
-            sb.AppendLine($"\n🟢 開始タスク: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
+            sb.AppendLine($"\n{title}: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
             sb.AppendLine($"開始日時: {startDate:yyyy/MM/dd} 終了日時: {endDate:yyyy/MM/dd}");
         }
 
