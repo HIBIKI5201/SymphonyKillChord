@@ -23,7 +23,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             _client.Ready += () =>
             {
-                _readyTcs.SetResult(default);
+                _readyTcs.TrySetResult(default);
                 return Task.CompletedTask;
             };
 
