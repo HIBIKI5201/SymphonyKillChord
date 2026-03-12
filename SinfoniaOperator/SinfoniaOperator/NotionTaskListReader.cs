@@ -24,6 +24,8 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task<string> GetTaskContent()
         {
+            try
+            {
             List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_databaseID);
 
             // 日本時間を取得。
@@ -119,6 +121,12 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             Console.WriteLine($"{new string('-', 10)}");
             return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"タスク情報の取得中に予期せぬエラーが発生しました: {ex.Message}");
+                return string.Empty;
+            }
         }
 
         private readonly NotionReader _reader;
