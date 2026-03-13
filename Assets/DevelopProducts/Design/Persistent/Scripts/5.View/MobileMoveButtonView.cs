@@ -17,7 +17,7 @@ namespace DevelopProducts.Persistent.View
 
         public void Initialize(MoveInputAdaptor moveInput)
         {
-            if (moveInput == null) throw new ArgumentException(nameof(moveInput));
+            if (moveInput == null) throw new ArgumentNullException(nameof(moveInput));
             _moveInputAdaptor = moveInput;
         }
 
