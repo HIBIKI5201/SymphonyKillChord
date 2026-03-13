@@ -1,4 +1,4 @@
-using DevelopProducts.Persistent.Application;
+using DevelopProducts.Persistent.Adaptor;
 using DevelopProducts.Persistent.Domain.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,41 +15,28 @@ namespace DevelopProducts.Persistent.View
         public Vector2 Direction => _direction;
 
         public void Initialize(
-            BufferMoveInputUsecase moveInputUseCase,
-            InputTimestampProvider timestampProvider)
+            MoveInputAdaptor moveInput
+            )
         {
-            _moveInputUseCase = moveInputUseCase;
-            _timestampProvider = timestampProvider;
+            _moveInputAdaptor = moveInput;
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
             _isPressed = true;
-
-            _moveInputUseCase.Execute(
-                _direction.x,
-                _direction.y,
-                InputPheseIds.Performed,
-                _timestampProvider.GetTimestamp());
-
-            Debug.Log($"MobileMoveButtonView: OnPointerDown - Direction: {_direction}, Timestamp: {_timestampProvider.GetTimestamp()}");
+            _moveInputAdaptor.HandleMove(_direction, InputPheseIds.Started);
+            Debug.Log($"MobileMoveButtonView: OnPointerDown, Direction: {_direction}");
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             _isPressed = false;
-
-            _moveInputUseCase.Execute(
-                0f,
-                0f,
-                InputPheseIds.Canceled,
-                _timestampProvider.GetTimestamp());
+            _moveInputAdaptor.HandleMove(_direction, InputPheseIds.Canceled);
         }
 
         [SerializeField] private Vector2 _direction;
 
-        private BufferMoveInputUsecase _moveInputUseCase;
-        private InputTimestampProvider _timestampProvider;
+        private MoveInputAdaptor _moveInputAdaptor;
         private bool _isPressed;
     }
 }
