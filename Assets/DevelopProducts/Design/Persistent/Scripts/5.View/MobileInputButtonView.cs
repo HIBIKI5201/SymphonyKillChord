@@ -6,7 +6,7 @@ namespace DevelopProducts.Persistent.View
 {
     /// <summary>
     ///     UI Buttonにアタッチして使用する、モバイル向けの入力ボタンのView。
-    ///     ボタンが押されたときに、BufferButtonInputUsecaseを呼び出して入力をバッファに記録する。
+    ///     ボタンが押されたときに、ButtonInputAdaptorを呼び出して入力をバッファに記録する。
     /// </summary>
     public class MobileInputButtonView : MonoBehaviour
     {
