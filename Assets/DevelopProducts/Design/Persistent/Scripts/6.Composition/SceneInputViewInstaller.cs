@@ -1,3 +1,4 @@
+using DevelopProducts.Persistent.Adaptor;
 using DevelopProducts.Persistent.View;
 using UnityEngine;
 
@@ -21,33 +22,30 @@ namespace DevelopProducts.Persistent.Composition
                 Debug.LogError("PersistentInputInstaller が見つかりません。");
                 return;
             }
-            if(_mobileInputButtonViews != null)
-            {
-                for (int i = 0; i < _mobileInputButtonViews.Length; i++)
-                {
-                    if (_mobileInputButtonViews[i] == null)
-                    {
-                        continue;
-                    }
 
-                    _mobileInputButtonViews[i].Initialize(
-                        persistentInstaller.BufferButtonInputUsecase,
-                        persistentInstaller.TimestampProvider);
+            ButtonInputAdaptor buttonInputAdaptor = new ButtonInputAdaptor(
+                persistentInstaller.BufferButtonInputUsecase,
+                persistentInstaller.TimestampProvider);
+
+            MoveInputAdaptor moveInputAdaptor = new MoveInputAdaptor(
+                persistentInstaller.BufferMoveInputUsecase,
+                persistentInstaller.TimestampProvider);
+
+            if (_mobileInputButtonViews != null)
+            {
+                foreach (var buttonView in _mobileInputButtonViews)
+                {
+                    if (buttonView == null) continue;
+                    buttonView.Initialize(buttonInputAdaptor);
                 }
             }
 
-            if(_mobileMoveButtonViews != null)
+            if (_mobileMoveButtonViews != null)
             {
-                for (int i = 0; i < _mobileMoveButtonViews.Length; i++)
+                foreach (var moveView in _mobileMoveButtonViews)
                 {
-                    if (_mobileMoveButtonViews[i] == null)
-                    {
-                        continue;
-                    }
-
-                    _mobileMoveButtonViews[i].Initialize(
-                        persistentInstaller.BufferMoveInputUsecase,
-                        persistentInstaller.TimestampProvider);
+                    if (moveView == null) continue;
+                    moveView.Initialize(moveInputAdaptor);
                 }
             }
         }
