@@ -23,7 +23,7 @@ namespace DevelopProducts.Persistent.View
         {
             InputActionId actionId = new InputActionId(_actionIdValue);
 
-            _buttonInputAdaptor.HandleButton(actionId, InputPheseIds.Started);
+            _buttonInputAdaptor.HandleButton(actionId, InputPheseIds.Performed);
         }
 
         [SerializeField] private int _actionIdValue;
