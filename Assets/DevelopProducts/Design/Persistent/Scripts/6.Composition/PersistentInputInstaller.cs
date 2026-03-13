@@ -65,18 +65,24 @@ namespace DevelopProducts.Persistent.Composition
             _swichInputMapUseCase = new SwichInputMapUseCase(inputMapController);
 
             // Viewに依存性注入
+            if (_playerInputView == null)
+            {
+                Debug.LogError($"{nameof(PersistentInputInstaller)}: {nameof(_playerInputView)} is not assigned.", this);
+                return;
+            }
+
             _playerInputView.Initialize(_buttonInputAdaptor
                 , _moveInputAdaptor
                 );
 
-            if(_inputDebugView != null) 
+            if (_inputDebugView != null)
                 _inputDebugView.Initialize(_bufferedInputBuffer);
 
-            if(_mobileInputButtonViews != null)
+            if (_mobileInputButtonViews != null)
             {
                 foreach (var mobileInputButtonView in _mobileInputButtonViews)
                 {
-                    if(mobileInputButtonView == null) continue;
+                    if (mobileInputButtonView == null) continue;
                     mobileInputButtonView.Initialize(_buttonInputAdaptor);
                 }
             }
