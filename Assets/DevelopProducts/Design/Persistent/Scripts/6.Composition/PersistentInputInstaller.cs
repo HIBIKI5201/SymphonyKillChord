@@ -76,6 +76,7 @@ namespace DevelopProducts.Persistent.Composition
             {
                 foreach (var mobileInputButtonView in _mobileInputButtonViews)
                 {
+                    if(mobileInputButtonView == null) continue;
                     mobileInputButtonView.Initialize(_buttonInputAdaptor);
                 }
             }
