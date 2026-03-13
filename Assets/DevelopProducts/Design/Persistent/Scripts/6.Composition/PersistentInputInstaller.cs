@@ -13,8 +13,7 @@ namespace DevelopProducts.Persistent.Composition
     /// </summary>
     public class PersistentInputInstaller : MonoBehaviour
     {
-        public IInputBufferReader InputBufferReader => _inputStore;
-        public IInputBufferWriter InputBufferWriter => _inputStore;
+        public BufferdInputBuffer BufferedInputBuffer => _bufferedInputBuffer;
         public SwichInputMapUseCase SwichInputMapUseCase => _swichInputMapUseCase;
         public BufferButtonInputUsecase BufferButtonInputUsecase => _bufferButtonInputUsecase;
         public BufferMoveInputUsecase BufferMoveInputUsecase => _bufferInputActionUsecase;
@@ -29,7 +28,7 @@ namespace DevelopProducts.Persistent.Composition
         [SerializeField] private int _bufferSize;
         [SerializeField] private bool _initializeToOutGame;
 
-        private BufferdInputStore _inputStore;
+        private BufferdInputBuffer _bufferedInputBuffer;
         private InputTimestampProvider _timestampProvider;
 
         private BufferMoveInputUsecase _bufferInputActionUsecase;
@@ -39,12 +38,12 @@ namespace DevelopProducts.Persistent.Composition
         private void Install()
         {
             // Store / Providerの生成
-            _inputStore = new BufferdInputStore(_bufferSize);
+            _bufferedInputBuffer = new BufferdInputBuffer(_bufferSize);
             _timestampProvider = new InputTimestampProvider();
 
             // Usecaseの生成
-            _bufferButtonInputUsecase = new BufferButtonInputUsecase(_inputStore);
-            _bufferInputActionUsecase = new BufferMoveInputUsecase(_inputStore);
+            _bufferButtonInputUsecase = new BufferButtonInputUsecase(_bufferedInputBuffer);
+            _bufferInputActionUsecase = new BufferMoveInputUsecase(_bufferedInputBuffer);
 
             // ActionMapの取得
             InputActionMap commonMap = _playerInput.actions.FindActionMap(InputMapNames.Common);
@@ -66,7 +65,7 @@ namespace DevelopProducts.Persistent.Composition
                 );
 
             if(_inputDebugView != null) 
-                _inputDebugView.Initialize(_inputStore);
+                _inputDebugView.Initialize(_bufferedInputBuffer);
 
             if(_mobileInputButtonViews != null)
             {
