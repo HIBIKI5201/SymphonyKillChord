@@ -1,4 +1,4 @@
-using DevelopProducts.Persistent.Application;
+using DevelopProducts.Persistent.Adaptor;
 using DevelopProducts.Persistent.Domain.Input;
 using UnityEngine;
 
@@ -11,11 +11,9 @@ namespace DevelopProducts.Persistent.View
     public class MobileInputButtonView : MonoBehaviour
     {
         public void Initialize(
-            BufferButtonInputUsecase bufferButtonInputUsecase,
-            InputTimestampProvider inputTimestampProvider)
+            ButtonInputAdaptor inputAdaptor)
         {
-            _bufferButtonInputUsecase = bufferButtonInputUsecase;
-            _inputTimestampProvider = inputTimestampProvider;
+            _buttonInputAdaptor = inputAdaptor;
         }
 
         /// <summary>
@@ -25,16 +23,11 @@ namespace DevelopProducts.Persistent.View
         {
             InputActionId actionId = new InputActionId(_actionIdValue);
 
-            _bufferButtonInputUsecase.Execute(
-                actionId,
-                InputPheseIds.Performed,
-                _inputTimestampProvider.GetTimestamp()
-                );
+            _buttonInputAdaptor.HandleButton(actionId, InputPheseIds.Started);
         }
 
         [SerializeField] private int _actionIdValue;
 
-        private BufferButtonInputUsecase _bufferButtonInputUsecase;
-        private InputTimestampProvider _inputTimestampProvider;
+        private ButtonInputAdaptor _buttonInputAdaptor;
     }
 }
