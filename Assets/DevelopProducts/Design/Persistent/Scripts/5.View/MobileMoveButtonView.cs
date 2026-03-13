@@ -31,7 +31,7 @@ namespace DevelopProducts.Persistent.View
         public void OnPointerUp(PointerEventData eventData)
         {
             _isPressed = false;
-            _moveInputAdaptor.HandleMove(_direction, InputPheseIds.Canceled);
+            _moveInputAdaptor.Release();
         }
 
         [SerializeField] private Vector2 _direction;
