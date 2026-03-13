@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace DevelopProducts.Persistent.Adaptor
+namespace DevelopProducts.Persistent.Utility
 {
     /// <summary>
     ///     固定長のリングバッファ。
