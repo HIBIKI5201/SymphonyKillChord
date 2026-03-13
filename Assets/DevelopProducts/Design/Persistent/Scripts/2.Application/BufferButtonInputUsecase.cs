@@ -1,5 +1,4 @@
 using DevelopProducts.Persistent.Domain.Input;
-using UnityEngine;
 
 namespace DevelopProducts.Persistent.Application
 {
@@ -8,7 +7,7 @@ namespace DevelopProducts.Persistent.Application
     /// </summary>
     public class BufferButtonInputUsecase
     {
-        public BufferButtonInputUsecase(IInputBufferWriter inputBufferWriter)
+        public BufferButtonInputUsecase(BufferdInputBuffer inputBufferWriter)
         {
             _inputBufferWriter = inputBufferWriter;
         }
@@ -21,6 +20,6 @@ namespace DevelopProducts.Persistent.Application
             _inputBufferWriter.Push(input);
         }
 
-        private readonly IInputBufferWriter _inputBufferWriter;
+        private readonly BufferdInputBuffer _inputBufferWriter;
     }
 }

@@ -13,8 +13,7 @@ namespace DevelopProducts.Persistent.Composition
     /// </summary>
     public class PersistentInputInstaller : MonoBehaviour
     {
-        public IInputBufferReader InputBufferReader => _inputStore;
-        public IInputBufferWriter InputBufferWriter => _inputStore;
+        public BufferdInputBuffer BufferedInputBuffer => _bufferedInputBuffer;
         public SwichInputMapUseCase SwichInputMapUseCase => _swichInputMapUseCase;
         public BufferButtonInputUsecase BufferButtonInputUsecase => _bufferButtonInputUsecase;
         public BufferMoveInputUsecase BufferMoveInputUsecase => _bufferInputActionUsecase;
@@ -29,22 +28,28 @@ namespace DevelopProducts.Persistent.Composition
         [SerializeField] private int _bufferSize;
         [SerializeField] private bool _initializeToOutGame;
 
-        private BufferdInputStore _inputStore;
+        private BufferdInputBuffer _bufferedInputBuffer;
         private InputTimestampProvider _timestampProvider;
 
         private BufferMoveInputUsecase _bufferInputActionUsecase;
         private BufferButtonInputUsecase _bufferButtonInputUsecase;
         private SwichInputMapUseCase _swichInputMapUseCase;
+        private ButtonInputAdaptor _buttonInputAdaptor;
+        private MoveInputAdaptor _moveInputAdaptor;
 
         private void Install()
         {
             // Store / Providerの生成
-            _inputStore = new BufferdInputStore(_bufferSize);
+            _bufferedInputBuffer = new BufferdInputBuffer(_bufferSize);
             _timestampProvider = new InputTimestampProvider();
 
             // Usecaseの生成
-            _bufferButtonInputUsecase = new BufferButtonInputUsecase(_inputStore);
-            _bufferInputActionUsecase = new BufferMoveInputUsecase(_inputStore);
+            _bufferButtonInputUsecase = new BufferButtonInputUsecase(_bufferedInputBuffer);
+            _bufferInputActionUsecase = new BufferMoveInputUsecase(_bufferedInputBuffer);
+
+            // Adaptorの生成
+            _moveInputAdaptor = new MoveInputAdaptor(_bufferInputActionUsecase, _timestampProvider);
+            _buttonInputAdaptor = new ButtonInputAdaptor(_bufferButtonInputUsecase, _timestampProvider);
 
             // ActionMapの取得
             InputActionMap commonMap = _playerInput.actions.FindActionMap(InputMapNames.Common);
@@ -60,19 +65,25 @@ namespace DevelopProducts.Persistent.Composition
             _swichInputMapUseCase = new SwichInputMapUseCase(inputMapController);
 
             // Viewに依存性注入
-            _playerInputView.Initialize(_bufferButtonInputUsecase, 
-                _bufferInputActionUsecase,
-                _timestampProvider
+            if (_playerInputView == null)
+            {
+                Debug.LogError($"{nameof(PersistentInputInstaller)}: {nameof(_playerInputView)} is not assigned.", this);
+                return;
+            }
+
+            _playerInputView.Initialize(_buttonInputAdaptor
+                , _moveInputAdaptor
                 );
 
-            if(_inputDebugView != null) 
-                _inputDebugView.Initialize(_inputStore);
+            if (_inputDebugView != null)
+                _inputDebugView.Initialize(_bufferedInputBuffer);
 
-            if(_mobileInputButtonViews != null)
+            if (_mobileInputButtonViews != null)
             {
                 foreach (var mobileInputButtonView in _mobileInputButtonViews)
                 {
-                    mobileInputButtonView.Initialize(_bufferButtonInputUsecase, _timestampProvider);
+                    if (mobileInputButtonView == null) continue;
+                    mobileInputButtonView.Initialize(_buttonInputAdaptor);
                 }
             }
 

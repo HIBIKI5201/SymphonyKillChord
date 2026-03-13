@@ -1,4 +1,4 @@
-using DevelopProducts.Persistent.Application;
+using DevelopProducts.Persistent.Adaptor;
 using DevelopProducts.Persistent.Domain.Input;
 using UnityEngine;
 
@@ -6,16 +6,14 @@ namespace DevelopProducts.Persistent.View
 {
     /// <summary>
     ///     UI Buttonにアタッチして使用する、モバイル向けの入力ボタンのView。
-    ///     ボタンが押されたときに、BufferButtonInputUsecaseを呼び出して入力をバッファに記録する。
+    ///     ボタンが押されたときに、ButtonInputAdaptorを呼び出して入力をバッファに記録する。
     /// </summary>
     public class MobileInputButtonView : MonoBehaviour
     {
         public void Initialize(
-            BufferButtonInputUsecase bufferButtonInputUsecase,
-            InputTimestampProvider inputTimestampProvider)
+            ButtonInputAdaptor inputAdaptor)
         {
-            _bufferButtonInputUsecase = bufferButtonInputUsecase;
-            _inputTimestampProvider = inputTimestampProvider;
+            _buttonInputAdaptor = inputAdaptor;
         }
 
         /// <summary>
@@ -25,16 +23,11 @@ namespace DevelopProducts.Persistent.View
         {
             InputActionId actionId = new InputActionId(_actionIdValue);
 
-            _bufferButtonInputUsecase.Execute(
-                actionId,
-                InputPheseIds.Performed,
-                _inputTimestampProvider.GetTimestamp()
-                );
+            _buttonInputAdaptor.HandleButton(actionId, InputPheseIds.Performed);
         }
 
         [SerializeField] private int _actionIdValue;
 
-        private BufferButtonInputUsecase _bufferButtonInputUsecase;
-        private InputTimestampProvider _inputTimestampProvider;
+        private ButtonInputAdaptor _buttonInputAdaptor;
     }
 }

@@ -9,7 +9,7 @@ namespace DevelopProducts.Persistent.View
     /// </summary>
     public class InputBufferDebugView : MonoBehaviour
     {
-        public void Initialize(IInputBufferReader inputBufferReader) 
+        public void Initialize(BufferdInputBuffer inputBufferReader)
         {
             _inputBufferReader = inputBufferReader;
         }
@@ -17,7 +17,7 @@ namespace DevelopProducts.Persistent.View
         [SerializeField] private TMP_Text _text;
         [SerializeField] private int _previewCount;
 
-        private IInputBufferReader _inputBufferReader;
+        private BufferdInputBuffer _inputBufferReader;
 
         private void Update()
         {

@@ -1,17 +1,16 @@
-using DevelopProducts.Persistent.Application;
 using DevelopProducts.Persistent.Domain.Input;
+using DevelopProducts.Persistent.Utility;
 using System;
-using UnityEngine;
 
-namespace DevelopProducts.Persistent.Adaptor
+namespace DevelopProducts.Persistent.Application
 {
     /// <summary>
     ///     入力履歴保存の実体。
     ///     リングバッファを使用して、一定数の入力履歴を保存する。
     /// </summary>
-    public class BufferdInputStore : IInputBufferWriter, IInputBufferReader
+    public class BufferdInputBuffer
     {
-        public BufferdInputStore(int capacity)
+        public BufferdInputBuffer(int capacity)
         {
             _buffer = new RingBuffer<BufferedInput>(capacity);
         }
