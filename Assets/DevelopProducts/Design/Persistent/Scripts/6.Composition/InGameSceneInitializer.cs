@@ -20,7 +20,7 @@ namespace DevelopProducts.Persistent.View
             }
 
             installer.SwichInputMapUseCase.ToInGame();
-            installer.InputBufferWriter.Clear();
+            installer.BufferedInputBuffer.Clear();
 
             Debug.Log("InGameSceneInitializer: ToInGame 実行");
         }
