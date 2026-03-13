@@ -34,6 +34,8 @@ namespace DevelopProducts.Persistent.Composition
         private BufferMoveInputUsecase _bufferInputActionUsecase;
         private BufferButtonInputUsecase _bufferButtonInputUsecase;
         private SwichInputMapUseCase _swichInputMapUseCase;
+        private ButtonInputAdaptor _buttonInputAdaptor;
+        private MoveInputAdaptor _moveInputAdaptor;
 
         private void Install()
         {
@@ -44,6 +46,10 @@ namespace DevelopProducts.Persistent.Composition
             // Usecaseの生成
             _bufferButtonInputUsecase = new BufferButtonInputUsecase(_bufferedInputBuffer);
             _bufferInputActionUsecase = new BufferMoveInputUsecase(_bufferedInputBuffer);
+
+            // Adaptorの生成
+            _moveInputAdaptor = new MoveInputAdaptor(_bufferInputActionUsecase, _timestampProvider);
+            _buttonInputAdaptor = new ButtonInputAdaptor(_bufferButtonInputUsecase, _timestampProvider);
 
             // ActionMapの取得
             InputActionMap commonMap = _playerInput.actions.FindActionMap(InputMapNames.Common);
@@ -59,9 +65,8 @@ namespace DevelopProducts.Persistent.Composition
             _swichInputMapUseCase = new SwichInputMapUseCase(inputMapController);
 
             // Viewに依存性注入
-            _playerInputView.Initialize(_bufferButtonInputUsecase, 
-                _bufferInputActionUsecase,
-                _timestampProvider
+            _playerInputView.Initialize(_buttonInputAdaptor
+                , _moveInputAdaptor
                 );
 
             if(_inputDebugView != null) 
@@ -71,7 +76,7 @@ namespace DevelopProducts.Persistent.Composition
             {
                 foreach (var mobileInputButtonView in _mobileInputButtonViews)
                 {
-                    mobileInputButtonView.Initialize(_bufferButtonInputUsecase, _timestampProvider);
+                    mobileInputButtonView.Initialize(_buttonInputAdaptor);
                 }
             }
 
