@@ -1,3 +1,4 @@
+using System;
 using DevelopProducts.Persistent.Adaptor;
 using DevelopProducts.Persistent.Domain.Input;
 using UnityEngine;
@@ -14,10 +15,9 @@ namespace DevelopProducts.Persistent.View
         public bool IsPressed => _isPressed;
         public Vector2 Direction => _direction;
 
-        public void Initialize(
-            MoveInputAdaptor moveInput
-            )
+        public void Initialize(MoveInputAdaptor moveInput)
         {
+            if (moveInput == null) throw new ArgumentException(nameof(moveInput));
             _moveInputAdaptor = moveInput;
         }
 
