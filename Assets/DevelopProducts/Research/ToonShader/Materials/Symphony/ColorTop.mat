@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FaceColor
+  m_Name: ColorTop
   m_Shader: {fileID: -6465566751694194690, guid: 6ce9a46295a327b4d8e38661df0e2497, type: 3}
   m_Parent: {fileID: 2100000, guid: 151fe5c129a624f49acb2dc9a5d0f2e9, type: 2}
   m_ModifiedSerializedProperties: 0
@@ -23,12 +23,32 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _MetalnessTexture:
+        m_Texture: {fileID: 2800000, guid: 9b3e77dd14be40c458a1ee7be41f39e2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal:
+        m_Texture: {fileID: 2800000, guid: 2826d09a92086a544a598540d954800f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SmoothnessTexture:
+        m_Texture: {fileID: 2800000, guid: 7eb388f895ea64f4189339cbd2ccef32, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2D:
+        m_Texture: {fileID: 2800000, guid: d3518849166e8dd4a80b1ce77ca732ca, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ForFace: 1
-    m_Colors:
-    - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
+    - _MetallicApply: 1
+    - _NPRorPBR: 0.5
+    - _NormalMap: 1
+    - _SmoothnessApply: 1
+    - _metallic: 0
+    - _smoothness: 0
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &4571832962701577303

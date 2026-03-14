@@ -4,8 +4,6 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class EnvironmentValidator
     {
-
-
         public static bool Validate(params EnvironmentVariable[] variables)
         {
             bool hasError = false;

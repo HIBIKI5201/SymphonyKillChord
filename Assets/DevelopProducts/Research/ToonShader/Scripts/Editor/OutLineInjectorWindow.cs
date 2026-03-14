@@ -56,7 +56,7 @@ namespace DevelopProducts.ToonShader.Editor
             foreach (var renderer in renderers)
             {
                 TangentBaker.BakeMesh(renderer.sharedMesh);
-                var materials = renderer.materials;
+                var materials = renderer.sharedMaterials;
 
                 bool hasOutline = false;
                 foreach (var item in materials)
