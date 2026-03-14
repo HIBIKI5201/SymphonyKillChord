@@ -45,7 +45,6 @@ Material:
     - _MetallicApply: 1
     - _NPRorPBR: 0.5
     - _NormalMap: 1
-    - _Perspective: 0.2
     - _SmoothnessApply: 1
     - _metallic: 0
     - _smoothness: 0
