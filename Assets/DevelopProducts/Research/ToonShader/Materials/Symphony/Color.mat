@@ -140,7 +140,7 @@ Material:
     - _NormalMap: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
-    - _Perspective: 0.5
+    - _Perspective: 0.4
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Radius: 0.2
