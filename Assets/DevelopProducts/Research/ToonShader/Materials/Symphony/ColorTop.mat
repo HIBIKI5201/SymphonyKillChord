@@ -43,11 +43,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _MetallicApply: 1
-    - _NPRorPBR: 0.5
     - _NormalMap: 1
     - _SmoothnessApply: 1
-    - _metallic: 0
-    - _smoothness: 0
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
