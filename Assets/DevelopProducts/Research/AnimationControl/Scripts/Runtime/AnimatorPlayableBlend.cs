@@ -1,3 +1,4 @@
+using DevelopProducts.AnimationControl.Adaptor;
 using System;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -7,10 +8,10 @@ namespace DevelopProducts.AnimationControl.Blender
 {
     public class AnimatorPlayableBlend : IDisposable
     {
-        public AnimatorPlayableBlend(Animator animator, RuntimeAnimatorController controller)
+        public AnimatorPlayableBlend(AnimationAdaptor adaptor)
         {
-            _animator = animator;
-            _controller = controller;
+            _animator = adaptor.Animator;
+            _controller = adaptor.Controller;
 
             Initialize();
         }
