@@ -28,6 +28,7 @@ namespace Research.SaveSystem
         #region ライフサイクル
         private void OnDestroy()
         {
+            if (_saveLoadEvents == null) return;
             _saveLoadEvents.OnLoadStart -= ActivateShelter;
             _saveLoadEvents.OnLoadEnd -= DeactivateShelter;
         }

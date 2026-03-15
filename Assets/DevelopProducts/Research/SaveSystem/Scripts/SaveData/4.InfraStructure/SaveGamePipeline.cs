@@ -21,11 +21,19 @@ namespace Research.SaveSystem
         public void  SaveAsync(KillChordGameData data)
         {
             if (_isSaving) return;
+            if (data == null) return;
 
             SaveAsyncTask().Forget();
             _saveData = _saveDataEntity.SaveData;
             SetSaveData(data);
-            _saveDataEntity.Save();
+            try
+            {
+                _saveDataEntity.Save();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"セーブ失敗しました: {e.Message}");
+            }
         }
         #endregion
 
@@ -58,6 +66,8 @@ namespace Research.SaveSystem
             _saveData.Attack = newData.Attack;
             _saveData.CritRate = newData.CritRate;
             _saveData.CritScale = newData.CritScale;
+            _saveData.Equipments = newData.Equipments;
+            _saveData.Skills = newData.Skills;
             _saveData.MissionProgress = newData.MissionProgress;
             _saveData.MissionUnlock = newData.MissionUnlock;
             _saveData.EquipmentUnlock = newData.EquipmentUnlock;

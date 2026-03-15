@@ -20,9 +20,7 @@ namespace Research.SaveSystem
         {
             if(_isLoading) return;
 
-            LoadAsyncTask().Forget();
-            KillChordGameData saveData = _saveDataEntity.SaveData;
-            callback.Invoke(saveData);
+            LoadAsyncTask(callback).Forget();
         }
 
         private bool _isLoading;
@@ -33,13 +31,20 @@ namespace Research.SaveSystem
         ///     ロード開始イベントを発火し、一定時間後にロード終了イベントを発火する。
         /// </summary>
         /// <returns></returns>
-        private async Awaitable LoadAsyncTask()
+        private async Awaitable LoadAsyncTask(Action<KillChordGameData> callback)
         {
             _isLoading = true;
-            _saveLoadEvents.InvokeLoadStart();
-            await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
-            _isLoading = false;
-            _saveLoadEvents.InvokeLoadEnd();
+            try
+            {
+                _saveLoadEvents.InvokeLoadStart();
+                await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
+                callback.Invoke(_saveDataEntity.SaveData);
+            }
+            finally
+            {
+                _isLoading = false;
+                _saveLoadEvents.InvokeLoadEnd();
+            }
         }
     }
 }
