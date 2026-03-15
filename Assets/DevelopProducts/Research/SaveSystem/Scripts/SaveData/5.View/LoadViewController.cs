@@ -26,8 +26,15 @@ namespace Research.SaveSystem
         }
 
         #region ライフサイクル
+        /// <summary>
+        /// Unregisters this object's load event handlers when the MonoBehaviour is destroyed.
+        /// </summary>
+        /// <remarks>
+        /// If the <c>_saveLoadEvents</c> reference is null, no action is taken.
+        /// </remarks>
         private void OnDestroy()
         {
+            if (_saveLoadEvents == null) return;
             _saveLoadEvents.OnLoadStart -= ActivateShelter;
             _saveLoadEvents.OnLoadEnd -= DeactivateShelter;
         }

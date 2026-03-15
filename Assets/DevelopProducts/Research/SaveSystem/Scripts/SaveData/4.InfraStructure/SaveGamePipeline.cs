@@ -17,15 +17,30 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブ処理を行う。
         /// </summary>
-        /// <param name="data">セーブデータ</param>
+        /// <summary>
+        /// Initiates saving of the provided game data and persists it to the configured save storage.
+        /// </summary>
+        /// <param name="data">The game state to save.</param>
+        /// <remarks>
+        /// If a save is already in progress or <paramref name="data"/> is null, the call has no effect.
+        /// Errors that occur during persistence are caught and logged; this method does not throw.
+        /// </remarks>
         public void  SaveAsync(KillChordGameData data)
         {
             if (_isSaving) return;
+            if (data == null) return;
 
             SaveAsyncTask().Forget();
             _saveData = _saveDataEntity.SaveData;
             SetSaveData(data);
-            _saveDataEntity.Save();
+            try
+            {
+                _saveDataEntity.Save();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"セーブ失敗しました: {e.Message}");
+            }
         }
         #endregion
 
@@ -50,7 +65,10 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブデータの値をSymphonyFrameworkのセーブデータオブジェクトに設定する。
         /// </summary>
-        /// <param name="newData"></param>
+        /// <summary>
+        /// Copies relevant game-state fields from the provided KillChordGameData into the pipeline's internal save data object.
+        /// </summary>
+        /// <param name="newData">Source game data whose values will overwrite the internal save data.</param>
         private void SetSaveData(KillChordGameData newData)
         {
             _saveData.Gold = newData.Gold;
@@ -58,6 +76,8 @@ namespace Research.SaveSystem
             _saveData.Attack = newData.Attack;
             _saveData.CritRate = newData.CritRate;
             _saveData.CritScale = newData.CritScale;
+            _saveData.Equipments = newData.Equipments;
+            _saveData.Skills = newData.Skills;
             _saveData.MissionProgress = newData.MissionProgress;
             _saveData.MissionUnlock = newData.MissionUnlock;
             _saveData.EquipmentUnlock = newData.EquipmentUnlock;
