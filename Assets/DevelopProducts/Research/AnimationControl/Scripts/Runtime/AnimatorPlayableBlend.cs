@@ -73,7 +73,6 @@ namespace DevelopProducts.AnimationControl.Blender
 
         private AnimationClip _currentClip;
         private bool _playingClip;
-        private bool _initialized;
 
         private void Initialize()
         {
