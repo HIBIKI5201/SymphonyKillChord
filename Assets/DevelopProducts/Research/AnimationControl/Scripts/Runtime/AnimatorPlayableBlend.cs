@@ -1,81 +1,107 @@
+using System;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
 
 namespace DevelopProducts.AnimationControl.Blender
 {
-    public class AnimatorPlayableBlend : MonoBehaviour
+    public class AnimatorPlayableBlend : IDisposable
     {
-        public Animator animator;
-        public RuntimeAnimatorController controller;
-        public AnimationClip specialClip;
-        public KeyCode triggerKey = KeyCode.Space;
-
-        PlayableGraph graph;
-        AnimationMixerPlayable mixer;
-        AnimationClipPlayable clipPlayable;
-        AnimatorControllerPlayable controllerPlayable;
-
-        bool playingClip = false;
-
-        void Start()
+        public AnimatorPlayableBlend(Animator animator, RuntimeAnimatorController controller)
         {
-            graph = PlayableGraph.Create("PlayableGraph");
+            _animator = animator;
+            _controller = controller;
+
+            Initialize();
+        }
+
+        public void Play(AnimationClip clip)
+        {
+            if (_clipPlayable.IsValid())
+            {
+                _graph.Disconnect(_mixer, 1);
+                _clipPlayable.Destroy();
+            }
+
+            _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+
+            _graph.Connect(_clipPlayable, 0, _mixer, 1);
+
+            _clipPlayable.SetTime(0);
+            _clipPlayable.SetDone(false);
+
+            _playingClip = true;
+
+            _mixer.SetInputWeight(0, 0f);
+            _mixer.SetInputWeight(1, 1f);
+
+            _currentClip = clip;
+        }
+
+        public void Update()
+        {
+            if (!_playingClip) { return; }
+
+            if (_clipPlayable.GetTime() >= _currentClip.length)
+            {
+                _playingClip = false;
+
+                _mixer.SetInputWeight(0, 1f);
+                _mixer.SetInputWeight(1, 0f);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_graph.IsValid())
+            {
+                _graph.Destroy();
+            }
+        }
+
+        private const string ANIMATION_OUTPUT_NAME = "AnimationOutput";
+        private const string GRAPH_NAME = "AnimatorPlayableBlend";
+
+        private readonly Animator _animator;
+        private readonly RuntimeAnimatorController _controller;
+
+        private PlayableGraph _graph;
+        private AnimationMixerPlayable _mixer;
+        private AnimationClipPlayable _clipPlayable;
+        private AnimatorControllerPlayable _controllerPlayable;
+
+        private AnimationClip _currentClip;
+        private bool _playingClip;
+        private bool _initialized;
+
+        private void Initialize()
+        {
+            _graph = PlayableGraph.Create(GRAPH_NAME);
 
             var output = AnimationPlayableOutput.Create(
-                graph,
-                "AnimationOutput",
-                animator
+                _graph,
+                ANIMATION_OUTPUT_NAME,
+                _animator
             );
 
-            mixer = AnimationMixerPlayable.Create(graph, 2);
+            _mixer = AnimationMixerPlayable.Create(_graph, 2);
 
-            controllerPlayable =
-                AnimatorControllerPlayable.Create(graph, controller);
+            _controllerPlayable =
+                AnimatorControllerPlayable.Create(_graph, _controller);
 
-            clipPlayable =
-                AnimationClipPlayable.Create(graph, specialClip);
+            // 空Clipで初期化
+            _clipPlayable =
+                AnimationClipPlayable.Create(_graph, new AnimationClip());
 
-            graph.Connect(controllerPlayable, 0, mixer, 0);
-            graph.Connect(clipPlayable, 0, mixer, 1);
+            _graph.Connect(_controllerPlayable, 0, _mixer, 0);
+            _graph.Connect(_clipPlayable, 0, _mixer, 1);
 
-            mixer.SetInputWeight(0, 1f);
-            mixer.SetInputWeight(1, 0f);
+            _mixer.SetInputWeight(0, 1f);
+            _mixer.SetInputWeight(1, 0f);
 
-            output.SetSourcePlayable(mixer);
+            output.SetSourcePlayable(_mixer);
 
-            graph.Play();
-        }
-
-        void Update()
-        {
-            // スペースキーでアニメ再生
-            if (Input.GetKeyDown(triggerKey) && !playingClip)
-            {
-                Debug.Log("Play Special Clip");
-                clipPlayable.SetTime(0);
-                playingClip = true;
-
-                mixer.SetInputWeight(0, 0f);
-                mixer.SetInputWeight(1, 1f);
-            }
-
-            // 再生終了チェック
-            if (playingClip)
-            {
-                if (clipPlayable.GetTime() >= specialClip.length)
-                {
-                    playingClip = false;
-
-                    mixer.SetInputWeight(0, 1f);
-                    mixer.SetInputWeight(1, 0f);
-                }
-            }
-        }
-
-        void OnDestroy()
-        {
-            graph.Destroy();
+            _graph.Play();
         }
     }
 }
