@@ -865,11 +865,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5159078012444724336, guid: d91034d52857be0498686f7803764974, type: 3}
   m_PrefabInstance: {fileID: 1999710080}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &1999710083 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 4870552773557632513, guid: d91034d52857be0498686f7803764974, type: 3}
-  m_PrefabInstance: {fileID: 1999710080}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1999710085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -879,13 +874,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1796662316}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16abff512705faf488b2644dfe7dac26, type: 3}
+  m_Script: {fileID: 11500000, guid: 07edb21d6c7de544fb2565dbd3ebb9d7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: DevelopProducts-AnimationControl::DevelopProducts.AnimationControl.Blender.AnimatorPlayableBlend
-  animator: {fileID: 1999710083}
-  controller: {fileID: 9100000, guid: ef5730232b80a344ba4abc8a6b4b487c, type: 2}
-  specialClip: {fileID: 658572295128323382, guid: a95a36096dafd684986a8a1d073b74b6, type: 3}
-  triggerKey: 32
+  m_EditorClassIdentifier: DevelopProducts-AnimationControl::DevelopProducts.AnimationControl.Blender.AnimationManager
+  _playClip: {fileID: 658572295128323382, guid: a95a36096dafd684986a8a1d073b74b6, type: 3}
+  _playKey: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
