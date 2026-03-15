@@ -33,6 +33,12 @@ namespace Research.SaveSystem
         }
 
         #region ライフサイクル
+        /// <summary>
+        /// Unregisters the component's save-related event handlers from the SaveLoadEvents instance when the Unity object is destroyed.
+        /// </summary>
+        /// <remarks>
+        /// If the _saveLoadEvents reference is null, the method exits without attempting to unsubscribe.
+        /// </remarks>
         private void OnDestroy()
         {
             if (_saveLoadEvents == null) return;

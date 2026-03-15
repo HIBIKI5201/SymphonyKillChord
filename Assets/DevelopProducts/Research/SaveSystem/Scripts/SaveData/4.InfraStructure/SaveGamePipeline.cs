@@ -17,7 +17,14 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブ処理を行う。
         /// </summary>
-        /// <param name="data">セーブデータ</param>
+        /// <summary>
+        /// Initiates saving of the provided game data and persists it to the configured save storage.
+        /// </summary>
+        /// <param name="data">The game state to save.</param>
+        /// <remarks>
+        /// If a save is already in progress or <paramref name="data"/> is null, the call has no effect.
+        /// Errors that occur during persistence are caught and logged; this method does not throw.
+        /// </remarks>
         public void  SaveAsync(KillChordGameData data)
         {
             if (_isSaving) return;
@@ -58,7 +65,10 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブデータの値をSymphonyFrameworkのセーブデータオブジェクトに設定する。
         /// </summary>
-        /// <param name="newData"></param>
+        /// <summary>
+        /// Copies relevant game-state fields from the provided KillChordGameData into the pipeline's internal save data object.
+        /// </summary>
+        /// <param name="newData">Source game data whose values will overwrite the internal save data.</param>
         private void SetSaveData(KillChordGameData newData)
         {
             _saveData.Gold = newData.Gold;
