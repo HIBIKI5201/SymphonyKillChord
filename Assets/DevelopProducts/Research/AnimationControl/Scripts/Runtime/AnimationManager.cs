@@ -1,3 +1,4 @@
+using DevelopProducts.AnimationControl.Adaptor;
 using DevelopProducts.AnimationControl.Blender;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,12 +19,14 @@ namespace DevelopProducts.AnimationControl.Blender
         private Animator _animator;
         private RuntimeAnimatorController _controller;
         private AnimatorPlayableBlend _blender;
+        private SymphonyAnimeAdaptor _adaptor;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
             _controller = _animator.runtimeAnimatorController;
-            _blender = new AnimatorPlayableBlend(_animator, _controller);
+            _adaptor = new SymphonyAnimeAdaptor(_animator);
+            _blender = new AnimatorPlayableBlend(_adaptor);
         }
 
         private void Update()
