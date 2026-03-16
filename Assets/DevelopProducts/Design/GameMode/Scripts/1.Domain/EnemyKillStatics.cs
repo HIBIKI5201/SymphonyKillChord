@@ -37,14 +37,14 @@ namespace DevelopProducts.Design.GameMode.Domain
         /// </summary>
         /// <param name="enemyId"></param>
         /// <returns></returns>
-        public int GetKillCount(string enemyId)
+        public int GetKillCount(EnemyDefinition enemyDef)
         {
-            if (string.IsNullOrEmpty(enemyId))
+            if (string.IsNullOrEmpty(enemyDef.Id))
             {
                 Debug.LogWarning("Invalid enemy ID provided to GetKillCount.");
                 return 0;
             }
-            return _enemyKillCounts.TryGetValue(enemyId, out int count) ? count : 0;
+            return _enemyKillCounts.TryGetValue(enemyDef.Id, out int count) ? count : 0;
         }
 
         private readonly Dictionary<string, int> _enemyKillCounts = new();
