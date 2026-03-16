@@ -17,12 +17,10 @@ namespace DevelopProducts.Design.GameMode.Application
     public class StageRuleRunner
     {
         public StageRuleRunner(StageRuntimeContext runtimeContext,
-            EnemyKillStatics enemyKillStatics,
             IClearCondition clearCondition, 
             IFailCondition failCondition)
         {
             _runtimeContext = runtimeContext;
-            _enemyKillStatics = enemyKillStatics;
             _clearCondition = clearCondition;
             _failCondition = failCondition;
         }
@@ -52,7 +50,6 @@ namespace DevelopProducts.Design.GameMode.Application
         }
 
         private readonly StageRuntimeContext _runtimeContext;
-        private readonly EnemyKillStatics _enemyKillStatics;
         private readonly IClearCondition _clearCondition;
         private readonly IFailCondition _failCondition;
     }
