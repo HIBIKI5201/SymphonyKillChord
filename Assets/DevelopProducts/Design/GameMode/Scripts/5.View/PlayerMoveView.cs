@@ -1,16 +1,28 @@
 using UnityEngine;
-
-public class PlayerMoveView : MonoBehaviour
+namespace DevelopProducts.Design.GameMode.View
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    ///     プレイヤーの移動を管理するクラス。
+    ///     プレイヤーの入力に基づいて、プレイヤーの位置を更新する役割を持つ。
+    /// </summary>
+    public class PlayerMoveView : MonoBehaviour
     {
-        
-    }
+        private void Update()
+        {
+            float move = 0f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                move = -1f;
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                move = 1f;
+            }
+
+            transform.position += Vector3.right * (move * _moveSpeed * Time.deltaTime);
+        }
+
+        [SerializeField] private float _moveSpeed;
     }
 }
