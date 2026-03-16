@@ -43,6 +43,7 @@ Material:
     m_Floats:
     - _ForFace: 1
     m_Colors:
+    - _MiddleColor: {r: 0.7, g: 0.5523437, b: 0.525, a: 1}
     - _ShadowColor: {r: 0.5019608, g: 0.39607844, b: 0.3764706, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

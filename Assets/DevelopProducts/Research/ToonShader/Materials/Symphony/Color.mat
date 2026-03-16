@@ -144,8 +144,9 @@ Material:
     - _NPRorPBR: 0.2
     - _NormalMap: 0
     - _OcclusionStrength: 1
+    - _OldType: 0
     - _Parallax: 0.005
-    - _Perspective: 0.4
+    - _Perspective: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Radius: 0.2
