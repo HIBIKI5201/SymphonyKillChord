@@ -32,7 +32,7 @@ void GetAdditionalLights_float(
     {
         Light light = GetAdditionalLight(i, WorldPos, 1);
 
-        float atten = light.shadowAttenuation;
+        float atten = light.shadowAttenuation * light.distanceAttenuation;
         float NdotL = saturate(dot(WorldNormal, light.direction));
         DiffuseLight += light.color * atten * NdotL;
     }
