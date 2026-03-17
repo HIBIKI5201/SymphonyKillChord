@@ -39,7 +39,7 @@ namespace DevelopProducts.Design.GameMode.Domain
         /// <returns></returns>
         public int GetKillCount(EnemyDefinition enemyDef)
         {
-            if (string.IsNullOrEmpty(enemyDef.Id))
+            if (enemyDef == null || string.IsNullOrEmpty(enemyDef.Id))
             {
                 Debug.LogWarning("Invalid enemy ID provided to GetKillCount.");
                 return 0;

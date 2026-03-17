@@ -16,6 +16,12 @@ namespace DevelopProducts.Design.GameMode.View
 
         private void OnCollisionEnter(Collision collision)
         {
+            if(_controller == null)
+            {
+                Debug.LogError("PlayerCollisionView is not initialized.");
+                return;
+            }
+
             EnemyView enemyView = collision.gameObject.GetComponent<EnemyView>();
 
             if (enemyView != null)
