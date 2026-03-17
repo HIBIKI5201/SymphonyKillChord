@@ -14,12 +14,12 @@ namespace DevelopProducts.Design.GameMode.View
             _controller = controller;
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void OnCollisionEnter(Collision collision)
         {
-            EnemyView enemyView = other.GetComponent<EnemyView>();
+            EnemyView enemyView = collision.gameObject.GetComponent<EnemyView>();
+
             if (enemyView != null)
             {
-                // プレイヤーと敵が衝突した場合の処理
                 _controller.HitEnemy(enemyView.RuntimeState, enemyView.EnemyDefinition);
             }
         }
