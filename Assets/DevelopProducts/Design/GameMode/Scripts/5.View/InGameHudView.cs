@@ -8,7 +8,7 @@ namespace DevelopProducts.Design.GameMode.View
     ///     UI表示するクラス。
     ///     StageHudViewModelを受け取り、HP、経過時間、結果、評価数を表示する役割を持つ。
     /// </summary>
-    public class InGameHudView
+    public class InGameHudView : MonoBehaviour
     {
         public void View(StageHudViewModel viewModel)
         {
