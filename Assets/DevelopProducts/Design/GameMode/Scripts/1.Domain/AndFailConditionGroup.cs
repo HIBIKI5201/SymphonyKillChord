@@ -1,5 +1,4 @@
 using SymphonyFrameWork.Attribute;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,7 +28,7 @@ namespace DevelopProducts.Design.GameMode.Domain
 
         public string GetDescription()
         {
-            throw new NotImplementedException();
+            return "すべての失敗条件を満たす";
         }
     }
 }

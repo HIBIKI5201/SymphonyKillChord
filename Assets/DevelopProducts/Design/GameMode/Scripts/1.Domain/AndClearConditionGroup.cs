@@ -14,9 +14,16 @@ namespace DevelopProducts.Design.GameMode.Domain
     {
         public bool IsSatisfied(StageRuntimeContext context)
         {
+            // 未設定時は常にクリアしないようにする。
+            if (_children.Count == 0 || _children.Count == 0)
+            {
+                return false;
+            }
+
             for (int i = 0; i < _children.Count; i++)
             {
-                if(!_children[i].IsSatisfied(context))
+                IClearCondition child = _children[i];
+                if (child == null || !child.IsSatisfied(context))
                 {
                     return false;
                 }
@@ -31,7 +38,7 @@ namespace DevelopProducts.Design.GameMode.Domain
 
         public string GetDescription()
         {
-            throw new NotImplementedException();
+            return "すべてのクリア条件を満たす";
         }
 
     }

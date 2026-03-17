@@ -30,7 +30,7 @@ namespace DevelopProducts.Design.GameMode.Domain
 
         public string GetDescription()
         {
-            throw new NotImplementedException();
+            return "いずれかのクリア条件を満たす";
         }
 
     }
