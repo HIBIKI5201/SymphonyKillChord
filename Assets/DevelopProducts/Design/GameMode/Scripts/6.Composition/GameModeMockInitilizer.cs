@@ -20,7 +20,7 @@ namespace DevelopProducts.Design.GameMode.Composition
 
         private void Awake()
         {
-            PlayerRuntimeState playerRuntimeState = new PlayerRuntimeState(3);
+            PlayerRuntimeState playerRuntimeState = new PlayerRuntimeState(10);
             StageTimeState stageTimeState = new StageTimeState();
             EnemyKillStatics enemyKillStatics = new EnemyKillStatics();
 
