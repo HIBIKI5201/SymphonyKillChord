@@ -1,8 +1,9 @@
+using DevelopProducts.Design.GameMode.Utility;
 using UnityEngine;
 
 namespace DevelopProducts.Design.GameMode.InfraStructure
 {
-    [CreateAssetMenu(fileName = "EnemyDefinition", menuName = "Scriptable Objects/EnemyDefinition")]
+    [CreateAssetMenu(fileName = nameof(EnemyDefinition), menuName = Const.CREATE_ASSET_PATH + nameof(EnemyDefinition))]
     public class EnemyDefinition : ScriptableObject
     {
         public string Id => _id;
