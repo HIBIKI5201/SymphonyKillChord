@@ -11,9 +11,15 @@ namespace DevelopProducts.Design.GameMode.Domain
     {
         public bool IsSatisfied(StageRuntimeContext context)
         {
+            if (_children == null || _children.Count == 0)
+            {
+                return false;
+            }
+
             for (int i = 0; i < _children.Count; i++)
             {
-                if (!_children[i].IsSatisfied(context))
+                IFailCondition failCondition = _children[i];
+                if (failCondition == null || !failCondition.IsSatisfied(context))
                 {
                     return false;
                 }
@@ -23,7 +29,7 @@ namespace DevelopProducts.Design.GameMode.Domain
         }
 
 
-        [SerializeReference, SubclassSelector, Tooltip("組み合わせるクリア条件のリスト。")]
+        [SerializeReference, SubclassSelector, Tooltip("組み合わせる失敗条件のリスト。")]
         private List<IFailCondition> _children = new();
 
         public string GetDescription()
