@@ -16,7 +16,6 @@ namespace DevelopProducts.Design.GameMode.Application
         public void Execute(float deltaTime)
         {
             _runtimeContext.StageTimeState.UpdateTimer(deltaTime);
-            Debug.Log($"Current Time: {_runtimeContext.StageTimeState.ElapsedTime}");
         }
 
         private readonly StageRuntimeContext _runtimeContext;
