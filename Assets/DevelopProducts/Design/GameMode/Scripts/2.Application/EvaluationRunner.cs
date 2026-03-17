@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace DevelopProducts.Design.GameMode.Application
 {
+    /// <summary>
+    ///     評価条件の達成状況を表すクラス。
+    /// </summary>
     public class EvaluationResult
     {
         public EvaluationResult(IReadOnlyList<string> achivedDescriptions)
