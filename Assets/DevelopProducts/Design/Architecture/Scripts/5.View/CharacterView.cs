@@ -34,9 +34,7 @@ namespace DevelopProducts.Architecture.View
             _vm = vm;
         }
 
-        [SerializeField, Tooltip("操作するRigidbody。")]
         private Rigidbody _rb;
-
         private CharacterViewModel _vm;
         private CharacterController _controller;
 
@@ -80,6 +78,11 @@ namespace DevelopProducts.Architecture.View
         void UpdateHealth(float currentHealth, float maxHealth)
         {
             Debug.Log($"{name} Health: {currentHealth} / {maxHealth}");
+
+            if (currentHealth <= 0)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
