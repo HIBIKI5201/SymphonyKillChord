@@ -1,6 +1,5 @@
 using DevelopProducts.Design.GameMode.Domain;
 using DevelopProducts.Design.GameMode.InfraStructure;
-using UnityEditor;
 using UnityEngine;
 
 namespace DevelopProducts.Design.GameMode.View
@@ -31,7 +30,7 @@ namespace DevelopProducts.Design.GameMode.View
 
         private void Update()
         {
-            if(_runtimeState !=null && _runtimeState.IsDead)
+            if (_runtimeState != null && _runtimeState.IsDead)
             {
                 Destroy(gameObject);
             }
