@@ -5,7 +5,9 @@
 void PerspectiveRemoval_float(
     float3 positionOS,
     float3 objectCenterOS,
-    out float3 positionOS_out
+    float3 normalOS,
+    out float3 positionOS_out,
+    out float3 normalOS_out
 )
 {
     float4 posVS = mul(UNITY_MATRIX_MV, float4(positionOS, 1.0));
@@ -19,6 +21,7 @@ void PerspectiveRemoval_float(
     float4 worldPos = mul(UNITY_MATRIX_I_V, posVS);
     float4 posOS = mul(UNITY_MATRIX_I_M, worldPos);
     positionOS_out = posOS.xyz;
+    normalOS_out = normalOS;
 }
 
 #endif
