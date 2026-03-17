@@ -25,11 +25,11 @@ MonoBehaviour:
     - rid: 5427475651214966879
       type: {class: ClearTimeEvaluationCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
       data:
-        _clearTimeThreshold: 60
+        _clearTimeThreshold: 15
     - rid: 5427475651214966880
       type: {class: ClearTimeEvaluationCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
       data:
-        _clearTimeThreshold: 120
+        _clearTimeThreshold: 25
     - rid: 5427475651214966881
       type: {class: OrClearConditionGroup, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
       data:
