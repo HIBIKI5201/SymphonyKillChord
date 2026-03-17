@@ -11,11 +11,11 @@ namespace DevelopProducts.Design.GameMode.View
         {
             float move = 0f;
 
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKey(KeyCode.A))
             {
                 move = -1f;
             }
-            else if (Input.GetKeyDown(KeyCode.D))
+            else if (Input.GetKey(KeyCode.D))
             {
                 move = 1f;
             }
