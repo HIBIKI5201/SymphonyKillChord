@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace DevelopProducts.Design.GameMode.Domain
@@ -6,6 +7,7 @@ namespace DevelopProducts.Design.GameMode.Domain
     ///     ステージの経過時間に関するクリア条件。
     ///     例えば、何秒間生存することなど、ステージの経過時間に関連する条件を管理するためのクラス。
     /// </summary>
+    [Serializable]
     public class ElapsedTimeClearCondition : IClearCondition
     {
         public bool IsSatisfied(StageRuntimeContext context)

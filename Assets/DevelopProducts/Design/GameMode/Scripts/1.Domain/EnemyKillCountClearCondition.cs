@@ -19,7 +19,7 @@ namespace DevelopProducts.Design.GameMode.Domain
         public string GetDescription()
         {
             string enemyName = _enemyDefinition != null ? _enemyDefinition.DisplayName : "Unknown Enemy";
-            return$"{enemyName}を{_requiredCount}体以上撃破する";
+            return $"{enemyName}を{_requiredCount}体以上撃破する";
         }
 
         [SerializeField] private EnemyDefinition _enemyDefinition;
