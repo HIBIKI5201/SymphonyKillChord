@@ -15,17 +15,9 @@
 void GetAdditionalLights_float(
     float3 WorldPos,
     float3 WorldNormal,
-    float3 WorldView,
     out float3 DiffuseLight)
 {
     DiffuseLight = float3(0, 0, 0);
-    
-    InputData inputData = (InputData) 0;
-    inputData.positionWS = WorldPos;
-    inputData.normalWS = normalize(WorldNormal);
-    inputData.viewDirectionWS = normalize(WorldView);
-    inputData.shadowMask = unity_ProbesOcclusion;
-    inputData.bakedGI = float3(0, 0, 0);
 
     int lightCount = GetAdditionalLightsCount();
     for (int i = 0; i < lightCount; i++)
