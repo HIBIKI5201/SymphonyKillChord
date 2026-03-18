@@ -1,24 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-4348149165342011815
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8169c64506fc65459788f540199688f, type: 3}
-  m_Name: BitonicPixelSortingFeature
-  m_EditorClassIdentifier: BitonicPixelSorter.UniversalRP::Ruccho.Utilities.BitonicPixelSortingFeature
-  m_Active: 1
-  shader: {fileID: 7200000, guid: 950241c127228c44b8fdb4f48baad5f0, type: 3}
-  direction: 1
-  ascending: 1
-  thresholdMin: 0
-  thresholdMax: 1
-  passEvent: 500
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44,8 +25,8 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
-  - {fileID: -4348149165342011815}
-  m_RendererFeatureMap: 59ce60215f45a8c3
+  - {fileID: 4395166471911360209}
+  m_RendererFeatureMap: d1c6fb9e9ec4fe3c
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -74,3 +55,22 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4395166471911360209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25fa49196dd004941bf89d96f250a9fa, type: 3}
+  m_Name: BitonicPixelSortingFeatureMod
+  m_EditorClassIdentifier: DevelopProducts-RenderingExtension::DevelopProducts.RenderingExtension.BitonicPixelSortingFeatureMod
+  m_Active: 1
+  shader: {fileID: 7200000, guid: 950241c127228c44b8fdb4f48baad5f0, type: 3}
+  direction: 1
+  ascending: 0
+  thresholdMin: 0
+  thresholdMax: 0.074
+  passEvent: 500
