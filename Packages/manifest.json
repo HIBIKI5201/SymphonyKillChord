@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.annulusgames.lit-motion": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion",
     "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
     "com.ruccho.bitonicpixelsorter": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter#release",
     "com.ruccho.bitonicpixelsorter.urp": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter.urp#release",
