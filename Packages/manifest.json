@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
+    "com.ruccho.bitonicpixelsorter": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter#release",
+    "com.ruccho.bitonicpixelsorter.urp": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter.urp#release",
     "com.unity.addressables": "2.9.0",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.animation.rigging": "1.4.1",
