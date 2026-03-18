@@ -26,6 +26,11 @@ namespace DevelopProducts.RenderingExtension
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
+            if (shader == null)
+            {
+                Debug.LogWarning("[BitonicPixelSorter] Compute shader is not assigned.");
+                return;
+            }
             _pass.renderPassEvent = passEvent;
             _pass.Shader = shader;
             _pass.Direction = direction;
@@ -64,69 +69,75 @@ namespace DevelopProducts.RenderingExtension
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 var cmd = CommandBufferPool.Get(Tag);
-
-                var metaPassIndex = Shader.FindKernel("MetaPass");
-                var sortPassIndex = Shader.FindKernel("SortPass");
-
-                var desc = renderingData.cameraData.cameraTargetDescriptor;
-
-
-                var width = desc.width;
-                var height = desc.height;
-                var size = Direction ? width : height;
-                var lines = Direction ? height : width;
-
-                var metaWidth = Direction ? width / 2 : width;
-                var metaHeight = Direction ? height : height / 2;
-
-                if (size >= 2048)
+                try
                 {
-                    Debug.LogError("[BitonicPixelSorter] Size of source texture must be smaller than 2048.");
-                    return;
+                    var metaPassIndex = Shader.FindKernel("MetaPass");
+                    var sortPassIndex = Shader.FindKernel("SortPass");
+
+                    var desc = renderingData.cameraData.cameraTargetDescriptor;
+
+
+                    var width = desc.width;
+                    var height = desc.height;
+                    var size = Direction ? width : height;
+                    var lines = Direction ? height : width;
+
+                    var metaWidth = Direction ? width / 2 : width;
+                    var metaHeight = Direction ? height : height / 2;
+
+                    if (size >= 2048)
+                    {
+                        Debug.LogError("[BitonicPixelSorter] Size of source texture must be smaller than 2048.");
+                        return;
+                    }
+
+                    var renderer = renderingData.cameraData.renderer;
+                    var src = renderer.cameraColorTargetHandle;
+
+                    cmd.GetTemporaryRT(PropMetaTex, metaWidth, metaHeight, 0, FilterMode.Point, RenderTextureFormat.RInt,
+                        RenderTextureReadWrite.Default, 1, true);
+                    cmd.GetTemporaryRT(PropSortTex, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32,
+                        RenderTextureReadWrite.Default, 1, true);
+
+                    cmd.SetComputeIntParam(Shader, PropDirection, Direction ? 1 : 0);
+                    cmd.SetComputeFloatParam(Shader, PropThresholdMin, ThresholdMin);
+                    cmd.SetComputeFloatParam(Shader, PropThresholdMax, ThresholdMax);
+
+                    cmd.SetComputeTextureParam(Shader, metaPassIndex, PropSrcTex, src);
+                    cmd.SetComputeTextureParam(Shader, metaPassIndex, PropMetaTex, new RenderTargetIdentifier(PropMetaTex));
+
+                    Shader.GetKernelThreadGroupSizes(metaPassIndex, out var metaGroupX, out var metaGroupY,
+                        out var metaGroupZ);
+                    var metaGroupSize = metaGroupX * metaGroupY * metaGroupZ;
+                    var metaDispatchCount = Mathf.CeilToInt((float)lines * 2 / metaGroupSize);
+
+                    cmd.DispatchCompute(Shader, metaPassIndex, metaDispatchCount, 1, 1);
+
+                    cmd.Blit(src, new RenderTargetIdentifier(PropSortTex));
+
+                    cmd.SetComputeTextureParam(Shader, sortPassIndex, PropSrcMetaTex,
+                        new RenderTargetIdentifier(PropMetaTex));
+                    cmd.SetComputeTextureParam(Shader, sortPassIndex, PropSortTex, new RenderTargetIdentifier(PropSortTex));
+
+                    cmd.SetComputeIntParam(Shader, PropOrdering, Ascending ? 1 : 0);
+
+                    var maxLevel = Mathf.CeilToInt(Mathf.Log(size, 2));
+
+                    cmd.SetComputeIntParam(Shader, PropMaxLevels, maxLevel);
+
+                    cmd.DispatchCompute(Shader, sortPassIndex, lines, 1, 1);
+
+                    cmd.Blit(new RenderTargetIdentifier(PropSortTex), src);
+
+                    context.ExecuteCommandBuffer(cmd);
+                    cmd.ReleaseTemporaryRT(PropMetaTex);
+                    cmd.ReleaseTemporaryRT(PropSortTex);
+                }
+                finally
+                {
+                    CommandBufferPool.Release(cmd);
                 }
 
-                var renderer = renderingData.cameraData.renderer;
-                var src = renderer.cameraColorTargetHandle;
-
-                cmd.GetTemporaryRT(PropMetaTex, metaWidth, metaHeight, 0, FilterMode.Point, RenderTextureFormat.RInt,
-                    RenderTextureReadWrite.Default, 1, true);
-                cmd.GetTemporaryRT(PropSortTex, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32,
-                    RenderTextureReadWrite.Default, 1, true);
-
-                cmd.SetComputeIntParam(Shader, PropDirection, Direction ? 1 : 0);
-                cmd.SetComputeFloatParam(Shader, PropThresholdMin, ThresholdMin);
-                cmd.SetComputeFloatParam(Shader, PropThresholdMax, ThresholdMax);
-
-                cmd.SetComputeTextureParam(Shader, metaPassIndex, PropSrcTex, src);
-                cmd.SetComputeTextureParam(Shader, metaPassIndex, PropMetaTex, new RenderTargetIdentifier(PropMetaTex));
-
-                Shader.GetKernelThreadGroupSizes(metaPassIndex, out var metaGroupX, out var metaGroupY,
-                    out var metaGroupZ);
-                var metaGroupSize = metaGroupX * metaGroupY * metaGroupZ;
-                var metaDispatchCount = Mathf.CeilToInt((float)lines * 2 / metaGroupSize);
-
-                cmd.DispatchCompute(Shader, metaPassIndex, metaDispatchCount, 1, 1);
-
-                cmd.Blit(src, new RenderTargetIdentifier(PropSortTex));
-
-                cmd.SetComputeTextureParam(Shader, sortPassIndex, PropSrcMetaTex,
-                    new RenderTargetIdentifier(PropMetaTex));
-                cmd.SetComputeTextureParam(Shader, sortPassIndex, PropSortTex, new RenderTargetIdentifier(PropSortTex));
-
-                cmd.SetComputeIntParam(Shader, PropOrdering, Ascending ? 1 : 0);
-
-                var maxLevel = Mathf.CeilToInt(Mathf.Log(size, 2));
-
-                cmd.SetComputeIntParam(Shader, PropMaxLevels, maxLevel);
-
-                cmd.DispatchCompute(Shader, sortPassIndex, lines, 1, 1);
-
-                cmd.Blit(new RenderTargetIdentifier(PropSortTex), src);
-
-                context.ExecuteCommandBuffer(cmd);
-                cmd.ReleaseTemporaryRT(PropMetaTex);
-                cmd.ReleaseTemporaryRT(PropSortTex);
-                CommandBufferPool.Release(cmd);
             }
 
 #if BPS_URP_17

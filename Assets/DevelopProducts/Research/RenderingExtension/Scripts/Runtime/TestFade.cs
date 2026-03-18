@@ -18,6 +18,12 @@ namespace DevelopProducts.RenderingExtension
         private void OnDestroy()
         {
             _handle.TryCancel();
+            if (_renderFeauture != null)
+            {
+                _renderFeauture.thresholdMin = 0f;
+                _renderFeauture.thresholdMax = 0f;
+                _renderFeauture.SetActive(false);
+            }
         }
         [ContextMenu("Play")]
         void Animation()
@@ -27,11 +33,13 @@ namespace DevelopProducts.RenderingExtension
             _handle.TryComplete();
             MotionSequenceBuilder builder = LSequence.Create();
 
+            _renderFeauture.thresholdMax = 0;
+            _renderFeauture.thresholdMin = 0;
+
             SetTrueFeauture();
 
             builder
                 .Append(LMotion.Create(0f, 1f, duration / 2)
-                    .WithDelay(0.5f)
                     .WithOnComplete(ToggleActive)
                     .Bind(_renderFeauture, (value, state) => state.thresholdMax = value))
                 .Append(LMotion.Create(0f, 1f, duration / 2)
