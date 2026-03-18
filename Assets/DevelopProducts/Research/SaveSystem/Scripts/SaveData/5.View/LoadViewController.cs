@@ -10,12 +10,11 @@ namespace Research.SaveSystem
         /// </summary>
         /// <param name="loadGame"></param>
         /// <param name="saveLoadEvents"></param>
-        public void Initialize(LoadGame loadGame, SaveLoadEvents saveLoadEvents)
+        public void Initialize(LoadGame loadGame)
         {
             _loadGame = loadGame;
-            _saveLoadEvents = saveLoadEvents;
-            _saveLoadEvents.OnLoadStart += ActivateShelter;
-            _saveLoadEvents.OnLoadEnd += DeactivateShelter;
+            EventBus<EOnLoadStart>.Register(OnLoadStart);
+            EventBus<EOnLoadEnd>.Register(OnLoadEnd);
         }
         /// <summary>
         ///     ロードボタン押下時の処理。
@@ -26,17 +25,10 @@ namespace Research.SaveSystem
         }
 
         #region ライフサイクル
-        /// <summary>
-        /// Unregisters this object's load event handlers when the MonoBehaviour is destroyed.
-        /// </summary>
-        /// <remarks>
-        /// If the <c>_saveLoadEvents</c> reference is null, no action is taken.
-        /// </remarks>
         private void OnDestroy()
         {
-            if (_saveLoadEvents == null) return;
-            _saveLoadEvents.OnLoadStart -= ActivateShelter;
-            _saveLoadEvents.OnLoadEnd -= DeactivateShelter;
+            EventBus<EOnLoadStart>.Unregister(OnLoadStart);
+            EventBus<EOnLoadEnd>.Unregister(OnLoadEnd);
         }
         #endregion
 
@@ -45,30 +37,17 @@ namespace Research.SaveSystem
         [SerializeField, Tooltip("")]
         private Text _shelterText;
         [SerializeField, Tooltip("")]
-        private InputField _inputGold;
-        [SerializeField, Tooltip("")]
-        private InputField _inputHpMax;
-        [SerializeField, Tooltip("")]
-        private InputField _inputAttack;
-        [SerializeField, Tooltip("")]
-        private InputField _inputCritRate;
-        [SerializeField, Tooltip("")]
-        private InputField _inputCritScale;
-        [SerializeField, Tooltip("")]
         private InputField _inputEquipments;
         [SerializeField, Tooltip("")]
         private InputField _inputSkills;
         [SerializeField, Tooltip("")]
-        private InputField _inputMissionProgress;
-        [SerializeField, Tooltip("")]
-        private Toggle[] _chkboxMission;
+        private Toggle[] _chkboxStoryProgress;
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxEquipment;
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxSkill;
 
         private LoadGame _loadGame;
-        private SaveLoadEvents _saveLoadEvents;
 
         /// <summary>
         ///     ロードしたデータを画面に設定する。
@@ -78,8 +57,7 @@ namespace Research.SaveSystem
         {
             // デバッグ用処理
             SetupPlayerStatus(saveData);
-            SetupMissionProgress(saveData);
-            SetupMissionUnlock(saveData);
+            SetupStoryProgress(saveData);
             SetupEquipmentUnlock(saveData);
             SetupSkillUnlock(saveData);
         }
@@ -87,40 +65,29 @@ namespace Research.SaveSystem
         #region デバッグ用
         private void SetupPlayerStatus(KillChordGameData saveData)
         {
-            _inputGold.text = saveData.Gold.ToString();
-            _inputHpMax.text = saveData.HpMax.ToString();
-            _inputAttack.text = saveData.Attack.ToString();
-            _inputCritRate.text = saveData.CritRate.ToString();
-            _inputCritScale.text = saveData.CritScale.ToString();
-            _inputEquipments.text = string.Join(',', saveData.Equipments);
-            _inputSkills.text = string.Join(',', saveData.Skills);
+            _inputEquipments.text = string.Join(',', saveData.PlayerData.Equipment);
+            _inputSkills.text = string.Join(',', saveData.PlayerData.Skill);
         }
 
-        private void SetupMissionProgress(KillChordGameData saveData)
+        private void SetupStoryProgress(KillChordGameData saveData)
         {
-            List<int> progress = saveData.MissionProgress;
-            _inputMissionProgress.text = progress.Count == 0 ? "0" : string.Join(',', progress.ToArray());
-        }
-
-        private void SetupMissionUnlock(KillChordGameData saveData)
-        {
-            List<int> missions = saveData.MissionUnlock;
-            for (int i = 0; i < _chkboxMission.Length; i++)
+            HashSet<int> stories = saveData.OutGameData.StoryProgress;
+            for (int i = 0; i < _chkboxStoryProgress.Length; i++)
             {
-                int id = _chkboxMission[i].GetComponent<MissionData>().Id;
-                if (missions.Contains(id))
+                int id = _chkboxStoryProgress[i].GetComponent<StoryProgress>().Id;
+                if (stories.Contains(id))
                 {
-                    _chkboxMission[i].isOn = true;
+                    _chkboxStoryProgress[i].isOn = true;
                 }
                 else
                 {
-                    _chkboxMission[i].isOn = false;
+                    _chkboxStoryProgress[i].isOn = false;
                 }
             }
         }
         private void SetupEquipmentUnlock(KillChordGameData saveData)
         {
-            List<int> equipments = saveData.EquipmentUnlock;
+            HashSet<int> equipments = saveData.OutGameData.EquipmentUnlock;
             for (int i = 0; i < _chkboxEquipment.Length; i++)
             {
                 int id = _chkboxEquipment[i].GetComponent<EquipmentData>().Id;
@@ -136,7 +103,7 @@ namespace Research.SaveSystem
         }
         private void SetupSkillUnlock(KillChordGameData saveData)
         {
-            List<int> skills = saveData.SkillUnlock;
+            HashSet<int> skills = saveData.OutGameData.SkillUnlock;
             for (int i = 0; i < _chkboxSkill.Length; i++)
             {
                 int id = _chkboxSkill[i].GetComponent<SkillData>().Id;
@@ -151,16 +118,16 @@ namespace Research.SaveSystem
             }
         }
 
-        private void ActivateShelter()
+        private void OnLoadStart(EOnLoadStart eventParam)
         {
             _shelter.SetActive(true);
             _shelterText.text = "Loading...";
         }
 
-        private void DeactivateShelter()
+        private void OnLoadEnd(EOnLoadEnd eventParam)
         {
             _shelter.SetActive(false);
         }
-        #endregion    
+        #endregion
     }
 }
