@@ -8,7 +8,7 @@ namespace DevelopProducts.Utility.Editor
 {
     public static class DevelopProductsTemplateCreator
     {
-        private const string TEMPLATE_PATH = "Assets/DevelopProducts/Utility/Editor/DevelopProductsTemplateDirectory";
+        private const string TEMPLATE_PATH = DevelopProductsConst.ASSET_DEVELOP_PRODUCTS_PATH + "Utility/Editor/DevelopProductsTemplateDirectory";
 
         [MenuItem("Assets/Create/" + DevelopProductsConst.DEVELOP_PRODUCTS_CREATE_ASSET_PATH + "Products Template (Native)", false, 220)]
         public static void Create()
