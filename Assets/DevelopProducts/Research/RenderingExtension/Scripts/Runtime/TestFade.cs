@@ -18,6 +18,12 @@ namespace DevelopProducts.RenderingExtension
         private void OnDestroy()
         {
             _handle.TryCancel();
+            if (_renderFeauture != null)
+            {
+                _renderFeauture.thresholdMin = 0f;
+                _renderFeauture.thresholdMax = 0f;
+                _renderFeauture.SetActive(false);
+            }
         }
         [ContextMenu("Play")]
         void Animation()
