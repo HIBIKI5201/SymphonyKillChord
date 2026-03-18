@@ -31,6 +31,11 @@ namespace DevelopProducts.RenderingExtension
                 Debug.LogWarning("[BitonicPixelSorter] Compute shader is not assigned.");
                 return;
             }
+            if (!shader.HasKernel("MetaPass") || !shader.HasKernel("SortPass"))
+            {
+                Debug.LogError("[BitonicPixelSorter] Required kernels (MetaPass/SortPass) were not found.");
+                return;
+            }
             _pass.renderPassEvent = passEvent;
             _pass.Shader = shader;
             _pass.Direction = direction;
