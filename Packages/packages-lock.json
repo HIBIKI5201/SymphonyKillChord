@@ -16,6 +16,23 @@
       },
       "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
     },
+    "com.ruccho.bitonicpixelsorter": {
+      "version": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter#release",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "922f50ed0aabceda9f3f8a8ebcfbb960d1a5117a"
+    },
+    "com.ruccho.bitonicpixelsorter.urp": {
+      "version": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter.urp#release",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.ruccho.bitonicpixelsorter": "1.0.0",
+        "com.unity.render-pipelines.universal": "12.1.6"
+      },
+      "hash": "922f50ed0aabceda9f3f8a8ebcfbb960d1a5117a"
+    },
     "com.unity.2d.animation": {
       "version": "13.0.4",
       "depth": 1,
@@ -518,7 +535,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "bc28b446fb728e6350204e60493bd3ada99501bb"
+      "hash": "dd7a07b7ee70e9f820c34d6321fc4489bd539950"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
