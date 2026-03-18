@@ -26,6 +26,11 @@ namespace DevelopProducts.RenderingExtension
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
+            if (shader == null)
+            {
+                Debug.LogWarning("[BitonicPixelSorter] Compute shader is not assigned.");
+                return;
+            }
             _pass.renderPassEvent = passEvent;
             _pass.Shader = shader;
             _pass.Direction = direction;
