@@ -129,9 +129,9 @@ namespace DevelopProducts.RenderingExtension
 
                     cmd.Blit(new RenderTargetIdentifier(PropSortTex), src);
 
-                    context.ExecuteCommandBuffer(cmd);
                     cmd.ReleaseTemporaryRT(PropMetaTex);
                     cmd.ReleaseTemporaryRT(PropSortTex);
+                    context.ExecuteCommandBuffer(cmd);
                 }
                 finally
                 {
