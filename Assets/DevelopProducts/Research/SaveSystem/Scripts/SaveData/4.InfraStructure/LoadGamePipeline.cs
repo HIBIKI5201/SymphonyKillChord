@@ -9,6 +9,7 @@ namespace Research.SaveSystem
     {
         public LoadGamePipeline(SaveDataEntity saveDataEntity, SaveDataMigration saveDataMigration)
         {
+            _isLoading = false;
             _saveDataEntity = saveDataEntity;
             _saveDataMigration = saveDataMigration;
         }
@@ -20,9 +21,7 @@ namespace Research.SaveSystem
         {
             if (_isLoading) return;
 
-            LoadAsyncTask().Forget();
-            _saveDataMigration.DoMigration();
-            callback.Invoke(_saveDataEntity.SaveData);
+            LoadAsyncTask(callback).Forget();
         }
 
         private bool _isLoading;
@@ -30,21 +29,25 @@ namespace Research.SaveSystem
         private SaveDataMigration _saveDataMigration;
 
         /// <summary>
-        ///     ロード開始イベントを発火し、一定時間後にロード終了イベントを発火する。
+        ///     ロード開始イベントを発火してロードする。<br/>
+        ///     ロード完了後、ロード完了イベントを発火する。
         /// </summary>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        private async Awaitable LoadAsyncTask()
+        private async Awaitable LoadAsyncTask(Action<KillChordGameData> callback)
         {
             _isLoading = true;
             try
             {
                 EventBus<EOnLoadStart>.Raise(new EOnLoadStart());
-                await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
+                await _saveDataEntity.Load();
+                _saveDataMigration.DoMigration();
+                callback?.Invoke(_saveDataEntity.SaveData);
             }
             finally
             {
-                _isLoading = false;
                 EventBus<EOnLoadEnd>.Raise(new EOnLoadEnd());
+                _isLoading = false;
             }
         }
     }
