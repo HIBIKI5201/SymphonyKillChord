@@ -28,19 +28,19 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MetalnessTexture:
-        m_Texture: {fileID: 2800000, guid: 9b3e77dd14be40c458a1ee7be41f39e2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6c13052823f5c9549bbe3f25dbcea20d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Normal:
-        m_Texture: {fileID: 2800000, guid: 2826d09a92086a544a598540d954800f, type: 3}
+        m_Texture: {fileID: 2800000, guid: b0ed6f6232476934ca370da9c484ab11, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SmoothnessTexture:
-        m_Texture: {fileID: 2800000, guid: 7eb388f895ea64f4189339cbd2ccef32, type: 3}
+        m_Texture: {fileID: 2800000, guid: 14424a9dc853e2c4584448736a4912ee, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D:
-        m_Texture: {fileID: 2800000, guid: d3518849166e8dd4a80b1ce77ca732ca, type: 3}
+        m_Texture: {fileID: 2800000, guid: d06da33f3d0da79499a1ecf843414540, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
