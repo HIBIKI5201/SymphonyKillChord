@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using UnityEngine;
 namespace Research.SaveSystem
 {
 
@@ -34,7 +36,20 @@ namespace Research.SaveSystem
         /// <param name="eventData"></param>
         public static void Raise(T eventData)
         {
-            _onEvent?.Invoke(eventData);
+            Action<T> handlers = _onEvent;
+            if (handlers is null) return;
+
+            foreach (Action<T> handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(eventData);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
         }
 
         private static event Action<T> _onEvent;

@@ -7,9 +7,9 @@ namespace Research.SaveSystem
 
         /// <summary>【開発用】バージョンナンバー_0.1</summary>
         public const string VERSION_0_1 = "0.1";
-        /// <summary>【開発用】バージョンナンバー_0.3</summary>
+        /// <summary>【開発用】バージョンナンバー_0.2</summary>
         public const string VERSION_0_2 = "0.2";
-        /// <summary>【開発用】バージョンナンバー_0.5</summary>
+        /// <summary>【開発用】バージョンナンバー_0.3</summary>
         public const string VERSION_0_3 = "0.3";
         /// <summary>【開発用】現在バージョンナンバー</summary>
         public const string CURRENT_VERSION = "0.3";

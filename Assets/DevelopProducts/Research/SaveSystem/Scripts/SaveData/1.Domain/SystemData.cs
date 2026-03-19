@@ -1,8 +1,11 @@
+using System;
+
 namespace Research.SaveSystem
 {
     /// <summary>
     ///     セーブデータ：システム情報
     /// </summary>
+    [Serializable]
     public class SystemData
     {
         public SystemData()

@@ -18,9 +18,9 @@ namespace Research.SaveSystem
         /// <param name="callback">ロード後実行する処理</param>
         public void LoadGameAsync(Action<KillChordGameData> callback)
         {
-            if(_isLoading) return;
+            if (_isLoading) return;
 
-            LoadAsyncTask(callback).Forget();
+            LoadAsyncTask().Forget();
             _saveDataMigration.DoMigration();
             callback.Invoke(_saveDataEntity.SaveData);
         }
@@ -33,13 +33,19 @@ namespace Research.SaveSystem
         ///     ロード開始イベントを発火し、一定時間後にロード終了イベントを発火する。
         /// </summary>
         /// <returns></returns>
-        private async Awaitable LoadAsyncTask(Action<KillChordGameData> callback)
+        private async Awaitable LoadAsyncTask()
         {
             _isLoading = true;
-            EventBus<EOnLoadStart>.Raise(new EOnLoadStart());
-            await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
-            _isLoading = false;
-            EventBus<EOnLoadEnd>.Raise(new EOnLoadEnd());
+            try
+            {
+                EventBus<EOnLoadStart>.Raise(new EOnLoadStart());
+                await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
+            }
+            finally
+            {
+                _isLoading = false;
+                EventBus<EOnLoadEnd>.Raise(new EOnLoadEnd());
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 namespace Research.SaveSystem
 {
@@ -5,6 +6,7 @@ namespace Research.SaveSystem
     /// <summary>
     ///     セーブデータ：プレイヤー情報
     /// </summary>
+    [Serializable]
     public class PlayerData
     {
         public PlayerData()
