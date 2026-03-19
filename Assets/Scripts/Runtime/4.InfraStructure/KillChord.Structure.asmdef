@@ -1,0 +1,19 @@
+{
+    "name": "KillChord.Structure",
+    "rootNamespace": "",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:dd408af17d035564b957321d79adba1d",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -2,7 +2,8 @@
     "name": "DevelopProducts-Architecture",
     "rootNamespace": "DevelopProducts.Architecture.",
     "references": [
-        "GUID:68a532f43eeefd5408e4e8871b769ee4"
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:c8a23a053cdb72f4c9c0fe6b76b389aa"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

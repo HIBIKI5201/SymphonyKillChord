@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System;
+using SymphonyFrameWork.System.SaveSystem;
 namespace Research.SaveSystem
 {
     /// <summary>
@@ -24,7 +24,7 @@ namespace Research.SaveSystem
         /// </summary>
         public void Save()
         {
-            SaveDataSystem<KillChordGameData>.Save();
+            SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Save();
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Research.SaveSystem
         /// </summary>
         public void Load()
         {
-            _saveData = SaveDataSystem<KillChordGameData>.Data;
+            _saveData = SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Get().Result;
         }
 
         private KillChordGameData _saveData;

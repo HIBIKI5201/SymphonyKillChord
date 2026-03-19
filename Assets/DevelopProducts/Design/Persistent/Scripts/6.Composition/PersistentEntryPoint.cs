@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System;
+using SymphonyFrameWork.System.SceneLoad;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
