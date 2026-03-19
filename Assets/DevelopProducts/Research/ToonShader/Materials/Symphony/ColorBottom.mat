@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetalnessTexture:
-        m_Texture: {fileID: 2800000, guid: 33f231dd7bbc99a409236aaba5685fa0, type: 3}
+        m_Texture: {fileID: 2800000, guid: ee915514554dfc543a32a466564284e1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MettalicTexture:
@@ -40,15 +40,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Normal:
-        m_Texture: {fileID: 2800000, guid: d52c87db30cb13044ad2422b98052663, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8a4ea4510b4ffcb41ac0cc47e083de59, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SmoothnessTexture:
-        m_Texture: {fileID: 2800000, guid: 2188adcf5bb7bd643aa676ef77b759fd, type: 3}
+        m_Texture: {fileID: 2800000, guid: ae3b979b9b657ac408c0753135da7501, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D:
-        m_Texture: {fileID: 2800000, guid: 094da64981074c14286597c76fe0c1ec, type: 3}
+        m_Texture: {fileID: 2800000, guid: e2e559c826c8a514daf509415a404d81, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
