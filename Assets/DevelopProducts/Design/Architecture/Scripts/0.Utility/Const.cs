@@ -1,4 +1,5 @@
 using UnityEngine;
+using DevelopProducts.Utility;
 
 namespace DevelopProducts.Architecture.Utility
 {
@@ -8,6 +9,6 @@ namespace DevelopProducts.Architecture.Utility
     public static class Const 
     {
         /// <summary> アセット作成時のメニューパス。 </summary>
-        public const string CREATE_ASSET_PATH = "DevelopProducts/Architecture/";
+        public const string CREATE_ASSET_PATH =  DevelopProductsConst.DEVELOP_PRODUCTS_CREATE_ASSET_PATH + "Architecture/";
     }
 }
