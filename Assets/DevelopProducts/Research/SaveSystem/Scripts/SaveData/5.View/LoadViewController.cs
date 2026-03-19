@@ -10,7 +10,7 @@ namespace Research.SaveSystem
         /// </summary>
         /// <param name="loadGame"></param>
         /// <param name="saveLoadEvents"></param>
-        public void Initialize(LoadGame loadGame)
+        public void Initialize(ILoadService loadGame)
         {
             _loadGame = loadGame;
             EventBus<EOnLoadStart>.Register(OnLoadStart);
@@ -21,7 +21,7 @@ namespace Research.SaveSystem
         /// </summary>
         public void OnLoadButtonClick()
         {
-            _loadGame.LoadGameAsync(SetupSaveData);
+            _loadGame.Load(SetupSaveData);
         }
 
         #region ライフサイクル
@@ -47,7 +47,7 @@ namespace Research.SaveSystem
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxSkill;
 
-        private LoadGame _loadGame;
+        private ILoadService _loadGame;
 
         /// <summary>
         ///     ロードしたデータを画面に設定する。

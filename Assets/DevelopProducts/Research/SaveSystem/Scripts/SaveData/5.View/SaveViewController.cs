@@ -15,7 +15,7 @@ namespace Research.SaveSystem
         /// <param name="saveData"></param>
         /// <param name="saveGame"></param>
         /// <param name="saveLoadEvents"></param>
-        public void Initialize(SaveGame saveGame)
+        public void Initialize(ISaveService saveGame)
         {
             _saveGame = saveGame;
             EventBus<EOnSaveStart>.Register(OnSaveStart);
@@ -28,7 +28,7 @@ namespace Research.SaveSystem
         {
             KillChordGameData newData = new();
             SetSaveData(newData);
-            _saveGame.SaveGameAsync(newData);
+            _saveGame.Save(newData);
         }
 
         #region ライフサイクル
@@ -54,7 +54,7 @@ namespace Research.SaveSystem
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxSkill;
 
-        private SaveGame _saveGame;
+        private ISaveService _saveGame;
 
         #region プライベートメソッド
         /// <summary>
