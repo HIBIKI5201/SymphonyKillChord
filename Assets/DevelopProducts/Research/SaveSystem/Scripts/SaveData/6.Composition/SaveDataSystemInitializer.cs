@@ -10,11 +10,20 @@ namespace Research.SaveSystem
         private void Awake()
         {
             _saveDataEntity = new SaveDataEntity();
-            _saveDataMigration = new SaveDataMigration(GetSaveDataMigrations(), _saveDataEntity.SaveData);
+            _saveDataMigration = new SaveDataMigration(GetSaveDataMigrations());
             _saveGamePipeline = new SaveGamePipeline(_saveDataEntity);
-            _saveGame = new SaveGame(_saveGamePipeline);
             _loadGamePipeline = new LoadGamePipeline(_saveDataEntity, _saveDataMigration);
-            _loadGame = new LoadGame(_loadGamePipeline);
+
+            // PlayerPrefの場合
+            //_saveGame = new SaveGame(_saveGamePipeline);
+            // ファイルに保存する場合
+            _saveGame = new SaveGameLocal();
+
+            // PlayerPrefの場合
+            //_loadGame = new LoadGame(_loadGamePipeline);
+            // ファイルに保存する場合
+            _loadGame = new LoadGameLocal();
+
             _saveViewController.Initialize(_saveGame);
             _loadViewController.Initialize(_loadGame);
         }
@@ -25,9 +34,8 @@ namespace Research.SaveSystem
         private LoadViewController _loadViewController;
 
         private SaveDataEntity _saveDataEntity;
-        private SaveLoadEvents _saveLoadEvents;
-        private SaveGame _saveGame;
-        private LoadGame _loadGame;
+        private ISaveService _saveGame;
+        private ILoadService _loadGame;
         private SaveGamePipeline _saveGamePipeline;
         private LoadGamePipeline _loadGamePipeline;
         private SaveDataMigration _saveDataMigration;

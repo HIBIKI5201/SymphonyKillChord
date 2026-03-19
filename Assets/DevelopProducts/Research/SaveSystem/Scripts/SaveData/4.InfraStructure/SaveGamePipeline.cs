@@ -16,23 +16,14 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブ処理を行う。
         /// </summary>
-        /// <param name="data">セーブデータ</param>
-        public void  SaveAsync(KillChordGameData data)
+        /// <param name="newData">セーブデータ</param>
+        public void SaveAsync(KillChordGameData newData)
         {
             if (_isSaving) return;
-            if (data == null) return;
+            if (newData == null) return;
 
-            SaveAsyncTask().Forget();
-            _saveData = _saveDataEntity.SaveData;
-            SetSaveData(data);
-            try
-            {
-                _saveDataEntity.Save();
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"セーブ失敗しました: {e.Message}");
-            }
+            SaveAsyncTask(newData).Forget();
+            
         }
         #endregion
 
@@ -45,13 +36,25 @@ namespace Research.SaveSystem
         ///     セーブ開始イベントを発火し、一定時間後にセーブ終了イベントを発火する。
         /// </summary>
         /// <returns></returns>
-        private async Awaitable SaveAsyncTask()
+        private async Awaitable SaveAsyncTask(KillChordGameData newData)
         {
             _isSaving = true;
-            EventBus<EOnSaveStart>.Raise(new EOnSaveStart());
-            await Awaitable.WaitForSecondsAsync(Constants.SAVE_LOAD_WAIT_DUR);
-            _isSaving = false;
-            EventBus<EOnSaveEnd>.Raise(new EOnSaveEnd());
+            try
+            {
+                EventBus<EOnSaveStart>.Raise(new EOnSaveStart());
+                _saveData = _saveDataEntity.SaveData;
+                SetSaveData(newData); 
+                await _saveDataEntity.Save();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"セーブ失敗しました: {e.Message}");
+            }
+            finally
+            {
+                EventBus<EOnSaveEnd>.Raise(new EOnSaveEnd());
+                _isSaving = false;
+            }
         }
         /// <summary>
         ///     セーブデータの値をSymphonyFrameworkのセーブデータオブジェクトに設定する。

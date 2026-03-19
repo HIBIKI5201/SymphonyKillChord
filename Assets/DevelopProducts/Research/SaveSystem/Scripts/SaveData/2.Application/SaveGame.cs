@@ -4,7 +4,7 @@ namespace Research.SaveSystem
     /// <summary>
     ///     セーフするユースケース。
     /// </summary>
-    public class SaveGame
+    public class SaveGame : ISaveService
     {
         public SaveGame(SaveGamePipeline saveGamePipeline)
         {
@@ -16,7 +16,7 @@ namespace Research.SaveSystem
         /// </summary>
         /// <param name="newData">新データ</param>
         /// <returns></returns>
-        public void SaveGameAsync(KillChordGameData newData)
+        public void Save(KillChordGameData newData)
         {
             _saveGamePipeline.SaveAsync(newData);
         }
