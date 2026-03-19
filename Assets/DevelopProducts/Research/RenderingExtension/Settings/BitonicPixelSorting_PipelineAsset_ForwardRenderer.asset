@@ -67,10 +67,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25fa49196dd004941bf89d96f250a9fa, type: 3}
   m_Name: BitonicPixelSortingFeatureMod
   m_EditorClassIdentifier: DevelopProducts-RenderingExtension::DevelopProducts.RenderingExtension.BitonicPixelSortingFeatureMod
-  m_Active: 1
+  m_Active: 0
   shader: {fileID: 7200000, guid: 950241c127228c44b8fdb4f48baad5f0, type: 3}
-  direction: 1
+  direction: 0
   ascending: 0
   thresholdMin: 0
-  thresholdMax: 0.074
+  thresholdMax: 0
   passEvent: 500
