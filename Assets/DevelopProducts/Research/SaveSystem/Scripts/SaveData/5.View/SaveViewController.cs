@@ -15,12 +15,11 @@ namespace Research.SaveSystem
         /// <param name="saveData"></param>
         /// <param name="saveGame"></param>
         /// <param name="saveLoadEvents"></param>
-        public void Initialize(SaveGame saveGame, SaveLoadEvents saveLoadEvents)
+        public void Initialize(SaveGame saveGame)
         {
             _saveGame = saveGame;
-            _saveLoadEvents = saveLoadEvents;
-            _saveLoadEvents.OnSaveStart += ActivateShelter;
-            _saveLoadEvents.OnSaveEnd += DeactivateShelter;
+            EventBus<EOnSaveStart>.Register(OnSaveStart);
+            EventBus<EOnSaveEnd>.Register(OnSaveEnd);
         }
         /// <summary>
         ///     Saveボタン押下処理。
@@ -33,17 +32,10 @@ namespace Research.SaveSystem
         }
 
         #region ライフサイクル
-        /// <summary>
-        /// Unregisters the component's save-related event handlers from the SaveLoadEvents instance when the Unity object is destroyed.
-        /// </summary>
-        /// <remarks>
-        /// If the _saveLoadEvents reference is null, the method exits without attempting to unsubscribe.
-        /// </remarks>
         private void OnDestroy()
         {
-            if (_saveLoadEvents == null) return;
-            _saveLoadEvents.OnSaveStart -= ActivateShelter;
-            _saveLoadEvents.OnSaveEnd -= DeactivateShelter;
+            EventBus<EOnSaveStart>.Unregister(OnSaveStart);
+            EventBus<EOnSaveEnd>.Unregister(OnSaveEnd);
         }
         #endregion
 
@@ -52,30 +44,18 @@ namespace Research.SaveSystem
         [SerializeField, Tooltip("UI遮蔽物の文字")]
         private Text _shelterText;
         [SerializeField, Tooltip("")]
-        private InputField _inputGold;
-        [SerializeField, Tooltip("")]
-        private InputField _inputHpMax;
-        [SerializeField, Tooltip("")]
-        private InputField _inputAttack;
-        [SerializeField, Tooltip("")]
-        private InputField _inputCritRate;
-        [SerializeField, Tooltip("")]
-        private InputField _inputCritScale;
-        [SerializeField, Tooltip("")]
         private InputField _inputEquipments;
         [SerializeField, Tooltip("")]
         private InputField _inputSkills;
         [SerializeField, Tooltip("")]
-        private InputField _inputMissionProgress;
-        [SerializeField, Tooltip("")]
-        private Toggle[] _chkboxMission;
+        private Toggle[] _chkboxStoryProgress;
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxEquipment;
         [SerializeField, Tooltip("")]
         private Toggle[] _chkboxSkill;
 
         private SaveGame _saveGame;
-        private SaveLoadEvents _saveLoadEvents;
+
         #region プライベートメソッド
         /// <summary>
         ///     画面の入力からセーブデータを設定する。
@@ -84,8 +64,7 @@ namespace Research.SaveSystem
         private void SetSaveData(KillChordGameData newData)
         {
             ReadPlayerStatus(newData);
-            ReadMissionProgress(newData);
-            ReadMissionUnlock(newData);
+            ReadStoryProgress(newData);
             ReadEquipmentUnlock(newData);
             ReadSkillUnlock(newData);
         }
@@ -95,40 +74,24 @@ namespace Research.SaveSystem
         private void ReadPlayerStatus(KillChordGameData newData)
         {
             // デバッグ用処理
-            newData.Gold = long.Parse(_inputGold.text);
-            newData.HpMax = float.Parse(_inputHpMax.text);
-            newData.Attack = float.Parse(_inputAttack.text);
-            newData.CritRate = float.Parse(_inputCritRate.text);
-            newData.CritScale = float.Parse(_inputCritScale.text);
-            newData.Equipments = _inputEquipments.text.Split(',').Select(int.Parse).ToList();
-            newData.Skills = _inputSkills.text.Split(',').Select(int.Parse).ToList();
+            newData.PlayerData.Equipment = _inputEquipments.text.Split(',').Select(int.Parse).ToList();
+            newData.PlayerData.Skill = _inputSkills.text.Split(',').Select(int.Parse).ToList();
         }
-        private void ReadMissionProgress(KillChordGameData newData)
+        private void ReadStoryProgress(KillChordGameData newData)
         {
-            List<int> progress = new List<int>();
-            int[] missionIds = _inputMissionProgress.text.Split(',').Select(int.Parse).ToArray();
-            for (int i = 0; i < missionIds.Length; i++)
+            HashSet<int> progress = new();
+            for (int i = 0; i < _chkboxStoryProgress.Length; i++)
             {
-                progress.Add(missionIds[i]);
-            }
-            newData.MissionProgress = progress;
-        }
-
-        private void ReadMissionUnlock(KillChordGameData newData)
-        {
-            List<int> missions = new List<int>();
-            for (int i = 0; i < _chkboxMission.Length; i++)
-            {
-                if (_chkboxMission[i].isOn)
+                if (_chkboxStoryProgress[i].isOn)
                 {
-                    missions.Add(_chkboxMission[i].GetComponent<MissionData>().Id);
+                    progress.Add(_chkboxStoryProgress[i].GetComponent<StoryProgress>().Id);
                 }
             }
-            newData.MissionUnlock = missions;
+            newData.OutGameData.StoryProgress = progress;
         }
         private void ReadEquipmentUnlock(KillChordGameData newData)
         {
-            List<int> equipments = new List<int>();
+            HashSet<int> equipments = new HashSet<int>();
             for (int i = 0; i < _chkboxEquipment.Length; i++)
             {
                 if (_chkboxEquipment[i].isOn)
@@ -136,11 +99,11 @@ namespace Research.SaveSystem
                     equipments.Add(_chkboxEquipment[i].GetComponent<EquipmentData>().Id);
                 }
             }
-            newData.EquipmentUnlock = equipments;
+            newData.OutGameData.EquipmentUnlock = equipments;
         }
         private void ReadSkillUnlock(KillChordGameData newData)
         {
-            List<int> skills = new List<int>();
+            HashSet<int> skills = new HashSet<int>();
             for (int i = 0; i < _chkboxSkill.Length; i++)
             {
                 if (_chkboxSkill[i].isOn)
@@ -148,15 +111,15 @@ namespace Research.SaveSystem
                     skills.Add(_chkboxSkill[i].GetComponent<SkillData>().Id);
                 }
             }
-            newData.SkillUnlock = skills;
+            newData.OutGameData.SkillUnlock = skills;
         }
-        private void ActivateShelter()
+        private void OnSaveStart(EOnSaveStart eventParam)
         {
             _shelter.SetActive(true);
             _shelterText.text = "Saving...";
         }
 
-        private void DeactivateShelter()
+        private void OnSaveEnd(EOnSaveEnd eventParam)
         {
             _shelter.SetActive(false);
         }
