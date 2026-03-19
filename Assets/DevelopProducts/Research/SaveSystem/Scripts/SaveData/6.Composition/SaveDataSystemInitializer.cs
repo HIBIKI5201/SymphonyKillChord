@@ -10,7 +10,7 @@ namespace Research.SaveSystem
         private void Awake()
         {
             _saveDataEntity = new SaveDataEntity();
-            _saveDataMigration = new SaveDataMigration(GetSaveDataMigrations(), _saveDataEntity.SaveData);
+            _saveDataMigration = new SaveDataMigration(GetSaveDataMigrations());
             _saveGamePipeline = new SaveGamePipeline(_saveDataEntity);
             _loadGamePipeline = new LoadGamePipeline(_saveDataEntity, _saveDataMigration);
 

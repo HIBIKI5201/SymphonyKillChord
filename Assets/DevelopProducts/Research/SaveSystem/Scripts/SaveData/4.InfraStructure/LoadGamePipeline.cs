@@ -41,8 +41,12 @@ namespace Research.SaveSystem
             {
                 EventBus<EOnLoadStart>.Raise(new EOnLoadStart());
                 await _saveDataEntity.Load();
-                _saveDataMigration.DoMigration();
+                _saveDataMigration.DoMigration(_saveDataEntity.SaveData);
                 callback?.Invoke(_saveDataEntity.SaveData);
+            }
+            catch(Exception e)
+            {
+                Debug.LogError(e);
             }
             finally
             {

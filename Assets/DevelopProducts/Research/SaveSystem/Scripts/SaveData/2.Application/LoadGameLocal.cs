@@ -23,6 +23,11 @@ namespace Research.SaveSystem
                 {
                     string json = File.ReadAllText(_savefilePath);
                     data = JsonConvert.DeserializeObject<KillChordGameData>(json);
+                    if(data is null)
+                    {
+                        Debug.Log("セーブデータ読み込みが失敗しました。新しいデータを作成します。");
+                        data = new KillChordGameData();
+                    }
                 }
                 catch (Exception e)
                 {
