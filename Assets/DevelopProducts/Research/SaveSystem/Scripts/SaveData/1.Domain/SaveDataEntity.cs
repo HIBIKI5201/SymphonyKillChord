@@ -1,4 +1,5 @@
 using SymphonyFrameWork.System.SaveSystem;
+using UnityEngine;
 namespace Research.SaveSystem
 {
     /// <summary>
@@ -22,17 +23,17 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブする。
         /// </summary>
-        public void Save()
+        public async Awaitable Save()
         {
-            SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Save();
+            await SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Save();
         }
 
         /// <summary>
         ///     ロードする
         /// </summary>
-        public void Load()
+        public async Awaitable Load()
         {
-            _saveData = SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Get().Result;
+            _saveData = await SaveSystem<KillChordGameData, NugetDataLoader<KillChordGameData>>.Get();
         }
 
         private KillChordGameData _saveData;

@@ -4,7 +4,7 @@ namespace Research.SaveSystem
     /// <summary>
     ///     ロードするユースケース
     /// </summary>
-    public class LoadGame
+    public class LoadGame : ILoadService
     {
         public LoadGame(LoadGamePipeline loadGamePipeline)
         {
@@ -16,7 +16,7 @@ namespace Research.SaveSystem
         ///     セーブデータをロードする。
         /// </summary>
         /// <param name="callback">ロード後行う処理</param>
-        public void LoadGameAsync(Action<KillChordGameData> callback)
+        public void Load(Action<KillChordGameData> callback)
         {
             _loadGamePipeline.LoadGameAsync(callback);
         }
