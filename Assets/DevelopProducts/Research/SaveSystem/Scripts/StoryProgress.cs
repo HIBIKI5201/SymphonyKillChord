@@ -1,8 +1,7 @@
 using UnityEngine;
 namespace Research.SaveSystem
 {
-
-    public class MissionData : MonoBehaviour
+    public class StoryProgress : MonoBehaviour
     {
         public int Id => _id;
 

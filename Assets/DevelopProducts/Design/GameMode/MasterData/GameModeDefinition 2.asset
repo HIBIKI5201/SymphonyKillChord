@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034c3c9626e162142809af4c3eacf3e4, type: 3}
+  m_Name: GameModeDefinition 2
+  m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Design.GameMode.InfraStructure.GameModeDefinition
+  _clearConditions:
+    rid: 5427475651214966889
+  _failConditions:
+    rid: 5427475651214966884
+  _evaluationConditions:
+  - rid: 5427475651214966879
+  - rid: 5427475651214966880
+  references:
+    version: 2
+    RefIds:
+    - rid: 5427475651214966879
+      type: {class: ClearTimeEvaluationCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _clearTimeThreshold: 15
+    - rid: 5427475651214966880
+      type: {class: ClearTimeEvaluationCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _clearTimeThreshold: 25
+    - rid: 5427475651214966884
+      type: {class: OrFailConditionGroup, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _children:
+        - rid: 5427475651214966887
+        - rid: 5427475651214966888
+    - rid: 5427475651214966887
+      type: {class: PlayerDeadFailCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data: 
+    - rid: 5427475651214966888
+      type: {class: ElapsedTimeFailCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _timeLimit: 30
+    - rid: 5427475651214966889
+      type: {class: AndClearConditionGroup, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _children:
+        - rid: 5427475651214966890
+        - rid: 5427475651214966891
+    - rid: 5427475651214966890
+      type: {class: EnemyKillCountClearCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _enemyDefinition: {fileID: 11400000, guid: cf8b3e4572efe2c4a9c49598097b0c3e, type: 2}
+        _requiredCount: 2
+    - rid: 5427475651214966891
+      type: {class: EnemyKillCountClearCondition, ns: DevelopProducts.Design.GameMode.Domain, asm: Assembly-CSharp}
+      data:
+        _enemyDefinition: {fileID: 11400000, guid: d2bcb1f696d54dc41b08862009396b02, type: 2}
+        _requiredCount: 1
