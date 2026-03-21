@@ -21,6 +21,7 @@
     "com.unity.probuilder": "6.0.9",
     "com.unity.project-auditor": "1.0.2",
     "com.unity.render-pipelines.universal": "17.3.0",
+    "com.unity.springbone": "https://github.com/unity3d-jp/UnityChanSpringBone.git",
     "com.unity.test-framework": "1.6.0",
     "com.unity.timeline": "1.8.10",
     "com.unity.ugui": "2.0.0",
@@ -61,5 +62,14 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.cysharp"
+      ]
+    }
+  ]
 }

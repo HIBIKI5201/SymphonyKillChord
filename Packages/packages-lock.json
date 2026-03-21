@@ -479,6 +479,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.springbone": {
+      "version": "https://github.com/unity3d-jp/UnityChanSpringBone.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "9415071549aee47c094657d9ef5af239b96c201f"
+    },
     "com.unity.test-framework": {
       "version": "1.6.0",
       "depth": 0,
