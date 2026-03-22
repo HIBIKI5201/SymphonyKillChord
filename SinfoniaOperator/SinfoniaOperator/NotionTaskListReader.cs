@@ -22,7 +22,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
-            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.DatabaseID);
+            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.TaskDatabaseID);
 
             // 日本時間を取得。
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
@@ -51,13 +51,13 @@ namespace SinfoniaStudio.SinfoniaOperator
                 DateTime startDate = default;
                 DateTime endDate = default;
 
-                if (!ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
+                if (!NotionReader.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
                 {
                     Console.WriteLine($"{pageName}は開始日時がないため、通知しません。");
                     continue; // 開始日時がない場合は、通知しない。
                 }
 
-                if (!ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
+                if (!NotionReader.ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
                 {
                     endDate = startDate; // 終了日時がない場合は、開始日時と同じにする。
                 }
@@ -136,7 +136,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         private async Task AppendPageContentAsync(StringBuilder sb, Page page)
         {
-            string pageContext = await _reader.GetBlockChildrenViaHttpAsync(page.Id);
+            string pageContext = await _reader.GetPageContentAsync(page);
             sb.AppendLine(new string('-', 10));
             sb.AppendLine(pageContext.TrimEnd());
             sb.AppendLine(new string('-', 10));
@@ -148,18 +148,5 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine($"\n{title}: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
             sb.AppendLine($"開始日時: {startDate:yyyy/MM/dd} 終了日時: {endDate:yyyy/MM/dd}");
         }
-
-        private static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
-        {
-            if (utc == null)
-            {
-                jst = default;
-                return false;
-            }
-
-            jst = utc.Value.AddHours(9);
-            return true;
-        }
-
     }
 }

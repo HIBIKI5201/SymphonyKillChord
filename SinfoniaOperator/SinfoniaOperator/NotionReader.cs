@@ -18,11 +18,29 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     タスクの中身を再帰的に文字列にする。
+        ///     ページの中身を再帰的に文字列にする。
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public async Task<string> GetPageContentAsync(Page page)
+        {
+            try
+            {
+                return await GetBlockChildrenAsync(page.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ページ内容の取得中にエラーが発生しました（PageId: {page.Id}）: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        ///     ブロックの中身を再帰的に文字列にする。
         /// </summary>
         /// <param name="blockId"></param>
         /// <returns></returns>
-        public async Task<string> GetBlockChildrenViaHttpAsync(string blockId)
+        public async Task<string> GetBlockChildrenAsync(string blockId)
         {
             StringBuilder sb = new();
             string? startCursor = null;
@@ -71,7 +89,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                                     string? childId = childIdEl.GetString();
                                     if (!string.IsNullOrEmpty(childId))
                                     { 
-                                        sb.AppendLine(await GetBlockChildrenViaHttpAsync(childId)); 
+                                        sb.AppendLine(await GetBlockChildrenAsync(childId)); 
                                     }
                                 }
                             }
@@ -139,19 +157,6 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
         }
 
-        private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
-        private const string BLOCK_TYPE_HEADING_1 = "heading_1";
-        private const string BLOCK_TYPE_HEADING_2 = "heading_2";
-        private const string BLOCK_TYPE_HEADING_3 = "heading_3";
-        private const string BLOCK_TYPE_TO_DO = "to_do";
-        private const string BLOCK_TYPE_BULLETED_LIST_ITEM = "bulleted_list_item";
-        private const string BLOCK_TYPE_NUMBERED_LIST_ITEM = "numbered_list_item";
-        private const string BLOCK_TYPE_QUOTE = "quote";
-        private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
-
-        private readonly string? _notionToken;
-        private const string NOTION_API_VERSION = "2025-09-03";
-
         /// <summary>
         ///     ページからページ名を取得する。
         /// </summary>
@@ -168,6 +173,37 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             return pageName;
         }
+
+        /// <summary>
+        ///     UTCからJSTに変換する。変換できない場合はfalseを返す。
+        /// </summary>
+        /// <param name="utc"></param>
+        /// <param name="jst"></param>
+        /// <returns></returns>
+        public static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
+        {
+            if (utc == null)
+            {
+                jst = default;
+                return false;
+            }
+
+            jst = utc.Value.AddHours(9);
+            return true;
+        }
+
+        private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
+        private const string BLOCK_TYPE_HEADING_1 = "heading_1";
+        private const string BLOCK_TYPE_HEADING_2 = "heading_2";
+        private const string BLOCK_TYPE_HEADING_3 = "heading_3";
+        private const string BLOCK_TYPE_TO_DO = "to_do";
+        private const string BLOCK_TYPE_BULLETED_LIST_ITEM = "bulleted_list_item";
+        private const string BLOCK_TYPE_NUMBERED_LIST_ITEM = "numbered_list_item";
+        private const string BLOCK_TYPE_QUOTE = "quote";
+        private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
+
+        private readonly string? _notionToken;
+        private const string NOTION_API_VERSION = "2025-09-03";
 
         private static void ConvertBlock(StringBuilder sb, string type, JsonElement block)
         {
