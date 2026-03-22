@@ -4,9 +4,10 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\UVToSmoothNormal.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZeroZ.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZOffset.hlsl"
 
 
-float _IsForFace;
+float _ZOffset;
 float _IsSmoothNormal;
 float _OutlineWidth;
 
@@ -34,9 +35,9 @@ v2f vert(appdata v)
     normalOS = GetViewZeroZ_OS(normalOS);
     
     float3 pushedOS = v.positionOS.xyz + normalOS * _OutlineWidth;
+    pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
-    o.pos.z -= _IsForFace ? 0.0005 * o.pos.w : 0;
     return o;
 }
 
