@@ -75,7 +75,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 Console.WriteLine("今日は月曜日なので、スプリントの内容も送信します。");
                 string sprintContent = await reader.GetSprintContent();
-                await discordBot.PushTaskChannelAsync(sprintContent);
+                await discordBot.PushSprintChannelAsync(sprintContent);
             }
         }
     }
