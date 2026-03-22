@@ -181,7 +181,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.addressables": {
-      "version": "2.9.0",
+      "version": "2.9.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -191,13 +191,13 @@
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.imageconversion": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.scriptablebuildpipeline": "2.6.0",
+        "com.unity.scriptablebuildpipeline": "2.6.1",
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.ai.navigation": {
-      "version": "2.0.10",
+      "version": "2.0.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -217,7 +217,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.behavior": {
-      "version": "1.0.13",
+      "version": "1.0.15",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -244,7 +244,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.cinemachine": {
-      "version": "3.1.5",
+      "version": "3.1.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -254,7 +254,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
-      "version": "2.11.3",
+      "version": "2.11.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -334,7 +334,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.26",
+      "version": "2.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -359,7 +359,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.memoryprofiler": {
-      "version": "1.1.11",
+      "version": "1.1.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -394,10 +394,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.postprocessing": {
-      "version": "3.5.1",
+      "version": "3.5.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
+        "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.physics": "1.0.0"
       },
       "url": "https://packages.unity.com"
@@ -464,7 +465,7 @@
       }
     },
     "com.unity.scriptablebuildpipeline": {
-      "version": "2.6.0",
+      "version": "2.6.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -535,7 +536,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.10",
+      "version": "1.8.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -565,7 +566,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.9",
+      "version": "1.9.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
