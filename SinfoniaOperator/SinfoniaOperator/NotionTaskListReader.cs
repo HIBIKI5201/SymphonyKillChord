@@ -25,7 +25,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.TaskDatabaseID);
 
             // 日本時間を取得。
-            DateTime nowTime = DateTime.UtcNow.AddHours(9);
+            DateTime nowTime = DateTimeUtility.JstNow();
             DateTime today = nowTime.Date;
 
             PriorityQueue<StringBuilder, int> outputTaskQueue = new();
