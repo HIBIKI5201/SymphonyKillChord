@@ -30,7 +30,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <summary>
         ///     曜日を取得する。
         /// </summary>
-        public static bool IsDayOfWeek(DayOfWeek dayOfWeek)
+        public static bool IsTodayDayOfWeek(DayOfWeek dayOfWeek)
         {
             DateTime date = DateTime.UtcNow.AddHours(9);
             return date.DayOfWeek == dayOfWeek;

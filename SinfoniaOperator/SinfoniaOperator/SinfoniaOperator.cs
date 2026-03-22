@@ -44,25 +44,36 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(notionEnv);
+            NotionSprintListReader sprintReader = new(notionEnv);
             DiscordBotManager discordBot = new(discordEnv);
 
             // タスク取得を開始。
-            Task<string> getTaskList = taskReader.GetTaskContent();
-            Task discordAwake = discordBot.Awake();
+            Task taskListTask = PushTaskList(taskReader, discordBot);
+            Task sprintTask = PushSprint(sprintReader, discordBot);
+            await Task.WhenAll(taskListTask, sprintTask);
+        }
 
-            await Task.WhenAll(getTaskList, discordAwake);
-
-            string content = getTaskList.Result;
-            if (!string.IsNullOrEmpty(content))
+        private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
+        {
+            string taskContent = await reader.GetTaskContent();
+            if (string.IsNullOrEmpty(taskContent))
             {
-                await discordBot.PushTaskChannelAsync(content);
+                Console.WriteLine("送信するタスクがありません。");
+                return;
             }
-            else
+            await discordBot.PushTaskChannelAsync(taskContent);
+        }
+
+        private static async Task PushSprint(NotionSprintListReader reader, DiscordBotManager discordBot)
+        {
+            await discordBot.AwakeTask;
+
+            if (DateTimeUtility.IsTodayDayOfWeek(DayOfWeek.Monday))
             {
-                Console.WriteLine("タスクの内容が空なのでスキップ。");
+                Console.WriteLine("今日は月曜日なので、スプリントの内容も送信します。");
+                string sprintContent = await reader.GetSprintContent();
+                await discordBot.PushTaskChannelAsync(sprintContent);
             }
-
-
         }
     }
 }

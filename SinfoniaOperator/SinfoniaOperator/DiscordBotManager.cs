@@ -17,6 +17,8 @@ namespace SinfoniaStudio.SinfoniaOperator
             _client = new DiscordSocketClient(config);
         }
 
+        public Task AwakeTask => _readyTcs.Task;
+
         public async Task Awake()
         {
             _client.Ready += () =>
