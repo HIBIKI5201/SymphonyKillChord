@@ -11,11 +11,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         public NotionTaskListReader(NotionEnvironment env)
         {
             _reader = new NotionReader(env.NotionToken);
-            _databaseID = env.DatabaseID;
-            _datePropertyName = env.DatePropertyName;
-            _namePropertyName = env.NamePropertyName;
-            _statusPropertyName = env.StatusPropertyName;
-            _taskStatusDoneName = env.TaskDoneStatusName;
+            _env = env;
         }
 
         /// <summary>
@@ -26,7 +22,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
-            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_databaseID);
+            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.DatabaseID);
 
             // 日本時間を取得。
             DateTime nowTime = DateTime.UtcNow.AddHours(9);
@@ -41,17 +37,17 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (item is not Page page) { continue; }
 
                 // 日付プロパティを取得できる場合。
-                if (!page.Properties.TryGetValue(_datePropertyName, out PropertyValue? datePropertyValue) ||
+                if (!page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue) ||
                     datePropertyValue is not DatePropertyValue dateProperty) { continue; }
                 // ステータスプロパティを取得できる場合。
-                if (!page.Properties.TryGetValue(_statusPropertyName, out PropertyValue? statusPropertyValue) ||
+                if (!page.Properties.TryGetValue(_env.StatusPropertyName, out PropertyValue? statusPropertyValue) ||
                         statusPropertyValue is not StatusPropertyValue statusProperty) { continue; }
 
                 // ステータスが完了済みなら終了。
-                if (statusProperty.Status.Name == _taskStatusDoneName) { continue; }
+                if (statusProperty.Status.Name == _env.TaskDoneStatusName) { continue; }
 
                 // ページ名を取得。
-                string pageName = NotionReader.GetPageName(page, _namePropertyName);
+                string pageName = NotionReader.GetPageName(page, _env.NamePropertyName);
                 DateTime startDate = default;
                 DateTime endDate = default;
 
@@ -130,11 +126,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         private readonly NotionReader _reader;
-        private readonly string _databaseID;
-        private readonly string _datePropertyName;
-        private readonly string _namePropertyName;
-        private readonly string _statusPropertyName;
-        private readonly string _taskStatusDoneName;
+        private readonly NotionEnvironment _env;
 
         /// <summary>
         ///     タスクのデータを取得する。
