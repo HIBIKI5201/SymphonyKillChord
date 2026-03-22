@@ -27,6 +27,50 @@
       },
       "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
     },
+    "com.cysharp.observablecollections": {
+      "version": "1.1.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.r3": {
+      "version": "1.3.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.imgui": "1.0.0"
+      },
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.unitask": {
+      "version": "2.5.10",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.zlinq": {
+      "version": "1.5.5",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.zstring": {
+      "version": "2.6.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.github-glitchenzo.nugetforunity": {
+      "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c2af83c9d4f8cdaada9d4a0e94de2f195d8e1d01"
+    },
     "com.ruccho.bitonicpixelsorter": {
       "version": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter#release",
       "depth": 0,
@@ -478,6 +522,13 @@
         "com.unity.settings-manager": "1.0.3"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.unity.springbone": {
+      "version": "https://github.com/unity3d-jp/UnityChanSpringBone.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "9415071549aee47c094657d9ef5af239b96c201f"
     },
     "com.unity.test-framework": {
       "version": "1.6.0",
