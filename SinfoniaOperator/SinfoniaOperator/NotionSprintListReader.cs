@@ -18,7 +18,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
-                List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.TaskDatabaseID);
+                List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.SprintDatabaseID);
 
                 // 日本時間を取得。
                 DateTime nowTime = DateTime.UtcNow.AddHours(9);

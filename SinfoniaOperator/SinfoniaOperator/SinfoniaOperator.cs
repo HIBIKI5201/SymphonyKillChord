@@ -9,6 +9,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
+        private const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
         private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
         private const string NOTION_DATABASE_NAME_PROPERTY = "NOTION_DATABASE_NAME_PROPERTY";
         private const string NOTION_DATABASE_STATUS_PROPERTY = "NOTION_DATABASE_STATUS_PROPERTY";
