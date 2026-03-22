@@ -55,7 +55,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             StringBuilder sb = new();
             sb.AppendLine($"NotionToken: {(string.IsNullOrEmpty(NotionToken) ? "null or empty" : "set")}");
-            sb.AppendLine($"DatabaseID: {TaskDatabaseID}");
+            sb.AppendLine($"TaskDatabaseID: {TaskDatabaseID}");
             sb.AppendLine($"SprintDatabaseID: {SprintDatabaseID}");
             sb.AppendLine($"DatePropertyName: {DatePropertyName}");
             sb.AppendLine($"NamePropertyName: {NamePropertyName}");

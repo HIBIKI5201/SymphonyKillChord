@@ -35,7 +35,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             StringBuilder sb = new();
             sb.AppendLine($"DiscordBotToken: {(string.IsNullOrEmpty(DiscordBotToken) ? "null or empty" : "set")}, ");
-            sb.AppendLine($"DiscordChannelID: {DiscordTaskChannelID}");
+            sb.AppendLine($"DiscordTaskChannelID: {DiscordTaskChannelID}");
             sb.AppendLine($"DiscordSprintChannelID: {DiscordSprintChannelID}");
             return sb.ToString();
         }
