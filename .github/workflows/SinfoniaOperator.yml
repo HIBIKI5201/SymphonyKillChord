@@ -31,6 +31,7 @@ jobs:
         env: # 使用する環境変数を呼び出す。
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_TASK_CHANNEL_ID: ${{ vars.DISCORD_TASK_CHANNEL_ID }}
+          DISCORD_SPRINT_CHANNEL_ID: ${{ vars.DISCORD_SPRINT_CHANNEL_ID }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_TASK_DATABASE_ID: ${{ vars.NOTION_TASK_DATABASE_ID }}
           NOTION_SPRINT_DATABASE_ID : ${{ vars.NOTION_SPRINT_DATABASE_ID }}
