@@ -11,11 +11,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         public NotionTaskListReader(NotionEnvironment env)
         {
             _reader = new NotionReader(env.NotionToken);
-            _databaseID = env.DatabaseID;
-            _datePropertyName = env.DatePropertyName;
-            _namePropertyName = env.NamePropertyName;
-            _statusPropertyName = env.StatusPropertyName;
-            _taskStatusDoneName = env.TaskDoneStatusName;
+            _env = env;
         }
 
         /// <summary>
@@ -26,10 +22,10 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
-            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_databaseID);
+            List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.TaskDatabaseID);
 
             // 日本時間を取得。
-            DateTime nowTime = DateTime.UtcNow.AddHours(9);
+            DateTime nowTime = DateTimeUtility.JstNow();
             DateTime today = nowTime.Date;
 
             PriorityQueue<StringBuilder, int> outputTaskQueue = new();
@@ -41,27 +37,27 @@ namespace SinfoniaStudio.SinfoniaOperator
                 if (item is not Page page) { continue; }
 
                 // 日付プロパティを取得できる場合。
-                if (!page.Properties.TryGetValue(_datePropertyName, out PropertyValue? datePropertyValue) ||
+                if (!page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue) ||
                     datePropertyValue is not DatePropertyValue dateProperty) { continue; }
                 // ステータスプロパティを取得できる場合。
-                if (!page.Properties.TryGetValue(_statusPropertyName, out PropertyValue? statusPropertyValue) ||
+                if (!page.Properties.TryGetValue(_env.StatusPropertyName, out PropertyValue? statusPropertyValue) ||
                         statusPropertyValue is not StatusPropertyValue statusProperty) { continue; }
 
                 // ステータスが完了済みなら終了。
-                if (statusProperty.Status.Name == _taskStatusDoneName) { continue; }
+                if (statusProperty.Status.Name == _env.TaskDoneStatusName) { continue; }
 
                 // ページ名を取得。
-                string pageName = NotionReader.GetPageName(page, _namePropertyName);
+                string pageName = NotionReader.GetPageName(page, _env.NamePropertyName);
                 DateTime startDate = default;
                 DateTime endDate = default;
 
-                if (!ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
+                if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
                 {
                     Console.WriteLine($"{pageName}は開始日時がないため、通知しません。");
                     continue; // 開始日時がない場合は、通知しない。
                 }
 
-                if (!ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
+                if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
                 {
                     endDate = startDate; // 終了日時がない場合は、開始日時と同じにする。
                 }
@@ -130,11 +126,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         private readonly NotionReader _reader;
-        private readonly string _databaseID;
-        private readonly string _datePropertyName;
-        private readonly string _namePropertyName;
-        private readonly string _statusPropertyName;
-        private readonly string _taskStatusDoneName;
+        private readonly NotionEnvironment _env;
 
         /// <summary>
         ///     タスクのデータを取得する。
@@ -144,7 +136,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         private async Task AppendPageContentAsync(StringBuilder sb, Page page)
         {
-            string pageContext = await _reader.GetBlockChildrenViaHttpAsync(page.Id);
+            string pageContext = await _reader.GetPageContentAsync(page);
             sb.AppendLine(new string('-', 10));
             sb.AppendLine(pageContext.TrimEnd());
             sb.AppendLine(new string('-', 10));
@@ -156,18 +148,5 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine($"\n{title}: {pageName}\n[URL]({page.PublicUrl}) [編集]({page.Url})");
             sb.AppendLine($"開始日時: {startDate:yyyy/MM/dd} 終了日時: {endDate:yyyy/MM/dd}");
         }
-
-        private static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
-        {
-            if (utc == null)
-            {
-                jst = default;
-                return false;
-            }
-
-            jst = utc.Value.AddHours(9);
-            return true;
-        }
-
     }
 }

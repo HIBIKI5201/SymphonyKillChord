@@ -9,15 +9,15 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         public DiscordBotManager(DiscordEnvironment env)
         {
-            _botToken = env.DiscordBotToken;
-            _channelID = env.DiscordChannelID;
-
+            _env = env;
             var config = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
             };
             _client = new DiscordSocketClient(config);
         }
+
+        public Task AwakeTask => _readyTcs.Task;
 
         public async Task Awake()
         {
@@ -29,7 +29,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             try
             {
-                await _client.LoginAsync(TokenType.Bot, _botToken);
+                await _client.LoginAsync(TokenType.Bot, _env.DiscordBotToken);
                 await _client.StartAsync();
             }
             catch (Exception ex)
@@ -42,28 +42,56 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     タスクリストの文字列をDiscordに出力します。
+        ///     タスクチャンネルに文字列をDiscordに出力します。
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
-        public async Task PushTaskListAsync(string content)
+        public async Task PushTaskChannelAsync(string content)
         {
             await _readyTcs.Task;
 
-            if (_client.GetChannel(_channelID) is not IMessageChannel channel)
+            ulong channelID = _env.DiscordTaskChannelID;
+            await PushContextAsync(channelID, content);
+            Console.WriteLine($" タスクチャンネルに文字を送信しました。");
+        }
+
+        /// <summary>
+        ///     スプリントチャンネルに文字列をDiscordに出力します。
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task PushSprintChannelAsync(string content)
+        {
+            await _readyTcs.Task;
+
+            ulong channelID = _env.DiscordSprintChannelID;
+            await PushContextAsync(channelID, content);
+            Console.WriteLine($" スプリントチャンネルに文字を送信しました。");
+        }
+
+
+        private readonly DiscordEnvironment _env;
+        private readonly DiscordSocketClient _client;
+        private readonly TaskCompletionSource<Void> _readyTcs = new();
+
+        /// <summary>
+        ///     入力されたチャンネルに文字を送信します。
+        /// </summary>
+        /// <param name="channelID"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        private async Task PushContextAsync(ulong channelID, string content)
+        {
+            await _readyTcs.Task;
+
+            if (_client.GetChannel(channelID) is not IMessageChannel channel)
             {
-                Console.WriteLine($"id:{_channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
+                Console.WriteLine($"id:{channelID} のチャンネルがメッセージチャンネルにキャストできませんでした");
                 return;
             }
 
             await channel.SendMessageAsync(content);
-            Console.WriteLine("メッセージ送信完了");
         }
-
-        private readonly string _botToken;
-        private readonly ulong _channelID;
-        private readonly DiscordSocketClient _client;
-        private readonly TaskCompletionSource<Void> _readyTcs = new();
 
         private struct Void { }
     }
