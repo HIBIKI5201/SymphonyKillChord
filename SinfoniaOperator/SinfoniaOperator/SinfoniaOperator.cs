@@ -50,6 +50,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             DiscordBotManager discordBot = new(discordEnv);
 
             // タスク取得を開始。
+            await discordBot.Awake();
             Task taskListTask = PushTaskList(taskReader, discordBot);
             Task sprintTask = PushSprint(sprintReader, discordBot);
             await Task.WhenAll(taskListTask, sprintTask);
