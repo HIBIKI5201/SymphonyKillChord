@@ -174,24 +174,6 @@ namespace SinfoniaStudio.SinfoniaOperator
             return pageName;
         }
 
-        /// <summary>
-        ///     UTCからJSTに変換する。変換できない場合はfalseを返す。
-        /// </summary>
-        /// <param name="utc"></param>
-        /// <param name="jst"></param>
-        /// <returns></returns>
-        public static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
-        {
-            if (utc == null)
-            {
-                jst = default;
-                return false;
-            }
-
-            jst = utc.Value.AddHours(9);
-            return true;
-        }
-
         private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
         private const string BLOCK_TYPE_HEADING_1 = "heading_1";
         private const string BLOCK_TYPE_HEADING_2 = "heading_2";

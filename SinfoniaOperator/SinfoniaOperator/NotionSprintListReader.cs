@@ -41,13 +41,13 @@ namespace SinfoniaStudio.SinfoniaOperator
                     DateTime startDate = default;
                     DateTime endDate = default;
 
-                    if (!NotionReader.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
+                    if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
                     {
                         Console.WriteLine($"{pageName}は開始日時がないため、通知しません。");
                         continue; // 開始日時がない場合は、通知しない。
                     }
 
-                    if (!NotionReader.ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
+                    if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
                     {
                         Console.WriteLine($"{pageName}は終了日時がないため、通知しません。");
                         continue; // 終了日時がない場合は、通知しない。
