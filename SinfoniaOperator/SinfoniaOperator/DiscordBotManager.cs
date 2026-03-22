@@ -42,7 +42,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     タスクリストの文字列をDiscordに出力します。
+        ///     タスクチャンネルに文字列をDiscordに出力します。
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
@@ -54,6 +54,21 @@ namespace SinfoniaStudio.SinfoniaOperator
             await PushContextAsync(channelID, content);
             Console.WriteLine($" タスクチャンネルに文字を送信しました。");
         }
+
+        /// <summary>
+        ///     スプリントチャンネルに文字列をDiscordに出力します。
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task PushSprintChannelAsync(string content)
+        {
+            await _readyTcs.Task;
+
+            ulong channelID = _env.DiscordSprintChannelID;
+            await PushContextAsync(channelID, content);
+            Console.WriteLine($" スプリントチャンネルに文字を送信しました。");
+        }
+
 
         private readonly DiscordEnvironment _env;
         private readonly DiscordSocketClient _client;

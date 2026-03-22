@@ -7,6 +7,7 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
         private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
+        private const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
         private const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
@@ -23,7 +24,8 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 discordEnv = new DiscordEnvironment(
                     DISCORD_BOT_TOKEN,
-                    DISCORD_TASK_CHANNEL_ID);
+                    DISCORD_TASK_CHANNEL_ID,
+                    DISCORD_SPRINT_CHANNEL_ID);
                 notionEnv = new NotionEnvironment(
                     NOTION_TOKEN,
                     NOTION_TASK_DATABASE_ID,
