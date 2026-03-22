@@ -2,18 +2,23 @@
 #define OUTLINE_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\UVToSmoothNormal.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZeroZ.hlsl"
 
 
 float _IsForFace;
+float _IsSmoothNormal;
+float _OutlineWidth;
 
 float4 _OutlineColor = float4(0, 0, 0, 1);
 
 struct appdata
 {
-    float4 vertex : POSITION;
-    float3 normal : NORMAL;
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 uv3 : TEXCOORD3;//SmoothNormal
 };
-
 struct v2f
 {
     float4 pos : SV_POSITION;
@@ -22,8 +27,15 @@ struct v2f
 v2f vert(appdata v)
 {
     v2f o;
-    float3 pushed = v.vertex.xyz + v.normal * 0.1;
-    o.pos = TransformObjectToHClip(float4(pushed, 1.0));
+    
+    float3 smoothNormalOS = GetSmoothNormalFromUV(v.uv3, v.normalOS, v.tangentOS);
+    
+    float3 normalOS = _IsSmoothNormal ? smoothNormalOS : v.normalOS;
+    normalOS = GetViewZeroZ_OS(normalOS);
+    
+    float3 pushedOS = v.positionOS.xyz + normalOS * _OutlineWidth;
+    
+    o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
     o.pos.z -= _IsForFace ? 0.0005 * o.pos.w : 0;
     return o;
 }
