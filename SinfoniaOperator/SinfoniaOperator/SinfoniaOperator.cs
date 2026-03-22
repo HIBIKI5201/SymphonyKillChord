@@ -6,7 +6,7 @@ namespace SinfoniaStudio.SinfoniaOperator
     internal static class SinfoniaOperator
     {
         private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
-        private const string DISCORD_CHANNEL_ID = "DISCORD_CHANNEL_ID";
+        private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_DATABASE_ID = "NOTION_DATABASE_ID";
         private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
@@ -22,7 +22,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 discordEnv = new DiscordEnvironment(
                     DISCORD_BOT_TOKEN,
-                    DISCORD_CHANNEL_ID);
+                    DISCORD_TASK_CHANNEL_ID);
                 notionEnv = new NotionEnvironment(
                     NOTION_TOKEN,
                     NOTION_DATABASE_ID,
@@ -44,20 +44,23 @@ namespace SinfoniaStudio.SinfoniaOperator
             NotionTaskListReader taskReader = new(notionEnv);
             DiscordBotManager discordBot = new(discordEnv);
 
-            // タスクを開始。
+            // タスク取得を開始。
             Task<string> getTaskList = taskReader.GetTaskContent();
             Task discordAwake = discordBot.Awake();
 
             await Task.WhenAll(getTaskList, discordAwake);
 
             string content = getTaskList.Result;
-            if (string.IsNullOrEmpty(content))
+            if (!string.IsNullOrEmpty(content))
             {
-                Console.WriteLine("タスクリストのコンテンツに何もないため終了");
-                return;
+                await discordBot.PushTaskChannelAsync(content);
+            }
+            else
+            {
+                Console.WriteLine("タスクの内容が空なのでスキップ。");
             }
 
-            await discordBot.PushTaskListAsync(content);
+
         }
     }
 }

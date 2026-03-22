@@ -7,30 +7,30 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         public DiscordEnvironment(
             string discordBotTokenKey,
-            string discordChannelIDKey)
+            string discordTaskChannelIDKey)
         {
             EnvironmentVariable discordBotToken = new(discordBotTokenKey);
-            EnvironmentVariable discordChannelID = new(discordChannelIDKey);
+            EnvironmentVariable discordTaskChannelID = new(discordTaskChannelIDKey);
 
             if (EnvironmentValidator.Validate([
                 discordBotToken,
-                discordChannelID]))
+                discordTaskChannelID]))
             {
                 throw new ArgumentException("必要な環境変数が見つかりませんでした。");
             }
 
             DiscordBotToken = discordBotToken;
-            DiscordChannelID = discordChannelID;
+            DiscordTaskChannelID = discordTaskChannelID;
         }
 
         public readonly string DiscordBotToken;
-        public readonly ulong DiscordChannelID;
+        public readonly ulong DiscordTaskChannelID;
 
         public override string ToString()
         {
             StringBuilder sb = new();
             sb.AppendLine($"DiscordBotToken: {(string.IsNullOrEmpty(DiscordBotToken) ? "null or empty" : "set")}, ");
-            sb.AppendLine($"DiscordChannelID: {DiscordChannelID}");
+            sb.AppendLine($"DiscordChannelID: {DiscordTaskChannelID}");
             return sb.ToString();
         }
     }
