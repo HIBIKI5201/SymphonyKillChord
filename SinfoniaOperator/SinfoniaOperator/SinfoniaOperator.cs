@@ -6,9 +6,11 @@ namespace SinfoniaStudio.SinfoniaOperator
     internal static class SinfoniaOperator
     {
         private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
-        private const string DISCORD_CHANNEL_ID = "DISCORD_CHANNEL_ID";
+        private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
+        private const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
-        private const string NOTION_DATABASE_ID = "NOTION_DATABASE_ID";
+        private const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
+        private const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
         private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
         private const string NOTION_DATABASE_NAME_PROPERTY = "NOTION_DATABASE_NAME_PROPERTY";
         private const string NOTION_DATABASE_STATUS_PROPERTY = "NOTION_DATABASE_STATUS_PROPERTY";
@@ -22,10 +24,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 discordEnv = new DiscordEnvironment(
                     DISCORD_BOT_TOKEN,
-                    DISCORD_CHANNEL_ID);
+                    DISCORD_TASK_CHANNEL_ID,
+                    DISCORD_SPRINT_CHANNEL_ID);
                 notionEnv = new NotionEnvironment(
                     NOTION_TOKEN,
-                    NOTION_DATABASE_ID,
+                    NOTION_TASK_DATABASE_ID,
+                    NOTION_SPRINT_DATABASE_ID,
                     NOTION_DATABASE_DATE_PROPERTY,
                     NOTION_DATABASE_NAME_PROPERTY,
                     NOTION_DATABASE_STATUS_PROPERTY,
@@ -42,22 +46,37 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(notionEnv);
+            NotionSprintListReader sprintReader = new(notionEnv);
             DiscordBotManager discordBot = new(discordEnv);
 
-            // タスクを開始。
-            Task<string> getTaskList = taskReader.GetTaskContent();
-            Task discordAwake = discordBot.Awake();
+            // タスク取得を開始。
+            await discordBot.Awake();
+            Task taskListTask = PushTaskList(taskReader, discordBot);
+            Task sprintTask = PushSprint(sprintReader, discordBot);
+            await Task.WhenAll(taskListTask, sprintTask);
+        }
 
-            await Task.WhenAll(getTaskList, discordAwake);
-
-            string content = getTaskList.Result;
-            if (string.IsNullOrEmpty(content))
+        private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
+        {
+            string taskContent = await reader.GetTaskContent();
+            if (string.IsNullOrEmpty(taskContent))
             {
-                Console.WriteLine("タスクリストのコンテンツに何もないため終了");
+                Console.WriteLine("送信するタスクがありません。");
                 return;
             }
+            await discordBot.PushTaskChannelAsync(taskContent);
+        }
 
-            await discordBot.PushTaskListAsync(content);
+        private static async Task PushSprint(NotionSprintListReader reader, DiscordBotManager discordBot)
+        {
+            await discordBot.AwakeTask;
+
+            if (DateTimeUtility.IsTodayDayOfWeek(DayOfWeek.Monday))
+            {
+                Console.WriteLine("今日は月曜日なので、スプリントの内容も送信します。");
+                string sprintContent = await reader.GetSprintContent();
+                await discordBot.PushSprintChannelAsync(sprintContent);
+            }
         }
     }
 }

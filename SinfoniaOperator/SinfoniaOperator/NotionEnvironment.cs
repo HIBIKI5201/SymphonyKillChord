@@ -7,14 +7,16 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         public NotionEnvironment(
             string notionTokenKey,
-            string databaseIDKey,
+            string taskDatabaseIDKey,
+            string sprintDatabaseIDKey,
             string datePropertyNameKey,
             string namePropertyNameKey,
             string statusPropertyNameKey,
             string taskDoneStatusNameKey)
         {
             EnvironmentVariable notionToken = new(notionTokenKey);
-            EnvironmentVariable databaseID = new(databaseIDKey);
+            EnvironmentVariable taskDatabaseID = new(taskDatabaseIDKey);
+            EnvironmentVariable sprintDatabaseID = new(sprintDatabaseIDKey);
             EnvironmentVariable datePropertyName = new(datePropertyNameKey);
             EnvironmentVariable namePropertyName = new(namePropertyNameKey);
             EnvironmentVariable statusPropertyName = new(statusPropertyNameKey);
@@ -22,7 +24,8 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             if (EnvironmentValidator.Validate([
                 notionToken,
-                databaseID,
+                taskDatabaseID,
+                sprintDatabaseID,
                 datePropertyName,
                 namePropertyName,
                 statusPropertyName,
@@ -32,7 +35,8 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             NotionToken = notionToken;
-            DatabaseID = databaseID;
+            TaskDatabaseID = taskDatabaseID;
+            SprintDatabaseID = sprintDatabaseID;
             DatePropertyName = datePropertyName;
             NamePropertyName = namePropertyName;
             StatusPropertyName = statusPropertyName;
@@ -40,7 +44,8 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         public readonly string NotionToken;
-        public readonly string DatabaseID;
+        public readonly string TaskDatabaseID;
+        public readonly string SprintDatabaseID;
         public readonly string DatePropertyName;
         public readonly string NamePropertyName;
         public readonly string StatusPropertyName;
@@ -50,7 +55,8 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             StringBuilder sb = new();
             sb.AppendLine($"NotionToken: {(string.IsNullOrEmpty(NotionToken) ? "null or empty" : "set")}");
-            sb.AppendLine($"DatabaseID: {DatabaseID}");
+            sb.AppendLine($"TaskDatabaseID: {TaskDatabaseID}");
+            sb.AppendLine($"SprintDatabaseID: {SprintDatabaseID}");
             sb.AppendLine($"DatePropertyName: {DatePropertyName}");
             sb.AppendLine($"NamePropertyName: {NamePropertyName}");
             sb.AppendLine($"StatusPropertyName: {StatusPropertyName}");
