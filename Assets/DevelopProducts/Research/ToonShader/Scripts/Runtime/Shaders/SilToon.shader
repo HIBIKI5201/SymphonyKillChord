@@ -58,6 +58,22 @@ Shader "Custom/SilToon"
             ENDHLSL
         }
 
+        Pass {
+            Name "ShadowCaster"
+            Tags { "LightMode"="ShadowCaster" }
 
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0  // カラーは書き込まない（デプスだけでOK）
+
+            HLSLPROGRAM
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShadowCasterPass.hlsl"
+
+            ENDHLSL
+        }
     }
 }
