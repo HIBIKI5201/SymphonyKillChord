@@ -18,6 +18,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
         public static async Task Main()
         {
+            Console.WriteLine("[Main] SinfoniaOperator 起動中...");
             DiscordEnvironment discordEnv = default;
             NotionEnvironment notionEnv = default;
             try
@@ -37,12 +38,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine($"[Main] 環境変数の読み込み中にエラーが発生しました: {ex.Message}");
                 return;
             }
-            Console.WriteLine("環境変数のチェックが完了しました。\n" +
-                $"discord env {discordEnv}\n" +
-                $"notion env {notionEnv}");
+
+            Console.WriteLine("[Main] 環境変数のチェックが完了しました。");
+            Console.WriteLine($"[Main] Notion設定 - 日付プロパティ名: '{notionEnv.DatePropertyName}', 名前プロパティ名: '{notionEnv.NamePropertyName}'");
 
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(notionEnv);
@@ -50,20 +51,28 @@ namespace SinfoniaStudio.SinfoniaOperator
             DiscordBotManager discordBot = new(discordEnv);
 
             // タスク取得を開始。
+            Console.WriteLine("[Main] Discordボットの初期化を開始します...");
             await discordBot.Awake();
+
+            Console.WriteLine("[Main] 各リーダーによる情報の取得を開始します...");
             Task taskListTask = PushTaskList(taskReader, discordBot);
             Task sprintTask = PushSprint(sprintReader, discordBot);
+            
             await Task.WhenAll(taskListTask, sprintTask);
+            Console.WriteLine("[Main] 全ての処理が完了しました。");
         }
 
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
         {
+            Console.WriteLine("[PushTaskList] タスクリストの取得を開始します...");
             string taskContent = await reader.GetTaskContent();
             if (string.IsNullOrEmpty(taskContent))
             {
-                Console.WriteLine("送信するタスクがありません。");
+                Console.WriteLine("[PushTaskList] 送信するタスクがありませんでした。");
                 return;
             }
+
+            return; // デバッグのため、一時的に衆力を行わない。
             await discordBot.PushTaskChannelAsync(taskContent);
         }
 
@@ -71,11 +80,22 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             await discordBot.AwakeTask;
 
-            if (DateTimeUtility.IsTodayDayOfWeek(DayOfWeek.Monday))
+            DayOfWeek targetDay = DayOfWeek.Monday;
+            if (DateTimeUtility.IsTodayDayOfWeek(targetDay))
             {
-                Console.WriteLine("今日は月曜日なので、スプリントの内容も送信します。");
+                Console.WriteLine($"[PushSprint] 今日は {targetDay} なので、スプリントの内容も取得します。");
                 string sprintContent = await reader.GetSprintContent();
+                if (string.IsNullOrEmpty(sprintContent))
+                {
+                    Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
+                    return;
+                }
+                return; // デバッグのため、一時的に衆力を行わない。
                 await discordBot.PushSprintChannelAsync(sprintContent);
+            }
+            else
+            {
+                Console.WriteLine($"[PushSprint] 今日は {targetDay} ではないため、スプリントの処理をスキップします。 (今日は {DateTimeUtility.JstNow().DayOfWeek})");
             }
         }
     }
