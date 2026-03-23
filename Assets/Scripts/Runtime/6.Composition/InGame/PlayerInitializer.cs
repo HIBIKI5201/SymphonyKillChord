@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Composition
 {
     public sealed class PlayerInitializer : MonoBehaviour
     {
-        [SerializeField] private Player _player;
+        [SerializeField] private PlayerView _player;
         private void Awake()
         {
             PlayerMovement playerMovement = new(new MoveSpeed(10), new MoveSpeed(10), 0.3f);
