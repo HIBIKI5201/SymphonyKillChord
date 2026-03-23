@@ -31,11 +31,15 @@ float BackRimFresnel(float3 normalWS, float3 viewDirWS)
     pow(saturate(-dot(lightDirWS, normalWS) + 0.4), 20);
 }
 
-float GetFresnel(float3 normalWS, float3 viewDirWS)
-{
-    float backLight = 8 * BackLight(normalWS, viewDirWS);
-    float rimLightFront = 4 * FrontRimFresnel(normalWS, viewDirWS);
-    float rimLightBack = 0.5 * BackRimFresnel(normalWS, viewDirWS);
-    return backLight + rimLightBack + rimLightFront;
+void GetFresnel(
+float3 normalWS,
+float3 viewDirWS,
+out float backLight,
+out float rimLightFront,
+out float rimLightBack)
+{   
+    backLight = BackLight(normalWS, viewDirWS);
+    rimLightFront = FrontRimFresnel(normalWS, viewDirWS);
+    rimLightBack = BackRimFresnel(normalWS, viewDirWS);
 }
 #endif

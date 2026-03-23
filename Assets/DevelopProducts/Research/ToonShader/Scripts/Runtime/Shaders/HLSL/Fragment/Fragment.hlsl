@@ -28,6 +28,10 @@ half4 _ColorLit;
 half4 _ColorMiddle;
 half4 _ColorShadow;
 
+float _FresnelBackLight;
+float _FresnelFrontRimLight;
+float _FresnelBackRimLight;
+
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
@@ -45,7 +49,12 @@ half4 frag(Varyings IN) : SV_Target
     
     float3 color;
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
-    color += GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS));
+    
+    float backLight, rimLightFront, rimLightBack;
+    GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
+    color += backLight * _FresnelBackLight;
+    color += rimLightBack * _FresnelBackRimLight;
+    color += rimLightFront * _FresnelFrontRimLight;
     return (half4) (float4(color, 1.0));
 }
 #endif
