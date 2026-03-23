@@ -12,7 +12,7 @@ namespace Research.SaveSystem
         public SaveService(ISaveRepository<TSaveType, TDtoType> saveRepo, ISaveDataValidator<TDtoType> validator)
         {
             _saveRepo = saveRepo;
-            _saveDataValidatior = validator;
+            _saveDataValidator = validator;
             _isSaving = false;
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace Research.SaveSystem
 
         private bool _isSaving;
         private ISaveRepository<TSaveType, TDtoType> _saveRepo;
-        private ISaveDataValidator<TDtoType> _saveDataValidatior;
+        private ISaveDataValidator<TDtoType> _saveDataValidator;
 
         private async Awaitable SaveTask(TDtoType dto)
         {
@@ -37,7 +37,7 @@ namespace Research.SaveSystem
             try
             {
                 // 検証を行う
-                ValidationResult validationResult = _saveDataValidatior.Validate(dto);
+                ValidationResult validationResult = _saveDataValidator.Validate(dto);
                 if (validationResult.Result)
                 {
                     // 検証OKの場合、セーブを行う

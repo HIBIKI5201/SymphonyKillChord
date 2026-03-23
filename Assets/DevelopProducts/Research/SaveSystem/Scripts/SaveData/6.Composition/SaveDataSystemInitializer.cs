@@ -28,7 +28,7 @@ namespace Research.SaveSystem
             _savePlayerDataController = new SavePlayerDataController(_savePlayerDataService);
             _saveOutGameDataController = new SaveOutGameDataController(_saveOutGameDataService);
 
-            InitSaveDataMigrasions();
+            InitSaveDataMigrations();
 
             _loadSystemDataRepo = new LoadGameSymphonyRepository<SystemData>(_saveDataEntity, _systemDataMigration);
             _playerDataRepo = new LoadGameSymphonyRepository<PlayerData>(_saveDataEntity, _playerDataMigration);
@@ -94,15 +94,15 @@ namespace Research.SaveSystem
         ///     移行処理の1個1個もScriptableObject化したほうが良い…？
         /// </summary>
         /// <returns></returns>
-        private void InitSaveDataMigrasions()
+        private void InitSaveDataMigrations()
         {
             List<SaveDataMigrationBase<SystemData>> systemDataMigrations = new();
             systemDataMigrations.Add(new SystemDataMigration_0_1_To_0_2());
             _systemDataMigration = new(systemDataMigrations);
 
-            List<SaveDataMigrationBase<PlayerData>> playerDataMigrasions = new();
-            playerDataMigrasions.Add(new PlayerDataMigration_0_1_To_0_2()); 
-            _playerDataMigration = new(playerDataMigrasions);
+            List<SaveDataMigrationBase<PlayerData>> playerDataMigrations = new();
+            playerDataMigrations.Add(new PlayerDataMigration_0_1_To_0_2()); 
+            _playerDataMigration = new(playerDataMigrations);
 
             List<SaveDataMigrationBase<OutGameData>> outGameDataMigrations = new();
             outGameDataMigrations.Add(new OutGameDataMigration_0_1_To_0_2());

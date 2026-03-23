@@ -17,6 +17,9 @@ namespace Research.SaveSystem
         /// <param name="source"></param>
         public static void CopyFields<TTarget, TSource>(TTarget target, TSource source)
         {
+            if (ReferenceEquals(target, null)) throw new ArgumentNullException(nameof(target));
+            if (ReferenceEquals(source, null)) throw new ArgumentNullException(nameof(source)); 
+            
             Type sourceType = typeof(TSource);
             Type targetType = typeof(TTarget);
 
