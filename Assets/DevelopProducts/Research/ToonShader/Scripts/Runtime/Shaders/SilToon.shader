@@ -4,8 +4,10 @@ Shader "Custom/SilToon"
     {
         [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+
+        [Header(OutLine)]
+
         _ZOffset("Z Offset",Range(0,0.01)) = 0
-        [Toggle] _IsForFace("Is For Face", Float) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
          _OutlineWidth("OutLine Width", Float) = 0
     }
