@@ -2,9 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Research.SaveSystem
 {
-    public class SaveDataMigration
+    /// <summary>
+    ///     セーブデータを新しいバージョンに移行するクラス。
+    /// </summary>
+    /// <typeparam name="TSaveType"></typeparam>
+    public class SaveDataMigration<TSaveType>
+        where TSaveType : SaveDataBase, new()
     {
-        public SaveDataMigration(List<ISaveDataMigration> migrations)
+        public SaveDataMigration(List<SaveDataMigrationBase<TSaveType>> migrations)
         {
             _migrations = migrations;
         }
@@ -12,18 +17,18 @@ namespace Research.SaveSystem
         /// <summary>
         ///     セーブデータ移行を実施する。
         /// </summary>
-        public void DoMigration(KillChordGameData saveData)
+        public async Awaitable DoMigration(TSaveType saveData)
         {
             if (saveData is null || _migrations is null || _migrations.Count == 0) return;
 
             // 読み取ったセーブデータのバージョンナンバーを取得
-            string saveDataVersion = saveData.VersionNo;
+            string saveDataVersion = saveData.Version;
 
             // セーブデータのバージョンナンバーが現在のゲームバージョンより小さい間、
             // 繰り返して現在バージョンと一致するまでデータ移行を行う
             while (saveDataVersion.CompareTo(Constants.CURRENT_VERSION) < 0)
             {
-                ISaveDataMigration mig = _migrations.Find(m => m.FromVersion == saveDataVersion);
+                SaveDataMigrationBase<TSaveType> mig = _migrations.Find(m => m.FromVersion == saveDataVersion);
 
                 // 移行処理がなかった場合
                 if(mig is null)
@@ -32,11 +37,11 @@ namespace Research.SaveSystem
                     break;
                 }
 
-                mig.Migrate(saveData);
-                saveDataVersion = saveData.VersionNo;
+                await mig.Migrate(saveData);
+                saveDataVersion = saveData.Version;
             }
         }
 
-        private List<ISaveDataMigration> _migrations;
+        private List<SaveDataMigrationBase<TSaveType>> _migrations;
     }
 }

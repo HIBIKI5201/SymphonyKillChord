@@ -2,7 +2,7 @@ using UnityEngine;
 namespace Research.SaveSystem
 {
     /// <summary>
-    ///     asyncメソッドをForgetできるようにする拡張
+    ///     asyncメソッドをForgetできるようにする拡張するクラス。
     /// </summary>
     public static class AwaitableExtension
     {
