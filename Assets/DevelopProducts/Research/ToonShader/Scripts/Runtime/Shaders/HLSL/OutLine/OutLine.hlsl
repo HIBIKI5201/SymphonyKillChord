@@ -49,9 +49,9 @@ v2f vert(appdata v)
     float3 pushedOS = v.positionOS.xyz + normalOS * lerp(_OutlineWidthShadow, _OutlineWidthLit, GetOutlineThicknessRatio(v.positionOS, v.normalOS));
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
+    pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
-    pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
     
     // オブジェクト空間の位置をクリップ空間（HClip）へ変換し、描画用の位置に設定する。
     o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
