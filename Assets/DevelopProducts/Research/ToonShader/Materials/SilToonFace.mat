@@ -109,9 +109,11 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.001
-    - _OutlineWidthShadow: 0.002
+    - _OutlineWidthLit: 0.0002
+    - _OutlineWidthShadow: 0.0005
     - _Parallax: 0.005
+    - _PerspectiveRemovalRadius: 0.2
+    - _PerspectiveRemovalRatio: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
@@ -122,7 +124,7 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
-    - _ZOffset: 0.001
+    - _ZOffset: 0
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
@@ -131,6 +133,9 @@ Material:
     - _ColorMiddle: {r: 1, g: 0.7490196, b: 0.8156863, a: 1}
     - _ColorShadow: {r: 0.8, g: 0.6392157, b: 0.654902, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
+    - _Head: {r: 1, g: 0.9, b: 0, a: 0}
+    - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
