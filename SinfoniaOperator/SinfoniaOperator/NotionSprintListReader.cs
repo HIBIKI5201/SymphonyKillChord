@@ -56,6 +56,12 @@ namespace SinfoniaStudio.SinfoniaOperator
                         continue;
                     }
 
+                    if (dateProperty.Date == null)
+                    {
+                        Console.WriteLine($"[SprintReader] {pageName}: 日付プロパティの中身が空です。");
+                        continue;
+                    }
+
                     DateTime startDate = default;
                     DateTime endDate = default;
 
