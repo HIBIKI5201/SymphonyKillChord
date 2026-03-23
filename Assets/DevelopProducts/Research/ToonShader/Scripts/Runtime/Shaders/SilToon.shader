@@ -2,8 +2,13 @@ Shader "Custom/SilToon"
 {
     Properties
     {
-        [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+
+        // [Header(Fragment)}
+        
+        [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
+        _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
+        _ColorShadow("Shadow Color",Color) = (1, 1, 1, 1)
 
         [Header(OutLine)]
 
