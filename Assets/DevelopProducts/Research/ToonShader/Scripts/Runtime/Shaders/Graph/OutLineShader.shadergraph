@@ -1397,7 +1397,7 @@
     "m_Title": "ForFace",
     "m_Position": {
         "x": -324.0,
-        "y": -764.0000610351563
+        "y": -764.0
     }
 }
 
@@ -3589,8 +3589,8 @@
     "m_ObjectId": "6ee2802ddb7a4075b34be68fe1f1118f",
     "m_Title": "PerspectiveRemoval",
     "m_Position": {
-        "x": -1737.0001220703125,
-        "y": -1178.0001220703125
+        "x": -1737.0,
+        "y": -1178.0
     }
 }
 
@@ -4181,8 +4181,8 @@
     "m_ObjectId": "822b337d35804cfaae0bd82d61541cf5",
     "m_Title": "ViewZtoZero",
     "m_Position": {
-        "x": -1914.0001220703125,
-        "y": 60.999935150146487
+        "x": -1914.0,
+        "y": 61.0
     }
 }
 
@@ -6180,7 +6180,7 @@
     "m_ObjectId": "c89722b286fb4bb4801c3be44875a1ca",
     "m_Title": "UVToTangent",
     "m_Position": {
-        "x": -3610.000244140625,
+        "x": -3610.0,
         "y": -219.0
     }
 }
