@@ -72,7 +72,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                 return;
             }
 
-            return; // デバッグのため、一時的に衆力を行わない。
             await discordBot.PushTaskChannelAsync(taskContent);
         }
 
