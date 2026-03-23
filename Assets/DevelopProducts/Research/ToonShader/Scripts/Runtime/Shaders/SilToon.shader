@@ -17,7 +17,7 @@ Shader "Custom/SilToon"
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
 
         [Header(OutLine)]
-
+        _OutLineColor("Color",Color) = (1, 1, 1, 1)
         _ZOffset("Z Offset",Range(0,0.01)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
