@@ -4,7 +4,7 @@ namespace Research.SaveSystem
     ///     セーブデータ検証のインタフェース。
     /// </summary>
     /// <typeparam name="TDtoType"></typeparam>
-    public interface ISaveDataValidatior<TDtoType>
+    public interface ISaveDataValidator<TDtoType>
     {
         public ValidationResult Validate(TDtoType dto);
     }

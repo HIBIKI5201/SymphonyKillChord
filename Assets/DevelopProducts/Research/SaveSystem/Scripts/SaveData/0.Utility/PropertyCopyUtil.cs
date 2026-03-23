@@ -22,10 +22,9 @@ namespace Research.SaveSystem
 
             foreach (PropertyInfo sProp in sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
+                PropertyInfo tProp = targetType.GetProperty(sProp.Name);
                 try
                 {
-                    PropertyInfo tProp = targetType.GetProperty(sProp.Name);
-
                     if (tProp == null) continue;
                     if (!tProp.CanWrite) continue;
                     if (!sProp.CanRead) continue;
@@ -37,7 +36,8 @@ namespace Research.SaveSystem
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning($"プロパティ設定失敗したため、値設定をスキップします。プロパティ名：{sProp.Name}");
+                    throw new InvalidOperationException(
+                        $"プロパティコピーに失敗しました: {sourceType.Name}.{sProp.Name} -> {targetType.Name}.{tProp.Name}",e);
                 }
             }
         }

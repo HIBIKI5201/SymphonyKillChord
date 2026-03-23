@@ -7,15 +7,21 @@ namespace Research.SaveSystem
     /// </summary>
     public class SaveDataEntity
     {
+        public SaveDataEntity()
+        {
+            SystemData = new();
+            PlayerData = new();
+            OutGameData = new();
+        }
         static SaveDataEntity()
         {
             SetterCache<SystemData>.AssignAction = (entity, data) => entity.SystemData = data;
             SetterCache<PlayerData>.AssignAction = (entity, data) => entity.PlayerData = data;
-            SetterCache<OutGameData>.AssignAction = (entity, data) => entity.OutgameData = data;
+            SetterCache<OutGameData>.AssignAction = (entity, data) => entity.OutGameData = data;
 
             GetterCache<SystemData>.GetFunc = (entity) => entity.SystemData;
             GetterCache<PlayerData>.GetFunc = (entity) => entity.PlayerData;
-            GetterCache<OutGameData>.GetFunc = (entity) => entity.OutgameData;
+            GetterCache<OutGameData>.GetFunc = (entity) => entity.OutGameData;
         }
 
         /// <summary>システム情報</summary>
@@ -23,7 +29,7 @@ namespace Research.SaveSystem
         /// <summary>プレイヤー情報</summary>
         public PlayerData PlayerData { get; private set; }
         /// <summary>アウトゲーム情報</summary>
-        public OutGameData OutgameData { get; private set; }
+        public OutGameData OutGameData { get; private set; }
 
         /// <summary>
         ///     渡されたオブジェクトの型を判断し、フィールドに設定する。
@@ -39,7 +45,7 @@ namespace Research.SaveSystem
             }
             else
             {
-                Debug.LogError($"この型のセーブデータはありません：{typeof(TSaveType).Name}");
+                throw new NotSupportedException($"未対応のセーブデータ型です: {typeof(TSaveType).FullName}");
             }
         }
         /// <summary>
@@ -55,8 +61,7 @@ namespace Research.SaveSystem
             }
             else
             {
-                Debug.LogError($"この型のセーブデータはありません：{typeof(TSaveType).Name}");
-                return default(TSaveType);
+                throw new NotSupportedException($"未対応のセーブデータ型です: {typeof(TSaveType).FullName}");
             }
         }
 

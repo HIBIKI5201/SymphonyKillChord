@@ -5,11 +5,11 @@ namespace Research.SaveSystem
     /// <summary>
     ///     プレイヤー情報をセーブ時の検証。
     /// </summary>
-    public class PlayerDataValidator : ISaveDataValidatior<PlayerDataDto>
+    public class PlayerDataValidator : ISaveDataValidator<PlayerDataDto>
     {
-        public PlayerDataValidator(StageItemDB stageItemDb)
+        public PlayerDataValidator(SkillItemDB skillItemDb)
         {
-            _stageItemDb = stageItemDb;
+            _skillItemDb = skillItemDb;
         }
 
         public ValidationResult Validate(PlayerDataDto dto)
@@ -17,7 +17,7 @@ namespace Research.SaveSystem
             foreach(int skillId in dto.EquippedSkills)
             {
                 // 装備中のスキルが存在しないスキルの場合、検証エラーとする
-                if(!_stageItemDb.Items.Any(e => e.Id == skillId ))
+                if(!_skillItemDb.Items.Any(e => e.Id == skillId ))
                 {
                     return new ValidationResult(false, "不正なスキルがあります。セーブできません。");
                 }
@@ -25,6 +25,6 @@ namespace Research.SaveSystem
             return new ValidationResult(true, Constants.EMPTY_STRING);
         }
 
-        private StageItemDB _stageItemDb;
+        private SkillItemDB _skillItemDb;
     }
 }

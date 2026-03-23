@@ -26,12 +26,12 @@ namespace Research.SaveSystem
         {
             if (_isLoading) return;
 
+            _isLoading = true;
             LoadAsyncTask(callback).Forget();
         }
 
         private async Awaitable LoadAsyncTask(Action<TDtoType> callback)
         {
-            _isLoading = true;
             EventBus<EOnLoadStart>.Raise(new EOnLoadStart());
             try
             {

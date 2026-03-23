@@ -5,7 +5,7 @@ namespace Research.SaveSystem
     /// <summary>
     ///     アウトゲーム情報をセーブ時の検証。
     /// </summary>
-    public class OutGameDataValidator : ISaveDataValidatior<OutGameDataDto>
+    public class OutGameDataValidator : ISaveDataValidator<OutGameDataDto>
     {
         public OutGameDataValidator(StageItemDB stageItemDb, SkillItemDB skillItemDb)
         {

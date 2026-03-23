@@ -13,7 +13,7 @@ namespace Research.SaveSystem
             _saveDataEntity = new();
 
             _systemDataValidator = new SystemDataValidator();
-            _playerDataValidator = new PlayerDataValidator(_stageItemDB);
+            _playerDataValidator = new PlayerDataValidator(_skillItemDB);
             _outGameDataValidator = new OutGameDataValidator(_stageItemDB, _skillItemDB);
 
             _saveSystemDataRepo = new SaveGameSymphonyRepository<SystemData, SystemDataDto>();

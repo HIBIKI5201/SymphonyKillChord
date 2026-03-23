@@ -9,7 +9,7 @@ namespace Research.SaveSystem
         where TSaveType : class, new()
         where TDtoType : class, new()
     {
-        public SaveService(ISaveRepository<TSaveType, TDtoType> saveRepo, ISaveDataValidatior<TDtoType> validator)
+        public SaveService(ISaveRepository<TSaveType, TDtoType> saveRepo, ISaveDataValidator<TDtoType> validator)
         {
             _saveRepo = saveRepo;
             _saveDataValidatior = validator;
@@ -23,17 +23,17 @@ namespace Research.SaveSystem
         {
             if (_isSaving) return;
 
+            _isSaving = true;
             SaveTask(dto).Forget();
         }
 
         private bool _isSaving;
         private ISaveRepository<TSaveType, TDtoType> _saveRepo;
-        private ISaveDataValidatior<TDtoType> _saveDataValidatior;
+        private ISaveDataValidator<TDtoType> _saveDataValidatior;
 
         private async Awaitable SaveTask(TDtoType dto)
         {
             EventBus<EOnSaveStart>.Raise(new EOnSaveStart());
-            _isSaving = true;
             try
             {
                 // 検証を行う

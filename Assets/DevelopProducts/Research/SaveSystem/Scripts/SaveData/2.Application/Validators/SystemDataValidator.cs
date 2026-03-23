@@ -3,7 +3,7 @@ namespace Research.SaveSystem
     /// <summary>
     ///     システム情報をセーブ時の検証。
     /// </summary>
-    public class SystemDataValidator : ISaveDataValidatior<SystemDataDto>
+    public class SystemDataValidator : ISaveDataValidator<SystemDataDto>
     {
         public ValidationResult Validate(SystemDataDto dto)
         {

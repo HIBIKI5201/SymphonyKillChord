@@ -22,17 +22,9 @@ namespace Research.SaveSystem
         /// <returns></returns>
         public async Awaitable Load()
         {
-            try
-            {
-                TSaveType saveData = await SaveSystem<TSaveType, NugetDataLoader<TSaveType>>.Get();
-                await _saveDataMigration.DoMigration(saveData);
-                _saveDataEntity.AssignData(saveData);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("ロード処理でエラーが発生しました。");
-                Debug.LogException(e);
-            }
+            TSaveType saveData = await SaveSystem<TSaveType, NugetDataLoader<TSaveType>>.Get();
+            await _saveDataMigration.DoMigration(saveData);
+            _saveDataEntity.AssignData(saveData);
         }
 
         private SaveDataEntity _saveDataEntity;
