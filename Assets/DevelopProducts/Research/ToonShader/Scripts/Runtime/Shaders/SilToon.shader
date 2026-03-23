@@ -10,6 +10,12 @@ Shader "Custom/SilToon"
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
         _ColorShadow("Shadow Color",Color) = (1, 1, 1, 1)
 
+        [Header(Fresnel)]
+        _FresnelBackLight("Back Light Intensity",Float) = 8
+        _FresnelFrontRimLight("Front Rim Light Intensity",Float) = 4
+        _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
+
+
         [Header(OutLine)]
 
         _ZOffset("Z Offset",Range(0,0.01)) = 0
