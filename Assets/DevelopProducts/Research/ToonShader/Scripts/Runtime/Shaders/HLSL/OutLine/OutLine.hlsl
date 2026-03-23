@@ -5,11 +5,13 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\UVToSmoothNormal.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZeroZ.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZOffset.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
 
 
 float _ZOffset;
 float _IsSmoothNormal;
-float _OutlineWidth;
+float _OutlineWidthLit;
+float _OutlineWidthShadow;
 
 float4 _OutlineColor = float4(0, 0, 0, 1);
 
@@ -39,7 +41,7 @@ v2f vert(appdata v)
     normalOS = GetViewZeroZ_OS(normalOS);
     
     // 頂点位置を法線方向に押し出してアウトライン幅を作る。
-    float3 pushedOS = v.positionOS.xyz + normalOS * _OutlineWidth;
+    float3 pushedOS = v.positionOS.xyz + normalOS * lerp(_OutlineWidthShadow, _OutlineWidthLit, GetOutlineThicknessRatio(v.positionOS, v.normalOS));
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
