@@ -16,7 +16,7 @@ namespace KillChord.Runtime.View
         void Update()
         {
             UpdateMovement();
-            UpdateDash();
+            UpdateDodge();
         }
 
 
@@ -30,7 +30,7 @@ namespace KillChord.Runtime.View
 
             _cacheTransform.position = _controller.GetMovedPosition(_cacheTransform.position, dir, Time.deltaTime);
         }
-        private void UpdateDash()
+        private void UpdateDodge()
         {
             if (!Input.GetKeyDown(KeyCode.LeftShift))
                 return;
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.View
             if (dir == Vector2.zero)
                 return;
 
-            _cacheTransform.position = _controller.GetDashedPosition(_cacheTransform.position, dir, Time.time);
+            _cacheTransform.position = _controller.GetDodgedPosition(_cacheTransform.position, dir, Time.time);
         }
 
         private Transform _cacheTransform;

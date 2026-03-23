@@ -7,34 +7,37 @@ namespace KillChord.Runtime.Application
     {
         public PlayerMovement(
             MoveSpeed speed,
-            MoveSpeed dashSpeed,
-            float dashCooldown)
+            MoveSpeed dodgeSpeed,
+            float dodgeCooldown)
         {
             _speed = speed;
-            _dashSpeed = dashSpeed;
-            _dashCooldown = dashCooldown;
+            _dodgeSpeed = dodgeSpeed;
+            _dodgedCooldown = dodgeCooldown;
         }
 
         public Vector3 GetMovedPostion(Vector3 currentPosition, Vector2 input, float deltaTime)
         {
-            return currentPosition + new Vector3(input.x, 0, input.y).normalized * (deltaTime * _speed.Value);
+            if (input.sqrMagnitude > 1f)
+                input.Normalize();
+
+            return currentPosition + new Vector3(input.x, 0, input.y) * (deltaTime * _speed.Value);
         }
-        public bool TryGetDashedPosition(Vector3 currentPosition, Vector2 input, float currentTime, out Vector3 result)
+        public bool TryGetDodgedPosition(Vector3 currentPosition, Vector2 input, float currentTime, out Vector3 result)
         {
             result = currentPosition;
-            if (_previousDashedTime + _dashCooldown >= currentTime)
+            if (_previousDodgedTime + _dodgedCooldown >= currentTime)
                 return false;
 
-            _previousDashedTime = currentTime;
+            _previousDodgedTime = currentTime;
 
-            result = currentPosition + new Vector3(input.x, 0, input.y).normalized * _dashSpeed.Value;
+            result = currentPosition + new Vector3(input.x, 0, input.y).normalized * _dodgeSpeed.Value;
             return true;
         }
 
 
         private MoveSpeed _speed;
-        private MoveSpeed _dashSpeed;
-        private float _previousDashedTime;
-        private float _dashCooldown;
+        private MoveSpeed _dodgeSpeed;
+        private float _previousDodgedTime;
+        private float _dodgedCooldown;
     }
 }
