@@ -90,7 +90,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                     Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
                     return;
                 }
-                return; // デバッグのため、一時的に衆力を行わない。
                 await discordBot.PushSprintChannelAsync(sprintContent);
             }
             else

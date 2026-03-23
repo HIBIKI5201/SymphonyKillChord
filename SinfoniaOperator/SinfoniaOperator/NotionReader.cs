@@ -173,14 +173,21 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public static string GetPageName(Page page, string namePropertyName)
         {
-            string pageName = "(名称未設定)";
+            const string DEFAULT_NAME = "(名称未設定)";
+            if (page?.Properties == null) return DEFAULT_NAME;
+
             if (page.Properties.TryGetValue(namePropertyName, out PropertyValue? titlePropValue) &&
-                titlePropValue is TitlePropertyValue titleProperty)
+                titlePropValue is TitlePropertyValue titleProperty &&
+                titleProperty.Title != null)
             {
-                pageName = string.Join("", titleProperty.Title.Select(t => t.PlainText));
+                string name = string.Join("", titleProperty.Title
+                    .Where(t => t != null && t.PlainText != null)
+                    .Select(t => t.PlainText));
+                
+                return string.IsNullOrWhiteSpace(name) ? DEFAULT_NAME : name;
             }
 
-            return pageName;
+            return DEFAULT_NAME;
         }
 
         private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
