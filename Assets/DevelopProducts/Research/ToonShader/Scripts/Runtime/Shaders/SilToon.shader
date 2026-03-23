@@ -16,13 +16,17 @@ Shader "Custom/SilToon"
         _FresnelFrontRimLight("Front Rim Light Intensity",Float) = 4
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
 
-
         [Header(OutLine)]
 
         _ZOffset("Z Offset",Range(0,0.01)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
-         _OutlineWidthLit("OutLine Width Lit", Float) = 0
-         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
+        _OutlineWidthLit("OutLine Width Lit", Float) = 0
+        _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
+
+        [Header(PerspectiveRemoval)]
+        _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
+        _PerspectiveRemovalRadius("Radius",Float) = 1
+        _Head("HeadPosition", Vector,3) = (0,0,0)
     }
 
     SubShader
@@ -64,7 +68,7 @@ Shader "Custom/SilToon"
 
             ZWrite On
             ZTest LEqual
-            ColorMask 0  // カラーは書き込まない（デプスだけでOK）
+            ColorMask 0
 
             HLSLPROGRAM
             #pragma vertex ShadowPassVertex

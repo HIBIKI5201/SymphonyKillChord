@@ -5,6 +5,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Lights.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 
 struct Attributes
 {
@@ -25,6 +26,10 @@ TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 float4 _BaseMap_ST;
 
+float _PerspectiveRemovalRatio;
+float _PerspectiveRemovalRadius;
+float3 _Head;
+
 float _IsForFace;
 float3 _FaceUp;
 
@@ -39,9 +44,11 @@ float _FresnelBackRimLight;
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
-    OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-    OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
+    float3 perspectiveRemoval = GetPerspectiveRemoval(_Head, IN.positionOS.xyz, IN.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+    
+    OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
     OUT.positionOS = IN.positionOS;
+    OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
     OUT.normalOS = IN.normalOS;
     return OUT;
 }
