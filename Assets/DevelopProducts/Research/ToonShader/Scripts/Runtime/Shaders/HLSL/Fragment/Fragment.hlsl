@@ -3,6 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Lights.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
 
 struct Attributes
 {
@@ -44,6 +45,7 @@ half4 frag(Varyings IN) : SV_Target
     
     float3 color;
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
+    color += GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS));
     return (half4) (float4(color, 1.0));
 }
 #endif
