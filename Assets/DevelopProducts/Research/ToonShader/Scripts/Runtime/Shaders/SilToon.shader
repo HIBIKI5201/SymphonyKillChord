@@ -9,7 +9,8 @@ Shader "Custom/SilToon"
 
         _ZOffset("Z Offset",Range(0,0.01)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
-         _OutlineWidth("OutLine Width", Float) = 0
+         _OutlineWidthLit("OutLine Width Lit", Float) = 0
+         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
     }
 
     SubShader
