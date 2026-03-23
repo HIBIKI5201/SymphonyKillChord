@@ -6,7 +6,12 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZeroZ.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZOffset.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 
+
+float _PerspectiveRemovalRatio;
+float _PerspectiveRemovalRadius;
+float3 _Head;
 
 float _ZOffset;
 float _IsSmoothNormal;
@@ -45,6 +50,8 @@ v2f vert(appdata v)
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
+    
+    pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
     
     // オブジェクト空間の位置をクリップ空間（HClip）へ変換し、描画用の位置に設定する。
     o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
