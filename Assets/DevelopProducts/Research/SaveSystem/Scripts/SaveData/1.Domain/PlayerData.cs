@@ -7,17 +7,15 @@ namespace Research.SaveSystem
     ///     セーブデータ：プレイヤー情報
     /// </summary>
     [Serializable]
-    public class PlayerData
+    public class PlayerData : SaveDataBase
     {
         public PlayerData()
         {
-            Equipment = new();
-            Skill = new();
+            EquippedSkills = new();
+            Version = Constants.CURRENT_VERSION;
         }
 
-        /// <summary>装備している装備品</summary>
-        public List<int> Equipment { get; set; }
         /// <summary>装備しているスキル</summary>
-        public List<int> Skill { get; set; }
+        public List<int> EquippedSkills { get; set; }
     }
 }
