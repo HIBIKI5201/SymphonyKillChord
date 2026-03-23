@@ -10,6 +10,10 @@ Shader "Custom/SilToon"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+        [Headedr(Normal)]
+        _NormalMap("Normal Map", 2D) = "black"{}
+        _NormalMapIntensity("Intensity",Float) = 0
+
 
         [Header(Fresnel)]
         _FresnelBackLight("Back Light Intensity",Float) = 8

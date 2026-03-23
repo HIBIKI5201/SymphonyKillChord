@@ -26,6 +26,10 @@ TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 float4 _BaseMap_ST;
 
+TEXTURE2D(_NormalMap);
+SAMPLER(sampler_NormalMap);
+float4 _NormalMap_ST;
+
 float _PerspectiveRemovalRatio;
 float _PerspectiveRemovalRadius;
 float3 _Head;
