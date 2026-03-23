@@ -27,16 +27,24 @@ struct v2f
 
 v2f vert(appdata v)
 {
+    // vert: 頂点シェーダーの主要処理ブロック
     v2f o;
     
+    // UV を用いて滑らかな法線を取得。必要に応じて頂点法線の代わりに使う。
     float3 smoothNormalOS = GetSmoothNormalFromUV(v.uv3, v.normalOS, v.tangentOS);
     
     float3 normalOS = _IsSmoothNormal ? smoothNormalOS : v.normalOS;
+    
+    // ビュー方向に依存する Z 成分の補正を行うユーティリティ。
     normalOS = GetViewZeroZ_OS(normalOS);
     
+    // 頂点位置を法線方向に押し出してアウトライン幅を作る。
     float3 pushedOS = v.positionOS.xyz + normalOS * _OutlineWidth;
+    
+    // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
+    // オブジェクト空間の位置をクリップ空間（HClip）へ変換し、描画用の位置に設定する。
     o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
     return o;
 }
