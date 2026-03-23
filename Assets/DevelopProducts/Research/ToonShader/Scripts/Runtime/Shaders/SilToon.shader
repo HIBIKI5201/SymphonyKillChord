@@ -2,13 +2,14 @@ Shader "Custom/SilToon"
 {
     Properties
     {
-        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
-
         // [Header(Fragment)}
-        
+        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
         _ColorShadow("Shadow Color",Color) = (1, 1, 1, 1)
+        [Toggle] _IsForFace("Is For Face", Float) = 0
+        _FaceUp("Face Up", Vector, 3) = (0,1,0)
+
 
         [Header(Fresnel)]
         _FresnelBackLight("Back Light Intensity",Float) = 8
