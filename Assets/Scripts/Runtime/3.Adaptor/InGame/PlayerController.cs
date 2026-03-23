@@ -14,9 +14,9 @@ namespace KillChord.Runtime.Adaptor
         {
             return _movement.GetMovedPostion(currentPositon, input, deltaTime);
         }
-        public Vector3 GetDashedPosition(Vector3 currentPosition, Vector2 input, float currentTime)
+        public Vector3 GetDodgedPosition(Vector3 currentPosition, Vector2 input, float currentTime)
         {
-            _movement.TryGetDashedPosition(currentPosition, input, currentTime, out Vector3 result);
+            _movement.TryGetDodgedPosition(currentPosition, input, currentTime, out Vector3 result);
             return result;
         }
 
