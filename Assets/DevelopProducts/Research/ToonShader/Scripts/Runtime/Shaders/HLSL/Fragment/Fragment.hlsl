@@ -4,6 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Lights.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
 
 struct Attributes
 {
@@ -24,9 +25,16 @@ TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 float4 _BaseMap_ST;
 
+float _IsForFace;
+float3 _FaceUp;
+
 half4 _ColorLit;
 half4 _ColorMiddle;
 half4 _ColorShadow;
+
+float _FresnelBackLight;
+float _FresnelFrontRimLight;
+float _FresnelBackRimLight;
 
 Varyings vert(Attributes IN)
 {
@@ -43,9 +51,16 @@ half4 frag(Varyings IN) : SV_Target
     float3 positionWS = mul(unity_ObjectToWorld, float4(IN.positionOS, 1.0)).xyz;
     float3 normalWS = normalize(mul((float3x3) unity_ObjectToWorld, IN.normalOS));
     
+    normalWS = _IsForFace ? GetFaceNormal(_FaceUp, normalWS) : normalWS;
+    
     float3 color;
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
-    color += GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS));
-    return (half4) (float4(color, 1.0));
+    
+    float backLight, rimLightFront, rimLightBack;
+    GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
+    color += backLight * _FresnelBackLight;
+    color += rimLightBack * _FresnelBackRimLight;
+    color += rimLightFront * _FresnelFrontRimLight;
+    return (half4) (float4(color, 1.0)) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
 }
 #endif
