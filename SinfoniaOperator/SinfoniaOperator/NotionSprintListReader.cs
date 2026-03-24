@@ -18,46 +18,79 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
+                Console.WriteLine($"[SprintReader] スプリント情報の構築を開始します。 (Target Property: {_env.DatePropertyName})");
                 List<IWikiDatabase> database = await _reader.GetDatabaseAsync(_env.SprintDatabaseID);
 
                 // 日本時間を取得。
                 DateTime nowTime = DateTimeUtility.JstNow();
                 DateTime today = nowTime.Date;
+                Console.WriteLine($"[SprintReader] 判定基準日 (JST): {today:yyyy/MM/dd}");
 
                 StringBuilder output = new();
+                int evaluatedCount = 0;
+                int matchCount = 0;
 
-                Console.WriteLine($"{new string('-', 5)}スプリントリスト ログ{new string('-', 5)}");
+                output.AppendLine($"{new string('-', 5)}スプリントリスト ログ{new string('-', 5)}");
 
                 foreach (IWikiDatabase item in database)
                 {
-                    if (item is not Page page) { continue; }
+                    evaluatedCount++;
+                    if (item == null) continue;
+
+                    if (item is not Page page) 
+                    {
+                        Console.WriteLine($"[SprintReader] アイテム {evaluatedCount} はページではないためスキップします。");
+                        continue; 
+                    }
+
+                    string pageName = NotionReader.GetPageName(page, _env.NamePropertyName) ?? "(null)";
 
                     // 日付プロパティを取得できる場合。
-                    if (!page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue) ||
-                        datePropertyValue is not DatePropertyValue dateProperty) { continue; }
+                    if (page.Properties == null || !page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue))
+                    {
+                        Console.WriteLine($"[SprintReader] {pageName}: プロパティ '{_env.DatePropertyName}' が見つかりません。");
+                        continue;
+                    }
 
-                    // ページ名を取得。
-                    string pageName = NotionReader.GetPageName(page, _env.NamePropertyName);
+                    if (datePropertyValue is not DatePropertyValue dateProperty)
+                    {
+                        Console.WriteLine($"[SprintReader] {pageName}: プロパティ '{_env.DatePropertyName}' の型が Date ではありません (型: {datePropertyValue?.Type.ToString() ?? "unknown"})。");
+                        continue;
+                    }
+
+                    if (dateProperty.Date == null)
+                    {
+                        Console.WriteLine($"[SprintReader] {pageName}: 日付プロパティの中身が空です。");
+                        continue;
+                    }
+
                     DateTime startDate = default;
                     DateTime endDate = default;
 
-                    if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
+                    var dateInfo = dateProperty.Date;
+                    if (dateInfo == null || !DateTimeUtility.ConvertDateUtcToJst(dateInfo.Start?.UtcDateTime, out startDate))
                     {
-                        Console.WriteLine($"{pageName}は開始日時がないため、通知しません。");
-                        continue; // 開始日時がない場合は、通知しない。
+                        Console.WriteLine($"[SprintReader] {pageName}: 開始日時が設定されていないか、変換に失敗したためスキップします。");
+                        continue;
                     }
 
-                    if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.End?.UtcDateTime, out endDate))
+                    if (!DateTimeUtility.ConvertDateUtcToJst(dateInfo.End?.UtcDateTime, out endDate))
                     {
-                        Console.WriteLine($"{pageName}は終了日時がないため、通知しません。");
-                        continue; // 終了日時がない場合は、通知しない。
-                    }
-                    if (!(startDate <= today && today <= endDate))
-                    {
-                        Console.WriteLine($"{pageName}はスプリント期間外のため、通知しません。");
-                        continue; // スプリント期間外の場合は、通知しない。
+                        Console.WriteLine($"[SprintReader] {pageName}: 終了日時が設定されていないか、変換に失敗したためスキップします。");
+                        continue;
                     }
 
+                    // 時刻を無視して日付のみで比較
+                    bool isInside = startDate.Date <= today && today <= endDate.Date;
+                    Console.WriteLine($"[SprintReader] {pageName}: 期間判定 [{startDate:yyyy/MM/dd} ～ {endDate:yyyy/MM/dd}] -> {(isInside ? "一致" : "範囲外")}");
+
+                    if (!isInside)
+                    {
+                        continue;
+                    }
+
+                    matchCount++;
+                    Console.WriteLine($"[SprintReader] {pageName}: スプリント期間に合致しました。内容を取得します。");
                     output.AppendLine($"# 今週のスプリント");
                     output.AppendLine($"タイトル【{pageName}】");
                     output.AppendLine($"開始日時: {startDate:yyyy/MM/dd HH:mm}");
@@ -71,11 +104,12 @@ namespace SinfoniaStudio.SinfoniaOperator
                     break;
                 }
 
+                Console.WriteLine($"[SprintReader] 評価終了 (評価数: {evaluatedCount}, 合致数: {matchCount})");
                 return output.ToString();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"スプリントリストの取得に失敗しました: {ex}");
+                Console.WriteLine($"[SprintReader] スプリントリストの取得に失敗しました: {ex}");
                 return string.Empty;
             }
         }
