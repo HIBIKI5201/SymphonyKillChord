@@ -11,5 +11,13 @@ namespace KillChord.Runtime.Domain
 
         public static explicit operator float(MoveSpeed value)
             => value.Value;
+        public static bool operator ==(MoveSpeed left, MoveSpeed right)
+            => left.Value == right.Value;
+        public static bool operator !=(MoveSpeed left, MoveSpeed right)
+            => left.Value != right.Value;
+        public override bool Equals(object obj)
+        {
+            return obj is MoveSpeed moveSpeed && moveSpeed.Value == Value;
+        }
     }
 }
