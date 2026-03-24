@@ -6,11 +6,11 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
-
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
     float2 uv : TEXCOORD0;
 };
 
@@ -19,7 +19,9 @@ struct Varyings
     float4 positionHCS : SV_POSITION;
     float2 uv : TEXCOORD0;
     float3 positionOS : TEXCOORD1;
-    float3 normalOS : TEXCOORD2;
+    float3 normalWS : TEXCOORD2;
+    float3 tangentWS : TEXCOORD3;
+    float3 bitangentWS : TEXCOORD4;
 };
 
 TEXTURE2D(_BaseMap);
@@ -29,6 +31,8 @@ float4 _BaseMap_ST;
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 float4 _NormalMap_ST;
+
+float _NormalMapIntensity;
 
 float _PerspectiveRemovalRatio;
 float _PerspectiveRemovalRadius;
@@ -44,6 +48,7 @@ half4 _ColorShadow;
 float _FresnelBackLight;
 float _FresnelFrontRimLight;
 float _FresnelBackRimLight;
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 
 Varyings vert(Attributes IN)
 {
@@ -53,14 +58,28 @@ Varyings vert(Attributes IN)
     OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
     OUT.positionOS = IN.positionOS;
     OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
-    OUT.normalOS = IN.normalOS;
+    
+    
+    
+    OUT.normalWS = normalize(mul(float4(IN.normalOS, 0.0), unity_WorldToObject).xyz);
+    OUT.tangentWS = normalize(mul((float3x3) unity_ObjectToWorld, IN.tangentOS.xyz));
+    float sign = IN.tangentOS.w * unity_WorldTransformParams.w;
+    OUT.bitangentWS = cross(OUT.normalWS, OUT.tangentWS) * sign;
+    
     return OUT;
 }
 
 half4 frag(Varyings IN) : SV_Target
 {
     float3 positionWS = mul(unity_ObjectToWorld, float4(IN.positionOS, 1.0)).xyz;
-    float3 normalWS = normalize(mul((float3x3) unity_ObjectToWorld, IN.normalOS));
+    float3 normalWS = GetNormalCombine(
+        TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap), // ← マクロで渡す
+        IN.uv,
+        IN.normalWS,
+        IN.tangentWS,
+        IN.bitangentWS,
+        _NormalMapIntensity
+    );
     
     normalWS = _IsForFace ? GetFaceNormal(_FaceUp, normalWS) : normalWS;
     
@@ -68,7 +87,7 @@ half4 frag(Varyings IN) : SV_Target
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
     
     float backLight, rimLightFront, rimLightBack;
-    GetFresnel(normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
+    GetFresnel(IN.normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
     color += backLight * _FresnelBackLight;
     color += rimLightBack * _FresnelBackRimLight;
     color += rimLightFront * _FresnelFrontRimLight;
