@@ -1,7 +1,16 @@
 namespace Research.SaveSystem
 {
-    public interface ISaveService
+    /// <summary>
+    ///     セーブ機能Serviceのインタフェース。
+    /// </summary>
+    /// <typeparam name="TSaveType"></typeparam>
+    /// <typeparam name="TDtoType"></typeparam>
+    public interface ISaveService<TSaveType, TDtoType>
     {
-        public void Save(KillChordGameData newData);
+        /// <summary>
+        ///     セーブを行う。
+        /// </summary>
+        /// <param name="dto"></param>
+        public void Save(TDtoType dto);
     }
 }

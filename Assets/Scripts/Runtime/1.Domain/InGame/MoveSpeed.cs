@@ -8,5 +8,8 @@ namespace KillChord.Runtime.Domain
         }
 
         public readonly float Value;
+
+        public static explicit operator float(MoveSpeed value)
+            => value.Value;
     }
 }
