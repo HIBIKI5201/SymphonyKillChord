@@ -10,6 +10,10 @@ Shader "Custom/SilToon"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+        [Headedr(Normal)]
+        _NormalMap("Normal Map", 2D) = "black"{}
+        _NormalMapIntensity("Intensity",Float) = 0
+
 
         [Header(Fresnel)]
         _FresnelBackLight("Back Light Intensity",Float) = 8
@@ -17,7 +21,7 @@ Shader "Custom/SilToon"
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
 
         [Header(OutLine)]
-        _OutLineColor("Color",Color) = (1, 1, 1, 1)
+        _OutlineColor("Color",Color) = (1, 1, 1, 1)
         _ZOffset("Z Offset",Range(0,0.01)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
