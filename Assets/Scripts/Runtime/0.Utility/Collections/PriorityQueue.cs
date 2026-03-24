@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Utility
         private const int ARRAY_MAX_SIZE = 0X7FEFFFFF;
 
         private (TElement Element, TPriority Priority)[] _nodes;
-        private readonly IComparer<TPriority>? _comparer;
+        private readonly IComparer<TPriority> _comparer;
         private int _size;
         private int _version;
 
@@ -38,12 +38,12 @@ namespace KillChord.Runtime.Utility
         }
         public PriorityQueue(int initialCapacity) : this(initialCapacity, comparer: null) { }
 
-        public PriorityQueue(IComparer<TPriority>? comparer)
+        public PriorityQueue(IComparer<TPriority> comparer)
         {
             _nodes = Array.Empty<(TElement, TPriority)>();
             _comparer = InitializeComparer(comparer);
         }
-        public PriorityQueue(int initialCapacity, IComparer<TPriority>? comparer)
+        public PriorityQueue(int initialCapacity, IComparer<TPriority> comparer)
         {
             _nodes = new (TElement, TPriority)[initialCapacity];
             _comparer = InitializeComparer(comparer);
@@ -281,7 +281,7 @@ namespace KillChord.Runtime.Utility
             TElement element,
             [MaybeNullWhen(false)] out TElement removedElement,
             [MaybeNullWhen(false)] out TPriority priority,
-            IEqualityComparer<TElement>? equalityComparer = null)
+            IEqualityComparer<TElement> equalityComparer = null)
         {
             int index = FindIndex(element, equalityComparer);
             if (index < 0)
@@ -555,7 +555,7 @@ namespace KillChord.Runtime.Utility
             nodes[nodeIndex] = node;
         }
 
-        private int FindIndex(TElement element, IEqualityComparer<TElement>? equalityComparer)
+        private int FindIndex(TElement element, IEqualityComparer<TElement> equalityComparer)
         {
             equalityComparer ??= EqualityComparer<TElement>.Default;
             ReadOnlySpan<(TElement Element, TPriority Priority)> nodes = _nodes.AsSpan(0, _size);

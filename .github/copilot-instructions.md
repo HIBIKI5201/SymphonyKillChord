@@ -1,1 +1,1 @@
-コードを生成する場合は"\Assets\Scripts\CodeGuidelines.md"のコード規定に従う。
+コードを生成する場合は"Assets/Docs/AGENTS.md"のコード規定に従う。
