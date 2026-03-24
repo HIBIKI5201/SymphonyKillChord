@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.Composition
 {
-
     /// <summary>
     ///     常駐シーン起動時のエントリーポイントとなるクラス。
     /// </summary>
