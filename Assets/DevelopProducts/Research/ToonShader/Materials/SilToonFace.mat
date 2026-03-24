@@ -26,7 +26,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 6cddaf398381d864490e2452414348d7, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2b112d13daecefb4594890cef4cbf8fc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -54,6 +54,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -107,13 +111,14 @@ Material:
     - _IsForFace: 0
     - _IsSmoothNormal: 1
     - _Metallic: 0
+    - _NormalMapIntensity: 0
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.0002
-    - _OutlineWidthShadow: 0.0005
+    - _OutlineWidthLit: 0.0005
+    - _OutlineWidthShadow: 0.001
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
-    - _PerspectiveRemovalRatio: 1
+    - _PerspectiveRemovalRatio: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
@@ -136,6 +141,7 @@ Material:
     - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
     - _Head: {r: 1, g: 0.9, b: 0, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

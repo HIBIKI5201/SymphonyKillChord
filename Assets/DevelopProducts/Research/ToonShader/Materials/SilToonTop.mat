@@ -26,7 +26,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: d06da33f3d0da79499a1ecf843414540, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6bc793b0a76ad2845800ff585b24c34a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -55,6 +55,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: c291a5fa8c1c56a4a86b8df725ce2e3c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -107,13 +111,14 @@ Material:
     - _IsForFace: 0
     - _IsSmoothNormal: 1
     - _Metallic: 0
+    - _NormalMapIntensity: 0.5
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.0002
-    - _OutlineWidthShadow: 0.0005
+    - _OutlineWidthLit: 0.0005
+    - _OutlineWidthShadow: 0.001
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
-    - _PerspectiveRemovalRatio: 1
+    - _PerspectiveRemovalRatio: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
@@ -130,12 +135,13 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorMiddle: {r: 0.5019608, g: 0.2509804, b: 0.2509804, a: 1}
-    - _ColorShadow: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+    - _ColorMiddle: {r: 0.6, g: 0.4786517, b: 0.4786517, a: 1}
+    - _ColorShadow: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
     - _Head: {r: 1, g: 0.9, b: 0, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
