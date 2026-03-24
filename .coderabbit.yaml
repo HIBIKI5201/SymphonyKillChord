@@ -2,6 +2,9 @@ language: "ja-JP"
 early_access: false
 
 reviews:
+  instructions: |
+    コードレビュー時は以下の規約を必ず参照してください:
+    - Assets/Docs/AGENTS.md
   profile: "chill"
   auto_review:
     enabled: true # 自動レビューを有効にする
