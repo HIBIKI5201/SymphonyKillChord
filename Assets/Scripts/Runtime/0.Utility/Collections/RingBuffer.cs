@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Utility
 {
@@ -17,7 +16,9 @@ namespace KillChord.Runtime.Utility
             _count = 0;
         }
 
+        /// <summary> バッファの最大容量。 </summary>
         public int Capacity => _buffer.Length;
+        /// <summary> 現在の要素数。 </summary>
         public int Count => _count;
 
         /// <summary>
@@ -89,6 +90,11 @@ namespace KillChord.Runtime.Utility
         private int _head;
         private int _count;
 
+        /// <summary>
+        ///     循環するインデックス取得。
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         private int GetIndexByRing(int offset) => (_head + offset + _buffer.Length) % _buffer.Length;
     }
 }
