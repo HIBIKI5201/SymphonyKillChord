@@ -9,7 +9,8 @@ namespace KillChord.Runtime.View
 
         public void ChangeHitPoint(float fillAmount)
         {
-            _hpBarImage.fillAmount = fillAmount;
+            _hpBarImage.fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
         }
     }
 }
+
