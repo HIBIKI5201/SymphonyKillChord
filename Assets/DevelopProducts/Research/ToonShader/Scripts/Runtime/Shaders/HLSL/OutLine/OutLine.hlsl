@@ -18,7 +18,7 @@ float _IsSmoothNormal;
 float _OutlineWidthLit;
 float _OutlineWidthShadow;
 
-float4 _OutlineColor = float4(0, 0, 0, 1);
+float4 _OutlineColor;
 
 struct appdata
 {
