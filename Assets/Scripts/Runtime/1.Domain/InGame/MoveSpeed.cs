@@ -19,5 +19,13 @@ namespace KillChord.Runtime.Domain
         {
             return obj is MoveSpeed moveSpeed && moveSpeed.Value == Value;
         }
+        public bool Equals(MoveSpeed other)
+        {
+            return other.Value == Value;
+        }
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
     }
 }
