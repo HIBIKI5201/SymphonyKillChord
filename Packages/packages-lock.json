@@ -1,5 +1,16 @@
 {
   "dependencies": {
+    "com.annulusgames.lit-motion": {
+      "version": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.6.0",
+        "com.unity.collections": "1.5.1",
+        "com.unity.mathematics": "1.0.1"
+      },
+      "hash": "a174f0ace85831bc6790d497d2d683a64fc513dd"
+    },
     "com.autodesk.fbx": {
       "version": "5.1.3",
       "depth": 1,
@@ -15,6 +26,51 @@
         "com.unity.test-framework": "1.1.9"
       },
       "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
+    },
+    "com.cysharp.observablecollections": {
+      "version": "1.1.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.unitask": {
+      "version": "2.5.10",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.zstring": {
+      "version": "2.6.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.github-glitchenzo.nugetforunity": {
+      "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c2af83c9d4f8cdaada9d4a0e94de2f195d8e1d01"
+    },
+    "com.ruccho.bitonicpixelsorter": {
+      "version": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter#release",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "922f50ed0aabceda9f3f8a8ebcfbb960d1a5117a"
+    },
+    "com.ruccho.bitonicpixelsorter.urp": {
+      "version": "https://github.com/ruccho/BitonicPixelSorter.git?path=/Packages/com.ruccho.bitonicpixelsorter.urp#release",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.ruccho.bitonicpixelsorter": "1.0.0",
+        "com.unity.render-pipelines.universal": "12.1.6"
+      },
+      "hash": "922f50ed0aabceda9f3f8a8ebcfbb960d1a5117a"
     },
     "com.unity.2d.animation": {
       "version": "13.0.4",
@@ -125,7 +181,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.addressables": {
-      "version": "2.9.0",
+      "version": "2.9.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -135,13 +191,13 @@
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.imageconversion": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.scriptablebuildpipeline": "2.6.0",
+        "com.unity.scriptablebuildpipeline": "2.6.1",
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.ai.navigation": {
-      "version": "2.0.10",
+      "version": "2.0.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -161,7 +217,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.behavior": {
-      "version": "1.0.13",
+      "version": "1.0.15",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -188,7 +244,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.cinemachine": {
-      "version": "3.1.5",
+      "version": "3.1.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -198,7 +254,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
-      "version": "2.11.3",
+      "version": "2.11.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -278,7 +334,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.26",
+      "version": "2.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -303,7 +359,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.memoryprofiler": {
-      "version": "1.1.11",
+      "version": "1.1.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -338,10 +394,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.postprocessing": {
-      "version": "3.5.1",
+      "version": "3.5.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
+        "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.physics": "1.0.0"
       },
       "url": "https://packages.unity.com"
@@ -408,7 +465,7 @@
       }
     },
     "com.unity.scriptablebuildpipeline": {
-      "version": "2.6.0",
+      "version": "2.6.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -451,6 +508,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.springbone": {
+      "version": "https://github.com/unity3d-jp/UnityChanSpringBone.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "9415071549aee47c094657d9ef5af239b96c201f"
+    },
     "com.unity.test-framework": {
       "version": "1.6.0",
       "depth": 0,
@@ -472,7 +536,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.10",
+      "version": "1.8.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -502,7 +566,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.9",
+      "version": "1.9.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -518,7 +582,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "bc28b446fb728e6350204e60493bd3ada99501bb"
+      "hash": "6fad2db5dc6282aefa7ae561ca4b205319b6bc56"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

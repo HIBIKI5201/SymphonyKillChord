@@ -1,1 +1,14 @@
-language: ja
+language: "ja-JP"
+early_access: false
+
+reviews:
+  profile: "chill"
+  auto_review:
+    enabled: true # 自動レビューを有効にする
+    drafts: false # ドラフトPRをレビュー対象から除外
+  path_filters:
+    - "!dist/**" # ビルド成果物などをレビューから除外
+    - "!node_modules/**"
+  tools:
+    shellcheck:
+      enabled: true # 特定のツールの有効・無効を切り替え

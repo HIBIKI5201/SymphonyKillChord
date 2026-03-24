@@ -1,0 +1,17 @@
+{
+    "name": "KillChord.Domain",
+    "rootNamespace": "KillChord.Runtime.Domain",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:912501d3a9c2c414ba93298e84096560"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
