@@ -18,7 +18,7 @@ float FrontRimFresnel(float3 normalWS, float3 viewDirWS)
 {
     float3 lightDirWS = _MainLightPosition.xyz;
     return
-    saturate(pow(FresnelEffect(normalWS, viewDirWS, 10) * 50, 10))
+    saturate(pow(FresnelEffect(normalWS, viewDirWS, 10) * 10, 10))
     *
     saturate(dot(lightDirWS, normalWS));
 }
