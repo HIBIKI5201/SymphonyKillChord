@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain
 {
+    [System.Serializable]
     public sealed class CameraParameter
     {
         public CameraParameter(
@@ -32,17 +33,30 @@ namespace KillChord.Runtime.Domain
             CameraCollisionOffset = cameraCollisionOffset;
         }
 
-        public Vector3 CameraOffset { get; }
-        public Vector3 CameraLookAtOffset { get; }
-        public float CameraPlayerFollowDamping { get; }
-        public float CameraPlayerLookAtDamping { get; }
-        public float CameraLockOnFollowDamping { get; }
-        public float CameraLockOnLookAtDamping { get; }
-        public float CameraRotationSpeed { get; }
-        public float PitchRangeMin { get; }
-        public float PitchRangeMax { get; }
-        public bool IsCameraFlipX { get; }
-        public float CameraCollisionRadius { get; }
-        public Vector3 CameraCollisionOffset { get; }
+        [field: SerializeField]
+        public Vector3 CameraOffset { get; private set; }
+
+        [field: SerializeField]
+        public Vector3 CameraLookAtOffset { get; private set; }
+        [field: SerializeField]
+        public float CameraPlayerFollowDamping { get; private set; }
+        [field: SerializeField]
+        public float CameraPlayerLookAtDamping { get; private set; }
+        [field: SerializeField]
+        public float CameraLockOnFollowDamping { get; private set; }
+        [field: SerializeField]
+        public float CameraLockOnLookAtDamping { get; private set; }
+        [field: SerializeField]
+        public float CameraRotationSpeed { get; private set; }
+        [field: SerializeField]
+        public float PitchRangeMin { get; private set; }
+        [field: SerializeField]
+        public float PitchRangeMax { get; private set; }
+        [field: SerializeField]
+        public bool IsCameraFlipX { get; private set; }
+        [field: SerializeField]
+        public float CameraCollisionRadius { get; private set; }
+        [field: SerializeField]
+        public Vector3 CameraCollisionOffset { get; private set; }
     }
 }
