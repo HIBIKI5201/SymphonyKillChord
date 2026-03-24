@@ -7,9 +7,9 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         public static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
         {
-            if (utc == null)
+            if (utc == null || !utc.HasValue)
             {
-                jst = default;
+                jst = DateTime.MinValue;
                 return false;
             }
 
