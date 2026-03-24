@@ -7,9 +7,9 @@ namespace KillChord.Runtime.View
     {
         [SerializeField] private Image _hpBarImage;
 
-        private void ChangeHitPoint()
+        public void ChangeHitPoint(float fillAmount)
         {
-            
+            _hpBarImage.fillAmount = fillAmount;
         }
     }
 }
