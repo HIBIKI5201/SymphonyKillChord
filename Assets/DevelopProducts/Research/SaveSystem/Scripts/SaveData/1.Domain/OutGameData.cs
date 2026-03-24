@@ -2,24 +2,21 @@ using System;
 using System.Collections.Generic;
 namespace Research.SaveSystem
 {
-
     /// <summary>
     ///     セーブデータ：アウトゲーム情報
     /// </summary>
     [Serializable]
-    public class OutGameData
+    public class OutGameData : SaveDataBase
     {
         public OutGameData()
         {
-            StoryProgress = new();
-            EquipmentUnlock = new();
+            StageUnlock = new();
             SkillUnlock = new();
+            Version = Constants.CURRENT_VERSION;
         }
 
-        /// <summary>ストーリー進捗</summary>
-        public HashSet<int> StoryProgress { get; set; }
-        /// <summary>装備解放状況</summary>
-        public HashSet<int> EquipmentUnlock { get; set; }
+        /// <summary>ステージ解放状況</summary>
+        public HashSet<int> StageUnlock { get; set; }
         /// <summary>スキル解放状況</summary>
         public HashSet<int> SkillUnlock { get; set; }
     }

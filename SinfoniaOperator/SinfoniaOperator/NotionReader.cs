@@ -123,6 +123,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
+                Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
                 NotionClient notion = NotionClientFactory.Create(new ClientOptions
                 {
                     AuthToken = _notionToken,
@@ -130,9 +131,12 @@ namespace SinfoniaStudio.SinfoniaOperator
 
                 List<IWikiDatabase> allResults = new();
                 string? nextCursor = null;
+                int pageCount = 0;
 
                 do
                 {
+                    pageCount++;
+                    Console.WriteLine($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
                     DatabaseQueryResponse query = await notion.Databases.QueryAsync(
                         databaseID,
                         new DatabasesQueryParameters { StartCursor = nextCursor }
@@ -140,19 +144,24 @@ namespace SinfoniaStudio.SinfoniaOperator
 
                     allResults.AddRange(query.Results);
                     nextCursor = query.HasMore ? query.NextCursor : null;
+                    Console.WriteLine($"[NotionReader] {query.Results.Count} 件のアイテムを取得しました (累計: {allResults.Count} 件)");
 
                 } while (!string.IsNullOrEmpty(nextCursor));
 
                 if (allResults.Count == 0)
                 {
-                    Console.WriteLine("データベースの要素がありません。");
+                    Console.WriteLine($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
+                }
+                else
+                {
+                    Console.WriteLine($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
                 }
 
                 return allResults;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"データベース取得中にエラーが発生しました: {ex.Message}");
+                Console.WriteLine($"[NotionReader] データベース取得中にエラーが発生しました: {ex.Message}");
                 return new List<IWikiDatabase>();
             }
         }
@@ -164,14 +173,21 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public static string GetPageName(Page page, string namePropertyName)
         {
-            string pageName = "(名称未設定)";
+            const string DEFAULT_NAME = "(名称未設定)";
+            if (page?.Properties == null) return DEFAULT_NAME;
+
             if (page.Properties.TryGetValue(namePropertyName, out PropertyValue? titlePropValue) &&
-                titlePropValue is TitlePropertyValue titleProperty)
+                titlePropValue is TitlePropertyValue titleProperty &&
+                titleProperty.Title != null)
             {
-                pageName = string.Join("", titleProperty.Title.Select(t => t.PlainText));
+                string name = string.Join("", titleProperty.Title
+                    .Where(t => t != null && t.PlainText != null)
+                    .Select(t => t.PlainText));
+                
+                return string.IsNullOrWhiteSpace(name) ? DEFAULT_NAME : name;
             }
 
-            return pageName;
+            return DEFAULT_NAME;
         }
 
         private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
