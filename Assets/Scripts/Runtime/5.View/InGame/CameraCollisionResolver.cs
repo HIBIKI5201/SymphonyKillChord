@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.View
 {
     // MonoBehaviour側が差し替え可能な、interface代替のアダプタクラス。
     public class CameraCollisionResolver
