@@ -12,9 +12,9 @@ namespace KillChord.Runtime.Adaptor
 
         public bool TryDodge(Vector2 input, float time)
             => _playerApplication.TryDodge(input, time);
-        public void Update(ref Vector3 position, ref Quaternion rotation, Vector2 input, float time, float deltaTime)
+        public void Update(ref Quaternion rotation, Vector2 input, float time, out Vector3 velocity)
         {
-            _playerApplication.Update(ref position, ref rotation, input, time, deltaTime);
+            _playerApplication.Update(ref rotation, input, time, out velocity);
         }
 
         private readonly PlayerApplication _playerApplication;
