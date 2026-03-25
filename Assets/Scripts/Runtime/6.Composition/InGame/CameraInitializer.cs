@@ -18,14 +18,11 @@ namespace KillChord.Runtime.Composition
 
         private void Awake()
         {
-            if (_cameraManager == null)
-                Debug.LogError($"{nameof(CameraManager)}がNullです", this);
-            if (_cameraConfigs == null)
-                Debug.LogError($"{nameof(CameraConfigs)}がNullです", this);
-            if (_followTarget == null)
-                Debug.LogError($"{nameof(_followTarget)}がNullです", this);
-            if (_initialLockTarget == null)
-                Debug.LogError($"{nameof(_initialLockTarget)}がNullです", this);
+            Debug.Assert(_cameraManager != null, $"{nameof(CameraManager)}がNullです");
+            Debug.Assert(_cameraConfigs != null, $"{nameof(CameraConfigs)}がNullです");
+            Debug.Assert(_followTarget != null, $"{nameof(_followTarget)}がNullです");
+            Debug.Assert(_initialLockTarget != null, $"{nameof(_initialLockTarget)}がNullです");
+
 
             CameraCollisionResolver collisionResolver = new();
             CameraParameter parameter = _cameraConfigs.ToDomain();
