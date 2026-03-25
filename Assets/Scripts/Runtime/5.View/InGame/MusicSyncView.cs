@@ -49,7 +49,9 @@ namespace KillChord.Runtime.View
 
         private void PlayBgm(string cueName)
         {
+#if UNITY_EDITOR
             _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
+#endif
         }
 
         private void OnAttack(InputContext<float> context)
