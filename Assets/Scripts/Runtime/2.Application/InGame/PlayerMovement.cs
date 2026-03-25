@@ -5,9 +5,9 @@ namespace KillChord.Runtime.Application
 {
     public sealed class PlayerMovement
     {
-        public PlayerMovement(MoveSpeed speed)
+        public PlayerMovement(PlayerMoveParameter parameter)
         {
-            _speed = speed;
+            _parameter = parameter;
         }
 
         public void Update(ref Vector3 position, ref Quaternion rotation, Vector2 input, float deltaTime)
@@ -18,10 +18,10 @@ namespace KillChord.Runtime.Application
             if (input.sqrMagnitude > 1f)
                 input.Normalize();
             Vector3 direction = new Vector3(input.x, 0, input.y);
-            position += direction * (deltaTime * _speed.Value);
+            position += direction * (deltaTime * _parameter.MoveSpeed.Value);
             rotation = Quaternion.LookRotation(direction, Vector3.up);
         }
 
-        private MoveSpeed _speed;
+        private readonly PlayerMoveParameter _parameter;
     }
 }
