@@ -7,9 +7,9 @@ namespace KillChord.Runtime.Adaptor
     /// <summary>
     ///     入力を履歴保存用に変換してInputBufferRecorderに渡すクラス。
     /// </summary>
-    public class InputAdaptor
+    public class RecordController
     {
-        public InputAdaptor(InputBufferRecorder inputBufferRecorder)
+        public RecordController(InputBufferRecorder inputBufferRecorder)
         {
             _inputBufferRecorder = inputBufferRecorder;
         }
@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="inputContext"></param>
         public void HandleMove(InputContext<Vector2> inputContext)
         {
-            InputActionId actionId = InputIdCoverter.Convert(inputContext.ActionKind);
+            InputActionId actionId = InputIdConverter.Convert(inputContext.ActionKind);
             _inputBufferRecorder.Record(actionId, inputContext.Phase, inputContext.Timestamp, inputContext.Value);
         }
 
@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="inputContext"></param>
         public void HandleButton(InputContext<float> inputContext)
         {
-            InputActionId actionId = InputIdCoverter.Convert(inputContext.ActionKind);
+            InputActionId actionId = InputIdConverter.Convert(inputContext.ActionKind);
             _inputBufferRecorder.Record(actionId, inputContext.Phase, inputContext.Timestamp, inputContext.Value);
         }
 

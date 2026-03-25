@@ -73,6 +73,12 @@ namespace KillChord.Runtime.View
 
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
+            if (actionId == InputActionKind.Move)
+            {
+                Debug.LogError("Move action should not be handled by OnMobileButton. Use OnMobileMove instead.");
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 actionId, value, phase, time);
