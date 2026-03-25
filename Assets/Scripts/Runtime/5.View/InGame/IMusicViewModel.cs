@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
-    public interface IIngameMusicViewModel
+    public interface IMusicViewModel
     {
-        public void UpdateBgm(in IngameMusicDTO dto);
+        
     }
 }

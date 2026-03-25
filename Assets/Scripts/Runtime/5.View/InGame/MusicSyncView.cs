@@ -5,25 +5,20 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncView : MonoBehaviour
     {
+        public int Bpm => _bpm;
+
         private MusicPlayer _mp;
+        private int _bpm;
 
         public void Bind(MusicPlayer musicPlayer)
         {
             _mp = musicPlayer;
         }
 
-        private void PlayBgm(string cueName)
-        {
-            _mp.PlayBgm(cueName);
-        }
-
         private void PlayBgm(string cueName, int bpm)
         {
-            _mp.PlayBgm(cueName, bpm);
-        }
-
-        private void Update()
-        {
+            _mp.PlayBgm(cueName);
+            _bpm = bpm;
         }
 
 #if UNITY_EDITOR
@@ -32,7 +27,7 @@ namespace KillChord.Runtime.View
         [ContextMenu(nameof(PlayBgm))]
         public void PlayBgm()
         {
-            PlayBgm(cueName);
+            PlayBgm(cueName, 1);
         }
 #endif
     }

@@ -7,12 +7,11 @@ namespace KillChord.Runtime.View
     {
         public double Time => _playback.time;
         public string CueName => _cueName;
-        public int Bpm => _bpm;
 
         private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
 
-        private int _bpm;
+
         private string _cueName;
 
         public void Awake()
@@ -32,14 +31,7 @@ namespace KillChord.Runtime.View
         public void StopBgm()
         {
             _playback.Stop();
-            _bpm = -1;
             _cueName = string.Empty;
-        }
-
-        public void PlayBgm(string cueName, int bpm)
-        {
-            PlayBgm(cueName);
-            _bpm = bpm;
         }
     }
 }
