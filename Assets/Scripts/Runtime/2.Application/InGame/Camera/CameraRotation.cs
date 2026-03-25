@@ -12,9 +12,9 @@ namespace KillChord.Runtime.Application
             dir.y = 0;
 
             Quaternion target = Quaternion.LookRotation(dir, Vector3.up);
-            rotation = Quaternion.Lerp(target, rotation, deltaTime * _speed);
+            rotation = Quaternion.Lerp(rotation, target, deltaTime * _speed);
         }
 
-        private readonly float _speed = 0.5f;
+        private readonly float _speed = 1.2f;
     }
 }
