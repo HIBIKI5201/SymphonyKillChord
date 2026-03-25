@@ -18,6 +18,9 @@ namespace KillChord.Runtime.Application
 
         public bool TryDodge(Vector2 input, float currentTime)
         {
+            if (input == Vector2.zero)
+                return false;
+
             if (currentTime - _previousDodgedTime < _dodgedCooldown)
                 return false;
 
@@ -35,6 +38,7 @@ namespace KillChord.Runtime.Application
             if (time > _previousDodgedTime + _dodgeDuration)
             {
                 _isDodging = false;
+                return;
             }
 
             position += _dodgeSpeed.Value * deltaTime * _direction;
