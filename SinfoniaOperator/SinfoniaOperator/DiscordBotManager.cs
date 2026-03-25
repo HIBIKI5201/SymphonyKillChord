@@ -104,9 +104,37 @@ namespace SinfoniaStudio.SinfoniaOperator
                 return;
             }
 
+            const int MAX_LENGTH = 2000;
+            string remainingContent = content;
+
             try
             {
-                await channel.SendMessageAsync(content);
+                while (remainingContent.Length > MAX_LENGTH)
+                {
+                    // 2000文字以内で最後の改行を探す
+                    int splitIndex = remainingContent.LastIndexOf('\n', MAX_LENGTH - 1);
+
+                    // 改行が見つからない場合は2000文字で強制分割
+                    if (splitIndex == -1)
+                    {
+                        splitIndex = MAX_LENGTH;
+                    }
+                    else
+                    {
+                        // 改行文字そのものを含めて分割する
+                        splitIndex++;
+                    }
+
+                    string chunk = remainingContent.Substring(0, splitIndex);
+                    await channel.SendMessageAsync(chunk);
+                    remainingContent = remainingContent.Substring(splitIndex);
+                }
+
+                if (!string.IsNullOrWhiteSpace(remainingContent))
+                {
+                    await channel.SendMessageAsync(remainingContent);
+                }
+
                 Console.WriteLine($"[DiscordBot] id:{channelID} へのメッセージ送信が完了しました。");
             }
             catch (Exception ex)
