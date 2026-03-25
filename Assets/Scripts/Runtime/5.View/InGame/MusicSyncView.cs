@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -12,6 +13,11 @@ namespace KillChord.Runtime.View
         public void Bind(MusicPlayer musicPlayer)
         {
             _mp = musicPlayer;
+        }
+        
+        private void Update()
+        {
+            
         }
 
         private void PlayBgm(string cueName, int bpm)
