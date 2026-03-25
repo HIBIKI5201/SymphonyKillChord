@@ -1,10 +1,14 @@
+using KillChord.Runtime.Domain;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
     public sealed class CameraRotation
     {
-        public CameraRotation() { }
+        public CameraRotation(CameraMovementParameter parameter)
+        {
+            _parameter = parameter;
+        }
 
         public void Update(ref Quaternion rotation, in Vector3 playerPosition, in Vector3 targetPosition, float deltaTime)
         {
@@ -12,9 +16,9 @@ namespace KillChord.Runtime.Application
             dir.y = 0;
 
             Quaternion target = Quaternion.LookRotation(dir, Vector3.up);
-            rotation = Quaternion.Lerp(target, rotation, deltaTime * _speed);
+            rotation = Quaternion.Lerp(rotation, target, deltaTime * _parameter.RotateLerpSpeed);
         }
 
-        private readonly float _speed = 0.5f;
+        private readonly CameraMovementParameter _parameter;
     }
 }

@@ -5,7 +5,11 @@ namespace KillChord.Runtime.Adaptor
 {
     public sealed class CameraCenterOffsetController
     {
-
+        public CameraCenterOffsetController(CameraFollow followSystem, CameraRotation rotationSystem)
+        {
+            _follow = followSystem;
+            _rotation = rotationSystem;
+        }
         public void Update(
             ref Vector3 cameraCenterPosition,
             ref Quaternion rotation,
@@ -21,7 +25,7 @@ namespace KillChord.Runtime.Adaptor
                 _rotation.Update(ref rotation, followPostion, targetPosition, deltaTime);
         }
 
-        private readonly CameraFollow _follow = new(2f);
-        private readonly CameraRotation _rotation = new();
+        private readonly CameraFollow _follow;
+        private readonly CameraRotation _rotation;
     }
 }

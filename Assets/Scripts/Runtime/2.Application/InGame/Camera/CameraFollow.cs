@@ -1,12 +1,13 @@
+using KillChord.Runtime.Domain;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
     public sealed class CameraFollow
     {
-        public CameraFollow(float offsetPower)
+        public CameraFollow(CameraMovementParameter parameter)
         {
-            _offsetPower = offsetPower;
+            _parameter = parameter;
         }
 
         public void Update(
@@ -19,17 +20,16 @@ namespace KillChord.Runtime.Application
         {
             Vector3 targetFollowCenterOffset = -_followVelocity.UpdateFollowVelocity(followPostion, deltaTime);
             targetFollowCenterOffset.y = 0;
-            if (targetFollowCenterOffset.sqrMagnitude >= _offsetPower * _offsetPower)
+            if (targetFollowCenterOffset.sqrMagnitude >= _parameter.FollowOffsetPower * _parameter.FollowOffsetPower)
             {
                 targetFollowCenterOffset.Normalize();
-                targetFollowCenterOffset *= _offsetPower;
+                targetFollowCenterOffset *= _parameter.FollowOffsetPower;
             }
 
-            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _speed * deltaTime);
+            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * deltaTime);
         }
 
-        private readonly float _speed = 1.0f;
-        private readonly float _offsetPower = 2f;
+        private readonly CameraMovementParameter _parameter;
         private CameraFollowVelocityApplication _followVelocity;
     }
 }
