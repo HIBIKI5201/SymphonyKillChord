@@ -18,22 +18,15 @@ namespace KillChord.Runtime.View
         }
         void Update()
         {
-            UpdateAnimation();
             UpdateMovement();
-        }
-        private void UpdateAnimation()
-        {
-            Vector2 dir = Vector2.zero;
-            dir.x = Input.GetAxis("Horizontal");
-            dir.y = Input.GetAxis("Vertical");
-
-            _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
         }
         private void UpdateMovement()
         {
             Vector2 dir = Vector2.zero;
             dir.x = Input.GetAxis("Horizontal");
             dir.y = Input.GetAxis("Vertical");
+
+            _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
 
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
