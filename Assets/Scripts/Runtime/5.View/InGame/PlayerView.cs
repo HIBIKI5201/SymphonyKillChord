@@ -16,6 +16,9 @@ namespace KillChord.Runtime.View
         }
         void Start()
         {
+            if (_controller == null)
+                Debug.LogError($"{nameof(_controller)}がNullです。Update()更新前にInit()を実行するようにしてください。", this);
+
             _cacheTransform = transform;
         }
         void Update()
