@@ -265,6 +265,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 519239620}
+  - component: {fileID: 519239621}
   m_Layer: 0
   m_Name: MusicPlayer
   m_TagString: Untagged
@@ -287,6 +288,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519239621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519239619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62a357b8644c9604e8c18d492ad20e0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MusicPlayer
 --- !u!1 &1924775717
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,7 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ffd41da8bc4e654387111de5b0b7fe1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PersistentEntryPoint
-  _active: 1
+  _active: 0
   _firstSceneName: MusicSyncMock
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
