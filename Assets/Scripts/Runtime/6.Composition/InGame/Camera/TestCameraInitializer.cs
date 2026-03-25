@@ -3,6 +3,7 @@ using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
+using KillChord.Structure;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
@@ -12,11 +13,11 @@ namespace KillChord.Runtime.Composition
     {
         [SerializeField] private TestCameraSystem _cameraSystem;
 
-        //[SerializeField] private Config _config;
+        [SerializeField] private CameraMovementConfig _config;
 
         private void Awake()
         {
-            CameraMovementParameter parameter = null;
+            CameraMovementParameter parameter = _config.ToDomain();
 
             CameraRotation rotationSystem = new(parameter);
             CameraFollow followSystem = new(parameter);
