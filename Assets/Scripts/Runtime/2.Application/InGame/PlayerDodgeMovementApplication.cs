@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application
 
         public bool TryDodge(Vector2 input, float currentTime)
         {
-            if (input == Vector2.zero)
+            if (input.sqrMagnitude <= float.Epsilon)
                 return false;
 
             if (currentTime - _previousDodgedTime < _dodgedCooldown)
