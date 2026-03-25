@@ -7,23 +7,27 @@ namespace KillChord.Runtime.View
     {
         public int Bpm => _bpm;
 
+#if UNITY_EDITOR
+        [SerializeField] private int _testBpm;
+#endif
+
         private MusicPlayer _mp;
+        private MusicViewModel _musicViewModel;
         private int _bpm;
 
-        public void Bind(MusicPlayer musicPlayer)
+        public void Bind(MusicPlayer musicPlayer, MusicViewModel musicViewModel)
         {
             _mp = musicPlayer;
-        }
-        
-        private void Update()
-        {
-            
+            _musicViewModel = musicViewModel;
         }
 
-        private void PlayBgm(string cueName, int bpm)
+        private void Update()
         {
-            _mp.PlayBgm(cueName);
-            _bpm = bpm;
+        }
+
+        private void PlayBgm(string cueName)
+        {
+            _bpm = _testBpm;
         }
 
 #if UNITY_EDITOR
@@ -32,7 +36,7 @@ namespace KillChord.Runtime.View
         [ContextMenu(nameof(PlayBgm))]
         public void PlayBgm()
         {
-            PlayBgm(cueName, 1);
+            PlayBgm(cueName);
         }
 #endif
     }
