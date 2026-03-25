@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Composition
 
         private BufferedInputBuffer _bufferedInputBuffer;
         private InputBufferRecorder _inputBufferRecorder;
-        private InputAdaptor _inputAdaptor;
+        private RecordController _inputAdaptor;
         private PlayerInputView _playerInputView;
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Composition
         {
             _bufferedInputBuffer = new BufferedInputBuffer(_bufferCapacity);
             _inputBufferRecorder = new InputBufferRecorder(_bufferedInputBuffer);
-            _inputAdaptor = new InputAdaptor(_inputBufferRecorder);
+            _inputAdaptor = new RecordController(_inputBufferRecorder);
 
             _timestampProvider = new InputTimestampProvider();
             _playerInputView = new PlayerInputView(_timestampProvider);
@@ -90,6 +90,19 @@ namespace KillChord.Runtime.Composition
             _playerInputView.OnDodgeInput += _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput += _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput += _inputAdaptor.HandleMove;
+        }
+
+        /// <summary>
+        ///     ViewのイベントからAdaptorの処理を解除する。
+        /// </summary>
+        private void UnbindViewAdaptor()
+        {
+            _playerInputView.OnOptionInput -= _inputAdaptor.HandleButton;
+            _playerInputView.OnSubmitInput -= _inputAdaptor.HandleButton;
+            _playerInputView.OnCancelInput -= _inputAdaptor.HandleButton;
+            _playerInputView.OnDodgeInput -= _inputAdaptor.HandleButton;
+            _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
+            _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
         }
 
         /// <summary>
@@ -168,6 +181,7 @@ namespace KillChord.Runtime.Composition
         private void OnDisable()
         {
             UnregisterActions();
+            UnbindViewAdaptor();
         }
     }
 }
