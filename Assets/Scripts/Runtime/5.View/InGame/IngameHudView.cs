@@ -6,7 +6,7 @@ namespace KillChord.Runtime.View
 {
     public class IngameHudView : MonoBehaviour
     {
-        [SerializeField] private Image _halthBarImage;
+        [SerializeField] private Image _healthBarImage;
 
         private IngameHudViewModel _viewModel;
         
@@ -19,7 +19,7 @@ namespace KillChord.Runtime.View
 
         private void ChangeHitPoint(float fillAmount)
         {
-            _halthBarImage.fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
+            _healthBarImage.fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
         }
     }
 }
