@@ -1,12 +1,14 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
+using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 using KillChord.Structure;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class CameraInitializer : MonoBehaviour
     {
         [SerializeField] private CameraManager _cameraManager;
