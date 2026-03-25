@@ -11,8 +11,11 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private PlayerView _player;
         private void Awake()
         {
-            PlayerMovement playerMovement = new(new MoveSpeed(10), new MoveSpeed(10), 0.3f);
-            PlayerController playerMovementController = new(playerMovement);
+            PlayerDodgeMovementApplication dodge = new(new MoveSpeed(20), 0.2f, 0.3f);
+            PlayerMovement move = new(new MoveSpeed(10));
+            PlayerApplication application = new(move, dodge);
+
+            PlayerController playerMovementController = new(application);
             _player.Init(playerMovementController);
         }
     }

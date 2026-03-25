@@ -5,39 +5,23 @@ namespace KillChord.Runtime.Application
 {
     public sealed class PlayerMovement
     {
-        public PlayerMovement(
-            MoveSpeed speed,
-            MoveSpeed dodgeSpeed,
-            float dodgeCooldown)
+        public PlayerMovement(MoveSpeed speed)
         {
             _speed = speed;
-            _dodgeSpeed = dodgeSpeed;
-            _dodgedCooldown = dodgeCooldown;
         }
 
-        public Vector3 GetMovedPostion(Vector3 currentPosition, Vector2 input, float deltaTime)
+        public void Update(ref Vector3 position, ref Quaternion rotation, Vector2 input, float deltaTime)
         {
+            if (input == Vector2.zero)
+                return;
+
             if (input.sqrMagnitude > 1f)
                 input.Normalize();
-
-            return currentPosition + new Vector3(input.x, 0, input.y) * (deltaTime * _speed.Value);
+            Vector3 direction = new Vector3(input.x, 0, input.y);
+            position += direction * (deltaTime * _speed.Value);
+            rotation = Quaternion.LookRotation(direction, Vector3.up);
         }
-        public bool TryGetDodgedPosition(Vector3 currentPosition, Vector2 input, float currentTime, out Vector3 result)
-        {
-            result = currentPosition;
-            if (_previousDodgedTime + _dodgedCooldown >= currentTime)
-                return false;
-
-            _previousDodgedTime = currentTime;
-
-            result = currentPosition + new Vector3(input.x, 0, input.y).normalized * _dodgeSpeed.Value;
-            return true;
-        }
-
 
         private MoveSpeed _speed;
-        private MoveSpeed _dodgeSpeed;
-        private float _previousDodgedTime;
-        private float _dodgedCooldown;
     }
 }
