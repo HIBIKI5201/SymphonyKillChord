@@ -7,6 +7,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View
 {
     [RequireComponent(typeof(CinemachineCamera))]
+    [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public class CameraManager : MonoBehaviour, IDisposable
     {
         public bool Init(CameraController controller, Transform followTarget)

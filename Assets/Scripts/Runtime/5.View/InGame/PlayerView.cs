@@ -1,8 +1,10 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Utility;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
     public sealed class PlayerView : MonoBehaviour
     {
         [SerializeField] private string _blendName;
