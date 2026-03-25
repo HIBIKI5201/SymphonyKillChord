@@ -12,15 +12,16 @@ namespace KillChord.Runtime.Application
 
         public bool TryDodge(Vector2 input, float time)
             => _dodge.TryDodge(input, time);
-        public void Update(ref Vector3 position, ref Quaternion rotation, Vector2 input, float time, float deltaTime)
+        public void Update(ref Quaternion rotation, Vector2 input, float time, out Vector3 velocity)
         {
+            velocity = Vector3.zero;
             if (_dodge.IsDodhing)
             {
-                _dodge.Update(ref position, ref rotation, time, deltaTime);
+                _dodge.Update(ref rotation, time, out velocity);
             }
             else
             {
-                _movement.Update(ref position, ref rotation, input, deltaTime);
+                _movement.Update(ref rotation, input, out velocity);
             }
         }
 

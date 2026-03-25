@@ -28,8 +28,9 @@ namespace KillChord.Runtime.Application
 
             return true;
         }
-        public void Update(ref Vector3 position, ref Quaternion rotaition, float time, float deltaTime)
+        public void Update(ref Quaternion rotaition, float time, out Vector3 velocity)
         {
+            velocity = Vector3.zero;
             if (!_isDodging)
                 return;
 
@@ -39,7 +40,7 @@ namespace KillChord.Runtime.Application
                 return;
             }
 
-            position += (float)_parameter.DodgeSpeed * deltaTime * _direction;
+            velocity = (float)_parameter.DodgeSpeed * _direction;
             rotaition = Quaternion.LookRotation(_direction, Vector3.up);
         }
 
