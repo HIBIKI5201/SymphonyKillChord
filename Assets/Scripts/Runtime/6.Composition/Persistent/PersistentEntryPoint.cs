@@ -11,12 +11,14 @@ namespace KillChord.Runtime.Composition
     /// </summary>
     public class PersistentEntryPoint : MonoBehaviour
     {
+        [SerializeField] private bool _active;
         [SerializeField, SceneNameSelector] private string _firstSceneName;
 
         private CancellationTokenSource _cancellationTokenSource;
 
         private async void Start()
         {
+            if (!_active) return;
             _cancellationTokenSource = new CancellationTokenSource();
 
             if (!SceneLoader.GetExistScene(_firstSceneName, out _))
@@ -25,7 +27,7 @@ namespace KillChord.Runtime.Composition
                     null,
                     LoadSceneMode.Additive,
                     _cancellationTokenSource.Token
-                    );
+                );
 
                 if (!success)
                 {
@@ -39,8 +41,8 @@ namespace KillChord.Runtime.Composition
 
         private void OnDestroy()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
         }
     }
 }
