@@ -5,8 +5,11 @@ namespace KillChord.Runtime.View
 {
     public class MusicPlayer : MonoBehaviour
     {
-        private CriAtomSource _cri;
+        public double Time => _playback.time;
+        public string CueName => _cueName;
+        public int Bpm => _bpm;
 
+        private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
 
         private int _bpm;
@@ -37,16 +40,6 @@ namespace KillChord.Runtime.View
         {
             PlayBgm(cueName);
             _bpm = bpm;
-        }
-
-        public double GetPlayTime()
-        {
-            return _playback.time;
-        }
-
-        public int GetBpm()
-        {
-            return _bpm;
         }
     }
 }
