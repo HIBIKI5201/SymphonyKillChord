@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Composition
     /// </summary>
     public class PersistentEntryPoint : MonoBehaviour
     {
-        [SerializeField] private bool _active;
+        [SerializeField] private bool _active = true;
         [SerializeField, SceneNameSelector] private string _firstSceneName;
 
         private CancellationTokenSource _cancellationTokenSource;

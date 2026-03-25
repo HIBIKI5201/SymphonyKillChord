@@ -1,4 +1,3 @@
-using CriWare;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
