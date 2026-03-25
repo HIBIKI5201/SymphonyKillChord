@@ -1,10 +1,15 @@
+using KillChord.Runtime.Adaptor;
 using R3;
-using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
-    public class IngameHudViewModel
+    public class IngameHudViewModel : IIngameHudViewModel
     {
-        ReactiveProperty<float> _healthRate;
+        public ReactiveProperty<float> HealthRate { get; } = new();
+
+        public void UpdateHealth(in IngameHudDTO dto)
+        {
+            HealthRate.Value = dto.HealthRate;
+        }
     }
 }

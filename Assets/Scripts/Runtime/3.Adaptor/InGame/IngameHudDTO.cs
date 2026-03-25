@@ -1,8 +1,6 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor
 {
-    public readonly struct IngameHudDTO
+    public readonly ref struct IngameHudDTO
     {
         public IngameHudDTO(float healthRate)
         {
