@@ -1,11 +1,11 @@
 using KillChord.Runtime.View;
-using R3;
-using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.View
 {
     public class MusicViewModel : IMusicViewModel
     {
-        
+        MusicViewModel()
+        {
+        }
     }
 }
