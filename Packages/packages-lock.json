@@ -582,7 +582,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "6fad2db5dc6282aefa7ae561ca4b205319b6bc56"
+      "hash": "6d4b158f4152cb1502da585f41fb6dd6793ffdda"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
