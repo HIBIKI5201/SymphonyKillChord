@@ -1,12 +1,16 @@
+using System.Numerics;
+
 namespace KillChord.Runtime.Adaptor
 {
     public readonly ref struct IngameHudDTO
     {
-        public IngameHudDTO(float healthRate)
+        public IngameHudDTO(float maxHealth, float currentHealth)
         {
-            HealthRate = healthRate;
+            MaxHealth = maxHealth;
+            CurrentHealth = currentHealth;
         }
 
-        public readonly float HealthRate;
+        public readonly float MaxHealth;
+        public readonly float CurrentHealth;
     }
 }
