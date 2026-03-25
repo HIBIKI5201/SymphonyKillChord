@@ -6,7 +6,6 @@ namespace KillChord.Runtime.View
     public class IngameHudViewModel : IIngameHudViewModel
     {
         public ReactiveProperty<float> HealthRate { get; } = new();
-
         public void UpdateHealth(in IngameHudDTO dto)
         {
             if (dto.MaxHealth <= 0)
