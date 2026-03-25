@@ -1,20 +1,9 @@
 using System;
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.View;
 
 namespace KillChord.Runtime.View
 {
-    public class MusicSyncViewModel : IMusicSyncViewModel
+    public class MusicSyncViewMode
     {
-        private int _bpm;
-
-        public void SetBpm(int bpm)
-        {
-            _bpm = bpm;
-        }
-
-        public void RegisterActionType(ActionType actionType)
-        {
-            
-        }
     }
 }

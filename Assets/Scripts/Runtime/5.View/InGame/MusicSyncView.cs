@@ -1,10 +1,11 @@
 using System;
+using KillChord.Runtime.Adaptor;
 using R3;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
-    public class MusicSyncView : MonoBehaviour
+    public class MusicSyncView : MonoBehaviour, IMusicSyncViewModel
     {
         public int Bpm => _bpm;
 
@@ -31,6 +32,11 @@ namespace KillChord.Runtime.View
         private void PlayBgm(string cueName)
         {
             _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
+        }
+
+        private void OnAttack()
+        {
+            
         }
 
         /// <summary>
