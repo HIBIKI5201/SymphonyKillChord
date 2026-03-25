@@ -6,13 +6,13 @@ namespace KillChord.Runtime.View
     {
         public readonly ActionType ActionType;
         public readonly int BeatType;
-        public readonly float Timeing;
+        public readonly float Timing;
 
         public ActionParams(ActionType actionType, int beatType)
         {
             BeatType = beatType;
             ActionType = actionType;
-            Timeing = Time.unscaledTime;
+            Timing = Time.unscaledTime;
         }
     }
 }
