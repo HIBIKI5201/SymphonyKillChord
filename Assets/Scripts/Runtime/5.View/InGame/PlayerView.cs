@@ -51,12 +51,8 @@ namespace KillChord.Runtime.View
         }
 
         private static Vector2 Rotate(Vector2 v, float degrees)
-        {
-            float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
-            float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+            => Quaternion.Euler(0, 0, degrees) * v;
 
-            return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
-        }
 
         private Transform _cacheTransform;
         private PlayerController _controller;
