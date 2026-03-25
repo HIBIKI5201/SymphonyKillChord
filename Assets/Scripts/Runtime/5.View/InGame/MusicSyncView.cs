@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View
         private MusicPlayer _mp;
         private MusicViewModel _musicViewModel;
         private IMusicSyncViewModel _musicSyncViewModel;
+        private PlayerInputView _playerInputView;
         private int _bpm;
 
         public void Bind(
@@ -30,13 +31,20 @@ namespace KillChord.Runtime.View
             _musicViewModel = musicViewModel;
             _musicSyncViewModel = syncViewModel;
             _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
-            playerInputView.OnAttackInput += OnAttack;
-            playerInputView.OnDodgeInput += OnDodge;
+            _playerInputView = playerInputView;
+            _playerInputView.OnAttackInput += OnAttack;
+            _playerInputView.OnDodgeInput += OnDodge;
         }
 
         private void Update()
         {
             if (_mp == null || _bpm <= 0) return;
+        }
+
+        private void OnDestroy()
+        {
+            _playerInputView.OnAttackInput -= OnAttack;
+            _playerInputView.OnDodgeInput -= OnDodge;
         }
 
         private void PlayBgm(string cueName)
@@ -66,7 +74,7 @@ namespace KillChord.Runtime.View
             if (_musicSyncViewModel.Count != 0)
             {
                 var actionLength =
-                    Time.unscaledTime - _musicSyncViewModel.LastAction.Timeing;
+                    Time.unscaledTime - _musicSyncViewModel.LastAction.Timing;
                 signature = GetNearestSignature(actionLength);
             }
 
