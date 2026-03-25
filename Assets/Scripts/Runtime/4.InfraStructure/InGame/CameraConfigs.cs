@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace KillChord.Structure
@@ -35,7 +36,7 @@ namespace KillChord.Structure
         private float _cameraLockOnLookAtDamping = 0f;
         [SerializeField, Tooltip("カメラ感度。")]
         private float _cameraRotationSpeed = 3f;
-        [SerializeField, Tooltip("ピッチ角度の範囲（オイラー角度）。")]
+        [SerializeField, Tooltip("ピッチ角度の範囲（オイラー角度）。"), MinMaxRangeSlider(-90f, 90f)]
         private Vector2 _pitchRange = new Vector2(-30f, 60f);
         [SerializeField, Tooltip("カメラのX回転を反転。")]
         private bool _isCameraFlipX;
