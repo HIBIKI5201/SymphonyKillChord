@@ -9,6 +9,12 @@ namespace KillChord.Runtime.View
 
         public void UpdateHealth(in IngameHudDTO dto)
         {
+            if (dto.MaxHealth <= 0)
+            {
+                HealthRate.Value = 0;
+                return;
+            }
+
             HealthRate.Value = dto.CurrentHealth / dto.MaxHealth;
         }
     }

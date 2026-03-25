@@ -11,9 +11,10 @@ namespace KillChord.Runtime.Domain
         }
 
         public static explicit operator float(Health health) => health.Value;
+
         public override bool Equals(object obj)
         {
-            return obj is Health health && Mathf.Approximately(Value, health.Value);
+            return obj is Health health && Value.Equals(health.Value);
         }
 
         public override int GetHashCode()
