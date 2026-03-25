@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Adaptor
     /// <summary>
     ///     InputActionKindをInputActionIdに変換するためのクラス。
     /// </summary>
-    public static class InputIdCoverter
+    public static class InputIdConverter
     {
         public static InputActionId Convert(InputActionKind actionKind)
         {
