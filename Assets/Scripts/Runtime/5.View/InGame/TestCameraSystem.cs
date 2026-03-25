@@ -28,10 +28,11 @@ namespace KillChord.Runtime.View
 
         private CameraCenterOffsetController _cecterOffsetController;
 
-        void Start()
+        public void Init(CameraCenterOffsetController cecterOffsetController)
         {
-            _cecterOffsetController = new();
+            _cecterOffsetController = cecterOffsetController;
         }
+
         void Update()
         {
             Quaternion rotation = _cameraT.rotation;
