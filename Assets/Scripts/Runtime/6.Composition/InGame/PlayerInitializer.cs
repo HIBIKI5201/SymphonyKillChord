@@ -13,7 +13,9 @@ namespace KillChord.Runtime.Composition
         {
             PlayerDodgeMovementApplication dodge = new(new MoveSpeed(20), 0.2f, 0.3f);
             PlayerMovement move = new(new MoveSpeed(10));
-            PlayerController playerMovementController = new(move, dodge);
+            PlayerApplication application = new(move, dodge);
+
+            PlayerController playerMovementController = new(application);
             _player.Init(playerMovementController);
         }
     }

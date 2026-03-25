@@ -5,28 +5,18 @@ namespace KillChord.Runtime.Adaptor
 {
     public class PlayerController
     {
-        public PlayerController(PlayerMovement movement, PlayerDodgeMovementApplication dodgeMovement)
+        public PlayerController(PlayerApplication playerApplication)
         {
-            _movement = movement;
-            _dodgeMovement = dodgeMovement;
+            _playerApplication = playerApplication;
         }
 
         public bool TryDodge(Vector2 input, float time)
-            => _dodgeMovement.TryDodge(input, time);
+            => _playerApplication.TryDodge(input, time);
         public void Update(ref Vector3 position, ref Quaternion rotation, Vector2 input, float time, float deltaTime)
         {
-            if (_dodgeMovement.IsDodhing)
-            {
-                _dodgeMovement.Update(ref position, ref rotation, time, deltaTime);
-            }
-            else
-            {
-                _movement.Update(ref position, ref rotation, input, deltaTime);
-            }
+            _playerApplication.Update(ref position, ref rotation, input, time, deltaTime);
         }
 
-
-        private readonly PlayerMovement _movement;
-        private readonly PlayerDodgeMovementApplication _dodgeMovement;
+        private readonly PlayerApplication _playerApplication;
     }
 }
