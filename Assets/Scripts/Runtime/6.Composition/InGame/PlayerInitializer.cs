@@ -1,11 +1,13 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
+using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class PlayerInitializer : MonoBehaviour
     {
         [SerializeField] private PlayerView _player;
