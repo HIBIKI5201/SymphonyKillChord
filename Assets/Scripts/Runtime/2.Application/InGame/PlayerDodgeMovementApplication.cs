@@ -35,6 +35,7 @@ namespace KillChord.Runtime.Application
             if (time > _previousDodgedTime + _dodgeDuration)
             {
                 _isDodging = false;
+                return;
             }
 
             position += _dodgeSpeed.Value * deltaTime * _direction;
