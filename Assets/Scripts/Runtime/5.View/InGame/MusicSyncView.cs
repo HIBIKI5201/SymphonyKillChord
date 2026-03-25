@@ -1,4 +1,4 @@
-using System;
+using R3;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -19,25 +19,17 @@ namespace KillChord.Runtime.View
         {
             _mp = musicPlayer;
             _musicViewModel = musicViewModel;
+            _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
         }
 
         private void Update()
         {
+            if (_mp == null || _bpm <= 0) return;
         }
-
+        
         private void PlayBgm(string cueName)
         {
-            _bpm = _testBpm;
+            _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
         }
-
-#if UNITY_EDITOR
-        [SerializeField] private string cueName;
-
-        [ContextMenu(nameof(PlayBgm))]
-        public void PlayBgm()
-        {
-            PlayBgm(cueName);
-        }
-#endif
     }
 }
