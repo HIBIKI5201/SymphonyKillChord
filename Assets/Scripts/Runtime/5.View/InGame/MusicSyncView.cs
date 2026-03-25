@@ -24,5 +24,15 @@ namespace KillChord.Runtime.View
         private void Update()
         {
         }
+
+#if UNITY_EDITOR
+        [SerializeField] private string cueName;
+
+        [ContextMenu(nameof(PlayBgm))]
+        public void PlayBgm()
+        {
+            PlayBgm(cueName);
+        }
+#endif
     }
 }
