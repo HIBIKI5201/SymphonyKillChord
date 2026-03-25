@@ -3,17 +3,11 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
-    public sealed class PlayerView : MonoBehaviour, IPosition
+    public sealed class PlayerView : MonoBehaviour
     {
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Transform _cameraTransform;
-
-        public Vector3 Position
-        {
-            get => _cacheTransform.position;
-            set => _cacheTransform.position = value;
-        }
         public void Init(PlayerController playerMovementController)
         {
             _controller = playerMovementController;
