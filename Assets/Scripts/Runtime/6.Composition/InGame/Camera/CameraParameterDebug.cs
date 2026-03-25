@@ -3,7 +3,7 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 
-namespace KillChord.Structure
+namespace KillChord.Runtime.Composition
 {
     public sealed class CameraParameterDebug : MonoBehaviour
     {

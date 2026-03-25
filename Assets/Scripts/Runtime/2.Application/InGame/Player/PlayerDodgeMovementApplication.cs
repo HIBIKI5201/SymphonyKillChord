@@ -5,11 +5,9 @@ namespace KillChord.Runtime.Application
 {
     public sealed class PlayerDodgeMovementApplication
     {
-        public PlayerDodgeMovementApplication(MoveSpeed dodgeSpeed, float duration, float cooldown)
+        public PlayerDodgeMovementApplication(PlayerMoveParameter parameter)
         {
-            _dodgeSpeed = dodgeSpeed;
-            _dodgeDuration = duration;
-            _dodgedCooldown = cooldown;
+            _parameter = parameter;
 
             _previousDodgedTime = -1;
         }
@@ -21,7 +19,7 @@ namespace KillChord.Runtime.Application
             if (input.sqrMagnitude <= float.Epsilon)
                 return false;
 
-            if (currentTime - _previousDodgedTime < _dodgedCooldown)
+            if (currentTime - _previousDodgedTime < _parameter.DodgeCooldown)
                 return false;
 
             _previousDodgedTime = currentTime;
@@ -35,20 +33,17 @@ namespace KillChord.Runtime.Application
             if (!_isDodging)
                 return;
 
-            if (time > _previousDodgedTime + _dodgeDuration)
+            if (time > _previousDodgedTime + _parameter.DodgeDuration)
             {
                 _isDodging = false;
                 return;
             }
 
-            position += _dodgeSpeed.Value * deltaTime * _direction;
+            position += (float)_parameter.DodgeSpeed * deltaTime * _direction;
             rotaition = Quaternion.LookRotation(_direction, Vector3.up);
         }
 
-
-        private readonly MoveSpeed _dodgeSpeed;
-        private readonly float _dodgeDuration;
-        private readonly float _dodgedCooldown;
+        private readonly PlayerMoveParameter _parameter;
 
         private Vector3 _direction;
         private float _previousDodgedTime;

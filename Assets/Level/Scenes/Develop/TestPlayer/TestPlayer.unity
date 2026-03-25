@@ -350,6 +350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
+  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
   _player: {fileID: 150956200}
 --- !u!114 &150956200
 MonoBehaviour:
@@ -386,7 +387,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 2
+  m_Height: 1.4
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &150956204
@@ -1280,7 +1281,7 @@ MonoBehaviour:
   _playerT: {fileID: 150956204}
   _cameraOffset: {x: 0, y: 1.5, z: -8}
   _lockOnState: 0
-  _positionState: 0
+  _target: {fileID: 0}
 --- !u!4 &1352694595 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4830128889694569818, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
