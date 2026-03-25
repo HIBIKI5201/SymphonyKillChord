@@ -5,20 +5,21 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncView : MonoBehaviour
     {
-        private CriAtomSource _cri;
+        private MusicPlayer _mp;
 
-        private CriAtomExPlayback _playback;
-
-        public void Awake()
+        public void Bind(MusicPlayer musicPlayer)
         {
-            _cri = GetComponent<CriAtomSource>();
+            _mp = musicPlayer;
         }
 
         private void PlayBgm(string cueName)
         {
-            _playback.Stop();
-            _cri.cueName = cueName;
-            _playback = _cri.Play();
+            _mp.PlayBgm(cueName);
+        }
+
+        private void PlayBgm(string cueName, int bpm)
+        {
+            _mp.PlayBgm(cueName, bpm);
         }
 
         private void Update()
