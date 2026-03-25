@@ -16,30 +16,5 @@ namespace KillChord.Runtime.View
         {
             
         }
-
-        public int GetNearestSignature(double seconds)
-        {
-            if (_bpm <= 0) return 4;
-
-            double beatSeconds = 60d / _bpm;
-            double barSeconds = beatSeconds * 4d;
-
-            int nearestSignature = 1;
-            double minDiff = double.MaxValue;
-
-            for (int i = 1; i <= 8; i++)
-            {
-                double targetSeconds = barSeconds / i;
-                double diff = Math.Abs(seconds - targetSeconds);
-
-                if (diff < minDiff)
-                {
-                    minDiff = diff;
-                    nearestSignature = i;
-                }
-            }
-
-            return nearestSignature;
-        }
     }
 }
