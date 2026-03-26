@@ -13,6 +13,8 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _CHAR_OUTLINE_ON
+  - _CHAR_SHADOW_ON
   - _ISSMOOTHNORMAL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -93,6 +95,8 @@ Material:
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
+    - _CharOutline: 1
+    - _CharShadow: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2

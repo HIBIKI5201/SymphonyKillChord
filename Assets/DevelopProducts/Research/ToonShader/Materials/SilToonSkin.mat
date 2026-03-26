@@ -13,6 +13,8 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _CHAR_OUTLINE_ON
+  - _CHAR_SHADOW_ON
   - _ISFORFACE_ON
   - _ISSMOOTHNORMAL_ON
   m_LightmapFlags: 4
@@ -94,6 +96,8 @@ Material:
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
+    - _CharOutline: 1
+    - _CharShadow: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -137,7 +141,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMiddle: {r: 1, g: 0.7905139, b: 0.798419, a: 1}
-    - _ColorShadow: {r: 0.93333334, g: 0.7411765, b: 0.7529412, a: 1}
+    - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
     - _Head: {r: 1, g: 0.9, b: 0, a: 0}
