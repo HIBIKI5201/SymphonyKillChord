@@ -1,5 +1,4 @@
 using KillChord.Runtime.Application;
-using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
@@ -9,20 +8,6 @@ namespace KillChord.Runtime.Adaptor
         public CameraSystemController(CameraSystemApplication application)
         {
             _application = application;
-        }
-
-        [Obsolete("", true)]
-        public void Update(
-            ref Vector3 cameraCenterPosition,
-            ref Quaternion boneRotation,
-            ref Quaternion cameraRotation,
-            in Vector3 followPostion,
-            in Vector3 targetPosition,
-            in Vector3 cameraPosition,
-            bool isLockOn,
-            float deltaTime
-            )
-        {
         }
         public void Update(
             in Vector3 followPostion,
