@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Adaptor
             _application = application;
         }
         public void Update(
-            in Vector3 followPostion,
+            in Vector3 followPosition,
             in Vector3 targetPosition,
             bool isLockOn,
             float deltaTime,
@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Adaptor
             out Vector3 resultPosition
             )
         {
-            _application.Update(followPostion, targetPosition, isLockOn, deltaTime, out resultRotation, out resultPosition);
+            _application.Update(followPosition, targetPosition, isLockOn, deltaTime, out resultRotation, out resultPosition);
         }
 
         private readonly CameraSystemApplication _application;
