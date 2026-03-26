@@ -3,9 +3,9 @@ using UnityEngine;
 namespace KillChord.Runtime.Domain
 {
     [System.Serializable]
-    public sealed class CameraMovementParameter
+    public sealed class CameraSystemParameter
     {
-        public CameraMovementParameter(
+        public CameraSystemParameter(
             in Vector3 cameraOffset,
             float followOffsetPower,
             float followLerpSpeed,

@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Application
 {
     public sealed class CameraBoneRotation
     {
-        public CameraBoneRotation(CameraMovementParameter parameter)
+        public CameraBoneRotation(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
@@ -33,6 +33,6 @@ namespace KillChord.Runtime.Application
             cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-_parameter.BoneRotateSpeed * deltaTime));
         }
 
-        private readonly CameraMovementParameter _parameter;
+        private readonly CameraSystemParameter _parameter;
     }
 }

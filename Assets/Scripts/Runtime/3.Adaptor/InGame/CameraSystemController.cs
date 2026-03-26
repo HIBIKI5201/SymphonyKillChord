@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public sealed class TestCameraController
+    public sealed class CameraSystemController
     {
-        public TestCameraController(TestCameraApplication application)
+        public CameraSystemController(CameraSystemApplication application)
         {
             _application = application;
         }
@@ -36,6 +36,6 @@ namespace KillChord.Runtime.Adaptor
             _application.Update(followPostion, targetPosition, isLockOn, deltaTime, out resultRotation, out resultPosition);
         }
 
-        private readonly TestCameraApplication _application;
+        private readonly CameraSystemApplication _application;
     }
 }

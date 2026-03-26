@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
-    public sealed class TestCameraApplication
+    public sealed class CameraSystemApplication
     {
-        public TestCameraApplication(
-            CameraMovementParameter parameter,
+        public CameraSystemApplication(
+            CameraSystemParameter parameter,
             CameraFollow followSystem,
             CameraBoneRotation boneRotationSystem,
             CameraRotation cameraRotationSystem
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Application
         private Quaternion _cameraRotation = Quaternion.identity;
         private Quaternion _cameraBoneRotation = Quaternion.identity;
 
-        private readonly CameraMovementParameter _parameter;
+        private readonly CameraSystemParameter _parameter;
         private readonly CameraFollow _followSystem;
         private readonly CameraBoneRotation _boneRotationSystem;
         private readonly CameraRotation _cameraRotationSystem;

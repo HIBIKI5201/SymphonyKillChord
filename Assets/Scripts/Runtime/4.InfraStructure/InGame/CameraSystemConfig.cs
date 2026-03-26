@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace KillChord.Structure
 {
-    [CreateAssetMenu(fileName = nameof(CameraMovementConfig), menuName = "KillChord/InGame/CameraMovementConfig")]
-    public sealed class CameraMovementConfig : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraMovementConfig")]
+    public sealed class CameraSystemConfig : ScriptableObject
     {
-        public CameraMovementParameter ToDomain()
+        public CameraSystemParameter ToDomain()
             => new(
                 _cameraOffset,
                 _followOffsetPower,

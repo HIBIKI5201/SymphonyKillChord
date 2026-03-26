@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Application
 {
     public sealed class CameraRotation
     {
-        public CameraRotation(CameraMovementParameter parameter)
+        public CameraRotation(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
@@ -30,6 +30,6 @@ namespace KillChord.Runtime.Application
             rotation = Quaternion.Slerp(rotation, target, 1f - Mathf.Exp(-_parameter.LockOnRotationSpeed * deltaTime));
         }
 
-        private readonly CameraMovementParameter _parameter;
+        private readonly CameraSystemParameter _parameter;
     }
 }

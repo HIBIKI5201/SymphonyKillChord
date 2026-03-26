@@ -5,7 +5,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View
 {
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
-    public sealed class TestCameraSystem : MonoBehaviour
+    public sealed class CameraSystemView : MonoBehaviour
     {
         [Range(-90, 90)]
         [SerializeField] private float _cameraRotateX;
@@ -20,9 +20,9 @@ namespace KillChord.Runtime.View
         [SerializeField]
         private Transform _target;
 
-        private TestCameraController _controller;
+        private CameraSystemController _controller;
 
-        public void Init(TestCameraController controller)
+        public void Init(CameraSystemController controller)
         {
             _controller = controller;
         }

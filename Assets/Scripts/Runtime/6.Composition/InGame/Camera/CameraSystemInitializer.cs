@@ -9,27 +9,27 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition
 {
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
-    public sealed class TestCameraInitializer : MonoBehaviour
+    public sealed class CameraSystemInitializer : MonoBehaviour
     {
-        [SerializeField] private TestCameraSystem _cameraSystem;
+        [SerializeField] private CameraSystemView _cameraSystem;
 
-        [SerializeField] private CameraMovementConfig _config;
+        [SerializeField] private CameraSystemConfig _config;
 
         private void Awake()
         {
-            CameraMovementParameter parameter = _config.ToDomain();
+            CameraSystemParameter parameter = _config.ToDomain();
 
             CameraBoneRotation boneRotationSystem = new(parameter);
             CameraRotation rotationSystem = new(parameter);
             CameraFollow followSystem = new(parameter);
-            TestCameraApplication application = new(parameter, followSystem, boneRotationSystem, rotationSystem);
+            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, rotationSystem);
 
-            TestCameraController controller = new(application);
+            CameraSystemController controller = new(application);
             _cameraSystem.Init(controller);
 
 #if UNITY_EDITOR
             _cameraSystem.gameObject
-                .AddComponent<TestCameraParameterDebug>()
+                .AddComponent<CameraSystemParameterDebug>()
                 .SetCameraParameter(parameter);
 #endif
         }

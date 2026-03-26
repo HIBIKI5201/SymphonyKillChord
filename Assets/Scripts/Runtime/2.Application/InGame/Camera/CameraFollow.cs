@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Application
 {
     public sealed class CameraFollow
     {
-        public CameraFollow(CameraMovementParameter parameter)
+        public CameraFollow(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Application
             cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * deltaTime);
         }
 
-        private readonly CameraMovementParameter _parameter;
+        private readonly CameraSystemParameter _parameter;
         private CameraFollowVelocityApplication _followVelocity;
     }
 }
