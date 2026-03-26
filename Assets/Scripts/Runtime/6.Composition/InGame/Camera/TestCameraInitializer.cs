@@ -19,9 +19,10 @@ namespace KillChord.Runtime.Composition
         {
             CameraMovementParameter parameter = _config.ToDomain();
 
-            CameraRotation rotationSystem = new(parameter);
+            CameraBoneRotation boneRotationSystem = new(parameter);
+            CameraRotation rotationSystem = new();
             CameraFollow followSystem = new(parameter);
-            CameraCenterOffsetController controller = new(followSystem, rotationSystem);
+            CameraCenterOffsetController controller = new(followSystem, boneRotationSystem, rotationSystem);
             _cameraSystem.Init(controller);
 
 #if UNITY_EDITOR
