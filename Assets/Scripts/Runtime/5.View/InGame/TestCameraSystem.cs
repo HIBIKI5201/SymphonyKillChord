@@ -17,6 +17,8 @@ namespace KillChord.Runtime.View
 
         [SerializeField] private Vector3 _cameraOffset;
 
+        private Quaternion _cameraBoneRotation;
+        private Quaternion _cameraRotation;
         private Vector3 _localCenterOffset;
         private float _cameraRotationZ;
 
@@ -32,30 +34,38 @@ namespace KillChord.Runtime.View
         {
             _cecterOffsetController = cecterOffsetController;
         }
+        private void Start()
+        {
+            _cameraBoneRotation = _cameraT.rotation;
+            _cameraRotation = _cameraT.rotation;
+        }
 
         void Update()
         {
-            Quaternion rotation = _cameraT.rotation;
-            _cecterOffsetController.Update(ref _localCenterOffset, ref rotation, _playerT.position, _cameraT.right, _target.position, _lockOnState != LockOnState.Free, Time.deltaTime);
+            if (Input.GetKeyDown(KeyCode.Space))
+                if (_lockOnState == LockOnState.Free)
+                    _lockOnState = LockOnState.LockOnManual;
+                else
+                    _lockOnState = LockOnState.Free;
+
+            _cecterOffsetController.Update(
+                ref _localCenterOffset,
+                ref _cameraBoneRotation,
+                ref _cameraRotation,
+                _playerT.position,
+                _target.position,
+                _cameraT.position,
+                _lockOnState != LockOnState.Free,
+                Time.deltaTime);
 
             //screenVelocityX = Mathf.Clamp01((screenVelocityX + 1f) / 2);
 
             //_cameraRotationZ = Mathf.Lerp(_cameraRotationZ, Mathf.Lerp(1f, -1f, screenVelocityX), Time.deltaTime);
 
-
-            /*if (_lockOnState == LockOnState.Free)
-            {
-                rotation = Quaternion.Euler(_cameraRotateX, 0, _cameraRotationZ);
-            }
-            else
-            {
-                rotation = Quaternion.LookRotation(_target.position - _playerT.position - _localCenterOffset, Vector3.up) * Quaternion.Euler(0, 0, _cameraRotationZ);
-            }*/
-
-            Vector3 position = _playerT.position + _localCenterOffset + _cameraT.rotation * _cameraOffset;
+            Vector3 position = _playerT.position + _localCenterOffset + _cameraBoneRotation * _cameraOffset;
 
 
-            _cameraT.SetPositionAndRotation(position, rotation);
+            _cameraT.SetPositionAndRotation(position, _cameraBoneRotation * _cameraRotation);
         }
         private enum LockOnState : byte
         {
