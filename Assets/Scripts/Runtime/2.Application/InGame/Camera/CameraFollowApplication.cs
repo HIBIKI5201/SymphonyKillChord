@@ -3,22 +3,20 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
-    public sealed class CameraFollow
+    public sealed class CameraFollowApplication
     {
-        public CameraFollow(CameraMovementParameter parameter)
+        public CameraFollowApplication(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
 
         public void Update(
             ref Vector3 cameraCenterPosition,
-            in Vector3 followPostion,
-            in Vector3 cameraRight,
-            bool isLockOn,
+            in Vector3 followPosition,
             float deltaTime
             )
         {
-            Vector3 targetFollowCenterOffset = -_followVelocity.UpdateFollowVelocity(followPostion, deltaTime);
+            Vector3 targetFollowCenterOffset = -_followVelocity.UpdateFollowVelocity(followPosition, deltaTime);
             targetFollowCenterOffset.y = 0;
             if (targetFollowCenterOffset.sqrMagnitude >= _parameter.FollowOffsetPower * _parameter.FollowOffsetPower)
             {
@@ -29,7 +27,7 @@ namespace KillChord.Runtime.Application
             cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * deltaTime);
         }
 
-        private readonly CameraMovementParameter _parameter;
+        private readonly CameraSystemParameter _parameter;
         private CameraFollowVelocityApplication _followVelocity;
     }
 }
