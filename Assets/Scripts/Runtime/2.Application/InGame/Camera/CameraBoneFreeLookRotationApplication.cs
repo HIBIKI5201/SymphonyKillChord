@@ -18,8 +18,8 @@ namespace KillChord.Runtime.Application
             float yaw = euler.y + input.x * _parameter.FollowRotationSpeed * deltaTime;
             float pitch = euler.x - input.y * _parameter.FollowRotationSpeed * deltaTime;
 
-            // ピッチ角の制限（暫定的に-80〜80度）
-            pitch = Mathf.Clamp(pitch, -80f, 80f);
+            // ピッチ角の制限
+            pitch = Mathf.Clamp(pitch, _parameter.PitchRange.x, _parameter.PitchRange.y);
 
             cameraBoneRotation = Quaternion.Euler(pitch, yaw, 0f);
         }
