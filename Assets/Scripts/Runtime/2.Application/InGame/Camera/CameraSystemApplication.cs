@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Application
         public CameraSystemApplication(
             CameraSystemParameter parameter,
             CameraFollowApplication followSystem,
-            CameraBoneRotationApplication boneRotationSystem,
+            CameraBoneLockOnRotationApplication boneRotationSystem,
             CameraRotationApplication cameraRotationSystem
         )
         {
@@ -45,7 +45,7 @@ namespace KillChord.Runtime.Application
 
         private readonly CameraSystemParameter _parameter;
         private readonly CameraFollowApplication _followSystem;
-        private readonly CameraBoneRotationApplication _boneRotationSystem;
+        private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
         private readonly CameraRotationApplication _cameraRotationSystem;
     }
 }
