@@ -37,7 +37,7 @@ namespace KillChord.Runtime.Domain
         ///     減算演算子。
         /// </summary>
         public static AttackPower operator -(AttackPower left, AttackPower right)
-            => new(Mathf.Max(left.Value - right.Value));
+            => new(Mathf.Max(left.Value - right.Value,0f));
 
         /// <summary>
         ///     乗算演算子。
