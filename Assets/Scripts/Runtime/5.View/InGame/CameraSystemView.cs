@@ -21,7 +21,10 @@ namespace KillChord.Runtime.View
         {
             _controller = controller;
         }
-
+        private void Start()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
         void Update()
         {
             UpdateInput(out Vector2 input);
