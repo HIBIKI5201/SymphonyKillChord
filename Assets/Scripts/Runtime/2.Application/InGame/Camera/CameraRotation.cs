@@ -1,24 +1,27 @@
-using KillChord.Runtime.Domain;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
     public sealed class CameraRotation
     {
-        public CameraRotation(CameraMovementParameter parameter)
+        public void Update(
+            bool isLockon,
+            ref Quaternion rotation,
+            in Quaternion boneRotation,
+            in Vector3 targetPosition,
+            in Vector3 followPosition,
+            in Vector3 cameraPosition,
+            float deltaTime
+        )
         {
-            _parameter = parameter;
+            Quaternion target = Quaternion.identity;
+            if (isLockon)
+            {
+                Vector3 lerpPosition = Vector3.Lerp(followPosition, targetPosition, 0.4f);
+                Vector3 dir = lerpPosition - cameraPosition;
+                target = Quaternion.Inverse(boneRotation) * Quaternion.LookRotation(dir);
+            }
+            rotation = Quaternion.Slerp(rotation, target, 1f - Mathf.Exp(-10 * deltaTime));
         }
-
-        public void Update(ref Quaternion rotation, in Vector3 playerPosition, in Vector3 targetPosition, float deltaTime)
-        {
-            Vector3 dir = targetPosition - playerPosition;
-            dir.y = 0;
-
-            Quaternion target = Quaternion.LookRotation(dir, Vector3.up);
-            rotation = Quaternion.Lerp(rotation, target, deltaTime * _parameter.RotateLerpSpeed);
-        }
-
-        private readonly CameraMovementParameter _parameter;
     }
 }
