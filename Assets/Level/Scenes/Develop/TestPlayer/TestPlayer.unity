@@ -1375,7 +1375,7 @@ MonoBehaviour:
   _cameraT: {fileID: 84799483}
   _playerT: {fileID: 150956204}
   _cameraOffset: {x: 0, y: 1.5, z: -8}
-  _lockOnState: 1
+  _lockOnState: 0
   _target: {fileID: 950355651}
 --- !u!114 &1288559922
 MonoBehaviour:
