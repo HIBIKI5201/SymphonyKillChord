@@ -8,17 +8,30 @@ namespace KillChord.Structure
     {
         public CameraMovementParameter ToDomain()
             => new(
-                _rotateLerpSpeed,
+                _cameraOffset,
+                _followOffsetPower,
                 _followLerpSpeed,
-                _followOffsetPower);
+                _boneRotateSpeed,
+                _lockOnAngleMargin,
+                _followRotationSpeed,
+                _lockOnLookAtRatio,
+                _lockOnRotationSpeed);
 
-        [SerializeField, Tooltip("カメラ回転の補間速度。")]
-        private float _rotateLerpSpeed = 1.2f;
+        [Header("Main")]
+        [SerializeField] private Vector3 _cameraOffset;
 
-        [SerializeField, Tooltip("カメラ追従の補間速度。")]
-        private float _followLerpSpeed = 1.0f;
+        [Header("Follow")]
+        [SerializeField] private float _followOffsetPower = 2f;
+        [SerializeField] private float _followLerpSpeed = 1.0f;
 
-        [SerializeField, Tooltip("カメラ追従のオフセット強度。")]
-        private float _followOffsetPower = 2f;
+        [Header("Bone Rotation")]
+        [SerializeField] private float _boneRotateSpeed = 1.2f;
+        [SerializeField] private float _lockOnAngleMargin = 10f;
+        [SerializeField] private float _followRotationSpeed = 1.5f;
+
+        [Header("Camera Rotation")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _lockOnLookAtRatio = 0.5f;
+        [SerializeField] private float _lockOnRotationSpeed = 2.0f;
     }
 }
