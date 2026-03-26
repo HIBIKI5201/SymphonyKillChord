@@ -14,11 +14,9 @@ namespace KillChord.Runtime.Application
         {
             Vector3 followDir = targetPosition - playerPosition;
             followDir.y = 0;
-            followDir.Normalize();
 
             Vector3 cameraDir = cameraBoneRotation * Vector3.forward;
             cameraDir.y = 0;
-            cameraDir.Normalize();
 
             float angle = Vector3.Angle(followDir, cameraDir);
 
