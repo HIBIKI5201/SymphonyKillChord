@@ -15,7 +15,10 @@ namespace KillChord.Structure
                 _lockOnAngleMargin,
                 _followRotationSpeed,
                 _lockOnLookAtRatio,
-                _lockOnRotationSpeed);
+                _lockOnRotationSpeed,
+                _collisionRadius);
+
+        public LayerMask CollisionMask => _collisionMask;
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
@@ -33,5 +36,9 @@ namespace KillChord.Structure
         [Range(0f, 1f)]
         [SerializeField] private float _lockOnLookAtRatio = 0.5f;
         [SerializeField] private float _lockOnRotationSpeed = 2.0f;
+
+        [Header("Collision")]
+        [SerializeField] private float _collisionRadius = 0.2f;
+        [SerializeField] private LayerMask _collisionMask;
     }
 }

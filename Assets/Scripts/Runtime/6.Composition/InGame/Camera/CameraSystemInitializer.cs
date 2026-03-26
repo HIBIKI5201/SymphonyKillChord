@@ -20,9 +20,10 @@ namespace KillChord.Runtime.Composition
             CameraSystemParameter parameter = _config.ToDomain();
 
             CameraBoneLockOnRotationApplication boneRotationSystem = new(parameter);
+            CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
             CameraRotationApplication rotationSystem = new(parameter);
             CameraFollowApplication followSystem = new(parameter);
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, rotationSystem);
+            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, freeLookRotationSystem, rotationSystem, _config.CollisionMask);
 
             CameraSystemController controller = new(application);
             _cameraSystem.Init(controller);

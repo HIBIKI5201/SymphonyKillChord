@@ -7,9 +7,6 @@ namespace KillChord.Runtime.View
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
-        [Range(-90, 90)]
-        [SerializeField] private float _cameraRotateX;
-
         [SerializeField] private Transform _cameraT;
 
         [SerializeField] private Transform _playerT;
@@ -27,15 +24,16 @@ namespace KillChord.Runtime.View
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-                if (_lockOnState == LockOnState.Free)
-                    _lockOnState = LockOnState.LockOnManual;
-                else
-                    _lockOnState = LockOnState.Free;
+            UpdateInput(out Vector2 input);
+            input *= 200;
+
+            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
+                _lockOnState = LockOnState.Free;
 
             _controller.Update(
                 _playerT.position,
                 _target.position,
+                input,
                 _lockOnState != LockOnState.Free,
                 Time.deltaTime,
                 out Quaternion rotation,
@@ -43,12 +41,19 @@ namespace KillChord.Runtime.View
             );
             _cameraT.SetPositionAndRotation(position, rotation);
 
-            //screenVelocityX = Mathf.Clamp01((screenVelocityX + 1f) / 2);
+        }
+        private void UpdateInput(out Vector2 input)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse2))
+                if (_lockOnState == LockOnState.Free)
+                    _lockOnState = LockOnState.LockOnManual;
+                else
+                    _lockOnState = LockOnState.Free;
+            if (Input.GetKeyDown(KeyCode.Mouse0) && _lockOnState == LockOnState.Free)
+                _lockOnState = LockOnState.LockOnAuto;
 
-            //_cameraRotationZ = Mathf.Lerp(_cameraRotationZ, Mathf.Lerp(1f, -1f, screenVelocityX), Time.deltaTime);
-
-
-
+            input.x = Input.GetAxisRaw("Mouse X");
+            input.y = Input.GetAxisRaw("Mouse Y");
         }
         private enum LockOnState : byte
         {
