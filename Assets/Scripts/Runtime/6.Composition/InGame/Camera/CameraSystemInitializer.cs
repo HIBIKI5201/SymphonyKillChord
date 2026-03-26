@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Composition
 
             CameraBoneRotation boneRotationSystem = new(parameter);
             CameraRotation rotationSystem = new(parameter);
-            CameraFollow followSystem = new(parameter);
+            CameraFollowApplication followSystem = new(parameter);
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, rotationSystem);
 
             CameraSystemController controller = new(application);

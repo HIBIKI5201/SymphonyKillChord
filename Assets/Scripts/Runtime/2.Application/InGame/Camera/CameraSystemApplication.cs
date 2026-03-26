@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Application
     {
         public CameraSystemApplication(
             CameraSystemParameter parameter,
-            CameraFollow followSystem,
+            CameraFollowApplication followSystem,
             CameraBoneRotation boneRotationSystem,
             CameraRotation cameraRotationSystem
         )
@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Application
         {
             if (isLockOn)
                 _boneRotationSystem.Update(ref _cameraBoneRotation, followPosition, targetPosition, deltaTime);
-            _followSystem.Update(ref _cameraCenterOffset, followPosition, _cameraRotation * Vector3.right, isLockOn, deltaTime);
+            _followSystem.Update(ref _cameraCenterOffset, followPosition, deltaTime);
             _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, targetPosition, followPosition, _cameraPosition, deltaTime);
 
             _cameraPosition = followPosition + _cameraCenterOffset + _cameraBoneRotation * _parameter.Offset;
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Application
         private Quaternion _cameraBoneRotation = Quaternion.identity;
 
         private readonly CameraSystemParameter _parameter;
-        private readonly CameraFollow _followSystem;
+        private readonly CameraFollowApplication _followSystem;
         private readonly CameraBoneRotation _boneRotationSystem;
         private readonly CameraRotation _cameraRotationSystem;
     }

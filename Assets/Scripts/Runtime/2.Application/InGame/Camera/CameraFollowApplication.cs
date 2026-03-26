@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
-    public sealed class CameraFollow
+    public sealed class CameraFollowApplication
     {
-        public CameraFollow(CameraSystemParameter parameter)
+        public CameraFollowApplication(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
@@ -13,8 +13,6 @@ namespace KillChord.Runtime.Application
         public void Update(
             ref Vector3 cameraCenterPosition,
             in Vector3 followPosition,
-            in Vector3 cameraRight,
-            bool isLockOn,
             float deltaTime
             )
         {
