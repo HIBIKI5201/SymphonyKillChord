@@ -45,9 +45,9 @@ Shader "Custom/SilToon"
 
             HLSLPROGRAM
 
-            #pragma vertex vert
-            #pragma fragment frag
-            #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
+                #pragma vertex vert
+                #pragma fragment frag
+                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
 
             ENDHLSL
         }
@@ -59,9 +59,10 @@ Shader "Custom/SilToon"
             Cull Front
 
             HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
+
+                #pragma vertex vert
+                #pragma fragment frag
+                #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
 
             ENDHLSL
         }
@@ -75,11 +76,12 @@ Shader "Custom/SilToon"
             ColorMask 0
 
             HLSLPROGRAM
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+                #pragma vertex ShadowPassVertex
+                #pragma fragment ShadowPassFragment
+
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+                #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
 
             ENDHLSL
         }
