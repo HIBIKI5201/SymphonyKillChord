@@ -20,17 +20,17 @@ namespace KillChord.Runtime.Application
 
             float angle = Vector3.Angle(followDir, cameraDir);
 
-            float ANGLE = 30;
+            float lockOnAngleMargin = _parameter.LockOnAngleMargin;
 
-            if (angle < ANGLE)
+            if (angle < lockOnAngleMargin)
             {
                 return;
             }
             float crossY = Vector3.Cross(followDir, cameraDir).y;
 
-            Quaternion target = Quaternion.LookRotation(followDir, Vector3.up) * Quaternion.Euler(0, (crossY <= 0) ? -ANGLE : ANGLE, 0);
+            Quaternion target = Quaternion.LookRotation(followDir, Vector3.up) * Quaternion.Euler(0, (crossY <= 0) ? -lockOnAngleMargin : lockOnAngleMargin, 0);
 
-            cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-_parameter.RotateLerpSpeed * deltaTime));
+            cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-_parameter.BoneRotateSpeed * deltaTime));
         }
 
         private readonly CameraMovementParameter _parameter;
