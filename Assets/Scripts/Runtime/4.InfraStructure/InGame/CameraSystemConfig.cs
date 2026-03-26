@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace KillChord.Structure
 {
-    [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraMovementConfig")]
+    [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject
     {
         public CameraSystemParameter ToDomain()
