@@ -14,30 +14,17 @@ namespace KillChord.Runtime.View
 
         [SerializeField] private Transform _playerT;
 
-
-        [SerializeField] private Vector3 _cameraOffset;
-
-        private Quaternion _cameraBoneRotation;
-        private Quaternion _cameraRotation;
-        private Vector3 _localCenterOffset;
-        private float _cameraRotationZ;
-
         [SerializeField]
         private LockOnState _lockOnState;
 
         [SerializeField]
         private Transform _target;
 
-        private CameraCenterOffsetController _cecterOffsetController;
+        private TestCameraController _controller;
 
-        public void Init(CameraCenterOffsetController cecterOffsetController)
+        public void Init(TestCameraController controller)
         {
-            _cecterOffsetController = cecterOffsetController;
-        }
-        private void Start()
-        {
-            _cameraBoneRotation = _cameraT.rotation;
-            _cameraRotation = _cameraT.rotation;
+            _controller = controller;
         }
 
         void Update()
@@ -48,24 +35,22 @@ namespace KillChord.Runtime.View
                 else
                     _lockOnState = LockOnState.Free;
 
-            _cecterOffsetController.Update(
-                ref _localCenterOffset,
-                ref _cameraBoneRotation,
-                ref _cameraRotation,
+            _controller.Update(
                 _playerT.position,
                 _target.position,
-                _cameraT.position,
                 _lockOnState != LockOnState.Free,
-                Time.deltaTime);
+                Time.deltaTime,
+                out Quaternion rotation,
+                out Vector3 position
+            );
+            _cameraT.SetPositionAndRotation(position, rotation);
 
             //screenVelocityX = Mathf.Clamp01((screenVelocityX + 1f) / 2);
 
             //_cameraRotationZ = Mathf.Lerp(_cameraRotationZ, Mathf.Lerp(1f, -1f, screenVelocityX), Time.deltaTime);
 
-            Vector3 position = _playerT.position + _localCenterOffset + _cameraBoneRotation * _cameraOffset;
 
 
-            _cameraT.SetPositionAndRotation(position, _cameraBoneRotation * _cameraRotation);
         }
         private enum LockOnState : byte
         {
