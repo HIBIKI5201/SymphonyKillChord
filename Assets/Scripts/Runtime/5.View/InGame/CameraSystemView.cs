@@ -14,11 +14,9 @@ namespace KillChord.Runtime.View
 
         [SerializeField] private Transform _playerT;
 
-        [SerializeField]
-        private LockOnState _lockOnState;
+        [SerializeField] private Transform _target;
 
-        [SerializeField]
-        private Transform _target;
+        [SerializeField] private LockOnState _lockOnState;
 
         private CameraSystemController _controller;
 
