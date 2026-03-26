@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
-    public sealed class CameraRotation
+    public sealed class CameraRotationApplication
     {
-        public CameraRotation(CameraSystemParameter parameter)
+        public CameraRotationApplication(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
