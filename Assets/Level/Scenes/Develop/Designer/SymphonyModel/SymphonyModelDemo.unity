@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 52585993}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -94,7 +94,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: cb4d30965cc31fe4f87834498ea1f957, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -119,6 +119,16 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &3075386 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3882912647684759327, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &18040261 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6486653288119842359, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &52585992
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,6 +256,828 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!4 &59442654 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4015832224415972826, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &62212384 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5822417511284155084, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &72567769 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4388334497525923983, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &90324347 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1027182778659793421, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &113003037 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 27006879490609715, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &178192773 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4474948883456625490, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &198289357 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9085767086325169258, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &202395703 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6301096593812398129, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &202395704 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4600682120391548966, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &202395705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202395703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 0.01
+  dragForce: 0.4
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 1087616000}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -20
+    max: 20
+  zAngleLimits:
+    active: 1
+    min: 0
+    max: 20
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &247256909 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1889345648103582210, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &249295300 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5843862723315178492, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &276659263 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4063400272543369072, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &300531236 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5989879447957546084, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &303957499 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3003836067206931089, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &312960418 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5557439695665466429, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &315040090 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1829140043207249475, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &347373821
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+      propertyPath: m_Name
+      value: Symphony_0326
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9d35cb7a52bfe4b458a8c0fde991082a, type: 3}
+--- !u!4 &360052064 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2900461994288838524, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &413873840 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -640452572055280439, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &413873841 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8402387159543385520, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &413873842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 413873840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 2094
+  dragForce: 1
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 1775992927}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &414126290 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8126409888140141098, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &427342454 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4948905026374846278, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &430224929 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -7161195191083342899, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &454448382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 454448383}
+  - component: {fileID: 454448384}
+  m_Layer: 0
+  m_Name: chain_C1_chain_03_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &454448383
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454448382}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.18525872, y: 0.092028946, z: 0.4366049, w: 0.8755491}
+  m_LocalPosition: {x: -0.038850777, y: -0.00000004656613, z: 0.000000028871}
+  m_LocalScale: {x: 0.9999999, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641530538}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &454448384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454448382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &477957080 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2739491968983919819, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &490240647 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7965116044086697479, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &498081337 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3136913908413610622, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &517986977
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 517986978}
+  - component: {fileID: 517986979}
+  m_Layer: 0
+  m_Name: chain_C1_chain_01_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &517986978
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 517986977}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.18082975, y: 0.24050151, z: -0.4002882, w: 0.86558014}
+  m_LocalPosition: {x: -0.16206211, y: 0.00427513, z: 0.01614756}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 18040261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &517986979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 517986977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!1 &545810622 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2546461180985715777, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &545810623 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1950190453074699849, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &545810624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545810622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 5000
+  dragForce: 1
+  springForce: {x: 0, y: -0.1, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 454448383}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &567619711 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3960087142324173517, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &574540055 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3217662812859033488, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &637246724 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6682373418057126021, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &691179387 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4271239689435057396, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &740851619 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -694627622632874661, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &746690860 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7847132591808712577, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &748341441
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 748341442}
+  - component: {fileID: 748341443}
+  m_Layer: 0
+  m_Name: chain_C1_chain_04_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &748341442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748341441}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.1318531, y: 0.1437895, z: 0.31847253, w: 0.92763925}
+  m_LocalPosition: {x: -0.053973805, y: 0.00000006146729, z: -0.0000000027939677}
+  m_LocalScale: {x: 0.99999976, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 545810623}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &748341443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748341441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &748685630 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2049093766371971026, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &763043850 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -466179404259942248, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &772719607 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5810569349401410844, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &792525059 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4970228757315460667, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &810259669 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8955304527107889652, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &824340085 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -7413974727222718513, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &826733700 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2730031288248775998, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &826733701 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8644029418927553869, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &826733702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826733700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 2838
+  dragForce: 1
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 1282413858}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &866419340 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3259807147159791331, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &879638753 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -8924832907501594037, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &879638754 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6828156543343130495, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &879638755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879638753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 1520
+  dragForce: 1
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 1078167616}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &885434220 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1123473033512182044, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &896243642 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6311739760308290273, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &896243643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896243642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 0.01
+  dragForce: 0.4
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 997517580}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -20
+    max: 20
+  zAngleLimits:
+    active: 1
+    min: 0
+    max: 20
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &896243644 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3624589032673356603, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &926158901 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3538232446001149725, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &958568771 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 653263680677990162, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &971477492 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5246436263626583802, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &997517579
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 997517580}
+  - component: {fileID: 997517581}
+  m_Layer: 0
+  m_Name: leg_L0_foot_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &997517580
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997517579}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.548237, y: -0.24820828, z: 0.3552954, w: -0.71525806}
+  m_LocalPosition: {x: -0.28700873, y: 0.00000013531826, z: -0.000000022156172}
+  m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1827932117}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &997517581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997517579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &1016818403 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3273941684360771836, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1033018016 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6709566810804843905, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1047067492 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8229910509753243245, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1078167615
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1078167616}
+  - component: {fileID: 1078167617}
+  m_Layer: 0
+  m_Name: chain_C1_chain_07_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1078167616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078167615}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.009447884, y: 0.0093662925, z: 0.14402872, w: 0.98948413}
+  m_LocalPosition: {x: -0.062387332, y: 0.00000018952414, z: 0.00000013131648}
+  m_LocalScale: {x: 0.99999964, y: 0.99999976, z: 0.99999976}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 413873841}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1078167617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078167615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!1 &1087615999
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1087616000}
+  - component: {fileID: 1087616001}
+  m_Layer: 0
+  m_Name: leg_L0_thigh_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1087616000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087615999}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.017570736, y: 0.699022, z: -0.71482414, w: -0.009278525}
+  m_LocalPosition: {x: 0.019530416, y: 0.0068032965, z: -0.054131806}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 958568771}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1087616001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087615999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &1087795099 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5019606077713527609, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1089283365 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4220639361940614613, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1115724050 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1946952786087766506, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1116672584 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -7677133910065510771, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1119866475 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4554277985346424393, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1122143347 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3307258015249439045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1125825428 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -691543372814964315, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1136903338 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4830128889694569818, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1150330022 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3447786651437438721, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1160061062 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -9102504168864137110, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1179914315
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,6 +1215,519 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!4 &1180028059 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2434950461142026486, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1229262154 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4297889412755565892, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1235058894 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1637456456063906216, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1282413857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1282413858}
+  - component: {fileID: 1282413859}
+  m_Layer: 0
+  m_Name: chain_C1_chain_05_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1282413858
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282413857}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.11884038, y: 0.06924223, z: 0.28322256, w: 0.94914037}
+  m_LocalPosition: {x: -0.055139005, y: 0.00000004656613, z: 0.000000016298145}
+  m_LocalScale: {x: 0.99999976, y: 0.9999999, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1701117380}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1282413859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282413857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &1291362313 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8210637831716522761, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1295120353 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1130444296054412092, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1298134888 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2755759123051548759, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1311804092
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.93428
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.95295
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_Name
+      value: Symphony_0324
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: c7cbd4f2173850947b4bd9c7dafee96a, type: 2}
+    - target: {fileID: 5866666021909216657, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 653263680677990162, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1087616000}
+    - targetCorrespondingSourceObject: {fileID: 4600682120391548966, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2027333456}
+    - targetCorrespondingSourceObject: {fileID: -6605303111268064390, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 997517580}
+    - targetCorrespondingSourceObject: {fileID: -6486653288119842359, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 517986978}
+    - targetCorrespondingSourceObject: {fileID: -842222826992687205, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1767480052}
+    - targetCorrespondingSourceObject: {fileID: -8099980083018300878, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 454448383}
+    - targetCorrespondingSourceObject: {fileID: -1950190453074699849, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 748341442}
+    - targetCorrespondingSourceObject: {fileID: -8224565657792401837, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1282413858}
+    - targetCorrespondingSourceObject: {fileID: -8644029418927553869, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1775992927}
+    - targetCorrespondingSourceObject: {fileID: 8402387159543385520, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1078167616}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1633165786}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1633165785}
+    - targetCorrespondingSourceObject: {fileID: 6301096593812398129, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202395705}
+    - targetCorrespondingSourceObject: {fileID: 1377709798272771566, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827932118}
+    - targetCorrespondingSourceObject: {fileID: -6311739760308290273, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 896243643}
+    - targetCorrespondingSourceObject: {fileID: 1695882856728072267, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1731460805}
+    - targetCorrespondingSourceObject: {fileID: 9200179263604456734, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1641530539}
+    - targetCorrespondingSourceObject: {fileID: -2546461180985715777, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 545810624}
+    - targetCorrespondingSourceObject: {fileID: 8266027901972243244, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1701117381}
+    - targetCorrespondingSourceObject: {fileID: -2730031288248775998, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 826733702}
+    - targetCorrespondingSourceObject: {fileID: -640452572055280439, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 413873842}
+    - targetCorrespondingSourceObject: {fileID: -8924832907501594037, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 879638755}
+  m_SourcePrefab: {fileID: 100100000, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+--- !u!4 &1395690726 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9089360878678966172, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1407226267 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 572807229778160094, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1421940148 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1262235052012715330, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1444394372 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5905790029573265429, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1593129039 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -353791976520886697, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1621432531 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -9200395733099253142, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1623125611 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2075575672820909245, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1631947392 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8947975215230202842, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1633165784 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1633165785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633165784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af276926b0db1c248a93ab3c1134a6c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringManager
+  automaticUpdates: 1
+  isPaused: 0
+  simulationFrameRate: 60
+  dynamicRatio: 0.5
+  gravity: {x: 0, y: -10, z: 0}
+  bounce: 0
+  friction: 1
+  enableAngleLimits: 1
+  enableCollision: 1
+  enableLengthLimits: 1
+  collideWithGround: 1
+  groundHeight: 0
+  springBones:
+  - {fileID: 202395705}
+  - {fileID: 1827932118}
+  - {fileID: 896243643}
+  - {fileID: 1731460805}
+  - {fileID: 1641530539}
+  - {fileID: 545810624}
+  - {fileID: 1701117381}
+  - {fileID: 826733702}
+  - {fileID: 413873842}
+  - {fileID: 879638755}
+  boneColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  colliderColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  collisionColor: {r: 1, g: 0, b: 0, a: 1}
+  groundCollisionColor: {r: 0, g: 1, b: 0, a: 1}
+  angleLimitDrawScale: 0.05
+--- !u!114 &1633165786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633165784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2d8418b0b9634b1892b0268dd9c2743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.BoneRenderer
+  boneShape: 1
+  drawBones: 1
+  drawTripods: 0
+  boneSize: 1
+  tripodSize: 1
+  boneColor: {r: 0, g: 0, b: 1, a: 0.5}
+  m_Transforms:
+  - {fileID: 1621432531}
+  - {fileID: 958568771}
+  - {fileID: 1122143347}
+  - {fileID: 691179387}
+  - {fileID: 1047067492}
+  - {fileID: 1295120353}
+  - {fileID: 1444394372}
+  - {fileID: 1623125611}
+  - {fileID: 1871765149}
+  - {fileID: 1593129039}
+  - {fileID: 824340085}
+  - {fileID: 1136903338}
+  - {fileID: 2010563677}
+  - {fileID: 1119866475}
+  - {fileID: 490240647}
+  - {fileID: 866419340}
+  - {fileID: 59442654}
+  - {fileID: 198289357}
+  - {fileID: 1115724050}
+  - {fileID: 62212384}
+  - {fileID: 1962227848}
+  - {fileID: 178192773}
+  - {fileID: 885434220}
+  - {fileID: 1973772213}
+  - {fileID: 1759172513}
+  - {fileID: 2093464752}
+  - {fileID: 1810211928}
+  - {fileID: 90324347}
+  - {fileID: 926158901}
+  - {fileID: 247256909}
+  - {fileID: 1298134888}
+  - {fileID: 1678485321}
+  - {fileID: 971477492}
+  - {fileID: 276659263}
+  - {fileID: 1087795099}
+  - {fileID: 18040261}
+  - {fileID: 1160061062}
+  - {fileID: 740851619}
+  - {fileID: 1641740471}
+  - {fileID: 746690860}
+  - {fileID: 1886793283}
+  - {fileID: 414126290}
+  - {fileID: 1631947392}
+  - {fileID: 427342454}
+  - {fileID: 1180028059}
+  - {fileID: 637246724}
+  - {fileID: 1731460804}
+  - {fileID: 1641530538}
+  - {fileID: 545810623}
+  - {fileID: 1701117380}
+  - {fileID: 826733701}
+  - {fileID: 413873841}
+  - {fileID: 879638754}
+  - {fileID: 574540055}
+  - {fileID: 1089283365}
+  - {fileID: 748685630}
+  - {fileID: 1125825428}
+  - {fileID: 303957499}
+  - {fileID: 249295300}
+  - {fileID: 1407226267}
+  - {fileID: 113003037}
+  - {fileID: 1016818403}
+  - {fileID: 2117166818}
+  - {fileID: 312960418}
+  - {fileID: 772719607}
+  - {fileID: 810259669}
+  - {fileID: 1235058894}
+  - {fileID: 498081337}
+  - {fileID: 1687864466}
+  - {fileID: 300531236}
+  - {fileID: 1291362313}
+  - {fileID: 1116672584}
+  - {fileID: 2020265753}
+  - {fileID: 430224929}
+  - {fileID: 360052064}
+  - {fileID: 1229262154}
+  - {fileID: 1033018016}
+  - {fileID: 1421940148}
+  - {fileID: 477957080}
+  - {fileID: 763043850}
+  - {fileID: 792525059}
+  - {fileID: 1945651705}
+  - {fileID: 2047434322}
+  - {fileID: 72567769}
+  - {fileID: 202395704}
+  - {fileID: 1827932117}
+  - {fileID: 1395690726}
+  - {fileID: 896243644}
+  - {fileID: 567619711}
+  - {fileID: 1702314270}
+  - {fileID: 315040090}
+  - {fileID: 3075386}
+  - {fileID: 1150330022}
+  - {fileID: 2045029821}
+--- !u!1 &1641530537 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9200179263604456734, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1641530538 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8099980083018300878, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1641530539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641530537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 5000
+  dragForce: 1
+  springForce: {x: 0, y: -0.1, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 1767480052}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &1641740471 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8072140885932026689, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1678485321 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2361527046507010302, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1687864466 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3761626283179157770, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1701117379 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8266027901972243244, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1701117380 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8224565657792401837, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1701117381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701117379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 5000
+  dragForce: 1
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 748341442}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &1702314270 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4043556423969149812, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1714391153
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,6 +1777,285 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1731460803 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1695882856728072267, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1731460804 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -842222826992687205, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1731460805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1731460803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 5000
+  dragForce: 1
+  springForce: {x: 0, y: -0.1, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 517986978}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  zAngleLimits:
+    active: 1
+    min: -180
+    max: 180
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &1759172513 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2039540463598806055, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1767480051
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1767480052}
+  - component: {fileID: 1767480053}
+  m_Layer: 0
+  m_Name: chain_C1_chain_02_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1767480052
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767480051}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.1214259, y: 0.012815222, z: 0.48841414, w: 0.8640274}
+  m_LocalPosition: {x: -0.034432728, y: -0.000000077765435, z: 0.000000059604645}
+  m_LocalScale: {x: 0.9999999, y: 1, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1731460804}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1767480053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767480051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!1 &1775992926
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1775992927}
+  - component: {fileID: 1775992928}
+  m_Layer: 0
+  m_Name: chain_C1_chain_06_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1775992927
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775992926}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.042782158, y: -0.016406067, z: 0.30517262, w: 0.9511941}
+  m_LocalPosition: {x: -0.06136361, y: 0.00000005029142, z: 0.00000006519258}
+  m_LocalScale: {x: 0.9999999, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 826733701}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1775992928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775992926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &1810211928 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4725550911484080797, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1827932116 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1377709798272771566, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1827932117 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6605303111268064390, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1827932118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827932116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03118221f4bfcd74ba0ad8075da02411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBone
+  stiffnessForce: 0.01
+  dragForce: 0.4
+  springForce: {x: 0, y: -0.0001, z: 0}
+  windInfluence: 1
+  pivotNode: {fileID: 2027333456}
+  angularStiffness: 100
+  yAngleLimits:
+    active: 1
+    min: -20
+    max: 20
+  zAngleLimits:
+    active: 1
+    min: 0
+    max: 20
+  lengthLimitTargets: []
+  radius: 0.05
+  sphereColliders: []
+  capsuleColliders: []
+  panelColliders: []
+--- !u!4 &1871765149 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7531477145091007404, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1886793283 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8756589871991598499, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1945651705 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6001923556977679887, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1962227848 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6424768654632877499, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1973772213 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7072008157565303568, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2010563677 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5232821653799349582, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2020265753 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5189700163652341919, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2027333455
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2027333456}
+  - component: {fileID: 2027333457}
+  m_Layer: 0
+  m_Name: leg_L0_calf_Jnt_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2027333456
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027333455}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.6146348, y: 0.023019146, z: -0.029509017, w: -0.7879235}
+  m_LocalPosition: {x: -0.32791054, y: 0.000000014901161, z: 0.000000024068868}
+  m_LocalScale: {x: 0.9999999, y: 1, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 202395704}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2027333457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027333455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!4 &2045029821 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6572391165540106318, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2047434322 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -103941365748063804, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2093464752 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7523088941461600096, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2117166818 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2589238257609939152, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+  m_PrefabInstance: {fileID: 1311804092}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -439,3 +2063,5 @@ SceneRoots:
   - {fileID: 1179914318}
   - {fileID: 52585994}
   - {fileID: 1714391155}
+  - {fileID: 1311804092}
+  - {fileID: 347373821}
