@@ -5,27 +5,35 @@ namespace KillChord.Runtime.Adaptor
 {
     public sealed class CameraCenterOffsetController
     {
-        public CameraCenterOffsetController(CameraFollow followSystem, CameraRotation rotationSystem)
+        public CameraCenterOffsetController(
+            CameraFollow followSystem,
+            CameraBoneRotation boneRotationSystem,
+            CameraRotation cameraRotationSystem
+        )
         {
             _follow = followSystem;
-            _rotation = rotationSystem;
+            _boneRotation = boneRotationSystem;
+            _cameraRotation = cameraRotationSystem;
         }
         public void Update(
             ref Vector3 cameraCenterPosition,
-            ref Quaternion rotation,
+            ref Quaternion boneRotation,
+            ref Quaternion cameraRotation,
             in Vector3 followPostion,
-            in Vector3 cameraRight,
             in Vector3 targetPosition,
+            in Vector3 cameraPosition,
             bool isLockOn,
             float deltaTime
             )
         {
-            _follow.Update(ref cameraCenterPosition, followPostion, cameraRight, isLockOn, deltaTime);
             if (isLockOn)
-                _rotation.Update(ref rotation, followPostion, targetPosition, deltaTime);
+                _boneRotation.Update(ref boneRotation, followPostion, targetPosition, deltaTime);
+            _follow.Update(ref cameraCenterPosition, followPostion, cameraRotation * Vector3.right, isLockOn, deltaTime);
+            _cameraRotation.Update(isLockOn, ref cameraRotation, boneRotation, targetPosition, followPostion, cameraPosition, deltaTime);
         }
 
         private readonly CameraFollow _follow;
-        private readonly CameraRotation _rotation;
+        private readonly CameraBoneRotation _boneRotation;
+        private readonly CameraRotation _cameraRotation;
     }
 }
