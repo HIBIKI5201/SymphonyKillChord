@@ -129,9 +129,12 @@ namespace KillChord.Runtime.View
             const double propTimeSignature = 4d;
             double currentBar = Math.Floor(_currentBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;
-            double executeBeat = targetBar * propTimeSignature +
-                                 propTimeSignature / timing.Beat.Signature * (timing.Beat.Count - 1);
-            return executeBeat * _beatLength;
+            
+            double barLengthMs = _beatLength * propTimeSignature;
+            double targetBarStartTimeMs = targetBar * barLengthMs;
+            double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
+
+            return targetBarStartTimeMs + offsetInBarMs;
         }
 
         /// <summary>
