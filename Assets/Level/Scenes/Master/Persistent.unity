@@ -344,8 +344,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ffd41da8bc4e654387111de5b0b7fe1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PersistentEntryPoint
-  _active: 0
-  _firstSceneName: MusicSyncMock
+  _active: 1
+  _firstSceneName: OutGame
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
