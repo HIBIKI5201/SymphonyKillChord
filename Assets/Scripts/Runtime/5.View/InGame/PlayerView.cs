@@ -9,21 +9,31 @@ namespace KillChord.Runtime.View
     {
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
+        [SerializeField] private Rigidbody _rb;
         [SerializeField] private Transform _cameraTransform;
-        public void Init(PlayerController playerMovementController)
+        public void Init(
+            PlayerController playerMovementController)
         {
             _controller = playerMovementController;
         }
         void Start()
         {
-            if (_controller == null)
-                Debug.LogError($"{nameof(_controller)}がNullです。Update()更新前にInit()を実行するようにしてください。", this);
+            Debug.Assert(_rb != null, $"{nameof(_rb)}がNull", this);
+            Debug.Assert(_animator != null, $"{nameof(_animator)}がNull", this);
+            Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
+            Debug.Assert(_controller != null, $"{nameof(_controller)}がNullです。Update()更新前にInit()を実行するようにしてください。", this);
 
             _cacheTransform = transform;
         }
         void Update()
         {
             UpdateMovement();
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                _controller.ChangeAttack(AttackCommandType.SkillA);
+                _controller.ExecuteAttack();
+            }
         }
         private void UpdateMovement()
         {
@@ -40,22 +50,18 @@ namespace KillChord.Runtime.View
                 _controller.TryDodge(dir, Time.time);
             }
 
-            Vector3 position = _cacheTransform.position;
             Quaternion rotation = _cacheTransform.rotation;
-            _controller.Update(ref position, ref rotation, dir, Time.time, Time.deltaTime);
-            _cacheTransform.SetPositionAndRotation(position, rotation);
+            _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
+            _rb.linearVelocity = velocity;
+
+            _cacheTransform.rotation = rotation;
         }
 
         private static Vector2 Rotate(Vector2 v, float degrees)
-        {
-            float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
-            float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+            => Quaternion.Euler(0, 0, degrees) * v;
 
-            return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
-        }
 
         private Transform _cacheTransform;
         private PlayerController _controller;
-
     }
 }
