@@ -15,7 +15,10 @@ namespace KillChord.Runtime.View
 
         [SerializeField] private LockOnState _lockOnState;
 
+        [SerializeField] private CameraUpdateModeEnum _updateMode;
+
         private CameraSystemController _controller;
+        private Vector2 _input;
 
         public void Init(CameraSystemController controller)
         {
@@ -25,25 +28,44 @@ namespace KillChord.Runtime.View
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
-        void Update()
+        private void FixedUpdate()
         {
-            UpdateInput(out Vector2 input);
-            input *= 200;
+            if (_updateMode != CameraUpdateModeEnum.FixedUpdate)
+                return;
+            Tick(Time.deltaTime);
+        }
+        private void Update()
+        {
+            UpdateInput(out _input);
+            if (_updateMode != CameraUpdateModeEnum.Update)
+                return;
+            Tick(Time.deltaTime);
+        }
+        private void LateUpdate()
+        {
+            if (_updateMode != CameraUpdateModeEnum.LateUpdate)
+                return;
+            Tick(Time.deltaTime);
+        }
 
-            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
+
+        private void Tick(float deltaTime)
+        {
+            _input *= 200;
+
+            if (_lockOnState == LockOnState.LockOnAuto && _input.sqrMagnitude > float.Epsilon)
                 _lockOnState = LockOnState.Free;
 
             _controller.Update(
                 _playerT.position,
                 _target.position,
-                input,
+                _input,
                 _lockOnState != LockOnState.Free,
-                Time.deltaTime,
+                deltaTime,
                 out Quaternion rotation,
                 out Vector3 position
             );
             _cameraT.SetPositionAndRotation(position, rotation);
-
         }
         private void UpdateInput(out Vector2 input)
         {
