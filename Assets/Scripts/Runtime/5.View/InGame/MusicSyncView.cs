@@ -1,5 +1,7 @@
 using System;
+using System.Threading;
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Utility;
 using R3;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,6 +20,9 @@ namespace KillChord.Runtime.View
         private MusicViewModel _musicViewModel;
         private MusicSyncViewModel _musicSyncViewModel;
         private PlayerInputView _playerInputView;
+
+        private PriorityQueue<ScheduledAction, double> _scheduledActions = new();
+
         private int _bpm;
 
         private double _beatLength;
@@ -37,6 +42,7 @@ namespace KillChord.Runtime.View
             _playerInputView.OnDodgeInput += OnDodge;
 
             _beatLength = 60000d / _bpm;
+            _musicSyncViewModel.Register = SchedulingAction;
         }
 
         private void Update()
@@ -46,6 +52,25 @@ namespace KillChord.Runtime.View
             _currentBeat = _mp.Time / _beatLength;
             _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
             _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
+
+            //登録されているアクションの中から実行すべきものをすべて実行、それ以外はスキップ
+            while (_scheduledActions.TryPeek(out var actionData, out _))
+            {
+                if (actionData.CancellationToken.IsCancellationRequested)
+                {
+                    _scheduledActions.Dequeue();
+                    continue;
+                }
+
+                if (actionData.Time <= _mp.Time)
+                {
+                    _scheduledActions.Dequeue();
+                    actionData.Action?.Invoke();
+                    continue;
+                }
+
+                break;
+            }
         }
 
         private void OnDestroy()
@@ -91,7 +116,13 @@ namespace KillChord.Runtime.View
 
             _musicSyncViewModel.Enqueue(param);
         }
-        
+
+        private void SchedulingAction(ExecuteRequestTiming ert, Action action, CancellationToken ct)
+        {
+            var d = GetExecuteTime(ert);
+            _scheduledActions.Enqueue(new(d, action, ct), d);
+        }
+
         private double GetExecuteTime(ExecuteRequestTiming timing)
         {
             if (_bpm <= 0) return 0;
@@ -99,7 +130,7 @@ namespace KillChord.Runtime.View
             double currentBar = Math.Floor(_currentBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;
             double executeBeat = targetBar * propTimeSignature +
-                                 propTimeSignature / timing.Beat.Signature * timing.Beat.Count;
+                                 propTimeSignature / timing.Beat.Signature * (timing.Beat.Count - 1);
             return executeBeat * _beatLength;
         }
 
@@ -131,6 +162,20 @@ namespace KillChord.Runtime.View
             }
 
             return nearestSignature;
+        }
+
+        private readonly struct ScheduledAction
+        {
+            public ScheduledAction(double time, Action action, CancellationToken ct)
+            {
+                Time = time;
+                Action = action;
+                CancellationToken = ct;
+            }
+
+            public double Time { get; }
+            public Action Action { get; }
+            public CancellationToken CancellationToken { get; }
         }
     }
 }

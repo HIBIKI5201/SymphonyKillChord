@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Utility;
-using UnityEditor;
 
 namespace KillChord.Runtime.View
 {
     public class MusicSyncViewModel : IMusicSyncViewModel
     {
-        public PriorityQueue<double, Action> _actionQueue = new();
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
@@ -17,7 +15,6 @@ namespace KillChord.Runtime.View
         public int NearestBeat { get; set; }
 
         private List<ActionParams> _actionList = new();
-
 
         public ActionParams Dequeue()
         {
@@ -31,8 +28,12 @@ namespace KillChord.Runtime.View
             _actionList.Add(param);
         }
 
+
+        public Action<ExecuteRequestTiming, Action, CancellationToken> Register;
+
         public void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token)
         {
+            Register?.Invoke(timing, action, token);
         }
     }
 }
