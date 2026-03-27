@@ -32,7 +32,7 @@ namespace KillChord.Runtime.View
         {
             if (_updateMode != CameraUpdateModeEnum.FixedUpdate)
                 return;
-            Tick(Time.deltaTime);
+            Tick(Time.fixedDeltaTime);
         }
         private void Update()
         {
@@ -51,15 +51,16 @@ namespace KillChord.Runtime.View
 
         private void Tick(float deltaTime)
         {
-            _input *= 200;
+            Vector2 input = _input * 200;
+            _input = Vector2.zero;
 
-            if (_lockOnState == LockOnState.LockOnAuto && _input.sqrMagnitude > float.Epsilon)
+            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
                 _lockOnState = LockOnState.Free;
 
             _controller.Update(
                 _playerT.position,
                 _target.position,
-                _input,
+                input,
                 _lockOnState != LockOnState.Free,
                 deltaTime,
                 out Quaternion rotation,
