@@ -304,6 +304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38b68d7f1b541ac4cb30999d5d71c871, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
+  _cueName: Cyber
   _musicSyncView: {fileID: 596385843}
   _composition: {fileID: 1455956528}
 --- !u!1 &893635771

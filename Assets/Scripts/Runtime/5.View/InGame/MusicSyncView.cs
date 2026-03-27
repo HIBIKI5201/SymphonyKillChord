@@ -1,7 +1,6 @@
 using System;
 using KillChord.Runtime.Adaptor;
 using R3;
-using SymphonyFrameWork.Debugger.HUD;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,29 +15,21 @@ namespace KillChord.Runtime.View
 #endif
 
         private MusicPlayer _mp;
-        private MusicViewModel _musicViewModel;
         private IMusicSyncViewModel _musicSyncViewModel;
         private PlayerInputView _playerInputView;
         private int _bpm;
 
         public void Bind(
             MusicPlayer musicPlayer,
-            MusicViewModel musicViewModel,
             MusicSyncViewModel syncViewModel,
             PlayerInputView playerInputView)
         {
             _mp = musicPlayer;
-            _musicViewModel = musicViewModel;
             _musicSyncViewModel = syncViewModel;
-            _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
+            _musicSyncViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
             _playerInputView = playerInputView;
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
-        }
-
-        private void Update()
-        {
-            if (_mp == null || _bpm <= 0) return;
         }
 
         private void OnDestroy()
@@ -47,11 +38,12 @@ namespace KillChord.Runtime.View
             _playerInputView.OnDodgeInput -= OnDodge;
         }
 
-        private void PlayBgm(string cueName)
+        public void PlayBgm(string cueName)
         {
 #if UNITY_EDITOR
             _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
+            _mp.PlayBgm(cueName);
         }
 
         private void OnAttack(InputContext<float> context)
@@ -70,8 +62,14 @@ namespace KillChord.Runtime.View
             }
         }
 
+        /// <summary>
+        /// 行動キューに保存する
+        /// </summary>
+        /// <param name="type"></param>
         private void RegisterActionQueue(ActionType type)
         {
+            //TODO : 明らかなロジックなので今後適切な層に移動する
+            //TOTO : リングバッファを使たものに変更する
             int signature = 1;
             if (_musicSyncViewModel.Count != 0)
             {
