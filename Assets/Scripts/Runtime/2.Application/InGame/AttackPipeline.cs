@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain;
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Application
 {
@@ -14,6 +14,19 @@ namespace KillChord.Runtime.Application
         /// <param name="attackSteps"></param>
         public AttackPipeline(IAttackStep[] attackSteps)
         {
+            if (attackSteps == null)
+            {
+                throw new ArgumentNullException(nameof(attackSteps));
+            }
+
+            for (int i = 0; i < attackSteps.Length; i++)
+            {
+                if (attackSteps[i] == null)
+                {
+                    throw new ArgumentException($"attackSteps[{i}] is null.", nameof(attackSteps));
+                }
+            }
+
             _attackSteps = attackSteps;
         }
 
@@ -24,7 +37,7 @@ namespace KillChord.Runtime.Application
         /// <returns></returns>
         public AttackResult Execute(AttackContext context)
         {
-            for(int i = 0; i < _attackSteps.Length; i++)
+            for (int i = 0; i < _attackSteps.Length; i++)
             {
                 _attackSteps[i].Execute(context);
             }

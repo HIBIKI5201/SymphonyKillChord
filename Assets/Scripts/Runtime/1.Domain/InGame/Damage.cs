@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain
 {
@@ -14,6 +13,10 @@ namespace KillChord.Runtime.Domain
         /// <param name="value"> 初期ダメージ量。 </param>
         public Damage(float value)
         {
+            if (!float.IsFinite(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Damage must be finite.");
+            }
             if (value < 0) { value = 0; }
             _value = value;
         }

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain;
+using System;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -19,8 +20,8 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="target"></param>
         public void Setup(CharacterEntity attacker, IHitTarget target)
         {
-            Attacker = attacker;
-            Target = target;
+            Attacker = attacker ?? throw new ArgumentNullException(nameof(attacker));
+            Target = target ?? throw new ArgumentNullException(nameof(target));
         }
     }
 }

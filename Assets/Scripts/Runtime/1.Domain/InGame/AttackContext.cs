@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Domain
 {
@@ -15,9 +15,9 @@ namespace KillChord.Runtime.Domain
         /// <param name="attack"></param>
         public AttackContext(CharacterEntity attacker, IHitTarget target, AttackDefinition attack)
         {
-            Attacker = attacker;
-            Target = target;
-            Attack = attack;
+            Attacker = attacker ?? throw new ArgumentNullException(nameof(attacker));
+            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             CurrentDamage = attack.BaseDamage;
         }
 
@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Domain
         /// <summary> 攻撃の基本情報。 </summary>
         public AttackDefinition Attack { get; }
         /// <summary> 現在のダメージ。 </summary>
-        public Damage CurrentDamage {  get; set; }
+        public Damage CurrentDamage { get; set; }
         /// <summary> クリティカルヒットかどうかを示すフラグ。 </summary>
         public bool IsCritical { get; set; }
     }

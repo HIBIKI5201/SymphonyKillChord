@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain;
-using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -22,7 +21,7 @@ namespace KillChord.Runtime.Adaptor
                 AttackCommandType.SkillA => AttackId.SkillA,
                 AttackCommandType.SkillB => AttackId.SkillB,
                 AttackCommandType.Ultimate => AttackId.Ultimate,
-                _ => AttackId.Normal,
+                _ => throw new System.ArgumentOutOfRangeException(nameof(commandType), commandType, "Unsupported attack command."),
             };
         }
     }

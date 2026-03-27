@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain
 {
@@ -14,6 +14,10 @@ namespace KillChord.Runtime.Domain
         /// <param name="attackDifinitions"></param>
         public CharacterCombatSpec(IReadOnlyDictionary<AttackId, AttackDefinition> attackDifinitions)
         {
+            if (attackDifinitions == null)
+            {
+                throw new ArgumentNullException(nameof(attackDifinitions));
+            }
             _attackDifinitions = attackDifinitions;
         }
 
@@ -24,7 +28,7 @@ namespace KillChord.Runtime.Domain
         /// <returns>　対応する攻撃定義。　</returns>
         public AttackDefinition GetAttackDifinition(AttackId id)
         {
-            if(_attackDifinitions.TryGetValue(id, out var difinition))
+            if (_attackDifinitions.TryGetValue(id, out var difinition))
             {
                 return difinition;
             }
@@ -32,6 +36,6 @@ namespace KillChord.Runtime.Domain
             throw new InvalidOperationException($"AttackId {id} is not defined in this CharacterCombatSpec.");
         }
 
-        private readonly IReadOnlyDictionary<AttackId,AttackDefinition> _attackDifinitions;
+        private readonly IReadOnlyDictionary<AttackId, AttackDefinition> _attackDifinitions;
     }
 }

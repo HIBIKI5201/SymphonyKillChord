@@ -27,8 +27,28 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
+        private bool ValidateSerializedReferences()
+        {
+            if (_playerData == null || _enemyData == null ||
+                _normalPipelineAsset == null || _skillAPipelineAsset == null ||
+                _skillBPipelineAsset == null || _ultimatePipelineAsset == null ||
+                _playerAttackInputView == null || _attackResultView == null)
+            {
+                Debug.LogError("[BattleCompositionInitializer] SerializedField が未設定です。");
+                return false;
+            }
+            return true;
+        }
+
         private void Awake()
         {
+            if (!ValidateSerializedReferences())
+            {
+                enabled = false;
+                return;
+            }
+
+
             CharacterFactory characterFactory = new CharacterFactory();
 
             CharacterEntity player = characterFactory.Create(_playerData);
