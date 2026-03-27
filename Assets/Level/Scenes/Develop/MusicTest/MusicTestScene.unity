@@ -306,7 +306,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 596385843}
   _composition: {fileID: 1455956528}
-  _cue: Cyber
+  _cue: Cyber2
 --- !u!1 &1455956525
 GameObject:
   m_ObjectHideFlags: 0
