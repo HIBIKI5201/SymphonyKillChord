@@ -8,7 +8,8 @@ namespace KillChord.Runtime.Domain
     {
         public Beat(float signature, float count)
         {
-            _signature = signature;
+             
+            _signature = Math.Max(signature, 1);
             _count = count;
         }
 

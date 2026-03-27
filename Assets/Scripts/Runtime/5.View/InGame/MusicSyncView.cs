@@ -41,7 +41,6 @@ namespace KillChord.Runtime.View
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
 
-            _beatLength = 60000d / _bpm;
             _musicSyncViewModel.Register = SchedulingAction;
         }
 
@@ -84,6 +83,7 @@ namespace KillChord.Runtime.View
 #if UNITY_EDITOR
             _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
+            _beatLength = 60000d / _bpm;
         }
 
         private void OnAttack(InputContext<float> context)
@@ -129,7 +129,7 @@ namespace KillChord.Runtime.View
             const double propTimeSignature = 4d;
             double currentBar = Math.Floor(_currentBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;
-            
+
             double barLengthMs = _beatLength * propTimeSignature;
             double targetBarStartTimeMs = targetBar * barLengthMs;
             double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);

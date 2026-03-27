@@ -29,7 +29,11 @@ namespace KillChord.Runtime.View
 
         public void PlayBgm(string cueName)
         {
-            if (cueName == _cri.cueName || cueName == string.Empty) return;
+            if (cueName == _cri.cueName || cueName == string.Empty)
+            {
+                Debug.Log("cueNameが空か元と同じです");
+                return;
+            }
             StopBgm();
             _cri.cueName = cueName;
             _playback = _cri.Play();
