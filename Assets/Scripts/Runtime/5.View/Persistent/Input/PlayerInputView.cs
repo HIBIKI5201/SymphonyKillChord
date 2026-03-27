@@ -27,6 +27,7 @@ namespace KillChord.Runtime.View
         public event Action<InputContext<float>> OnDodgeInput;
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
+        public event Action<InputContext<Vector2>> OnLookInput;
 
         public void OnOption(InputAction.CallbackContext context)
         {
@@ -76,18 +77,16 @@ namespace KillChord.Runtime.View
             OnMoveInput?.Invoke(inputContext);
         }
 
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<Vector2> inputContext = new InputContext<Vector2>(
+                InputActionKind.Look, context, time);
+            OnLookInput?.Invoke(inputContext);
+        }
+
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
-            if (actionId == InputActionKind.Move)
-            {
-                Debug.LogError("Move action should not be handled by OnMobileButton. Use OnMobileMove instead.");
-                return;
-            }
-
-            float time = _timestampProvider.GetCurrentTimestamp();
-            InputContext<float> inputContext = new InputContext<float>(
-                actionId, value, phase, time);
-
             Action<InputContext<float>> action = actionId switch
             {
                 InputActionKind.Option => OnOptionInput,
@@ -95,8 +94,18 @@ namespace KillChord.Runtime.View
                 InputActionKind.Cancel => OnCancelInput,
                 InputActionKind.Dodge => OnDodgeInput,
                 InputActionKind.Attack => OnAttackInput,
-                _ => throw new ArgumentOutOfRangeException(nameof(actionId), $"Unexpected actionId: {actionId}")
+                _ => null
             };
+
+            if (action == null)
+            {
+                Debug.LogError($"Unsupported actionId: {actionId}");
+                return;
+            }
+
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                actionId, value, phase, time);
             action?.Invoke(inputContext);
         }
 
@@ -108,6 +117,14 @@ namespace KillChord.Runtime.View
             OnMoveInput?.Invoke(inputContext);
         }
 
+        public void OnMobileLook(InputActionPhase phase, Vector2 value)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<Vector2> inputContext = new InputContext<Vector2>(
+                InputActionKind.Look, value, phase, time);
+            OnLookInput?.Invoke(inputContext);
+        }
+
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
 
@@ -117,6 +134,36 @@ namespace KillChord.Runtime.View
         private InputAction _moveAction;
         private InputAction _dodgeAction;
         private InputAction _attackAction;
+        private InputAction _lookAction;
+
+        private void Awake()
+        {
+            _playerInput = GetComponent<PlayerInput>();
+
+            CacheActions();
+        }
+
+        private void OnEnable()
+        {
+            RegistarAction(_optionAction, OnOption);
+            RegistarAction(_submitAction, OnSubmit);
+            RegistarAction(_cancelAction, OnCancel);
+            RegistarAction(_dodgeAction, OnDodge);
+            RegistarAction(_attackAction, OnAttack);
+            RegistarAction(_moveAction, OnMove);
+            RegistarAction(_lookAction, OnLook);
+        }
+
+        private void OnDisable()
+        {
+            UnregistarAction(_optionAction, OnOption);
+            UnregistarAction(_submitAction, OnSubmit);
+            UnregistarAction(_cancelAction, OnCancel);
+            UnregistarAction(_dodgeAction, OnDodge);
+            UnregistarAction(_attackAction, OnAttack);
+            UnregistarAction(_moveAction, OnMove);
+            UnregistarAction(_lookAction, OnLook);
+        }
 
         /// <summary>
         ///     Actionをキャッシュして、後でイベントの登録と解除を行いやすくする。
@@ -131,67 +178,31 @@ namespace KillChord.Runtime.View
             _moveAction = actions.FindAction($"{InputMapNames.InGame}/Move", true);
             _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/Dodge", true);
             _attackAction = actions.FindAction($"{InputMapNames.InGame}/Attack", true);
+            _lookAction = actions.FindAction($"{InputMapNames.InGame}/Look", true);
         }
 
-        private void OnEnable()
+        /// <summary>
+        ///     メソッドをInputactionに登録するためのヘルパーメソッド。
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="callback"></param>
+        private static void RegistarAction(InputAction action, Action<InputAction.CallbackContext> callback)
         {
-            _playerInput = GetComponent<PlayerInput>();
-
-            _optionAction.started += OnOption;
-            _optionAction.performed += OnOption;
-            _optionAction.canceled += OnOption;
-
-            _submitAction.started += OnSubmit;
-            _submitAction.performed += OnSubmit;
-            _submitAction.canceled += OnSubmit;
-
-            _cancelAction.started += OnCancel;
-            _cancelAction.performed += OnCancel;
-            _cancelAction.canceled += OnCancel;
-
-            _moveAction.started += OnMove;
-            _moveAction.performed += OnMove;
-            _moveAction.canceled += OnMove;
-
-            _dodgeAction.started += OnDodge;
-            _dodgeAction.performed += OnDodge;
-            _dodgeAction.canceled += OnDodge;
-
-            _attackAction.started += OnAttack;
-            _attackAction.performed += OnAttack;
-            _attackAction.canceled += OnAttack;
+            action.started += callback;
+            action.performed += callback;
+            action.canceled += callback;
         }
 
-        private void Awake()
+        /// <summary>
+        ///     メソッドをInputActionから解除するためのヘルパーメソッド。
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="callback"></param>
+        private static void UnregistarAction(InputAction action, Action<InputAction.CallbackContext> callback)
         {
-            CacheActions();
-        }
-
-        private void OnDisable()
-        {
-            _optionAction.started -= OnOption;
-            _optionAction.performed -= OnOption;
-            _optionAction.canceled -= OnOption;
-
-            _submitAction.started -= OnSubmit;
-            _submitAction.performed -= OnSubmit;
-            _submitAction.canceled -= OnSubmit;
-
-            _cancelAction.started -= OnCancel;
-            _cancelAction.performed -= OnCancel;
-            _cancelAction.canceled -= OnCancel;
-
-            _moveAction.started -= OnMove;
-            _moveAction.performed -= OnMove;
-            _moveAction.canceled -= OnMove;
-
-            _dodgeAction.started -= OnDodge;
-            _dodgeAction.performed -= OnDodge;
-            _dodgeAction.canceled -= OnDodge;
-
-            _attackAction.started -= OnAttack;
-            _attackAction.performed -= OnAttack;
-            _attackAction.canceled -= OnAttack;
+            action.started -= callback;
+            action.performed -= callback;
+            action.canceled -= callback;
         }
     }
 }
