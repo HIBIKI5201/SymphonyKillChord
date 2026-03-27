@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using KillChord.Runtime.Domain;
+using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.InfraStructure
 {
@@ -15,15 +16,24 @@ namespace KillChord.Runtime.InfraStructure
         /// <returns></returns>
         public CharacterEntity Create(CharacterData data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+            if (data.AttackDifinitions == null)
+            {
+                throw new ArgumentException("AttackDifinitions must not be null.", nameof(data));
+            }
+
             Dictionary<AttackId, AttackDefinition> definitions = new Dictionary<AttackId, AttackDefinition>();
 
             AttackDefinitionData[] attackDefinitions = data.AttackDifinitions;
             for (int i = 0; i < attackDefinitions.Length; i++)
             {
                 AttackDefinitionData attackDefinition = attackDefinitions[i];
-                definitions[attackDefinition.AttackId] = new AttackDefinition(
+                definitions.Add(attackDefinition.AttackId, new AttackDefinition(
                     attackDefinition.AttackId,
-                    new Damage(attackDefinition.BaseDamage));
+                    new Damage(attackDefinition.BaseDamage)));
             }
 
             CharacterCombatSpec combatSpec = new CharacterCombatSpec(definitions);

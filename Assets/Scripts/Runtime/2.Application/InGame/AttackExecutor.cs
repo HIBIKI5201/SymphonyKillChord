@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
@@ -19,6 +20,9 @@ namespace KillChord.Runtime.Application
 
         public AttackResult Execute(CharacterEntity attacker, IHitTarget target, AttackId attackId)
         {
+            if (attacker is null) throw new ArgumentNullException(nameof(attacker));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+
             // 攻撃定義を取得し、攻撃処理のパイプラインを解決する。
             AttackDefinition attackDifinition = attacker.CombatSpec.GetAttackDifinition(attackId);
             AttackPipeline pipeline = _resolver.Resolve(attackDifinition.Id);
@@ -28,7 +32,7 @@ namespace KillChord.Runtime.Application
             AttackResult result = pipeline.Execute(attackContext);
 
             // ダメージをターゲットの体力に適用する。
-            float nextHealth = target.Health.CurrentHealth.Value - result.FinalDamage.Value;
+            float nextHealth = Mathf.Max(0f, target.Health.CurrentHealth.Value - result.FinalDamage.Value);
             target.Health.ChangeHealth(new Health(nextHealth));
 
             Debug.Log(

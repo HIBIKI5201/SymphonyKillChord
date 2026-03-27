@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain
@@ -13,6 +14,8 @@ namespace KillChord.Runtime.Domain
         /// <param name="value"></param>
         public AttackPower(float value)
         {
+            if (value < 0f)
+                throw new ArgumentOutOfRangeException(nameof(value), "AttackPower must be non-negative.");
             Value = value;
         }
 
@@ -37,7 +40,7 @@ namespace KillChord.Runtime.Domain
         ///     減算演算子。
         /// </summary>
         public static AttackPower operator -(AttackPower left, AttackPower right)
-            => new(Mathf.Max(left.Value - right.Value,0f));
+            => new(Mathf.Max(left.Value - right.Value, 0f));
 
         /// <summary>
         ///     乗算演算子。

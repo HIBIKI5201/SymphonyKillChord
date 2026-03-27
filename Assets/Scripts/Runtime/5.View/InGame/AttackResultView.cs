@@ -1,5 +1,6 @@
-using UnityEngine;
+using System;
 using TMPro;
+using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
@@ -14,6 +15,12 @@ namespace KillChord.Runtime.View
         /// <param name="viewModel"></param>
         public void Bind(AttackResultViewModel viewModel)
         {
+            if (viewModel == null) throw new ArgumentNullException(nameof(viewModel));
+            if (_viewModel != null)
+            {
+                _viewModel.OnChanged -= HandleChanged;
+            }
+
             _viewModel = viewModel;
             _viewModel.OnChanged += HandleChanged;
         }
@@ -36,7 +43,8 @@ namespace KillChord.Runtime.View
 
         private void OnDestroy()
         {
-            _viewModel.OnChanged -= HandleChanged;
+            if (_viewModel != null)
+                _viewModel.OnChanged -= HandleChanged;
         }
     }
 }

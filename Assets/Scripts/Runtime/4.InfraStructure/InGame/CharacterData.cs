@@ -13,7 +13,7 @@ namespace KillChord.Runtime.InfraStructure
         public float MaxHealth => _maxHealth;
         public float MoveSpeed => _moveSpeed;
         public float AttackPower => _attackPower;
-        public AttackDefinitionData[] AttackDifinitions => _attackDifinitions;
+        public AttackDefinitionData[] AttackDifinitions => (AttackDefinitionData[])_attackDifinitions.Clone();
 
         [SerializeField] private string _characterName;
         [SerializeField] private float _maxHealth;

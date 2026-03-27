@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Domain
 {
@@ -16,12 +16,19 @@ namespace KillChord.Runtime.Domain
         /// <param name="attackPower"></param>
         /// <param name="combatSpec"></param>
         public CharacterEntity(string name,
-            HealthEntity health, 
+            HealthEntity health,
             MoveSpeed moveSpeed,
-            AttackPower attackPower, 
+            AttackPower attackPower,
             CharacterCombatSpec combatSpec
             )
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("name must not be null or empty.", nameof(name));
+            if (health is null)
+                throw new ArgumentNullException(nameof(health));
+            if (combatSpec is null)
+                throw new ArgumentNullException(nameof(combatSpec));
+
             Name = name;
             Health = health;
             MoveSpeed = moveSpeed;
