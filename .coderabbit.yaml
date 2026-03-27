@@ -12,6 +12,7 @@ reviews:
   path_filters:
     - "!dist/**" # ビルド成果物などをレビューから除外
     - "!node_modules/**"
+    - "**/*.shader"
   tools:
     shellcheck:
       enabled: true # 特定のツールの有効・無効を切り替え
