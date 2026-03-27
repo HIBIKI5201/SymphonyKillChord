@@ -5,17 +5,19 @@ namespace KillChord.Runtime.View
 {
     public class IngameHudViewModel : IIngameHudViewModel
     {
-        public ReactiveProperty<float> HealthRate { get; } = new();
+        public ReadOnlyReactiveProperty<float> HealthRate => _healthRate;
+
+        private ReactiveProperty<float> _healthRate = new(1);
 
         public void UpdateHealth(in IngameHudDTO dto)
         {
             if (dto.MaxHealth <= 0)
             {
-                HealthRate.Value = 0;
+                _healthRate.Value = 0;
                 return;
             }
 
-            HealthRate.Value = dto.CurrentHealth / dto.MaxHealth;
+            _healthRate.Value = dto.CurrentHealth / dto.MaxHealth;
         }
     }
 }
