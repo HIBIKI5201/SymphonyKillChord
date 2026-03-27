@@ -15,11 +15,6 @@ namespace KillChord.Runtime.View
 
         private string _cueName;
 
-        public void Bind(MusicViewModel musicViewModel)
-        {
-            musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
-        }
-
         public void Awake()
         {
             _cri = GetComponent<CriAtomSource>();
