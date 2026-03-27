@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Application
         {
             _parameter = parameter;
 
-            _previousDodgedTime = -1;
+            _previousDodgedTime = float.NegativeInfinity;
         }
 
         public bool IsDodhing => _isDodging;

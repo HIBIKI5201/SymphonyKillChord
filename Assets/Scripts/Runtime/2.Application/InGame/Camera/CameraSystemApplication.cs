@@ -20,6 +20,8 @@ namespace KillChord.Runtime.Application
             _freeLookRotationSystem = freeLookRotationSystem;
             _cameraRotationSystem = cameraRotationSystem;
             _collisionMask = collisionMask;
+
+            _isDistanceInitialized = false;
         }
 
         public void Update(
@@ -46,7 +48,15 @@ namespace KillChord.Runtime.Application
             Vector3 direction = idealOffset.normalized;
 
             float distance = GetDistance(cameraAnchorPosition, direction, maxDistance);
-            _distance = Mathf.Lerp(Mathf.Min(_distance, distance), distance, deltaTime * 4);
+            if (!_isDistanceInitialized)
+            {
+                _distance = distance;
+                _isDistanceInitialized = true;
+            }
+            else
+            {
+                _distance = Mathf.Lerp(Mathf.Min(_distance, distance), distance, deltaTime * 4);
+            }
 
             _cameraPosition = cameraAnchorPosition + direction * _distance;
 
@@ -64,17 +74,18 @@ namespace KillChord.Runtime.Application
             return maxDistance;
         }
 
-        private float _distance;
-        private Vector3 _cameraCenterOffset;
-        private Vector3 _cameraPosition;
-        private Quaternion _cameraRotation = Quaternion.identity;
-        private Quaternion _cameraBoneRotation = Quaternion.identity;
-
         private readonly CameraSystemParameter _parameter;
         private readonly CameraFollowApplication _followSystem;
         private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
         private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
         private readonly CameraRotationApplication _cameraRotationSystem;
         private readonly int _collisionMask;
+
+        private float _distance;
+        private Vector3 _cameraCenterOffset;
+        private Vector3 _cameraPosition;
+        private Quaternion _cameraRotation = Quaternion.identity;
+        private Quaternion _cameraBoneRotation = Quaternion.identity;
+        private bool _isDistanceInitialized;
     }
 }

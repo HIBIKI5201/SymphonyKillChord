@@ -25,7 +25,10 @@ namespace KillChord.Runtime.Application
             {
                 Vector3 lerpPosition = Vector3.Lerp(followPosition, targetPosition, _parameter.LockOnLookAtRatio);
                 Vector3 dir = lerpPosition - cameraPosition;
-                target = Quaternion.Inverse(boneRotation) * Quaternion.LookRotation(dir);
+                if (dir.sqrMagnitude > float.Epsilon)
+                {
+                    target = Quaternion.Inverse(boneRotation) * Quaternion.LookRotation(dir);
+                }
             }
             rotation = Quaternion.Slerp(rotation, target, 1f - Mathf.Exp(-_parameter.LockOnRotationSpeed * deltaTime));
         }
