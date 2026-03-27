@@ -37,6 +37,7 @@ namespace KillChord.Runtime.View
         private void Update()
         {
             if (_mp == null || _bpm <= 0) return;
+            
         }
 
         private void OnDestroy()

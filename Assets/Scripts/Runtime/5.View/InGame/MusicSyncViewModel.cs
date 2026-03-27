@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View;
 
 namespace KillChord.Runtime.View
 {
@@ -23,6 +23,11 @@ namespace KillChord.Runtime.View
         public void Enqueue(ActionParams param)
         {
             _actionList.Add(param);
+        }
+
+        public void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token)
+        {
+            
         }
     }
 }
