@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View
 
 #if UNITY_EDITOR
         [SerializeField] private int _testBpm;
+        [SerializeField] private string _testBgmCueName;
 #endif
 
         private MusicPlayer _mp;
