@@ -31,7 +31,7 @@ namespace KillChord.Runtime.View
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                _controller.ChangeAttack(AttackCommandType.Normal);
+                _controller.ChangeAttack(AttackCommandType.SkillA);
                 _controller.ExecuteAttack();
             }
         }
