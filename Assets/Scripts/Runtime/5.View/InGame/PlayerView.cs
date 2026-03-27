@@ -11,7 +11,8 @@ namespace KillChord.Runtime.View
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private Transform _cameraTransform;
-        public void Init(PlayerController playerMovementController)
+        public void Init(
+            PlayerController playerMovementController)
         {
             _controller = playerMovementController;
         }
@@ -27,6 +28,12 @@ namespace KillChord.Runtime.View
         void Update()
         {
             UpdateMovement();
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                _controller.ChangeAttack(AttackCommandType.Normal);
+                _controller.ExecuteAttack();
+            }
         }
         private void UpdateMovement()
         {
@@ -56,6 +63,5 @@ namespace KillChord.Runtime.View
 
         private Transform _cacheTransform;
         private PlayerController _controller;
-
     }
 }
