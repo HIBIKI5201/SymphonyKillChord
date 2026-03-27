@@ -83,13 +83,13 @@
             "id": "0d7fe3a4-4d83-48c8-aabd-dc0231206530",
             "actions": [
                 {
-                    "name": "Move",
-                    "type": "Value",
-                    "id": "e44ae1f6-5659-46b5-bfa1-37ac24029fc7",
+                    "name": "Dodge",
+                    "type": "Button",
+                    "id": "d96d20de-2bce-46df-9d8c-1c2f22ff4e1d",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Attack",
@@ -101,13 +101,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Dodge",
-                    "type": "Button",
-                    "id": "d96d20de-2bce-46df-9d8c-1c2f22ff4e1d",
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "e44ae1f6-5659-46b5-bfa1-37ac24029fc7",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "70c831d0-9ab1-48f4-8ea7-b26282d8d209",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -185,6 +194,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dodge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dcf131ed-e0ee-4536-88e3-500502e29254",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
