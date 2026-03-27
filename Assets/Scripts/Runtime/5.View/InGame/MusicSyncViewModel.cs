@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncViewModel : IMusicSyncViewModel
     {
+        public PriorityQueue<double, Action> _actionQueue = new();
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
@@ -17,7 +18,6 @@ namespace KillChord.Runtime.View
 
         private List<ActionParams> _actionList = new();
 
-        private PriorityQueue<double, Action> _actionQueue = new();
 
         public ActionParams Dequeue()
         {

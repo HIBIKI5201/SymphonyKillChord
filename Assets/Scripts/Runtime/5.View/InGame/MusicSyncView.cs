@@ -91,14 +91,16 @@ namespace KillChord.Runtime.View
 
             _musicSyncViewModel.Enqueue(param);
         }
-
+        
         private double GetExecuteTime(ExecuteRequestTiming timing)
         {
             if (_bpm <= 0) return 0;
             const double propTimeSignature = 4d;
             double currentBar = Math.Floor(_currentBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;
-            return targetBar * propTimeSignature + propTimeSignature / timing.Beat.Signature * timing.Beat.Count;
+            double executeBeat = targetBar * propTimeSignature +
+                                 propTimeSignature / timing.Beat.Signature * timing.Beat.Count;
+            return executeBeat * _beatLength;
         }
 
         /// <summary>
