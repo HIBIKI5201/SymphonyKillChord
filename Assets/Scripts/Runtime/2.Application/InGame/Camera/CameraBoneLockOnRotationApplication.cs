@@ -14,6 +14,10 @@ namespace KillChord.Runtime.Application
         {
             Vector3 followDir = targetPosition - playerPosition;
             followDir.y = 0;
+            if (followDir.sqrMagnitude <= float.Epsilon)
+            {
+                return;
+            }
 
             Vector3 cameraDir = cameraBoneRotation * Vector3.forward;
             cameraDir.y = 0;
