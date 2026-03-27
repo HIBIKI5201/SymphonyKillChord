@@ -1,4 +1,4 @@
-Shader "Custom/SilToon"
+Shader "Custom/SilToon/Base"
 {
     Properties
     {
