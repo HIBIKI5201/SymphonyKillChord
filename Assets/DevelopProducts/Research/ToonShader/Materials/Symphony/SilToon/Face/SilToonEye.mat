@@ -7,15 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SilToonSkin
-  m_Shader: {fileID: 4800000, guid: 6b65efc8265b986478cf2235fd235bb8, type: 3}
+  m_Name: SilToonEye
+  m_Shader: {fileID: 4800000, guid: 981628722a0e9c34eaea8b03ebec7e55, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
   - _CHAR_SHADOW_ON
-  - _ISFORFACE_ON
   - _ISSMOOTHNORMAL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -113,14 +112,14 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _IsForFace: 1
+    - _IsForFace: 0
     - _IsSmoothNormal: 1
     - _Metallic: 0
     - _NormalMapIntensity: 0
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.0005
-    - _OutlineWidthShadow: 0.001
+    - _OutlineWidthLit: 0.0001
+    - _OutlineWidthShadow: 0.0005
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
     - _PerspectiveRemovalRatio: 1
@@ -134,16 +133,16 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
-    - _ZOffset: 0.01
+    - _ZOffset: 0
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorMiddle: {r: 1, g: 0.7905139, b: 0.798419, a: 1}
+    - _ColorMiddle: {r: 0.9647059, g: 0.8235294, b: 0.84705883, a: 1}
     - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
+    - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
     - _Head: {r: 1, g: 0.9, b: 0, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
