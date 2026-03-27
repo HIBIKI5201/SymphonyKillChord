@@ -8,10 +8,11 @@ namespace KillChord.Structure
     {
         public PlayerMoveParameter ToDomain()
             => new(
-                _moveSpeed,
-                _dodgeSpeed,
-                _dodgeDuration,
-                _dodgeCooldown);
+                Mathf.Max(0f, _moveSpeed),
+                Mathf.Max(0f, _dodgeSpeed),
+                Mathf.Max(0f, _dodgeDuration),
+                Mathf.Max(0f, _dodgeCooldown)
+                );
 
         [SerializeField] private float _moveSpeed;
         [Space]
