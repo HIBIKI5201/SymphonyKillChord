@@ -12,6 +12,9 @@ reviews:
   path_filters:
     - "!dist/**" # ビルド成果物などをレビューから除外
     - "!node_modules/**"
+  path_instructions:
+    - path: "**/*.shader"
+      instructions: "Unity HLSL/CG シェーダーファイルです。パフォーマンス、correctness、Unity のベストプラクティスに従ってレビューしてください。"
   tools:
     shellcheck:
       enabled: true # 特定のツールの有効・無効を切り替え

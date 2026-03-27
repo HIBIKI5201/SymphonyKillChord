@@ -1,16 +1,21 @@
 using KillChord.Runtime.Adaptor;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 namespace KillChord.Runtime.View
 {
     /// <summary>
     ///     入力イベントを受け取り、InputContextを生成して外部に通知するクラス。
     /// </summary>
-    public class PlayerInputView
+    [RequireComponent(typeof(PlayerInput))]
+    [RequireComponent(typeof(EventSystem))]
+    [RequireComponent(typeof(InputSystemUIInputModule))]
+    public class PlayerInputView : MonoBehaviour
     {
-        public PlayerInputView(InputTimestampProvider timestampProvider)
+        public void Initialize(InputTimestampProvider timestampProvider)
         {
             _timestampProvider = timestampProvider;
         }
@@ -103,6 +108,90 @@ namespace KillChord.Runtime.View
             OnMoveInput?.Invoke(inputContext);
         }
 
-        private readonly InputTimestampProvider _timestampProvider;
+        private PlayerInput _playerInput;
+        private InputTimestampProvider _timestampProvider;
+
+        private InputAction _optionAction;
+        private InputAction _submitAction;
+        private InputAction _cancelAction;
+        private InputAction _moveAction;
+        private InputAction _dodgeAction;
+        private InputAction _attackAction;
+
+        /// <summary>
+        ///     Actionをキャッシュして、後でイベントの登録と解除を行いやすくする。
+        /// </summary>
+        private void CacheActions()
+        {
+            InputActionAsset actions = _playerInput.actions;
+
+            _optionAction = actions.FindAction($"{InputMapNames.Common}/Option", true);
+            _submitAction = actions.FindAction($"{InputMapNames.OutGame}/Submit", true);
+            _cancelAction = actions.FindAction($"{InputMapNames.OutGame}/Cancel", true);
+            _moveAction = actions.FindAction($"{InputMapNames.InGame}/Move", true);
+            _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/Dodge", true);
+            _attackAction = actions.FindAction($"{InputMapNames.InGame}/Attack", true);
+        }
+
+        private void OnEnable()
+        {
+            _playerInput = GetComponent<PlayerInput>();
+
+            _optionAction.started += OnOption;
+            _optionAction.performed += OnOption;
+            _optionAction.canceled += OnOption;
+
+            _submitAction.started += OnSubmit;
+            _submitAction.performed += OnSubmit;
+            _submitAction.canceled += OnSubmit;
+
+            _cancelAction.started += OnCancel;
+            _cancelAction.performed += OnCancel;
+            _cancelAction.canceled += OnCancel;
+
+            _moveAction.started += OnMove;
+            _moveAction.performed += OnMove;
+            _moveAction.canceled += OnMove;
+
+            _dodgeAction.started += OnDodge;
+            _dodgeAction.performed += OnDodge;
+            _dodgeAction.canceled += OnDodge;
+
+            _attackAction.started += OnAttack;
+            _attackAction.performed += OnAttack;
+            _attackAction.canceled += OnAttack;
+        }
+
+        private void Awake()
+        {
+            CacheActions();
+        }
+
+        private void OnDisable()
+        {
+            _optionAction.started -= OnOption;
+            _optionAction.performed -= OnOption;
+            _optionAction.canceled -= OnOption;
+
+            _submitAction.started -= OnSubmit;
+            _submitAction.performed -= OnSubmit;
+            _submitAction.canceled -= OnSubmit;
+
+            _cancelAction.started -= OnCancel;
+            _cancelAction.performed -= OnCancel;
+            _cancelAction.canceled -= OnCancel;
+
+            _moveAction.started -= OnMove;
+            _moveAction.performed -= OnMove;
+            _moveAction.canceled -= OnMove;
+
+            _dodgeAction.started -= OnDodge;
+            _dodgeAction.performed -= OnDodge;
+            _dodgeAction.canceled -= OnDodge;
+
+            _attackAction.started -= OnAttack;
+            _attackAction.performed -= OnAttack;
+            _attackAction.canceled -= OnAttack;
+        }
     }
 }
