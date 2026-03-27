@@ -12,17 +12,28 @@ namespace KillChord.Runtime.InfraStructure
     {
         public bool IsReady => _agent != null && _agent.isOnNavMesh;
 
+        /// <summary>
+        ///     スピードを設定する。
+        /// </summary>
+        /// <param name="speed"></param>
         public void SetMoveSpeed(float speed)
         {
             _agent.speed = speed;
         }
 
+        /// <summary>
+        ///     敵を目的地に移動させる。
+        /// </summary>
+        /// <param name="destination"></param>
         public void MoveTo(Vector3 destination)
         {
             _agent.isStopped = false;
             _agent.SetDestination(destination);
         }
 
+        /// <summary>
+        ///     動きを止める。
+        /// </summary>
         public void Stop()
         {
             _agent.isStopped = true;
@@ -31,11 +42,6 @@ namespace KillChord.Runtime.InfraStructure
         private NavMeshAgent _agent;
 
         private void Awake()
-        {
-            _agent = GetComponent<NavMeshAgent>();
-        }
-
-        private void Reset()
         {
             _agent = GetComponent<NavMeshAgent>();
         }
