@@ -31,6 +31,10 @@ namespace KillChord.Runtime.InfraStructure
             for (int i = 0; i < attackDefinitions.Length; i++)
             {
                 AttackDefinitionData attackDefinition = attackDefinitions[i];
+                if (attackDefinition == null)
+                {
+                    throw new ArgumentException($"AttackDifinitions[{i}] must not be null.", nameof(data));
+                }
                 definitions.Add(attackDefinition.AttackId, new AttackDefinition(
                     attackDefinition.AttackId,
                     new Damage(attackDefinition.BaseDamage)));

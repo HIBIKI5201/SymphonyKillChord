@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application
         /// <param name="resolver"></param>
         public AttackExecutor(IAttackPipelineResolver resolver)
         {
-            _resolver = resolver;
+            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
         }
 
         public AttackResult Execute(CharacterEntity attacker, IHitTarget target, AttackId attackId)

@@ -41,6 +41,15 @@ namespace KillChord.Runtime.View
             _criticalText.text = isCritical ? "Critical!" : "";
         }
 
+        private void Awake()
+        {
+            if (_damageText == null || _criticalText == null)
+            {
+                Debug.LogError("[AttackResultView] TMP_Text が未設定です。", this);
+                enabled = false;
+            }
+        }
+
         private void OnDestroy()
         {
             if (_viewModel != null)
