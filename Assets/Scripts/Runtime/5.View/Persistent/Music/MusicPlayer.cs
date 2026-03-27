@@ -1,5 +1,6 @@
 using CriWare;
 using R3;
+using SymphonyFrameWork.Debugger.HUD;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -36,6 +37,8 @@ namespace KillChord.Runtime.View
             _cueName = cueName;
             _cri.cueName = cueName;
             _playback = _cri.Play();
+            Debug.Log($"cueName : {cueName}");
+            SymphonyDebugHUD.AddText(() => _playback.time.ToString());
         }
 
         public void StopBgm()

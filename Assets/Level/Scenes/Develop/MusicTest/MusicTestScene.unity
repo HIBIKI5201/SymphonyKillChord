@@ -306,59 +306,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 596385843}
   _composition: {fileID: 1455956528}
---- !u!1 &893635771
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 893635773}
-  - component: {fileID: 893635772}
-  m_Layer: 0
-  m_Name: CRIWARE
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &893635772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 893635771}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91f529aa944b914449d62b8c40f188fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtom
-  acfFile: SymphonyKillChord.acf
-  cueSheets:
-  - name: MusicSyncMock
-    acbFile: MusicSyncMock.acb
-    awbFile: 
-    loaderStatus: 0
-  dspBusSetting: 
-  dontDestroyOnLoad: 0
-  dontRemoveExistsCueSheet: 0
---- !u!4 &893635773
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 893635771}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  _cue: Cyber
 --- !u!1 &1455956525
 GameObject:
   m_ObjectHideFlags: 0
@@ -442,5 +390,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 95234608}
   - {fileID: 596385844}
-  - {fileID: 893635773}
   - {fileID: 1455956527}
