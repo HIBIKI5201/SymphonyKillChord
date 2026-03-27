@@ -11,7 +11,7 @@ Shader "Custom/SilToon"
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
         [Headedr(Normal)]
-        _NormalMap("Normal Map", 2D) = "black"{}
+        [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
 
