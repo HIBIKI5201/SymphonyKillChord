@@ -2,6 +2,7 @@ Shader "Custom/SilToon/Eye"
 {
     Properties
     {
+        [IntRange] _StencilRef ("Stencil ID", Range(0, 255)) = 0
         // [Header(Fragment)}
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
@@ -46,7 +47,7 @@ Shader "Custom/SilToon/Eye"
 
             ZTest LEqual
             Stencil{
-                Ref 1
+                Ref [_StencilRef]
                 Comp Always
                 Pass Replace
                 Fail Keep
