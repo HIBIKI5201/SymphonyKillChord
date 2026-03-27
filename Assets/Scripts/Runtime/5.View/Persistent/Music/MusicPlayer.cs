@@ -6,18 +6,27 @@ namespace KillChord.Runtime.View
 {
     public class MusicPlayer : MonoBehaviour
     {
+        public MusicViewModel MusicVM => _musicVm;
         public double Time => _playback.time;
         public string CueName => _cueName;
 
         private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
+        private MusicViewModel _musicVm;
 
 
         private string _cueName;
 
+        public void Bind(MusicViewModel musicViewModel)
+        {
+            _musicVm = musicViewModel;
+            musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
+        }
+
         public void Awake()
         {
             _cri = GetComponent<CriAtomSource>();
+            Bind(new());
         }
 
         public void PlayBgm(string cueName)
