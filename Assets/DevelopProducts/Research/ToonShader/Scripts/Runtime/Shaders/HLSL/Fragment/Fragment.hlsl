@@ -6,6 +6,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
+
 struct Attributes
 {
     float4 positionOS : POSITION;
@@ -18,10 +19,10 @@ struct Varyings
 {
     float4 positionHCS : SV_POSITION;
     float2 uv : TEXCOORD0;
-    float3 positionOS : TEXCOORD1;
-    float3 normalWS : TEXCOORD2;
-    float3 tangentWS : TEXCOORD3;
-    float3 bitangentWS : TEXCOORD4;
+    float3 positionWS : TEXCOORD1;
+    half3 normalWS : TEXCOORD2; 
+    half3 tangentWS : TEXCOORD3;
+    half3 bitangentWS : TEXCOORD4;
 };
 
 TEXTURE2D(_BaseMap);
@@ -32,38 +33,43 @@ TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 float4 _NormalMap_ST;
 
-float _NormalMapIntensity;
+half _NormalMapIntensity;
 
 float _PerspectiveRemovalRatio;
 float _PerspectiveRemovalRadius;
-float3 _Head;
+float3 _Head; 
 
-float _IsForFace;
-float3 _FaceUp;
+half _IsForFace;
+float3 _FaceUp; // 方向ベクトルだが正規化前提で half でも可
 
 half4 _ColorLit;
 half4 _ColorMiddle;
 half4 _ColorShadow;
 
-float _FresnelBackLight;
-float _FresnelFrontRimLight;
-float _FresnelBackRimLight;
+half _FresnelBackLight; 
+half _FresnelFrontRimLight; 
+half _FresnelBackRimLight; 
+
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
-    float3 perspectiveRemoval = GetPerspectiveRemoval(_Head, IN.positionOS.xyz, IN.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
-    
+    float3 perspectiveRemoval = GetPerspectiveRemoval(
+        _Head, IN.positionOS.xyz, IN.normalOS,
+        _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+
     OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
-    OUT.positionOS = IN.positionOS;
+    
+    
+    OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+    
     OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
     
+    OUT.normalWS = (half3) TransformObjectToWorldNormal(IN.normalOS);
+    OUT.tangentWS = (half3) TransformObjectToWorldDir(IN.tangentOS.xyz);
     
-    
-    OUT.normalWS = normalize(mul(float4(IN.normalOS, 0.0), unity_WorldToObject).xyz);
-    OUT.tangentWS = normalize(mul((float3x3) unity_ObjectToWorld, IN.tangentOS.xyz));
-    float sign = IN.tangentOS.w * unity_WorldTransformParams.w;
+    half sign = (half) (IN.tangentOS.w * unity_WorldTransformParams.w);
     OUT.bitangentWS = cross(OUT.normalWS, OUT.tangentWS) * sign;
     
     return OUT;
@@ -71,26 +77,28 @@ Varyings vert(Attributes IN)
 
 half4 frag(Varyings IN) : SV_Target
 {
-    float3 positionWS = mul(unity_ObjectToWorld, float4(IN.positionOS, 1.0)).xyz;
-    float3 normalWS = GetNormalCombine(
-        TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap), // ← マクロで渡す
+    half3 normalWS = (half3) GetNormalCombine(
+        TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap),
         IN.uv,
         IN.normalWS,
         IN.tangentWS,
         IN.bitangentWS,
         _NormalMapIntensity
     );
+
+    normalWS = _IsForFace ? (half3) GetFaceNormal(_FaceUp, (float3) normalWS) : normalWS;
+
+    half3 color;
+    GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, IN.positionWS, (float3) normalWS, color);
     
-    normalWS = _IsForFace ? GetFaceNormal(_FaceUp, normalWS) : normalWS;
-    
-    float3 color;
-    GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
-    
-    float backLight, rimLightFront, rimLightBack;
-    GetFresnel(IN.normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
+    half backLight, rimLightFront, rimLightBack;
+    GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
+               backLight, rimLightFront, rimLightBack);
+
     color += backLight * _FresnelBackLight;
     color += rimLightBack * _FresnelBackRimLight;
     color += rimLightFront * _FresnelFrontRimLight;
-    return (half4) (float4(color, 1.0)) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+    
+    return half4(color, 1.0h) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
 }
 #endif
