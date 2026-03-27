@@ -21,6 +21,10 @@ namespace KillChord.Runtime.Application
 
             Vector3 cameraDir = cameraBoneRotation * Vector3.forward;
             cameraDir.y = 0;
+            if (cameraDir.sqrMagnitude <= float.Epsilon)
+            {
+                return;
+            }
 
             float angle = Vector3.Angle(followDir, cameraDir);
 
