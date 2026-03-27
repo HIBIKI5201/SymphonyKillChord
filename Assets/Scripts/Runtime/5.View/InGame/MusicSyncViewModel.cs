@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Utility;
+using UnityEditor;
 
 namespace KillChord.Runtime.View
 {
@@ -10,8 +12,12 @@ namespace KillChord.Runtime.View
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
+        public int CurrentBeat { get; set; }
+        public int NearestBeat { get; set; }
 
         private List<ActionParams> _actionList = new();
+
+        private PriorityQueue<double, Action> _actionQueue = new();
 
         public ActionParams Dequeue()
         {
@@ -27,7 +33,6 @@ namespace KillChord.Runtime.View
 
         public void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token)
         {
-            
         }
     }
 }

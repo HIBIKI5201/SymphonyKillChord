@@ -16,9 +16,12 @@ namespace KillChord.Runtime.View
 
         private MusicPlayer _mp;
         private MusicViewModel _musicViewModel;
-        private IMusicSyncViewModel _musicSyncViewModel;
+        private MusicSyncViewModel _musicSyncViewModel;
         private PlayerInputView _playerInputView;
         private int _bpm;
+
+        private double _beatLength;
+        private double _currentBeat;
 
         public void Bind(
             MusicPlayer musicPlayer,
@@ -32,12 +35,17 @@ namespace KillChord.Runtime.View
             _playerInputView = playerInputView;
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
+
+            _beatLength = 60000d / _bpm;
         }
 
         private void Update()
         {
             if (_mp == null || _bpm <= 0) return;
-            
+
+            _currentBeat = _mp.Time / _beatLength;
+            _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
+            _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
         }
 
         private void OnDestroy()
@@ -82,6 +90,15 @@ namespace KillChord.Runtime.View
             var param = new ActionParams(type, signature);
 
             _musicSyncViewModel.Enqueue(param);
+        }
+
+        private double GetExecuteTime(ExecuteRequestTiming timing)
+        {
+            if (_bpm <= 0) return 0;
+            const double propTimeSignature = 4d;
+            double currentBar = Math.Floor(_currentBeat / propTimeSignature);
+            double targetBar = currentBar + timing.BarFlag;
+            return targetBar * propTimeSignature + propTimeSignature / timing.Beat.Signature * timing.Beat.Count;
         }
 
         /// <summary>

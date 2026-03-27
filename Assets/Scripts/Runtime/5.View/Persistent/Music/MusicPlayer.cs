@@ -7,6 +7,8 @@ namespace KillChord.Runtime.View
     public class MusicPlayer : MonoBehaviour
     {
         public MusicViewModel MusicVM => _musicVm;
+
+        /// <summary> 現在の曲の累計再生時間を取得 </summary>
         public double Time => _playback.time;
 
         private CriAtomSource _cri;

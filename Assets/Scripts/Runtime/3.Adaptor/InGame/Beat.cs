@@ -22,9 +22,11 @@ namespace KillChord.Runtime.Domain
             return unitSeconds * beat._count;
         }
 
-        [SerializeField, Tooltip("拍子"), Min(0)]
-        private readonly double _signature;
+        public double Signature => _signature;
+        public double Count => _count;
 
-        [SerializeField, Tooltip("数"), Min(0)] private readonly double _count;
+        [Tooltip("拍子"), Min(0)] private readonly double _signature;
+
+        [Tooltip("数"), Min(0)] private readonly double _count;
     }
 }
