@@ -1344,6 +1344,7 @@ MonoBehaviour:
   _playerT: {fileID: 150956204}
   _target: {fileID: 950355651}
   _lockOnState: 0
+  _updateMode: 2
 --- !u!114 &1288559922
 MonoBehaviour:
   m_ObjectHideFlags: 0

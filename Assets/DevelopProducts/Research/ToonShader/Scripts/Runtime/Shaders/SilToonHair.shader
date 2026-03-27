@@ -47,8 +47,10 @@ Shader "Custom/SilToon/Hair"
             Stencil{
                 Ref 1
                 Comp Always
-                Pass IncrSat
-                Fail Keep
+
+                Pass Keep
+                Fail Zero
+
                 ZFail Keep
             }
 

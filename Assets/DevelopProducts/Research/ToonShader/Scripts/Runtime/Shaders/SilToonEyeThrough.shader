@@ -3,6 +3,7 @@ Shader "Custom/SilToon/EyeThrough"
     Properties
     {
         [IntRange] _StencilRef ("Stencil ID", Range(0, 255)) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPass ("Stencil Pass Op", Float) = 0
         // [Header(Fragment)}
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
@@ -45,7 +46,7 @@ Shader "Custom/SilToon/EyeThrough"
             Stencil{
                 Ref [_StencilRef]
                 Comp Equal
-                Pass Keep
+                Pass [_StencilPass]
             }
 
             HLSLPROGRAM
