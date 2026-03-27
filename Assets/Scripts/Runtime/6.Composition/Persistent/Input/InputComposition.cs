@@ -17,6 +17,32 @@ namespace KillChord.Runtime.Composition
 
         public BufferedInputBuffer GetBufferedInputBuffer => _bufferedInputBuffer;
 
+        [Header("PlayerInput")]
+        [SerializeField] private PlayerInput _playerInput;
+
+        [Header("Bufferの最大容量")]
+        [SerializeField] private int _bufferCapacity;
+
+        private BufferedInputBuffer _bufferedInputBuffer;
+        private InputBufferRecorder _inputBufferRecorder;
+        private RecordController _inputAdaptor;
+        private PlayerInputView _playerInputView;
+        private InputTimestampProvider _timestampProvider;
+        private UnityInputMapController _inputMapController;
+
+        private void Awake()
+        {
+            _playerInputView = GetComponent<PlayerInputView>();
+            InitializePureObjects();
+            InitializeInputMaps();
+            BindViewToAdaptor();
+        }
+
+        private void OnDisable()
+        {
+            UnbindViewAdaptor();
+        }
+
         /// <summary>
         ///     クラスの初期化を行う。
         /// </summary>
@@ -69,25 +95,5 @@ namespace KillChord.Runtime.Composition
             _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
         }
-
-        private void Awake()
-        {
-            InitializePureObjects();
-            InitializeInputMaps();
-            BindViewToAdaptor();
-        }
-
-        [Header("PlayerInput")]
-        [SerializeField] private PlayerInput _playerInput;
-
-        [Header("Bufferの最大容量")]
-        [SerializeField] private int _bufferCapacity;
-
-        private BufferedInputBuffer _bufferedInputBuffer;
-        private InputBufferRecorder _inputBufferRecorder;
-        private RecordController _inputAdaptor;
-        private PlayerInputView _playerInputView;
-        private InputTimestampProvider _timestampProvider;
-        private UnityInputMapController _inputMapController;
     }
 }
