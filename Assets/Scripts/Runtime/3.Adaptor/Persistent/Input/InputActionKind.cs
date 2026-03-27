@@ -14,5 +14,6 @@ namespace KillChord.Runtime.Adaptor
         Move = 100,
         Dodge = 101,
         Attack = 102,
+        Look = 103,
     }
 }

@@ -1,45 +1,55 @@
 ﻿#ifndef SILTOON_FRESNEL_INCLUDED
 #define SILTOON_FRESNEL_INCLUDED
 
-float FresnelEffect(float3 normal, float3 viewDir, float power)
+half Pow5(half x) { half x2 = x * x; return x2 * x2 * x; }
+half Pow10(half x) { half x2 = x * x; half x5 = x2 * x2 * x; return x5 * x5; }
+half Pow20(half x) { half x10 = Pow10(x); return x10 * x10; }
+
+half FresnelEffect(half3 normal, half3 viewDir, half power)
 {
-    return pow(1 - abs(dot(normal, viewDir)), power);
+    half fresnel = 1.0h - saturate(abs(dot(normal, viewDir)));
+    return pow(fresnel, power);
 }
 
-float BackLight(float3 normalWS, float3 viewDirWS)
+half BackLight(half3 normalWS, half3 viewDirWS)
 {
-    float3 lightDirWS = _MainLightPosition.xyz;
-    return 
-    pow(saturate(-dot(viewDirWS, lightDirWS)), 5) 
-    * 
-    saturate(20 * FresnelEffect(normalWS, viewDirWS, 9));
+    half3 lightDirWS = half3(_MainLightPosition.xyz);
+    half vdl = saturate(-dot(viewDirWS, lightDirWS));
+    
+    half vdl5 = Pow5(vdl);
+    return vdl5 * saturate(20.0h * FresnelEffect(normalWS, viewDirWS, 9.0h));
 }
-float FrontRimFresnel(float3 normalWS, float3 viewDirWS)
+
+half FrontRimFresnel(half3 normalWS, half3 viewDirWS)
 {
-    float3 lightDirWS = _MainLightPosition.xyz;
-    return
-    saturate(pow(FresnelEffect(normalWS, viewDirWS, 10) * 10, 10))
-    *
-    saturate(dot(lightDirWS, normalWS));
+    half3 lightDirWS = half3(_MainLightPosition.xyz);
+    half f20 = FresnelEffect(normalWS, viewDirWS, 20.0h);
+    half rim = saturate(pow(f20 * 10.0h, 10.0h));
+    
+    return rim * saturate(dot(lightDirWS, normalWS));
 }
-float BackRimFresnel(float3 normalWS, float3 viewDirWS)
+
+half BackRimFresnel(half3 normalWS, half3 viewDirWS)
 {
-    float3 lightDirWS = _MainLightPosition.xyz;
-    return
-    FresnelEffect(normalWS, viewDirWS, 2)
-    *
-    pow(saturate(-dot(lightDirWS, normalWS) + 0.4), 20);
+    half3 lightDirWS = half3(_MainLightPosition.xyz);
+    half f2 = FresnelEffect(normalWS, viewDirWS, 2.0h);
+    
+    half ldn = saturate(-dot(lightDirWS, normalWS) + 0.4h);
+    return f2 * Pow20(ldn);
 }
 
 void GetFresnel(
-float3 normalWS,
-float3 viewDirWS,
-out float backLight,
-out float rimLightFront,
-out float rimLightBack)
+    float3 normalWS,
+    float3 viewDirWS,
+    out float backLight,
+    out float rimLightFront,
+    out float rimLightBack)
 {   
-    backLight = BackLight(normalWS, viewDirWS);
-    rimLightFront = FrontRimFresnel(normalWS, viewDirWS);
-    rimLightBack = BackRimFresnel(normalWS, viewDirWS);
+    half3 n = half3(normalWS);
+    half3 v = half3(viewDirWS);
+
+    backLight = float(BackLight(n, v));
+    rimLightFront = float(FrontRimFresnel(n, v));
+    rimLightBack = float(BackRimFresnel(n, v));
 }
 #endif

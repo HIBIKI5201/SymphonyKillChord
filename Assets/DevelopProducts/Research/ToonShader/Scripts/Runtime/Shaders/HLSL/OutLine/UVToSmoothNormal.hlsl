@@ -3,29 +3,28 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-float3 UVToSmoothNormal(float2 uv)
+half3 UVToSmoothNormal(half2 uv)
 {
-    float z = sqrt(max(0, 1 - saturate(dot(uv.xy, uv.xy))));
-    return float3(uv.x, uv.y, z);
+    half z = sqrt(max(0.0h, 1.0h - saturate(dot(uv, uv))));
+    return half3(uv.x, uv.y, z);
 }
-float3 NormalTSToOS(float3 smoothNormalTS, float3 normalOS, float4 tangentOS)
+
+half3 NormalTSToOS(half3 smoothNormalTS, half3 normalOS, half4 tangentOS)
 {
-    float3 normalWS = TransformObjectToWorldNormal(normalOS);
-    float3 tangentWS = TransformObjectToWorldDir(tangentOS.xyz);
-    float3 bitangentWS = cross(normalWS,tangentWS) * tangentOS.w;
+    half3 normalWS = half3(TransformObjectToWorldNormal(float3(normalOS)));
+    half3 tangentWS = half3(TransformObjectToWorldDir(float3(tangentOS.xyz)));
+    half3 bitangentWS = cross(normalWS, tangentWS) * tangentOS.w;
     
-    // ShaderGraphと同じ：World空間のTBNを使う
-    float3x3 tangentTransform = float3x3(tangentWS, bitangentWS, normalWS);
-    float3 smoothNormalWS = TransformTangentToWorld(smoothNormalTS, tangentTransform, false);
-
-    // World → Object
-    return TransformWorldToObjectNormal(smoothNormalWS, true);
+    half3x3 tangentTransform = half3x3(tangentWS, bitangentWS, normalWS);
+    
+    half3 smoothNormalWS = mul(smoothNormalTS, tangentTransform);
+    
+    return half3(TransformWorldToObjectNormal(float3(smoothNormalWS)));
 }
 
-
-float3 GetSmoothNormalFromUV(float2 uv, float3 normalOS, float4 tangentOS)
+half3 GetSmoothNormalFromUV(half2 uv, half3 normalOS, half4 tangentOS)
 {
-    float3 smoothNormalTS = UVToSmoothNormal(uv);
+    half3 smoothNormalTS = UVToSmoothNormal(uv);
     return NormalTSToOS(smoothNormalTS, normalOS, tangentOS);
 }
 

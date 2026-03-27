@@ -15,7 +15,6 @@ float3 GetNormalCombine(
     float3 normalTS = UnpackNormal(normalSample);
 
     normalTS.xy *= strength;
-    normalTS = normalize(normalTS);
 
     float3x3 TBN = float3x3(tangentWS, bitangentWS, normalWS);
     return normalize(mul(normalTS, TBN));

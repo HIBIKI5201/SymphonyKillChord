@@ -7,15 +7,19 @@ namespace KillChord.Runtime.Composition
     {
         [SerializeField] private MusicSyncView _musicSyncView;
         [SerializeField] private InputComposition _composition;
+        [SerializeField] private string _cue;
 
         private void Start()
         {
+            var mp = FindFirstObjectByType<MusicPlayer>();
             _composition.GetInputMapController.EnableOnly(InputMapNames.InGame);
             _musicSyncView.Bind(
-                FindFirstObjectByType<MusicPlayer>().GetComponent<MusicPlayer>(),
+                mp,
                 new(),
                 _composition.GetInputView
             );
+            
+            mp.MusicVM.UpdateMusicCue(_cue);
         }
     }
 }
