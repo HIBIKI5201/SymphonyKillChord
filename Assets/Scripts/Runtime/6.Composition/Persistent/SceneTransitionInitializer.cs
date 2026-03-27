@@ -15,6 +15,12 @@ namespace KillChord.Runtime.Composition
 
         private void Awake()
         {
+            if (_debugView == null)
+            {
+                Debug.LogError($"[{nameof(SceneTransitionInitializer)}] _debugView is not assigned.", this);
+                return;
+            }
+
             ISceneTransitionService service = new SceneTransitionService();
             SceneTransitionController controller = new SceneTransitionController(service);
 
