@@ -14,7 +14,6 @@ namespace KillChord.Runtime.Composition
             _musicSyncView.Bind(
                 FindFirstObjectByType<MusicPlayer>().GetComponent<MusicPlayer>(),
                 new(),
-                new(),
                 _composition.GetInputView
             );
         }

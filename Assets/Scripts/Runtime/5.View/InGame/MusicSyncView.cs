@@ -1,7 +1,6 @@
 using System;
 using KillChord.Runtime.Adaptor;
 using R3;
-using SymphonyFrameWork.Debugger.HUD;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,14 +22,13 @@ namespace KillChord.Runtime.View
 
         public void Bind(
             MusicPlayer musicPlayer,
-            MusicViewModel musicViewModel,
             MusicSyncViewModel syncViewModel,
             PlayerInputView playerInputView)
         {
             _mp = musicPlayer;
-            _musicViewModel = musicViewModel;
-            _musicSyncViewModel = syncViewModel;
+            _musicViewModel = _mp.MusicVM;
             _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
+            _musicSyncViewModel = syncViewModel;
             _playerInputView = playerInputView;
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
