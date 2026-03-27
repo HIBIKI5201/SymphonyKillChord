@@ -14,7 +14,8 @@ namespace KillChord.Runtime.Domain
             float followRotationSpeed,
             float lockOnLookAtRatio,
             float lockOnRotationSpeed,
-            float collisionRadius)
+            float collisionRadius,
+            Vector2 pitchRange)
         {
             _cameraOffset = cameraOffset;
             _followOffsetPower = followOffsetPower;
@@ -25,6 +26,7 @@ namespace KillChord.Runtime.Domain
             _lockOnLookAtRatio = lockOnLookAtRatio;
             _lockOnRotationSpeed = lockOnRotationSpeed;
             _collisionRadius = collisionRadius;
+            _pitchRange = pitchRange;
         }
         public Vector3 Offset => _cameraOffset;
         public float FollowOffsetPower => _followOffsetPower;
@@ -38,6 +40,8 @@ namespace KillChord.Runtime.Domain
         public float LockOnRotationSpeed => _lockOnRotationSpeed;
 
         public float CollisionRadius => _collisionRadius;
+
+        public Vector2 PitchRange => _pitchRange;
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
@@ -58,6 +62,9 @@ namespace KillChord.Runtime.Domain
 
         [Header("Collision")]
         [SerializeField] private float _collisionRadius;
+
+        [Header("Limits")]
+        [SerializeField] private Vector2 _pitchRange;
 
     }
 }

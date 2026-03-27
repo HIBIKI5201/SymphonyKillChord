@@ -16,7 +16,8 @@ namespace KillChord.Structure
                 _followRotationSpeed,
                 _lockOnLookAtRatio,
                 _lockOnRotationSpeed,
-                _collisionRadius);
+                _collisionRadius,
+                _pitchRange);
 
         public LayerMask CollisionMask => _collisionMask;
 
@@ -40,5 +41,8 @@ namespace KillChord.Structure
         [Header("Collision")]
         [SerializeField] private float _collisionRadius = 0.2f;
         [SerializeField] private LayerMask _collisionMask;
+
+        [Header("Limits")]
+        [SerializeField] private Vector2 _pitchRange = new Vector2(-45f, 75f);
     }
 }

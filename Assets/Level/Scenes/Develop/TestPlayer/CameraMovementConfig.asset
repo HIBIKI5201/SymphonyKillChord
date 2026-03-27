@@ -13,10 +13,15 @@ MonoBehaviour:
   m_Name: CameraMovementConfig
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Structure.CameraMovementConfig
   _cameraOffset: {x: 0, y: 1, z: -5}
-  _followOffsetPower: 2
+  _followOffsetPower: 1
   _followLerpSpeed: 2
   _boneRotateSpeed: 10
   _lockOnAngleMargin: 30
   _followRotationSpeed: 1.5
-  _lockOnLookAtRatio: 0.5
+  _lockOnLookAtRatio: 0.3
   _lockOnRotationSpeed: 10
+  _collisionRadius: 0.2
+  _collisionMask:
+    serializedVersion: 2
+    m_Bits: 51
+  _pitchRange: {x: -45, y: 75}

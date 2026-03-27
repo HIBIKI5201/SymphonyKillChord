@@ -75,3 +75,6 @@ crashlytics-build.properties
 Assets/AssetStoreTools/
 
 ExportedPackages/
+
+# JetBrains IDEs (IntelliJ, Rider, etc.)
+.idea/
