@@ -25,7 +25,7 @@
     "com.unity.probuilder": "6.0.9",
     "com.unity.project-auditor": "1.0.2",
     "com.unity.render-pipelines.universal": "17.3.0",
-    "com.unity.springbone": "https://github.com/unity3d-jp/UnityChanSpringBone.git",
+    "com.unity.springbone": "https://github.com/unity3d-jp/UnityChanSpringBone.git?path=/#release/1.2",
     "com.unity.test-framework": "1.6.0",
     "com.unity.timeline": "1.8.12",
     "com.unity.ugui": "2.0.0",
