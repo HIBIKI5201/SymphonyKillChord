@@ -1340,7 +1340,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f067364449e6d8e42a16423cc7702ae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.TestCameraSystem
-  _cameraRotateX: 0
   _cameraT: {fileID: 1288559916}
   _playerT: {fileID: 150956204}
   _target: {fileID: 950355651}
@@ -2786,7 +2785,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 6874508ad5be4e54a82a96a90fc1fd86, type: 2}
+      objectReference: {fileID: 9100000, guid: bad3f51a1e6c18f43a1d5093a11a7f1e, type: 2}
     - target: {fileID: 5866666021909216657, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
