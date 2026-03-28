@@ -31,9 +31,9 @@ namespace KillChord.Runtime.Domain
 
         public bool Equals(SkillDefinition other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && SkillPattern.Equals(other.SkillPattern);
+            if (other == null || Id != other.Id) return false;
+            if (SkillPattern != other.SkillPattern) return false;
+            return true;
         }
     }
 }
