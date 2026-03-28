@@ -2,14 +2,17 @@ using System;
 
 namespace KillChord.Runtime.Domain
 {
-    public readonly struct SkillPattern  : IEquatable<SkillPattern>
+    public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
         public ReadOnlySpan<int> Signatures => _signatures;
         private readonly int[] _signatures;
 
         public SkillPattern(int[] signatures)
         {
-            _signatures = signatures;
+            if (signatures == null) throw new ArgumentNullException(nameof(signatures));
+            if (signatures.Length == 0)
+                throw new ArgumentException("signatures must not be empty.", nameof(signatures));
+            _signatures = (int[])signatures.Clone();
         }
 
         public static bool operator ==(SkillPattern left, SkillPattern right)
