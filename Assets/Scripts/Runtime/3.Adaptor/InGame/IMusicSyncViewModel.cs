@@ -1,7 +1,5 @@
 using System;
-using System.Threading;
-using KillChord.Runtime.Utility;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -9,9 +7,6 @@ namespace KillChord.Runtime.Adaptor
     {
         event Action OnUpdate;
         double PlayTime { get; }
-        ActionParams LastAction { get; }
-        ActionParams Peek { get; }
-        int Count { get; }
 
         public int Bpm { get; }
 
@@ -26,8 +21,5 @@ namespace KillChord.Runtime.Adaptor
 
         /// <summary> 一拍の長さ </summary>
         public double BeatLength { get; }
-
-        ActionParams Dequeue();
-        void Enqueue(ActionParams param);
     }
 }

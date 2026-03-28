@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.Domain
 {
     public readonly struct ActionParams
     {
