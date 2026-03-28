@@ -9,9 +9,10 @@ namespace KillChord.Runtime.View.InGame
     /// </summary>
     public class EnemyMoveView : MonoBehaviour
     {
-        public void Initialize(EnemyMoveController enemyMoveController)
+        public void Initialize(EnemyMoveController enemyMoveController,Transform target)
         {
             _enemyMoveController = enemyMoveController;
+            _target = target;
         }
 
         private void Update()
@@ -22,8 +23,7 @@ namespace KillChord.Runtime.View.InGame
             }
         }
 
-        [SerializeField] private Transform _target;
-
+        private Transform _target;
         private EnemyMoveController _enemyMoveController;
     }
 }
