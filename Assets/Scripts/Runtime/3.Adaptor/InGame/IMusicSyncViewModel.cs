@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 
 namespace KillChord.Runtime.Adaptor
@@ -25,6 +26,5 @@ namespace KillChord.Runtime.Adaptor
 
         ActionParams Dequeue();
         void Enqueue(ActionParams param);
-        void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,7 +8,8 @@ namespace KillChord.Runtime.Adaptor
 {
     public class MusicSyncController
     {
-        private IMusicSyncViewModel _musicSyncViewModel;
+        private readonly IMusicSyncViewModel _musicSyncViewModel;
+        private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
         public MusicSyncController(IMusicSyncViewModel musicSyncViewModel)
         {
@@ -19,8 +21,7 @@ namespace KillChord.Runtime.Adaptor
         private void Update()
         {
             var time = _musicSyncViewModel.PlayTime;
-
-            /*
+            
             //登録されているアクションの中から実行すべきものをすべて実行、それ以外はスキップ
             while (_scheduledActions.TryPeek(out var actionData, out _))
             {
@@ -39,7 +40,6 @@ namespace KillChord.Runtime.Adaptor
 
                 break;
             }
-            */
         }
 
         private void OnAttack(InputContext<float> context)

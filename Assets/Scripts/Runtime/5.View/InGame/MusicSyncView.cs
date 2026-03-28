@@ -18,8 +18,6 @@ namespace KillChord.Runtime.View
         private MusicViewModel _musicViewModel;
         private MusicSyncViewModel _musicSyncViewModel;
 
-        private PriorityQueue<ScheduledAction, double> _scheduledActions = new();
-
         private double _beatLength;
         private double _currentBeat;
 
@@ -31,8 +29,6 @@ namespace KillChord.Runtime.View
             _musicViewModel = _mp.MusicVM;
             _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
             _musicSyncViewModel = syncViewModel;
-
-            _musicSyncViewModel.Register = SchedulingAction;
         }
 
         private void Update()
@@ -44,27 +40,6 @@ namespace KillChord.Runtime.View
             _currentBeat = _mp.Time / _beatLength;
             _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
             _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
-
-            /*
-            //登録されているアクションの中から実行すべきものをすべて実行、それ以外はスキップ
-            while (_scheduledActions.TryPeek(out var actionData, out _))
-            {
-                if (actionData.CancellationToken.IsCancellationRequested)
-                {
-                    _scheduledActions.Dequeue();
-                    continue;
-                }
-
-                if (actionData.Time <= _mp.Time)
-                {
-                    _scheduledActions.Dequeue();
-                    actionData.Action?.Invoke();
-                    continue;
-                }
-
-                break;
-            }
-            */
         }
 
         private void PlayBgm(string cueName)
@@ -73,12 +48,6 @@ namespace KillChord.Runtime.View
             _musicSyncViewModel.Bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
             _musicSyncViewModel.BeatLength = 60000d / _musicSyncViewModel.Bpm;
-        }
-
-        private void SchedulingAction(ExecuteRequestTiming ert, Action action, CancellationToken ct)
-        {
-            var d = GetExecuteTime(ert);
-            _scheduledActions.Enqueue(new(d, action, ct), d);
         }
 
         private double GetExecuteTime(ExecuteRequestTiming timing)
@@ -124,7 +93,5 @@ namespace KillChord.Runtime.View
 
             return nearestSignature;
         }
-
-
     }
 }

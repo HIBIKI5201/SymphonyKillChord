@@ -39,13 +39,5 @@ namespace KillChord.Runtime.View
         {
             _actionList.Add(param);
         }
-
-
-        public Action<ExecuteRequestTiming, Action, CancellationToken> Register;
-
-        public void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token)
-        {
-            Register?.Invoke(timing, action, token);
-        }
     }
 }
