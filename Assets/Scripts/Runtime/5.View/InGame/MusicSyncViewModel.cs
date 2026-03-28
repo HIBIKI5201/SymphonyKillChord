@@ -14,8 +14,11 @@ namespace KillChord.Runtime.View
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
+
+        public int Bpm { get; set; }
         public int CurrentBeat { get; set; }
         public int NearestBeat { get; set; }
+        public double BeatLength { get; set; }
 
         private List<ActionParams> _actionList = new();
 

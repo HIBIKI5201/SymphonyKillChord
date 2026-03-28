@@ -10,8 +10,6 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncView : MonoBehaviour
     {
-        public int Bpm => _bpm;
-
 #if UNITY_EDITOR
         [SerializeField] private int _testBpm;
 #endif
@@ -21,8 +19,6 @@ namespace KillChord.Runtime.View
         private MusicSyncViewModel _musicSyncViewModel;
 
         private PriorityQueue<ScheduledAction, double> _scheduledActions = new();
-
-        private int _bpm;
 
         private double _beatLength;
         private double _currentBeat;
@@ -41,16 +37,15 @@ namespace KillChord.Runtime.View
 
         private void Update()
         {
-            if (_mp == null || _bpm <= 0) return;
-            
+            if (_mp == null || _musicSyncViewModel.Bpm <= 0) return;
+
             _musicSyncViewModel.Update(_mp.Time);
             
-
-            /*
             _currentBeat = _mp.Time / _beatLength;
             _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
             _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
 
+            /*
             //登録されているアクションの中から実行すべきものをすべて実行、それ以外はスキップ
             while (_scheduledActions.TryPeek(out var actionData, out _))
             {
@@ -75,9 +70,9 @@ namespace KillChord.Runtime.View
         private void PlayBgm(string cueName)
         {
 #if UNITY_EDITOR
-            _bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
+            _musicSyncViewModel.Bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
-            _beatLength = 60000d / _bpm;
+            _musicSyncViewModel.BeatLength = 60000d / _musicSyncViewModel.Bpm;
         }
 
         /*
@@ -96,8 +91,8 @@ namespace KillChord.Runtime.View
                 RegisterActionQueue(ActionType.Dodge);
             }
         }
-        
-        
+
+
         private void RegisterActionQueue(ActionType type)
         {
             int signature = 1;
@@ -122,7 +117,7 @@ namespace KillChord.Runtime.View
 
         private double GetExecuteTime(ExecuteRequestTiming timing)
         {
-            if (_bpm <= 0) return 0;
+            if (_musicSyncViewModel.Bpm <= 0) return 0;
             const double propTimeSignature = 4d;
             double currentBar = Math.Floor(_currentBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;
@@ -141,9 +136,9 @@ namespace KillChord.Runtime.View
         /// <returns></returns>
         private int GetNearestSignature(double seconds)
         {
-            if (_bpm <= 0) return 4;
+            if (_musicSyncViewModel.Bpm <= 0) return 4;
 
-            double beatSeconds = 60d / _bpm;
+            double beatSeconds = 60d / _musicSyncViewModel.Bpm;
             double barSeconds = beatSeconds * 4d;
 
             int nearestSignature = 1;
