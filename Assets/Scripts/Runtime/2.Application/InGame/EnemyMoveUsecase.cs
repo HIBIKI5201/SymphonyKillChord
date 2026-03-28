@@ -23,7 +23,6 @@ namespace KillChord.Runtime.Application
             }
 
             float distanceToPlayer = Vector3.Distance(enemyPosition, playerPosition);
-            Debug.Log($"Distance to player: {distanceToPlayer}");
 
             if (distanceToPlayer <= _enemyMoveSpec.AttackRange.Value)
             {
