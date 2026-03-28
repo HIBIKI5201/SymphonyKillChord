@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.View;
 using UnityEngine;
 
@@ -8,17 +9,19 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private MusicSyncView _musicSyncView;
         [SerializeField] private string _cue;
 
+        public MusicSyncController _musicSyncViewModel;
+
         private void Start()
         {
+            MusicSyncViewModel msvm = new();
             var mp = FindFirstObjectByType<MusicPlayer>();
-            var _composition = FindFirstObjectByType<PlayerInputView>();
             _musicSyncView.Bind(
                 mp,
-                new(),
-                _composition
+                msvm
             );
-            
+
             mp.MusicVM.UpdateMusicCue(_cue);
+            _musicSyncViewModel = new(msvm);
         }
     }
 }

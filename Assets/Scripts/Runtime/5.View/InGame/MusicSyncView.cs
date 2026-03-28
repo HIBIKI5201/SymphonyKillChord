@@ -1,10 +1,6 @@
 using System;
-using System.Threading;
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Utility;
 using R3;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.View
 {
@@ -18,9 +14,6 @@ namespace KillChord.Runtime.View
         private MusicViewModel _musicViewModel;
         private MusicSyncViewModel _musicSyncViewModel;
 
-        private double _beatLength;
-        private double _currentBeat;
-
         public void Bind(
             MusicPlayer musicPlayer,
             MusicSyncViewModel syncViewModel)
@@ -33,13 +26,13 @@ namespace KillChord.Runtime.View
 
         private void Update()
         {
-            if (_mp == null || _musicSyncViewModel.Bpm <= 0) return;
+            if (_mp == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
 
             _musicSyncViewModel.Update(_mp.Time);
-            
-            _currentBeat = _mp.Time / _beatLength;
-            _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
-            _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
+
+            _musicSyncViewModel.AccurateBeat = _mp.Time / _musicSyncViewModel.BeatLength;
+            _musicSyncViewModel.NearestBeat = (int)Math.Round(_musicSyncViewModel.AccurateBeat);
+            _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_musicSyncViewModel.AccurateBeat);
         }
 
         private void PlayBgm(string cueName)

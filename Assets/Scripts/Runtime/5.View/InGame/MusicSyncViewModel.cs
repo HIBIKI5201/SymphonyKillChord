@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View
         public int Bpm { get; set; }
         public int CurrentBeat { get; set; }
         public int NearestBeat { get; set; }
+        public double AccurateBeat { get; set; }
         public double BeatLength { get; set; }
 
         private List<ActionParams> _actionList = new();

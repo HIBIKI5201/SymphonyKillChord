@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Adaptor
         /// <summary> 最も近い拍を取得する </summary>
         public int NearestBeat { get; }
 
+        /// <summary> double精度の拍を取得する </summary>
+        public double AccurateBeat { get; }
+
         /// <summary> 一拍の長さ </summary>
         public double BeatLength { get; }
 
