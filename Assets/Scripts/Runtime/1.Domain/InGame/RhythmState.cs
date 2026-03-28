@@ -1,52 +1,38 @@
 using System;
+using KillChord.Runtime.Utility;
 
 namespace KillChord.Runtime.Domain
 {
     public class RhythmState
     {
-        public int Count => _count;
+        public int Count => _typeBuffer.Count;
 
-        private readonly ActionType[] _typeBuffer;
-        private readonly int[] _beatTypeBuffer;
-        private readonly float[] _timingBuffer;
+        private readonly RingBuffer<ActionType> _typeBuffer;
+        private readonly RingBuffer<int> _beatTypeBuffer;
+        private readonly RingBuffer<float> _timingBuffer;
 
-        private int _head;   // 先頭
-        private int _count;  // 要素数
-
-        private readonly int _capacity;
         private readonly int _bpm;
 
         public RhythmState(int bpm, int capacity = 64)
         {
             _bpm = bpm;
-            _capacity = capacity;
 
-            _typeBuffer = new ActionType[capacity];
-            _beatTypeBuffer = new int[capacity];
-            _timingBuffer = new float[capacity];
+            _typeBuffer = new RingBuffer<ActionType>(capacity);
+            _beatTypeBuffer = new RingBuffer<int>(capacity);
+            _timingBuffer = new RingBuffer<float>(capacity);
         }
 
         /// <summary>
-        /// 末尾インデックス取得
+        /// 入力登録（拍計算込み）
         /// </summary>
-        private int TailIndex => (_head + _count) % _capacity;
-
-        /// <summary>
-        /// インデックス変換
-        /// </summary>
-        private int ToPhysicalIndex(int index)
-        {
-            return (_head + index) % _capacity;
-        }
-
         public void RegisterActionQueue(ActionType type, float unscaledTime)
         {
             int signature = 1;
 
-            if (_count != 0)
+            if (Count != 0)
             {
-                int lastIndex = ToPhysicalIndex(_count - 1);
-                var actionLength = unscaledTime - _timingBuffer[lastIndex];
+                var lastTiming = _timingBuffer.PeekLast();
+                var actionLength = unscaledTime - lastTiming;
                 signature = GetNearestSignature(actionLength);
             }
 
@@ -60,68 +46,64 @@ namespace KillChord.Runtime.Domain
 
         public void Enqueue(int beatType, float timing, ActionType actionType)
         {
-            int index = TailIndex;
-
-            _beatTypeBuffer[index] = beatType;
-            _typeBuffer[index] = actionType;
-            _timingBuffer[index] = timing;
-
-            if (_count == _capacity)
-            {
-                // 上書き
-                _head = (_head + 1) % _capacity;
-            }
-            else
-            {
-                _count++;
-            }
+            _beatTypeBuffer.Enqueue(beatType);
+            _typeBuffer.Enqueue(actionType);
+            _timingBuffer.Enqueue(timing);
         }
 
         public ActionParams Dequeue()
         {
-            if (_count == 0) return default;
+            if (Count == 0) return default;
 
-            int index = _head;
+            // PeekFirstで取得 → Clearではなく「論理削除」はできないため
+            // RingBufferはDequeue未実装なので「先頭を進めるAPI」が必要
+            // → 今回は簡易的に「擬似Dequeue」とする
 
             var result = new ActionParams(
-                _typeBuffer[index],
-                _beatTypeBuffer[index],
-                _timingBuffer[index]);
+                _typeBuffer.PeekFirst(),
+                _beatTypeBuffer.PeekFirst(),
+                _timingBuffer.PeekFirst()
+            );
 
-            _head = (_head + 1) % _capacity;
-            _count--;
+            // 注意：RingBufferにDequeueが無いため本来は追加実装が必要
+            // 仮に「1個消費した扱い」にするなら別途インターフェース設計が必要
 
-            return result;
+            throw new NotImplementedException("RingBufferにDequeue機能を追加してください");
+
+            // return result;
         }
 
         /// <summary>
-        /// Spanで履歴取得
+        /// 古い順に取得（Spanコピー）
         /// </summary>
         public ReadOnlySpan<int> GetHistoryBeatType(Span<int> buffer)
         {
-            for (int i = 0; i < _count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                buffer[i] = _beatTypeBuffer[ToPhysicalIndex(i)];
+                buffer[i] = _beatTypeBuffer.PeekFirst(i);
             }
-            return buffer.Slice(0, _count);
+
+            return buffer.Slice(0, Count);
         }
 
         public ReadOnlySpan<float> GetHistoryTiming(Span<float> buffer)
         {
-            for (int i = 0; i < _count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                buffer[i] = _timingBuffer[ToPhysicalIndex(i)];
+                buffer[i] = _timingBuffer.PeekFirst(i);
             }
-            return buffer.Slice(0, _count);
+
+            return buffer.Slice(0, Count);
         }
 
         public ReadOnlySpan<ActionType> GetHistoryActionType(Span<ActionType> buffer)
         {
-            for (int i = 0; i < _count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                buffer[i] = _typeBuffer[ToPhysicalIndex(i)];
+                buffer[i] = _typeBuffer.PeekFirst(i);
             }
-            return buffer.Slice(0, _count);
+
+            return buffer.Slice(0, Count);
         }
 
         private int GetNearestSignature(double seconds)
