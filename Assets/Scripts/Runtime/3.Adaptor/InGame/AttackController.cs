@@ -15,15 +15,21 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="presenter"></param>
         /// <param name="commandState"></param>
         /// <param name="battleState"></param>
+        /// <param name="skillRepository"></param>
+        /// <param name="musicSyncViewModel"></param>
         public AttackController(AttackExecutor attackExecutor,
             AttackResultPresenter presenter,
             AttackCommandState commandState,
-            AttackBattleState battleState)
+            AttackBattleState battleState,
+            ISkillRepository skillRepository,
+            IMusicSyncViewModel musicSyncViewModel)
         {
             _attackExecutor = attackExecutor;
             _presenter = presenter;
             _commandState = commandState;
             _battleState = battleState;
+            _skillRepository = skillRepository;
+            _musicSyncViewModel = musicSyncViewModel;
         }
 
         /// <summary>
@@ -43,7 +49,7 @@ namespace KillChord.Runtime.Adaptor
             AttackId attackId = _commandState.SelectedAttackId;
             AttackResult result = _attackExecutor.Execute(
                 _battleState.Attacker,
-                _battleState.Target, 
+                _battleState.Target,
                 attackId);
             _presenter.Push(result);
         }
@@ -52,5 +58,7 @@ namespace KillChord.Runtime.Adaptor
         private readonly AttackResultPresenter _presenter;
         private readonly AttackCommandState _commandState;
         private readonly AttackBattleState _battleState;
+        private readonly ISkillRepository _skillRepository;
+        private readonly IMusicSyncViewModel _musicSyncViewModel;
     }
 }
