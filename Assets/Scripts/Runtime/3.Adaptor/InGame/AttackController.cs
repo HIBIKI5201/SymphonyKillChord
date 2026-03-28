@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
+using KillChord.Runtime.View;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -52,6 +53,8 @@ namespace KillChord.Runtime.Adaptor
                 _battleState.Target,
                 attackId);
             _presenter.Push(result);
+            //_musicSyncViewModel.Enqueue(new(ActionType.Attack, ));
+            //SkillCheckService.TryCheckSkills(_musicSyncViewModel.)
         }
 
         private readonly AttackExecutor _attackExecutor;
