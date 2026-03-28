@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public class MusicSyncController
+    public class MusicSyncController : IDisposable
     {
         private readonly IMusicSyncViewModel _musicSyncViewModel;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Adaptor
         private void Update()
         {
             var time = _musicSyncViewModel.PlayTime;
-            
+
             //登録されているアクションの中から実行すべきものをすべて実行、それ以外はスキップ
             while (_scheduledActions.TryPeek(out var actionData, out _))
             {
@@ -102,6 +102,11 @@ namespace KillChord.Runtime.Adaptor
             }
 
             return nearestSignature;
+        }
+
+        public void Dispose()
+        {
+            _musicSyncViewModel.OnUpdate -= Update;
         }
     }
 }

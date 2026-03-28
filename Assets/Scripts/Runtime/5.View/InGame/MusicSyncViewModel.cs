@@ -31,6 +31,8 @@ namespace KillChord.Runtime.View
 
         public ActionParams Dequeue()
         {
+            if (_actionList.Count <= 0) return default;
+            
             var returnParam = _actionList[0];
             _actionList.RemoveAt(0);
             return returnParam;
