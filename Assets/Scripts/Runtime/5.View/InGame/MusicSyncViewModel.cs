@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Utility;
 
 namespace KillChord.Runtime.View
 {
@@ -10,6 +11,8 @@ namespace KillChord.Runtime.View
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
+        public int CurrentBeat { get; set; }
+        public int NearestBeat { get; set; }
 
         private List<ActionParams> _actionList = new();
 
@@ -23,6 +26,14 @@ namespace KillChord.Runtime.View
         public void Enqueue(ActionParams param)
         {
             _actionList.Add(param);
+        }
+
+
+        public Action<ExecuteRequestTiming, Action, CancellationToken> Register;
+
+        public void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token)
+        {
+            Register?.Invoke(timing, action, token);
         }
     }
 }

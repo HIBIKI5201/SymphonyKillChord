@@ -30,12 +30,18 @@ namespace KillChord.Runtime.Composition
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
 
-        private InputAction _optionAction;
-        private InputAction _submitAction;
-        private InputAction _cancelAction;
-        private InputAction _moveAction;
-        private InputAction _dodgeAction;
-        private InputAction _attackAction;
+        private void Awake()
+        {
+            _playerInputView = GetComponent<PlayerInputView>();
+            InitializePureObjects();
+            InitializeInputMaps();
+            BindViewToAdaptor();
+        }
+
+        private void OnDisable()
+        {
+            UnbindViewAdaptor();
+        }
 
         /// <summary>
         ///     クラスの初期化を行う。
@@ -47,7 +53,7 @@ namespace KillChord.Runtime.Composition
             _inputAdaptor = new RecordController(_inputBufferRecorder);
 
             _timestampProvider = new InputTimestampProvider();
-            _playerInputView = new PlayerInputView(_timestampProvider);
+            _playerInputView.Initialize(_timestampProvider);
         }
 
         /// <summary>
@@ -62,21 +68,6 @@ namespace KillChord.Runtime.Composition
             InputActionMap outGameMap = actions.FindActionMap(InputMapNames.OutGame, true);
 
             _inputMapController = new UnityInputMapController(commonMap, inGameMap, outGameMap);
-        }
-
-        /// <summary>
-        ///     Actionをキャッシュして、後でイベントの登録と解除を行いやすくする。
-        /// </summary>
-        private void CacheActions()
-        {
-            InputActionAsset actions = _playerInput.actions;
-
-            _optionAction = actions.FindAction($"{InputMapNames.Common}/Option", true);
-            _submitAction = actions.FindAction($"{InputMapNames.OutGame}/Submit", true);
-            _cancelAction = actions.FindAction($"{InputMapNames.OutGame}/Cancel", true);
-            _moveAction = actions.FindAction($"{InputMapNames.InGame}/Move", true);
-            _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/Dodge", true);
-            _attackAction = actions.FindAction($"{InputMapNames.InGame}/Attack", true);
         }
 
         /// <summary>
@@ -103,85 +94,6 @@ namespace KillChord.Runtime.Composition
             _playerInputView.OnDodgeInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
-        }
-
-        /// <summary>
-        ///     InputActionのイベントにViewの処理を登録する。
-        /// </summary>
-        private void RegisterActions()
-        {
-            _optionAction.started += _playerInputView.OnOption;
-            _optionAction.performed += _playerInputView.OnOption;
-            _optionAction.canceled += _playerInputView.OnOption;
-
-            _submitAction.started += _playerInputView.OnSubmit;
-            _submitAction.performed += _playerInputView.OnSubmit;
-            _submitAction.canceled += _playerInputView.OnSubmit;
-
-            _cancelAction.started += _playerInputView.OnCancel;
-            _cancelAction.performed += _playerInputView.OnCancel;
-            _cancelAction.canceled += _playerInputView.OnCancel;
-
-            _moveAction.started += _playerInputView.OnMove;
-            _moveAction.performed += _playerInputView.OnMove;
-            _moveAction.canceled += _playerInputView.OnMove;
-
-            _dodgeAction.started += _playerInputView.OnDodge;
-            _dodgeAction.performed += _playerInputView.OnDodge;
-            _dodgeAction.canceled += _playerInputView.OnDodge;
-
-            _attackAction.started += _playerInputView.OnAttack;
-            _attackAction.performed += _playerInputView.OnAttack;
-            _attackAction.canceled += _playerInputView.OnAttack;
-        }
-
-        /// <summary>
-        ///     InputActionのイベントからViewの処理を解除する。
-        /// </summary>
-        private void UnregisterActions()
-        {
-            _optionAction.started -= _playerInputView.OnOption;
-            _optionAction.performed -= _playerInputView.OnOption;
-            _optionAction.canceled -= _playerInputView.OnOption;
-
-            _submitAction.started -= _playerInputView.OnSubmit;
-            _submitAction.performed -= _playerInputView.OnSubmit;
-            _submitAction.canceled -= _playerInputView.OnSubmit;
-
-            _cancelAction.started -= _playerInputView.OnCancel;
-            _cancelAction.performed -= _playerInputView.OnCancel;
-            _cancelAction.canceled -= _playerInputView.OnCancel;
-
-            _moveAction.started -= _playerInputView.OnMove;
-            _moveAction.performed -= _playerInputView.OnMove;
-            _moveAction.canceled -= _playerInputView.OnMove;
-
-            _dodgeAction.started -= _playerInputView.OnDodge;
-            _dodgeAction.performed -= _playerInputView.OnDodge;
-            _dodgeAction.canceled -= _playerInputView.OnDodge;
-
-            _attackAction.started -= _playerInputView.OnAttack;
-            _attackAction.performed -= _playerInputView.OnAttack;
-            _attackAction.canceled -= _playerInputView.OnAttack;
-        }
-
-        private void Awake()
-        {
-            InitializePureObjects();
-            InitializeInputMaps();
-            CacheActions();
-            BindViewToAdaptor();
-        }
-
-        private void OnEnable()
-        {
-            RegisterActions();
-        }
-
-        private void OnDisable()
-        {
-            UnregisterActions();
-            UnbindViewAdaptor();
         }
     }
 }

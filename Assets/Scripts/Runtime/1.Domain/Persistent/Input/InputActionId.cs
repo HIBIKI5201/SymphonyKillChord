@@ -13,5 +13,6 @@ namespace KillChord.Runtime.Domain
         Move = 100,
         Dodge = 101,
         Attack = 102,
+        Look = 103,
     }
 }
