@@ -36,7 +36,7 @@ Shader "Custom/SilToon/EyeThrough"
         Pass
         {
             Name "MAIN Eye Flash"
-            Tags { "LightMode" = "UniversalForward" } 
+            Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
 
             Blend SrcAlpha OneMinusSrcAlpha
@@ -45,6 +45,8 @@ Shader "Custom/SilToon/EyeThrough"
             ZTest Always
             Stencil{
                 Ref [_StencilRef]
+
+
                 Comp Equal
                 Pass [_StencilPass]
             }

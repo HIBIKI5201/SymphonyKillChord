@@ -40,12 +40,14 @@ Shader "Custom/SilToon/Hair"
         Pass
         {
             Name "MAIN"
-            Tags { "LightMode" = "UniversalForward" } 
+            Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
 
             ZTest LEqual
             Stencil{
                 Ref 1
+                
+
                 Comp Always
 
                 Pass Keep
