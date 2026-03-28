@@ -42,5 +42,18 @@ namespace KillChord.Runtime.Domain
 
             return nearestSignature;
         }
+
+        public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
+        {
+            if (Bpm <= 0) return 0;
+            const double propTimeSignature = 4d;
+            double currentBar = Math.Floor(accurateBeat / propTimeSignature);
+            double targetBar = currentBar + timing.BarFlag;
+
+            double barLengthMs = BeatLength * propTimeSignature;
+            double targetBarStartTimingMs = targetBar * barLengthMs;
+            double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
+            return targetBarStartTimingMs + offsetInBarMs;
+        }
     }
 }

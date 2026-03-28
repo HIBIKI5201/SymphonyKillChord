@@ -9,14 +9,15 @@ namespace KillChord.Runtime.Application
 {
     public class MusicSyncService : IMusicSyncService
     {
-
         private readonly RhythmDefinition _rhythmDefinition;
 
+        private readonly RhythmState _rhythmState;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
         public MusicSyncService(RhythmDefinition rhythmDefinition)
         {
             _rhythmDefinition = rhythmDefinition;
+            _rhythmState = new(_rhythmDefinition.Bpm);
         }
 
         public void Update(double playTime)
@@ -40,35 +41,43 @@ namespace KillChord.Runtime.Application
             }
         }
 
+        public int GetHistoryLength()
+        {
+            return _rhythmState.Count;
+        }
+
+        public IReadOnlyList<int> GetBeatTypeHistory()
+        {
+            return _rhythmState.GetHistoryBeatType();
+        }
+
+        public IReadOnlyList<float> GetBeatTypeTiming()
+        {
+            return _rhythmState.GetHistoryTiming();
+        }
+
+        public IReadOnlyList<ActionType> GetActionHistory()
+        {
+            return _rhythmState.GetHistoryActionType();
+        }
+
         public void RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,
             CancellationToken ct)
         {
-            var executeTime = GetExecuteTime(timing, accurateBeat);
+            var executeTime = _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
         public void RegisterButtleActionHistory(ActionType actionType)
         {
+            _rhythmState.RegisterActionQueue(actionType, Time.unscaledTime);
         }
 
         public void ClearActions()
         {
-        }
-
-        private double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
-        {
-            if (_rhythmDefinition.Bpm <= 0) return 0;
-            const double propTimeSignature = 4d;
-            double currentBar = Math.Floor(accurateBeat / propTimeSignature);
-            double targetBar = currentBar + timing.BarFlag;
-
-            double barLengthMs = _rhythmDefinition.BeatLength * propTimeSignature;
-            double targetBarStartTimingMs = targetBar * barLengthMs;
-            double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
-            return targetBarStartTimingMs + offsetInBarMs;
         }
     }
 }

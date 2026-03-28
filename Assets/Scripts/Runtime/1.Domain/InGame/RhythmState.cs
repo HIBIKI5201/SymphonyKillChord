@@ -5,12 +5,12 @@ namespace KillChord.Runtime.Domain
 {
     public class RhythmState
     {
-        public ActionParams LastAction => _actionList[^1];
-        public ActionParams Peek => _actionList[0];
-        public int Count => _actionList.Count;
+        public int Count => _typeList.Count;
 
-        private readonly List<ActionParams> _actionList = new();
-        private int _bpm;
+        private readonly List<ActionType> _typeList = new();
+        private readonly List<int> _beatTypeList = new();
+        private readonly List<float> _timing = new();
+        private readonly int _bpm;
 
         public RhythmState(int bpm)
         {
@@ -22,32 +22,59 @@ namespace KillChord.Runtime.Domain
         /// </summary>
         /// <param name="type"></param>
         /// <param name="unscaledTime">Time.unscaledTime</param>
-        private void RegisterActionQueue(ActionType type, float unscaledTime)
+        public void RegisterActionQueue(ActionType type, float unscaledTime)
         {
             int signature = 1;
-            if (_actionList.Count != 0)
+            if (_typeList.Count != 0)
             {
                 var actionLength =
-                    unscaledTime - _actionList[^1].Timing;
+                    unscaledTime - _timing[^1];
                 signature = GetNearestSignature(actionLength);
             }
 
-            var param = new ActionParams(type, signature);
-
-            _actionList.Add(param);
+            _typeList.Add(type);
+            _timing.Add(unscaledTime);
+            _beatTypeList.Add(signature);
         }
 
-        private void Enqueue(ActionParams param)
+        public IReadOnlyList<int> GetHistoryBeatType()
         {
-            _actionList.Add(param);
+            return _beatTypeList;
         }
 
-        private ActionParams Dequeue()
+        public IReadOnlyList<float> GetHistoryTiming()
         {
-            if (_actionList.Count <= 0) return default;
+            return _timing;
+        }
 
-            var returnParam = _actionList[0];
-            _actionList.RemoveAt(0);
+        public IReadOnlyList<ActionType> GetHistoryActionType()
+        {
+            return _typeList;
+        }
+
+        public void Enqueue(ActionParams param)
+        {
+            _beatTypeList.Add(param.BeatType);
+            _typeList.Add(param.ActionType);
+            _timing.Add(param.Timing);
+        }
+
+        public void Enqueue(int beatType, float timing, ActionType actionType)
+        {
+            _beatTypeList.Add(beatType);
+            _typeList.Add(actionType);
+            _timing.Add(timing);
+        }
+
+        public ActionParams Dequeue()
+        {
+            if (_typeList.Count <= 0) return default;
+
+            var returnParam = new ActionParams(_typeList[0], _beatTypeList[0], _timing[0]);
+            _typeList.RemoveAt(0);
+            _beatTypeList.RemoveAt(0);
+            _timing.RemoveAt(0);
+            
             return returnParam;
         }
 

@@ -14,5 +14,12 @@ namespace KillChord.Runtime.Domain
             ActionType = actionType;
             Timing = Time.unscaledTime;
         }
+
+        public ActionParams(ActionType actionType, int beatType, float timing)
+        {
+            BeatType = beatType;
+            ActionType = actionType;
+            Timing = timing;
+        }
     }
 }
