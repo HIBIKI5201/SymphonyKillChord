@@ -42,12 +42,14 @@ Shader "Custom/SilToon/Eye"
         Pass
         {
             Name "MAIN"
-            Tags { "LightMode" = "UniversalForward" } 
+            Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
 
             ZTest LEqual
             Stencil{
                 Ref [_StencilRef]
+
+
                 Comp Always
                 Pass Replace
                 Fail Keep
