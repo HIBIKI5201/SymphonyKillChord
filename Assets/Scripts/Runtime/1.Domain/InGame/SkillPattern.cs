@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Domain
 
         public override int GetHashCode()
         {
-            return (_signatures != null ? _signatures.GetHashCode() : 0);
+            return (_signatures != null ? _signatures[^1].GetHashCode() : 0);
         }
     }
 }
