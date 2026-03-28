@@ -75,40 +75,6 @@ namespace KillChord.Runtime.View
             _musicSyncViewModel.BeatLength = 60000d / _musicSyncViewModel.Bpm;
         }
 
-        /*
-        private void OnAttack(InputContext<float> context)
-        {
-            if (context.Phase == InputActionPhase.Started)
-            {
-                RegisterActionQueue(ActionType.Attack);
-            }
-        }
-
-        private void OnDodge(InputContext<float> context)
-        {
-            if (context.Phase == InputActionPhase.Started)
-            {
-                RegisterActionQueue(ActionType.Dodge);
-            }
-        }
-
-
-        private void RegisterActionQueue(ActionType type)
-        {
-            int signature = 1;
-            if (_musicSyncViewModel.Count != 0)
-            {
-                var actionLength =
-                    Time.unscaledTime - _musicSyncViewModel.LastAction.Timing;
-                signature = GetNearestSignature(actionLength);
-            }
-
-            var param = new ActionParams(type, signature);
-
-            _musicSyncViewModel.Enqueue(param);
-        }
-        */
-
         private void SchedulingAction(ExecuteRequestTiming ert, Action action, CancellationToken ct)
         {
             var d = GetExecuteTime(ert);
@@ -159,18 +125,6 @@ namespace KillChord.Runtime.View
             return nearestSignature;
         }
 
-        private readonly struct ScheduledAction
-        {
-            public ScheduledAction(double time, Action action, CancellationToken ct)
-            {
-                Time = time;
-                Action = action;
-                CancellationToken = ct;
-            }
 
-            public double Time { get; }
-            public Action Action { get; }
-            public CancellationToken CancellationToken { get; }
-        }
     }
 }
