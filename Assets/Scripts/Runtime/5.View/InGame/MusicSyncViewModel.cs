@@ -8,6 +8,9 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncViewModel : IMusicSyncViewModel
     {
+        public event Action OnUpdate;
+
+        public double PlayTime { get; set; }
         public ActionParams LastAction => _actionList[^1];
         public ActionParams Peek => _actionList[0];
         public int Count => _actionList.Count;
@@ -15,6 +18,12 @@ namespace KillChord.Runtime.View
         public int NearestBeat { get; set; }
 
         private List<ActionParams> _actionList = new();
+
+        public void Update(double playTime)
+        {
+            PlayTime = playTime;
+            OnUpdate?.Invoke();
+        }
 
         public ActionParams Dequeue()
         {

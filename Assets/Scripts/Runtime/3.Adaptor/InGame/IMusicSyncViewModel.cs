@@ -6,6 +6,8 @@ namespace KillChord.Runtime.Adaptor
 {
     public interface IMusicSyncViewModel
     {
+        event Action OnUpdate;
+        double PlayTime { get; }
         ActionParams LastAction { get; }
         ActionParams Peek { get; }
         int Count { get; }
@@ -15,6 +17,7 @@ namespace KillChord.Runtime.Adaptor
 
         /// <summary> 最も近い拍を取得する </summary>
         public int NearestBeat { get; }
+
         ActionParams Dequeue();
         void Enqueue(ActionParams param);
         void RegisterAction(ExecuteRequestTiming timing, Action action, CancellationToken token);

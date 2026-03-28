@@ -19,7 +19,6 @@ namespace KillChord.Runtime.View
         private MusicPlayer _mp;
         private MusicViewModel _musicViewModel;
         private MusicSyncViewModel _musicSyncViewModel;
-        private PlayerInputView _playerInputView;
 
         private PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
@@ -30,16 +29,12 @@ namespace KillChord.Runtime.View
 
         public void Bind(
             MusicPlayer musicPlayer,
-            MusicSyncViewModel syncViewModel,
-            PlayerInputView playerInputView)
+            MusicSyncViewModel syncViewModel)
         {
             _mp = musicPlayer;
             _musicViewModel = _mp.MusicVM;
             _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
             _musicSyncViewModel = syncViewModel;
-            _playerInputView = playerInputView;
-            _playerInputView.OnAttackInput += OnAttack;
-            _playerInputView.OnDodgeInput += OnDodge;
 
             _musicSyncViewModel.Register = SchedulingAction;
         }
@@ -47,7 +42,11 @@ namespace KillChord.Runtime.View
         private void Update()
         {
             if (_mp == null || _bpm <= 0) return;
+            
+            _musicSyncViewModel.Update(_mp.Time);
+            
 
+            /*
             _currentBeat = _mp.Time / _beatLength;
             _musicSyncViewModel.NearestBeat = (int)Math.Round(_currentBeat);
             _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_currentBeat);
@@ -70,12 +69,7 @@ namespace KillChord.Runtime.View
 
                 break;
             }
-        }
-
-        private void OnDestroy()
-        {
-            _playerInputView.OnAttackInput -= OnAttack;
-            _playerInputView.OnDodgeInput -= OnDodge;
+            */
         }
 
         private void PlayBgm(string cueName)
@@ -86,6 +80,7 @@ namespace KillChord.Runtime.View
             _beatLength = 60000d / _bpm;
         }
 
+        /*
         private void OnAttack(InputContext<float> context)
         {
             if (context.Phase == InputActionPhase.Started)
@@ -101,7 +96,8 @@ namespace KillChord.Runtime.View
                 RegisterActionQueue(ActionType.Dodge);
             }
         }
-
+        
+        
         private void RegisterActionQueue(ActionType type)
         {
             int signature = 1;
@@ -116,6 +112,7 @@ namespace KillChord.Runtime.View
 
             _musicSyncViewModel.Enqueue(param);
         }
+        */
 
         private void SchedulingAction(ExecuteRequestTiming ert, Action action, CancellationToken ct)
         {
