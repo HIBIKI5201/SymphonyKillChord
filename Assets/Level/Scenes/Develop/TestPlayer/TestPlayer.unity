@@ -163,7 +163,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &84799481
 AudioListener:
   m_ObjectHideFlags: 0
@@ -330,7 +330,6 @@ GameObject:
   - component: {fileID: 150956204}
   - component: {fileID: 150956201}
   - component: {fileID: 150956200}
-  - component: {fileID: 150956199}
   - component: {fileID: 150956205}
   - component: {fileID: 150956206}
   m_Layer: 2
@@ -340,26 +339,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &150956199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 150956198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
-  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
-  _player: {fileID: 150956200}
-  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
-  _normalPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
-  _skillAPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
-  _skillBPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
-  _ultimatePipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
 --- !u!114 &150956200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,7 +354,7 @@ MonoBehaviour:
   _blendName: Speed
   _animator: {fileID: 487520792}
   _rb: {fileID: 150956205}
-  _cameraTransform: {fileID: 84799483}
+  _cameraTransform: {fileID: 1288559916}
 --- !u!136 &150956201
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -856,6 +835,76 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -7677133910065510771, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
   m_PrefabInstance: {fileID: 1731781451}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &789693867
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 789693870}
+  - component: {fileID: 789693869}
+  - component: {fileID: 789693868}
+  m_Layer: 0
+  m_Name: Enemy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &789693868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789693867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0f8972330ec59a4e96e1fa592d578cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.EnemySample
+  _view: {fileID: 852913148}
+--- !u!136 &789693869
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789693867}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &789693870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789693867}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.86241, y: 1.5, z: -1.27588}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 852913148}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &791502219 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6572391165540106318, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
@@ -871,6 +920,96 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3136913908413610622, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
   m_PrefabInstance: {fileID: 1731781451}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &852913147
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 852913148}
+  - component: {fileID: 852913150}
+  - component: {fileID: 852913149}
+  m_Layer: 0
+  m_Name: Capsule_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &852913148
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852913147}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 789693870}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &852913149
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852913147}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &852913150
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852913147}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &865498163 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 653263680677990162, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
@@ -1217,6 +1356,59 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7965116044086697479, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
   m_PrefabInstance: {fileID: 1731781451}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1176857065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1176857067}
+  - component: {fileID: 1176857066}
+  m_Layer: 0
+  m_Name: Initialize
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1176857066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176857065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7f8ba397756733449310b0fde89c846, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.Assets.Scripts.Develop.BattleInitialize
+  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
+  _player: {fileID: 150956200}
+  _enemySample: {fileID: 789693868}
+  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
+  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
+  _normalPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
+  _skillAPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
+  _skillBPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
+  _ultimatePipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
+--- !u!4 &1176857067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176857065}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.58355, y: 2.08822, z: -0.03832}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1180803669 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -353791976520886697, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
@@ -1304,8 +1496,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
   Priority:
-    Enabled: 0
-    m_Value: 0
+    Enabled: 1
+    m_Value: 1
   OutputChannel: 1
   StandbyUpdate: 2
   m_StreamingVersion: 20241001
@@ -1348,7 +1540,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.TestCameraSystem
   _cameraT: {fileID: 1288559916}
   _playerT: {fileID: 150956204}
-  _target: {fileID: 950355651}
+  _target: {fileID: 789693870}
   _lockOnState: 0
   _updateMode: 1
 --- !u!114 &1288559922
@@ -3275,8 +3467,10 @@ SceneRoots:
   m_Roots:
   - {fileID: 84799483}
   - {fileID: 1288559916}
+  - {fileID: 1176857067}
   - {fileID: 1053529648}
   - {fileID: 150956204}
   - {fileID: 950355651}
   - {fileID: 612090497}
   - {fileID: 1918379352}
+  - {fileID: 789693870}
