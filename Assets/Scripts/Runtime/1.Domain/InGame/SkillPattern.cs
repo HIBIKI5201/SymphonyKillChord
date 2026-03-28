@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain
             if (signatures == null) throw new ArgumentNullException(nameof(signatures));
             if (signatures.Length == 0)
                 throw new ArgumentException("signatures must not be empty.", nameof(signatures));
-            _signatures = (int[])signatures.Clone();
+            _signatures = signatures;//受け取ったデータは変わらない為そのまま利用する
         }
 
         public static bool operator ==(SkillPattern left, SkillPattern right)
