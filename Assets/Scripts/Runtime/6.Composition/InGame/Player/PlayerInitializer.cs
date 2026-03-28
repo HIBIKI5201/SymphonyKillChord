@@ -37,7 +37,6 @@ namespace KillChord.Runtime.Composition
             CharacterFactory characterFactory = new CharacterFactory();
 
             CharacterEntity player = characterFactory.Create(_playerData);
-            CharacterEntity enemy = characterFactory.Create(_enemyData);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
             {
@@ -54,20 +53,17 @@ namespace KillChord.Runtime.Composition
             AttackPipelineResolver attackPipelineResolver = new(pipelines);
             AttackExecutor attackExecutor = new(attackPipelineResolver);
 
-            AttackCommandState attackCommandState = new();
-            AttackBattleState attackBattleState = new();
-            attackBattleState.Setup(player, enemy);
 
 
-
-
+            BattleApplication battleApplication = new(player, attackExecutor);
+            BattleController battleController = new(battleApplication, new(), null);
 
             PlayerDodgeMovementApplication dodge = new(parameter);
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
-            PlayerController playerMovementController = new(application, attackExecutor, attackCommandState, attackBattleState);
-            _player.Init(playerMovementController);
+            PlayerController playerMovementController = new(application);
+            _player.Init(playerMovementController, battleController);
 
 
 #if UNITY_EDITOR
