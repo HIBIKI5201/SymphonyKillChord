@@ -49,49 +49,5 @@ namespace KillChord.Runtime.View
 #endif
             _musicSyncViewModel.BeatLength = 60000d / _musicSyncViewModel.Bpm;
         }
-
-        private double GetExecuteTime(ExecuteRequestTiming timing)
-        {
-            if (_musicSyncViewModel.Bpm <= 0) return 0;
-            const double propTimeSignature = 4d;
-            double currentBar = Math.Floor(_currentBeat / propTimeSignature);
-            double targetBar = currentBar + timing.BarFlag;
-
-            double barLengthMs = _beatLength * propTimeSignature;
-            double targetBarStartTimeMs = targetBar * barLengthMs;
-            double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
-
-            return targetBarStartTimeMs + offsetInBarMs;
-        }
-
-        /// <summary>
-        /// 1~8拍子の中で最も近いものを取得する
-        /// </summary>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
-        private int GetNearestSignature(double seconds)
-        {
-            if (_musicSyncViewModel.Bpm <= 0) return 4;
-
-            double beatSeconds = 60d / _musicSyncViewModel.Bpm;
-            double barSeconds = beatSeconds * 4d;
-
-            int nearestSignature = 1;
-            double minDiff = double.MaxValue;
-
-            for (int i = 1; i <= 8; i++)
-            {
-                double targetSeconds = barSeconds / i;
-                double diff = Math.Abs(seconds - targetSeconds);
-
-                if (diff < minDiff)
-                {
-                    minDiff = diff;
-                    nearestSignature = i;
-                }
-            }
-
-            return nearestSignature;
-        }
     }
 }
