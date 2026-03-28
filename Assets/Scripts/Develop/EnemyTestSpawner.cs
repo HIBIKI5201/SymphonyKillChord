@@ -6,7 +6,7 @@ namespace KillChord.Develop
     /// <summary>
     ///     テスト用のスポナー。
     /// </summary>
-    public class EnemyTestSpawer : MonoBehaviour
+    public class EnemyTestSpawner : MonoBehaviour
     {
         [SerializeField] private EnemyMoveDebugInitializer _enemyPrefab;
         [SerializeField] private Transform _target;

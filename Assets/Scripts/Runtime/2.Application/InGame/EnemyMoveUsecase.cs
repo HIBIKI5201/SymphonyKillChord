@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application
         {
             if (!_enemyNavigationAgent.IsReady)
             {
-                Debug.Log("EnemyNavigationAgent is not ready.");
+                Debug.LogError("EnemyNavigationAgent is not ready.");
                 return;
             }
 
