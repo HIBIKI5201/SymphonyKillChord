@@ -1,25 +1,25 @@
 using System;
+using System.Collections.Generic;
 using KillChord.Runtime.Domain;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
     public class SkillCheckService
     {
-        private ISkillRepository _repository;
-
-        public SkillCheckService(ISkillRepository repository)
+        public static bool TryCheckSkills(
+            IReadOnlyList<SkillDefinition> equipmentSkills,
+            ReadOnlySpan<int> history,
+            out SkillId skillId)
         {
-            _repository = repository;
-        }
-
-        public bool TryCheckSkills(ReadOnlySpan<int> history, out SkillId skillId)
-        {
-            var skills = _repository.GetEquipmentSkills();
-
-            foreach (var skillDefinition in skills)
+            Span<int> reversInput = stackalloc int[history.Length];
+            for (int i = 0; i < history.Length; i++)
             {
-                if (skillDefinition.IsMatch(history))
+                reversInput[i] = history[^(i + 1)];
+            }
+
+            foreach (var skillDefinition in equipmentSkills)
+            {
+                if (skillDefinition.IsMatch(reversInput))
                 {
                     skillId = skillDefinition.Id;
                     return true;

@@ -20,12 +20,17 @@ namespace KillChord.Runtime.Domain
             SkillPattern = skillPattern;
         }
 
-        public bool IsMatch(ReadOnlySpan<int> input)
+        /// <summary>
+        /// 逆順にソートした入力を利用してスキルの成立をチェックする
+        /// </summary>
+        /// <param name="reversInput"></param>
+        /// <returns></returns>
+        public bool IsMatch(ReadOnlySpan<int> reversInput)
         {
             if (SkillPattern.Signatures.Length < MIN_PATTERN_LENGTH) return false;
-            if (input.Length < SkillPattern.Signatures.Length) return false;
-
-            ReadOnlySpan<int> pattern = input.Slice(0, SkillPattern.Signatures.Length);
+            if (reversInput.Length < SkillPattern.Signatures.Length) return false;
+            
+            ReadOnlySpan<int> pattern = reversInput.Slice(0, SkillPattern.Signatures.Length);
             return pattern.SequenceEqual(SkillPattern.Signatures);
         }
 
