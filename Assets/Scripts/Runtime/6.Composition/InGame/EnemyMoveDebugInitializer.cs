@@ -17,7 +17,7 @@ namespace KillChord.Runtime.View
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private NavMeshEnemyAgent _navigationAgent;
 
-        private void Awake()
+        public void Initialize(Transform target)
         {
             // Factory
             EnemyFactory factory = new EnemyFactory();
@@ -34,7 +34,7 @@ namespace KillChord.Runtime.View
             EnemyMoveController controller = new EnemyMoveController(useCase);
 
             // View接続
-            _view.Initialize(controller);
+            _view.Initialize(controller, target);
         }
     }
 }
