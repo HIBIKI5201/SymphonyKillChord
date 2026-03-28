@@ -6,8 +6,6 @@ namespace KillChord.Runtime.Adaptor
     public class MusicSyncController : IDisposable
     {
         private readonly IMusicSyncViewModel _musicSyncViewModel;
-        
-        private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
         public MusicSyncController(IMusicSyncViewModel musicSyncViewModel)
         {

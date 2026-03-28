@@ -6,7 +6,6 @@ namespace KillChord.Runtime.Application
 {
     public interface IMusicSyncService
     {
-        event Action<ActionParams> OnActionTriggered;
         void Update(double playTime);
 
         /// <summary> メソッドの実行予約を行う </summary>
