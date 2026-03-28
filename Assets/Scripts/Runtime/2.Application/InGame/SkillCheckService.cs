@@ -11,6 +11,12 @@ namespace KillChord.Runtime.Application
             ReadOnlySpan<int> history,
             out SkillId skillId)
         {
+            const int MAX_STACKALLOC_SIZE = 256;//入力履歴の最大長　
+            if (history.Length > MAX_STACKALLOC_SIZE)
+            {
+                throw new Exception("入力履歴が長すぎます");
+            }
+            
             Span<int> reversInput = stackalloc int[history.Length];
             for (int i = 0; i < history.Length; i++)
             {
