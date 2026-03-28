@@ -24,6 +24,8 @@ namespace KillChord.Runtime.InfraStructure.Player
             {
                 skills.Add(skillData.ToSkillDefinition());
             }
+
+            return skills;
         }
     }
 }
