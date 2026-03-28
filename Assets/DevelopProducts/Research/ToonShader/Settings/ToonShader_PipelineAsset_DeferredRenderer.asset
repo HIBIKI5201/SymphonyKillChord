@@ -109,10 +109,9 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
-  - {fileID: 4395166471911360209}
   - {fileID: -5020809249361372582}
   - {fileID: -2736256204867979506}
-  m_RendererFeatureMap: d1c6fb9e9ec4fe3c5adad1ce968052ba0eb7629e7add06da
+  m_RendererFeatureMap: 5adad1ce968052ba0eb7629e7add06da
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -141,22 +140,3 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
---- !u!114 &4395166471911360209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25fa49196dd004941bf89d96f250a9fa, type: 3}
-  m_Name: BitonicPixelSortingFeatureMod
-  m_EditorClassIdentifier: DevelopProducts-RenderingExtension::DevelopProducts.RenderingExtension.BitonicPixelSortingFeatureMod
-  m_Active: 0
-  shader: {fileID: 7200000, guid: 950241c127228c44b8fdb4f48baad5f0, type: 3}
-  direction: 0
-  ascending: 0
-  thresholdMin: 0
-  thresholdMax: 0
-  passEvent: 500
