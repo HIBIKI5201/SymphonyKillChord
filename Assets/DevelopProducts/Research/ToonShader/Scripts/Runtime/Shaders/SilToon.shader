@@ -40,7 +40,7 @@ Shader "Custom/SilToon/Base"
         Pass
         {
             Name "MAIN"
-            Tags { "LightMode" = "UniversalForward" } 
+            Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
 
             HLSLPROGRAM
