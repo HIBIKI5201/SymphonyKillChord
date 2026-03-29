@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DevelopProducts.ToonShader
 {
@@ -127,26 +128,73 @@ namespace DevelopProducts.ToonShader
 
             DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
+                EditorGUILayout.LabelField("Presets", EditorStyles.boldLabel);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("通常 (Default)"))
+                {
+                    SetStencil(
+                        materialEditor,
+                        stencilRef,
+                        1,
+                        stencilComp,
+                        CompareFunction.Disabled,
+                        stencilPass,
+                        StencilOp.Keep,
+                        stencilFail,
+                        StencilOp.Keep,
+                        2000);
+                }
+                if (GUILayout.Button("透過処理（目・眉毛）"))
+                {
+                    SetStencil(
+                        materialEditor,
+                        stencilRef,
+                        1,
+                        stencilComp,
+                        CompareFunction.Always,
+                        stencilPass,
+                        StencilOp.Replace,
+                        stencilFail,
+                        StencilOp.Keep,
+                        2005
+                    );
+                }
+                if (GUILayout.Button("透過処理（髪）"))
+                {
+                    SetStencil(
+                        materialEditor,
+                        stencilRef,
+                        1,
+                        stencilComp,
+                        CompareFunction.Always,
+                        stencilPass,
+                        StencilOp.Keep,
+                        stencilFail,
+                        StencilOp.Zero,
+                        2010
+                    );
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(5);
+
                 materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値 (0-255)"));
                 materialEditor.ShaderProperty(stencilComp, new GUIContent("Compare Function", "ステンシル比較関数"));
                 materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass Operation", "ステンシル成功時の処理"));
                 materialEditor.ShaderProperty(stencilFail, new GUIContent("Fail Operation", "ステンシル失敗時の処理"));
-
-                // ===== Footer =====
-                EditorGUILayout.Space(15);
-                EditorGUILayout.BeginVertical(Styles.background);
-                {
-                    materialEditor.RenderQueueField();
-                    materialEditor.EnableInstancingField();
-                    materialEditor.DoubleSidedGIField();
-                }
-                EditorGUILayout.EndVertical();
             });
 
+            // ===== Footer =====
+            EditorGUILayout.Space(15);
+            EditorGUILayout.BeginVertical(Styles.background);
+            {
+                materialEditor.RenderQueueField();
+                materialEditor.EnableInstancingField();
+                materialEditor.DoubleSidedGIField();
+            }
+            EditorGUILayout.EndVertical();
 
-
-            //EditorGUILayout.Space(5);
-            //EditorGUILayout.LabelField("SilToon v1.0.15", EditorStyles.centeredGreyMiniLabel);
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("SilToon v1.0.1", EditorStyles.centeredGreyMiniLabel);
         }
 
         // ===== Helper Methods =====
@@ -162,10 +210,8 @@ namespace DevelopProducts.ToonShader
             rect.xMin -= 20;
             rect.xMax += 20;
 
-            // Gradient or solid background
             EditorGUI.DrawRect(rect, new Color(0.15f, 0.15f, 0.15f, 1));
 
-            // Accent line
             Rect accentRect = new Rect(rect.x, rect.y, 4, rect.height);
             EditorGUI.DrawRect(accentRect, Styles.headerColor);
 
@@ -185,11 +231,8 @@ namespace DevelopProducts.ToonShader
             EditorGUILayout.Space(5);
 
             Rect rect = EditorGUILayout.GetControlRect(true, 20);
-
-            // Draw header background
             EditorGUI.DrawRect(new Rect(rect.x - 3, rect.y, rect.width + 6, rect.height), new Color(0.2f, 0.2f, 0.2f, 1));
 
-            // Draw toggle
             state = EditorGUI.Foldout(rect, state, title, true, Styles.header);
 
             if (state)
@@ -197,6 +240,23 @@ namespace DevelopProducts.ToonShader
                 EditorGUILayout.BeginVertical(Styles.background);
                 drawer();
                 EditorGUILayout.EndVertical();
+            }
+        }
+
+        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pComp, CompareFunction vComp, MaterialProperty pPass, StencilOp vPass, MaterialProperty pFail, StencilOp vFail, int queue)
+        {
+            editor.RegisterPropertyChangeUndo("Set Stencil Template");
+            pRef.floatValue = vRef;
+            if (pComp != null) pComp.floatValue = (float)vComp;
+            if (pPass != null) pPass.floatValue = (float)vPass;
+            if (pFail != null) pFail.floatValue = (float)vFail;
+
+            foreach (var target in editor.targets)
+            {
+                if (target is Material mat)
+                {
+                    mat.renderQueue = queue;
+                }
             }
         }
     }
