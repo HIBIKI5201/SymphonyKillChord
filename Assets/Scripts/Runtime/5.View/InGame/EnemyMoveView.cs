@@ -39,9 +39,11 @@ namespace KillChord.Runtime.View.InGame
 
         private void OnDestroy()
         {
+            if (_enemyAIController == null) return;
+
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
-            _enemyAIController?.Dispose();
+            _enemyAIController.Dispose();
         }
 
         private void ApplyMove(EnemyMoveInstruction intruction)

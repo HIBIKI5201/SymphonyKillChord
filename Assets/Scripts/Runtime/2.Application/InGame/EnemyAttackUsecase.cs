@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain;
-using NUnit.Framework.Constraints;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
@@ -9,7 +8,7 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public class EnemyAttackUsecase
     {
-        public EnemyAttackUsecase(AttackExecutor attackExecutor,IMusicSyncService musicSyncService)
+        public EnemyAttackUsecase(AttackExecutor attackExecutor, IMusicSyncService musicSyncService)
         {
             _attackExecutor = attackExecutor;
             _musicSyncService = musicSyncService;

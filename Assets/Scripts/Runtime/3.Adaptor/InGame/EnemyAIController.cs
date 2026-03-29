@@ -6,6 +6,9 @@ using static Codice.CM.Common.Purge.PurgeReport;
 
 namespace KillChord.Runtime.Adaptor
 {
+    /// <summary>
+    ///     敵の動きを制御するコントローラークラス。
+    /// </summary>
     public class EnemyAIController : IDisposable
     {
         public EnemyAIController(
@@ -29,7 +32,6 @@ namespace KillChord.Runtime.Adaptor
         public EnemyMoveInstruction Tick(Vector3 enemyPosition, Vector3 targetPosition)
         {
             EnemyMoveDecision moveDecision = _enemyMoveUsecase.Tick(enemyPosition, targetPosition);
-            Debug.Log($"[EnemyAI] ShouldMove={moveDecision.ShouldMove}, IsInRange={_enemyBattleState.IsInAttackRange}");
 
             if (moveDecision.ShouldMove)
             {
