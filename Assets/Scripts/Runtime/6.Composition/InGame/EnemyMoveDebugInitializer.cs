@@ -40,6 +40,7 @@ namespace KillChord.Runtime.View
 
             Dictionary<AttackId, AttackPipeline> attackPipelines = new Dictionary<AttackId, AttackPipeline>
             {
+                // テスト段階のもので最初の攻撃定義のみパイプラインを作成している。
                 {_enemyData.AttackDifinitions[0].AttackId, _attackPipelineAsset.Create() }
             };
 

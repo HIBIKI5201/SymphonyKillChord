@@ -36,7 +36,7 @@ namespace KillChord.Runtime.Application
         {
             if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
             {
-                Debug.LogWarning("予約が存在しないか、すでにキャンセルされています。");
+                Debug.Log("予約が存在しないか、すでにキャンセルされています。");
                 return;
             }
 
@@ -48,17 +48,23 @@ namespace KillChord.Runtime.Application
 
         public void Dispose()
         {
-            _cancellationTokenSource = null;
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+            _hasReservation = false;
         }
 
         private void Reserve(in EnemyMusicSpec musicSpec)
         {
             // 既存の予約をキャンセルしてから新しい予約を設定
-            Cancel(); 
+            Cancel();
 
             _cancellationTokenSource = new CancellationTokenSource();
             _hasReservation = true;
-            
+
             _musicActionScheduler.Schedule(
                 musicSpec,
                 HandleReservedTimingReached,

@@ -5,14 +5,14 @@ namespace KillChord.Runtime.Domain
     /// </summary>
     public readonly struct EnemyMusicSpec
     {
-        public EnemyMusicSpec(long barFlag, long timeSignature, long targetBeat)
+        public EnemyMusicSpec(byte barFlag, long timeSignature, long targetBeat)
         {
             BarFlag = barFlag;
             TimeSignature = timeSignature;
             TargetBeat = targetBeat;
         }
 
-        public long BarFlag { get; }
+        public byte BarFlag { get; }
         public long TimeSignature { get; }
         public long TargetBeat { get; }
     }
