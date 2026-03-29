@@ -520,12 +520,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.BattleCompositionInitializer
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
   _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
+  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
   _normalPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
   _skillAPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
   _skillBPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
   _ultimatePipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
   _playerAttackInputView: {fileID: 1408947431}
   _attackResultView: {fileID: 1408947432}
+  _bpm: 60
 --- !u!114 &1408947431
 MonoBehaviour:
   m_ObjectHideFlags: 0

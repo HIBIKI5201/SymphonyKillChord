@@ -163,7 +163,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!81 &84799481
 AudioListener:
   m_ObjectHideFlags: 0
@@ -865,7 +865,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0f8972330ec59a4e96e1fa592d578cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.EnemySample
-  _view: {fileID: 852913148}
+  _view: {fileID: 0}
 --- !u!136 &789693869
 CapsuleCollider:
   m_ObjectHideFlags: 0

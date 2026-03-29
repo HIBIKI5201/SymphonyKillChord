@@ -7,18 +7,18 @@ namespace KillChord.Runtime.Adaptor
         event Action OnUpdate;
         double PlayTime { get; }
 
-        public int Bpm { get; }
+        int Bpm { get; }
 
         /// <summary> 最も近く過ぎた拍を取得する </summary>
         int CurrentBeat { get; }
 
         /// <summary> 最も近い拍を取得する </summary>
-        public int NearestBeat { get; }
+        int NearestBeat { get; }
 
         /// <summary> double精度の拍を取得する </summary>
-        public double AccurateBeat { get; }
+        double AccurateBeat { get; }
 
         /// <summary> 一拍の長さ </summary>
-        public double BeatLength { get; }
+        double BeatLength { get; }
     }
 }

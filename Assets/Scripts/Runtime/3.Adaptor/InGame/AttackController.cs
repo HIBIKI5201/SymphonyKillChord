@@ -1,6 +1,6 @@
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Domain.Player;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -16,21 +16,32 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="presenter"></param>
         /// <param name="commandState"></param>
         /// <param name="battleState"></param>
-        /// <param name="skillRepository"></param>
         /// <param name="musicSyncViewModel"></param>
-        public AttackController(AttackExecutor attackExecutor,
+        /// <param name="skillRepository"></param>
+        /// <param name="musicSyncService"></param>
+        public AttackController(
+            AttackExecutor attackExecutor,
             AttackResultPresenter presenter,
             AttackCommandState commandState,
             AttackBattleState battleState,
             ISkillRepository skillRepository,
-            IMusicSyncViewModel musicSyncViewModel)
+            IMusicSyncService musicSyncService,
+            int[] skillId = null
+        )
         {
             _attackExecutor = attackExecutor;
             _presenter = presenter;
             _commandState = commandState;
             _battleState = battleState;
-            _skillRepository = skillRepository;
-            _musicSyncViewModel = musicSyncViewModel;
+            _musicSyncService = musicSyncService;
+            var skillRepository1 = skillRepository;
+
+            skillId ??= new[] { 0 };
+            _skillCash = new SkillDefinition[skillId.Length];
+            for (int i = 0; i < skillId.Length; i++)
+            {
+                _skillCash[i] = skillRepository1.GetSkill(skillId[i]);
+            }
         }
 
         /// <summary>
@@ -47,21 +58,30 @@ namespace KillChord.Runtime.Adaptor
         /// </summary>
         public void ExecuteAttack()
         {
+            _musicSyncService.RegisterBattleActionHistory(ActionType.Attack);
+
+            if (SkillCheckService.TryCheckSkills(
+                    _skillCash,
+                    _musicSyncService.GetBeatTypeHistory(),
+                    out var index))
+            {
+                _skillCash[index].SkillExecute();
+            }
+
             AttackId attackId = _commandState.SelectedAttackId;
             AttackResult result = _attackExecutor.Execute(
                 _battleState.Attacker,
                 _battleState.Target,
                 attackId);
             _presenter.Push(result);
-            //_musicSyncViewModel.Enqueue(new(ActionType.Attack, ));
-            //SkillCheckService.TryCheckSkills(_musicSyncViewModel.)
         }
 
         private readonly AttackExecutor _attackExecutor;
         private readonly AttackResultPresenter _presenter;
         private readonly AttackCommandState _commandState;
         private readonly AttackBattleState _battleState;
-        private readonly ISkillRepository _skillRepository;
-        private readonly IMusicSyncViewModel _musicSyncViewModel;
+        private readonly IMusicSyncService _musicSyncService;
+
+        private readonly SkillDefinition[] _skillCash;
     }
 }
