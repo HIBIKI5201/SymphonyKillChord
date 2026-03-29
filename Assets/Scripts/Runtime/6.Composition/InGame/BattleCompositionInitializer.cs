@@ -77,7 +77,7 @@ namespace KillChord.Runtime.Composition
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
-            IMusicSyncService musicSyncService = new MusicSyncService(new(_bpm));
+            IMusicSyncService musicSyncService = new MusicSyncService(new(_bpm));//TODO : ちゃんと取得しなさい！
             SkillController skillController = new SkillController(_skillRepository, musicSyncService);
             
             AttackController attackController = new AttackController(
@@ -86,7 +86,7 @@ namespace KillChord.Runtime.Composition
                 attackCommandState,
                 attackBattleState,
                 skillController
-                ); //TODO : ちゃんと取得しなさい！
+                ); 
 
 
             _playerAttackInputView.Initialize(attackController);
