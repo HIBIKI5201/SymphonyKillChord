@@ -8,6 +8,11 @@ namespace KillChord.Runtime.Application
     {
         void Update(double playTime);
 
+        int GetHistoryLength();
+        ReadOnlySpan<int> GetBeatTypeHistory();
+        ReadOnlySpan<float> GetBeatTypeTiming();
+        ReadOnlySpan<ActionType> GetActionHistory();
+
         /// <summary> メソッドの実行予約を行う </summary>
         void RegisterAction(double accurateBeat,
             ExecuteRequestTiming timing,
