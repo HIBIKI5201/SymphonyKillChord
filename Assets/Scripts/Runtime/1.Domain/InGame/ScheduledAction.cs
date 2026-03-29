@@ -8,9 +8,10 @@ namespace KillChord.Runtime.Domain
     {
         public ScheduledAction(Action action, CancellationToken ct)
         {
-            Action = action;
+            Action = action ?? throw new ArgumentNullException(nameof(action));
             CancellationToken = ct;
         }
+
         public Action Action { get; }
         public CancellationToken CancellationToken { get; }
     }
