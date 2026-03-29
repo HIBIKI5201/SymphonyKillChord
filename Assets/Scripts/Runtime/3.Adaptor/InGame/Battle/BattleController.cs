@@ -18,6 +18,9 @@ namespace KillChord.Runtime.Adaptor
 
         public void Attack(BattleController toTarget)
         {
+            if (toTarget is null)
+                throw new System.ArgumentNullException(nameof(toTarget));
+
             IHitTarget hitTarget = toTarget.DamageApplication.hitTarget;
             _application.Attack(hitTarget);
 
