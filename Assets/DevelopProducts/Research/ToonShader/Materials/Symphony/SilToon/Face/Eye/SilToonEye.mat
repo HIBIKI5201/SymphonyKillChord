@@ -146,7 +146,7 @@ Material:
     - _ColorMiddle: {r: 0.9647059, g: 0.8235294, b: 0.84705883, a: 1}
     - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
+    - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
     - _Head: {r: 1, g: 0.9, b: 0, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}

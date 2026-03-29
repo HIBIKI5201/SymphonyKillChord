@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SilToonEyeThro
+  m_Name: SilToonEyeOverlay
   m_Shader: {fileID: 4800000, guid: 0fb7132fe235379418713a051d215e2c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -90,7 +90,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
-    - _Alpha: 0.5
+    - _Alpha: 0.3
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0

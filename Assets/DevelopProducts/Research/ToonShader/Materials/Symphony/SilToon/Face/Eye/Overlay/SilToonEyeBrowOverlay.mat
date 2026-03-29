@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SilToonFace
-  m_Shader: {fileID: 4800000, guid: 6b65efc8265b986478cf2235fd235bb8, type: 3}
+  m_Name: SilToonEyeBrowOverlay
+  m_Shader: {fileID: 4800000, guid: 0fb7132fe235379418713a051d215e2c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -19,7 +19,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -90,6 +90,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
+    - _Alpha: 0.5
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
@@ -130,9 +131,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _StencilComp: 0
-    - _StencilFail: 0
-    - _StencilPass: 0
+    - _StencilPass: 1
     - _StencilRef: 1
     - _Surface: 0
     - _WorkflowMode: 1

@@ -1,4 +1,4 @@
-Shader "Custom/SilToon/EyeThrough"
+Shader "Custom/SilToon/FaceOverlay"
 {
     Properties
     {
