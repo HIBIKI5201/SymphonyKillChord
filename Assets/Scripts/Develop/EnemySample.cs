@@ -18,6 +18,11 @@ namespace KillChord.Develop
 
         public void OnDamage(DamageDTO dto)
         {
+            if (_view == null)
+            {
+                Debug.Log("_viewがnullなので早期returnしました。", this);
+                return;
+            }
             if (_currentHealth.Value > dto.CurrentHealth.Value)
             {
                 _handle.TryCancel();
@@ -34,6 +39,11 @@ namespace KillChord.Develop
                     .Run();
             }
             _currentHealth = dto.CurrentHealth;
+        }
+        private void Awake()
+        {
+            if (_view != null)
+                Debug.LogWarning("View is not assigned. Please assign a view transform to enable damage feedback.", this);
         }
         private void OnDestroy()
         {
