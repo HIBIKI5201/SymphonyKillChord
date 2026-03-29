@@ -31,6 +31,20 @@ Shader "Custom/SilToon/Base"
         _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
         _PerspectiveRemovalRadius("Radius",Float) = 1
         _Head("HeadPosition", Vector,3) = (0,0,0)
+
+        [Header(RenderState)]
+        
+        [IntRange]
+        _StencilRef ("Stencil ID", Range(0, 255)) = 1
+        
+        [Enum(UnityEngine.Rendering.CompareFunction)]
+        _StencilComp ("Stencil Comp", Float) = 8
+
+        [Enum(UnityEngine.Rendering.StencilOp)] 
+        _StencilPass ("Stencil Pass Op", Float) = 0
+
+        [Enum(UnityEngine.Rendering.StencilOp)] 
+        _StencilFail ("Stencil Fail Op", Float) = 0
     }
 
     SubShader
@@ -42,6 +56,16 @@ Shader "Custom/SilToon/Base"
             Name "MAIN"
             Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
+
+            Stencil{
+                Ref [_StencilRef]
+
+                Comp [_StencilComp] //Hair:Always, Eye:Always, EyeThrouth:Equal
+                Pass [_StencilPass] //Hair:Keep, Eye:Replace, EyeThrouth: Zero Keep
+                Fail [_StencilFail] //Hair:Zero, Eye:Keep, EyeThrouth: Keep
+
+                ZFail Keep
+            }
 
             HLSLPROGRAM
 

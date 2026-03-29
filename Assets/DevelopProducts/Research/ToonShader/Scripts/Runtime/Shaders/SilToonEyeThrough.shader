@@ -2,8 +2,6 @@ Shader "Custom/SilToon/EyeThrough"
 {
     Properties
     {
-        [IntRange] _StencilRef ("Stencil ID", Range(0, 255)) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPass ("Stencil Pass Op", Float) = 0
         // [Header(Fragment)}
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
@@ -13,7 +11,7 @@ Shader "Custom/SilToon/EyeThrough"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
-        [Headedr(Normal)]
+        [Header(Normal)]
         [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
@@ -27,6 +25,12 @@ Shader "Custom/SilToon/EyeThrough"
         _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
         _PerspectiveRemovalRadius("Radius",Float) = 1
         _Head("HeadPosition", Vector,3) = (0,0,0)
+
+        [Header(RenderState)]
+        [IntRange] _StencilRef ("Stencil ID", Range(0, 255)) = 1
+
+        [Enum(UnityEngine.Rendering.StencilOp)] 
+        _StencilPass ("Stencil Pass Op", Float) = 0
     }
 
     SubShader
