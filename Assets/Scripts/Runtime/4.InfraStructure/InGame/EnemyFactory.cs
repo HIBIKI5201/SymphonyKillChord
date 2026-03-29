@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain;
-using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
 {
@@ -13,6 +12,23 @@ namespace KillChord.Runtime.InfraStructure
             return new EnemyMoveSpec(
                 new MoveSpeed(enemyMoveData.MoveSpeed),
                 new AttackRange(enemyMoveData.AttackRange));
+        }
+
+        public EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)
+        {
+            return new EnemyMusicSpec(
+                enemyMusicData.BarFlag,
+                enemyMusicData.TimeSignature,
+                enemyMusicData.TargetBeat);
+        }
+
+        public EnemyAttackMusicSpec CreateEnemyAttackMusicSpec(
+            EnemyMusicData encounterData,
+            EnemyMusicData battleMusicData)
+        {
+            return new EnemyAttackMusicSpec(
+                CreateEnemyMusicSpec(encounterData),
+                CreateEnemyMusicSpec(battleMusicData));
         }
     }
 }

@@ -8,35 +8,31 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public class EnemyMoveUsecase
     {
-        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec, IEnemyNavigationAgent enemyNavigationAgent)
+        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec)
         {
             _enemyMoveSpec = enemyMoveSpec;
-            _enemyNavigationAgent = enemyNavigationAgent;
         }
 
-        public void Tick(Vector3 enemyPosition, Vector3 playerPosition)
+        public EnemyMoveDecision Tick(Vector3 enemyPosition, Vector3 playerPosition)
         {
-            if (!_enemyNavigationAgent.IsReady)
+            float distance = Vector3.Distance(enemyPosition, playerPosition);
+
+            if (distance > _enemyMoveSpec.AttackRange.Value)
             {
-                Debug.LogError("EnemyNavigationAgent is not ready.");
-                return;
+                return new EnemyMoveDecision(
+                    true,
+                    playerPosition,
+                    _enemyMoveSpec.MoveSpeed.Value
+                );
             }
 
-            float distanceToPlayer = Vector3.Distance(enemyPosition, playerPosition);
-
-            if (distanceToPlayer <= _enemyMoveSpec.AttackRange.Value)
-            {
-                Debug.Log("攻撃範囲に入った。");
-                _enemyNavigationAgent.Stop();
-                return;
-            }
-
-            Debug.Log("プレイヤーを追従中...");
-            _enemyNavigationAgent.SetMoveSpeed(_enemyMoveSpec.MoveSpeed.Value);
-            _enemyNavigationAgent.MoveTo(playerPosition);
+            return new EnemyMoveDecision(
+                false,
+                enemyPosition,
+                0f
+            );
         }
 
-        private readonly EnemyMoveSpec _enemyMoveSpec;  
-        private readonly IEnemyNavigationAgent _enemyNavigationAgent;
+        private readonly EnemyMoveSpec _enemyMoveSpec;
     }
 }
