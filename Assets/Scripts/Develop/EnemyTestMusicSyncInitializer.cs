@@ -12,8 +12,6 @@ namespace KillChord.Develop
         [SerializeField] private string _testCue;
         [SerializeField] private int _testBpm;
 
-        [SerializeField] private EnemyTestSpawner _testSpawner;
-
         public MusicSyncController MusicSyncController;
         public MusicSyncService MusicSyncService;
 
@@ -29,7 +27,6 @@ namespace KillChord.Develop
             mp.MusicVM.UpdateMusicCue(_testCue);
             MusicSyncService = new(new(_testBpm));
             MusicSyncController = new(msvm, MusicSyncService);
-            _testSpawner.Initialize(msvm, MusicSyncService);
         }
     }
 }
