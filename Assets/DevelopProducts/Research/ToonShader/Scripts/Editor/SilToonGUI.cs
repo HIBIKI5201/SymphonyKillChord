@@ -145,8 +145,8 @@ namespace DevelopProducts.ToonShader
 
 
 
-            EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("SilToon v1.0.15", EditorStyles.centeredGreyMiniLabel);
+            //EditorGUILayout.Space(5);
+            //EditorGUILayout.LabelField("SilToon v1.0.15", EditorStyles.centeredGreyMiniLabel);
         }
 
         // ===== Helper Methods =====
