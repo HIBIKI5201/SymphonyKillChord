@@ -11,15 +11,19 @@ namespace KillChord.Runtime.Domain
         private readonly RingBuffer<int> _beatTypeBuffer;
         private readonly RingBuffer<float> _timingBuffer;
 
-        private readonly int _bpm;
+        private RhythmDefinition _rhythmDefinition;
 
-        public RhythmState(int bpm, int capacity)
+        public RhythmState(RhythmDefinition rhythmDefinition, int capacity)
         {
-            _bpm = bpm;
-
             _typeBuffer = new RingBuffer<ActionType>(capacity);
             _beatTypeBuffer = new RingBuffer<int>(capacity);
             _timingBuffer = new RingBuffer<float>(capacity);
+            _rhythmDefinition = rhythmDefinition;
+        }
+
+        public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
+        {
+            return _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
         }
 
         /// <summary>
@@ -33,7 +37,7 @@ namespace KillChord.Runtime.Domain
             {
                 var lastTiming = _timingBuffer.PeekLast();
                 var actionLength = unscaledTime - lastTiming;
-                signature = GetNearestSignature(actionLength);
+                signature = _rhythmDefinition.GetNearestSignature(actionLength);
             }
 
             Enqueue(signature, unscaledTime, type);
@@ -67,31 +71,6 @@ namespace KillChord.Runtime.Domain
         public ReadOnlySpan<ActionType> GetHistoryActionType()
         {
             return _typeBuffer.AsReadonlySpan();
-        }
-
-        private int GetNearestSignature(double seconds)
-        {
-            if (_bpm <= 0) return 4;
-
-            double beatSeconds = 60d / _bpm;
-            double barSeconds = beatSeconds * 4d;
-
-            int nearestSignature = 1;
-            double minDiff = double.MaxValue;
-
-            for (int i = 1; i <= 8; i++)
-            {
-                double targetSeconds = barSeconds / i;
-                double diff = Math.Abs(seconds - targetSeconds);
-
-                if (diff < minDiff)
-                {
-                    minDiff = diff;
-                    nearestSignature = i;
-                }
-            }
-
-            return nearestSignature;
         }
     }
 }

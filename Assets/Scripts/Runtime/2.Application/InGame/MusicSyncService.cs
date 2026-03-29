@@ -9,15 +9,13 @@ namespace KillChord.Runtime.Application
     public class MusicSyncService : IMusicSyncService
     {
         private const int BUFFER_SIZE = 64;
-        private readonly RhythmDefinition _rhythmDefinition;
 
         private readonly RhythmState _rhythmState;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
         public MusicSyncService(RhythmDefinition rhythmDefinition)
         {
-            _rhythmDefinition = rhythmDefinition;
-            _rhythmState = new(_rhythmDefinition.Bpm, BUFFER_SIZE);
+            _rhythmState = new(rhythmDefinition, BUFFER_SIZE);
         }
 
         public void Update(double playTime)
@@ -67,7 +65,7 @@ namespace KillChord.Runtime.Application
             Action action,
             CancellationToken ct)
         {
-            var executeTime = _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
+            var executeTime = _rhythmState.GetExecuteTime(timing, accurateBeat);
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
