@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.View;
 using UnityEngine;
 
@@ -7,9 +8,11 @@ namespace KillChord.Runtime.Composition
     public class MusicSyncInitializer : MonoBehaviour
     {
         [SerializeField] private MusicSyncView _musicSyncView;
-        [SerializeField] private string _cue;
+        [SerializeField] private string _testCue;
+        [SerializeField] private int _testBpm;
 
-        public MusicSyncController _musicSyncViewModel;
+        public MusicSyncController MusicSyncController;
+        public MusicSyncService MusicSyncService;
 
         private void Start()
         {
@@ -20,8 +23,9 @@ namespace KillChord.Runtime.Composition
                 msvm
             );
 
-            mp.MusicVM.UpdateMusicCue(_cue);
-            _musicSyncViewModel = new(msvm);
+            mp.MusicVM.UpdateMusicCue(_testCue);
+            MusicSyncService = new(new(_testBpm));
+            MusicSyncController = new(msvm, MusicSyncService);
         }
     }
 }

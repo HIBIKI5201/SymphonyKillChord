@@ -1,20 +1,20 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
+using KillChord.Runtime.Composition;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 using KillChord.Structure;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Develop.Assets.Scripts.Develop
 {
-    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
-    public sealed class PlayerInitializer : MonoBehaviour
+    public sealed class BattleInitialize : MonoBehaviour
     {
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
+        [SerializeField] private EnemySample _enemySample;
 
         [Space]
 
@@ -37,6 +37,7 @@ namespace KillChord.Runtime.Composition
             CharacterFactory characterFactory = new CharacterFactory();
 
             CharacterEntity player = characterFactory.Create(_playerData);
+            CharacterEntity enemy = characterFactory.Create(_enemyData);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
             {
@@ -46,21 +47,22 @@ namespace KillChord.Runtime.Composition
                 { AttackId.Ultimate, _ultimatePipelineAsset.Create() },
             };
 
-
-
-
-            PlayerMoveParameter parameter = _playerConfig.ToDomain();
             AttackPipelineResolver attackPipelineResolver = new(pipelines);
             AttackExecutor attackExecutor = new(attackPipelineResolver);
 
 
 
-            BattleApplication battleApplication = new(player, attackExecutor);
-            BattleController battleController = new(battleApplication, new(), null);
+            InitializePlayer(new BattleController(new BattleApplication(player, attackExecutor), new(), null));
+            InitializeEnemy(new BattleController(new BattleApplication(enemy, attackExecutor), new(), new(_enemySample, enemy)));
+        }
+        private void InitializePlayer(BattleController battleController)
+        {
+            PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
             PlayerDodgeMovementApplication dodge = new(parameter);
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
+
 
             PlayerController playerMovementController = new(application);
             _player.Init(playerMovementController, battleController);
@@ -71,6 +73,10 @@ namespace KillChord.Runtime.Composition
                 .AddComponent<PlayerMoveParameterDebug>()
                 .SetPlayerMoveParameter(parameter);
 #endif
+        }
+        private void InitializeEnemy(BattleController battleController)
+        {
+            _enemySample.Init(battleController);
         }
     }
 }

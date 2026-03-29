@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View;
 using System.Collections.Generic;
+using KillChord.Runtime.InfraStructure.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
@@ -76,7 +77,10 @@ namespace KillChord.Runtime.Composition
                 attackExecutor,
                 attackResultPresenter,
                 attackCommandState,
-                attackBattleState);
+                attackBattleState,
+                new SkillRepository(),//TODO　インスタンスを正しく取得するようにする
+                new MusicSyncViewModel());
+
 
             _playerAttackInputView.Initialize(attackController);
             _attackResultView.Bind(attackResultViewModel);
