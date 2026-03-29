@@ -69,7 +69,7 @@ namespace KillChord.Runtime.Application
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
-        public void RegisterButtleActionHistory(ActionType actionType)
+        public void RegisterBattleActionHistory(ActionType actionType)
         {
             _rhythmState.RegisterActionQueue(actionType, Time.unscaledTime);
         }

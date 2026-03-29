@@ -20,6 +20,6 @@ namespace KillChord.Runtime.Application
             CancellationToken ct);
 
         /// <summary> プレイヤーの行動履歴を保存する </summary>
-        void RegisterButtleActionHistory(ActionType actionType);
+        void RegisterBattleActionHistory(ActionType actionType);
     }
 }
