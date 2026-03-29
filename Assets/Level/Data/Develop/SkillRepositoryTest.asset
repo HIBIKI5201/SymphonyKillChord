@@ -12,7 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edf783b390a177a42bb1aec28341bc15, type: 3}
   m_Name: SkillRepositoryTest
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
-  _skillDatas: []
+  _skillDatas:
+  - _skillEffect:
+      rid: 2576686375619264613
+    _skillVisual:
+      rid: 2576686375619264614
+    _id: 0
+    _pattern: 0400000004000000
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 2576686375619264613
+      type: {class: TestSkillEffect, ns: KillChord.Runtime.Application, asm: KillChord.Application}
+      data: 
+    - rid: 2576686375619264614
+      type: {class: SkillVisualTest, ns: KillChord.Runtime.Application, asm: KillChord.Application}
+      data: 
