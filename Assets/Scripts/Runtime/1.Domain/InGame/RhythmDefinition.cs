@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Domain
 
         public RhythmDefinition(int bpm)
         {
+            if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             Bpm = bpm;
             BeatLength = 60000d / Bpm;
         }
@@ -46,6 +47,11 @@ namespace KillChord.Runtime.Domain
         public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
         {
             if (Bpm <= 0) return 0;
+            if (timing.Beat.Signature <= 0 || timing.Beat.Count <= 0 || timing.Beat.Count > timing.Beat.Signature)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timing), "Beat must be within the bar.");
+            }
+
             const double propTimeSignature = 4d;
             double currentBar = Math.Floor(accurateBeat / propTimeSignature);
             double targetBar = currentBar + timing.BarFlag;

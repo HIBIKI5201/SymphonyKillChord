@@ -90,7 +90,8 @@ namespace KillChord.Runtime.Utility
                 _head = 0;
                 buffer.CopyTo(_buffer);
             }
-            return _buffer;
+
+            return _buffer.AsSpan().Slice(0, _count);
         }
 
         /// <summary>
