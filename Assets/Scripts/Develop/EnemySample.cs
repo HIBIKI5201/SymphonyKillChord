@@ -42,8 +42,7 @@ namespace KillChord.Develop
         }
         private void Awake()
         {
-            if (_view != null)
-                Debug.LogWarning("View is not assigned. Please assign a view transform to enable damage feedback.", this);
+            Debug.Assert(_view != null, "_view is not assigned. Please assign a view transform to enable damage feedback.", this);
         }
         private void OnDestroy()
         {
