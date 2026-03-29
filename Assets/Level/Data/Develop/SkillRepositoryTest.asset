@@ -18,7 +18,7 @@ MonoBehaviour:
     _skillVisual:
       rid: 2576686375619264614
     _id: 0
-    _pattern: 0400000004000000
+    _pattern: 0800000008000000
   references:
     version: 2
     RefIds:

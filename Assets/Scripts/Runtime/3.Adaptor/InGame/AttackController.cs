@@ -16,32 +16,20 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="presenter"></param>
         /// <param name="commandState"></param>
         /// <param name="battleState"></param>
-        /// <param name="musicSyncViewModel"></param>
-        /// <param name="skillRepository"></param>
-        /// <param name="musicSyncService"></param>
+        /// <param name="skillController"></param>
         public AttackController(
             AttackExecutor attackExecutor,
             AttackResultPresenter presenter,
             AttackCommandState commandState,
             AttackBattleState battleState,
-            ISkillRepository skillRepository,
-            IMusicSyncService musicSyncService,
-            int[] skillId = null
+            SkillController skillController
         )
         {
             _attackExecutor = attackExecutor;
             _presenter = presenter;
             _commandState = commandState;
             _battleState = battleState;
-            _musicSyncService = musicSyncService;
-            var skillRepository1 = skillRepository;
-
-            skillId ??= new[] { 0 };
-            _skillCash = new SkillDefinition[skillId.Length];
-            for (int i = 0; i < skillId.Length; i++)
-            {
-                _skillCash[i] = skillRepository1.GetSkill(skillId[i]);
-            }
+            _skillController = skillController;
         }
 
         /// <summary>
@@ -58,16 +46,7 @@ namespace KillChord.Runtime.Adaptor
         /// </summary>
         public void ExecuteAttack()
         {
-            _musicSyncService.RegisterBattleActionHistory(ActionType.Attack);
-
-            if (SkillCheckService.TryCheckSkills(
-                    _skillCash,
-                    _musicSyncService.GetBeatTypeHistory(),
-                    out var index))
-            {
-                _skillCash[index].SkillExecute();
-            }
-
+            _skillController.CheckSkill(ActionType.Attack);
             AttackId attackId = _commandState.SelectedAttackId;
             AttackResult result = _attackExecutor.Execute(
                 _battleState.Attacker,
@@ -80,8 +59,6 @@ namespace KillChord.Runtime.Adaptor
         private readonly AttackResultPresenter _presenter;
         private readonly AttackCommandState _commandState;
         private readonly AttackBattleState _battleState;
-        private readonly IMusicSyncService _musicSyncService;
-
-        private readonly SkillDefinition[] _skillCash;
+        private readonly SkillController _skillController;
     }
 }
