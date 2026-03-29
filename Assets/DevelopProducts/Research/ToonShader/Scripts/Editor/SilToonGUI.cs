@@ -5,17 +5,37 @@ namespace DevelopProducts.ToonShader
 {
     public class SilToonGUI : ShaderGUI
     {
-        // Foldout状態（staticで保持）
+        // Foldout states (static to persist across selections)
         static bool showBase = true;
         static bool showNormal = true;
         static bool showFresnel = true;
         static bool showOutline = true;
         static bool showPerspective = true;
-        static bool showRenderState = true;
+        static bool showRenderState = false;
+
+        private static class Styles
+        {
+            public static GUIStyle header = new GUIStyle("ShurikenModuleTitle")
+            {
+                fontStyle = FontStyle.Bold,
+                fixedHeight = 20,
+                contentOffset = new Vector2(20, -2)
+            };
+
+            public static GUIStyle background = new GUIStyle("HelpBox")
+            {
+                padding = new RectOffset(10, 10, 5, 5)
+            };
+
+            public static Color headerColor = new Color(0.2f, 0.4f, 0.6f, 1.0f);
+        }
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
-            // ===== プロパティ取得 =====
+            // ===== Banner / Header =====
+            DrawBanner();
+
+            // ===== Property Discovery =====
             MaterialProperty baseMap = Find("_BaseMap", props);
             MaterialProperty colorLit = Find("_ColorLit", props);
             MaterialProperty colorMiddle = Find("_ColorMiddle", props);
@@ -45,100 +65,139 @@ namespace DevelopProducts.ToonShader
             MaterialProperty stencilPass = Find("_StencilPass", props);
             MaterialProperty stencilFail = Find("_StencilFail", props);
 
-            // ===== UI描画 =====
+            // ===== Sections =====
 
-            DrawGroup("Base / Lighting", ref showBase, () =>
+            DrawSection("Base & Lighting", ref showBase, () =>
             {
-                materialEditor.TexturePropertySingleLine(
-                    new GUIContent("Base Map", "ベーステクスチャ"),
-                    baseMap,
-                    colorLit
-                );
+                materialEditor.TexturePropertySingleLine(new GUIContent("Base Map & Lit Color", "ベーステクスチャと明るい部分の色"), baseMap, colorLit);
 
-                materialEditor.ShaderProperty(colorMiddle, new GUIContent("Middle Color", "中間色"));
+                EditorGUI.indentLevel++;
+                materialEditor.ShaderProperty(colorMiddle, new GUIContent("Middle Color", "中間色 (LitとShadowの間)"));
                 materialEditor.ShaderProperty(colorShadow, new GUIContent("Shadow Color", "影色"));
+                EditorGUI.indentLevel--;
 
+                EditorGUILayout.Space(5);
                 materialEditor.ShaderProperty(isForFace, new GUIContent("Face Mode", "顔用シェーディングを有効化"));
-
                 if (isForFace.floatValue == 1)
                 {
                     EditorGUI.indentLevel++;
-                    materialEditor.ShaderProperty(faceUp, new GUIContent("Face Up", "顔の上方向ベクトル"));
+                    materialEditor.ShaderProperty(faceUp, new GUIContent("Face Up Direction", "顔の上方向ベクトル (ワールド空間)"));
                     EditorGUI.indentLevel--;
                 }
             });
 
-            DrawGroup("Normal", ref showNormal, () =>
+            DrawSection("Normal Mapping", ref showNormal, () =>
             {
-                materialEditor.TexturePropertySingleLine(
-                    new GUIContent("Normal Map", "法線マップ"),
-                    normalMap
-                );
-
-                materialEditor.ShaderProperty(normalIntensity, new GUIContent("Intensity", "法線の強さ"));
+                materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "法線マップ"), normalMap);
+                if (normalMap.textureValue != null)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(normalIntensity, new GUIContent("Intensity", "法線の適用強度"));
+                    EditorGUI.indentLevel--;
+                }
             });
 
-            DrawGroup("Fresnel / LimLight", ref showFresnel, () =>
+            DrawSection("Fresnel & Rim Light", ref showFresnel, () =>
             {
-                materialEditor.ShaderProperty(fresnelBack, new GUIContent("Back Light", "背面リムライト強度"));
-                materialEditor.ShaderProperty(fresnelFront, new GUIContent("Front Rim", "正面リムライト強度"));
-                materialEditor.ShaderProperty(fresnelBackRim, new GUIContent("Back Rim", "背面リム強度"));
+                materialEditor.ShaderProperty(fresnelBack, new GUIContent("Back Light Intensity", "背面からの回り込み光強度"));
+                materialEditor.ShaderProperty(fresnelFront, new GUIContent("Front Rim Intensity", "正面エッジのリムライト強度"));
+                materialEditor.ShaderProperty(fresnelBackRim, new GUIContent("Back Rim Intensity", "背面エッジのリムライト強度"));
             });
 
-            DrawGroup("Outline", ref showOutline, () =>
+            DrawSection("Outline Settings", ref showOutline, () =>
             {
-                materialEditor.ShaderProperty(outlineColor, new GUIContent("Color", "アウトライン色"));
-                materialEditor.ShaderProperty(zOffset, new GUIContent("Z Offset", "奥行き補正"));
+                materialEditor.ShaderProperty(outlineColor, new GUIContent("Color", "アウトラインの色"));
+                materialEditor.ShaderProperty(zOffset, new GUIContent("Z Offset", "アウトラインの奥行きオフセット (めり込み防止)"));
+                materialEditor.ShaderProperty(smoothNormal, new GUIContent("Smooth Normal", "スムーズ法線を使用して境界を滑らかにする"));
 
-                materialEditor.ShaderProperty(smoothNormal, new GUIContent("Smooth Normal", "スムーズ法線を使用"));
-
-                materialEditor.ShaderProperty(outlineWidthLit, new GUIContent("Width Lit", "明部の太さ"));
-                materialEditor.ShaderProperty(outlineWidthShadow, new GUIContent("Width Shadow", "影部の太さ"));
+                EditorGUILayout.Space(5);
+                EditorGUILayout.LabelField("Outline Width", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                materialEditor.ShaderProperty(outlineWidthLit, new GUIContent("Width (Lit)", "明部の太さ"));
+                materialEditor.ShaderProperty(outlineWidthShadow, new GUIContent("Width (Shadow)", "影部の太さ"));
+                EditorGUI.indentLevel--;
             });
 
-            DrawGroup("Perspective Removal", ref showPerspective, () =>
+            DrawSection("Perspective Removal", ref showPerspective, () =>
             {
-                materialEditor.ShaderProperty(perspectiveRatio, new GUIContent("Ratio", "透視除去の強さ"));
-                materialEditor.ShaderProperty(perspectiveRadius, new GUIContent("Radius", "影響範囲"));
-                materialEditor.ShaderProperty(head, new GUIContent("Head Position", "基準位置"));
+                materialEditor.ShaderProperty(perspectiveRatio, new GUIContent("Ratio", "透視除去(パース抜き)の強度"));
+                materialEditor.ShaderProperty(perspectiveRadius, new GUIContent("Radius", "効果が及ぶ半径"));
+                materialEditor.VectorProperty(head, "Head Position (World)");
             });
 
-            DrawGroup("Render State", ref showRenderState, () =>
+            DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
-                materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値"));
-                materialEditor.ShaderProperty(stencilComp, new GUIContent("Compare", "比較関数"));
-                materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass", "成功時処理"));
-                materialEditor.ShaderProperty(stencilFail, new GUIContent("Fail", "失敗時処理"));
+                materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値 (0-255)"));
+                materialEditor.ShaderProperty(stencilComp, new GUIContent("Compare Function", "ステンシル比較関数"));
+                materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass Operation", "ステンシル成功時の処理"));
+                materialEditor.ShaderProperty(stencilFail, new GUIContent("Fail Operation", "ステンシル失敗時の処理"));
+
+                // ===== Footer =====
+                EditorGUILayout.Space(15);
+                EditorGUILayout.BeginVertical(Styles.background);
+                {
+                    materialEditor.RenderQueueField();
+                    materialEditor.EnableInstancingField();
+                    materialEditor.DoubleSidedGIField();
+                }
+                EditorGUILayout.EndVertical();
             });
 
-            EditorGUILayout.Space(10);
 
-            materialEditor.RenderQueueField();
-            materialEditor.EnableInstancingField();
-            materialEditor.DoubleSidedGIField();
+
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("SilToon v1.0.15", EditorStyles.centeredGreyMiniLabel);
         }
 
-        // ===== ヘルパー =====
+        // ===== Helper Methods =====
 
-        MaterialProperty Find(string name, MaterialProperty[] props)
+        private MaterialProperty Find(string name, MaterialProperty[] props)
         {
             return FindProperty(name, props);
         }
 
-        void DrawGroup(string title, ref bool state, System.Action drawer)
+        private void DrawBanner()
+        {
+            Rect rect = EditorGUILayout.GetControlRect(false, 30);
+            rect.xMin -= 20;
+            rect.xMax += 20;
+
+            // Gradient or solid background
+            EditorGUI.DrawRect(rect, new Color(0.15f, 0.15f, 0.15f, 1));
+
+            // Accent line
+            Rect accentRect = new Rect(rect.x, rect.y, 4, rect.height);
+            EditorGUI.DrawRect(accentRect, Styles.headerColor);
+
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 18,
+                alignment = TextAnchor.MiddleLeft,
+                normal = { textColor = Color.white }
+            };
+
+            EditorGUI.LabelField(new Rect(rect.x + 15, rect.y, rect.width, rect.height), "SilToon Shader", labelStyle);
+            EditorGUILayout.Space(10);
+        }
+
+        private void DrawSection(string title, ref bool state, System.Action drawer)
         {
             EditorGUILayout.Space(5);
 
-            state = EditorGUILayout.BeginFoldoutHeaderGroup(state, title);
+            Rect rect = EditorGUILayout.GetControlRect(true, 20);
+
+            // Draw header background
+            EditorGUI.DrawRect(new Rect(rect.x - 3, rect.y, rect.width + 6, rect.height), new Color(0.2f, 0.2f, 0.2f, 1));
+
+            // Draw toggle
+            state = EditorGUI.Foldout(rect, state, title, true, Styles.header);
 
             if (state)
             {
-                EditorGUI.indentLevel++;
+                EditorGUILayout.BeginVertical(Styles.background);
                 drawer();
-                EditorGUI.indentLevel--;
+                EditorGUILayout.EndVertical();
             }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
         }
     }
 }
