@@ -15,9 +15,9 @@ namespace KillChord.Runtime.Application
 
         public IHitTarget hitTarget => _characterEntity;
 
-        public void Attack(IHitTarget toTaget)
+        public void Attack(IHitTarget toTarget)
         {
-            _attackExecutor.Execute(_characterEntity, toTaget, _attackId);
+            _attackExecutor.Execute(_characterEntity, toTarget, _attackId);
         }
         public void ChangeAttackID(AttackId value)
             => _attackId = value;
