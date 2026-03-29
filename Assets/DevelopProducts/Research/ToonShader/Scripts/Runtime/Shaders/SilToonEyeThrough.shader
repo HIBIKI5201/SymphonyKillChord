@@ -2,7 +2,6 @@ Shader "Custom/SilToon/EyeThrough"
 {
     Properties
     {
-        // [Header(Fragment)}
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
@@ -64,4 +63,5 @@ Shader "Custom/SilToon/EyeThrough"
             ENDHLSL
         }
     }
+    CustomEditor "DevelopProducts.ToonShader.SilToonEyeThroughGUI"
 }
