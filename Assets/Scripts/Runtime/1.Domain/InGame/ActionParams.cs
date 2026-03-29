@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.Domain
 {
     public readonly struct ActionParams
     {
@@ -13,6 +13,13 @@ namespace KillChord.Runtime.View
             BeatType = beatType;
             ActionType = actionType;
             Timing = Time.unscaledTime;
+        }
+
+        public ActionParams(ActionType actionType, int beatType, float timing)
+        {
+            BeatType = beatType;
+            ActionType = actionType;
+            Timing = timing;
         }
     }
 }
