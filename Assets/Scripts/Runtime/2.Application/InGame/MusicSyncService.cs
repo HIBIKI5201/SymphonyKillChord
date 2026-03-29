@@ -17,7 +17,11 @@ namespace KillChord.Runtime.Application
         {
             _rhythmState = new(rhythmDefinition, BUFFER_SIZE);
         }
-
+        
+        /// <summary>
+        /// 毎フレーム処理。
+        /// </summary>
+        /// <param name="playTime">音楽の再生時間</param>
         public void Update(double playTime)
         {
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))

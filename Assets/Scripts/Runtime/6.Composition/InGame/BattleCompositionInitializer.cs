@@ -14,20 +14,23 @@ namespace KillChord.Runtime.Composition
     /// </summary>
     public sealed class BattleCompositionInitializer : MonoBehaviour
     {
-        [Header("キャラクターデータ")]
-        [SerializeField] private CharacterData _playerData;
+        [Header("キャラクターデータ")] [SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
+        [SerializeField] private SkillRepository _skillRepository;
 
-        [Header("アタックパイプライン")]
-        [SerializeField] private AttackPipelineAsset _normalPipelineAsset;
+        [Header("アタックパイプライン")] [SerializeField]
+        private AttackPipelineAsset _normalPipelineAsset;
+
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
 
-        [Header("View")]
-        [SerializeField] private PlayerAttackInputView _playerAttackInputView;
+        [Header("View")] [SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
+#if UNITY_EDITOR
+        [SerializeField] private int _bpm = 60;
+#endif
         private bool ValidateSerializedReferences()
         {
             if (_playerData == null || _enemyData == null ||
@@ -38,6 +41,7 @@ namespace KillChord.Runtime.Composition
                 Debug.LogError("[BattleCompositionInitializer] SerializedField が未設定です。");
                 return false;
             }
+
             return true;
         }
 
@@ -73,13 +77,16 @@ namespace KillChord.Runtime.Composition
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
+            IMusicSyncService musicSyncService = new MusicSyncService(new(_bpm));//TODO : ちゃんと取得しなさい！
+            SkillController skillController = new SkillController(_skillRepository, musicSyncService);
+            
             AttackController attackController = new AttackController(
                 attackExecutor,
                 attackResultPresenter,
                 attackCommandState,
                 attackBattleState,
-                new SkillRepository(),//TODO　インスタンスを正しく取得するようにする
-                new MusicSyncViewModel());
+                skillController
+                ); 
 
 
             _playerAttackInputView.Initialize(attackController);

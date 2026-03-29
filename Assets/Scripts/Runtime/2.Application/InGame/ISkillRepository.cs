@@ -5,6 +5,6 @@ namespace KillChord.Runtime.Application
 {
     public interface ISkillRepository
     {
-        IReadOnlyList<SkillDefinition> GetEquipmentSkills();
+        SkillDefinition GetSkill(int id);
     }
 }

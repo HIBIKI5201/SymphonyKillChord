@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.Player
@@ -10,13 +11,7 @@ namespace KillChord.Runtime.InfraStructure.Player
     public class SkillRepository : ScriptableObject, ISkillRepository
     {
         [SerializeField] private SkillData[] _skillDatas;
-
-        //TODO　後々セーブデータから装備済みスキルを取得する形に変更する
-        public IReadOnlyList<SkillDefinition> GetEquipmentSkills()
-        {
-            return ConvertSkillDefinitions();
-        }
-
+        
         private List<SkillDefinition> ConvertSkillDefinitions()
         {
             var skills = new List<SkillDefinition>();
@@ -26,6 +21,11 @@ namespace KillChord.Runtime.InfraStructure.Player
             }
 
             return skills;
+        }
+
+        public SkillDefinition GetSkill(int id)
+        {
+            return Array.Find(_skillDatas, x => x.Id == id).ToSkillDefinition();
         }
     }
 }
