@@ -1,9 +1,10 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DevelopProducts.ToonShader
 {
-    public class SilToonEyeThroughGUI : ShaderGUI
+    public class SilToonFaceOverlayGUI : ShaderGUI
     {
         // Foldout states
         static bool showBase = true;
@@ -106,25 +107,37 @@ namespace DevelopProducts.ToonShader
 
             DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
+                EditorGUILayout.LabelField("Presets", EditorStyles.boldLabel);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("透過目 (Transparent Eye)"))
+                {
+                    SetStencil(materialEditor, stencilRef, 1, stencilPass, StencilOp.Keep, 3010);
+                }
+                if (GUILayout.Button("透過眉毛 (Transparent Eyebrow)"))
+                {
+                    SetStencil(materialEditor, stencilRef, 1, stencilPass, StencilOp.Zero, 3000);
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(5);
+
                 materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値"));
                 materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass Operation", "成功時処理"));
 
                 EditorGUILayout.HelpBox("This shader uses 'ZTest Always' and 'Comp Equal' for eye-through effect.", MessageType.Info);
-
-                // ===== Footer =====
-                EditorGUILayout.Space(15);
-                EditorGUILayout.BeginVertical(Styles.background);
-                {
-                    materialEditor.RenderQueueField();
-                    materialEditor.EnableInstancingField();
-                    materialEditor.DoubleSidedGIField();
-                }
-                EditorGUILayout.EndVertical();
             });
 
+            // ===== Footer =====
+            EditorGUILayout.Space(15);
+            EditorGUILayout.BeginVertical(Styles.background);
+            {
+                materialEditor.RenderQueueField();
+                materialEditor.EnableInstancingField();
+                materialEditor.DoubleSidedGIField();
+            }
+            EditorGUILayout.EndVertical();
 
-            //EditorGUILayout.Space(5);
-            //EditorGUILayout.LabelField("SilToon EyeThrough v1.0.0", EditorStyles.centeredGreyMiniLabel);
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("SilToon EyeThrough v1.0.1", EditorStyles.centeredGreyMiniLabel);
         }
 
         // ===== Helper Methods =====
@@ -152,7 +165,7 @@ namespace DevelopProducts.ToonShader
                 normal = { textColor = Color.white }
             };
 
-            EditorGUI.LabelField(new Rect(rect.x + 15, rect.y, rect.width, rect.height), "SilToon EyeThrough", labelStyle);
+            EditorGUI.LabelField(new Rect(rect.x + 15, rect.y, rect.width, rect.height), "SilToon FaceOverlay", labelStyle);
             EditorGUILayout.Space(10);
         }
 
@@ -170,6 +183,21 @@ namespace DevelopProducts.ToonShader
                 EditorGUILayout.BeginVertical(Styles.background);
                 drawer();
                 EditorGUILayout.EndVertical();
+            }
+        }
+
+        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pPass, StencilOp vPass, int queue)
+        {
+            editor.RegisterPropertyChangeUndo("Set Stencil Template");
+            pRef.floatValue = vRef;
+            if (pPass != null) pPass.floatValue = (float)vPass;
+
+            foreach (var target in editor.targets)
+            {
+                if (target is Material mat)
+                {
+                    mat.renderQueue = queue;
+                }
             }
         }
     }

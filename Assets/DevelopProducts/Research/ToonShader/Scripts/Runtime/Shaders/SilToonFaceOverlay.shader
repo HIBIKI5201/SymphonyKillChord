@@ -63,5 +63,5 @@ Shader "Custom/SilToon/EyeThrough"
             ENDHLSL
         }
     }
-    CustomEditor "DevelopProducts.ToonShader.SilToonEyeThroughGUI"
+    CustomEditor "DevelopProducts.ToonShader.SilToonFaceOverlayGUI"
 }
