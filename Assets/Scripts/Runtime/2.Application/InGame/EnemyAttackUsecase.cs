@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
+    /// <summary>
+    ///     敵の攻撃を実行するユースケースクラス。
+    /// </summary>
     public class EnemyAttackUsecase
     {
         public EnemyAttackUsecase(AttackExecutor attackExecutor,IMusicSyncService musicSyncService)

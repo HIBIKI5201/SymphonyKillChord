@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
+    /// <summary>
+    ///     敵の攻撃を予約するユースケース。
+    /// </summary>
     public class EnemyAttackReservationUsecase : IDisposable
     {
         public EnemyAttackReservationUsecase(
