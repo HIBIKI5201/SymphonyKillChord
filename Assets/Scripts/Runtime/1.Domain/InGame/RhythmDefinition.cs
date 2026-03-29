@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Domain
 
         public RhythmDefinition(int bpm)
         {
+            if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             Bpm = bpm;
             BeatLength = 60000d / Bpm;
         }
