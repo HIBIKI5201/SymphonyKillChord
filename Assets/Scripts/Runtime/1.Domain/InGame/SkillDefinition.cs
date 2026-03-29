@@ -7,6 +7,8 @@ namespace KillChord.Runtime.Domain
     {
         public readonly SkillId Id;
         public readonly SkillPattern SkillPattern;
+        public readonly ISkillEffect Effect;
+        public readonly ISkillVisual Visual;
 
         #region 定数
 
@@ -14,10 +16,18 @@ namespace KillChord.Runtime.Domain
 
         #endregion
 
-        public SkillDefinition(SkillId id, SkillPattern skillPattern)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, ISkillVisual visual)
         {
             Id = id;
             SkillPattern = skillPattern;
+            Effect = effect;
+            Visual = visual;
+        }
+
+        public void SkillExecute()
+        {
+            Effect.Do();
+            Visual.Do();
         }
 
         /// <summary>
@@ -29,7 +39,7 @@ namespace KillChord.Runtime.Domain
         {
             if (SkillPattern.Signatures.Length < MIN_PATTERN_LENGTH) return false;
             if (reversInput.Length < SkillPattern.Signatures.Length) return false;
-            
+
             ReadOnlySpan<int> pattern = reversInput.Slice(0, SkillPattern.Signatures.Length);
             return pattern.SequenceEqual(SkillPattern.Signatures);
         }

@@ -9,30 +9,30 @@ namespace KillChord.Runtime.Application
         public static bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
             ReadOnlySpan<int> history,
-            out SkillId skillId)
+            out int skillIndex)
         {
-            const int MAX_STACKALLOC_SIZE = 256;//入力履歴の最大長　
+            const int MAX_STACKALLOC_SIZE = 256; //入力履歴の最大長　
             if (history.Length > MAX_STACKALLOC_SIZE)
             {
                 throw new Exception("入力履歴が長すぎます");
             }
-            
+
             Span<int> reversInput = stackalloc int[history.Length];
             for (int i = 0; i < history.Length; i++)
             {
                 reversInput[i] = history[^(i + 1)];
             }
 
-            foreach (var skillDefinition in equipmentSkills)
+            for (int i = 0; i < equipmentSkills.Count; i++)
             {
-                if (skillDefinition.IsMatch(reversInput))
+                if (equipmentSkills[i].IsMatch(reversInput))
                 {
-                    skillId = skillDefinition.Id;
+                    skillIndex = i;
                     return true;
                 }
             }
 
-            skillId = default;
+            skillIndex = -1;
             return false;
         }
     }

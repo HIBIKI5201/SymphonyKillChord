@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition
     {
         [Header("キャラクターデータ")] [SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
+        [SerializeField] private SkillRepository _skillRepository;
 
         [Header("アタックパイプライン")] [SerializeField]
         private AttackPipelineAsset _normalPipelineAsset;
@@ -27,6 +28,9 @@ namespace KillChord.Runtime.Composition
         [Header("View")] [SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
+#if UNITY_EDITOR
+        [SerializeField] private int _bpm = 60;
+#endif
         private bool ValidateSerializedReferences()
         {
             if (_playerData == null || _enemyData == null ||
@@ -79,8 +83,8 @@ namespace KillChord.Runtime.Composition
                 attackCommandState,
                 attackBattleState,
                 new MusicSyncViewModel(), //TODO : ちゃんと取得しなさい！
-                ScriptableObject.CreateInstance<SkillRepository>(), //TODO : ちゃんと取得しなさい！
-                new MusicSyncService(new())); //TODO : ちゃんと取得しなさい！
+                _skillRepository,
+                new MusicSyncService(new(_bpm))); //TODO : ちゃんと取得しなさい！
 
 
             _playerAttackInputView.Initialize(attackController);

@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure.Player
+namespace KillChord.Runtime.Domain.Player
 {
     [Serializable]
     public class SkillData
@@ -21,7 +21,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillDefinition(
                 new SkillId(_id),
-                new SkillPattern(_pattern));
+                new SkillPattern(_pattern),
+                _skillEffect,
+                _skillVisual);
         }
     }
 }
