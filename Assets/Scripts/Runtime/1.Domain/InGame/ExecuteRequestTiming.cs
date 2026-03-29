@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Domain
 {
     public readonly struct ExecuteRequestTiming
     {
