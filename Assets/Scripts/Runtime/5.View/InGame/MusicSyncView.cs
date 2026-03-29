@@ -6,6 +6,8 @@ namespace KillChord.Runtime.View
 {
     public class MusicSyncView : MonoBehaviour
     {
+        public MusicSyncViewModel MusicSyncViewModel => _musicSyncViewModel;
+
 #if UNITY_EDITOR
         [SerializeField] private int _testBpm;
 #endif

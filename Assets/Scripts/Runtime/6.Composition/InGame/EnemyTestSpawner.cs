@@ -11,11 +11,6 @@ namespace KillChord.Runtime.Composition
     /// </summary>
     public class EnemyTestSpawner : MonoBehaviour
     {
-        public void Initialize(IMusicSyncViewModel musicSyncViewModel, IMusicSyncService musicSyncService)
-        {
-            _musicSyncViewModel = musicSyncViewModel;
-            _musicSyncService = musicSyncService;
-        }
 
         public void SetTargetEntity(IHitTarget targetEntity)
         {
@@ -34,6 +29,14 @@ namespace KillChord.Runtime.Composition
 
         private float _timer;
         private int _spawnCount;
+
+        private void Start()
+        {
+            MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
+            _musicSyncService = initializer.MusicSyncService;
+            MusicSyncView view = FindAnyObjectByType<MusicSyncView>();
+            _musicSyncViewModel = view.MusicSyncViewModel;
+        }
 
         private void Update()
         {
