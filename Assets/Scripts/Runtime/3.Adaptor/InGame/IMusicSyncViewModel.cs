@@ -1,5 +1,4 @@
 using System;
-using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Adaptor
 {

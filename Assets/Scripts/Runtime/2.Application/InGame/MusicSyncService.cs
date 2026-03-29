@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Utility;
@@ -9,6 +8,7 @@ namespace KillChord.Runtime.Application
 {
     public class MusicSyncService : IMusicSyncService
     {
+        private const int BUFFER_SIZE = 64;
         private readonly RhythmDefinition _rhythmDefinition;
 
         private readonly RhythmState _rhythmState;
@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Application
         public MusicSyncService(RhythmDefinition rhythmDefinition)
         {
             _rhythmDefinition = rhythmDefinition;
-            _rhythmState = new(_rhythmDefinition.Bpm);
+            _rhythmState = new(_rhythmDefinition.Bpm, BUFFER_SIZE);
         }
 
         public void Update(double playTime)
@@ -46,17 +46,17 @@ namespace KillChord.Runtime.Application
             return _rhythmState.Count;
         }
 
-        public IReadOnlyList<int> GetBeatTypeHistory()
+        public ReadOnlySpan<int> GetBeatTypeHistory()
         {
             return _rhythmState.GetHistoryBeatType();
         }
 
-        public IReadOnlyList<float> GetBeatTypeTiming()
+        public ReadOnlySpan<float> GetBeatTypeTiming()
         {
             return _rhythmState.GetHistoryTiming();
         }
 
-        public IReadOnlyList<ActionType> GetActionHistory()
+        public ReadOnlySpan<ActionType> GetActionHistory()
         {
             return _rhythmState.GetHistoryActionType();
         }
@@ -74,10 +74,6 @@ namespace KillChord.Runtime.Application
         public void RegisterButtleActionHistory(ActionType actionType)
         {
             _rhythmState.RegisterActionQueue(actionType, Time.unscaledTime);
-        }
-
-        public void ClearActions()
-        {
         }
     }
 }

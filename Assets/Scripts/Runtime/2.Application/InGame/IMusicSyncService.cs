@@ -16,6 +16,5 @@ namespace KillChord.Runtime.Application
 
         /// <summary> プレイヤーの行動履歴を保存する </summary>
         void RegisterButtleActionHistory(ActionType actionType);
-        void ClearActions();
     }
 }

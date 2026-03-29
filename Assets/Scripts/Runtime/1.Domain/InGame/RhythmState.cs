@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain
 
         private readonly int _bpm;
 
-        public RhythmState(int bpm, int capacity = 64)
+        public RhythmState(int bpm, int capacity)
         {
             _bpm = bpm;
 
@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Domain
         }
 
         /// <summary>
-        /// 入力登録（拍計算込み）
+        /// 入力登録
         /// </summary>
         public void RegisterActionQueue(ActionType type, float unscaledTime)
         {
@@ -51,59 +51,22 @@ namespace KillChord.Runtime.Domain
             _timingBuffer.Enqueue(timing);
         }
 
-        public ActionParams Dequeue()
-        {
-            if (Count == 0) return default;
-
-            // PeekFirstで取得 → Clearではなく「論理削除」はできないため
-            // RingBufferはDequeue未実装なので「先頭を進めるAPI」が必要
-            // → 今回は簡易的に「擬似Dequeue」とする
-
-            var result = new ActionParams(
-                _typeBuffer.PeekFirst(),
-                _beatTypeBuffer.PeekFirst(),
-                _timingBuffer.PeekFirst()
-            );
-
-            // 注意：RingBufferにDequeueが無いため本来は追加実装が必要
-            // 仮に「1個消費した扱い」にするなら別途インターフェース設計が必要
-
-            throw new NotImplementedException("RingBufferにDequeue機能を追加してください");
-
-            // return result;
-        }
-
         /// <summary>
         /// 古い順に取得（Spanコピー）
         /// </summary>
-        public ReadOnlySpan<int> GetHistoryBeatType(Span<int> buffer)
+        public ReadOnlySpan<int> GetHistoryBeatType()
         {
-            for (int i = 0; i < Count; i++)
-            {
-                buffer[i] = _beatTypeBuffer.PeekFirst(i);
-            }
-
-            return buffer.Slice(0, Count);
+            return _beatTypeBuffer.AsReadonlySpan();
         }
 
-        public ReadOnlySpan<float> GetHistoryTiming(Span<float> buffer)
+        public ReadOnlySpan<float> GetHistoryTiming()
         {
-            for (int i = 0; i < Count; i++)
-            {
-                buffer[i] = _timingBuffer.PeekFirst(i);
-            }
-
-            return buffer.Slice(0, Count);
+            return _timingBuffer.AsReadonlySpan();
         }
 
-        public ReadOnlySpan<ActionType> GetHistoryActionType(Span<ActionType> buffer)
+        public ReadOnlySpan<ActionType> GetHistoryActionType()
         {
-            for (int i = 0; i < Count; i++)
-            {
-                buffer[i] = _typeBuffer.PeekFirst(i);
-            }
-
-            return buffer.Slice(0, Count);
+            return _typeBuffer.AsReadonlySpan();
         }
 
         private int GetNearestSignature(double seconds)
