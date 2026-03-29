@@ -1,28 +1,25 @@
 using System;
 using System.Collections.Generic;
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View;
 
 namespace KillChord.Runtime.View
 {
     public class MusicSyncViewModel : IMusicSyncViewModel
     {
-        public ActionParams LastAction => _actionList[^1];
-        public ActionParams Peek => _actionList[0];
-        public int Count => _actionList.Count;
+        public event Action OnUpdate;
 
-        private List<ActionParams> _actionList = new();
+        public double PlayTime { get; set; }
 
-        public ActionParams Dequeue()
+        public int Bpm { get; set; }
+        public int CurrentBeat { get; set; }
+        public int NearestBeat { get; set; }
+        public double AccurateBeat { get; set; }
+        public double BeatLength { get; set; }
+
+        public void Update(double playTime)
         {
-            var returnParam = _actionList[0];
-            _actionList.RemoveAt(0);
-            return returnParam;
-        }
-
-        public void Enqueue(ActionParams param)
-        {
-            _actionList.Add(param);
+            PlayTime = playTime;
+            OnUpdate?.Invoke();
         }
     }
 }

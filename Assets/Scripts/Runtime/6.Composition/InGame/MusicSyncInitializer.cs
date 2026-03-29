@@ -1,3 +1,5 @@
+using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.View;
 using UnityEngine;
 
@@ -6,16 +8,24 @@ namespace KillChord.Runtime.Composition
     public class MusicSyncInitializer : MonoBehaviour
     {
         [SerializeField] private MusicSyncView _musicSyncView;
-        [SerializeField] private InputComposition _composition;
+        [SerializeField] private string _testCue;
+        [SerializeField] private int _testBpm;
+
+        public MusicSyncController MusicSyncController;
+        public MusicSyncService MusicSyncService;
 
         private void Start()
         {
-            _composition.GetInputMapController.EnableOnly(InputMapNames.InGame);
+            MusicSyncViewModel msvm = new();
+            var mp = FindFirstObjectByType<MusicPlayer>();
             _musicSyncView.Bind(
-                FindFirstObjectByType<MusicPlayer>().GetComponent<MusicPlayer>(),
-                new(),
-                _composition.GetInputView
+                mp,
+                msvm
             );
+
+            mp.MusicVM.UpdateMusicCue(_testCue);
+            MusicSyncService = new(new(_testBpm));
+            MusicSyncController = new(msvm, MusicSyncService);
         }
     }
 }

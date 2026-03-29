@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Utility
     ///     古いデータを上書きする。
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RingBuffer<T>
+    public class RingBuffer<T> where T : unmanaged
     {
         public RingBuffer(int capacity)
         {
@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Utility
 
         /// <summary> バッファの最大容量。 </summary>
         public int Capacity => _buffer.Length;
+
         /// <summary> 現在の要素数。 </summary>
         public int Count => _count;
 
@@ -74,6 +75,23 @@ namespace KillChord.Runtime.Utility
             int tailOffset = _count - 1 - offset;
             int bufferIndex = GetIndexByRing(tailOffset);
             return _buffer[bufferIndex];
+        }
+
+        public ReadOnlySpan<T> AsReadonlySpan()
+        {
+            if (_head != 0)
+            {
+                Span<T> buffer = stackalloc T[_buffer.Length];
+                for (int i = 0; i < _buffer.Length; i++)
+                {
+                    buffer[i] = PeekFirst(i);
+                }
+
+                _head = 0;
+                buffer.CopyTo(_buffer);
+            }
+
+            return _buffer.AsSpan().Slice(0, _count);
         }
 
         /// <summary>
