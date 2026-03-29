@@ -3,6 +3,7 @@ using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View.InGame;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -12,26 +13,50 @@ namespace KillChord.Runtime.View
     /// </summary>
     public class EnemyMoveDebugInitializer : MonoBehaviour
     {
+        [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
+        [SerializeField] private EnemyMusicData _encounterMusicData;
+        [SerializeField] private EnemyMusicData _battleMusicData;
+        [SerializeField] private AttackPipelineAsset _attackPipelineAsset;
 
         [SerializeField] private EnemyMoveView _view;
-        [SerializeField] private NavMeshEnemyAgent _navigationAgent;
 
-        public void Initialize(Transform target)
+        public void Initialize(
+            Transform target,
+            IHitTarget targetEntity,
+            IMusicSyncViewModel musicSyncViewModel,
+            IMusicSyncService musicSyncService
+            )
         {
             // Factory
+            CharacterFactory characterFactory = new CharacterFactory();
             EnemyFactory factory = new EnemyFactory();
+
+            CharacterEntity enemyEntity = characterFactory.Create(_enemyData);
 
             // Domain生成
             EnemyMoveSpec spec = factory.CreateEnemyMoveSpec(_moveData);
+            EnemyAttackMusicSpec attackMusicSpec = factory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
+
+            Dictionary<AttackId, AttackPipeline> attackPipelines = new Dictionary<AttackId, AttackPipeline>
+            {
+                // テスト段階のもので最初の攻撃定義のみパイプラインを作成している。
+                {_enemyData.AttackDifinitions[0].AttackId, _attackPipelineAsset.Create() }
+            };
+
+            IAttackPipelineResolver attackPipelineResolver = new AttackPipelineResolver(attackPipelines);
+            AttackExecutor attackExecutor = new AttackExecutor(attackPipelineResolver);
+            IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(
-                spec,
-                _navigationAgent);
+            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec);
+            EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(attackExecutor, musicSyncService);
+
+            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, _enemyData.AttackDifinitions[0].AttackId);
 
             // Controller
-            EnemyMoveController controller = new EnemyMoveController(useCase);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
 
             // View接続
             _view.Initialize(controller, target);

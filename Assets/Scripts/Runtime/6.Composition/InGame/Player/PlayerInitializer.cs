@@ -27,6 +27,9 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
+
+        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+
         private void Awake()
         {
             if (_player == null)
@@ -37,6 +40,7 @@ namespace KillChord.Runtime.Composition
             CharacterFactory characterFactory = new CharacterFactory();
 
             CharacterEntity player = characterFactory.Create(_playerData);
+            _enemyTestSpawner.SetTargetEntity(player);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
             {
