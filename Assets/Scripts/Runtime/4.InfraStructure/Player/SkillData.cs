@@ -1,5 +1,6 @@
 using System;
 using KillChord.Runtime.Domain;
+using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.Player
@@ -9,6 +10,9 @@ namespace KillChord.Runtime.InfraStructure.Player
     {
         public int Id => _id;
         public int[] Pattern => _pattern;
+
+        [SerializeReference, SubclassSelector] ISkillEffect _skillEffect;
+        [SerializeReference, SubclassSelector] ISkillVisual _skillVisual;
 
         [SerializeField] private int _id;
         [SerializeField] private int[] _pattern;

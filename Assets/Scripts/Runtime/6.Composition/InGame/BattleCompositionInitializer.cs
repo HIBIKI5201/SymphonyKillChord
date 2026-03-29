@@ -14,18 +14,17 @@ namespace KillChord.Runtime.Composition
     /// </summary>
     public sealed class BattleCompositionInitializer : MonoBehaviour
     {
-        [Header("キャラクターデータ")]
-        [SerializeField] private CharacterData _playerData;
+        [Header("キャラクターデータ")] [SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
 
-        [Header("アタックパイプライン")]
-        [SerializeField] private AttackPipelineAsset _normalPipelineAsset;
+        [Header("アタックパイプライン")] [SerializeField]
+        private AttackPipelineAsset _normalPipelineAsset;
+
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
 
-        [Header("View")]
-        [SerializeField] private PlayerAttackInputView _playerAttackInputView;
+        [Header("View")] [SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
         private bool ValidateSerializedReferences()
@@ -38,6 +37,7 @@ namespace KillChord.Runtime.Composition
                 Debug.LogError("[BattleCompositionInitializer] SerializedField が未設定です。");
                 return false;
             }
+
             return true;
         }
 
@@ -78,8 +78,9 @@ namespace KillChord.Runtime.Composition
                 attackResultPresenter,
                 attackCommandState,
                 attackBattleState,
-                new SkillRepository(),//TODO　インスタンスを正しく取得するようにする
-                new MusicSyncViewModel());
+                new MusicSyncViewModel(), //TODO : ちゃんと取得しなさい！
+                ScriptableObject.CreateInstance<SkillRepository>(), //TODO : ちゃんと取得しなさい！
+                new MusicSyncService(new())); //TODO : ちゃんと取得しなさい！
 
 
             _playerAttackInputView.Initialize(attackController);
