@@ -82,7 +82,6 @@ namespace KillChord.Runtime.Composition
                 attackResultPresenter,
                 attackCommandState,
                 attackBattleState,
-                new MusicSyncViewModel(), //TODO : ちゃんと取得しなさい！
                 _skillRepository,
                 new MusicSyncService(new(_bpm))); //TODO : ちゃんと取得しなさい！
 

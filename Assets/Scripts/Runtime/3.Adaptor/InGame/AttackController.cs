@@ -24,7 +24,6 @@ namespace KillChord.Runtime.Adaptor
             AttackResultPresenter presenter,
             AttackCommandState commandState,
             AttackBattleState battleState,
-            IMusicSyncViewModel musicSyncViewModel,
             ISkillRepository skillRepository,
             IMusicSyncService musicSyncService,
             int[] skillId = null
@@ -34,15 +33,14 @@ namespace KillChord.Runtime.Adaptor
             _presenter = presenter;
             _commandState = commandState;
             _battleState = battleState;
-            _musicSyncViewModel = musicSyncViewModel;
             _musicSyncService = musicSyncService;
-            _skillRepository = skillRepository;
+            var skillRepository1 = skillRepository;
 
             skillId ??= new[] { 0 };
             _skillCash = new SkillDefinition[skillId.Length];
             for (int i = 0; i < skillId.Length; i++)
             {
-                _skillCash[i] = _skillRepository.GetSkill(skillId[i]);
+                _skillCash[i] = skillRepository1.GetSkill(skillId[i]);
             }
         }
 
@@ -82,8 +80,6 @@ namespace KillChord.Runtime.Adaptor
         private readonly AttackResultPresenter _presenter;
         private readonly AttackCommandState _commandState;
         private readonly AttackBattleState _battleState;
-        private readonly IMusicSyncViewModel _musicSyncViewModel;
-        private readonly ISkillRepository _skillRepository;
         private readonly IMusicSyncService _musicSyncService;
 
         private readonly SkillDefinition[] _skillCash;
