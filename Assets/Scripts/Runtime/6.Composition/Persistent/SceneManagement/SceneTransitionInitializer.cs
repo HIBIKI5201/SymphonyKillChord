@@ -1,17 +1,17 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Structure;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.View;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.Persistent.SceneManagement
 {
     /// <summary>
     ///     シーン遷移機能の初期化を行うクラス。
     /// </summary>
     public class SceneTransitionInitializer : MonoBehaviour
     {
-        [SerializeField] private SceneTransitionView _debugView;
+        [SerializeField] private SceneTransitionView _debugView; // デバッグ用のView。
 
         private void Awake()
         {

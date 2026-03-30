@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
 {
     /// <summary>
     ///     Viewからのシーン遷移要求を受け取り、シーン遷移サービスを呼び出すコントローラー。
@@ -21,12 +21,12 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="toSceneName"> 遷移先シーン名。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns> 成功したらtrue。 </returns>
-        public Task<bool> ChangeSceneAsync(
+        public async Task<bool> ChangeSceneAsync(
             string fromSceneName,
             string toSceneName,
             CancellationToken cancellationToken)
         {
-            return _service.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
+            return await _service.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
         }
 
         private readonly ISceneTransitionService _service;

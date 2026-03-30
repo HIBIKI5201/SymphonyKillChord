@@ -1,8 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.Persistent.SceneManagement
 {
     /// <summary>
     ///     シーン遷移処理を表すインターフェース。
@@ -16,7 +15,7 @@ namespace KillChord.Runtime.Application
         /// <param name="toSceneName"> 遷移先シーン名。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns> 成功したらtrue。 </returns>
-        Task<bool> ChangeSceneAsync(
+        ValueTask<bool> ChangeSceneAsync(
             string fromSceneName,
             string toSceneName,
             CancellationToken cancellationToken);

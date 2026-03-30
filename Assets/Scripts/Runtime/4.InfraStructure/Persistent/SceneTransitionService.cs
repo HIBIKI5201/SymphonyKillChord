@@ -1,11 +1,10 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using SymphonyFrameWork.System.SceneLoad;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-namespace KillChord.Runtime.Structure
+namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 {
     /// <summary>
     ///     シーン遷移サービスの実装。
@@ -13,9 +12,10 @@ namespace KillChord.Runtime.Structure
     /// </summary>
     public class SceneTransitionService : ISceneTransitionService
     {
-        public async Task<bool> ChangeSceneAsync(string fromSceneName,
-        string toSceneName,
-        CancellationToken cancellationToken)
+        public async ValueTask<bool> ChangeSceneAsync(
+            string fromSceneName,
+            string toSceneName,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(toSceneName))
             {
@@ -26,9 +26,7 @@ namespace KillChord.Runtime.Structure
             if (!SceneLoader.GetExistScene(toSceneName, out _))
             {
                 bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
-                    null,
-                    LoadSceneMode.Additive,
-                    cancellationToken);
+                    token: cancellationToken);
                 if (!loadSuccess)
                 {
                     Debug.LogError($"シーンのロードに失敗 : {toSceneName}");
@@ -41,8 +39,7 @@ namespace KillChord.Runtime.Structure
             if (!string.IsNullOrEmpty(fromSceneName) && SceneLoader.GetExistScene(fromSceneName, out _))
             {
                 bool unloadSuccess = await SceneLoader.UnloadScene(fromSceneName,
-                    null,
-                    cancellationToken);
+                    token: cancellationToken);
                 if (!unloadSuccess)
                 {
                     Debug.LogError($"シーンのアンロードに失敗 : {fromSceneName}");
