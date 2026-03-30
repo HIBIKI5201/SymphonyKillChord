@@ -1,6 +1,6 @@
 using UnityEngine.InputSystem;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Input
 {
     /// <summary>
     ///     UnityのInputActionMapを制御するためのクラス。

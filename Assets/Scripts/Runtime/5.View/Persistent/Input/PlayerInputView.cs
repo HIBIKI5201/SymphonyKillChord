@@ -1,11 +1,11 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Input
 {
     /// <summary>
     ///     入力イベントを受け取り、InputContextを生成して外部に通知するクラス。

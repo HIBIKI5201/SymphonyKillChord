@@ -1,6 +1,7 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.Application.Persistent.Input;
+using KillChord.Runtime.Domain.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,7 +17,7 @@ namespace KillChord.Runtime.Composition
 
         public UnityInputMapController GetInputMapController => _inputMapController;
 
-        public BufferedInputBuffer GetBufferedInputBuffer => _bufferedInputBuffer;
+        public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
         [Header("PlayerInput")]
         [SerializeField] private PlayerInput _playerInput;
@@ -24,7 +25,7 @@ namespace KillChord.Runtime.Composition
         [Header("Bufferの最大容量")]
         [SerializeField] private int _bufferCapacity;
 
-        private BufferedInputBuffer _bufferedInputBuffer;
+        private InputBufferingQueue _bufferedInputBuffer;
         private InputBufferRecorder _inputBufferRecorder;
         private RecordController _inputAdaptor;
         private PlayerInputView _playerInputView;
@@ -49,7 +50,7 @@ namespace KillChord.Runtime.Composition
         /// </summary>
         private void InitializePureObjects()
         {
-            _bufferedInputBuffer = new BufferedInputBuffer(_bufferCapacity);
+            _bufferedInputBuffer = new InputBufferingQueue(_bufferCapacity);
             _inputBufferRecorder = new InputBufferRecorder(_bufferedInputBuffer);
             _inputAdaptor = new RecordController(_inputBufferRecorder);
 
