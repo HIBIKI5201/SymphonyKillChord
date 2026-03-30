@@ -121,6 +121,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task<List<IWikiDatabase>> GetDatabaseAsync(string databaseID)
         {
+            List<IWikiDatabase> allResults = new();
             try
             {
                 Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
@@ -129,7 +130,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                     AuthToken = _notionToken,
                 });
 
-                List<IWikiDatabase> allResults = new();
                 string? nextCursor = null;
                 int pageCount = 0;
 
@@ -162,7 +162,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             catch (Exception ex)
             {
                 Console.WriteLine($"[NotionReader] データベース取得中にエラーが発生しました: {ex.Message}");
-                return new List<IWikiDatabase>();
+                return allResults;
             }
         }
 
