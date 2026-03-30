@@ -150,7 +150,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                         requestData.Add("start_cursor", nextCursor);
                     }
 
-                    string jsonBody = Newtonsoft.Json.JsonSerializer.Serialize(requestData);
+                    string jsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
                     using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                     HttpResponseMessage resp = await http.PostAsync($"https://api.notion.com/v1/databases/{databaseID}/query", content);
@@ -383,40 +383,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
             return string.Empty;
-        }
-
-        /// <summary>
-        ///     IPageIconのインターフェースを安全にデシリアライズするためのコンバーター。
-        ///     未知のアイコンタイプ（custom_emoji等）に遭遇した際に例外を出さず、nullを返す。
-        /// </summary>
-        private class SafeIconConverter : JsonConverter
-        {
-            public override bool CanConvert(Type objectType) => objectType == typeof(IPageIcon);
-
-            public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, Newtonsoft.Json.JsonSerializer serializer)
-            {
-                try
-                {
-                    if (reader.TokenType == JsonToken.Null) return null;
-                    
-                    var jo = JObject.Load(reader);
-                    var type = jo["type"]?.ToString();
-                    
-                    return type switch
-                    {
-                        "emoji" => jo.ToObject<IPageIcon>(serializer),
-                        _ => null // custom_emoji 等、ライブラリが未対応の形式はnullとして扱う
-                    };
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-
-            public override bool CanWrite => false;
-            public override void WriteJson(Newtonsoft.Json.JsonWriter writer, object? value, Newtonsoft.Json.JsonSerializer serializer) 
-                => throw new NotImplementedException();
         }
     }
 }
