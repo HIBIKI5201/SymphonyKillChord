@@ -122,48 +122,79 @@ namespace SinfoniaStudio.SinfoniaOperator
         public async Task<List<IWikiDatabase>> GetDatabaseAsync(string databaseID)
         {
             List<IWikiDatabase> allResults = new();
-            try
+            string? nextCursor = null;
+            int pageCount = 0;
+
+            using HttpClient http = new();
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
+            http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
+
+            Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
+
+            do
             {
-                Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
-                NotionClient notion = NotionClientFactory.Create(new ClientOptions
-                {
-                    AuthToken = _notionToken,
-                });
-
-                string? nextCursor = null;
-                int pageCount = 0;
-
-                do
+                try
                 {
                     pageCount++;
                     Console.WriteLine($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
-                    DatabaseQueryResponse query = await notion.Databases.QueryAsync(
-                        databaseID,
-                        new DatabasesQueryParameters { StartCursor = nextCursor }
-                    );
 
-                    allResults.AddRange(query.Results);
-                    nextCursor = query.HasMore ? query.NextCursor : null;
-                    Console.WriteLine($"[NotionReader] {query.Results.Count} 件のアイテムを取得しました (累計: {allResults.Count} 件)");
+                    var requestData = new
+                    {
+                        start_cursor = nextCursor,
+                        page_size = 100
+                    };
+                    string jsonBody = JsonSerializer.Serialize(requestData);
+                    using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-                } while (!string.IsNullOrEmpty(nextCursor));
+                    HttpResponseMessage resp = await http.PostAsync($"https://api.notion.com/v1/databases/{databaseID}/query", content);
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID})");
+                        break;
+                    }
 
-                if (allResults.Count == 0)
-                {
-                    Console.WriteLine($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
+                    string rawJson = await resp.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(rawJson);
+                    JsonElement root = doc.RootElement;
+
+                    if (root.TryGetProperty("results", out JsonElement results))
+                    {
+                        foreach (JsonElement pageEl in results.EnumerateArray())
+                        {
+                            try
+                            {
+                                // ページ単位でデシリアライズを試みる。
+                                // 特定のページでアイコン(IPageIcon)のパースに失敗しても、ここでのキャッチにより無視して進める。
+                                string singlePageJson = pageEl.GetRawText();
+                                var page = Newtonsoft.Json.JsonConvert.DeserializeObject<Page>(singlePageJson);
+                                if (page != null)
+                                {
+                                    allResults.Add((IWikiDatabase)page);
+                                }
+                            }
+                            catch (Exception innerEx)
+                            {
+                                // カスタム絵文字など未対応の形式が含まれるページはスキップ。
+                                Console.WriteLine($"[NotionReader] ページの取得をスキップしました (エラー: {innerEx.Message})");
+                            }
+                        }
+                    }
+
+                    nextCursor = root.TryGetProperty("next_cursor", out var nextCursorEl) && nextCursorEl.ValueKind == JsonValueKind.String
+                        ? nextCursorEl.GetString()
+                        : null;
+
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
+                    Console.WriteLine($"[NotionReader] データベース取得中に重大なエラーが発生しました: {ex.Message}");
+                    break;
                 }
 
-                return allResults;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[NotionReader] データベース取得中にエラーが発生しました: {ex.Message}");
-                return allResults;
-            }
+            } while (!string.IsNullOrEmpty(nextCursor));
+
+            Console.WriteLine($"[NotionReader] データベースの取得が完了しました (合計: {allResults.Count} 件)");
+            return allResults;
         }
 
         /// <summary>
