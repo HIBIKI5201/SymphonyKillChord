@@ -1,8 +1,9 @@
 using System;
 using System.Threading;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility;
 using UnityEngine;
+using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {

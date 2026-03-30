@@ -1,7 +1,7 @@
 using System;
 using KillChord.Runtime.Utility;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Music
 {
     public class RhythmState
     {
