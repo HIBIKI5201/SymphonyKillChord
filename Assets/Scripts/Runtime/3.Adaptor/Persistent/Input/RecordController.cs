@@ -26,6 +26,17 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
         }
 
         /// <summary>
+        ///     カメラ入力を変換してInputBufferRecorderに渡す。
+        /// </summary>
+        /// <param name="inputContext"></param>
+        public void HandleLook(InputContext<Vector2> inputContext)
+        {
+            InputActionId actionId = InputIdConverter.Convert(inputContext.ActionKind);
+            BufferedInput bufferedInput = Convert(actionId, inputContext);
+            _inputBufferRecorder.Record(bufferedInput);
+        }
+
+        /// <summary>
         ///     float値の入力を変換してInputBufferRecorderに渡す。
         /// </summary>
         /// <param name="inputContext"></param>
