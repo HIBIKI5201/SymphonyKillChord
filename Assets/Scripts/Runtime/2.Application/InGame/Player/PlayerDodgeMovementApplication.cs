@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Player
 {
     public sealed class PlayerDodgeMovementApplication
     {

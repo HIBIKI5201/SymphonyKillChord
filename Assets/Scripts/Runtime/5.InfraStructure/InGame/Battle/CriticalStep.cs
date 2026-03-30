@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Battle;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     クリティカルヒットを処理する攻撃処理ステップ。
@@ -18,8 +18,8 @@ namespace KillChord.Runtime.InfraStructure
             }
         }
 
-        [SerializeField, Range(0f, 1f),Tooltip("クリティカル発生率")] private float _criticalChance;
-        [SerializeField,Tooltip("クリティカル倍率")] private float _criticalMultiplier;
+        [SerializeField, Range(0f, 1f), Tooltip("クリティカル発生率")] private float _criticalChance;
+        [SerializeField, Tooltip("クリティカル倍率")] private float _criticalMultiplier;
 
     }
 }

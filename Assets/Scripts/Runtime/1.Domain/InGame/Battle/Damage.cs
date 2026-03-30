@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     ダメージ計算の文脈を保持する構造体。

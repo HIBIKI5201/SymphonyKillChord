@@ -4,6 +4,7 @@ using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View;
 using UnityEngine;
+using KillChord.Runtime.Adaptor.InGame.Battle;
 
 namespace KillChord.Develop
 {

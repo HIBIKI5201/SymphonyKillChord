@@ -1,8 +1,7 @@
+using KillChord.Runtime.Application.InGame.Music;
 using System;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Utility;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     public class MusicSyncController : IDisposable
     {

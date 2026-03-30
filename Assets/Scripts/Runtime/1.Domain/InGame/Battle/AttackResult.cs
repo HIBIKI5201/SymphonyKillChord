@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     攻撃処理の結果を表す構造体。

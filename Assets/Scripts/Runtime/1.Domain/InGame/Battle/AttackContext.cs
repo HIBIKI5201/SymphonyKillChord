@@ -1,6 +1,7 @@
+using KillChord.Runtime.Domain.InGame.Character;
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     攻撃処理の文脈を保持するクラス。
@@ -23,12 +24,16 @@ namespace KillChord.Runtime.Domain
 
         /// <summary> アタッカー。</summary>
         public CharacterEntity Attacker { get; }
+
         /// <summary>　ターゲット。 </summary>
         public IHitTarget Target { get; }
+
         /// <summary> 攻撃の基本情報。 </summary>
         public AttackDefinition Attack { get; }
+
         /// <summary> 現在のダメージ。 </summary>
         public Damage CurrentDamage { get; set; }
+
         /// <summary> クリティカルヒットかどうかを示すフラグ。 </summary>
         public bool IsCritical { get; set; }
     }

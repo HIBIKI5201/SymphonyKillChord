@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Camera;
 using UnityEngine;
 
-namespace KillChord.Structure
+namespace KillChord.Runtime.Structure.InGame.Camera
 {
     [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject

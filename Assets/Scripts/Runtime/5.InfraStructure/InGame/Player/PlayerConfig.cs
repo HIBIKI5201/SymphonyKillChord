@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
-namespace KillChord.Structure
+namespace KillChord.Runtime.InfraStructure.InGame.Player
 {
     [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "KillChord/InGame/PlayerConfig")]
     public sealed class PlayerConfig : ScriptableObject

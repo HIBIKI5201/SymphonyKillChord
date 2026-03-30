@@ -1,7 +1,7 @@
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
-    ///     停止距離を表す値オブジェクト。
+    ///     射程距離を表す値オブジェクト。
     /// </summary>
     public readonly struct AttackRange
     {

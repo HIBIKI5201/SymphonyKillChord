@@ -1,7 +1,10 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
     ///     敵の攻撃を実行するユースケースクラス。
@@ -22,7 +25,7 @@ namespace KillChord.Runtime.Application
                 return default;
             }
 
-            _musicSyncService.RegisterBattleActionHistory(ActionType.Attack);
+            _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack);
             return _attackExecutor.Execute(attacker, target, attackId);
         }
 

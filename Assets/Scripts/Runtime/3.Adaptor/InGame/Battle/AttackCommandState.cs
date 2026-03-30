@@ -1,6 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Domain.InGame.Battle;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     /// <summary>
     ///     現在選択されている攻撃コマンドの状態を管理するクラス。

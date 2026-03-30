@@ -1,5 +1,5 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Battle;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
@@ -12,12 +12,12 @@ namespace KillChord.Runtime.InfraStructure
     {
         public void Execute(AttackContext context)
         {
-            if(context.CurrentDamage.Value < _confirmedDamage)
+            if (context.CurrentDamage.Value < _confirmedDamage)
             {
                 context.CurrentDamage = new Damage(_confirmedDamage);
             }
         }
 
-        [SerializeField,Tooltip("確定ダメージ。")] private float _confirmedDamage;
+        [SerializeField, Tooltip("確定ダメージ。")] private float _confirmedDamage;
     }
 }

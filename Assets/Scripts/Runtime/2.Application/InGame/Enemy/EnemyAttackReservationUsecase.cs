@@ -1,9 +1,10 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 using System.Threading;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Player
 {
     /// <summary>
     ///     敵の攻撃を予約するユースケース。

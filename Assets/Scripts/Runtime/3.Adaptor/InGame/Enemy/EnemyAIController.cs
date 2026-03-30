@@ -1,8 +1,9 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Enemy;
+using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 using UnityEngine;
-using static Codice.CM.Common.Purge.PurgeReport;
 
 namespace KillChord.Runtime.Adaptor
 {

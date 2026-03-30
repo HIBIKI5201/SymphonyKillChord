@@ -1,7 +1,6 @@
 using System;
-using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Skill
 {
     public readonly struct SkillId : IEquatable<SkillId>
     {

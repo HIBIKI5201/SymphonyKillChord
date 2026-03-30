@@ -1,10 +1,14 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Player;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -89,7 +93,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 attackBattleState,
                 skillController
                 );
-
 
             _playerAttackInputView.Initialize(attackController);
             _attackResultView.Bind(attackResultViewModel);

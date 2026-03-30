@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     public interface IViewModelDamage
     {

@@ -1,6 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Enemy;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
     /// <summary>
     ///     ScriptableObjectからDomainを生成する。

@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
     ///     敵の音楽同期予約に使うタイミング情報をまとめた構造体。

@@ -1,12 +1,21 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Enemy;
+using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     敵移動の依存関係を構築する。

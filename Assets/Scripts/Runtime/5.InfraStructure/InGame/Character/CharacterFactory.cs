@@ -1,8 +1,10 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
 using System;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
     /// <summary>
     ///     CharacterDataからCharacterEntityを生成するクラス。
@@ -43,7 +45,7 @@ namespace KillChord.Runtime.InfraStructure
             CharacterCombatSpec combatSpec = new CharacterCombatSpec(definitions);
 
             return new CharacterEntity(
-                data.CharacterName,
+                new CharacterName(data.CharacterName),
                 new HealthEntity(data.MaxHealth),
                 new MoveSpeed(data.MoveSpeed),
                 new AttackPower(data.AttackPower),

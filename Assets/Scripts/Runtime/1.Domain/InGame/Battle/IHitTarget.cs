@@ -1,6 +1,6 @@
-using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     攻撃の対象を表すインターフェース。

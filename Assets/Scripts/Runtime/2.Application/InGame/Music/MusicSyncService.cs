@@ -1,9 +1,9 @@
-using System;
-using System.Threading;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility;
+using System;
+using System.Threading;
 using UnityEngine;
-using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         {
             _rhythmState = new(rhythmDefinition, BUFFER_SIZE);
         }
-        
+
         /// <summary>
         ///     毎フレーム処理。
         /// </summary>
@@ -59,7 +59,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmState.GetHistoryTiming();
         }
 
-        public ReadOnlySpan<ActionType> GetActionHistory()
+        public ReadOnlySpan<BattleActionType> GetActionHistory()
         {
             return _rhythmState.GetHistoryActionType();
         }
@@ -74,7 +74,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
-        public void RegisterBattleActionHistory(ActionType actionType)
+        public void RegisterBattleActionHistory(BattleActionType actionType)
         {
             _rhythmState.RegisterActionQueue(actionType, Time.unscaledTime);
         }

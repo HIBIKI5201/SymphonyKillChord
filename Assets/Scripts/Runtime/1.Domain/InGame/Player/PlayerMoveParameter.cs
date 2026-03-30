@@ -1,8 +1,10 @@
 using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Character;
+using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Player
 {
-    [System.Serializable]
+    [Serializable]
     public sealed class PlayerMoveParameter
     {
         public PlayerMoveParameter(float moveSpeed, float dodgeSpeed, float dodgeDuration, float dodgeCooldown)

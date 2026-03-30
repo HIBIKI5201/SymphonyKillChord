@@ -1,7 +1,8 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
 using System;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     /// <summary>
     ///     現在の戦闘状態として、攻撃者と攻撃対象を保持するクラス。

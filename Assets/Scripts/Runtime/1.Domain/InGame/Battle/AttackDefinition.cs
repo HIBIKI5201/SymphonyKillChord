@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     攻撃の基本情報を保持するクラス。

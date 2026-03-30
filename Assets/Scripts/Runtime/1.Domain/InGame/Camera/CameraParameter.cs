@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Camera
 {
     [System.Serializable]
     public sealed class CameraParameter
