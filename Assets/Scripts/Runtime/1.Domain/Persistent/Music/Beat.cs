@@ -1,17 +1,19 @@
 using System;
-using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Persistent.Music
 {
     [Serializable]
     public readonly struct Beat
     {
         public Beat(float signature, float count)
         {
-             
+
             _signature = Math.Max(signature, 1);
             _count = count;
         }
+
+        public double Signature => _signature;
+        public double Count => _count;
 
         public static double GetLength(Beat beat, double bpm)
         {
@@ -23,11 +25,7 @@ namespace KillChord.Runtime.Domain
             return unitSeconds * beat._count;
         }
 
-        public double Signature => _signature;
-        public double Count => _count;
-
-        [Tooltip("拍子"), Min(0)] private readonly double _signature;
-
-        [Tooltip("数"), Min(0)] private readonly double _count;
+        private readonly double _signature;
+        private readonly double _count;
     }
 }

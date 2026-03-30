@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Persistent.Music;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain

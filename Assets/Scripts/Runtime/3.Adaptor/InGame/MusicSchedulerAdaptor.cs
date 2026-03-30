@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Threading;
 using KillChord.Runtime.Application;
+using KillChord.Runtime.Domain.Persistent.Music;
 
 namespace KillChord.Runtime.Adaptor
 {
