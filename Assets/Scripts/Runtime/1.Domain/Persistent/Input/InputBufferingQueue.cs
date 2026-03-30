@@ -1,8 +1,7 @@
-using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.Utility;
 using System;
 
-namespace KillChord.Runtime.Application.Persistent.Input
+namespace KillChord.Runtime.Domain.Persistent.Input
 {
     /// <summary>
     ///     入力をバッファリングするクラス。

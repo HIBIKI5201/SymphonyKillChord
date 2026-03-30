@@ -1,13 +1,13 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Persistent.Input;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.Persistent.Input
 {
     /// <summary>
     ///     入力をBufferedInputに変換してBufferedInputBufferに記録するクラス。
     /// </summary>
     public class InputBufferRecorder
     {
-        public InputBufferRecorder(BufferedInputBuffer inputBuffer)
+        public InputBufferRecorder(InputBufferingQueue inputBuffer)
         {
             _inputBuffer = inputBuffer;
         }
@@ -21,6 +21,6 @@ namespace KillChord.Runtime.Application
         /// <param name="value"></param>
         public void Record(BufferedInput input) => _inputBuffer.Push(input);
 
-        private readonly BufferedInputBuffer _inputBuffer;
+        private readonly InputBufferingQueue _inputBuffer;
     }
 }
