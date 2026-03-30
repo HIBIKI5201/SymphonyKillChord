@@ -3,6 +3,9 @@ using KillChord.Runtime.Utility;
 
 namespace KillChord.Runtime.Domain.InGame.Music
 {
+    /// <summary>
+    ///     リズム入力の履歴を管理するクラス。
+    /// </summary>
     public class RhythmState
     {
         public int Count => _typeBuffer.Count;
@@ -27,7 +30,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         }
 
         /// <summary>
-        /// 入力登録
+        ///     入力登録。
         /// </summary>
         public void RegisterActionQueue(ActionType type, float unscaledTime)
         {

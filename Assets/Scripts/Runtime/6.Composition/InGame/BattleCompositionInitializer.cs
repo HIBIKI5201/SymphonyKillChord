@@ -1,31 +1,33 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.View;
 using System.Collections.Generic;
-using KillChord.Runtime.InfraStructure.Player;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Music
 {
     /// <summary>
     ///     バトルで使用するクラスのインスタンスを生成し、依存関係を解決して結びつけるクラス。
     /// </summary>
     public sealed class BattleCompositionInitializer : MonoBehaviour
     {
-        [Header("キャラクターデータ")] [SerializeField] private CharacterData _playerData;
+        [Header("キャラクターデータ")][SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private SkillRepository _skillRepository;
 
-        [Header("アタックパイプライン")] [SerializeField]
+        [Header("アタックパイプライン")]
+        [SerializeField]
         private AttackPipelineAsset _normalPipelineAsset;
 
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
 
-        [Header("View")] [SerializeField] private PlayerAttackInputView _playerAttackInputView;
+        [Header("View")][SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
 #if UNITY_EDITOR
@@ -79,14 +81,14 @@ namespace KillChord.Runtime.Composition
 
             IMusicSyncService musicSyncService = new MusicSyncService(new(_bpm));//TODO : ちゃんと取得しなさい！
             SkillController skillController = new SkillController(_skillRepository, musicSyncService);
-            
+
             AttackController attackController = new AttackController(
                 attackExecutor,
                 attackResultPresenter,
                 attackCommandState,
                 attackBattleState,
                 skillController
-                ); 
+                );
 
 
             _playerAttackInputView.Initialize(attackController);

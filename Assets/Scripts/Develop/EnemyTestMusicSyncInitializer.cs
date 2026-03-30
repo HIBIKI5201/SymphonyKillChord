@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View;

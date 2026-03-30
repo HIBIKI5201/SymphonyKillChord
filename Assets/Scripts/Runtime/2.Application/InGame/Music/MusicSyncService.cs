@@ -5,7 +5,7 @@ using KillChord.Runtime.Utility;
 using UnityEngine;
 using KillChord.Runtime.Domain;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Music
 {
     public class MusicSyncService : IMusicSyncService
     {
@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Application
         }
         
         /// <summary>
-        /// 毎フレーム処理。
+        ///     毎フレーム処理。
         /// </summary>
         /// <param name="playTime">音楽の再生時間</param>
         public void Update(double playTime)
