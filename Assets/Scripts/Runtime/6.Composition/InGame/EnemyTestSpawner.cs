@@ -3,6 +3,8 @@ using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.View;
 using UnityEngine;
+using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.View.InGame.Music;
 
 namespace KillChord.Runtime.Composition
 {
