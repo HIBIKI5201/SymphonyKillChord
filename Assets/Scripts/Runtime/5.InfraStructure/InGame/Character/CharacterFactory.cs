@@ -45,7 +45,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
             CharacterCombatSpec combatSpec = new CharacterCombatSpec(definitions);
 
             return new CharacterEntity(
-                data.CharacterName,
+                new CharacterName(data.CharacterName),
                 new HealthEntity(data.MaxHealth),
                 new MoveSpeed(data.MoveSpeed),
                 new AttackPower(data.AttackPower),

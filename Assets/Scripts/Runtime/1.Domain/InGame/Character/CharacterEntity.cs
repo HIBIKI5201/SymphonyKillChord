@@ -16,15 +16,13 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="moveSpeed"></param>
         /// <param name="attackPower"></param>
         /// <param name="combatSpec"></param>
-        public CharacterEntity(string name,
+        public CharacterEntity(CharacterName name,
             HealthEntity health,
             MoveSpeed moveSpeed,
             AttackPower attackPower,
             CharacterCombatSpec combatSpec
             )
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("name must not be null or empty.", nameof(name));
             if (health is null)
                 throw new ArgumentNullException(nameof(health));
             if (combatSpec is null)
@@ -37,7 +35,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             CombatSpec = combatSpec;
         }
 
-        public string Name { get; }
+        public CharacterName Name { get; }
         public HealthEntity Health { get; }
         public MoveSpeed MoveSpeed { get; }
         public AttackPower AttackPower { get; }
