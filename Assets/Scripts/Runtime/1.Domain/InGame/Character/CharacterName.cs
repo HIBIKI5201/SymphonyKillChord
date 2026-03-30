@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterName(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                { throw new ArgumentException("name must not be null or empty.", nameof(name)); }
+                { throw new ArgumentException("name must not be null or empty.", nameof(value)); }
 
             Value = value;
         }
