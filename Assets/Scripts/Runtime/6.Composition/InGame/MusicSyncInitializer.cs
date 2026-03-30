@@ -1,9 +1,10 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
-
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Music
 {
     public class MusicSyncInitializer : MonoBehaviour
     {

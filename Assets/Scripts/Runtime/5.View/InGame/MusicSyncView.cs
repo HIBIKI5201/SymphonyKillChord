@@ -1,8 +1,9 @@
 using System;
 using R3;
 using UnityEngine;
+using KillChord.Runtime.View.Persistent.Music;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Music
 {
     public class MusicSyncView : MonoBehaviour
     {
