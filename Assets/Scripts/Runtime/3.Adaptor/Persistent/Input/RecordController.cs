@@ -21,7 +21,8 @@ namespace KillChord.Runtime.Adaptor
         public void HandleMove(InputContext<Vector2> inputContext)
         {
             InputActionId actionId = InputIdConverter.Convert(inputContext.ActionKind);
-            _inputBufferRecorder.Record(actionId, inputContext.Phase, inputContext.Timestamp, inputContext.Value);
+            BufferedInput bufferedInput = Convert(actionId, inputContext);
+            _inputBufferRecorder.Record(bufferedInput);
         }
 
         /// <summary>
@@ -31,9 +32,32 @@ namespace KillChord.Runtime.Adaptor
         public void HandleButton(InputContext<float> inputContext)
         {
             InputActionId actionId = InputIdConverter.Convert(inputContext.ActionKind);
-            _inputBufferRecorder.Record(actionId, inputContext.Phase, inputContext.Timestamp, inputContext.Value);
+            BufferedInput bufferedInput = Convert(actionId, inputContext);
+            _inputBufferRecorder.Record(bufferedInput);
         }
 
         private readonly InputBufferRecorder _inputBufferRecorder;
+
+        private BufferedInput Convert(InputActionId id, InputContext<Vector2> context)
+        {
+            return new(
+                id,
+                context.Phase,
+                context.Timestamp,
+                context.Value,
+                0f
+                );
+        }
+
+        private BufferedInput Convert(InputActionId id, InputContext<float> context)
+        {
+            return new(
+                id,
+                context.Phase,
+                context.Timestamp,
+                Vector2.zero,
+                context.Value
+                );
+        }
     }
 }

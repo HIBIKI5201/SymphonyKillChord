@@ -10,7 +10,6 @@ namespace KillChord.Runtime.Adaptor
         public float GetCurrentTimestamp()
         {
             return Time.unscaledTime;
-            //後で、CRIの時間取得に変更する予定。
         }
     }
 }
