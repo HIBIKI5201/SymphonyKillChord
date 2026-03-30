@@ -25,6 +25,8 @@ namespace KillChord.Runtime.View.Persistent.Music
 
         private void ChangeBgm(string cueName)
         {
+            string currentCueName = _cri.cueName;
+
             StopBgm();
 
             if (string.IsNullOrEmpty(cueName))
@@ -33,7 +35,7 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
-            if (cueName == _cri.cueName)
+            if (cueName == currentCueName)
             {
                 Debug.Log("cueNameが元と同じです。");
                 return;
