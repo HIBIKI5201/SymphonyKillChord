@@ -43,7 +43,7 @@ namespace KillChord.Runtime.View.InGame.Music
 #if UNITY_EDITOR
             _musicSyncViewModel.Bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
-            _musicSyncViewModel.BeatLength = 60000d / _musicSyncViewModel.Bpm;
+            _musicSyncViewModel.BeatLength = 60d / _musicSyncViewModel.Bpm;
         }
     }
 }
