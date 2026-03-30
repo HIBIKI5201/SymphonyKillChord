@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View
         public void Bind(MusicViewModel musicViewModel)
         {
             _musicVm = musicViewModel;
-            musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
+            musicViewModel.CueName.Subscribe(ChangeBgm).RegisterTo(destroyCancellationToken);
         }
 
         public void Awake()
@@ -24,15 +24,22 @@ namespace KillChord.Runtime.View
             Bind(new());
         }
 
-        public void PlayBgm(string cueName)
+        public void ChangeBgm(string cueName)
         {
-            if (string.IsNullOrEmpty(cueName) || cueName == _cri.cueName)
+            StopBgm();
+
+            if (string.IsNullOrEmpty(cueName))
             {
-                Debug.Log("cueNameが空か元と同じです");
+                Debug.Log("BGMの再生を停止します。");
                 return;
             }
 
-            StopBgm();
+            if (cueName == _cri.cueName)
+            {
+                Debug.Log("cueNameが元と同じです。");
+                return;
+            }
+
             _cri.cueName = cueName;
             _playback = _cri.Play();
         }
@@ -41,7 +48,6 @@ namespace KillChord.Runtime.View
         {
             _playback.Stop();
             _cri.cueName = string.Empty;
-            _musicVm.ClearMusicCue();
         }
 
         private CriAtomSource _cri;

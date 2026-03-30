@@ -11,14 +11,7 @@ namespace KillChord.Runtime.View
 
         public void UpdateMusicCue(string cueName)
         {
-            if (string.IsNullOrEmpty(cueName)) { return; }
-
             _cueName.Value = cueName;
-        }
-
-        public void ClearMusicCue()
-        {
-            _cueName.Value = string.Empty;
         }
     }
 }
