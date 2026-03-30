@@ -172,17 +172,30 @@ namespace SinfoniaStudio.SinfoniaOperator
                             try
                             {
                                 // ページ単位でデシリアライズを試みる。
-                                // 特定のページでアイコン(IPageIcon)のパースに失敗しても、ここでのキャッチにより無視して進める。
                                 string singlePageJson = pageEl.GetRawText();
-                                var page = Newtonsoft.Json.JsonConvert.DeserializeObject<Page>(singlePageJson);
+                                var jo = Newtonsoft.Json.Linq.JObject.Parse(singlePageJson);
+
+                                // 未知のアイコン形式（custom_emoji等）は、ライブラリのデシリアライザが対応していないため、
+                                // 事前にnullにしておくことでデシリアライズの失敗を防ぐ。
+                                var icon = jo["icon"];
+                                if (icon != null && icon.Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                                {
+                                    var type = icon["type"]?.ToString();
+                                    if (type != "emoji" && type != "external" && type != "file")
+                                    {
+                                        jo["icon"] = null;
+                                    }
+                                }
+
+                                var page = jo.ToObject<Page>();
                                 if (page != null)
                                 {
-                                    allResults.Add(page);
+                                    allResults.Add((IWikiDatabase)page);
                                 }
                             }
                             catch (Exception innerEx)
                             {
-                                // カスタム絵文字など未対応の形式が含まれるページはスキップ。
+                                // それでもパースに失敗した場合はスキップ。
                                 Console.WriteLine($"[NotionReader] ページの取得をスキップしました (エラー: {innerEx.Message})");
                             }
                         }
