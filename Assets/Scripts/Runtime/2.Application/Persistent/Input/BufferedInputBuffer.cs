@@ -1,7 +1,6 @@
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Utility;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
@@ -27,21 +26,11 @@ namespace KillChord.Runtime.Application
             OnBuffered?.Invoke(input);
         }
 
-        public BufferedInput GetAt(int index)
-        {
-            return _buffer.PeekFirst(index);
-        }
+        public BufferedInput GetAt(int offset = 0) => _buffer.PeekFirst(offset);
 
-        public BufferedInput GetLast(int offset = 0)
-        {
-            return _buffer.PeekLast(offset);
-        }
+        public BufferedInput GetLast(int offset = 0) => _buffer.PeekLast(offset);
 
-        public void Clear()
-        {
-            _buffer.Clear();
-        }
-
+        public void Clear() => _buffer.Clear();
         private readonly RingBuffer<BufferedInput> _buffer;
     }
 }
