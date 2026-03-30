@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// <summary>
     ///     攻撃処理の文脈を保持するクラス。
     /// </summary>
-    public class AttackContext
+    public struct AttackContext
     {
         /// <summary>
         ///     コンストラクタ。
@@ -20,6 +20,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             Target = target ?? throw new ArgumentNullException(nameof(target));
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             CurrentDamage = attack.BaseDamage;
+            IsCritical = false;
         }
 
         /// <summary> アタッカー。</summary>
