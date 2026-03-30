@@ -1,7 +1,8 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using System;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     キャラクターが使用できる攻撃定義を管理するクラス。

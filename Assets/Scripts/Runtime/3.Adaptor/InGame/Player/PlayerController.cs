@@ -1,7 +1,7 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Player;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Player
 {
     public class PlayerController
     {

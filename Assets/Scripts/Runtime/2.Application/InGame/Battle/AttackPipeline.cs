@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
 using System;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
     ///     複数の攻撃処理ステップを順番に実行するクラス。

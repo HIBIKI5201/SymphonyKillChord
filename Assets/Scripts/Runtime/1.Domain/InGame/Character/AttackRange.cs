@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     停止距離を表す値オブジェクト。

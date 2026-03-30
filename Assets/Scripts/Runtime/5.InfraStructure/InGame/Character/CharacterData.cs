@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     キャラクターの基本的なデータを保持するScriptableObject。

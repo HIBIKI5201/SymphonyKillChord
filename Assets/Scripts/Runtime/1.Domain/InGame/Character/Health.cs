@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     public readonly struct Health : IEquatable<Health>
     {

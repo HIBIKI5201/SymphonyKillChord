@@ -1,12 +1,12 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.View;
-using UnityEngine;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
+using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
     ///     テスト用のスポナー。
@@ -59,7 +59,7 @@ namespace KillChord.Runtime.Composition
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
-            enemyInstance.Initialize(_target,_targetEntity, _musicSyncViewModel, _musicSyncService);
+            enemyInstance.Initialize(_target, _targetEntity, _musicSyncViewModel, _musicSyncService);
 
             _spawnCount++;
         }

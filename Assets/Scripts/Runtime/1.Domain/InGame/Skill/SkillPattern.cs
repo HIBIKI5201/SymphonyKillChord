@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Skill
 {
     public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
@@ -9,9 +9,9 @@ namespace KillChord.Runtime.Domain
 
         public SkillPattern(int[] signatures)
         {
-            if (signatures == null) throw new ArgumentNullException(nameof(signatures));
+            if (signatures == null) { throw new ArgumentNullException(nameof(signatures)); }
             if (signatures.Length == 0)
-                throw new ArgumentException("signatures must not be empty.", nameof(signatures));
+                { throw new ArgumentException("signatures must not be empty.", nameof(signatures)); }
             _signatures = signatures;//受け取ったデータは変わらない為そのまま利用する
         }
 

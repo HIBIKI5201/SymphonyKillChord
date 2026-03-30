@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Battle;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃処理のパイプラインを定義するScriptableObject。

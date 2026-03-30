@@ -1,15 +1,17 @@
-using KillChord.Runtime.Domain;
-using UnityEngine;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.Persistent.Music;
 using System;
 using System.Threading;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain.Persistent.Music;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
     public class MusicSchedulerAdaptor : IMusicActionScheduler
     {
-        public MusicSchedulerAdaptor(IMusicSyncViewModel syncViewModel,IMusicSyncService musicSyncService)
+        public MusicSchedulerAdaptor(IMusicSyncViewModel syncViewModel, IMusicSyncService musicSyncService)
         {
             _syncViewModel = syncViewModel;
             _musicSyncService = musicSyncService;
@@ -22,7 +24,7 @@ namespace KillChord.Runtime.Adaptor
             Debug.Log("攻撃予約: " + musicSpec);
             ExecuteRequestTiming timing = Convert(musicSpec);
 
-            double accurateBeat =_syncViewModel.AccurateBeat;
+            double accurateBeat = _syncViewModel.AccurateBeat;
 
             _musicSyncService.RegisterAction(
                 accurateBeat,

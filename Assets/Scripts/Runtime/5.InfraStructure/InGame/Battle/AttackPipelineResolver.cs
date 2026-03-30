@@ -1,9 +1,9 @@
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Battle;
 using System;
 using System.Collections.Generic;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃IDに対応する攻撃パイプラインを解決するクラス。

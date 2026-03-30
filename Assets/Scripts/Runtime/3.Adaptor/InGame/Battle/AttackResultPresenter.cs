@@ -1,6 +1,6 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     /// <summary>
     ///     攻撃結果をViewModel向けDTOへ変換して渡すプレゼンタークラス。

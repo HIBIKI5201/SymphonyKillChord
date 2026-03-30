@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Utility;
 
 namespace KillChord.Runtime.Domain.InGame.Music
@@ -10,7 +11,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
     {
         public int Count => _typeBuffer.Count;
 
-        private readonly RingBuffer<ActionType> _typeBuffer;
+        private readonly RingBuffer<BattleActionType> _typeBuffer;
         private readonly RingBuffer<int> _beatTypeBuffer;
         private readonly RingBuffer<float> _timingBuffer;
 
@@ -18,7 +19,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
 
         public RhythmState(RhythmDefinition rhythmDefinition, int capacity)
         {
-            _typeBuffer = new RingBuffer<ActionType>(capacity);
+            _typeBuffer = new RingBuffer<BattleActionType>(capacity);
             _beatTypeBuffer = new RingBuffer<int>(capacity);
             _timingBuffer = new RingBuffer<float>(capacity);
             _rhythmDefinition = rhythmDefinition;
@@ -32,7 +33,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <summary>
         ///     入力登録。
         /// </summary>
-        public void RegisterActionQueue(ActionType type, float unscaledTime)
+        public void RegisterActionQueue(BattleActionType type, float unscaledTime)
         {
             int signature = 1;
 
@@ -51,7 +52,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             Enqueue(param.BeatType, param.Timing, param.ActionType);
         }
 
-        public void Enqueue(int beatType, float timing, ActionType actionType)
+        public void Enqueue(int beatType, float timing, BattleActionType actionType)
         {
             _beatTypeBuffer.Enqueue(beatType);
             _typeBuffer.Enqueue(actionType);
@@ -71,7 +72,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return _timingBuffer.AsReadonlySpan();
         }
 
-        public ReadOnlySpan<ActionType> GetHistoryActionType()
+        public ReadOnlySpan<BattleActionType> GetHistoryActionType()
         {
             return _typeBuffer.AsReadonlySpan();
         }

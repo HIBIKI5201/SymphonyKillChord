@@ -1,8 +1,7 @@
 using System;
 using System.Threading;
-using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Music
 {
     public readonly struct ScheduledAction
     {

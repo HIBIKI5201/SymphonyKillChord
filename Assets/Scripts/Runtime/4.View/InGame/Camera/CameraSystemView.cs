@@ -1,8 +1,8 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Utility;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Camera
 {
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour

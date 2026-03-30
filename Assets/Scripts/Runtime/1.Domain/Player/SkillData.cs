@@ -1,5 +1,6 @@
 using System;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Skill;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 

@@ -1,9 +1,9 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
 #if UNITY_EDITOR
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     public sealed class PlayerMoveParameterDebug : MonoBehaviour
     {

@@ -1,25 +1,25 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Battle
 {
     public readonly struct ActionParams
     {
-        public readonly ActionType ActionType;
-        public readonly int BeatType;
-        public readonly float Timing;
-
-        public ActionParams(ActionType actionType, int beatType)
+        public ActionParams(BattleActionType actionType, int beatType)
         {
             BeatType = beatType;
             ActionType = actionType;
             Timing = Time.unscaledTime;
         }
 
-        public ActionParams(ActionType actionType, int beatType, float timing)
+        public ActionParams(BattleActionType actionType, int beatType, float timing)
         {
             BeatType = beatType;
             ActionType = actionType;
             Timing = timing;
         }
+
+        public readonly BattleActionType ActionType;
+        public readonly int BeatType;
+        public readonly float Timing;
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
 

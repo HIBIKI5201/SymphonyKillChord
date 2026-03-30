@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     /// <summary>
     ///     Viewからの攻撃コマンドの入力を受け取り、攻撃処理の実行と結果の表示を仲介するクラス。
@@ -46,7 +46,7 @@ namespace KillChord.Runtime.Adaptor
         /// </summary>
         public void ExecuteAttack()
         {
-            _skillController.CheckSkill(ActionType.Attack);
+            _skillController.CheckSkill(BattleActionType.Attack);
             AttackId attackId = _commandState.SelectedAttackId;
             AttackResult result = _attackExecutor.Execute(
                 _battleState.Attacker,

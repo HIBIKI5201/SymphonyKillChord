@@ -1,8 +1,10 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
 using System;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
     /// <summary>
     ///     CharacterDataからCharacterEntityを生成するクラス。

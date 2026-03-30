@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
     ///     Viewから送られる攻撃コマンドの種類を表す列挙型。

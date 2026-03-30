@@ -1,8 +1,9 @@
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
-using KillChord.Runtime.Domain;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Music
 {
     public interface IMusicSyncService
     {
@@ -16,7 +17,7 @@ namespace KillChord.Runtime.Application
         ReadOnlySpan<float> GetBeatTypeTiming();
 
         /// <summary> プレイヤーの入力履歴のうち、アクションの種類を保存する </summary>
-        ReadOnlySpan<ActionType> GetActionHistory();
+        ReadOnlySpan<BattleActionType> GetActionHistory();
 
         /// <summary>
         /// メソッドの実行予約をする
@@ -32,6 +33,6 @@ namespace KillChord.Runtime.Application
             CancellationToken ct);
 
         /// <summary> プレイヤーの行動履歴を保存する </summary>
-        void RegisterBattleActionHistory(ActionType actionType);
+        void RegisterBattleActionHistory(BattleActionType actionType);
     }
 }

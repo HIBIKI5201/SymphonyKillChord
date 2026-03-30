@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Skill;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Skill
 {
     public interface ISkillRepository
     {

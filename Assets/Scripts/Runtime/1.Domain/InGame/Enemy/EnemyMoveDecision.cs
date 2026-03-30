@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
     ///     敵移動の結果を表す構造体。

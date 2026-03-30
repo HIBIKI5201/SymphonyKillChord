@@ -1,5 +1,8 @@
-namespace KillChord.Runtime.Domain
+using System;
+
+namespace KillChord.Runtime.Domain.InGame.Character
 {
+    [Serializable]
     public readonly struct MoveSpeed
     {
         public MoveSpeed(float value)

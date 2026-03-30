@@ -1,7 +1,8 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Player
 {
     /// <summary>
     ///     プレイヤーからの攻撃入力を受け取り、AttackControllerに伝えるクラス。

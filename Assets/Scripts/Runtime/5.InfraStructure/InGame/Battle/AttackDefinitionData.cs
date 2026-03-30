@@ -1,12 +1,12 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Battle;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃定義の初期設定値を保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(AttackDefinitionData), 
+    [CreateAssetMenu(fileName = nameof(AttackDefinitionData),
         menuName = "KillChord/Attack")]
     public class AttackDefinitionData : ScriptableObject
     {

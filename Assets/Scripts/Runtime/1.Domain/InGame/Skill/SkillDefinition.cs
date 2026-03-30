@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Skill
 {
     public class SkillDefinition : IEquatable<SkillDefinition>
     {

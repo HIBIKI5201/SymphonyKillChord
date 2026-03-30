@@ -1,6 +1,6 @@
-using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
     ///     敵移動の能力値。

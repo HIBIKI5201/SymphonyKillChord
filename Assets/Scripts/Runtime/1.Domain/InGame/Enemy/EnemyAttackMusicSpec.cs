@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
     ///     敵の攻撃に関する音楽同期のタイミング情報をまとめたクラス。

@@ -1,7 +1,6 @@
-using KillChord.Runtime.Domain;
-using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Battle;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
     ///     攻撃IDに基づいて、対応する攻撃処理のパイプラインを解決するインターフェース。

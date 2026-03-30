@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
     ///     敵の追従移動ロジック。

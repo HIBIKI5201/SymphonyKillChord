@@ -1,6 +1,6 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     public readonly ref struct DamageDTO
     {

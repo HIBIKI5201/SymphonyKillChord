@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
 using LitMotion;
 using LitMotion.Extensions;
 using UnityEngine;

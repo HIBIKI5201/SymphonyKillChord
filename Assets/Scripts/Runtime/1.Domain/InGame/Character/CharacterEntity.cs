@@ -1,6 +1,7 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     キャラクターの基本的な情報を保持するクラス。
