@@ -41,7 +41,7 @@ namespace KillChord.Runtime.View
         {
             _playback.Stop();
             _cri.cueName = string.Empty;
-            _musicVm.UpdateMusicCue(string.Empty);
+            _musicVm.ClearMusicCue();
         }
 
         private CriAtomSource _cri;

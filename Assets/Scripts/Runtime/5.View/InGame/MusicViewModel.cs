@@ -15,5 +15,10 @@ namespace KillChord.Runtime.View
 
             _cueName.Value = cueName;
         }
+
+        public void ClearMusicCue()
+        {
+            _cueName.Value = string.Empty;
+        }
     }
 }
