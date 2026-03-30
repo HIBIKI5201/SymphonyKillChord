@@ -89,7 +89,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
                     return;
                 }
-                return;
+                //return;
                 await discordBot.PushSprintChannelAsync(sprintContent);
             }
             else
