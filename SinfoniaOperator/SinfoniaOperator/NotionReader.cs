@@ -237,7 +237,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
 
         private readonly string? _notionToken;
-        private const string NOTION_API_VERSION = "2022-06-28";
+        private const string NOTION_API_VERSION = "2025-09-03";
 
         private static void ConvertBlock(StringBuilder sb, string type, JsonElement block)
         {
@@ -357,10 +357,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
             return string.Empty;
-        }
-    }
-}
-  return string.Empty;
         }
     }
 }
