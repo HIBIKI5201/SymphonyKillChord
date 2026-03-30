@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View
 
         [SerializeField] private LockOnState _lockOnState;
 
-        [SerializeField] private CameraUpdateModeEnum _updateMode;
+        [SerializeField] private UpdateModeEnum _updateMode;
 
         private CameraSystemController _controller;
         private Vector2 _input;
@@ -30,20 +30,20 @@ namespace KillChord.Runtime.View
         }
         private void FixedUpdate()
         {
-            if (_updateMode != CameraUpdateModeEnum.FixedUpdate)
+            if (_updateMode != UpdateModeEnum.FixedUpdate)
                 return;
             Tick(Time.fixedDeltaTime);
         }
         private void Update()
         {
             UpdateInput(out _input);
-            if (_updateMode != CameraUpdateModeEnum.Update)
+            if (_updateMode != UpdateModeEnum.Update)
                 return;
             Tick(Time.deltaTime);
         }
         private void LateUpdate()
         {
-            if (_updateMode != CameraUpdateModeEnum.LateUpdate)
+            if (_updateMode != UpdateModeEnum.LateUpdate)
                 return;
             Tick(Time.deltaTime);
         }

@@ -3,7 +3,7 @@ namespace KillChord.Runtime.Utility
     /// <summary>
     ///     カメラの更新モードを定義します。
     /// </summary>
-    public enum CameraUpdateModeEnum : byte
+    public enum UpdateModeEnum : byte
     {
         /// <summary> 更新を停止します。 </summary>
         Stop = 0,
