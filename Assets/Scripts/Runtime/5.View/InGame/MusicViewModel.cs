@@ -1,7 +1,7 @@
 using KillChord.Runtime.View;
 using R3;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Music
 {
     public class MusicViewModel : IMusicViewModel
     {

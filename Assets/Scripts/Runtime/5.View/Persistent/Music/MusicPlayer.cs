@@ -2,7 +2,7 @@ using CriWare;
 using R3;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Music
 {
     [RequireComponent(typeof(CriAtomSource))]
     public class MusicPlayer : MonoBehaviour
@@ -21,10 +21,9 @@ namespace KillChord.Runtime.View
         public void Awake()
         {
             _cri = GetComponent<CriAtomSource>();
-            Bind(new());
         }
 
-        public void ChangeBgm(string cueName)
+        private void ChangeBgm(string cueName)
         {
             StopBgm();
 
@@ -44,7 +43,7 @@ namespace KillChord.Runtime.View
             _playback = _cri.Play();
         }
 
-        public void StopBgm()
+        private void StopBgm()
         {
             _playback.Stop();
             _cri.cueName = string.Empty;
