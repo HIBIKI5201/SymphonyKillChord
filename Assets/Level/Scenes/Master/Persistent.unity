@@ -128,11 +128,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 358006341}
+  - component: {fileID: 358006346}
+  - component: {fileID: 358006342}
   - component: {fileID: 358006345}
   - component: {fileID: 358006344}
   - component: {fileID: 358006343}
-  - component: {fileID: 358006342}
-  - component: {fileID: 358006346}
   m_Layer: 0
   m_Name: InputBuffer
   m_TagString: Untagged
@@ -255,7 +255,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6749b87b6c4f9fb4fbc82a9cdee2681a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InputComposition
-  _playerInput: {fileID: 358006345}
   _bufferCapacity: 10
 --- !u!1 &427044744
 GameObject:
@@ -268,6 +267,7 @@ GameObject:
   - component: {fileID: 427044747}
   - component: {fileID: 427044746}
   - component: {fileID: 427044745}
+  - component: {fileID: 427044750}
   - component: {fileID: 427044748}
   - component: {fileID: 427044749}
   m_Layer: 0
@@ -374,7 +374,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -426,7 +426,21 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 11400000, guid: c0e5e04f40e627c4297f3caced9f829d, type: 2}
+  CustomBlends: {fileID: 11400000, guid: 0f6e54bbe825b324d94fee6a93d2644c, type: 2}
+--- !u!114 &427044750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 427044744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce7d42e042e4c9c4db4bde98b863e167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomListener
+  regionOnStart: {fileID: 0}
+  activateListenerOnEnable: 0
 --- !u!1 &519239619
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,6 +450,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 519239620}
+  - component: {fileID: 519239623}
   - component: {fileID: 519239621}
   - component: {fileID: 519239622}
   m_Layer: 0
@@ -443,7 +458,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &519239620
 Transform:
@@ -454,7 +469,7 @@ Transform:
   m_GameObject: {fileID: 519239619}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.37136, y: 15.2845, z: -562.00085}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -505,67 +520,18 @@ MonoBehaviour:
     - 0
   _cueName: 
   _cueSheet: 
---- !u!1 &984005580
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 984005583}
-  - component: {fileID: 984005582}
-  - component: {fileID: 984005581}
-  m_Layer: 0
-  m_Name: MusicSync
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &984005581
+--- !u!114 &519239623
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 984005580}
+  m_GameObject: {fileID: 519239619}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38b68d7f1b541ac4cb30999d5d71c871, type: 3}
+  m_Script: {fileID: 11500000, guid: e13ad88ad9853c44da4fd920e3249df8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
-  _musicSyncView: {fileID: 984005582}
-  _testCue: Cyber
-  _testBpm: 60
---- !u!114 &984005582
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 984005580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3702ab398ffa2534a8eacb53dba166e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MusicSyncView
-  _testBpm: 60
---- !u!4 &984005583
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 984005580}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.Persistent.Music.MusicPlayerInitializer
 --- !u!1 &985041024
 GameObject:
   m_ObjectHideFlags: 0
@@ -677,5 +643,4 @@ SceneRoots:
   - {fileID: 1924775718}
   - {fileID: 519239620}
   - {fileID: 358006341}
-  - {fileID: 984005583}
   - {fileID: 985041026}

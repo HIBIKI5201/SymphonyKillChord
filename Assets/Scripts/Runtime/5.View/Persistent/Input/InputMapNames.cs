@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Input
 {
     /// <summary>
     ///     UnityのInputSystemのInputMapの名前を定数で管理するクラス。

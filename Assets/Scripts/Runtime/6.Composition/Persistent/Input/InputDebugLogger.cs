@@ -1,6 +1,5 @@
-using KillChord.Runtime.Application;
 using KillChord.Runtime.Composition;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Persistent.Input;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -11,7 +10,7 @@ namespace KillChord.Runtime.View
 
         private void Start()
         {
-            BufferedInputBuffer buffer = _root.GetBufferedInputBuffer;
+            InputBufferingQueue buffer = _root.GetBufferedInputBuffer;
             buffer.OnBuffered += OnBuffered;
         }
 

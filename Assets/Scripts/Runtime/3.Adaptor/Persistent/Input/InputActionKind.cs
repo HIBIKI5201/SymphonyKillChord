@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力の種類を表す列挙型。
