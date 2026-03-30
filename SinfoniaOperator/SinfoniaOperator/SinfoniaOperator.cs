@@ -71,7 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 Console.WriteLine("[PushTaskList] 送信するタスクがありませんでした。");
                 return;
             }
-            return;
+
             await discordBot.PushTaskChannelAsync(taskContent);
         }
 
@@ -89,7 +89,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                     Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
                     return;
                 }
-                return;
                 await discordBot.PushSprintChannelAsync(sprintContent);
             }
             else
