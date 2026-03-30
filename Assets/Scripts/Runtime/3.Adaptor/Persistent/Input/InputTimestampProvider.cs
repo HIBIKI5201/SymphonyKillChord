@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力履歴用の時刻取得クラス。

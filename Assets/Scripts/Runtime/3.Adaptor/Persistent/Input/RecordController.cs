@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.Persistent.Input;
+using KillChord.Runtime.Domain.Persistent.Input;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力を履歴保存用に変換してInputBufferRecorderに渡すクラス。

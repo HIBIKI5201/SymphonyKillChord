@@ -1,7 +1,6 @@
-using UnityEngine;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Persistent.Input;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     InputActionKindをInputActionIdに変換するためのクラス。
@@ -20,7 +19,7 @@ namespace KillChord.Runtime.Adaptor
                 InputActionKind.Attack => InputActionId.Attack,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(actionKind), $"Unsupported action kind: {actionKind}")
             };
-            
+
             return actionId;
         }
     }
