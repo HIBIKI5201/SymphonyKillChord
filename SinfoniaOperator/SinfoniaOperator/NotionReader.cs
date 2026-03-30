@@ -138,23 +138,18 @@ namespace SinfoniaStudio.SinfoniaOperator
                     pageCount++;
                     Console.WriteLine($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
 
-                    var requestData = new Dictionary<string, object>
+                    var requestData = new
                     {
-                        { "page_size", 100 }
+                        start_cursor = nextCursor,
+                        page_size = 100
                     };
-                    if (!string.IsNullOrEmpty(nextCursor))
-                    {
-                        requestData.Add("start_cursor", nextCursor);
-                    }
-
                     string jsonBody = JsonSerializer.Serialize(requestData);
                     using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                     HttpResponseMessage resp = await http.PostAsync($"https://api.notion.com/v1/databases/{databaseID}/query", content);
                     if (!resp.IsSuccessStatusCode)
                     {
-                        string errorBody = await resp.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID}) - {errorBody}");
+                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID})");
                         break;
                     }
 
