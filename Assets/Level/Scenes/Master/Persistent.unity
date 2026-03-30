@@ -268,6 +268,7 @@ GameObject:
   - component: {fileID: 427044747}
   - component: {fileID: 427044746}
   - component: {fileID: 427044745}
+  - component: {fileID: 427044750}
   - component: {fileID: 427044748}
   - component: {fileID: 427044749}
   m_Layer: 0
@@ -374,7 +375,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -426,7 +427,21 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 11400000, guid: c0e5e04f40e627c4297f3caced9f829d, type: 2}
+  CustomBlends: {fileID: 11400000, guid: 0f6e54bbe825b324d94fee6a93d2644c, type: 2}
+--- !u!114 &427044750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 427044744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce7d42e042e4c9c4db4bde98b863e167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomListener
+  regionOnStart: {fileID: 0}
+  activateListenerOnEnable: 0
 --- !u!1 &519239619
 GameObject:
   m_ObjectHideFlags: 0
