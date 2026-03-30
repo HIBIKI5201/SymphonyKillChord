@@ -10,9 +10,7 @@ namespace KillChord.Runtime.View
     /// <summary>
     ///     入力イベントを受け取り、InputContextを生成して外部に通知するクラス。
     /// </summary>
-    [RequireComponent(typeof(PlayerInput))]
-    [RequireComponent(typeof(EventSystem))]
-    [RequireComponent(typeof(InputSystemUIInputModule))]
+    [RequireComponent(typeof(PlayerInput), typeof(EventSystem), typeof(InputSystemUIInputModule))]
     public class PlayerInputView : MonoBehaviour
     {
         public void Initialize(InputTimestampProvider timestampProvider)
@@ -22,8 +20,10 @@ namespace KillChord.Runtime.View
 
         // イベント群。
         public event Action<InputContext<float>> OnOptionInput;
+
         public event Action<InputContext<float>> OnSubmitInput;
         public event Action<InputContext<float>> OnCancelInput;
+
         public event Action<InputContext<float>> OnDodgeInput;
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
@@ -125,20 +125,40 @@ namespace KillChord.Runtime.View
             OnLookInput?.Invoke(inputContext);
         }
 
+        private const string OPTION_ACTION_NAME = "Option";
+        private const string SUBMIT_ACTION_NAME = "Submit";
+        private const string CANCEL_ACTION_NAME = "Cancel";
+        private const string DODGE_ACTION_NAME = "Dodge";
+        private const string ATTACK_ACTION_NAME = "Attack";
+        private const string MOVE_ACTION_NAME = "Move";
+        private const string LOOK_ACTION_NAME = "Look";
+
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
 
         private InputAction _optionAction;
+
         private InputAction _submitAction;
         private InputAction _cancelAction;
-        private InputAction _moveAction;
+
         private InputAction _dodgeAction;
         private InputAction _attackAction;
+        private InputAction _moveAction;
         private InputAction _lookAction;
 
         private void Awake()
         {
-            _playerInput = GetComponent<PlayerInput>();
+            if (TryGetComponent(out _playerInput))
+            {
+                _playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+                if (_playerInput.uiInputModule == null)
+                    { _playerInput.uiInputModule = GetComponent<InputSystemUIInputModule>(); }
+            }
+            else
+            {
+                Debug.LogError("PlayerInputコンポーネントが見つかりませんでした。");
+                return;
+            }
 
             CacheActions();
         }
@@ -172,13 +192,13 @@ namespace KillChord.Runtime.View
         {
             InputActionAsset actions = _playerInput.actions;
 
-            _optionAction = actions.FindAction($"{InputMapNames.Common}/Option", true);
-            _submitAction = actions.FindAction($"{InputMapNames.OutGame}/Submit", true);
-            _cancelAction = actions.FindAction($"{InputMapNames.OutGame}/Cancel", true);
-            _moveAction = actions.FindAction($"{InputMapNames.InGame}/Move", true);
-            _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/Dodge", true);
-            _attackAction = actions.FindAction($"{InputMapNames.InGame}/Attack", true);
-            _lookAction = actions.FindAction($"{InputMapNames.InGame}/Look", true);
+            _optionAction = actions.FindAction($"{InputMapNames.Common}/{OPTION_ACTION_NAME}", true);
+            _submitAction = actions.FindAction($"{InputMapNames.OutGame}/{SUBMIT_ACTION_NAME}", true);
+            _cancelAction = actions.FindAction($"{InputMapNames.OutGame}/{CANCEL_ACTION_NAME}", true);
+            _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/{DODGE_ACTION_NAME}", true);
+            _attackAction = actions.FindAction($"{InputMapNames.InGame}/{ATTACK_ACTION_NAME}", true);
+            _moveAction = actions.FindAction($"{InputMapNames.InGame}/{MOVE_ACTION_NAME}", true);
+            _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
         }
 
         /// <summary>
