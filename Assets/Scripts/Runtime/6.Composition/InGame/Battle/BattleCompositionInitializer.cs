@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -92,7 +93,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 attackBattleState,
                 skillController
                 );
-
 
             _playerAttackInputView.Initialize(attackController);
             _attackResultView.Bind(attackResultViewModel);

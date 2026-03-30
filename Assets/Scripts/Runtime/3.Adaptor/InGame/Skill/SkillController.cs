@@ -3,7 +3,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 
-namespace KillChord.Runtime.Adaptor.InGame.Battle
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     public class SkillController
     {
