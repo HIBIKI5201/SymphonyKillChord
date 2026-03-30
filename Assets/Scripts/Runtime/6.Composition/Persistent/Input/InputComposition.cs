@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition
     /// <summary>
     ///     入力の初期化クラス。
     /// </summary>
+    [RequireComponent(typeof(PlayerInputView))]
     public class InputComposition : MonoBehaviour
     {
         public PlayerInputView GetInputView => _playerInputView;
