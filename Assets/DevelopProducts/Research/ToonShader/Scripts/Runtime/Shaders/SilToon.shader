@@ -70,6 +70,10 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex vert
                 #pragma fragment frag
+                #pragma multi_compile _ FADE_ON
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
 
             ENDHLSL
@@ -85,6 +89,10 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex vert
                 #pragma fragment frag
+                #pragma multi_compile _ FADE_ON
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
                 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
 
             ENDHLSL
