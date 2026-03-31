@@ -10,7 +10,7 @@ namespace KillChord.Runtime.InfraStructure
     /// </summary>
     public class ConfirmedDamage : IAttackStep
     {
-        public void Execute(AttackContext context)
+        public void Execute(ref AttackContext context)
         {
             if (context.CurrentDamage.Value < _confirmedDamage)
             {
