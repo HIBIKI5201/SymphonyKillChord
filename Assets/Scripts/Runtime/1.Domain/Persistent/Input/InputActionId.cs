@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Persistent.Input
 {
     /// <summary>
     ///     入力のアクションを識別するためのID。
@@ -13,5 +13,6 @@ namespace KillChord.Runtime.Domain
         Move = 100,
         Dodge = 101,
         Attack = 102,
+        Look = 103,
     }
 }

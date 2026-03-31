@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力の種類を表す列挙型。
@@ -14,5 +12,6 @@ namespace KillChord.Runtime.Adaptor
         Move = 100,
         Dodge = 101,
         Attack = 102,
+        Look = 103,
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine.InputSystem;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力1件分の共通データ。
