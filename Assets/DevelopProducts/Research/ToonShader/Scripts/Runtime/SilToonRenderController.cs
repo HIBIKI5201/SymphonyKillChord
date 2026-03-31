@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace DevelopProducts.ToonShader
 {
+    [ExecuteInEditMode]
     public sealed class SilToonRenderController : MonoBehaviour
     {
         [SerializeField] private Material[] _materials;
