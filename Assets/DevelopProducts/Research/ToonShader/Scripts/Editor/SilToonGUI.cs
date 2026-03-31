@@ -8,6 +8,7 @@ namespace DevelopProducts.ToonShader
     {
         // Foldout states (static to persist across selections)
         static bool showBase = true;
+        static bool showFade = true;
         static bool showNormal = true;
         static bool showFresnel = true;
         static bool showOutline = true;
@@ -89,6 +90,10 @@ namespace DevelopProducts.ToonShader
                     EditorGUI.indentLevel--;
                 }
 
+            });
+
+            DrawSection("Fade", ref showFade, () =>
+            {
                 materialEditor.ShaderProperty(_fadeAlpha, new GUIContent("Fade Alpha", "アルファフェードの強度 (0-1)"));
                 materialEditor.ShaderProperty(_fadeOn, new GUIContent("Fade On", "アルファフェードを有効化"));
             });
