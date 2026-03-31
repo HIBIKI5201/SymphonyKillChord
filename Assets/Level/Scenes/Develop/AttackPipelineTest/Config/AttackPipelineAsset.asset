@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: AttackPipelineAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AttackPipelineAsset
   _attackSteps:
-  - rid: 5427475834945143013
+  - rid: 9167030446909030771
   references:
     version: 2
     RefIds:
-    - rid: 5427475834945143013
-      type: {class: CriticalStep, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+    - rid: 9167030446909030771
+      type: {class: CriticalStep, ns: KillChord.Runtime.InfraStructure.InGame.Battle, asm: KillChord.Structure}
       data:
         _criticalChance: 0.5
-        _criticalMultiplier: 2
+        _criticalMultiplier: 1

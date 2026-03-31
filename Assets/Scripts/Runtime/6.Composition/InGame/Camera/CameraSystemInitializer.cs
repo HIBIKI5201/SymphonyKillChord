@@ -1,9 +1,10 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Adaptor.InGame.Camera;
+using KillChord.Runtime.Application.InGame.Camera;
+using KillChord.Runtime.Composition.InGame.Camera;
+using KillChord.Runtime.Domain.InGame.Camera;
+using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
-using KillChord.Runtime.View;
-using KillChord.Structure;
+using KillChord.Runtime.View.InGame.Camera;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition

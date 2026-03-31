@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力履歴用の時刻取得クラス。
@@ -10,7 +10,6 @@ namespace KillChord.Runtime.Adaptor
         public float GetCurrentTimestamp()
         {
             return Time.unscaledTime;
-            //後で、CRIの時間取得に変更する予定。
         }
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Persistent.Input
 {
     /// <summary>
     ///     入力のアクションを識別するためのID。
