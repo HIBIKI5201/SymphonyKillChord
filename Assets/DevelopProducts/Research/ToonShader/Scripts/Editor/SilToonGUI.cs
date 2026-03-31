@@ -44,6 +44,9 @@ namespace DevelopProducts.ToonShader
             MaterialProperty isForFace = Find("_IsForFace", props);
             MaterialProperty faceUp = Find("_FaceUp", props);
 
+            MaterialProperty _fadeAlpha = Find("_FadeAlpha", props);
+            MaterialProperty _fadeOn = Find("_FadeOn", props);
+
             MaterialProperty normalMap = Find("_NormalMap", props);
             MaterialProperty normalIntensity = Find("_NormalMapIntensity", props);
 
@@ -85,6 +88,9 @@ namespace DevelopProducts.ToonShader
                     materialEditor.ShaderProperty(faceUp, new GUIContent("Face Up Direction", "顔の上方向ベクトル (ワールド空間)"));
                     EditorGUI.indentLevel--;
                 }
+
+                materialEditor.ShaderProperty(_fadeAlpha, new GUIContent("Fade Alpha", "アルファフェードの強度 (0-1)"));
+                materialEditor.ShaderProperty(_fadeOn, new GUIContent("Fade On", "アルファフェードを有効化"));
             });
 
             DrawSection("Normal Mapping", ref showNormal, () =>
