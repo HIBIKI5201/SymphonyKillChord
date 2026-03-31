@@ -27,6 +27,9 @@ namespace DevelopProducts.ToonShader
 
         public void Update(in HeadNFaceDTO dto)
         {
+            if (_head == null)
+                return;
+
             Vector3 position = _head.position + _head.rotation * _offset;
             Vector3 headUp = _head.rotation * AxisToVector3(_faceUp);
 
