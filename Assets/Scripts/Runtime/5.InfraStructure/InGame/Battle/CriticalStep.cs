@@ -9,7 +9,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     /// </summary>
     public class CriticalStep : IAttackStep
     {
-        public void Execute(AttackContext context)
+        public void Execute(ref AttackContext context)
         {
             if (Random.value <= _criticalChance)
             {
