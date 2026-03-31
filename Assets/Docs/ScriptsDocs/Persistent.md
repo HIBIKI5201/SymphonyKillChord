@@ -2,6 +2,12 @@
 
 Persistent は、シーンの切り替えに関わらず常に存在し、ゲーム全体で共有される機能（入力バッファリング、シーン遷移、音楽再生など）を担当します。
 
+## モジュール詳細
+
+- **[Persistent-Input](./Modules/Persistent-Input.md)**: 入力バッファリング、Unity Input System の統合。
+- **[Persistent-Music](./Modules/Persistent-Music.md)**: シーンを跨ぐ BGM 再生とリズム管理。
+- **[Persistent-SceneManagement](./Modules/Persistent-SceneManagement.md)**: 暗転演出を伴うシーン遷移ロジック。
+
 ## レイヤー構造
 
 ### 1. Domain
