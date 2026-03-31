@@ -31,6 +31,9 @@ namespace DevelopProducts.ToonShader
         // Update is called once per frame
         private void Update()
         {
+            if (_headNFace == null) return;
+            if (_materials == null || _materials.Length == 0) return;
+
             _headNFace.Update(new(
                 _materials,
                 _idHeadPosition,
@@ -39,6 +42,7 @@ namespace DevelopProducts.ToonShader
         }
         private void OnDrawGizmos()
         {
+            if (_headNFace == null) return;
             _headNFace.OnDrawGizmos();
         }
     }
