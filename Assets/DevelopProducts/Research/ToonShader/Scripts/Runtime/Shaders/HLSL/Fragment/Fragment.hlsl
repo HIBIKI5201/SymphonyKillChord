@@ -1,3 +1,4 @@
+
 #ifndef FRAGMENT_INCLUDED
 #define FRAGMENT_INCLUDED
 
@@ -7,6 +8,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
 
 struct Attributes
 {
@@ -24,11 +26,14 @@ struct Varyings
     half3 normalWS : TEXCOORD2; 
     half3 tangentWS : TEXCOORD3;
     half3 bitangentWS : TEXCOORD4;
+    float4 screenPos : TEXCOORD5;
 };
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 float4 _BaseMap_ST;
+
+float _FadeAlpha;
 
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
@@ -60,6 +65,7 @@ Varyings vert(Attributes IN)
         _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
 
     OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
+    OUT.screenPos = ComputeScreenPos(OUT.positionHCS);
     
     
     OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
@@ -99,6 +105,10 @@ half4 frag(Varyings IN) : SV_Target
     color += rimLightBack * _FresnelBackRimLight;
     color += rimLightFront * _FresnelFrontRimLight;
     
+#ifdef FADE_ON
+    float2 screenPixel = (IN.screenPos.xy / IN.screenPos.w) * _ScreenParams.xy / 2;
+    clip(_FadeAlpha - BayerDither(screenPixel) - 0.0001);
+#endif    
     return half4(color, 1.0h) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
 }
 #endif
