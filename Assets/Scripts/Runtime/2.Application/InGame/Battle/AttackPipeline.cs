@@ -39,7 +39,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         {
             for (int i = 0; i < _attackSteps.Length; i++)
             {
-                _attackSteps[i].Execute(context);
+                _attackSteps[i].Execute(ref context);
             }
 
             return new AttackResult(context.CurrentDamage, context.IsCritical);
