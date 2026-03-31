@@ -42,11 +42,7 @@ namespace KillChord.Runtime.Composition
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
 
-
-
-            CharacterFactory characterFactory = new CharacterFactory();
-
-            CharacterEntity player = characterFactory.Create(_playerData);
+            CharacterEntity player = CharacterFactory.Create(_playerData);
             _enemyTestSpawner.SetTargetEntity(player);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
