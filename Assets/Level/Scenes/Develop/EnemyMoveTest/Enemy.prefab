@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 2601078670896065214}
   - component: {fileID: 6024709665745219317}
   - component: {fileID: 3385280616353316531}
-  - component: {fileID: 7593645493748132616}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -130,9 +129,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535ba71651c02f2469918f19291b4862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.View.EnemyMoveDebugInitializer
+  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
   _moveData: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
+  _encounterMusicData: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
+  _battleMusicData: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
   _view: {fileID: 6024709665745219317}
-  _navigationAgent: {fileID: 7593645493748132616}
+  _navigationAgent: {fileID: 0}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,15 +170,3 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &7593645493748132616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1465007639519197220}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cfae661d35e3954da115067769e893c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.NavMeshEnemyAgent

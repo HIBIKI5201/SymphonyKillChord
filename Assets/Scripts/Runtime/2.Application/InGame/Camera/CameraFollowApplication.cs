@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Camera;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Camera
 {
     public sealed class CameraFollowApplication
     {

@@ -1,9 +1,9 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Camera;
 using UnityEngine;
 
 #if UNITY_EDITOR
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Camera
 {
     public sealed class CameraSystemParameterDebug : MonoBehaviour
     {

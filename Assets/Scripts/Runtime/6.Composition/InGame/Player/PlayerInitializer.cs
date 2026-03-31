@@ -1,10 +1,17 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Player;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.Utility;
-using KillChord.Runtime.View;
-using KillChord.Structure;
+using KillChord.Runtime.View.InGame.Player;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,6 +34,9 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
+
+        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+
         private void Awake()
         {
             if (_player == null)
@@ -37,6 +47,7 @@ namespace KillChord.Runtime.Composition
             CharacterFactory characterFactory = new CharacterFactory();
 
             CharacterEntity player = characterFactory.Create(_playerData);
+            _enemyTestSpawner.SetTargetEntity(player);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
             {

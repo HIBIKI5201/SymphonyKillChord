@@ -1,4 +1,6 @@
 using Notion.Client;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,49 +123,109 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <returns></returns>
         public async Task<List<IWikiDatabase>> GetDatabaseAsync(string databaseID)
         {
-            try
+            databaseID = databaseID.Trim();
+            List<IWikiDatabase> allResults = new();
+            string? nextCursor = null;
+            int pageCount = 0;
+
+            using HttpClient http = new();
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
+            http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
+
+            Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
+
+            do
             {
-                Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
-                NotionClient notion = NotionClientFactory.Create(new ClientOptions
-                {
-                    AuthToken = _notionToken,
-                });
-
-                List<IWikiDatabase> allResults = new();
-                string? nextCursor = null;
-                int pageCount = 0;
-
-                do
+                try
                 {
                     pageCount++;
                     Console.WriteLine($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
-                    DatabaseQueryResponse query = await notion.Databases.QueryAsync(
-                        databaseID,
-                        new DatabasesQueryParameters { StartCursor = nextCursor }
-                    );
 
-                    allResults.AddRange(query.Results);
-                    nextCursor = query.HasMore ? query.NextCursor : null;
-                    Console.WriteLine($"[NotionReader] {query.Results.Count} 件のアイテムを取得しました (累計: {allResults.Count} 件)");
+                    var requestData = new Dictionary<string, object>
+                    {
+                        { "page_size", 100 }
+                    };
+                    if (!string.IsNullOrEmpty(nextCursor))
+                    {
+                        requestData.Add("start_cursor", nextCursor);
+                    }
 
-                } while (!string.IsNullOrEmpty(nextCursor));
+                    string jsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
+                    using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-                if (allResults.Count == 0)
-                {
-                    Console.WriteLine($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
+                    HttpResponseMessage resp = await http.PostAsync($"https://api.notion.com/v1/databases/{databaseID}/query", content);
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        string errorBody = await resp.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID}) - {errorBody}");
+                        break;
+                    }
+
+                    string rawJson = await resp.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(rawJson);
+                    JsonElement root = doc.RootElement;
+
+                    if (root.TryGetProperty("results", out JsonElement results))
+                    {
+                        foreach (JsonElement pageEl in results.EnumerateArray())
+                        {
+                            try
+                            {
+                                // ページ単位でデシリアライズを試みる。
+                                string singlePageJson = pageEl.GetRawText();
+                                var jo = Newtonsoft.Json.Linq.JObject.Parse(singlePageJson);
+
+                                // 未知のアイコン形式（custom_emoji等）は、ライブラリのデシリアライザが対応していないため、
+                                // 事前にnullにしておくことでデシリアライズの失敗を防ぐ。
+                                var icon = jo["icon"];
+                                if (icon != null && icon.Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                                {
+                                    var type = icon["type"]?.ToString();
+                                    if (type != "emoji" && type != "external" && type != "file")
+                                    {
+                                        jo["icon"] = null;
+                                    }
+                                }
+
+                                var page = jo.ToObject<Page>();
+                                if (page != null)
+                                {
+                                    allResults.Add((IWikiDatabase)page);
+                                }
+                            }
+                            catch (Exception innerEx)
+                            {
+                                // それでもパースに失敗した場合はスキップ。
+                                Console.WriteLine($"[NotionReader] ページの取得をスキップしました (エラー: {innerEx.Message})");
+                            }
+                        }
+                    }
+
+                    nextCursor = root.TryGetProperty("next_cursor", out var nextCursorEl) && nextCursorEl.ValueKind == JsonValueKind.String
+                        ? nextCursorEl.GetString()
+                        : null;
+
+                    Console.WriteLine($"[NotionReader] {allResults.Count} 件のアイテムを取得済み");
+
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
+                    Console.WriteLine($"[NotionReader] データベース取得中に重大なエラーが発生しました: {ex.Message}");
+                    break;
                 }
 
-                return allResults;
-            }
-            catch (Exception ex)
+            } while (!string.IsNullOrEmpty(nextCursor));
+
+            if (allResults.Count == 0)
             {
-                Console.WriteLine($"[NotionReader] データベース取得中にエラーが発生しました: {ex.Message}");
-                return new List<IWikiDatabase>();
+                Console.WriteLine($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
             }
+            else
+            {
+                Console.WriteLine($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
+            }
+
+            return allResults;
         }
 
         /// <summary>
@@ -201,7 +263,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
 
         private readonly string? _notionToken;
-        private const string NOTION_API_VERSION = "2025-09-03";
+        private const string NOTION_API_VERSION = "2022-06-28";
 
         private static void ConvertBlock(StringBuilder sb, string type, JsonElement block)
         {

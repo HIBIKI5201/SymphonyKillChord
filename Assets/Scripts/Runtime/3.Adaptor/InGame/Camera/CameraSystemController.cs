@@ -1,7 +1,7 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Camera;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Camera
 {
     public sealed class CameraSystemController
     {
