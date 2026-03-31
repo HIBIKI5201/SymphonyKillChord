@@ -3,6 +3,9 @@ using R3;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     HUDの表示状態を管理するViewModelクラス。
+    /// </summary>
     public class IngameHudViewModel : IIngameHudViewModel
     {
         public ReadOnlyReactiveProperty<float> HealthRate => _healthRate;

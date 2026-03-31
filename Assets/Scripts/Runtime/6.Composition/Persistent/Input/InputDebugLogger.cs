@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     入力バッファの内容をデバッグ出力するクラス。
+    /// </summary>
     public class InputDebugLogger : MonoBehaviour
     {
         [SerializeField] private InputComposition _root;

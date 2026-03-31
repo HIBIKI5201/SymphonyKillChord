@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     ゲーム中のHUD表示を行うViewクラス。
+    /// </summary>
     public class IngameHudView : MonoBehaviour
     {
         [SerializeField] private Image _healthBarImage;

@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステムのパラメータをデバッグ表示するためのクラス。
+    /// </summary>
     public sealed class CameraSystemParameterDebug : MonoBehaviour
     {
         [SerializeField] private CameraSystemParameter _parameter;

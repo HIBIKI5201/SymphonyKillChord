@@ -2,6 +2,9 @@ using KillChord.Runtime.Domain.InGame.Character;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
+    /// <summary>
+    ///     ダメージ情報をViewModelへ伝えるためのプレゼンタークラス。
+    /// </summary>
     public sealed class DamagePresenter
     {
         public DamagePresenter(IViewModelDamage viewModel, CharacterEntity characterEntity)

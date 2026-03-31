@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Music
 {
+    /// <summary>
+    ///     音楽再生の実装を行うViewクラス。
+    /// </summary>
     [RequireComponent(typeof(CriAtomSource))]
     public class MusicPlayer : MonoBehaviour
     {

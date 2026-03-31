@@ -17,6 +17,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    /// <summary>
+    ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class PlayerInitializer : MonoBehaviour
     {

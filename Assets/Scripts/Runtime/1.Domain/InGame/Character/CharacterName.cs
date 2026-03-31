@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Character
 {
+    /// <summary>
+    ///     キャラクターの名前を表す値オブジェクト。
+    /// </summary>
     public readonly struct CharacterName
     {
         public CharacterName(string value)

@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Camera
 {
+    /// <summary>
+    ///     カメラの挙動に関する詳細なパラメータを保持するドメインクラス。
+    /// </summary>
     [System.Serializable]
     public sealed class CameraParameter
     {

@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Runtime.Domain.Persistent.Music
 {
+    /// <summary>
+    ///     音楽の拍（リズム）に関する情報を表す構造体。
+    /// </summary>
     [Serializable]
     public readonly struct Beat
     {

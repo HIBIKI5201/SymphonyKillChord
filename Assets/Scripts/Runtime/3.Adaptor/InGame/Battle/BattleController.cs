@@ -4,6 +4,9 @@ using KillChord.Runtime.Domain.InGame.Battle;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
+    /// <summary>
+    ///     戦闘（攻撃やダメージ適用など）の制御を行うコントローラークラス。
+    /// </summary>
     public sealed class BattleController
     {
         public BattleController(

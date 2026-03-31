@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
 {
+    /// <summary>
+    ///     カメラの回転（注視点制御など）を担当するクラス。
+    /// </summary>
     public sealed class CameraRotationApplication
     {
         public CameraRotationApplication(CameraSystemParameter parameter)

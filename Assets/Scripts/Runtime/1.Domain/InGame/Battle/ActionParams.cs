@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
+    /// <summary>
+    ///     バトルアクションの種類やタイミングを保持する構造体。
+    /// </summary>
     public readonly struct ActionParams
     {
         public ActionParams(BattleActionType actionType, int beatType)

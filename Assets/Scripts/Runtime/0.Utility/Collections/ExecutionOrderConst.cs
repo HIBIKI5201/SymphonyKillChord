@@ -1,5 +1,8 @@
 namespace KillChord.Runtime.Utility
 {
+    /// <summary>
+    ///     スクリプトの実行順序を管理する定数クラス。
+    /// </summary>
     public static class ExecutionOrderConst
     {
         /// <summary>

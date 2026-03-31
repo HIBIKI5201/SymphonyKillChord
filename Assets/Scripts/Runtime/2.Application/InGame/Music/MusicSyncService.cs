@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
+    /// <summary>
+    ///     音楽同期のタイミング管理やアクション実行を行うサービス。
+    /// </summary>
     public class MusicSyncService : IMusicSyncService
     {
         private const int BUFFER_SIZE = 64;

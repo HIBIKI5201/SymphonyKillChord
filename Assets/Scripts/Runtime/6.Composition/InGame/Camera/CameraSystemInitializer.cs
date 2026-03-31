@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    /// <summary>
+    ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class CameraSystemInitializer : MonoBehaviour
     {

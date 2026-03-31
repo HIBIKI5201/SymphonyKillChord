@@ -3,6 +3,9 @@ using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
+    /// <summary>
+    ///     音楽との同期タイミングの更新を制御するコントローラークラス。
+    /// </summary>
     public class MusicSyncController : IDisposable
     {
         private readonly IMusicSyncViewModel _musicSyncViewModel;

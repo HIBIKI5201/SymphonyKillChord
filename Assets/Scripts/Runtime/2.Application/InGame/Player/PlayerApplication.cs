@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動や回避といったアクションを管理するアプリケーション層のクラス。
+    /// </summary>
     public sealed class PlayerApplication
     {
         public PlayerApplication(PlayerMovement movement, PlayerDodgeMovementApplication dodge)
