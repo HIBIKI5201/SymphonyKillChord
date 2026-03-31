@@ -9,6 +9,9 @@ Shader "Custom/SilToon/Base"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+         [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
+        _FadeAlpha("Fade Alpha",Range(0,1)) = 0
+
         [Headedr(Normal)]
         [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
@@ -21,7 +24,7 @@ Shader "Custom/SilToon/Base"
 
         [Header(OutLine)]
         _OutlineColor("Color",Color) = (1, 1, 1, 1)
-        _ZOffset("Z Offset",Range(0,0.01)) = 0
+        _ZOffset("Z Offset",Range(0,0.1)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
