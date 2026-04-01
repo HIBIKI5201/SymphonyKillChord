@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの操作要求をアプリケーション層へ仲介するコントローラークラス。
+    /// </summary>
     public class PlayerController
     {
         public PlayerController(PlayerApplication playerApplication)

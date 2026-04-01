@@ -4,6 +4,9 @@ using KillChord.Runtime.Adaptor;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     音楽同期の状態を管理するViewModelクラス。
+    /// </summary>
     public class MusicSyncViewModel : IMusicSyncViewModel
     {
         public event Action OnUpdate;

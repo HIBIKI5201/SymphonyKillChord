@@ -6,16 +6,16 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// <summary>
     ///     ScriptableObjectからDomainを生成する。
     /// </summary>
-    public class EnemyFactory
+    public static class EnemyFactory
     {
-        public EnemyMoveSpec CreateEnemyMoveSpec(EnemyMoveData enemyMoveData)
+        public static EnemyMoveSpec CreateEnemyMoveSpec(EnemyMoveData enemyMoveData)
         {
             return new EnemyMoveSpec(
                 new MoveSpeed(enemyMoveData.MoveSpeed),
                 new AttackRange(enemyMoveData.AttackRange));
         }
 
-        public EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)
+        public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)
         {
             return new EnemyMusicSpec(
                 enemyMusicData.BarFlag,
@@ -23,7 +23,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 enemyMusicData.TargetBeat);
         }
 
-        public EnemyAttackMusicSpec CreateEnemyAttackMusicSpec(
+        public static EnemyAttackMusicSpec CreateEnemyAttackMusicSpec(
             EnemyMusicData encounterData,
             EnemyMusicData battleMusicData)
         {

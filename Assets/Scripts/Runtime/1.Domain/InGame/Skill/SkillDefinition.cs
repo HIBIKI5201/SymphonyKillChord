@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
 {
+    /// <summary>
+    ///     スキルの定義（条件や効果、演出）を管理するドメインクラス。
+    /// </summary>
     public class SkillDefinition : IEquatable<SkillDefinition>
     {
         public readonly SkillId Id;

@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動パラメータをデバッグ表示するためのクラス。
+    /// </summary>
     public sealed class PlayerMoveParameterDebug : MonoBehaviour
     {
         [SerializeField] private PlayerMoveParameter _playerMoveParameter;

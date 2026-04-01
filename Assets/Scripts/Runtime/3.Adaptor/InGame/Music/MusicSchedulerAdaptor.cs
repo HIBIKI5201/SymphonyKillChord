@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
+    /// <summary>
+    ///     音楽同期に合わせたアクションのスケジュールを管理するアダプタークラス。
+    /// </summary>
     public class MusicSchedulerAdaptor : IMusicActionScheduler
     {
         public MusicSchedulerAdaptor(IMusicSyncViewModel syncViewModel, IMusicSyncService musicSyncService)

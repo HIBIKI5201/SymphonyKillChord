@@ -2,6 +2,11 @@
 
 Utility は、プロジェクト全体で利用される汎用的なクラスやデータ、定数を担当します。
 
+## モジュール詳細
+
+- **[Utility-Collections](./Modules/Utility-Collections.md)**: `PriorityQueue` や `RingBuffer` などの汎用データ構造。
+- **[Utility-Constant](./Modules/Utility-Constant.md)**: パス、実行順序、共通の列挙型などの定数定義。
+
 ## レイヤー構造
 
 ### 0. Utility (直下)

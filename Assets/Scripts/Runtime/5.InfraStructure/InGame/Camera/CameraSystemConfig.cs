@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Structure.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステムの各種パラメータを設定するためのScriptableObject。
+    /// </summary>
     [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject
     {

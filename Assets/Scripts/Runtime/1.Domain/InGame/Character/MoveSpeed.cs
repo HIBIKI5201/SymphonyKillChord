@@ -1,5 +1,8 @@
 namespace KillChord.Runtime.Domain.InGame.Character
 {
+    /// <summary>
+    ///     移動速度を表す値オブジェクト。
+    /// </summary>
     public readonly struct MoveSpeed
     {
         public MoveSpeed(float value)
