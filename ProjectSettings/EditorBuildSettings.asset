@@ -5,13 +5,17 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/DevelopProducts/Mocks/MusicSyncMock/Scene/MusicSyncMock.unity
-    guid: 94c39c902d6ea17489b29b49385982f1
   - enabled: 1
-    path: Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scenes/MusicBattle_Mock_Master.unity
-    guid: 23cdd5404d0331741aeec1b788beea54
+    path: Assets/Level/Scenes/Master/Persistent.unity
+    guid: 1437f6d8b120a3e4c922d3cc9ada0344
+  - enabled: 1
+    path: Assets/Level/Scenes/Master/OutGame.unity
+    guid: fce827ee263c86e4eb5c5afade95533a
+  - enabled: 1
+    path: Assets/Level/Scenes/Master/InGame.unity
+    guid: c97fd7b35eef27540892b9e7a17207f3
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 4b47fc203f3092747a5ed8112cbdab7c, type: 2}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: bd44690c1e9a90641b7c08168a1fcc15, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -1,8 +1,7 @@
-Shader "Custom/SilToon"
+Shader "Custom/SilToon/Base"
 {
     Properties
     {
-        // [Header(Fragment)}
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
@@ -10,8 +9,11 @@ Shader "Custom/SilToon"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+         [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
+        _FadeAlpha("Fade Alpha",Range(0,1)) = 0
+
         [Headedr(Normal)]
-        _NormalMap("Normal Map", 2D) = "black"{}
+        [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
 
@@ -22,7 +24,7 @@ Shader "Custom/SilToon"
 
         [Header(OutLine)]
         _OutlineColor("Color",Color) = (1, 1, 1, 1)
-        _ZOffset("Z Offset",Range(0,0.01)) = 0
+        _ZOffset("Z Offset",Range(0,0.1)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
@@ -31,6 +33,20 @@ Shader "Custom/SilToon"
         _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
         _PerspectiveRemovalRadius("Radius",Float) = 1
         _Head("HeadPosition", Vector,3) = (0,0,0)
+
+        [Header(RenderState)]
+        
+        [IntRange]
+        _StencilRef ("Stencil ID", Range(0, 255)) = 1
+        
+        [Enum(UnityEngine.Rendering.CompareFunction)]
+        _StencilComp ("Stencil Comp", Float) = 8
+
+        [Enum(UnityEngine.Rendering.StencilOp)] 
+        _StencilPass ("Stencil Pass Op", Float) = 0
+
+        [Enum(UnityEngine.Rendering.StencilOp)] 
+        _StencilFail ("Stencil Fail Op", Float) = 0
     }
 
     SubShader
@@ -40,14 +56,28 @@ Shader "Custom/SilToon"
         Pass
         {
             Name "MAIN"
-            Tags { "LightMode" = "UniversalForward" } 
+            Tags { "LightMode" = "UniversalForwardOnly" } 
             Cull Back
+
+            Stencil{
+                Ref [_StencilRef]
+
+                Comp [_StencilComp] //Hair:Always, Eye:Always, EyeThrouth:Equal
+                Pass [_StencilPass] //Hair:Keep, Eye:Replace, EyeThrouth: Zero Keep
+                Fail [_StencilFail] //Hair:Zero, Eye:Keep, EyeThrouth: Keep
+
+                ZFail Keep
+            }
 
             HLSLPROGRAM
 
-            #pragma vertex vert
-            #pragma fragment frag
-            #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
+                #pragma vertex vert
+                #pragma fragment frag
+                #pragma multi_compile _ FADE_ON
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
+                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
 
             ENDHLSL
         }
@@ -59,9 +89,14 @@ Shader "Custom/SilToon"
             Cull Front
 
             HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
+
+                #pragma vertex vert
+                #pragma fragment frag
+                #pragma multi_compile _ FADE_ON
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
+                #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
 
             ENDHLSL
         }
@@ -75,13 +110,15 @@ Shader "Custom/SilToon"
             ColorMask 0
 
             HLSLPROGRAM
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+                #pragma vertex ShadowPassVertex
+                #pragma fragment ShadowPassFragment
+
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+                #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
 
             ENDHLSL
         }
     }
+    CustomEditor "DevelopProducts.ToonShader.SilToonGUI"
 }
