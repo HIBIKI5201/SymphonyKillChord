@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステム全体の更新ロジックを統合して管理するアプリケーション層のクラス。
+    /// </summary>
     public sealed class CameraSystemApplication
     {
         public CameraSystemApplication(

@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
 {
+    /// <summary>
+    ///     カメラのフリー視点での回転制御を担当するクラス。
+    /// </summary>
     public sealed class CameraBoneFreeLookRotationApplication
     {
         public CameraBoneFreeLookRotationApplication(CameraSystemParameter parameter)

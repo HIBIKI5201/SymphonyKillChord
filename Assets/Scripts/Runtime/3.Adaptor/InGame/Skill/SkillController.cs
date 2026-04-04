@@ -5,6 +5,9 @@ using KillChord.Runtime.Domain.InGame.Skill;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
+    /// <summary>
+    ///     スキルの発動条件の判定や実行を制御するコントローラークラス。
+    /// </summary>
     public class SkillController
     {
         public SkillController(

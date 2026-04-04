@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動計算を行うクラス。
+    /// </summary>
     public sealed class PlayerMovement
     {
         public PlayerMovement(PlayerMoveParameter parameter)

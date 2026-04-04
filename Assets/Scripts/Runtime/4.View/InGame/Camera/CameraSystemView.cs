@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステムの挙動を管理するViewクラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {

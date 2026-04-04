@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.Music
 {
+    /// <summary>
+    ///     音楽再生機能の初期化を行うクラス。
+    /// </summary>
     [RequireComponent(typeof(MusicPlayer))]
     public class MusicPlayerInitializer : MonoBehaviour
     {

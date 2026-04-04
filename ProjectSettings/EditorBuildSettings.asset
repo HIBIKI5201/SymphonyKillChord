@@ -15,6 +15,7 @@ EditorBuildSettings:
     path: Assets/Level/Scenes/Master/InGame.unity
     guid: c97fd7b35eef27540892b9e7a17207f3
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 51c1528388a853c408b26abbaed86a91, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 4b47fc203f3092747a5ed8112cbdab7c, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: bd44690c1e9a90641b7c08168a1fcc15, type: 3}
