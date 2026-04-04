@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動や回避に関する設定値を保持するScriptableObject。
+    /// </summary>
     [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "KillChord/InGame/PlayerConfig")]
     public sealed class PlayerConfig : ScriptableObject
     {

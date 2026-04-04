@@ -3,6 +3,9 @@ using KillChord.Runtime.Domain.InGame.Character;
 
 namespace KillChord.Runtime.Application.InGame.Battle
 {
+    /// <summary>
+    ///     戦闘アクションの実行を管理するアプリケーション層のクラス。
+    /// </summary>
     public sealed class BattleApplication
     {
         public BattleApplication(

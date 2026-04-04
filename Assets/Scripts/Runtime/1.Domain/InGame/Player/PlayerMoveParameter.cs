@@ -4,6 +4,9 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの移動に関するパラメータを保持するドメインクラス。
+    /// </summary>
     [Serializable]
     public sealed class PlayerMoveParameter
     {

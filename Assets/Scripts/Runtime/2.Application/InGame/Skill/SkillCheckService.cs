@@ -4,6 +4,9 @@ using KillChord.Runtime.Domain.InGame.Skill;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
+    /// <summary>
+    ///     入力履歴に基づいて発動可能なスキルを判定するサービス。
+    /// </summary>
     public class SkillCheckService
     {
         public static bool TryCheckSkills(

@@ -3,6 +3,9 @@ using System.Threading;
 
 namespace KillChord.Runtime.Domain.InGame.Music
 {
+    /// <summary>
+    ///     スケジュールされたアクションとそのキャンセル情報を保持する構造体。
+    /// </summary>
     public readonly struct ScheduledAction
     {
         public ScheduledAction(Action action, CancellationToken ct)

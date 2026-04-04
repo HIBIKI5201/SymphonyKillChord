@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの見た目や制御を管理するViewクラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
     public sealed class PlayerView : MonoBehaviour, IDamageable
     {

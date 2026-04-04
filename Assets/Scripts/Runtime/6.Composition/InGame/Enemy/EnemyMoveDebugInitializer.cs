@@ -37,15 +37,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             IMusicSyncService musicSyncService
             )
         {
-            // Factory
-            CharacterFactory characterFactory = new CharacterFactory();
-            EnemyFactory factory = new EnemyFactory();
-
-            CharacterEntity enemyEntity = characterFactory.Create(_enemyData);
+            CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
 
             // Domain生成
-            EnemyMoveSpec spec = factory.CreateEnemyMoveSpec(_moveData);
-            EnemyAttackMusicSpec attackMusicSpec = factory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
+            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
+            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
 
             Dictionary<AttackId, AttackPipeline> attackPipelines = new Dictionary<AttackId, AttackPipeline>
             {

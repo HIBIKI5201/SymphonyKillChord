@@ -59,11 +59,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-
-            CharacterFactory characterFactory = new CharacterFactory();
-
-            CharacterEntity player = characterFactory.Create(_playerData);
-            CharacterEntity enemy = characterFactory.Create(_enemyData);
+            CharacterEntity player = CharacterFactory.Create(_playerData);
+            CharacterEntity enemy = CharacterFactory.Create(_enemyData);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
             {

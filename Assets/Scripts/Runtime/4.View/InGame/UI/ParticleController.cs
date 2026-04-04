@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     パーティクルエフェクトの再生を管理するシングルトンクラス。
+    /// </summary>
     public class ParticleController : MonoBehaviour
     {
         #region パブリックプロパティ

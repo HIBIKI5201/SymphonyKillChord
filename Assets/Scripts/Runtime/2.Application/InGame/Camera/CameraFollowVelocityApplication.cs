@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application
 {
+    /// <summary>
+    ///     追従対象の速度を計算する構造体。
+    /// </summary>
     public struct CameraFollowVelocityApplication
     {
         public Vector3 UpdateFollowVelocity(in Vector3 currentFollowPosition, float deltaTime)

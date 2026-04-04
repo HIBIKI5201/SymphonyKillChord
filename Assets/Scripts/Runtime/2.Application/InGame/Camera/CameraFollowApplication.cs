@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
 {
+    /// <summary>
+    ///     カメラの追従移動の制御を担当するクラス。
+    /// </summary>
     public sealed class CameraFollowApplication
     {
         public CameraFollowApplication(CameraSystemParameter parameter)

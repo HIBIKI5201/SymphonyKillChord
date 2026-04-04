@@ -9,14 +9,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     /// <summary>
     ///     CharacterDataからCharacterEntityを生成するクラス。
     /// </summary>
-    public sealed class CharacterFactory
+    public static class CharacterFactory
     {
         /// <summary>
         ///     CharacterDataからCharacterEntityを生成する。
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public CharacterEntity Create(CharacterData data)
+        public static CharacterEntity Create(CharacterData data)
         {
             if (data == null)
             {

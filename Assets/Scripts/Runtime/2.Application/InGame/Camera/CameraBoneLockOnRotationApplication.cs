@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
 {
+    /// <summary>
+    ///     カメラのロックオン時の回転制御を担当するクラス。
+    /// </summary>
     public sealed class CameraBoneLockOnRotationApplication
     {
         public CameraBoneLockOnRotationApplication(CameraSystemParameter parameter)

@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Player
 {
+    /// <summary>
+    ///     スキルの設定データを保持するドメインクラス。
+    /// </summary>
     [Serializable]
     public class SkillData
     {

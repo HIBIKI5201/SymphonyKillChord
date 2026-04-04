@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
 {
+    /// <summary>
+    ///     音楽同期機能の初期化を行うクラス。
+    /// </summary>
     public class MusicSyncInitializer : MonoBehaviour
     {
         [SerializeField] private MusicSyncView _musicSyncView;

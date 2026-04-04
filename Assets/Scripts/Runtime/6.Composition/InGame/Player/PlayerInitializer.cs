@@ -17,6 +17,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    /// <summary>
+    ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class PlayerInitializer : MonoBehaviour
     {
@@ -42,11 +45,7 @@ namespace KillChord.Runtime.Composition
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
 
-
-
-            CharacterFactory characterFactory = new CharacterFactory();
-
-            CharacterEntity player = characterFactory.Create(_playerData);
+            CharacterEntity player = CharacterFactory.Create(_playerData);
             _enemyTestSpawner.SetTargetEntity(player);
 
             Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>

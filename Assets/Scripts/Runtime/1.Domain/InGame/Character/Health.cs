@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Character
 {
+    /// <summary>
+    ///     体力値を表す値オブジェクト。
+    /// </summary>
     public readonly struct Health : IEquatable<Health>
     {
         public Health(float value)
