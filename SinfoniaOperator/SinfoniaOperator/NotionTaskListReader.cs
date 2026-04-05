@@ -44,14 +44,14 @@ namespace SinfoniaStudio.SinfoniaOperator
                     string pageName = NotionReader.GetPageName(page, _env.NamePropertyName);
 
                     // 日付プロパティを取得できる場合。
-                    if (!page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue))
+                    if (page.Properties == null || !page.Properties.TryGetValue(_env.DatePropertyName, out PropertyValue? datePropertyValue))
                     {
                         Console.WriteLine($"[TaskReader] {pageName}: プロパティ '{_env.DatePropertyName}' が見つかりません。");
                         continue;
                     }
                     if (datePropertyValue is not DatePropertyValue dateProperty)
                     {
-                        Console.WriteLine($"[TaskReader] {pageName}: プロパティ '{_env.DatePropertyName}' の型が Date ではありません (型: {datePropertyValue.Type})。");
+                        Console.WriteLine($"[TaskReader] {pageName}: プロパティ '{_env.DatePropertyName}' の型が Date ではありません (型: {datePropertyValue?.Type.ToString() ?? "unknown"})。");
                         continue;
                     }
 
@@ -77,7 +77,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     DateTime startDate = default;
                     DateTime endDate = default;
 
-                    if (!DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
+                    if (dateProperty.Date == null || !DateTimeUtility.ConvertDateUtcToJst(dateProperty.Date.Start?.UtcDateTime, out startDate))
                     {
                         Console.WriteLine($"[TaskReader] {pageName}: 開始日時がないため、通知しません。");
                         continue; // 開始日時がない場合は、通知しない。
