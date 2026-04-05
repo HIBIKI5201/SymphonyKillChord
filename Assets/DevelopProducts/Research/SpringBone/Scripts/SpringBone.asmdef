@@ -1,0 +1,15 @@
+{
+    "name": "DevelopProducts-SpringBone",
+    "rootNamespace": "DevelopProducts.SpringBone",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "platforms": []
+}
