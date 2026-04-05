@@ -13,7 +13,7 @@ namespace DevelopProducts.Architecture.Adaptor
         /// </summary>
         /// <param name="entity"> キャラクターエンティティ。 </param>
         /// <param name="view"> ビューインターフェース。 </param>
-        public CharacterPresenter(CharacterEntity entity, ICharacterView view)
+        public CharacterPresenter(CharacterEntity entity, ICharacterViewModel view)
         {
             _entity = entity;
             _view = view;
@@ -44,6 +44,6 @@ namespace DevelopProducts.Architecture.Adaptor
         }
 
         private readonly CharacterEntity _entity;
-        private readonly ICharacterView _view;
+        private readonly ICharacterViewModel _view;
     }
 }

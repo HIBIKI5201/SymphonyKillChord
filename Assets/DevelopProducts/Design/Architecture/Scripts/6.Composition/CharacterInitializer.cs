@@ -21,11 +21,13 @@ namespace DevelopProducts.Architecture.Composition
         {
             CharacterView view = GetComponent<CharacterView>();
 
+            CharacterViewModel vm = new();
             CharacterEntity entity = new(_characterStatus.Name, _characterStatus.Health, _characterStatus.Speed, _characterStatus.AttackPower);
             CharacterAttack characterAttack = new(entity, attackPipeline.Create());
-            CharacterPresenter presenter = new(entity, view);
-            DevelopProducts.Architecture.Adaptor.CharacterController controller = new(characterAttack, presenter);
+            CharacterPresenter presenter = new(entity, vm);
+            CharacterController controller = new(characterAttack, presenter);
             view.SetController(controller);
+            view.BindViewModel(vm);
 
             _controller = controller;
         }
@@ -42,6 +44,6 @@ namespace DevelopProducts.Architecture.Composition
         [SerializeField, Tooltip("キャラクターのステータスデータ。")]
         private CharacterStatusAsset _characterStatus;
 
-        private DevelopProducts.Architecture.Adaptor.CharacterController _controller;
+        private CharacterController _controller;
     }
 }

@@ -1,0 +1,23 @@
+{
+    "name": "KillChord.Composition",
+    "rootNamespace": "KillChord.Runtime.Composition",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:dd408af17d035564b957321d79adba1d",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74",
+        "GUID:d596684d98378c643b70bc587024d24e",
+        "GUID:d07e9a279d4339845a9adaacdd0a1727",
+        "GUID:9465426c1e0fea94a9e89064d2be4eb8",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
