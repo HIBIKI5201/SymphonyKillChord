@@ -580,9 +580,10 @@
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.1"
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.unity.addressables": "1.21.19"
       },
-      "hash": "6d4b158f4152cb1502da585f41fb6dd6793ffdda"
+      "hash": "0517c5d068626238fc1fc82ffa871f3450f8340b"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
