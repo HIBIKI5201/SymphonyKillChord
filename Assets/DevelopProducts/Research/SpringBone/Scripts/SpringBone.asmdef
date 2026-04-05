@@ -1,7 +1,9 @@
 {
     "name": "DevelopProducts-SpringBone",
     "rootNamespace": "DevelopProducts.SpringBone",
-    "references": [],
+    "references": [
+        "GUID:9baf89b5bdeb140a3840fc0749a97c08"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -10,6 +12,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false,
-    "platforms": []
+    "noEngineReferences": false
 }

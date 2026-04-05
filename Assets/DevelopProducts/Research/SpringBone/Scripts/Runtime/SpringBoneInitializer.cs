@@ -1,19 +1,25 @@
+using System;
+using Unity.Animations.SpringBones;
 using UnityEngine;
 
 namespace DevelopProducts.SpringBone
 {
+    [DefaultExecutionOrder(1000)]
     public class SpringBoneInitializer : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
+        [SerializeField] private SpringManager springManager;
 
-        // Update is called once per frame
-        void Update()
+        private void Start()
         {
+            for (int i = 0; i < 10; i++)
+            {
+                springManager.UpdateDynamics();
+            }
+        }
         
+        private void Update()
+        {
+            springManager.UpdateDynamics();
         }
     }
 }
