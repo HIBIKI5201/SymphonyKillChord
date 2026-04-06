@@ -11,7 +11,14 @@ namespace DevelopProducts.AnimationControl.Blender
     public class AnimationManager : MonoBehaviour
     {
         [SerializeField]
-        private Key _walkKey = Key.W;
+        private Key _forwardKey = Key.W;
+        [SerializeField]
+        private Key _backKey = Key.S;
+        [SerializeField]
+        private Key _rightKey = Key.D;
+        [SerializeField]
+        private Key _leftKey = Key.A;
+
         [SerializeField, Range(0, 1)]
         private float _acceleration = 0.95f;
 
@@ -25,7 +32,7 @@ namespace DevelopProducts.AnimationControl.Blender
         private AnimatorPlayableBlend _blender;
         private SymphonyAnimeAdaptor _adaptor;
 
-        private float _velocity;
+        private Vector2 _velocity;
 
         private void Awake()
         {
@@ -37,19 +44,32 @@ namespace DevelopProducts.AnimationControl.Blender
 
         private void Update()
         {
-            float acc = 0;
+            Vector2 acc = Vector2.zero;
 
-            if (Keyboard.current[_walkKey].isPressed)
+            if (Keyboard.current[_forwardKey].isPressed)
             {
-                acc = 1;
+                acc += Vector2.up;
             }
+            if (Keyboard.current[_backKey].isPressed)
+            {
+                acc += Vector2.down;
+            }
+            if (Keyboard.current[_rightKey].isPressed)
+            {
+                acc += Vector2.right;
+            }
+            if (Keyboard.current[_leftKey].isPressed)
+            {
+                acc += Vector2.left;
+            }
+
 
             if (Keyboard.current[_playKey].wasPressedThisFrame)
             {
                 _blender.Play(_playClip);
             }
 
-            _velocity = Mathf.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
+            _velocity = Vector2.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
 
             _adaptor.SetVelocity(_velocity);
             _blender?.Update();
