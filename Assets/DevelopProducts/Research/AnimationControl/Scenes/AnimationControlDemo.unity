@@ -877,8 +877,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07edb21d6c7de544fb2565dbd3ebb9d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DevelopProducts-AnimationControl::DevelopProducts.AnimationControl.Blender.AnimationManager
-  _walkKey: 37
-  _acceleration: 0.99
+  _forwardKey: 37
+  _backKey: 33
+  _rightKey: 18
+  _leftKey: 15
+  _acceleration: 0.995
   _playClip: {fileID: 658572295128323382, guid: a95a36096dafd684986a8a1d073b74b6, type: 3}
   _playKey: 1
 --- !u!1660057539 &9223372036854775807
