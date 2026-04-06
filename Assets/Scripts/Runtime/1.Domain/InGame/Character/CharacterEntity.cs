@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     キャラクターの基本的な情報を保持するクラス。
     /// </summary>
-    public class CharacterEntity : IHitTarget
+    public class CharacterEntity : IAttacker, IDefender
     {
         /// <summary>
         ///     コンストラクタ。
@@ -40,5 +40,28 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public MoveSpeed MoveSpeed { get; }
         public AttackPower AttackPower { get; }
         public CharacterCombatSpec CombatSpec { get; }
+        public Health CurrentHelth => Health.CurrentHealth;
+        public Health MaxHealth => Health.MaxHealth;
+
+        /// <summary>
+        ///     ダメージを受ける処理。
+        ///     HealthEntityのChangeHealthを呼び出す。
+        /// </summary>
+        /// <param name="damage"></param>
+        public void TakeDamage(Damage damage)
+        {
+            Health nextHealth = new Health(CurrentHelth.Value - damage.Value);
+            Health.ChangeHealth(nextHealth);
+        }
+
+        /// <summary>
+        ///     HPを回復する処理。
+        /// </summary>
+        /// <param name="healAmount"></param>
+        public void Heal(Health healAmount)
+        {
+            Health nextHealth = new Health(CurrentHelth.Value + healAmount.Value);
+            Health.ChangeHealth(nextHealth);
+        }
     }
 }
