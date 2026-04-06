@@ -28,8 +28,8 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         public void SkillExecute()
         {
-            Effect.Do();
-            Visual.Do();
+            Effect.Execute();
+            Visual.Execute();
         }
 
         /// <summary>
