@@ -25,6 +25,7 @@ namespace KillChord.Runtime.Application.InGame.Player
 
         public void ReserveEncounter()
         {
+            Debug.Log("[EnemyAttackReservationUsecase] ReserveEncounter 呼び出し");
             Reserve(_enemyAttackMusicSpec.EncounterTiming);
         }
 
@@ -60,6 +61,7 @@ namespace KillChord.Runtime.Application.InGame.Player
 
         private void Reserve(in EnemyMusicSpec musicSpec)
         {
+            Debug.Log("[EnemyAttackReservationUsecase] Reserve 開始");
             // 既存の予約をキャンセルしてから新しい予約を設定
             Cancel();
 
