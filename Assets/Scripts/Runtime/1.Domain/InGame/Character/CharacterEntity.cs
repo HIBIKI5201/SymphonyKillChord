@@ -40,7 +40,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public MoveSpeed MoveSpeed { get; }
         public AttackPower AttackPower { get; }
         public CharacterCombatSpec CombatSpec { get; }
-        public Health CurrentHelth => Health.CurrentHealth;
+        public Health CurrentHealth => Health.CurrentHealth;
         public Health MaxHealth => Health.MaxHealth;
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage)
         {
-            Health nextHealth = new Health(CurrentHelth.Value - damage.Value);
+            Health nextHealth = new Health(CurrentHealth.Value - damage.Value);
             Health.ChangeHealth(nextHealth);
         }
 
@@ -60,7 +60,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="healAmount"></param>
         public void Heal(Health healAmount)
         {
-            Health nextHealth = new Health(CurrentHelth.Value + healAmount.Value);
+            Health nextHealth = new Health(CurrentHealth.Value + healAmount.Value);
             Health.ChangeHealth(nextHealth);
         }
     }
