@@ -29,10 +29,5 @@ namespace KillChord.Runtime.Composition
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();
         }
-
-        private void OnDestroy()
-        {
-            SceneLoader.UnloadScene(_backgroundSceneName);
-        }
     }
 }
