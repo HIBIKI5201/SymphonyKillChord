@@ -30,7 +30,6 @@ namespace DevelopProducts.AnimationControl.Blender
         private AnimatorUpdateMode _mode;
 
         private Animator _animator;
-        private RuntimeAnimatorController _controller;
         private AnimatorPlayableBlend _blender;
         private SymphonyAnimeAdaptor _adaptor;
 
@@ -39,9 +38,14 @@ namespace DevelopProducts.AnimationControl.Blender
         private void Awake()
         {
             _animator = GetComponent<Animator>();
-            _controller = _animator.runtimeAnimatorController;
             _adaptor = new SymphonyAnimeAdaptor(_animator);
             _blender = new AnimatorPlayableBlend(_adaptor);
+
+            for (int i = 0; i < _playClip.Length; i++)
+            {
+                AnimationData data = _playClip[i];
+                _blender.Register(new AnimationBlendClipRequest(data.Clip, data.EnterDuration, data.ExitDuration));
+            }
         }
 
         private void Update()
@@ -107,11 +111,17 @@ namespace DevelopProducts.AnimationControl.Blender
         {
             public AnimationClip Clip => _clip;
             public Key Key => _key;
+            public float EnterDuration => _enterDuration;
+            public float ExitDuration => _exitDuration;
 
             [SerializeField]
             private AnimationClip _clip;
             [SerializeField]
             private Key _key;
+            [SerializeField]
+            private float _enterDuration;
+            [SerializeField]
+            private float _exitDuration;
         }
     }
 }
