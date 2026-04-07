@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Character
@@ -13,6 +14,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="value"></param>
         public CriticalChance(float value)
         {
+            if (!float.IsFinite(value))
+            {
+                throw new ArgumentException("value must be finite.", nameof(value));
+            }
             _value = Mathf.Clamp01(value);
         }
 

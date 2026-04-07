@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
 using System;
 using UnityEngine;
 
@@ -24,6 +23,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
             IDefender defender
             )
         {
+            if (attackDefinition == null)
+                throw new ArgumentNullException(nameof(attackDefinition));
+            if (defender == null)
+                throw new ArgumentNullException(nameof(defender));
+
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender);
 
