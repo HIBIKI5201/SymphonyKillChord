@@ -1,7 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
@@ -34,12 +33,18 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             IDefender defender
             )
         {
+            if (attackDefinition == null)
+            {
+                Debug.LogError("[EnemyAttackUsecase] attackDefinition is null");
+                return default;
+            }
+
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
             AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender);
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
-       
+
             _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack);
             return result;
         }

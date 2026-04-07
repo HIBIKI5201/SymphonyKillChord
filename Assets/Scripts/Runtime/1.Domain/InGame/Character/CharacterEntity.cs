@@ -50,7 +50,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage)
         {
-            Health nextHealth = new Health(CurrentHealth.Value - damage.Value);
+            float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
+            Health nextHealth = new Health(nextHealthValue);
             Health.ChangeHealth(nextHealth);
         }
 
