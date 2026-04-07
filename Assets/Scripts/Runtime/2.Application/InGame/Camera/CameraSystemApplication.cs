@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Camera;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Camera
@@ -24,50 +25,54 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _cameraRotationSystem = cameraRotationSystem;
             _collisionMask = collisionMask;
 
-            _isDistanceInitialized = false;
+            _distance = _parameter.Offset.magnitude;
+        }
+        public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
+        {
+            UpdateCameraBone(context);
+            _followSystem.Update(ref _cameraCenterOffset, context);
+            _cameraRotationSystem.Update(context.IsLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context);
+
+
+            CalculateCameraPlacement(context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
+            UpdateDistance(ref _distance, result.Distance, context.DeltaTime);
+
+
+            resultPosition = result.CameraAnchorPosition + result.Direction * _distance;
+            resultRotation = _cameraBoneRotation * _cameraRotation;
+
+            _previousCameraPosition = resultPosition;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void UpdateDistance(ref float currentDistance, float targetDistance, float deltaTime)
+        {
+            float speed = 4;
+            currentDistance = Mathf.Lerp(Mathf.Min(currentDistance, targetDistance), targetDistance, deltaTime * speed);
         }
 
-        public void Update(
-            in Vector3 followPosition,
-            in Vector3 targetPosition,
-            in Vector2 input,
-            bool isLockOn,
-            float deltaTime,
-            out Quaternion resultRotation,
-            out Vector3 resultPosition
-            )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CalculateCameraPlacement(in CameraSystemContext context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result)
         {
-            if (isLockOn)
-                _boneRotationSystem.Update(ref _cameraBoneRotation, followPosition, targetPosition, deltaTime);
-            else
-                _freeLookRotationSystem.Update(ref _cameraBoneRotation, input, deltaTime);
+            result.CameraAnchorPosition = context.FollowPosition + _cameraCenterOffset;
 
-            _followSystem.Update(ref _cameraCenterOffset, followPosition, deltaTime);
-            _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, targetPosition, followPosition, _cameraPosition, deltaTime);
-
-            Vector3 cameraAnchorPosition = followPosition + _cameraCenterOffset;
             Vector3 idealOffset = _cameraBoneRotation * _parameter.Offset;
             float maxDistance = idealOffset.magnitude;
-            Vector3 direction = idealOffset.normalized;
+            result.Direction = idealOffset / maxDistance;
 
-            float distance = GetDistance(cameraAnchorPosition, direction, maxDistance);
-            if (!_isDistanceInitialized)
-            {
-                _distance = distance;
-                _isDistanceInitialized = true;
-            }
-            else
-            {
-                _distance = Mathf.Lerp(Mathf.Min(_distance, distance), distance, deltaTime * 4);
-            }
+            result.Distance = GetDistance(result.CameraAnchorPosition, result.Direction, maxDistance);
 
-            _cameraPosition = cameraAnchorPosition + direction * _distance;
-
-            resultRotation = _cameraBoneRotation * _cameraRotation;
-            resultPosition = _cameraPosition;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void UpdateCameraBone(in CameraSystemContext context)
+        {
+            if (context.IsLockOn)
+                _boneRotationSystem.Update(ref _cameraBoneRotation, context);
+            else
+                _freeLookRotationSystem.Update(ref _cameraBoneRotation, context);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private float GetDistance(in Vector3 center, in Vector3 direction, float maxDistance)
         {
             if (Physics.SphereCast(center, _parameter.CollisionRadius, direction, out RaycastHit hit, maxDistance, _collisionMask))
@@ -78,17 +83,18 @@ namespace KillChord.Runtime.Application.InGame.Camera
         }
 
         private readonly CameraSystemParameter _parameter;
+
         private readonly CameraFollowApplication _followSystem;
         private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
         private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
         private readonly CameraRotationApplication _cameraRotationSystem;
+
         private readonly int _collisionMask;
 
         private float _distance;
         private Vector3 _cameraCenterOffset;
-        private Vector3 _cameraPosition;
+        private Vector3 _previousCameraPosition;
         private Quaternion _cameraRotation = Quaternion.identity;
         private Quaternion _cameraBoneRotation = Quaternion.identity;
-        private bool _isDistanceInitialized;
     }
 }

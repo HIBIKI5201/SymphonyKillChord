@@ -13,9 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _parameter = parameter;
         }
 
-        public void Update(ref Quaternion cameraBoneRotation, in Vector3 playerPosition, in Vector3 targetPosition, float deltaTime)
+        public void Update(ref Quaternion cameraBoneRotation, in CameraSystemContext context)
         {
-            Vector3 followDir = targetPosition - playerPosition;
+            Vector3 followDir = context.TargetPosition - context.FollowPosition;
             followDir.y = 0;
             if (followDir.sqrMagnitude <= float.Epsilon)
             {
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             Quaternion target = Quaternion.LookRotation(followDir, Vector3.up) * Quaternion.Euler(0, (crossY <= 0) ? -lockOnAngleMargin : lockOnAngleMargin, 0);
 
-            cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-_parameter.BoneRotateSpeed * deltaTime));
+            cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-_parameter.BoneRotateSpeed * context.DeltaTime));
         }
 
         private readonly CameraSystemParameter _parameter;
