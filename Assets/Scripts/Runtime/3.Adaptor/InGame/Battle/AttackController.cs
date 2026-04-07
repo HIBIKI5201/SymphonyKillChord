@@ -45,11 +45,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public void ExecuteAttack()
         {
             _skillController.CheckSkill(BattleActionType.Attack);
+
             AttackDefinition attackDefinition = 
                 _battleState.Attacker.CombatSpec.GetAttackDifinition(0);
+
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
                 _battleState.Target);
+
             _presenter.Push(result);
         }
 

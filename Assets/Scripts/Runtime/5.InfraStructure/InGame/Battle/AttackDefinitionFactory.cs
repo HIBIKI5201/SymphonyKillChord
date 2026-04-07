@@ -22,7 +22,7 @@ namespace KillChord.Runtime.InfraStructure
 
             AttackParameterSet attackParameterSet = new AttackParameterSet(
                 new CriticalChance(data.AttackParameterSetData.CriticalChance),
-                new CriticalDamage(data.AttackParameterSetData.CriticalDamageMultiplier),
+                new CriticalMultiplier(data.AttackParameterSetData.CriticalDamageMultiplier),
                 new Damage(data.AttackParameterSetData.ConfirmedDamage)
                 );
 
