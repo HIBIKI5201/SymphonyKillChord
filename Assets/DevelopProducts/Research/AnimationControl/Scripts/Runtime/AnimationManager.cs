@@ -1,4 +1,5 @@
 using DevelopProducts.AnimationControl.Adaptor;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,9 +24,7 @@ namespace DevelopProducts.AnimationControl.Blender
         private float _acceleration = 0.95f;
 
         [SerializeField]
-        private AnimationClip _playClip;
-        [SerializeField]
-        private Key _playKey = Key.Space;
+        private AnimationData[] _playClip;
 
         private Animator _animator;
         private RuntimeAnimatorController _controller;
@@ -64,9 +63,13 @@ namespace DevelopProducts.AnimationControl.Blender
             }
 
 
-            if (Keyboard.current[_playKey].wasPressedThisFrame)
+            for(int i = 0; i < _playClip.Length; i++)
             {
-                _blender.Play(_playClip);
+                AnimationData data = _playClip[i];
+                if (Keyboard.current[data.Key].wasPressedThisFrame)
+                {
+                    _blender.Play(data.Clip);
+                }
             }
 
             _velocity = Vector2.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
@@ -78,6 +81,18 @@ namespace DevelopProducts.AnimationControl.Blender
         private void OnDestroy()
         {
             _blender?.Dispose();
+        }
+
+        [Serializable]
+        private struct AnimationData
+        {
+            public AnimationClip Clip => _clip;
+            public Key Key => _key;
+
+            [SerializeField]
+            private AnimationClip _clip;
+            [SerializeField]
+            private Key _key;
         }
     }
 }
