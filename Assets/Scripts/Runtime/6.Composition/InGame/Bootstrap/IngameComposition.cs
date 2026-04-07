@@ -1,3 +1,4 @@
+using System;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
@@ -26,6 +27,11 @@ namespace KillChord.Runtime.Composition
             _camerasystemInitializer.Initialize();
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();
+        }
+
+        private void OnDestroy()
+        {
+            SceneLoader.UnloadScene(_backgroundSceneName);
         }
     }
 }
