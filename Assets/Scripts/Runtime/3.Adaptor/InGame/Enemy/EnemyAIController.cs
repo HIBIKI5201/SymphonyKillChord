@@ -41,7 +41,6 @@ namespace KillChord.Runtime.Adaptor
                 {
                     Debug.Log("[EnemyAIController] 攻撃範囲から出たので予約キャンセル");
                     _enemyBattleState.ExitRange();
-                    _enemyBattleState.ExitRange();
                     _enemyAttackReservationUsecase.Cancel();
                 }
 
