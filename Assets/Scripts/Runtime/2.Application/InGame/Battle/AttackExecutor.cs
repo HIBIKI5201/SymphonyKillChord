@@ -25,6 +25,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
         {
             if (attackDefinition == null)
                 throw new ArgumentNullException(nameof(attackDefinition));
+            if (attacker == null)
+                throw new ArgumentNullException(nameof(attacker));
             if (defender == null)
                 throw new ArgumentNullException(nameof(defender));
 
@@ -35,7 +37,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
             Debug.Log(
                  $"[Attack] " +
-                 $"Attacker:{attackDefinition.AttackName} " +
+                 $"AttackName:{attackDefinition.AttackName} " +
                  $"Damage:{result.FinalDamage.Value} " +
                  $"Critical:{result.IsCritical}");
 
