@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _enemyMoveSpec = enemyMoveSpec;
         }
 
-        public EnemyMoveDecision Tick(Vector3 enemyPosition, Vector3 playerPosition)
+        public EnemyMoveDecision Evaluate(Vector3 enemyPosition, Vector3 playerPosition)
         {
             float distance = Vector3.Distance(enemyPosition, playerPosition);
 
