@@ -17,4 +17,4 @@ MonoBehaviour:
   _moveSpeed: 3
   _attackPower: 3
   _attackDifinitions:
-  - {fileID: 11400000, guid: a6c2e782e9969da40bdc7023c7aa0cda, type: 2}
+  - {fileID: 11400000, guid: 1119c366324871145b5c08ecd5b9ebaa, type: 2}

@@ -49,12 +49,12 @@ namespace KillChord.Develop.Assets.Scripts.Develop
             };
 
             AttackPipelineResolver attackPipelineResolver = new(pipelines);
-            AttackExecutor attackExecutor = new(attackPipelineResolver);
+          //  AttackExecutor attackExecutor = new(attackPipelineResolver);
 
 
 
-            InitializePlayer(new BattleController(new BattleApplication(player, attackExecutor), new(), null));
-            InitializeEnemy(new BattleController(new BattleApplication(enemy, attackExecutor), new(), new(_enemySample, enemy)));
+            //InitializePlayer(new BattleController(new BattleApplication(player, attackExecutor), new(), null));
+           // InitializeEnemy(new BattleController(new BattleApplication(enemy, attackExecutor), new(), new(_enemySample, enemy)));
         }
         private void InitializePlayer(BattleController battleController)
         {
