@@ -16,7 +16,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField] private Transform _target;
 
-        [SerializeField] private LockOnState _lockOnState;
+        [SerializeField] private CameraLockOnState _lockOnState;
 
         [SerializeField] private UpdateModeEnum _updateMode;
 
@@ -57,14 +57,10 @@ namespace KillChord.Runtime.View.InGame.Camera
             Vector2 input = _input * 200;
             _input = Vector2.zero;
 
-            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
-                _lockOnState = LockOnState.Free;
-
             _controller.Update(
                 _playerT.position,
                 _target.position,
                 input,
-                _lockOnState != LockOnState.Free,
                 deltaTime,
                 out Quaternion rotation,
                 out Vector3 position
@@ -74,32 +70,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void UpdateInput(out Vector2 input)
         {
             if (Input.GetKeyDown(KeyCode.Mouse2))
-                if (_lockOnState == LockOnState.Free)
-                    _lockOnState = LockOnState.LockOnManual;
-                else
-                    _lockOnState = LockOnState.Free;
-            if (Input.GetKeyDown(KeyCode.Mouse0) && _lockOnState == LockOnState.Free)
-                _lockOnState = LockOnState.LockOnAuto;
+                _controller.ToggleLockOnState();
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+                _controller.TryActiveAutoLockOn();
 
             input.x = Input.GetAxisRaw("Mouse X");
             input.y = Input.GetAxisRaw("Mouse Y");
-        }
-        private enum LockOnState : byte
-        {
-            /// <summary>
-            /// 操作によって自由にカメラを回せる
-            /// </summary>
-            Free,
-
-            /// <summary>
-            /// システムによって目標へロックオンした状態
-            /// </summary>
-            LockOnAuto,
-
-            /// <summary>
-            /// 操作によって目標へロックオンした状態
-            /// </summary>
-            LockOnManual,
         }
     }
 }
