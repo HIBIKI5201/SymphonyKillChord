@@ -9,17 +9,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
     public class EnemyBattleState
     {
         public EnemyBattleState(CharacterEntity attacker,
-            IHitTarget target,
-            AttackId attackId)
+            CharacterEntity target,
+            AttackDefinition currentAttack)
         {
             Attacker = attacker;
             Target = target;
-            AttackId = attackId;
+            CurrentAttack = currentAttack;
         }
 
         public CharacterEntity Attacker { get; }
-        public IHitTarget Target { get; }
-        public AttackId AttackId { get; }
+        public CharacterEntity Target { get; }
+        public AttackDefinition CurrentAttack { get; }
 
         public bool IsInAttackRange { get; private set; }
 

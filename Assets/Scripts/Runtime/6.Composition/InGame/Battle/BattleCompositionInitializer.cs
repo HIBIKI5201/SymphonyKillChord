@@ -71,7 +71,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
             };
 
             IAttackPipelineResolver attackPipelineResolver = new AttackPipelineResolver(pipelines);
-            AttackExecutor attackExecutor = new AttackExecutor(attackPipelineResolver);
 
             AttackCommandState attackCommandState = new AttackCommandState();
             AttackBattleState attackBattleState = new AttackBattleState();
@@ -84,7 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             SkillController skillController = new SkillController(_skillRepository, musicSyncService);
 
             AttackController attackController = new AttackController(
-                attackExecutor,
+                //attackExecutor,
                 attackResultPresenter,
                 attackCommandState,
                 attackBattleState,

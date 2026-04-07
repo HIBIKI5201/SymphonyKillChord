@@ -18,6 +18,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         /// <returns></returns>
         public static CharacterEntity Create(CharacterData data)
         {
+            AttackDefinitionData[] attackDefinitionDatas = data.AttackDifinitions;
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
@@ -27,22 +28,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 throw new ArgumentException("AttackDifinitions must not be null.", nameof(data));
             }
 
-            Dictionary<AttackId, AttackDefinition> definitions = new Dictionary<AttackId, AttackDefinition>();
-
-            AttackDefinitionData[] attackDefinitions = data.AttackDifinitions;
+            AttackDefinition[] attackDefinitions = new AttackDefinition[attackDefinitionDatas.Length];
             for (int i = 0; i < attackDefinitions.Length; i++)
             {
-                AttackDefinitionData attackDefinition = attackDefinitions[i];
-                if (attackDefinition == null)
-                {
-                    throw new ArgumentException($"AttackDifinitions[{i}] must not be null.", nameof(data));
-                }
-                definitions.Add(attackDefinition.AttackId, new AttackDefinition(
-                    attackDefinition.AttackId,
-                    new Damage(attackDefinition.BaseDamage)));
+                attackDefinitions[i] = AttackDefinitionFactory.Create(attackDefinitionDatas[i]);
             }
 
-            CharacterCombatSpec combatSpec = new CharacterCombatSpec(definitions);
+            CharacterCombatSpec combatSpec = new CharacterCombatSpec(attackDefinitions);
 
             return new CharacterEntity(
                 new CharacterName(data.CharacterName),

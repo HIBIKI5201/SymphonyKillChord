@@ -9,8 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0f47b3507d35b649bc2382e0d2b2137, type: 3}
-  m_Name: AttackDefinitionData 1
+  m_Script: {fileID: 11500000, guid: 992a3cc89961d554cb13e7d6ba345d99, type: 3}
+  m_Name: AttackDefinitionData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AttackDefinitionData
-  _attackId: 1
-  _baseDamage: 1
+  _attackName: Normal
+  _baseDamage: 10
+  _attackParameterSetData: {fileID: 11400000, guid: e2c3f53fe5d600640a2d03efd0f75ebd, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: ab4ff7fb7cf808b48aec5f14a474dc2e, type: 2}

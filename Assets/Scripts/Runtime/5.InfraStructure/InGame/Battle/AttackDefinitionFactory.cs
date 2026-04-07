@@ -1,0 +1,29 @@
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+
+namespace KillChord.Runtime.InfraStructure
+{
+    public static class AttackDefinitionFactory
+    {
+        public static AttackDefinition Create(AttackDefinitionData data)
+        {
+            if (data == null)
+            {
+                throw new System.ArgumentNullException(nameof(data));
+            }
+
+            AttackParameterSet attackParameterSet = new AttackParameterSet(
+                new CriticalChance(data.AttackParameterSetData.CriticalChance),
+                new CriticalDamage(data.AttackParameterSetData.CriticalDamageMultiplier),
+                new Damage(data.AttackParameterSetData.ConfirmedDamage)
+                );
+
+            return new AttackDefinition(
+                data.AttackName,
+                new Damage(data.BaseDamage),
+                attackParameterSet,
+                data.AttackPipelineAsset.Create()
+                );
+        }
+    }
+}
