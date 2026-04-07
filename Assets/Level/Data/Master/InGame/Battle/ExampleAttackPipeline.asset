@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 908da08c532dd0a44ae50903947a5b90, type: 3}
-  m_Name: AttackPipelineAsset
+  m_Name: ExampleAttackPipeline
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Battle.AttackPipelineAsset
   _attackSteps:
   - rid: 3714306555944894570

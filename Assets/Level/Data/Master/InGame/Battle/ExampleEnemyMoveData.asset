@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08c56607bf3c9b34bbb67404300c7fe2, type: 3}
-  m_Name: EnemyMusicData
-  m_EditorClassIdentifier: KillChord.Structure::EnemyMusicData
-  _barFlag: 1
-  _timeSignature: 4
-  _targetBeat: 2
+  m_Script: {fileID: 11500000, guid: e66e5a1f8efce344bb4b7cf5614a3036, type: 3}
+  m_Name: ExampleEnemyMoveData
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.EnemyMoveData
+  _moveSpeed: 3
+  _attackRange: 4
