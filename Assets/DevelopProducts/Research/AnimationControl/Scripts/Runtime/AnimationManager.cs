@@ -26,6 +26,9 @@ namespace DevelopProducts.AnimationControl.Blender
         [SerializeField]
         private AnimationData[] _playClip;
 
+        [SerializeField]
+        private AnimatorUpdateMode _mode;
+
         private Animator _animator;
         private RuntimeAnimatorController _controller;
         private AnimatorPlayableBlend _blender;
@@ -63,7 +66,7 @@ namespace DevelopProducts.AnimationControl.Blender
             }
 
 
-            for(int i = 0; i < _playClip.Length; i++)
+            for (int i = 0; i < _playClip.Length; i++)
             {
                 AnimationData data = _playClip[i];
                 if (Keyboard.current[data.Key].wasPressedThisFrame)
@@ -72,15 +75,32 @@ namespace DevelopProducts.AnimationControl.Blender
                 }
             }
 
-            _velocity = Vector2.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
+            _velocity = Vector2.Lerp(_velocity, acc, _acceleration);
 
             _adaptor.SetVelocity(_velocity);
-            _blender?.Update();
+
+            if (_mode == AnimatorUpdateMode.Normal)
+            {
+                BlendUpdate();
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_mode == AnimatorUpdateMode.Fixed)
+            {
+                BlendUpdate();
+            }
         }
 
         private void OnDestroy()
         {
             _blender?.Dispose();
+        }
+
+        private void BlendUpdate()
+        {
+            _blender?.Update();
         }
 
         [Serializable]

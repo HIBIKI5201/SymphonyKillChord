@@ -85,7 +85,7 @@ namespace DevelopProducts.AnimationControl.Blender
             if (!_currentBlendClip.IsValid) { return; }
 
             float deltaTime = Time.deltaTime;
-
+            
             switch (_state)
             {
                 case BlendState.Enter:
