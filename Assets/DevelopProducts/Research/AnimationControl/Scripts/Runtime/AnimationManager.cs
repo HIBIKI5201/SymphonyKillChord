@@ -64,7 +64,8 @@ namespace DevelopProducts.AnimationControl.Blender
             {
                 acc += Vector2.left;
             }
-
+            acc.Normalize();
+            _velocity = Vector2.Lerp(_velocity, acc, _acceleration);
 
             for (int i = 0; i < _playClip.Length; i++)
             {
@@ -74,8 +75,6 @@ namespace DevelopProducts.AnimationControl.Blender
                     _blender.Play(data.Clip);
                 }
             }
-
-            _velocity = Vector2.Lerp(_velocity, acc, _acceleration);
 
             _adaptor.SetVelocity(_velocity);
 
