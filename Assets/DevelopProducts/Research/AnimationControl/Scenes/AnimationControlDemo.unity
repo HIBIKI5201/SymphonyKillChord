@@ -881,9 +881,21 @@ MonoBehaviour:
   _backKey: 33
   _rightKey: 18
   _leftKey: 15
-  _acceleration: 0.995
-  _playClip: {fileID: 658572295128323382, guid: a95a36096dafd684986a8a1d073b74b6, type: 3}
-  _playKey: 1
+  _acceleration: 0.25
+  _playClip:
+  - _clip: {fileID: 658572295128323382, guid: a95a36096dafd684986a8a1d073b74b6, type: 3}
+    _key: 1
+    _enterDuration: 0.3
+    _exitDuration: 0.3
+  - _clip: {fileID: 474731757414567770, guid: 8a1077455951bdf4b9c0acdc8b9250fd, type: 3}
+    _key: 2
+    _enterDuration: 0.5
+    _exitDuration: 0.5
+  - _clip: {fileID: -6417989217049987097, guid: a14a366bd963abc458814455305cd1b9, type: 3}
+    _key: 3
+    _enterDuration: 0.5
+    _exitDuration: 0.5
+  _mode: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
