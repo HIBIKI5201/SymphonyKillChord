@@ -6,14 +6,25 @@ using UnityEngine;
 namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
-    ///     攻撃定義と攻撃処理のパイプラインを組み合わせて、攻撃処理全体を実行するクラス。
+    ///     攻撃を実行するクラス。
+    ///     攻撃の計算とダメージの適用を行う。
     /// </summary>
     public static class AttackExecutor
     {
-        public static AttackResult Execute(AttackDefinition attackDefinition,
+        /// <summary>
+        ///     攻撃を実行する。
+        /// </summary>
+        /// <param name="attackDefinition"></param>
+        /// <param name="attacker"></param>
+        /// <param name="defender"></param>
+        /// <returns></returns>
+        public static AttackResult Execute(
+            AttackDefinition attackDefinition,
             IAttacker attacker,
-            IDefender defender)
+            IDefender defender
+            )
         {
+            // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender);
 
             defender.TakeDamage(result.FinalDamage);

@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     public class AttackDefinition
     {
         /// <summary>
-        ///     コンストラクタ。
+        ///     攻撃の基本情報を初期化するコンストラクタ。
         /// </summary>
         public AttackDefinition(string attackName,
             Damage baseDamage,
@@ -20,9 +20,13 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             AttackPipeline = attackPipeline;
         }
 
+        /// <summary> 攻撃の名前を表すプロパティ。 </summary>
         public string AttackName { get; }
+        /// <summary> 攻撃の基本ダメージを表すプロパティ。 </summary>
         public Damage BaseDamage { get; }
+        /// <summary> 攻撃のパラメータセットを表すプロパティ。 </summary>
         public AttackParameterSet AttackParameterSet { get; }
+        /// <summary> 攻撃の処理パイプラインを表すプロパティ。 </summary>
         public IAttackPipeline AttackPipeline { get; }
     }
 }

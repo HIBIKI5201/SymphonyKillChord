@@ -11,9 +11,9 @@ namespace KillChord.Runtime.Application.InGame.Battle
         public AttackStepContext Execute(in AttackStepContext context)
         {
             float chance = context.AttackDefinition.AttackParameterSet.CriticalChance.Value;
-            float multiplier = context.AttackDefinition.AttackParameterSet.CriticalDamage.Value;
+            float multiplier = context.AttackDefinition.AttackParameterSet.CriticalMultiplier.Value;
 
-            if (Random.value > chance)
+            if (Random.value >= chance)
             {
                 return context;
             }

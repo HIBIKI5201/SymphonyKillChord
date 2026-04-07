@@ -7,6 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// </summary>
     public readonly struct CriticalChance
     {
+        /// <summary>
+        ///     クリティカル率のインスタンスを初期化するコンストラクタ。
+        /// </summary>
+        /// <param name="value"></param>
         public CriticalChance(float value)
         {
             _value = Mathf.Clamp01(value);

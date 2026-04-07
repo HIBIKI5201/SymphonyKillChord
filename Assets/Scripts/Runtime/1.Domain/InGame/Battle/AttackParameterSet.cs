@@ -2,21 +2,32 @@ using KillChord.Runtime.Domain.InGame.Character;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
+    /// <summary>
+    ///     攻撃に使うパラメータをまとめた構造体。
+    /// </summary>
     public readonly struct AttackParameterSet
     {
+        /// <summary>
+        ///     攻撃関係のパラメータのインスタンスを初期化するコンストラクタ。
+        /// </summary>
+        /// <param name="criticalChance"></param>
+        /// <param name="criticalDamage"></param>
+        /// <param name="confirmedDamage"></param>
         public AttackParameterSet(
             CriticalChance criticalChance,
-            CriticalDamage criticalDamage,
+            CriticalMultiplier criticalMultiplier,
             Damage confirmedDamage
             )
         {
             CriticalChance = criticalChance;
-            CriticalDamage = criticalDamage;
+            CriticalMultiplier = criticalMultiplier;
             ConfirmedDamage = confirmedDamage;
         }
 
+        /// <summary> クリティカルヒットの確率。 </summary>
         public CriticalChance CriticalChance { get; }
-        public CriticalDamage CriticalDamage { get; }
+        /// <summary> クリティカルヒットのダメージ倍率。 </summary>
+        public CriticalMultiplier CriticalMultiplier { get; }
         public Damage ConfirmedDamage { get; }
     }
 }

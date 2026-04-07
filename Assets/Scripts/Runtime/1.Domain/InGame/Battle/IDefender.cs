@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary>
         ///     現在の体力を表すプロパティ。
         /// </summary>
-        public Health CurrentHelth { get; }
+        public Health CurrentHealth { get; }
         /// <summary>
         ///     体力の最大値を表すプロパティ。
         /// </summary>

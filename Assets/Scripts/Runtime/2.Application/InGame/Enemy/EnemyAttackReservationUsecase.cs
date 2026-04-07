@@ -11,29 +11,45 @@ namespace KillChord.Runtime.Application.InGame.Player
     /// </summary>
     public class EnemyAttackReservationUsecase : IDisposable
     {
+        /// <summary>
+        ///     敵の攻撃を予約するユースケースのコンストラクタ。
+        /// </summary>
+        /// <param name="enemyAttackMusicSpec"></param>
+        /// <param name="musicActionScheduler"></param>
         public EnemyAttackReservationUsecase(
             EnemyAttackMusicSpec enemyAttackMusicSpec,
-            IMusicActionScheduler musicActionScheduler)
+            IMusicActionScheduler musicActionScheduler
+            )
         {
             _enemyAttackMusicSpec = enemyAttackMusicSpec;
             _musicActionScheduler = musicActionScheduler;
         }
 
+        /// <summary> 予約が存在するかどうかを示すプロパティ。
         public bool HasReservation => _hasReservation;
 
         public event Action OnReservedTimingReached;
 
+        /// <summary>
+        ///     Encounterタイミングで攻撃を予約する。
+        /// </summary>
         public void ReserveEncounter()
         {
             Debug.Log("[EnemyAttackReservationUsecase] ReserveEncounter 呼び出し");
             Reserve(_enemyAttackMusicSpec.EncounterTiming);
         }
 
+        /// <summary>
+        ///     Battleタイミングで攻撃を予約する。
+        /// </summary>
         public void ReserveBattle()
         {
             Reserve(_enemyAttackMusicSpec.BattleTiming);
         }
 
+        /// <summary>
+        ///     予約をキャンセルする。
+        /// </summary>
         public void Cancel()
         {
             if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
@@ -59,10 +75,15 @@ namespace KillChord.Runtime.Application.InGame.Player
             _hasReservation = false;
         }
 
+        /// <summary>
+        ///     予約を設定する内部メソッド。
+        ///     既存の予約がある場合はキャンセルしてから新しい予約を設定する。
+        /// </summary>
+        /// <param name="musicSpec"></param>
         private void Reserve(in EnemyMusicSpec musicSpec)
         {
             Debug.Log("[EnemyAttackReservationUsecase] Reserve 開始");
-            // 既存の予約をキャンセルしてから新しい予約を設定
+            // 既存の予約をキャンセルしてから新しい予約を設定する。
             Cancel();
 
             _cancellationTokenSource = new CancellationTokenSource();
