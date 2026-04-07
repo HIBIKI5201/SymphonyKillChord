@@ -8,13 +8,16 @@ namespace DevelopProducts.AnimationControl.Adaptor
         {
         }
 
-        public void SetVelocity(float value)
+        public void SetVelocity(Vector2 value)
         {
-            _animator.SetFloat(_velocityHash, value);
+            _animator.SetFloat(_velocityHashX, value.x);
+            _animator.SetFloat(_velocityHashY, value.y);
         }
 
-        private const string PARAM_VELOCITY = "Velocity";
+        private const string PARAM_VELOCITY_X = "VelocityX";
+        private const string PARAM_VELOCITY_Y = "VelocityY";
 
-        private readonly int _velocityHash = Animator.StringToHash(PARAM_VELOCITY);
+        private readonly int _velocityHashX = Animator.StringToHash(PARAM_VELOCITY_X);
+        private readonly int _velocityHashY = Animator.StringToHash(PARAM_VELOCITY_Y);
     }
 }
