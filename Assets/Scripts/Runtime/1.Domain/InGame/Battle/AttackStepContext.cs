@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// </summary>
     public readonly ref struct AttackStepContext
     {
-        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, int criticalCount)
+        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender)
         {
             _attackDefinition = attackDefinition;
             _damage = attackDefinition.BaseDamage;

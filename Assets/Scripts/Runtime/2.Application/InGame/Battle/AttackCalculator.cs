@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             IAttacker attacker,
             IDefender defender)
         {
-            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, 0);
+            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }
