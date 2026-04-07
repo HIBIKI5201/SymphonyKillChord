@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
@@ -7,6 +9,15 @@ namespace KillChord.Runtime.Domain.InGame.Character
     {
         public MoveSpeed(float value)
         {
+            if (value < 0)
+            {
+                throw new ArgumentException("value must be non-negative.", nameof(value));
+            }
+            if (!float.IsFinite(value))
+            {
+                throw new ArgumentException("Damage must be finite.", nameof(value));
+            }
+
             Value = value;
         }
 
