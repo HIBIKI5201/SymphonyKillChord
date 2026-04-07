@@ -20,8 +20,9 @@ namespace DevelopProducts.AnimationControl.Blender
         /// <summary>
         ///     Clip登録（事前生成）。
         /// </summary>
-        public void Register(AnimationClip clip)
+        public void Register(AnimationBlendClipRequest request)
         {
+            AnimationClip clip = request.Clip;
             if (clip == null) { return; }
 
             if (_clipMap.ContainsKey(clip))
@@ -29,13 +30,13 @@ namespace DevelopProducts.AnimationControl.Blender
                 return;
             }
 
-            var clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_graph, clip);
 
             clipPlayable.SetApplyFootIK(false);
             clipPlayable.SetApplyPlayableIK(false);
 
             var blendClip = new AnimationBlendClipData(
-                clip,
+                request,
                 clipPlayable
             );
 
@@ -45,13 +46,13 @@ namespace DevelopProducts.AnimationControl.Blender
         /// <summary>
         ///     再生（Enter/Exit時間指定）。
         /// </summary>
-        public void Play(AnimationClip clip, float enterDuration = 0.1f, float exitDuration = 0.1f)
+        public void Play(AnimationClip clip)
         {
             if (clip == null) { return; }
 
             if (!_clipMap.TryGetValue(clip, out AnimationBlendClipData blendClip))
             {
-                Register(clip);
+                Register(new(clip));
                 blendClip = _clipMap[clip];
             }
 
@@ -70,8 +71,8 @@ namespace DevelopProducts.AnimationControl.Blender
             _currentClip = clip;
             _currentBlendClip = blendClip;
 
-            _enterDuration = Mathf.Max(enterDuration, 0.0001f);
-            _exitDuration = Mathf.Max(exitDuration, 0.0001f);
+            _enterDuration = Mathf.Max(blendClip.EnterDuration, 0.0001f);
+            _exitDuration = Mathf.Max(blendClip.ExitDuration, 0.0001f);
 
             _blendTime = 0f;
             _state = BlendState.Enter;
