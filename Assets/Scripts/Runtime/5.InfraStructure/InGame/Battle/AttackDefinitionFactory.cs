@@ -11,6 +11,14 @@ namespace KillChord.Runtime.InfraStructure
             {
                 throw new System.ArgumentNullException(nameof(data));
             }
+            if (data.AttackParameterSetData == null)
+            {
+                throw new System.ArgumentNullException(nameof(data.AttackParameterSetData));
+            }
+            if (data.AttackPipelineAsset == null)
+            {
+                throw new System.ArgumentNullException(nameof(data.AttackPipelineAsset));
+            }
 
             AttackParameterSet attackParameterSet = new AttackParameterSet(
                 new CriticalChance(data.AttackParameterSetData.CriticalChance),
