@@ -11,25 +11,25 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class EnemyAttackUsecase
     {
-        public EnemyAttackUsecase(AttackExecutor attackExecutor, IMusicSyncService musicSyncService)
+        public EnemyAttackUsecase(IMusicSyncService musicSyncService)
         {
-            _attackExecutor = attackExecutor;
             _musicSyncService = musicSyncService;
         }
 
-        public AttackResult ExecuteAttack(CharacterEntity attacker, IHitTarget target, AttackId attackId)
+        public AttackResult ExecuteAttack(AttackDefinition attackDefinition,
+            IAttacker attacker,
+            IDefender defender)
         {
-            if (attacker == null || target == null)
-            {
-                Debug.LogError("Attacker or Target is null.");
-                return default;
-            }
+            Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
+            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender);
+
+            Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
+       
             _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack);
-            return _attackExecutor.Execute(attacker, target, attackId);
+            return result;
         }
 
-        private readonly AttackExecutor _attackExecutor;
         private readonly IMusicSyncService _musicSyncService;
     }
 }
