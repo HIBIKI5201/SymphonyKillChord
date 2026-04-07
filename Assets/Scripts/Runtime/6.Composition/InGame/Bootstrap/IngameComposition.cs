@@ -1,5 +1,7 @@
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
+using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -12,12 +14,15 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private SkillInitializer _skillInitializer;
 
+        [SerializeField, SceneNameSelector] private string _backgroundSceneName;
+
         private MusicPlayer _musicPlayer;
 
-        private void Start()
+        private async void Start()
         {
+            await SceneLoader.LoadScene(_backgroundSceneName);
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-            
+
             _camerasystemInitializer.Initialize();
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();
