@@ -4,7 +4,7 @@ namespace DevelopProducts.AnimationControl
 {
     public readonly ref struct AnimationBlendClipRequest
     {
-        public AnimationBlendClipRequest(AnimationClip clip, float enterDuration, float exitDuration)
+        public AnimationBlendClipRequest(AnimationClip clip, float enterDuration = 0.1f, float exitDuration = 0.1f)
         {
             _clip = clip;
             _enterDuration = enterDuration;
