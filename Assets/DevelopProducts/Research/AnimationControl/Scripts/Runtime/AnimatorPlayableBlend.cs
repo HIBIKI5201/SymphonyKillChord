@@ -34,7 +34,7 @@ namespace DevelopProducts.AnimationControl.Blender
             clipPlayable.SetApplyFootIK(false);
             clipPlayable.SetApplyPlayableIK(false);
 
-            var blendClip = new AnimationBlendClip(
+            var blendClip = new AnimationBlendClipData(
                 clip,
                 clipPlayable
             );
@@ -49,7 +49,7 @@ namespace DevelopProducts.AnimationControl.Blender
         {
             if (clip == null) { return; }
 
-            if (!_clipMap.TryGetValue(clip, out AnimationBlendClip blendClip))
+            if (!_clipMap.TryGetValue(clip, out AnimationBlendClipData blendClip))
             {
                 Register(clip);
                 blendClip = _clipMap[clip];
@@ -160,9 +160,9 @@ namespace DevelopProducts.AnimationControl.Blender
         private AnimationMixerPlayable _mixer;
         private AnimatorControllerPlayable _controllerPlayable;
 
-        private readonly Dictionary<AnimationClip, AnimationBlendClip> _clipMap = new();
+        private readonly Dictionary<AnimationClip, AnimationBlendClipData> _clipMap = new();
 
-        private AnimationBlendClip _currentBlendClip;
+        private AnimationBlendClipData _currentBlendClip;
         private AnimationClip _currentClip;
 
         private float _enterDuration;
@@ -197,26 +197,6 @@ namespace DevelopProducts.AnimationControl.Blender
             output.SetSourcePlayable(_mixer);
 
             _graph.Play();
-        }
-
-        /// <summary>
-        ///     クリップのPlayableデータ。
-        /// </summary>
-        private readonly struct AnimationBlendClip
-        {
-            public readonly AnimationClip Clip;
-            public readonly AnimationClipPlayable ClipPlayable;
-
-            public bool IsValid => ClipPlayable.IsValid();
-
-            public AnimationBlendClip(
-                AnimationClip clip,
-                AnimationClipPlayable clipPlayable
-            )
-            {
-                Clip = clip;
-                ClipPlayable = clipPlayable;
-            }
         }
 
         /// <summary>
