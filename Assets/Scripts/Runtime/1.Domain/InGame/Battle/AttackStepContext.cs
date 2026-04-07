@@ -1,5 +1,8 @@
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
+    /// <summary>
+    ///     攻撃段階のコンテキストを表す構造体。
+    /// </summary>
     public readonly ref struct AttackStepContext
     {
         public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, int criticalCount)

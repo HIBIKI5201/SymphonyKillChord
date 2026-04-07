@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
@@ -11,13 +9,20 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary>
         ///     コンストラクタ。
         /// </summary>
-        public AttackDefinition(AttackId id, Damage baseDamage)
+        public AttackDefinition(string attackName,
+            Damage baseDamage,
+            AttackParameterSet attackParameterSet,
+            IAttackPipeline attackPipeline)
         {
-            Id = id;
+            AttackName = attackName;
             BaseDamage = baseDamage;
+            AttackParameterSet = attackParameterSet;
+            AttackPipeline = attackPipeline;
         }
 
-        public AttackId Id { get; }
+        public string AttackName { get; }
         public Damage BaseDamage { get; }
+        public AttackParameterSet AttackParameterSet { get; }
+        public IAttackPipeline AttackPipeline { get; }
     }
 }

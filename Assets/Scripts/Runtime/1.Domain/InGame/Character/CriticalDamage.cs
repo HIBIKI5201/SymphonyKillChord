@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     public readonly struct CriticalDamage
     {

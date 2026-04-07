@@ -16,6 +16,12 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             IsCritical = isCritical;
         }
 
+        public AttackResult(in AttackStepContext attackStepContext)
+        {
+            FinalDamage = attackStepContext.Damage;
+            IsCritical = attackStepContext.CriticalCount > 0;
+        }
+
         /// <summary> 最終的なダメージ量。 </summary>
         public Damage FinalDamage { get; }
         /// <summary> クリティカルヒットかどうかを示すフラグ。 </summary>
