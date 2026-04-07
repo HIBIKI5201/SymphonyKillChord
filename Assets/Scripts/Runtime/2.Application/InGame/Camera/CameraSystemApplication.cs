@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Camera;
+using KillChord.Runtime.Utility;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -27,11 +28,28 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _distance = _parameter.Offset.magnitude;
         }
+        public void TryActiveAutoLockOn()
+        {
+            if (_lockOnState == CameraLockOnState.LockOnManual)
+                return;
+            _lockOnState = CameraLockOnState.LockOnAuto;
+        }
+        public void ToggleLockOnState()
+        {
+            if (_lockOnState == CameraLockOnState.Free)
+                _lockOnState = CameraLockOnState.LockOnManual;
+            else
+                _lockOnState = CameraLockOnState.Free;
+        }
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
         {
+            if (_lockOnState == CameraLockOnState.LockOnAuto && context.Input.sqrMagnitude > float.Epsilon)
+                _lockOnState = CameraLockOnState.Free;
+
+            bool isLockOn = _lockOnState != CameraLockOnState.Free;
             UpdateCameraBone(context);
             _followSystem.Update(ref _cameraCenterOffset, context);
-            _cameraRotationSystem.Update(context.IsLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context);
+            _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context);
 
 
             CalculateCameraPlacement(context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
@@ -66,7 +84,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdateCameraBone(in CameraSystemContext context)
         {
-            if (context.IsLockOn)
+            if (_lockOnState != CameraLockOnState.Free)
                 _boneRotationSystem.Update(ref _cameraBoneRotation, context);
             else
                 _freeLookRotationSystem.Update(ref _cameraBoneRotation, context);
@@ -96,5 +114,6 @@ namespace KillChord.Runtime.Application.InGame.Camera
         private Vector3 _previousCameraPosition;
         private Quaternion _cameraRotation = Quaternion.identity;
         private Quaternion _cameraBoneRotation = Quaternion.identity;
+        private CameraLockOnState _lockOnState;
     }
 }
