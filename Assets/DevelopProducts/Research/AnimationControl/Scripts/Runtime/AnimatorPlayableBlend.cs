@@ -17,9 +17,9 @@ namespace DevelopProducts.AnimationControl.Blender
             Initialize();
         }
 
-        // =========================================
-        // Clip登録（事前生成）
-        // =========================================
+        /// <summary>
+        ///     Clip登録（事前生成）。
+        /// </summary>
         public void Register(AnimationClip clip)
         {
             if (clip == null) { return; }
@@ -42,21 +42,19 @@ namespace DevelopProducts.AnimationControl.Blender
             _clipMap.Add(clip, blendClip);
         }
 
-        // =========================================
-        // 再生
-        // =========================================
-        public void Play(AnimationClip clip)
+        /// <summary>
+        ///     再生（Enter/Exit時間指定）。
+        /// </summary>
+        public void Play(AnimationClip clip, float enterDuration = 0.1f, float exitDuration = 0.1f)
         {
             if (clip == null) { return; }
 
-            // 未登録なら自動登録
             if (!_clipMap.TryGetValue(clip, out AnimationBlendClip blendClip))
             {
                 Register(clip);
                 blendClip = _clipMap[clip];
             }
 
-            // 既存接続を解除
             if (_currentBlendClip.IsValid)
             {
                 _graph.Disconnect(_mixer, 1);
@@ -69,37 +67,79 @@ namespace DevelopProducts.AnimationControl.Blender
             playable.SetTime(0);
             playable.SetDone(false);
 
-            _mixer.SetInputWeight(0, 0f);
-            _mixer.SetInputWeight(1, 1f);
-
-            _playingClip = true;
-
             _currentClip = clip;
             _currentBlendClip = blendClip;
+
+            _enterDuration = Mathf.Max(enterDuration, 0.0001f);
+            _exitDuration = Mathf.Max(exitDuration, 0.0001f);
+
+            _blendTime = 0f;
+            _state = BlendState.Enter;
         }
 
-        // =========================================
-        // 更新
-        // =========================================
+        /// <summary>
+        ///     更新。
+        /// </summary>
         public void Update()
         {
-            if (!_playingClip) { return; }
-
             if (!_currentBlendClip.IsValid) { return; }
 
-            if (_currentBlendClip.ClipPlayable.GetTime() >= _currentClip.length)
-            {
-                _playingClip = false;
+            float deltaTime = Time.deltaTime;
 
-                // Controllerへ戻す
-                _mixer.SetInputWeight(0, 1f);
-                _mixer.SetInputWeight(1, 0f);
+            switch (_state)
+            {
+                case BlendState.Enter:
+                {
+                    _blendTime += deltaTime;
+
+                    float t = Mathf.Clamp01(_blendTime / _enterDuration);
+
+                    // Controller → Clip
+                    _mixer.SetInputWeight(0, 1f - t);
+                    _mixer.SetInputWeight(1, t);
+
+                    if (t >= 1f)
+                    {
+                        _state = BlendState.Play;
+                    }
+                    break;
+                }
+
+                case BlendState.Play:
+                {
+                    double time = _currentBlendClip.ClipPlayable.GetTime();
+                    float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
+
+                    if (time >= exitStartTime)
+                    {
+                        _blendTime = 0f;
+                        _state = BlendState.Exit;
+                    }
+                    break;
+                }
+
+                case BlendState.Exit:
+                {
+                    _blendTime += deltaTime;
+
+                    float t = Mathf.Clamp01(_blendTime / _exitDuration);
+
+                    // Clip → Controller
+                    _mixer.SetInputWeight(0, t);
+                    _mixer.SetInputWeight(1, 1f - t);
+
+                    if (t >= 1f)
+                    {
+                        _state = BlendState.None;
+                    }
+                    break;
+                }
             }
         }
 
-        // =========================================
-        // 解放
-        // =========================================
+        /// <summary>
+        ///     解放。
+        /// </summary>
         public void Dispose()
         {
             if (_graph.IsValid())
@@ -125,11 +165,15 @@ namespace DevelopProducts.AnimationControl.Blender
         private AnimationBlendClip _currentBlendClip;
         private AnimationClip _currentClip;
 
-        private bool _playingClip;
+        private float _enterDuration;
+        private float _exitDuration;
+        private float _blendTime;
 
-        // =========================================
-        // 初期化
-        // =========================================
+        private BlendState _state;
+
+        /// <summary>
+        ///     初期化。
+        /// </summary>
         private void Initialize()
         {
             _graph = PlayableGraph.Create(GRAPH_NAME);
@@ -145,20 +189,19 @@ namespace DevelopProducts.AnimationControl.Blender
             _controllerPlayable =
                 AnimatorControllerPlayable.Create(_graph, _controller);
 
-            // Controllerを0番に接続（常時待機）
             _graph.Connect(_controllerPlayable, 0, _mixer, 0);
 
-            _mixer.SetInputWeight(0, 1f); // Controller
-            _mixer.SetInputWeight(1, 0f); // Clip
+            _mixer.SetInputWeight(0, 1f);
+            _mixer.SetInputWeight(1, 0f);
 
             output.SetSourcePlayable(_mixer);
 
             _graph.Play();
         }
 
-        // =========================================
-        // 内部データ構造
-        // =========================================
+        /// <summary>
+        ///     クリップのPlayableデータ。
+        /// </summary>
         private readonly struct AnimationBlendClip
         {
             public readonly AnimationClip Clip;
@@ -174,6 +217,17 @@ namespace DevelopProducts.AnimationControl.Blender
                 Clip = clip;
                 ClipPlayable = clipPlayable;
             }
+        }
+
+        /// <summary>
+        ///     ブレンド状態。
+        /// </summary>
+        private enum BlendState
+        {
+            None,
+            Enter,
+            Play,
+            Exit
         }
     }
 }
