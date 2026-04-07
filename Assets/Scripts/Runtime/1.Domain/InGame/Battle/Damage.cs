@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
@@ -13,10 +14,15 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="value"> 初期ダメージ量。 </param>
         public Damage(float value)
         {
+            if (value < 0)
+            {
+                throw new ArgumentException("value must be non-negative.", nameof(value)); 
+            }
             if (!float.IsFinite(value))
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "Damage must be finite.");
+                throw new ArgumentException("Damage must be finite.", nameof(value));
             }
+
             if (value < 0) { value = 0; }
             _value = value;
         }
