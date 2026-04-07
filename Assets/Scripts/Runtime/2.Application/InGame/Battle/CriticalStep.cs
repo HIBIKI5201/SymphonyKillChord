@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             float chance = context.AttackDefinition.AttackParameterSet.CriticalChance.Value;
             float multiplier = context.AttackDefinition.AttackParameterSet.CriticalDamage.Value;
 
-            if (Random.value > chance)
+            if (Random.value >= chance)
             {
                 return context;
             }
