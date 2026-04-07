@@ -42,7 +42,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _musicSyncService = initializer.MusicSyncService;
             MusicSyncView view = FindAnyObjectByType<MusicSyncView>();
             _musicSyncViewModel = view.MusicSyncViewModel;
-            _targetEntity = CharacterFactory.Create(_enemyData);
         }
 
         private void Update()
