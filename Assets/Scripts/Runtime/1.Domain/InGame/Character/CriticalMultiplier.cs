@@ -1,11 +1,14 @@
 namespace KillChord.Runtime.Domain.InGame.Character
 {
-    public readonly struct CriticalDamage
+    /// <summary>
+    ///     クリティカルダメージ倍率を表す構造体。
+    /// </summary>
+    public readonly struct CriticalMultiplier
     {
         /// <summary>
         ///     クリティカルダメージ倍率のインスタンスを初期化する。
         /// </summary>
-        public CriticalDamage(float value)
+        public CriticalMultiplier(float value)
         {
             _value = value;
         }
