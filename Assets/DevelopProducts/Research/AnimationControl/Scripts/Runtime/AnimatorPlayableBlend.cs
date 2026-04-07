@@ -1,5 +1,6 @@
 using DevelopProducts.AnimationControl.Adaptor;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -16,48 +17,138 @@ namespace DevelopProducts.AnimationControl.Blender
             Initialize();
         }
 
+        /// <summary>
+        ///     Clip登録（事前生成）。
+        /// </summary>
+        public void Register(AnimationBlendClipRequest request)
+        {
+            AnimationClip clip = request.Clip;
+            if (clip == null) { return; }
+
+            if (_clipMap.ContainsKey(clip))
+            {
+                return;
+            }
+
+            AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+
+            clipPlayable.SetApplyFootIK(false);
+            clipPlayable.SetApplyPlayableIK(false);
+
+            var blendClip = new AnimationBlendClipData(
+                request,
+                clipPlayable
+            );
+
+            _clipMap.Add(clip, blendClip);
+        }
+
+        /// <summary>
+        ///     再生（Enter/Exit時間指定）。
+        /// </summary>
         public void Play(AnimationClip clip)
         {
-            if (_clipPlayable.IsValid())
+            if (clip == null) { return; }
+
+            if (!_clipMap.TryGetValue(clip, out AnimationBlendClipData blendClip))
+            {
+                Register(new(clip));
+                blendClip = _clipMap[clip];
+            }
+
+            if (_currentBlendClip.IsValid)
             {
                 _graph.Disconnect(_mixer, 1);
-                _clipPlayable.Destroy();
             }
 
-            _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            var playable = blendClip.ClipPlayable;
 
-            _graph.Connect(_clipPlayable, 0, _mixer, 1);
+            _graph.Connect(playable, 0, _mixer, 1);
 
-            _clipPlayable.SetTime(0);
-            _clipPlayable.SetDone(false);
-
-            _playingClip = true;
-
-            _mixer.SetInputWeight(0, 0f);
-            _mixer.SetInputWeight(1, 1f);
+            playable.SetTime(0);
+            playable.SetDone(false);
 
             _currentClip = clip;
+            _currentBlendClip = blendClip;
+
+            _enterDuration = Mathf.Max(blendClip.EnterDuration, 0.0001f);
+            _exitDuration = Mathf.Max(blendClip.ExitDuration, 0.0001f);
+
+            _blendTime = 0f;
+            _state = BlendState.Enter;
         }
 
+        /// <summary>
+        ///     更新。
+        /// </summary>
         public void Update()
         {
-            if (!_playingClip) { return; }
+            if (!_currentBlendClip.IsValid) { return; }
 
-            if (_clipPlayable.GetTime() >= _currentClip.length)
+            float deltaTime = Time.deltaTime;
+            
+            switch (_state)
             {
-                _playingClip = false;
+                case BlendState.Enter:
+                {
+                    _blendTime += deltaTime;
 
-                _mixer.SetInputWeight(0, 1f);
-                _mixer.SetInputWeight(1, 0f);
+                    float t = Mathf.Clamp01(_blendTime / _enterDuration);
+
+                    // Controller → Clip
+                    _mixer.SetInputWeight(0, 1f - t);
+                    _mixer.SetInputWeight(1, t);
+
+                    if (t >= 1f)
+                    {
+                        _state = BlendState.Play;
+                    }
+                    break;
+                }
+
+                case BlendState.Play:
+                {
+                    double time = _currentBlendClip.ClipPlayable.GetTime();
+                    float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
+
+                    if (time >= exitStartTime)
+                    {
+                        _blendTime = 0f;
+                        _state = BlendState.Exit;
+                    }
+                    break;
+                }
+
+                case BlendState.Exit:
+                {
+                    _blendTime += deltaTime;
+
+                    float t = Mathf.Clamp01(_blendTime / _exitDuration);
+
+                    // Clip → Controller
+                    _mixer.SetInputWeight(0, t);
+                    _mixer.SetInputWeight(1, 1f - t);
+
+                    if (t >= 1f)
+                    {
+                        _state = BlendState.None;
+                    }
+                    break;
+                }
             }
         }
 
+        /// <summary>
+        ///     解放。
+        /// </summary>
         public void Dispose()
         {
             if (_graph.IsValid())
             {
                 _graph.Destroy();
             }
+
+            _clipMap.Clear();
         }
 
         private const string ANIMATION_OUTPUT_NAME = "AnimationOutput";
@@ -68,12 +159,22 @@ namespace DevelopProducts.AnimationControl.Blender
 
         private PlayableGraph _graph;
         private AnimationMixerPlayable _mixer;
-        private AnimationClipPlayable _clipPlayable;
         private AnimatorControllerPlayable _controllerPlayable;
 
-        private AnimationClip _currentClip;
-        private bool _playingClip;
+        private readonly Dictionary<AnimationClip, AnimationBlendClipData> _clipMap = new();
 
+        private AnimationBlendClipData _currentBlendClip;
+        private AnimationClip _currentClip;
+
+        private float _enterDuration;
+        private float _exitDuration;
+        private float _blendTime;
+
+        private BlendState _state;
+
+        /// <summary>
+        ///     初期化。
+        /// </summary>
         private void Initialize()
         {
             _graph = PlayableGraph.Create(GRAPH_NAME);
@@ -89,12 +190,7 @@ namespace DevelopProducts.AnimationControl.Blender
             _controllerPlayable =
                 AnimatorControllerPlayable.Create(_graph, _controller);
 
-            // 空Clipで初期化
-            _clipPlayable =
-                AnimationClipPlayable.Create(_graph, new AnimationClip());
-
             _graph.Connect(_controllerPlayable, 0, _mixer, 0);
-            _graph.Connect(_clipPlayable, 0, _mixer, 1);
 
             _mixer.SetInputWeight(0, 1f);
             _mixer.SetInputWeight(1, 0f);
@@ -102,6 +198,17 @@ namespace DevelopProducts.AnimationControl.Blender
             output.SetSourcePlayable(_mixer);
 
             _graph.Play();
+        }
+
+        /// <summary>
+        ///     ブレンド状態。
+        /// </summary>
+        private enum BlendState
+        {
+            None,
+            Enter,
+            Play,
+            Exit
         }
     }
 }
