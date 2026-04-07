@@ -16,10 +16,10 @@ namespace KillChord.Runtime.Application.InGame.Battle
             if (context.Damage.Value < confirmedDamage.Value)
             {
                 Debug.Log($"[ConfirmedDamage] Damage increased from {context.Damage.Value} to {confirmedDamage.Value}.");
-                return context;
+                return new AttackStepContext(confirmedDamage, context.CriticalCount, context);
             }
 
-            return new AttackStepContext(confirmedDamage, context.CriticalCount, context);
+            return context;
         }
     }
 }
