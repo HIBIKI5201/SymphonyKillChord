@@ -23,7 +23,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         }
         public void Update(
             in Vector3 followPosition,
-            in Vector3 targetPosition,
             in Vector2 input,
             float deltaTime,
             out Quaternion resultRotation,
@@ -32,7 +31,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         {
             CameraSystemContext context = new(
                  followPosition,
-                 targetPosition,
                  input,
                  deltaTime
             );

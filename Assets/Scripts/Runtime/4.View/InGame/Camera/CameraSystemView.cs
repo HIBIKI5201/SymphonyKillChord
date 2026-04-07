@@ -14,8 +14,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField] private Transform _playerT;
 
-        [SerializeField] private Transform _target;
-
         [SerializeField] private CameraLockOnState _lockOnState;
 
         [SerializeField] private UpdateModeEnum _updateMode;
@@ -59,7 +57,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             _controller.Update(
                 _playerT.position,
-                _target.position,
                 input,
                 deltaTime,
                 out Quaternion rotation,

@@ -13,9 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _parameter = parameter;
         }
 
-        public void Update(ref Quaternion cameraBoneRotation, in CameraSystemContext context)
+        public void Update(ref Quaternion cameraBoneRotation, in CameraSystemContext context, in Vector3 TargetPosition)
         {
-            Vector3 followDir = context.TargetPosition - context.FollowPosition;
+            Vector3 followDir = TargetPosition - context.FollowPosition;
             followDir.y = 0;
             if (followDir.sqrMagnitude <= float.Epsilon)
             {
