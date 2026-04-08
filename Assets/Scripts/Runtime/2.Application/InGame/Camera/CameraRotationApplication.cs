@@ -18,13 +18,14 @@ namespace KillChord.Runtime.Application.InGame.Camera
             ref Quaternion rotation,
             in Quaternion boneRotation,
             in Vector3 cameraPosition,
-            in CameraSystemContext context
+            in CameraSystemContext context,
+            in Vector3 TargetPosition
         )
         {
             Quaternion target = Quaternion.identity;
             if (isLockOn)
             {
-                Vector3 lerpPosition = Vector3.Lerp(context.FollowPosition, context.TargetPosition, _parameter.LockOnLookAtRatio);
+                Vector3 lerpPosition = Vector3.Lerp(context.FollowPosition, TargetPosition, _parameter.LockOnLookAtRatio);
                 Vector3 dir = lerpPosition - cameraPosition;
                 if (dir.sqrMagnitude > float.Epsilon)
                 {

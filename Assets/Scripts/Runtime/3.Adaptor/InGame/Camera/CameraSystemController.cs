@@ -13,17 +13,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         {
             _application = application;
         }
-        public void TryActiveAutoLockOn()
+        public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            _application.TryActiveAutoLockOn();
+            _application.TryActiveAutoLockOn(currentPosition);
         }
-        public void ToggleLockOnState()
+        public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            _application.ToggleLockOnState();
+            _application.ToggleLockOnState(currentPosition);
         }
         public void Update(
             in Vector3 followPosition,
-            in Vector3 targetPosition,
             in Vector2 input,
             float deltaTime,
             out Quaternion resultRotation,
@@ -32,7 +31,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         {
             CameraSystemContext context = new(
                  followPosition,
-                 targetPosition,
                  input,
                  deltaTime
             );

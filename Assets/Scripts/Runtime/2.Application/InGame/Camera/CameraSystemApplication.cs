@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
             CameraBoneLockOnRotationApplication boneRotationSystem,
             CameraBoneFreeLookRotationApplication freeLookRotationSystem,
             CameraRotationApplication cameraRotationSystem,
+            TargetSelector targetSelector,
             int collisionMask
         )
         {
@@ -25,18 +26,21 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _freeLookRotationSystem = freeLookRotationSystem;
             _cameraRotationSystem = cameraRotationSystem;
             _collisionMask = collisionMask;
+            _targetSelector = targetSelector;
 
             _distance = _parameter.Offset.magnitude;
         }
-        public void TryActiveAutoLockOn()
+        public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            if (_lockOnState == CameraLockOnState.LockOnManual)
+            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+            if (_lockOnState == CameraLockOnState.LockOnManual || !_targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
                 return;
             _lockOnState = CameraLockOnState.LockOnAuto;
         }
-        public void ToggleLockOnState()
+        public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            if (_lockOnState == CameraLockOnState.Free)
+            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+            if (_lockOnState == CameraLockOnState.Free && _targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
                 _lockOnState = CameraLockOnState.LockOnManual;
             else
                 _lockOnState = CameraLockOnState.Free;
@@ -47,9 +51,16 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 _lockOnState = CameraLockOnState.Free;
 
             bool isLockOn = _lockOnState != CameraLockOnState.Free;
-            UpdateCameraBone(context);
+            Vector3 targetPosition = Vector3.zero;
+            if (isLockOn)
+            {
+                Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+                _targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition);
+            }
+
+            UpdateCameraBone(context, targetPosition);
             _followSystem.Update(ref _cameraCenterOffset, context);
-            _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context);
+            _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context, targetPosition);
 
 
             CalculateCameraPlacement(context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
@@ -82,10 +93,10 @@ namespace KillChord.Runtime.Application.InGame.Camera
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void UpdateCameraBone(in CameraSystemContext context)
+        private void UpdateCameraBone(in CameraSystemContext context, in Vector3 targetPosition)
         {
             if (_lockOnState != CameraLockOnState.Free)
-                _boneRotationSystem.Update(ref _cameraBoneRotation, context);
+                _boneRotationSystem.Update(ref _cameraBoneRotation, context, targetPosition);
             else
                 _freeLookRotationSystem.Update(ref _cameraBoneRotation, context);
         }
@@ -106,6 +117,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
         private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
         private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
         private readonly CameraRotationApplication _cameraRotationSystem;
+        private readonly TargetSelector _targetSelector;
 
         private readonly int _collisionMask;
 

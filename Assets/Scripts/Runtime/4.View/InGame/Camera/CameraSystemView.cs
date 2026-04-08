@@ -14,8 +14,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField] private Transform _playerT;
 
-        [SerializeField] private Transform _target;
-
         [SerializeField] private CameraLockOnState _lockOnState;
 
         [SerializeField] private UpdateModeEnum _updateMode;
@@ -59,7 +57,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             _controller.Update(
                 _playerT.position,
-                _target.position,
                 input,
                 deltaTime,
                 out Quaternion rotation,
@@ -70,10 +67,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void UpdateInput(out Vector2 input)
         {
             if (Input.GetKeyDown(KeyCode.Mouse2))
-                _controller.ToggleLockOnState();
+                _controller.ToggleLockOnState(_playerT.position);
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
-                _controller.TryActiveAutoLockOn();
+                _controller.TryActiveAutoLockOn(_playerT.position);
 
             input.x = Input.GetAxisRaw("Mouse X");
             input.y = Input.GetAxisRaw("Mouse Y");
