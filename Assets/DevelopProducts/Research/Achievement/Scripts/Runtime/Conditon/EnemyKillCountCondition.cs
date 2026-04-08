@@ -4,7 +4,7 @@ namespace DevelopProducts.Achievement
 {
     public class EnemyKillCountCondition : IAchievementCondition
     {
-        public bool CheckAchievement(AchievementContext context)
+        public bool CheckAchievement(in AchievementContext context)
         {
             return _value < context.EnemyKillCount;
         }

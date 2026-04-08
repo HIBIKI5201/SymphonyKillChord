@@ -2,6 +2,6 @@ namespace DevelopProducts.Achievement
 {
     public interface IAchievementCondition
     {
-        public bool CheckAchievement(AchievementContext context);
+        public bool CheckAchievement(in AchievementContext context);
     }
 }
