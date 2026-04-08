@@ -28,7 +28,7 @@ namespace KillChord.Runtime.View
             }
             else
             {
-                Debug.LogError($"[IngameSceneView] Scene {sceneName} does not exist.]");
+                Debug.LogError($"[IngameSceneView] Scene {sceneName} does not exist.");
                 return default;
             }
         }
