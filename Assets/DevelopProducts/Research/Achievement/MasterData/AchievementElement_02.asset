@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4a398afe5989704a86ccd0654de0471, type: 3}
   m_Name: AchievementElement_02
   m_EditorClassIdentifier: DevelopProducts-Achievement::DevelopProducts.Achievement.AchievementElement
-  _id: 
+  _id: 02
   _conditions:
   - rid: 1992203118183186555
   _asset:
