@@ -184,6 +184,55 @@ Transform:
   - {fileID: 1275434601}
   m_Father: {fileID: 1643110729}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &438459088
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 438459090}
+  - component: {fileID: 438459089}
+  m_Layer: 0
+  m_Name: IngameComposition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &438459089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be24e48ffe8c5d4891751ddbd8377b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.IngameComposition
+  _playerInitializer: {fileID: 1114030568}
+  _musicSyncInitializer: {fileID: 1249666141}
+  _camerasystemInitializer: {fileID: 533730526}
+  _skillInitializer: {fileID: 1114030570}
+  _backgroundSceneName: Persistent
+--- !u!4 &438459090
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.04016, y: 0.39084, z: 0.4604}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &456552175
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,6 +357,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6603128112584395780, guid: a259115a9df77c44da61ba832833f97b, type: 3}
   m_PrefabInstance: {fileID: 533730524}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &533730526 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
+  m_PrefabInstance: {fileID: 533730524}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f975f23e67a3ea544a3bff6e3c90e7e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.TestCameraInitializer
 --- !u!1001 &1114030566
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -379,13 +439,45 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1265923734034419227, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1114030570}
   m_SourcePrefab: {fileID: 100100000, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
 --- !u!4 &1114030567 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
   m_PrefabInstance: {fileID: 1114030566}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1114030568 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 347656024251436478, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
+  m_PrefabInstance: {fileID: 1114030566}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114030569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
+--- !u!1 &1114030569 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1265923734034419227, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
+  m_PrefabInstance: {fileID: 1114030566}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1114030570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114030569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d24540182c664045867ee6da2f0dd10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
+  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
 --- !u!1 &1136649842
 GameObject:
   m_ObjectHideFlags: 0
@@ -1340,3 +1432,4 @@ SceneRoots:
   - {fileID: 2031779337}
   - {fileID: 1114030566}
   - {fileID: 1249666143}
+  - {fileID: 438459090}

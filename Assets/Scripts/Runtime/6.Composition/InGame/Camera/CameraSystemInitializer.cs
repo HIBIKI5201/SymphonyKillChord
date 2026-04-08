@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private CameraSystemConfig _config;
 
-        private void Awake()
+        public void Initialize()
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -27,7 +27,8 @@ namespace KillChord.Runtime.Composition
             CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
             CameraRotationApplication rotationSystem = new(parameter);
             CameraFollowApplication followSystem = new(parameter);
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, freeLookRotationSystem, rotationSystem, _config.CollisionMask);
+            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
+                freeLookRotationSystem, rotationSystem, _config.CollisionMask);
 
             CameraSystemController controller = new(application);
             _cameraSystem.Init(controller);
