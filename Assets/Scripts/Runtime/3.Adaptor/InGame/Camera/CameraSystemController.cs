@@ -13,13 +13,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         {
             _application = application;
         }
-        public void TryActiveAutoLockOn()
+        public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            _application.TryActiveAutoLockOn();
+            _application.TryActiveAutoLockOn(currentPosition);
         }
-        public void ToggleLockOnState()
+        public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            _application.ToggleLockOnState();
+            _application.ToggleLockOnState(currentPosition);
         }
         public void Update(
             in Vector3 followPosition,
