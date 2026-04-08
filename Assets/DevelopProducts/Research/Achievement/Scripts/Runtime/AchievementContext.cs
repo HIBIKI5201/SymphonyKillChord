@@ -8,6 +8,8 @@ namespace DevelopProducts.Achievement
             _enemyKillCount = enemyKillCount;
         }
 
+        public int EnemyKillCount => _enemyKillCount;
+
         private readonly int _enemyKillCount;
     }
 }
