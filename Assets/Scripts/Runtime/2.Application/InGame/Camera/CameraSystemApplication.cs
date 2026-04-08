@@ -30,15 +30,17 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _distance = _parameter.Offset.magnitude;
         }
-        public void TryActiveAutoLockOn()
+        public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            if (_lockOnState == CameraLockOnState.LockOnManual || !_targetSelector.TryGetTargetPosition(out _))
+            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+            if (_lockOnState == CameraLockOnState.LockOnManual || !_targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
                 return;
             _lockOnState = CameraLockOnState.LockOnAuto;
         }
-        public void ToggleLockOnState()
+        public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            if (_lockOnState == CameraLockOnState.Free && _targetSelector.TryGetTargetPosition(out _))
+            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+            if (_lockOnState == CameraLockOnState.Free && _targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
                 _lockOnState = CameraLockOnState.LockOnManual;
             else
                 _lockOnState = CameraLockOnState.Free;
@@ -52,7 +54,8 @@ namespace KillChord.Runtime.Application.InGame.Camera
             Vector3 targetPosition = Vector3.zero;
             if (isLockOn)
             {
-                _targetSelector.TryGetTargetPosition(out targetPosition);
+                Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+                _targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition);
             }
 
             UpdateCameraBone(context, targetPosition);
