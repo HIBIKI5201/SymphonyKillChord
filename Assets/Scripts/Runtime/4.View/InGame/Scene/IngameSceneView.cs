@@ -28,20 +28,14 @@ namespace KillChord.Runtime.View
             }
             else
             {
-                Debug.LogError($"[IngameSceneView] Scene {sceneName} does not exist.]");
+                Debug.LogError($"[IngameSceneView] Scene {sceneName} does not exist.");
                 return default;
             }
         }
 
         public async ValueTask UnloadAllScenes()
         {
-            var unloadTasks = new Task<bool>[_loadedScenes.Count];
-            for (int i = 0; i < _loadedScenes.Count; i++)
-            {
-                unloadTasks[i] = SceneLoader.UnloadScene(_loadedScenes[i]).AsTask();
-            }
-
-            await Task.WhenAll(unloadTasks);
+            await SceneLoader.UnloadScenes(_loadedScenes.ToArray());
         }
     }
 }
