@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
@@ -11,7 +12,6 @@ using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,7 +34,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             Transform target,
             IHitTarget targetEntity,
             IMusicSyncViewModel musicSyncViewModel,
-            IMusicSyncService musicSyncService
+            IMusicSyncService musicSyncService,
+            TargetManagerController targetManagerController
             )
         {
             CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
@@ -64,7 +65,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
 
             // View接続
-            _view.Initialize(controller, target);
+            _view.Initialize(controller, target, targetManagerController);
         }
     }
 }

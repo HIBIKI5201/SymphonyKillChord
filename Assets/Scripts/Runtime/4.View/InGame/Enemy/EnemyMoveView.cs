@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,10 +12,12 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
-        public void Initialize(EnemyAIController enemyAIController, Transform target)
+        public void Initialize(EnemyAIController enemyAIController, Transform target, TargetManagerController targetManagerController)
         {
             _enemyAIController = enemyAIController;
             _target = target;
+            _targetManagerController = targetManagerController;
+            _targetManagerController.Register(transform);
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
         }
@@ -22,6 +25,7 @@ namespace KillChord.Runtime.View.InGame
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
+        private TargetManagerController _targetManagerController;
 
         private void Awake()
         {
@@ -44,6 +48,7 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
+            _targetManagerController.Unregister(transform);
         }
 
         private void ApplyMove(EnemyMoveInstruction intruction)
