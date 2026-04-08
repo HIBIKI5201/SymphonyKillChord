@@ -32,12 +32,14 @@ namespace KillChord.Runtime.Adaptor
 
         public EnemyMoveInstruction Tick(Vector3 enemyPosition, Vector3 targetPosition)
         {
-            EnemyMoveDecision moveDecision = _enemyMoveUsecase.Tick(enemyPosition, targetPosition);
+            EnemyMoveDecision moveDecision = _enemyMoveUsecase.Evaluate(enemyPosition, targetPosition);
+            Debug.Log($"[EnemyAIController] ShouldMove={moveDecision.ShouldMove}, IsInAttackRange={_enemyBattleState.IsInAttackRange}");
 
             if (moveDecision.ShouldMove)
             {
                 if (_enemyBattleState.IsInAttackRange)
                 {
+                    Debug.Log("[EnemyAIController] 攻撃範囲から出たので予約キャンセル");
                     _enemyBattleState.ExitRange();
                     _enemyAttackReservationUsecase.Cancel();
                 }
@@ -50,10 +52,12 @@ namespace KillChord.Runtime.Adaptor
 
             if (!_enemyBattleState.IsInAttackRange)
             {
+                Debug.Log("[EnemyAIController] 攻撃範囲に入った");
                 _enemyBattleState.EnterRange();
 
                 if (!_enemyAttackReservationUsecase.HasReservation)
                 {
+                    Debug.Log("[EnemyAIController] Encounter予約開始");
                     _enemyAttackReservationUsecase.ReserveEncounter();
                     OnAttackReserved?.Invoke();
                 }
@@ -71,17 +75,14 @@ namespace KillChord.Runtime.Adaptor
             _enemyAttackReservationUsecase.Dispose();
         }
 
-        private readonly EnemyMoveUsecase _enemyMoveUsecase;
-        private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
-        private readonly EnemyAttackUsecase _enemyAttackUsecase;
-        private readonly EnemyBattleState _enemyBattleState;
-
         private void HandleReservedTimingReached()
         {
+            Debug.Log("[EnemyAIController] HandleReservedTimingReached 呼ばれた");
+
             _enemyAttackUsecase.ExecuteAttack(
+                _enemyBattleState.CurrentAttack,
                 _enemyBattleState.Attacker,
-                _enemyBattleState.Target,
-                _enemyBattleState.AttackId);
+                _enemyBattleState.Target);
 
             OnAttack?.Invoke();
 
@@ -91,5 +92,10 @@ namespace KillChord.Runtime.Adaptor
                 OnAttackReserved?.Invoke();
             }
         }
+
+        private readonly EnemyMoveUsecase _enemyMoveUsecase;
+        private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
+        private readonly EnemyAttackUsecase _enemyAttackUsecase;
+        private readonly EnemyBattleState _enemyBattleState;
     }
 }

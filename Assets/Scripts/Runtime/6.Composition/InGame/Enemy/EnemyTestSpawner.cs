@@ -3,6 +3,8 @@ using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
@@ -15,11 +17,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyTestSpawner : MonoBehaviour
     {
+
         public void SetTargetManager(TargetManager targetManager)
         {
             _targetManager = targetManager;
         }
-        public void SetTargetEntity(IHitTarget targetEntity)
+        public void SetTargetEntity(IDefender targetEntity)
         {
             _targetEntity = targetEntity;
         }
@@ -30,8 +33,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private float _spawnInterval;
         [SerializeField] private int _maxSpawnCount;
 
+        [SerializeField] private CharacterData _enemyData;
+
         private IMusicSyncViewModel _musicSyncViewModel;
         private IMusicSyncService _musicSyncService;
+        private IDefender _targetEntity;
         private IHitTarget _targetEntity;
         private TargetManager _targetManager;
         private TargetManagerController _targetManagerController;
@@ -68,7 +74,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
-            enemyInstance.Initialize(_target, _targetEntity, _musicSyncViewModel, _musicSyncService, _targetManagerController);
+            enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity, _musicSyncViewModel, _musicSyncService);
 
             _spawnCount++;
         }
