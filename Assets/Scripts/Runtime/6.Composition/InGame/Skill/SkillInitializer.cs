@@ -19,6 +19,7 @@ namespace KillChord.Runtime.Composition
 
         public void Inject(IMusicSyncService arg0)
         {
+            _musicSyncService = arg0;
         }
     }
 }
