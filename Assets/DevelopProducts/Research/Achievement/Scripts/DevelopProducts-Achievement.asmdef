@@ -1,7 +1,10 @@
 {
     "name": "DevelopProducts-Achievement",
     "rootNamespace": "DevelopProducts.Achievement",
-    "references": [],
+    "references": [
+        "GUID:c8a23a053cdb72f4c9c0fe6b76b389aa",
+        "GUID:68a532f43eeefd5408e4e8871b769ee4"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -10,6 +13,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false,
-    "platforms": []
+    "noEngineReferences": false
 }
