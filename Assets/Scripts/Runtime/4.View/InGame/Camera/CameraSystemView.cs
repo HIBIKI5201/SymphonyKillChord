@@ -67,10 +67,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void UpdateInput(out Vector2 input)
         {
             if (Input.GetKeyDown(KeyCode.Mouse2))
-                _controller.ToggleLockOnState();
+                _controller.ToggleLockOnState(_playerT.position);
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
-                _controller.TryActiveAutoLockOn();
+                _controller.TryActiveAutoLockOn(_playerT.position);
 
             input.x = Input.GetAxisRaw("Mouse X");
             input.y = Input.GetAxisRaw("Mouse Y");
