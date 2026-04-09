@@ -32,16 +32,22 @@ namespace KillChord.Runtime.Application.InGame.Camera
         }
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
-            if (_lockOnState == CameraLockOnState.LockOnManual || !_targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
+            if (_lockOnState == CameraLockOnState.LockOnManual)
                 return;
             _lockOnState = CameraLockOnState.LockOnAuto;
+
+            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+            _targetSelector.ChangeTarget(currentPosition, dir);
         }
         public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
-            if (_lockOnState == CameraLockOnState.Free && _targetSelector.TryGetTargetPosition(currentPosition, dir, out _))
+            if (_lockOnState == CameraLockOnState.Free)
+            {
                 _lockOnState = CameraLockOnState.LockOnManual;
+
+                Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
+                _targetSelector.ChangeTarget(currentPosition, dir);
+            }
             else
                 _lockOnState = CameraLockOnState.Free;
         }
@@ -52,10 +58,13 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             bool isLockOn = _lockOnState != CameraLockOnState.Free;
             Vector3 targetPosition = Vector3.zero;
-            if (isLockOn)
+            if (_lockOnState != CameraLockOnState.Free)
             {
                 Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
-                _targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition);
+                if (!_targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition))
+                {
+                    _lockOnState = CameraLockOnState.Free;
+                }
             }
 
             UpdateCameraBone(context, targetPosition);

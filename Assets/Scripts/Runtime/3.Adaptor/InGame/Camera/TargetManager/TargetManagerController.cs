@@ -1,24 +1,23 @@
-using KillChord.Runtime.Domain.InGame;
-using UnityEngine;
+using KillChord.Runtime.Application.InGame;
 
 namespace KillChord.Runtime.Adaptor.InGame
 {
     public sealed class TargetManagerController
     {
-        public TargetManagerController(ITargetRegisteable targetRegisteable)
+        public TargetManagerController(TargetManager targetManager)
         {
-            _targetRegisteable = targetRegisteable;
+            _manager = targetManager;
         }
 
-        public void Register(Transform target)
+        public void Register(LockOnTargetGateway gateway)
         {
-            _targetRegisteable.Register(target);
+            _manager.Register(gateway);
         }
-        public void Unregister(Transform target)
+        public void Unregister(LockOnTargetGateway gateway)
         {
-            _targetRegisteable.Unregister(target);
+            _manager.Unregister(gateway);
         }
 
-        private readonly ITargetRegisteable _targetRegisteable;
+        private readonly TargetManager _manager;
     }
 }
