@@ -13,13 +13,13 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _parameter = parameter;
         }
 
-        public void Update(ref Quaternion cameraBoneRotation, Vector2 input, float deltaTime)
+        public void Update(ref Quaternion cameraBoneRotation, in CameraSystemContext context)
         {
             Vector3 euler = cameraBoneRotation.eulerAngles;
             if (euler.x > 180) euler.x -= 360;
 
-            float yaw = euler.y + input.x * _parameter.FollowRotationSpeed * deltaTime;
-            float pitch = euler.x - input.y * _parameter.FollowRotationSpeed * deltaTime;
+            float yaw = euler.y + context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
+            float pitch = euler.x - context.Input.y * _parameter.FollowRotationSpeed * context.DeltaTime;
 
             // ピッチ角の制限
             pitch = Mathf.Clamp(pitch, _parameter.PitchRange.x, _parameter.PitchRange.y);

@@ -1,4 +1,5 @@
 using DevelopProducts.AnimationControl.Adaptor;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,12 +24,12 @@ namespace DevelopProducts.AnimationControl.Blender
         private float _acceleration = 0.95f;
 
         [SerializeField]
-        private AnimationClip _playClip;
+        private AnimationData[] _playClip;
+
         [SerializeField]
-        private Key _playKey = Key.Space;
+        private AnimatorUpdateMode _mode;
 
         private Animator _animator;
-        private RuntimeAnimatorController _controller;
         private AnimatorPlayableBlend _blender;
         private SymphonyAnimeAdaptor _adaptor;
 
@@ -37,9 +38,14 @@ namespace DevelopProducts.AnimationControl.Blender
         private void Awake()
         {
             _animator = GetComponent<Animator>();
-            _controller = _animator.runtimeAnimatorController;
             _adaptor = new SymphonyAnimeAdaptor(_animator);
             _blender = new AnimatorPlayableBlend(_adaptor);
+
+            for (int i = 0; i < _playClip.Length; i++)
+            {
+                AnimationData data = _playClip[i];
+                _blender.Register(new AnimationBlendClipRequest(data.Clip, data.EnterDuration, data.ExitDuration));
+            }
         }
 
         private void Update()
@@ -62,22 +68,60 @@ namespace DevelopProducts.AnimationControl.Blender
             {
                 acc += Vector2.left;
             }
+            acc.Normalize();
+            _velocity = Vector2.Lerp(_velocity, acc, _acceleration);
 
-
-            if (Keyboard.current[_playKey].wasPressedThisFrame)
+            for (int i = 0; i < _playClip.Length; i++)
             {
-                _blender.Play(_playClip);
+                AnimationData data = _playClip[i];
+                if (Keyboard.current[data.Key].wasPressedThisFrame)
+                {
+                    _blender.Play(data.Clip);
+                }
             }
 
-            _velocity = Vector2.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
-
             _adaptor.SetVelocity(_velocity);
-            _blender?.Update();
+
+            if (_mode == AnimatorUpdateMode.Normal)
+            {
+                BlendUpdate();
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_mode == AnimatorUpdateMode.Fixed)
+            {
+                BlendUpdate();
+            }
         }
 
         private void OnDestroy()
         {
             _blender?.Dispose();
+        }
+
+        private void BlendUpdate()
+        {
+            _blender?.Update();
+        }
+
+        [Serializable]
+        private struct AnimationData
+        {
+            public AnimationClip Clip => _clip;
+            public Key Key => _key;
+            public float EnterDuration => _enterDuration;
+            public float ExitDuration => _exitDuration;
+
+            [SerializeField]
+            private AnimationClip _clip;
+            [SerializeField]
+            private Key _key;
+            [SerializeField]
+            private float _enterDuration;
+            [SerializeField]
+            private float _exitDuration;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// <summary>
     ///     複数の攻撃処理ステップを順番に実行するクラス。
     /// </summary>
-    public class AttackPipeline
+    public class AttackPipeline : IAttackPipeline
     {
         /// <summary>
         ///     コンストラクタ。
@@ -35,14 +35,16 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public AttackResult Execute(AttackContext context)
+        public AttackResult Execute(in AttackStepContext context)
         {
+            AttackStepContext currentContext = context;
+
             for (int i = 0; i < _attackSteps.Length; i++)
             {
-                _attackSteps[i].Execute(ref context);
+                currentContext = _attackSteps[i].Execute(currentContext);
             }
 
-            return new AttackResult(context.CurrentDamage, context.IsCritical);
+            return new AttackResult(currentContext);
         }
 
         private readonly IAttackStep[] _attackSteps;

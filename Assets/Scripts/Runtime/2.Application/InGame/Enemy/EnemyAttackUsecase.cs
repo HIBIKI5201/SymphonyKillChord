@@ -1,7 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
@@ -11,25 +10,45 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class EnemyAttackUsecase
     {
-        public EnemyAttackUsecase(AttackExecutor attackExecutor, IMusicSyncService musicSyncService)
+        /// <summary>
+        /// 敵の攻撃を実行するユースケースクラスのインスタンスを生成する。
+        /// </summary>
+        /// <param name="musicSyncService"></param>
+        public EnemyAttackUsecase(IMusicSyncService musicSyncService)
         {
-            _attackExecutor = attackExecutor;
             _musicSyncService = musicSyncService;
         }
 
-        public AttackResult ExecuteAttack(CharacterEntity attacker, IHitTarget target, AttackId attackId)
+        /// <summary>
+        ///     攻撃を実行する。
+        ///     履歴の登録も行う。
+        /// </summary>
+        /// <param name="attackDefinition"></param>
+        /// <param name="attacker"></param>
+        /// <param name="defender"></param>
+        /// <returns></returns>
+        public AttackResult ExecuteAttack(
+            AttackDefinition attackDefinition,
+            IAttacker attacker,
+            IDefender defender
+            )
         {
-            if (attacker == null || target == null)
+            if (attackDefinition == null)
             {
-                Debug.LogError("Attacker or Target is null.");
+                Debug.LogError("[EnemyAttackUsecase] attackDefinition is null");
                 return default;
             }
 
+            Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
+
+            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender);
+
+            Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
+
             _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack);
-            return _attackExecutor.Execute(attacker, target, attackId);
+            return result;
         }
 
-        private readonly AttackExecutor _attackExecutor;
         private readonly IMusicSyncService _musicSyncService;
     }
 }

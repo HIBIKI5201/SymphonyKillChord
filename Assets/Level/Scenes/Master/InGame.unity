@@ -295,6 +295,10 @@ PrefabInstance:
       propertyPath: _playerT
       value: 
       objectReference: {fileID: 1114030567}
+    - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
+      propertyPath: _enemyTestSpawner
+      value: 
+      objectReference: {fileID: 1136649843}
     - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: Lens.ModeOverride
       value: 0
@@ -512,6 +516,7 @@ MonoBehaviour:
   _spawnPoint: {fileID: 1136649844}
   _spawnInterval: 5
   _maxSpawnCount: 10
+  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!4 &1136649844
 Transform:
   m_ObjectHideFlags: 0
