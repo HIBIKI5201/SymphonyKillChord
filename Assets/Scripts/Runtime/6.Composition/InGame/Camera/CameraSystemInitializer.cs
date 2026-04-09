@@ -1,9 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
+using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Camera;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
