@@ -13,13 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _parameter = parameter;
         }
 
-        public void Update(
-            ref Vector3 cameraCenterPosition,
-            in Vector3 followPosition,
-            float deltaTime
-            )
+        public void Update(ref Vector3 cameraCenterPosition, in CameraSystemContext context)
         {
-            Vector3 targetFollowCenterOffset = -_followVelocity.UpdateFollowVelocity(followPosition, deltaTime);
+            Vector3 targetFollowCenterOffset = -_followVelocity.UpdateFollowVelocity(context.FollowPosition, context.DeltaTime);
             targetFollowCenterOffset.y = 0;
             if (targetFollowCenterOffset.sqrMagnitude >= _parameter.FollowOffsetPower * _parameter.FollowOffsetPower)
             {
@@ -27,7 +23,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 targetFollowCenterOffset *= _parameter.FollowOffsetPower;
             }
 
-            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * deltaTime);
+            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * context.DeltaTime);
         }
 
         private readonly CameraSystemParameter _parameter;
