@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public class TestSkillEffect : ISkillEffect
     {
-        public void Execute()
+        public void Do()
         {
             Debug.Log("SkillEffect Do");
         }

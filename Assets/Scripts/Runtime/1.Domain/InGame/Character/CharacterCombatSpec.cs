@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         ///     コンストラクタ。
         /// </summary>
         /// <param name="attackDifinitions"></param>
-        public CharacterCombatSpec(IReadOnlyList<AttackDefinition> attackDifinitions)
+        public CharacterCombatSpec(IReadOnlyDictionary<AttackId, AttackDefinition> attackDifinitions)
         {
             if (attackDifinitions == null)
             {
@@ -27,16 +27,16 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// </summary>
         /// <param name="id"> 取得したい攻撃ID。 </param>
         /// <returns>　対応する攻撃定義。　</returns>
-        public AttackDefinition GetAttackDifinition(int index)
+        public AttackDefinition GetAttackDifinition(AttackId id)
         {
-            if(index < 0 || index >= _attackDifinitions.Count)
+            if (_attackDifinitions.TryGetValue(id, out var difinition))
             {
-                throw new ArgumentOutOfRangeException(nameof(index), $"攻撃IDは0以上{_attackDifinitions.Count - 1}以下でなければなりません。");
+                return difinition;
             }
 
-            return _attackDifinitions[index];
+            throw new InvalidOperationException($"AttackId {id} is not defined in this CharacterCombatSpec.");
         }
 
-        private readonly IReadOnlyList<AttackDefinition> _attackDifinitions;
+        private readonly IReadOnlyDictionary<AttackId, AttackDefinition> _attackDifinitions;
     }
 }

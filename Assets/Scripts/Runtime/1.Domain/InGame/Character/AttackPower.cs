@@ -14,56 +14,47 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="value"></param>
         public AttackPower(float value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentException("value must be non-negative.", nameof(value));
-            }
-            if (!float.IsFinite(value))
-            {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
-            }
-
-            _value = value;
+            if (value < 0f)
+                throw new ArgumentOutOfRangeException(nameof(value), "AttackPower must be non-negative.");
+            Value = value;
         }
 
-        public float Value => _value;
+        public float Value { get; }
 
         public static explicit operator float(AttackPower value)
-            => value._value;
+            => value.Value;
 
         public static bool operator ==(AttackPower left, AttackPower right)
-            => left._value == right._value;
+            => left.Value == right.Value;
 
         public static bool operator !=(AttackPower left, AttackPower right)
-            => left._value != right._value;
+            => left.Value != right.Value;
 
         /// <summary>
         ///     加算演算子。
         /// </summary>
         public static AttackPower operator +(AttackPower left, AttackPower right)
-            => new(left._value + right._value);
+            => new(left.Value + right.Value);
 
         /// <summary>
         ///     減算演算子。
         /// </summary>
         public static AttackPower operator -(AttackPower left, AttackPower right)
-            => new(Mathf.Max(left._value - right._value, 0f));
+            => new(Mathf.Max(left.Value - right.Value, 0f));
 
         /// <summary>
         ///     乗算演算子。
         /// </summary>
         public static AttackPower operator *(AttackPower left, float multiplier)
-            => new(left._value * multiplier);
+            => new(left.Value * multiplier);
 
         public bool Equals(AttackPower other)
-            => _value.Equals(other._value);
+            => Value.Equals(other.Value);
 
         public override bool Equals(object obj)
             => obj is AttackPower power && Equals(power);
 
         public override int GetHashCode()
-            => _value.GetHashCode();
-
-        private readonly float _value;
+            => Value.GetHashCode();
     }
 }

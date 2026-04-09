@@ -24,9 +24,6 @@ namespace KillChord.Runtime.Adaptor
             Action action,
             CancellationToken cancellationToken)
         {
-            Debug.Log($"[MusicSchedulerAdaptor] syncViewModel null? {_syncViewModel == null}");
-            Debug.Log($"[MusicSchedulerAdaptor] musicSyncService null? {_musicSyncService == null}");
-
             Debug.Log("攻撃予約: " + musicSpec);
             ExecuteRequestTiming timing = Convert(musicSpec);
 

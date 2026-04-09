@@ -4,6 +4,6 @@ namespace KillChord.Runtime.Domain
 {
     public interface ISkillVisual
     {
-        void Execute();
+        void Do();
     }
 }

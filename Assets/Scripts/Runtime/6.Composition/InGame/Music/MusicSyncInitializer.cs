@@ -3,7 +3,6 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -20,7 +19,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public MusicSyncController MusicSyncController;
         public MusicSyncService MusicSyncService;
 
-        private void Awake()
+        private void Start()
         {
             MusicSyncViewModel msvm = new();
             var mp = FindFirstObjectByType<MusicPlayer>();

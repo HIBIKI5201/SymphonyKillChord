@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
@@ -7,26 +9,15 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     public class AttackDefinition
     {
         /// <summary>
-        ///     攻撃の基本情報を初期化するコンストラクタ。
+        ///     コンストラクタ。
         /// </summary>
-        public AttackDefinition(string attackName,
-            Damage baseDamage,
-            AttackParameterSet attackParameterSet,
-            IAttackPipeline attackPipeline)
+        public AttackDefinition(AttackId id, Damage baseDamage)
         {
-            AttackName = attackName;
+            Id = id;
             BaseDamage = baseDamage;
-            AttackParameterSet = attackParameterSet;
-            AttackPipeline = attackPipeline;
         }
 
-        /// <summary> 攻撃の名前を表すプロパティ。 </summary>
-        public string AttackName { get; }
-        /// <summary> 攻撃の基本ダメージを表すプロパティ。 </summary>
+        public AttackId Id { get; }
         public Damage BaseDamage { get; }
-        /// <summary> 攻撃のパラメータセットを表すプロパティ。 </summary>
-        public AttackParameterSet AttackParameterSet { get; }
-        /// <summary> 攻撃の処理パイプラインを表すプロパティ。 </summary>
-        public IAttackPipeline AttackPipeline { get; }
     }
 }

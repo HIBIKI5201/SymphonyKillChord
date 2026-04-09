@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public class SkillVisualTest : ISkillVisual
     {
-        public void Execute()
+        public void Do()
         {
             Debug.Log("SkillVisual Do");
         }

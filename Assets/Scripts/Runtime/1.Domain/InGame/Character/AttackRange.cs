@@ -1,5 +1,3 @@
-using System;
-
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
@@ -9,23 +7,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
     {
         public AttackRange(float value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentException("value must be non-negative.", nameof(value));
-            }
-            if (!float.IsFinite(value))
-            {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
-            }
-
-            _value = value < 0f ? 0f : value;
+            Value = value < 0f ? 0f : value;
         }
 
-        public float Value => _value;
+        public float Value { get; }
 
         public bool Equals(AttackRange other)
         {
-            return _value.Equals(other._value);
+            return Value.Equals(other.Value);
         }
 
         public override bool Equals(object obj)
@@ -35,9 +24,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         public override int GetHashCode()
         {
-            return _value.GetHashCode();
+            return Value.GetHashCode();
         }
-
-        private readonly float _value;
     }
 }

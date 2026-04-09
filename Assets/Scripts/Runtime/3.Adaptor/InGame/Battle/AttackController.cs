@@ -18,12 +18,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
         public AttackController(
+            AttackExecutor attackExecutor,
             AttackResultPresenter presenter,
             AttackCommandState commandState,
             AttackBattleState battleState,
             SkillController skillController
         )
         {
+            _attackExecutor = attackExecutor;
             _presenter = presenter;
             _commandState = commandState;
             _battleState = battleState;
@@ -45,17 +47,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public void ExecuteAttack()
         {
             _skillController.CheckSkill(BattleActionType.Attack);
-
-            AttackDefinition attackDefinition = 
-                _battleState.Attacker.CombatSpec.GetAttackDifinition(0);
-
-            AttackResult result = AttackExecutor.Execute(attackDefinition,
+            AttackId attackId = _commandState.SelectedAttackId;
+            AttackResult result = _attackExecutor.Execute(
                 _battleState.Attacker,
-                _battleState.Target);
-
+                _battleState.Target,
+                attackId);
             _presenter.Push(result);
         }
 
+        private readonly AttackExecutor _attackExecutor;
         private readonly AttackResultPresenter _presenter;
         private readonly AttackCommandState _commandState;
         private readonly AttackBattleState _battleState;

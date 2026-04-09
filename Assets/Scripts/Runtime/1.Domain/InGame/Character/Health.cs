@@ -10,15 +10,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
     {
         public Health(float value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentException("value must be non-negative.", nameof(value));
-            }
-            if (!float.IsFinite(value))
-            {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
-            }
-
             Value = value;
         }
 

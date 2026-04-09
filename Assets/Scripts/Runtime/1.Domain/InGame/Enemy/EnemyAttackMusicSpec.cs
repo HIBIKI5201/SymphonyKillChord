@@ -3,7 +3,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// <summary>
     ///     敵の攻撃に関する音楽同期のタイミング情報をまとめたクラス。
     /// </summary>
-    public readonly struct EnemyAttackMusicSpec
+    public class EnemyAttackMusicSpec
     {
         public EnemyAttackMusicSpec(EnemyMusicSpec encounterTiming, EnemyMusicSpec battleTiming)
         {
