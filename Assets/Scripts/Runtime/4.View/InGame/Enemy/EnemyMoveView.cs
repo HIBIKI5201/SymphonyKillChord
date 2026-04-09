@@ -14,10 +14,11 @@ namespace KillChord.Runtime.View.InGame
     {
         public void Initialize(EnemyAIController enemyAIController, Transform target, TargetManagerController targetManagerController)
         {
+            _lockOnTargetGateway = new(transform);
             _enemyAIController = enemyAIController;
             _target = target;
             _targetManagerController = targetManagerController;
-            _targetManagerController.Register(transform);
+            _targetManagerController.Register(_lockOnTargetGateway);
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
         }
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.View.InGame
         private Transform _target;
         private EnemyAIController _enemyAIController;
         private TargetManagerController _targetManagerController;
+        private LockOnTargetGateway _lockOnTargetGateway;
 
         private void Awake()
         {
@@ -48,7 +50,7 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
-            _targetManagerController.Unregister(transform);
+            _targetManagerController.Unregister(_lockOnTargetGateway);
         }
 
         private void ApplyMove(EnemyMoveInstruction intruction)
