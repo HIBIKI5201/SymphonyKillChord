@@ -37,7 +37,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private IMusicSyncViewModel _musicSyncViewModel;
         private IMusicSyncService _musicSyncService;
         private IDefender _targetEntity;
-        private IHitTarget _targetEntity;
         private TargetManager _targetManager;
         private TargetManagerController _targetManagerController;
 
@@ -73,7 +72,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
-            enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity, _musicSyncViewModel, _musicSyncService);
+            enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity, _musicSyncViewModel, _musicSyncService, _targetManagerController);
 
             _spawnCount++;
         }

@@ -31,8 +31,6 @@ namespace KillChord.Runtime.Composition
             CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
             CameraRotationApplication rotationSystem = new(parameter);
             CameraFollowApplication followSystem = new(parameter);
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
-                freeLookRotationSystem, rotationSystem, _config.CollisionMask);
 
             TargetManager targetManager = new();
             _enemyTestSpawner.SetTargetManager(targetManager);
