@@ -19,11 +19,11 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
         public MusicSyncController MusicSyncController;
         public MusicSyncService MusicSyncService;
-
-        private void Awake()
+        
+        private void Initialize()
         {
             MusicSyncViewModel msvm = new();
-            var mp = FindFirstObjectByType<MusicPlayer>();
+            var mp = ServiceLocator.GetInstance<MusicPlayer>();
             _musicSyncView.Bind(
                 mp,
                 msvm
@@ -32,6 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             mp.MusicVM.UpdateMusicCue(_testCue);
             MusicSyncService = new(new(_testBpm));
             MusicSyncController = new(msvm, MusicSyncService);
+            ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
         }
     }
 }
