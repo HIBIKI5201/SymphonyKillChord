@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
         }
         public void ToggleLockOnState(in Vector3 currentPosition)
         {
-            if (_lockOnState == CameraLockOnState.Free)
+            if (!IsLockOn())
             {
                 _lockOnState = CameraLockOnState.LockOnManual;
 
@@ -56,9 +56,8 @@ namespace KillChord.Runtime.Application.InGame.Camera
             if (_lockOnState == CameraLockOnState.LockOnAuto && context.Input.sqrMagnitude > float.Epsilon)
                 _lockOnState = CameraLockOnState.Free;
 
-            bool isLockOn = _lockOnState != CameraLockOnState.Free;
             Vector3 targetPosition = Vector3.zero;
-            if (_lockOnState != CameraLockOnState.Free)
+            if (IsLockOn())
             {
                 Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
                 if (!_targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition))
@@ -69,7 +68,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             UpdateCameraBone(context, targetPosition);
             _followSystem.Update(ref _cameraCenterOffset, context);
-            _cameraRotationSystem.Update(isLockOn, ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context, targetPosition);
+            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context, targetPosition);
 
 
             CalculateCameraPlacement(context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
@@ -80,6 +79,11 @@ namespace KillChord.Runtime.Application.InGame.Camera
             resultRotation = _cameraBoneRotation * _cameraRotation;
 
             _previousCameraPosition = resultPosition;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsLockOn()
+        {
+            return _lockOnState != CameraLockOnState.Free;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdateDistance(ref float currentDistance, float targetDistance, float deltaTime)
