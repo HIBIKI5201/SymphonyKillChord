@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
-        private void Initialize()
+        public void Initialize()
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
