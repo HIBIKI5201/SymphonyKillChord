@@ -26,13 +26,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField] private EnemyMoveData _moveData;
         [SerializeField] private EnemyMusicData _encounterMusicData;
         [SerializeField] private EnemyMusicData _battleMusicData;
-        [SerializeField] private AttackPipelineAsset _attackPipelineAsset;
+
+        [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
 
         public void Initialize(
             Transform target,
-            IHitTarget targetEntity,
+            CharacterEntity targetEntity,
             IMusicSyncViewModel musicSyncViewModel,
             IMusicSyncService musicSyncService,
             TargetManagerController targetManagerController
@@ -44,22 +45,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
 
-            Dictionary<AttackId, AttackPipeline> attackPipelines = new Dictionary<AttackId, AttackPipeline>
-            {
-                // テスト段階のもので最初の攻撃定義のみパイプラインを作成している。
-                {_enemyData.AttackDifinitions[0].AttackId, _attackPipelineAsset.Create() }
-            };
-
-            IAttackPipelineResolver attackPipelineResolver = new AttackPipelineResolver(attackPipelines);
-            AttackExecutor attackExecutor = new AttackExecutor(attackPipelineResolver);
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(attackExecutor, musicSyncService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService);
 
-            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, _enemyData.AttackDifinitions[0].AttackId);
+            AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
+
+            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, attackDefinition);
 
             // Controller
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);

@@ -1,51 +1,47 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
 using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
-    ///     攻撃定義と攻撃処理のパイプラインを組み合わせて、攻撃処理全体を実行するクラス。
+    ///     攻撃を実行するクラス。
+    ///     攻撃の計算とダメージの適用を行う。
     /// </summary>
-    public class AttackExecutor
+    public static class AttackExecutor
     {
         /// <summary>
-        ///     コンストラクタ。
+        ///     攻撃を実行する。
         /// </summary>
-        /// <param name="resolver"></param>
-        public AttackExecutor(IAttackPipelineResolver resolver)
+        /// <param name="attackDefinition"></param>
+        /// <param name="attacker"></param>
+        /// <param name="defender"></param>
+        /// <returns></returns>
+        public static AttackResult Execute(
+            AttackDefinition attackDefinition,
+            IAttacker attacker,
+            IDefender defender
+            )
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-        }
+            if (attackDefinition == null)
+                throw new ArgumentNullException(nameof(attackDefinition));
+            if (attacker == null)
+                throw new ArgumentNullException(nameof(attacker));
+            if (defender == null)
+                throw new ArgumentNullException(nameof(defender));
 
-        public AttackResult Execute(CharacterEntity attacker, IHitTarget target, AttackId attackId)
-        {
-            if (attacker is null) throw new ArgumentNullException(nameof(attacker));
-            if (target is null) throw new ArgumentNullException(nameof(target));
+            // 計算を行い、ダメージを適用する。
+            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender);
 
-            // 攻撃定義を取得し、攻撃処理のパイプラインを解決する。
-            AttackDefinition attackDifinition = attacker.CombatSpec.GetAttackDifinition(attackId);
-            AttackPipeline pipeline = _resolver.Resolve(attackDifinition.Id);
-
-            // 攻撃処理の文脈を作成し、パイプラインを実行する。
-            AttackContext attackContext = new AttackContext(attacker, target, attackDifinition);
-            AttackResult result = pipeline.Execute(attackContext);
-
-            // ダメージをターゲットの体力に適用する。
-            float nextHealth = Mathf.Max(0f, target.Health.CurrentHealth.Value - result.FinalDamage.Value);
-            target.Health.ChangeHealth(new Health(nextHealth));
+            defender.TakeDamage(result.FinalDamage);
 
             Debug.Log(
                  $"[Attack] " +
-                 $"Attacker:{attacker.Name} " +
-                 $"TargetHP:{target.Health.CurrentHealth.Value} " +
+                 $"AttackName:{attackDefinition.AttackName} " +
                  $"Damage:{result.FinalDamage.Value} " +
                  $"Critical:{result.IsCritical}");
 
             return result;
         }
-
-        private readonly IAttackPipelineResolver _resolver;
     }
 }

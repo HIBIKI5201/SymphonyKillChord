@@ -32,7 +32,7 @@ namespace KillChord.Runtime.View.InGame.Player
             Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
             Debug.Assert(_controller != null, $"{nameof(_controller)}がNullです。Update()更新前にInit()を実行するようにしてください。", this);
 
-            _battleController.ChangeAttackID(AttackCommandType.SkillA);
+           // _battleController.ChangeAttackID(AttackCommandType.SkillA);
             _cacheTransform = transform;
         }
         void Update()
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         continue;
                     if (this is IDamageable myDamageable && myDamageable == damageable)
                         continue;
-                    _battleController.Attack(damageable.BattleController);
+                   // _battleController.Attack(damageable.BattleController);
                     Debug.Log($"{gameObject.name}から{_colliders[i].name}へ攻撃", this);
                 }
             }
