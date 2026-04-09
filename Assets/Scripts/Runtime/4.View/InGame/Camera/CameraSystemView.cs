@@ -14,8 +14,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField] private Transform _playerT;
 
-        [SerializeField] private CameraLockOnState _lockOnState;
-
         [SerializeField] private UpdateModeEnum _updateMode;
 
         private CameraSystemController _controller;
