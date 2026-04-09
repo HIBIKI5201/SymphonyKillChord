@@ -1,17 +1,30 @@
 using KillChord.Runtime.Domain.InGame;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame
 {
-    public sealed class LockOnTargetGateway : ILockOnTarget
+    public sealed class LockOnTargetGateway : ILockOnTarget, IDisposable
     {
         public LockOnTargetGateway(Transform fromTarget)
         {
             _cache = fromTarget;
+            _isDisposed = false;
         }
 
         public Vector3 Position => _cache.position;
+        public bool IsAlive => !_isDisposed && _cache != null;
 
-        private readonly Transform _cache;
+        public void Dispose()
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(LockOnTargetGateway));
+            }
+            _cache = null;
+            _isDisposed = true;
+        }
+        private Transform _cache;
+        private bool _isDisposed;
     }
 }
