@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             Bpm = bpm;
-            BeatLength = 60000d / Bpm;
+            BeatLength = 60d / Bpm;
         }
 
         public readonly int Bpm;

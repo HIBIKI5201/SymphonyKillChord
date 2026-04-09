@@ -11,11 +11,15 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterName(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                { throw new ArgumentException("name must not be null or empty.", nameof(value)); }
+                {
+                throw new ArgumentException("name must not be null or empty.", nameof(value));
+            }
 
-            Value = value;
+            _value = value;
         }
 
-        public readonly string Value;
+        public string Value => _value;
+
+        private readonly string _value;
     }
 }

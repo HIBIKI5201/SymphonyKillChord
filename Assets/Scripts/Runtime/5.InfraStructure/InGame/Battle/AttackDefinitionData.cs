@@ -1,19 +1,19 @@
-using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure.InGame.Battle
+namespace KillChord.Runtime.InfraStructure
 {
-    /// <summary>
-    ///     攻撃定義の初期設定値を保持するScriptableObject。
-    /// </summary>
-    [CreateAssetMenu(fileName = nameof(AttackDefinitionData),
-        menuName = "KillChord/Attack")]
+    [CreateAssetMenu(fileName = "AttackDefinitionData", menuName = "KillChord/AttackDefinitionData")]
     public class AttackDefinitionData : ScriptableObject
     {
-        public AttackId AttackId => _attackId;
+        public string AttackName => _attackName;
         public float BaseDamage => _baseDamage;
+        public AttackParameterSetData AttackParameterSetData => _attackParameterSetData;
+        public AttackPipelineAsset AttackPipelineAsset => _attackPipelineAsset;
 
-        [SerializeField] private AttackId _attackId;
+        [SerializeField] private string _attackName;
         [SerializeField] private float _baseDamage;
+        [SerializeField] private AttackParameterSetData _attackParameterSetData;
+        [SerializeField] private AttackPipelineAsset _attackPipelineAsset;
     }
 }

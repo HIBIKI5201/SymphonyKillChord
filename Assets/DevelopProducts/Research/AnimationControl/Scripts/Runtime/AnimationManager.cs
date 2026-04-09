@@ -1,4 +1,5 @@
 using DevelopProducts.AnimationControl.Adaptor;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,53 +12,116 @@ namespace DevelopProducts.AnimationControl.Blender
     public class AnimationManager : MonoBehaviour
     {
         [SerializeField]
-        private Key _walkKey = Key.W;
+        private Key _forwardKey = Key.W;
+        [SerializeField]
+        private Key _backKey = Key.S;
+        [SerializeField]
+        private Key _rightKey = Key.D;
+        [SerializeField]
+        private Key _leftKey = Key.A;
+
         [SerializeField, Range(0, 1)]
         private float _acceleration = 0.95f;
 
         [SerializeField]
-        private AnimationClip _playClip;
+        private AnimationData[] _playClip;
+
         [SerializeField]
-        private Key _playKey = Key.Space;
+        private AnimatorUpdateMode _mode;
 
         private Animator _animator;
-        private RuntimeAnimatorController _controller;
         private AnimatorPlayableBlend _blender;
         private SymphonyAnimeAdaptor _adaptor;
 
-        private float _velocity;
+        private Vector2 _velocity;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
-            _controller = _animator.runtimeAnimatorController;
             _adaptor = new SymphonyAnimeAdaptor(_animator);
             _blender = new AnimatorPlayableBlend(_adaptor);
+
+            for (int i = 0; i < _playClip.Length; i++)
+            {
+                AnimationData data = _playClip[i];
+                _blender.Register(new AnimationBlendClipRequest(data.Clip, data.EnterDuration, data.ExitDuration));
+            }
         }
 
         private void Update()
         {
-            float acc = 0;
+            Vector2 acc = Vector2.zero;
 
-            if (Keyboard.current[_walkKey].isPressed)
+            if (Keyboard.current[_forwardKey].isPressed)
             {
-                acc = 1;
+                acc += Vector2.up;
             }
-
-            if (Keyboard.current[_playKey].wasPressedThisFrame)
+            if (Keyboard.current[_backKey].isPressed)
             {
-                _blender.Play(_playClip);
+                acc += Vector2.down;
             }
+            if (Keyboard.current[_rightKey].isPressed)
+            {
+                acc += Vector2.right;
+            }
+            if (Keyboard.current[_leftKey].isPressed)
+            {
+                acc += Vector2.left;
+            }
+            acc.Normalize();
+            _velocity = Vector2.Lerp(_velocity, acc, _acceleration);
 
-            _velocity = Mathf.Lerp(_velocity, acc, _acceleration * Time.deltaTime);
+            for (int i = 0; i < _playClip.Length; i++)
+            {
+                AnimationData data = _playClip[i];
+                if (Keyboard.current[data.Key].wasPressedThisFrame)
+                {
+                    _blender.Play(data.Clip);
+                }
+            }
 
             _adaptor.SetVelocity(_velocity);
-            _blender?.Update();
+
+            if (_mode == AnimatorUpdateMode.Normal)
+            {
+                BlendUpdate();
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_mode == AnimatorUpdateMode.Fixed)
+            {
+                BlendUpdate();
+            }
         }
 
         private void OnDestroy()
         {
             _blender?.Dispose();
+        }
+
+        private void BlendUpdate()
+        {
+            _blender?.Update();
+        }
+
+        [Serializable]
+        private struct AnimationData
+        {
+            public AnimationClip Clip => _clip;
+            public Key Key => _key;
+            public float EnterDuration => _enterDuration;
+            public float ExitDuration => _exitDuration;
+
+            [SerializeField]
+            private AnimationClip _clip;
+            [SerializeField]
+            private Key _key;
+            [SerializeField]
+            private float _enterDuration;
+            [SerializeField]
+            private float _exitDuration;
         }
     }
 }
