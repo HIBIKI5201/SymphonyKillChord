@@ -22,6 +22,11 @@ namespace KillChord.Runtime.Application.InGame.Camera
             {
                 return false;
             }
+            if (!_currentTarget.IsAlive)
+            {
+                _currentTarget = null;
+                return false;
+            }
             result = _currentTarget.Position;
 
             return true;
