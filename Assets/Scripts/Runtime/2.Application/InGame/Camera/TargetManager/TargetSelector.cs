@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -7,57 +6,66 @@ namespace KillChord.Runtime.Application.InGame.Camera
 {
     public sealed class TargetSelector
     {
-        public TargetSelector(ITargetPositionsProvider provider)
+        public TargetSelector(TargetManager manager)
         {
-            _targetPositionsProvider = provider;
+            _manager = manager;
         }
 
         public bool TryGetTargetPosition(in Vector3 playerPosition, in Vector3 direction, out Vector3 result)
         {
             result = Vector3.zero;
-            _targetPositionsProvider.UpdatePositions();
-            if (_targetPositionsProvider.TargetPositions.Count <= 0)
+            if (_manager.Count == 0)
+            {
                 return false;
-
-            GetTargetPosition(playerPosition, direction, out result);
+            }
+            if (_currentTarget is null)
+            {
+                return false;
+            }
+            result = _currentTarget.Position;
 
             return true;
         }
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
+        {
+            GetTargetPosition(playerPosition, direction, out _currentTarget);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void GetTargetPosition(in Vector3 center, in Vector3 dir, out Vector3 result)
+        private void GetTargetPosition(in Vector3 center, in Vector3 dir, out ILockOnTarget result)
         {
             //優先順位は
             //1.視界内のカメラベクトルに近い敵
             //2.視界内の敵
             //3.視界外の近くの敵
             //4.視界外の敵
-            IReadOnlyList<Vector3> targets = _targetPositionsProvider.TargetPositions;
 
-            Vector3 shortestPos = Vector3.positiveInfinity;
+            ILockOnTarget shortestTarget = null;
+            ILockOnTarget bestAlignedTarget = null;
             float shortestDist = float.PositiveInfinity;
-            Vector3 bestAlignedPos = Vector3.positiveInfinity;
             float bestDot = -1f;
 
             float dot;
             float sqrDist;
-            foreach (var item in targets)
+            Vector3 pos;
+            foreach (var item in _manager.GetTargets)
             {
-                dot = NormalizeDot(dir, item - center);
+                pos = item.Position;
+                dot = NormalizeDot(dir, pos - center);
                 if (dot >= bestDot)
                 {
                     bestDot = dot;
-                    bestAlignedPos = item;
+                    bestAlignedTarget = item;
                 }
 
-                sqrDist = Vector3.SqrMagnitude(item - center);
+                sqrDist = Vector3.SqrMagnitude(pos - center);
                 if (sqrDist < shortestDist)
                 {
                     shortestDist = sqrDist;
-                    shortestPos = item;
+                    shortestTarget = item;
                 }
             }
-            result = (bestDot < 0f) ? shortestPos : bestAlignedPos;
+            result = (bestDot < 0f) ? shortestTarget : bestAlignedTarget;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float NormalizeDot(in Vector3 from, in Vector3 to)
@@ -70,6 +78,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             return Mathf.Clamp(Vector3.Dot(from, to) / num, -1f, 1f);
         }
-        private readonly ITargetPositionsProvider _targetPositionsProvider;
+
+        private ILockOnTarget _currentTarget;
+
+        private readonly TargetManager _manager;
     }
 }
