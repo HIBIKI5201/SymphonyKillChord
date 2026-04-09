@@ -295,6 +295,10 @@ PrefabInstance:
       propertyPath: _playerT
       value: 
       objectReference: {fileID: 1114030567}
+    - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
+      propertyPath: _enemyTestSpawner
+      value: 
+      objectReference: {fileID: 1136649843}
     - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: Lens.ModeOverride
       value: 0
