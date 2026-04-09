@@ -50,6 +50,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         private void Tick(float deltaTime)
         {
+            if (_controller == null) return;
             Vector2 input = _input * 200;
             _input = Vector2.zero;
 

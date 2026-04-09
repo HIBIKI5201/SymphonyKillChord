@@ -15,6 +15,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             MusicPlayer musicPlayer = GetComponent<MusicPlayer>();
             MusicViewModel musicViewModel = new MusicViewModel();
             musicPlayer.Bind(musicViewModel);
+            musicPlayer.Initialize();
             ServiceLocator.RegisterInstance(musicPlayer);
         }
     }

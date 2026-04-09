@@ -30,16 +30,16 @@ namespace KillChord.Runtime.View.InGame.Player
             Debug.Assert(_rb != null, $"{nameof(_rb)}がNull", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)}がNull", this);
             Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
-            Debug.Assert(_controller != null, $"{nameof(_controller)}がNullです。Update()更新前にInit()を実行するようにしてください。", this);
 
            // _battleController.ChangeAttackID(AttackCommandType.SkillA);
             _cacheTransform = transform;
         }
         void Update()
         {
+            if (_controller == null) return;
             UpdateMovement();
 
-            if (Input.GetKeyDown(KeyCode.Mouse0))
+            if (_battleController != null && Input.GetKeyDown(KeyCode.Mouse0))
             {
                 int length = Physics.OverlapSphereNonAlloc(_cacheTransform.position, 3f, _colliders);
                 for (int i = 0; i < length; i++)
@@ -55,6 +55,7 @@ namespace KillChord.Runtime.View.InGame.Player
         }
         private void UpdateMovement()
         {
+            if (_controller == null) return;
             Vector2 dir = Vector2.zero;
             dir.x = Input.GetAxis("Horizontal");
             dir.y = Input.GetAxis("Vertical");
