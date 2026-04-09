@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Adaptor.InGame
             _isDisposed = false;
         }
 
-        public Vector3 Position => _cache.position;
+        public Vector3 Position => IsAlive ? _cache.position : Vector3.zero;
         public bool IsAlive => !_isDisposed && _cache != null;
 
         public void Dispose()
