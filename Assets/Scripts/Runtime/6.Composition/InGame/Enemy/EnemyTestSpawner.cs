@@ -1,9 +1,9 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
 using UnityEngine;
