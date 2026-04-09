@@ -51,6 +51,7 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
             _targetManagerController.Unregister(_lockOnTargetGateway);
+            _lockOnTargetGateway.Dispose();
         }
 
         private void ApplyMove(EnemyMoveInstruction intruction)
