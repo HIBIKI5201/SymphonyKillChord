@@ -26,7 +26,6 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
-            _musicVm = new MusicViewModel();
         }
 
         private void ChangeBgm(string cueName)
