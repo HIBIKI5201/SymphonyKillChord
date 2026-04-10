@@ -224,9 +224,8 @@ Transform:
   m_LocalPosition: {x: -15.61901, y: 0, z: 0.43897}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1275434601}
-  m_Father: {fileID: 1643110729}
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &438459088
 GameObject:
@@ -257,10 +256,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be24e48ffe8c5d4891751ddbd8377b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.IngameComposition
-  _playerInitializer: {fileID: 1114030568}
+  _playerInitializer: {fileID: 0}
   _musicSyncInitializer: {fileID: 1249666141}
   _camerasystemInitializer: {fileID: 533730526}
-  _skillInitializer: {fileID: 1114030570}
+  _skillInitializer: {fileID: 0}
   _ingameSceneView: {fileID: 58835740}
   _backgroundSceneName: Stage_01
 --- !u!4 &438459090
@@ -339,7 +338,7 @@ PrefabInstance:
     - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: _playerT
       value: 
-      objectReference: {fileID: 1114030567}
+      objectReference: {fileID: 0}
     - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: _enemyTestSpawner
       value: 
@@ -351,7 +350,7 @@ PrefabInstance:
     - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: Target.TrackingTarget
       value: 
-      objectReference: {fileID: 1114030567}
+      objectReference: {fileID: 0}
     - target: {fileID: 5247649918134476368, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: m_Name
       value: CameraManager
@@ -401,11 +400,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a259115a9df77c44da61ba832833f97b, type: 3}
---- !u!4 &533730525 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6603128112584395780, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-  m_PrefabInstance: {fileID: 533730524}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &533730526 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
@@ -417,116 +411,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f975f23e67a3ea544a3bff6e3c90e7e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.TestCameraInitializer
---- !u!1001 &1114030566
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 347656024251436478, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: _enemyTestSpawner
-      value: 
-      objectReference: {fileID: 1136649843}
-    - target: {fileID: 1047834828965851563, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1128599231570399707, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1265923734034419227, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_Name
-      value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9223034822626770349, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      propertyPath: _cameraTransform
-      value: 
-      objectReference: {fileID: 533730525}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1265923734034419227, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1114030570}
-  m_SourcePrefab: {fileID: 100100000, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
---- !u!4 &1114030567 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3115950524344334010, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-  m_PrefabInstance: {fileID: 1114030566}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1114030568 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 347656024251436478, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-  m_PrefabInstance: {fileID: 1114030566}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1114030569}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
---- !u!1 &1114030569 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1265923734034419227, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
-  m_PrefabInstance: {fileID: 1114030566}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1114030570
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1114030569}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d24540182c664045867ee6da2f0dd10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
-  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
 --- !u!1 &1136649842
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,7 +441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.EnemyTestSpawner
   _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
-  _target: {fileID: 1114030567}
+  _target: {fileID: 0}
   _spawnPoint: {fileID: 1136649844}
   _spawnInterval: 5
   _maxSpawnCount: 10
@@ -1205,7 +1089,7 @@ SceneRoots:
   - {fileID: 456552177}
   - {fileID: 1898526996}
   - {fileID: 2031779337}
-  - {fileID: 1114030566}
   - {fileID: 1249666143}
   - {fileID: 438459090}
   - {fileID: 58835741}
+  - {fileID: 419177560}
