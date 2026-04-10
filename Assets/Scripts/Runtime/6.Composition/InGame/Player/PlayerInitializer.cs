@@ -9,6 +9,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Player;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
@@ -28,6 +29,11 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CharacterData _enemyData;
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+
+        private void Awake()
+        {
+            ServiceLocator.RegisterInstance(this);
+        }
 
         public void Initialize()
         {

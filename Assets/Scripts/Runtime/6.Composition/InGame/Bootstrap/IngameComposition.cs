@@ -9,7 +9,6 @@ namespace KillChord.Runtime.Composition
 {
     public class IngameComposition : MonoBehaviour
     {
-        [SerializeField] private PlayerInitializer _playerInitializer;
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private SkillInitializer _skillInitializer;
@@ -17,6 +16,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
+        private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
@@ -26,6 +26,7 @@ namespace KillChord.Runtime.Composition
 #endif
 
             await _ingameSceneView.LoadScene(_backgroundSceneName);
+            _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
@@ -45,6 +46,7 @@ namespace KillChord.Runtime.Composition
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
+
             _playerInitializer.Initialize();
 
             ServiceInjector.Inject(_skillInitializer);
