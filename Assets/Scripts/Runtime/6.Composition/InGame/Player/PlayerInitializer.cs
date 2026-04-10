@@ -1,10 +1,7 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
-using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
@@ -12,7 +9,6 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Player;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
@@ -26,15 +22,14 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
 
-        [Space]
+        [Space] [Header("キャラクターデータ（テスト用）")] [SerializeField]
+        private CharacterData _playerData;
 
-        [Header("キャラクターデータ（テスト用）")]
-        [SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
-        private void Awake()
+        public void Initialize()
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);

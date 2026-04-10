@@ -1,3 +1,4 @@
+using System;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.View;
@@ -20,10 +21,10 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public MusicSyncController MusicSyncController;
         public MusicSyncService MusicSyncService;
 
-        private void Awake()
+        public void Initialize()
         {
             MusicSyncViewModel msvm = new();
-            var mp = FindFirstObjectByType<MusicPlayer>();
+            var mp = ServiceLocator.GetInstance<MusicPlayer>();
             _musicSyncView.Bind(
                 mp,
                 msvm
@@ -32,6 +33,12 @@ namespace KillChord.Runtime.Composition.InGame.Music
             mp.MusicVM.UpdateMusicCue(_testCue);
             MusicSyncService = new(new(_testBpm));
             MusicSyncController = new(msvm, MusicSyncService);
+            ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
+        }
+
+        public void OnDestroy()
+        {
+            MusicSyncController.Dispose();
         }
     }
 }

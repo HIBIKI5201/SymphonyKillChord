@@ -51,7 +51,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             return true;
         }
 
-        private void Awake()
+        public void Initialize()
         {
             if (!ValidateSerializedReferences())
             {
