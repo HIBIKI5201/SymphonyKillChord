@@ -6,7 +6,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
     /// <summary>
-    ///     Viewからの攻撃コマンドの入力を受け取り、攻撃処理の実行と結果の表示を仲介するクラス。
+    ///     Viewの押された拍情報の入力を受け取り、攻撃処理の実行と結果の表示を仲介するクラス。
     /// </summary>
     public class PlayerAttackController
     {
@@ -31,17 +31,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _targetSelectorController = targetSelectorController;
         }
 
-        ///// <summary>
-        /////     Viewから攻撃コマンドの種類を受け取り、AttackCommandStateに選択された攻撃を更新するメソッド。
-        ///// </summary>
-        ///// <param name="commandType"></param>
-        //public void ChangeAttack(AttackCommandType commandType)
-        //{
-        //    _commandState.SelectAttack(commandType);
-        //}
-
         /// <summary>
-        ///     現在の戦闘状態と選択された攻撃コマンドに基づいて攻撃処理を実行しする。
+        ///     現在の戦闘状態と押された拍情報に基づいて攻撃処理を実行しする。
         /// </summary>
         public bool ExecuteAttack()
         {
