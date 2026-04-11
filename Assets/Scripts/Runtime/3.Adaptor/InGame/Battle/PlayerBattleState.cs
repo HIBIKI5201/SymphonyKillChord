@@ -7,10 +7,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
     /// <summary>
     ///     現在の戦闘状態として、攻撃者と攻撃対象を保持するクラス。
     /// </summary>
-    public class AttackBattleState
+    public class PlayerBattleState
     {
+        public PlayerBattleState(CharacterEntity attacker)
+        {
+            Attacker = attacker;
+        }
         /// <summary> 攻撃者。 </summary>
-        public CharacterEntity Attacker { get; private set; }
+        public CharacterEntity Attacker { get; }
         /// <summary> 攻撃対象。 </summary>
         public IDefender Target { get; private set; }
 
@@ -19,9 +23,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="target"></param>
-        public void Setup(CharacterEntity attacker, IDefender target)
+        public void ChangeTarget(IDefender target)
         {
-            Attacker = attacker ?? throw new ArgumentNullException(nameof(attacker));
             Target = target ?? throw new ArgumentNullException(nameof(target));
         }
     }

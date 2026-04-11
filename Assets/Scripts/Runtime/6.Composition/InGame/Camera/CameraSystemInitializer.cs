@@ -1,4 +1,6 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Camera;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
@@ -27,7 +29,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
-        public void Initialize()
+        public void Initialize(TargetManager targetManager,TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -36,9 +38,11 @@ namespace KillChord.Runtime.Composition
             CameraRotationApplication rotationSystem = new(parameter);
             CameraFollowApplication followSystem = new(parameter);
 
-            TargetManager targetManager = new();
-            _enemyTestSpawner.SetTargetManager(targetManager);
             TargetSelector targetSelector = new(targetManager);
+            TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
+            TargetSelectorController targetSelectorController = new(targetSelector, targetEntityRegistryController);
+            ServiceLocator.RegisterInstance(targetSelectorController);
+
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
                 freeLookRotationSystem, rotationSystem, targetSelector, _config.CollisionMask);
 
