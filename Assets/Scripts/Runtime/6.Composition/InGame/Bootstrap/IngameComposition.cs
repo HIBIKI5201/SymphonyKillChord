@@ -7,25 +7,23 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    [DefaultExecutionOrder(-100)]
     public class IngameComposition : MonoBehaviour
     {
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private SkillInitializer _skillInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
         private PlayerInitializer _playerInitializer;
+        private SkillInitializer _skillInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
         {
-#if UNITY_EDITOR
-            await _ingameSceneView.LoadScene("Persistent");
-#endif
-
             await _ingameSceneView.LoadScene(_backgroundSceneName);
+            _skillInitializer = ServiceLocator.GetInstance<SkillInitializer>();
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する

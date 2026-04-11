@@ -21,17 +21,18 @@ namespace KillChord.Develop.Assets.Scripts.Develop
         [SerializeField] private PlayerView _player;
         [SerializeField] private EnemySample _enemySample;
 
-        [Space]
+        [Space] [Header("キャラクターデータ（テスト用）")] [SerializeField]
+        private CharacterData _playerData;
 
-        [Header("キャラクターデータ（テスト用）")]
-        [SerializeField] private CharacterData _playerData;
         [SerializeField] private CharacterData _enemyData;
 
-        [Header("アタックパイプライン（テスト用）")]
-        [SerializeField] private AttackPipelineAsset _normalPipelineAsset;
+        [Header("アタックパイプライン（テスト用）")] [SerializeField]
+        private AttackPipelineAsset _normalPipelineAsset;
+
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
         [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
         [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
+
         private void Awake()
         {
             if (_player == null)
@@ -49,13 +50,13 @@ namespace KillChord.Develop.Assets.Scripts.Develop
             };
 
             AttackPipelineResolver attackPipelineResolver = new(pipelines);
-          //  AttackExecutor attackExecutor = new(attackPipelineResolver);
-
+            //  AttackExecutor attackExecutor = new(attackPipelineResolver);
 
 
             //InitializePlayer(new BattleController(new BattleApplication(player, attackExecutor), new(), null));
-           // InitializeEnemy(new BattleController(new BattleApplication(enemy, attackExecutor), new(), new(_enemySample, enemy)));
+            // InitializeEnemy(new BattleController(new BattleApplication(enemy, attackExecutor), new(), new(_enemySample, enemy)));
         }
+
         private void InitializePlayer(BattleController battleController)
         {
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
@@ -66,7 +67,7 @@ namespace KillChord.Develop.Assets.Scripts.Develop
 
 
             PlayerController playerMovementController = new(application);
-            _player.Init(playerMovementController, battleController);
+            _player.Init(playerMovementController, battleController, null);
 
 
 #if UNITY_EDITOR
@@ -75,6 +76,7 @@ namespace KillChord.Develop.Assets.Scripts.Develop
                 .SetPlayerMoveParameter(parameter);
 #endif
         }
+
         private void InitializeEnemy(BattleController battleController)
         {
             _enemySample.Init(battleController);

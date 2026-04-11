@@ -15,28 +15,31 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
-        [SerializeField] private Transform _cameraTransform;
+
+        private Transform _cameraTransform;
+        private bool _isInitialized = false;
+
         public BattleController BattleController => _battleController;
+
         public void Init(
             PlayerController playerMovementController,
-            BattleController battleController)
+            BattleController battleController,
+            Transform cameraTransform)
         {
             _controller = playerMovementController;
             _battleController = battleController;
-        }
-        void Start()
-        {
+            _cameraTransform = cameraTransform;
             _colliders = new Collider[8];
             Debug.Assert(_rb != null, $"{nameof(_rb)}がNull", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)}がNull", this);
             Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
-
-           // _battleController.ChangeAttackID(AttackCommandType.SkillA);
             _cacheTransform = transform;
+            _isInitialized = true;
         }
+
         void Update()
         {
-            if (_controller == null) return;
+            if (!_isInitialized || _controller == null) return;
             UpdateMovement();
 
             if (_battleController != null && Input.GetKeyDown(KeyCode.Mouse0))
@@ -48,11 +51,12 @@ namespace KillChord.Runtime.View.InGame.Player
                         continue;
                     if (this is IDamageable myDamageable && myDamageable == damageable)
                         continue;
-                   // _battleController.Attack(damageable.BattleController);
+                    // _battleController.Attack(damageable.BattleController);
                     Debug.Log($"{gameObject.name}から{_colliders[i].name}へ攻撃", this);
                 }
             }
         }
+
         private void UpdateMovement()
         {
             if (_controller == null) return;
@@ -84,6 +88,5 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private PlayerController _controller;
         private BattleController _battleController;
-
     }
 }

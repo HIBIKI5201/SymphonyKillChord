@@ -237,6 +237,7 @@ GameObject:
   m_Component:
   - component: {fileID: 438459090}
   - component: {fileID: 438459089}
+  - component: {fileID: 438459091}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -256,10 +257,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be24e48ffe8c5d4891751ddbd8377b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.IngameComposition
-  _playerInitializer: {fileID: 0}
   _musicSyncInitializer: {fileID: 1249666141}
   _camerasystemInitializer: {fileID: 533730526}
-  _skillInitializer: {fileID: 0}
+  _skillInitializer: {fileID: 438459091}
   _ingameSceneView: {fileID: 58835740}
   _backgroundSceneName: Stage_01
 --- !u!4 &438459090
@@ -277,6 +277,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &438459091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d24540182c664045867ee6da2f0dd10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
+  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
 --- !u!1 &456552175
 GameObject:
   m_ObjectHideFlags: 0

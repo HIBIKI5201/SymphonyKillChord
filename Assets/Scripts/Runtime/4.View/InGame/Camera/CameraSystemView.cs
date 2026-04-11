@@ -19,9 +19,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraSystemController _controller;
         private Vector2 _input;
 
-        public void Init(CameraSystemController controller)
+        public void Init(CameraSystemController controller, Transform playerT)
         {
             _controller = controller;
+            _playerT = playerT;
         }
         private void Start()
         {

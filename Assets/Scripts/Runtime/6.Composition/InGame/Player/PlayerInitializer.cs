@@ -27,8 +27,8 @@ namespace KillChord.Runtime.Composition
         private CharacterData _playerData;
 
         [SerializeField] private CharacterData _enemyData;
-
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        
+        private EnemyTestSpawner _enemyTestSpawner;
 
         private void Awake()
         {
@@ -39,6 +39,7 @@ namespace KillChord.Runtime.Composition
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
+            _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawner>();
 
             CharacterEntity player = CharacterFactory.Create(_playerData);
             _enemyTestSpawner.SetTargetEntity(player);
@@ -53,7 +54,7 @@ namespace KillChord.Runtime.Composition
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application);
-            _player.Init(playerMovementController, null);
+            _player.Init(playerMovementController, null, ServiceLocator.GetInstance<CameraTransform>().transform);
 
 
 #if UNITY_EDITOR
