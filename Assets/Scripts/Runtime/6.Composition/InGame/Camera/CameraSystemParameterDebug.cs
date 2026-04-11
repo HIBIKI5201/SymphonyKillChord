@@ -3,7 +3,7 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 
-namespace KillChord.Runtime.Composition.InGame.Camera
+namespace KillChord.Runtime.Composition.InGame.Debugger
 {
     /// <summary>
     ///     カメラシステムのパラメータをデバッグ表示するためのクラス。

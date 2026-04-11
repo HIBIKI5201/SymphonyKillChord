@@ -7,7 +7,6 @@ using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Enemy;
-using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
@@ -19,6 +18,10 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using KillChord.Runtime.Composition.InGame.Debugger;
+#endif
 
 namespace KillChord.Runtime.Composition
 {
@@ -66,7 +69,7 @@ namespace KillChord.Runtime.Composition
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application);
-            var ct = ServiceLocator.GetInstance<CameraTransform>().transform;
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
 
 
             TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
@@ -77,7 +80,7 @@ namespace KillChord.Runtime.Composition
 
             PlayerBattleState playerBattleState = new PlayerBattleState(player);
 
-            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,playerBattleState,skillController,targetSelectorController);
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController);
 
             _player.Init(playerMovementController, playerAttackController, ct);
 
