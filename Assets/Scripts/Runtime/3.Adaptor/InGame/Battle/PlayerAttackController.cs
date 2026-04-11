@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
@@ -50,8 +51,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             int beatType = _skillController.CheckSkill(BattleActionType.Attack);
 
-            AttackDefinition attackDefinition =
-                _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
+            AttackDefinition attackDefinition;
+            try
+            {
+                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDifinition(beatType);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Debug.LogWarning(ex.Message);
+                return false;
+            }
 
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,

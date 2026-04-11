@@ -22,14 +22,25 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackDifinitions = attackDifinitions;
         }
 
-        public AttackDefinition GetAttackDefinitionByBeatType(int beatType)
+        public bool TryGetAttackDefinitionByBeatType(int beatType, out AttackDefinition attackDefinition)
         {
             foreach (var attack in _attackDifinitions)
             {
                 if (attack.BeatType.HasValue && attack.BeatType.Value == beatType)
                 {
-                    return attack;
+                    attackDefinition = attack;
+                    return true;
                 }
+            }
+            attackDefinition = null;
+            return false;
+        }
+
+        public AttackDefinition GetAttackDefinitionByBeatType(int beatType)
+        {
+            if (TryGetAttackDefinitionByBeatType(beatType, out var attackDefinition))
+            {
+                return attackDefinition;
             }
             throw new InvalidOperationException($"ビートタイプ{beatType}に対応する攻撃定義が見つかりませんでした。");
         }
@@ -41,7 +52,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <returns>　対応する攻撃定義。　</returns>
         public AttackDefinition GetAttackDifinition(int index)
         {
-            if(index < 0 || index >= _attackDifinitions.Count)
+            if (index < 0 || index >= _attackDifinitions.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), $"攻撃IDは0以上{_attackDifinitions.Count - 1}以下でなければなりません。");
             }

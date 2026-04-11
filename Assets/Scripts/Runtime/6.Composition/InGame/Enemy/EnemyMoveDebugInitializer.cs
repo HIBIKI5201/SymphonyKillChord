@@ -79,7 +79,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _targetManagerController?.Unregister(_lockOnTargetGateway);
             _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _lockOnTargetGateway.Dispose();
+            _lockOnTargetGateway?.Dispose();
         }
     }
 }

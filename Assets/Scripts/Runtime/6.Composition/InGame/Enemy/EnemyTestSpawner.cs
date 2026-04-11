@@ -83,31 +83,27 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         private void SpawnEnemy()
         {
-            _target = ServiceLocator.GetInstance<PlayerInitializer>().transform;
-            if (_target == null) return;
+            PlayerInitializer playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            if (playerInitializer == null)
+            {
+                Debug.LogError("ターゲットのTransformが見つかりません。", this);
+                return;
+            }
+            _target = playerInitializer.transform;
+
+            if (_targetEntity == null || _musicSyncViewModel == null ||
+                _musicSyncService == null || _targetEntityRegistryController == null)
+            {
+                if (_targetEntity == null) Debug.LogError("ターゲットエンティティが設定されていません。", this);
+                if (_musicSyncViewModel == null) Debug.LogError("MusicSyncViewModelが見つかりません。", this);
+                if (_musicSyncService == null) Debug.LogError("MusicSyncServiceが見つかりません。", this);
+                if (_targetEntityRegistryController == null) Debug.LogError("TargetEntityRegistryControllerが見つかりません。", this);
+                return;
+            }
+
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
-            if (_targetEntity == null)
-            {
-                Debug.LogError("ターゲットエンティティが設定されていません。", this);
-                return;
-            }
-            if (_musicSyncViewModel == null)
-            {
-                Debug.LogError("MusicSyncViewModelが見つかりません。", this);
-                return;
-            }
-            if (_musicSyncService == null)
-            {
-                Debug.LogError("MusicSyncServiceが見つかりません。", this);
-                return;
-            }
-            if (_targetEntityRegistryController == null)
-            {
-                Debug.LogError("TargetEntityRegistryControllerが見つかりません。", this);
-                return;
-            }
             enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,
             _musicSyncViewModel, _musicSyncService, _targetManagerController, _targetEntityRegistryController);
 
