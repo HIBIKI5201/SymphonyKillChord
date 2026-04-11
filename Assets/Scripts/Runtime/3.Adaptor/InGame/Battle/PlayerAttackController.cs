@@ -54,7 +54,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             AttackDefinition attackDefinition;
             try
             {
-                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDifinition(beatType);
+                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
             }
             catch (InvalidOperationException ex)
             {
