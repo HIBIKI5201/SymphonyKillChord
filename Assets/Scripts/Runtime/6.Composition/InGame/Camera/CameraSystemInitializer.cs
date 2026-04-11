@@ -7,6 +7,7 @@ using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
@@ -35,10 +36,13 @@ namespace KillChord.Runtime.Composition
             TargetManager targetManager = new();
             _enemyTestSpawner.SetTargetManager(targetManager);
             TargetSelector targetSelector = new(targetManager);
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem, freeLookRotationSystem, rotationSystem, targetSelector, _config.CollisionMask);
+            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
+                freeLookRotationSystem, rotationSystem, targetSelector, _config.CollisionMask);
 
             CameraSystemController controller = new(application);
-            _cameraSystem.Init(controller);
+
+            var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
+            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform);
 
 #if UNITY_EDITOR
             _cameraSystem.gameObject
