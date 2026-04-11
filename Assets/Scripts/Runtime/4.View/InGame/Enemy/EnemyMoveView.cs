@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,7 +12,8 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
-        public void Initialize(EnemyAIController enemyAIController, Transform target)
+        public void Initialize(EnemyAIController enemyAIController,
+            Transform target)
         {
             _enemyAIController = enemyAIController;
             _target = target;

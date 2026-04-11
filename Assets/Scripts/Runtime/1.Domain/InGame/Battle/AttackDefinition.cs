@@ -12,12 +12,15 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public AttackDefinition(string attackName,
             Damage baseDamage,
             AttackParameterSet attackParameterSet,
-            IAttackPipeline attackPipeline)
+            IAttackPipeline attackPipeline,
+            int? beatType = null
+            )
         {
             AttackName = attackName;
             BaseDamage = baseDamage;
             AttackParameterSet = attackParameterSet;
             AttackPipeline = attackPipeline;
+            BeatType = beatType;
         }
 
         /// <summary> 攻撃の名前を表すプロパティ。 </summary>
@@ -28,5 +31,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public AttackParameterSet AttackParameterSet { get; }
         /// <summary> 攻撃の処理パイプラインを表すプロパティ。 </summary>
         public IAttackPipeline AttackPipeline { get; }
+        public int? BeatType { get; }
     }
 }

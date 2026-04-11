@@ -1,11 +1,19 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Camera;
+using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Composition.InGame.Camera;
+using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using KillChord.Runtime.Composition.InGame.Debugger;
+#endif
 
 namespace KillChord.Runtime.Composition
 {
@@ -19,7 +27,9 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private CameraSystemConfig _config;
 
-        public void Initialize()
+        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+
+        public void Initialize(TargetManager targetManager,TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -27,11 +37,19 @@ namespace KillChord.Runtime.Composition
             CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
             CameraRotationApplication rotationSystem = new(parameter);
             CameraFollowApplication followSystem = new(parameter);
+
+            TargetSelector targetSelector = new(targetManager);
+            TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
+            TargetSelectorController targetSelectorController = new(targetSelector, targetEntityRegistryController);
+            ServiceLocator.RegisterInstance(targetSelectorController);
+
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
-                freeLookRotationSystem, rotationSystem, _config.CollisionMask);
+                freeLookRotationSystem, rotationSystem, targetSelector, _config.CollisionMask);
 
             CameraSystemController controller = new(application);
-            _cameraSystem.Init(controller);
+
+            var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
+            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform);
 
 #if UNITY_EDITOR
             _cameraSystem.gameObject

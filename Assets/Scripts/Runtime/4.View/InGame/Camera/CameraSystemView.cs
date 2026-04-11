@@ -1,5 +1,7 @@
+using System;
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Utility;
+using SymphonyFrameWork.Debugger.HUD;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Camera
@@ -11,41 +13,44 @@ namespace KillChord.Runtime.View.InGame.Camera
     public sealed class CameraSystemView : MonoBehaviour
     {
         [SerializeField] private Transform _cameraT;
-
-        [SerializeField] private Transform _playerT;
-
-        [SerializeField] private Transform _target;
-
-        [SerializeField] private LockOnState _lockOnState;
-
         [SerializeField] private UpdateModeEnum _updateMode;
 
         private CameraSystemController _controller;
+        private Transform _playerT;
         private Vector2 _input;
 
-        public void Init(CameraSystemController controller)
+        public void Init(CameraSystemController controller, Transform playerT)
         {
             _controller = controller;
+            _playerT = playerT;
         }
+
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
+
         private void FixedUpdate()
         {
             if (_updateMode != UpdateModeEnum.FixedUpdate)
                 return;
             Tick(Time.fixedDeltaTime);
         }
+
         private void Update()
         {
+            if (_controller == null || _playerT == null) return;
+
             UpdateInput(out _input);
             if (_updateMode != UpdateModeEnum.Update)
                 return;
             Tick(Time.deltaTime);
         }
+
         private void LateUpdate()
         {
+            if (_controller == null || _playerT == null) return;
+
             if (_updateMode != UpdateModeEnum.LateUpdate)
                 return;
             Tick(Time.deltaTime);
@@ -54,52 +59,32 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         private void Tick(float deltaTime)
         {
+            if (_controller == null || _playerT == null) return;
             Vector2 input = _input * 200;
             _input = Vector2.zero;
 
-            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
-                _lockOnState = LockOnState.Free;
-
             _controller.Update(
                 _playerT.position,
-                _target.position,
                 input,
-                _lockOnState != LockOnState.Free,
                 deltaTime,
                 out Quaternion rotation,
                 out Vector3 position
             );
             _cameraT.SetPositionAndRotation(position, rotation);
         }
+
         private void UpdateInput(out Vector2 input)
         {
+            input = Vector2.zero;
+
             if (Input.GetKeyDown(KeyCode.Mouse2))
-                if (_lockOnState == LockOnState.Free)
-                    _lockOnState = LockOnState.LockOnManual;
-                else
-                    _lockOnState = LockOnState.Free;
-            if (Input.GetKeyDown(KeyCode.Mouse0) && _lockOnState == LockOnState.Free)
-                _lockOnState = LockOnState.LockOnAuto;
+                _controller.ToggleLockOnState(_playerT.position);
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+                _controller.TryActiveAutoLockOn(_playerT.position);
 
             input.x = Input.GetAxisRaw("Mouse X");
             input.y = Input.GetAxisRaw("Mouse Y");
-        }
-        private enum LockOnState : byte
-        {
-            /// <summary>
-            /// 操作によって自由にカメラを回せる
-            /// </summary>
-            Free,
-
-            /// <summary>
-            /// システムによって目標へロックオンした状態
-            /// </summary>
-            LockOnAuto,
-
-            /// <summary>
-            /// 操作によって目標へロックオンした状態
-            /// </summary>
-            LockOnManual,
         }
     }
 }

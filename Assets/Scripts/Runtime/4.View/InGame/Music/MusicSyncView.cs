@@ -32,7 +32,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
         private void Update()
         {
-            if (_mp == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
+            if (_mp == null || _musicSyncViewModel == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
 
             _musicSyncViewModel.Update(_mp.Time);
 
