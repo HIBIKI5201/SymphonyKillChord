@@ -2,7 +2,6 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
@@ -13,6 +12,10 @@ using KillChord.Runtime.View.InGame.Player;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using KillChord.Runtime.Composition.InGame.Debugger;
+#endif
+
 namespace KillChord.Develop.Assets.Scripts.Develop
 {
     public sealed class BattleInitialize : MonoBehaviour
@@ -21,12 +24,15 @@ namespace KillChord.Develop.Assets.Scripts.Develop
         [SerializeField] private PlayerView _player;
         [SerializeField] private EnemySample _enemySample;
 
-        [Space] [Header("キャラクターデータ（テスト用）")] [SerializeField]
+        [Space]
+        [Header("キャラクターデータ（テスト用）")]
+        [SerializeField]
         private CharacterData _playerData;
 
         [SerializeField] private CharacterData _enemyData;
 
-        [Header("アタックパイプライン（テスト用）")] [SerializeField]
+        [Header("アタックパイプライン（テスト用）")]
+        [SerializeField]
         private AttackPipelineAsset _normalPipelineAsset;
 
         [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;

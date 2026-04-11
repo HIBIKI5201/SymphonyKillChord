@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Composition.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
@@ -9,6 +8,10 @@ using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using KillChord.Runtime.Composition.InGame.Debugger;
+#endif
 
 namespace KillChord.Runtime.Composition
 {

@@ -1,7 +1,5 @@
-using Codice.CM.Common;
 using CriWare;
 using R3;
-using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Music
