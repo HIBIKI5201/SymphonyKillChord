@@ -4,15 +4,15 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
-    public class CameraInitialize : MonoBehaviour, CameraTransform
+    public class CameraInitialize : MonoBehaviour, ICameraTransform
     {
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<CameraTransform>(this);
+            ServiceLocator.RegisterInstance<ICameraTransform>(this);
         }
     }
 
-    public interface CameraTransform
+    public interface ICameraTransform
     {
         Transform transform { get; }
     }

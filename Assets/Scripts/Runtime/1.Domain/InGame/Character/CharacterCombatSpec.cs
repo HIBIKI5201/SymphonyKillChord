@@ -22,6 +22,18 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackDifinitions = attackDifinitions;
         }
 
+        public AttackDefinition GetAttackDefinitionByBeatType(int beatType)
+        {
+            foreach (var attack in _attackDifinitions)
+            {
+                if (attack.BeatType.HasValue && attack.BeatType.Value == beatType)
+                {
+                    return attack;
+                }
+            }
+            throw new InvalidOperationException($"ビートタイプ{beatType}に対応する攻撃定義が見つかりませんでした。");
+        }
+
         /// <summary>
         ///     指定した攻撃IDに対応する攻撃定義を取得する。
         /// </summary>

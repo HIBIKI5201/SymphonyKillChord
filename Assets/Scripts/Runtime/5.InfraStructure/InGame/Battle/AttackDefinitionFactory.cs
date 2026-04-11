@@ -26,11 +26,14 @@ namespace KillChord.Runtime.InfraStructure
                 new Damage(data.AttackParameterSetData.ConfirmedDamage)
                 );
 
+            int? beatType = data.UseBeatType ? data.BeatType : null;
+
             return new AttackDefinition(
                 data.AttackName,
                 new Damage(data.BaseDamage),
                 attackParameterSet,
-                data.AttackPipelineAsset.Create()
+                data.AttackPipelineAsset.Create(),
+                beatType
                 );
         }
     }

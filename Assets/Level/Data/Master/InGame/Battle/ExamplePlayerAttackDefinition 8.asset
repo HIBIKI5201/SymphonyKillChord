@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 992a3cc89961d554cb13e7d6ba345d99, type: 3}
+  m_Name: ExamplePlayerAttackDefinition 8
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AttackDefinitionData
+  _attackName: 8
+  _baseDamage: 8
+  _attackParameterSetData: {fileID: 11400000, guid: e2c3f53fe5d600640a2d03efd0f75ebd, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: ab4ff7fb7cf808b48aec5f14a474dc2e, type: 2}
+  _useBeatType: 1
+  _beatType: 8
