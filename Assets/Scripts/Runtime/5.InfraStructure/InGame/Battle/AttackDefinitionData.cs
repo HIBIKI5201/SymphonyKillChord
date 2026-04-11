@@ -10,10 +10,15 @@ namespace KillChord.Runtime.InfraStructure
         public float BaseDamage => _baseDamage;
         public AttackParameterSetData AttackParameterSetData => _attackParameterSetData;
         public AttackPipelineAsset AttackPipelineAsset => _attackPipelineAsset;
+        public bool UseBeatType => _useBeatType;
+        public int BeatType => _beatType;
 
         [SerializeField] private string _attackName;
         [SerializeField] private float _baseDamage;
         [SerializeField] private AttackParameterSetData _attackParameterSetData;
         [SerializeField] private AttackPipelineAsset _attackPipelineAsset;
+
+        [SerializeField] private bool _useBeatType;
+        [SerializeField] private int _beatType;
     }
 }
