@@ -28,24 +28,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            SymphonyDebugHUD.AddText(CheckNullC);
-            SymphonyDebugHUD.AddText(CheckNullPT);
-        }
-
-        private string CheckNullC()
-        {
-            return (_controller == null).ToString();
-        }
-
-        private string CheckNullPT()
-        {
-            return (_playerT == null).ToString();
-        }
-
-        private void OnDestroy()
-        {
-            SymphonyDebugHUD.RemoveText(CheckNullC);
-            SymphonyDebugHUD.RemoveText(CheckNullPT);
         }
 
         private void FixedUpdate()
