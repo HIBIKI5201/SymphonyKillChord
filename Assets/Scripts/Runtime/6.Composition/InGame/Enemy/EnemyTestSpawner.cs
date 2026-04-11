@@ -1,3 +1,4 @@
+using System;
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Application.InGame;
@@ -7,6 +8,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -16,11 +18,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyTestSpawner : MonoBehaviour
     {
+        private void Awake()
+        {
+            ServiceLocator.RegisterInstance(this);
+        }
 
         public void SetTargetManager(TargetManager targetManager)
         {
             _targetManager = targetManager;
         }
+
         public void SetTargetEntity(IDefender targetEntity)
         {
             _targetEntity = targetEntity;
@@ -72,7 +79,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
-            enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity, _musicSyncViewModel, _musicSyncService, _targetManagerController);
+            enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,
+                _musicSyncViewModel, _musicSyncService, _targetManagerController);
 
             _spawnCount++;
         }
