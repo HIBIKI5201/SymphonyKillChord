@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Composition
         private CharacterData _playerData;
 
         [SerializeField] private CharacterData _enemyData;
-        
+
         private EnemyTestSpawner _enemyTestSpawner;
 
         private void Awake()
@@ -54,7 +54,9 @@ namespace KillChord.Runtime.Composition
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application);
-            _player.Init(playerMovementController, null, ServiceLocator.GetInstance<CameraTransform>().transform);
+            var ct = ServiceLocator.GetInstance<CameraTransform>().transform;
+            
+            _player.Init(playerMovementController, null, ct);
 
 
 #if UNITY_EDITOR

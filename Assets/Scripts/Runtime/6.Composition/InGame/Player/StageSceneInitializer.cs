@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
-    public class StageSceneInstance : MonoBehaviour, IStageSceneInstance
+    public class StageSceneObjects : MonoBehaviour, IStageSceneInstance
     {
         public Transform PlayerTransform => _playerTransform;
         public SkillInitializer SkillInitializer => _skillInitializer;

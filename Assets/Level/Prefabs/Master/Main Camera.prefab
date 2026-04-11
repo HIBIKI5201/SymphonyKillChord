@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 360769588552614678}
   - component: {fileID: 2725166892272125398}
   - component: {fileID: 2283369739249037757}
+  - component: {fileID: 5825878392937498218}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -185,3 +186,15 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 11400000, guid: 0f6e54bbe825b324d94fee6a93d2644c, type: 2}
+--- !u!114 &5825878392937498218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6368359331200307922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5032142533a49204b94799673d0c7b7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.CameraInitialize

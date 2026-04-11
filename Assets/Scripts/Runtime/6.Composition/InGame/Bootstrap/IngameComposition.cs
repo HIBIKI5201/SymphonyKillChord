@@ -2,6 +2,7 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -23,11 +24,16 @@ namespace KillChord.Runtime.Composition
         private async void Start()
         {
             await _ingameSceneView.LoadScene(_backgroundSceneName);
-            _skillInitializer = ServiceLocator.GetInstance<SkillInitializer>();
+
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
+            Debug.Log(
+                $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
+            _skillInitializer = stageSceneI.SkillInitializer;
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
+
             int retryCount = 0;
             while (_musicPlayer == null && retryCount < 20)
             {
