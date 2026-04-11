@@ -1,45 +1,25 @@
 # Persistent-SceneManagement
 
-Persistent カテゴリーにおけるシーン遷移のモジュール詳細。
+シーン遷移モジュールです。現在はフェード演出を挟まず、サービス経由で対象シーンをロードして Active Scene を切り替え、必要なら遷移元シーンをアンロードします。
 
 ## 構造概要
 
-シーン遷移機能は、暗転などの演出（View）、遷移ロジック（Application）、およびUnityのSceneManagerを利用した実装（InfraStructure）で構成されています。
-
-### 1. Domain
-- **SceneId**: 遷移先のシーンを識別するための列挙型。
-
 ### 2. Application
-- **ISceneTransitionService**: シーン遷移の開始を指示するためのインターフェース。
-- **SceneTransitionApplication**: 遷移演出と遷移ロジックの実行。
+- **ISceneTransitionService**: `ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken)` を提供。
 
 ### 3. Adaptor
-- **SceneTransitionController**: 他のモジュールからシーン遷移をリクエストするためのコントローラー。
+- **SceneTransitionController**: View からの遷移要求を受ける。
 
 ### 4. View
-- **SceneTransitionView**: フェードイン・フェードアウトなどの視覚演出。
+- **SceneTransitionView**: デバッグ用のシーン遷移ボタン。
 
 ### 5. InfraStructure
-- **SceneTransitionService**: Unity の `SceneManager` を呼び出してシーンをロードする実実装。
+- **SceneTransitionService**: `SceneLoader` を使ってシーンのロード / アンロード / Active 化を行う実装。
 
 ### 6. Composition
-- **SceneTransitionInitializer**: シーン遷移関連のインスタンス生成と依存関係の解決。
+- **SceneTransitionInitializer**: `SceneTransitionView` に controller を注入。
 
-## クラス間連携図 (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-sequenceDiagram
-    participant STC as SceneTransitionController
-    participant ISTS as ISceneTransitionService (App)
-    participant STS as SceneTransitionService (Infra)
-    participant STV as SceneTransitionView (View)
-
-    STC->>ISTS: LoadScene(sceneId)
-    ISTS->>STV: StartFadeOut()
-    STV-->>ISTS: OnFadeOutComplete
-    ISTS->>STS: LoadSceneAsync(sceneId)
-    STS-->>ISTS: OnLoadComplete
-    ISTS->>STV: StartFadeIn()
-    STV-->>ISTS: OnFadeInComplete
-    ISTS-->>STC: Finished
-```
+- 以前の説明にあった「フェードアウト完了後にロード」のような演出フローは、現行コードには入っていません。
+- `SceneTransitionView` はデバッグ用途の MonoBehaviour で、ボタンから直接 `ChangeScene()` を呼ぶ想定です。
