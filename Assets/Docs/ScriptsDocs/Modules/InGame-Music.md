@@ -1,55 +1,33 @@
 # InGame-Music
 
-InGame カテゴリーにおける音楽同期（リズムアクション）機能のモジュール詳細。
+ゲーム中のビート同期を扱うモジュールです。再生中の経過時間に対して、予約されたアクションを所定のタイミングで実行します。
 
 ## 構造概要
 
-音楽同期機能は、再生中の音楽のビート（Beat）とゲーム内アクションを同期させるための中心的なロジックです。
-
 ### 1. Domain
-- **RhythmDefinition**: 楽曲のBPMや拍子、ビートごとの特性を定義するデータ。
-- **RhythmState**: 現在のビート数、再生時間、過去のヒット履歴などの状態を保持。
-- **ScheduledAction**: 特定のビートやタイミングで実行するように予約されたアクション。
-- **ExecuteRequestTiming**: アクションを実行すべき詳細なタイミング（ビートのオン/オフなど）の定義。
+- **RhythmDefinition**: BPM などの基礎定義。
+- **RhythmState**: ビート履歴とタイミング計算。
+- **ScheduledAction**: 実行予約されたアクション。
+- **ExecuteRequestTiming**: どのタイミングで発火するかの指定。
 
 ### 2. Application
-- **MusicSyncService**: 再生時間（playTime）を監視し、予約された `ScheduledAction` を適切なタイミングで実行する。
-- **IMusicSyncService**: 他の Application から音楽同期機能を利用するためのインターフェース。
-- **IMusicActionScheduler**: 特定のビートでアクションを実行するためのスケジュール機能の抽象。
+- **MusicSyncService**: スケジュール実行と履歴保存の中核。
+- **IMusicSyncService**: 利用側向けインターフェース。
+- **IMusicActionScheduler**: 予約用インターフェース。
 
 ### 3. Adaptor
-- **MusicSyncController**: ゲーム全体の再生時間の更新を管理し、MusicSyncService へ伝達。
-- **MusicSchedulerAdaptor**: ビートに合わせたアクションのスケジュールを簡略化するためのアダプター。
-- **IMusicSyncViewModel**: リズムの視覚化（ノーツの移動、判定表示）に必要なデータを提供するインターフェース。
+- **MusicSyncController**: 再生時間を service に渡す。
+- **MusicSchedulerAdaptor**: `EnemyMusicSpec` などから予約しやすい形へ変換。
+- **IMusicSyncViewModel / IMusicViewModel**: 表示用データの抽象。
 
 ### 4. View
-- **MusicSyncView**: リズムバーやノーツの描画。再生時間と同期してアニメーションを制御。
-- **MusicSyncViewModel**: 表示データの保持。
+- **MusicSyncView / MusicSyncViewModel**: 同期状態の可視化。
+- **MusicViewModel**: 再生中 cue 名などを保持。
 
 ### 6. Composition
-- **MusicSyncInitializer**: 音楽同期エンジンの構築、初期設定、および依存性の注入。
+- **MusicSyncInitializer**: `MusicPlayer` と同期サービスの接続。
 
-## 主要ロジック：アクション予約と実行 (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-graph TD
-    subgraph Client
-        AE[AttackExecutor]
-    end
-
-    subgraph Application
-        MSS[MusicSyncService]
-    end
-
-    subgraph Domain
-        SA[ScheduledAction]
-        RS[RhythmState]
-    end
-
-    AE -->|RegisterAction| MSS
-    MSS -->|Enqueue| PQ[PriorityQueue]
-    PQ --> SA
-    MSS -->|Update playTime| RS
-    PQ -->|Check Timing| MSS
-    MSS -->|Invoke| SA
-```
+- `MusicSyncService` は `PriorityQueue<ScheduledAction, double>` を使って実行時刻順に予約を保持します。
+- スキル判定用の行動履歴も `MusicSyncService.RegisterBattleActionHistory()` 経由でここに蓄積されます。

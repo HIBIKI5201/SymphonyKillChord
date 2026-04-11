@@ -1,43 +1,37 @@
 # InGame-Camera
 
-InGame カテゴリーにおけるカメラ制御機能のモジュール詳細。
+カメラ制御モジュールです。追従、フリールック、ロックオン、遮蔽物による距離補正を `CameraSystemApplication` が統合します。
 
 ## 構造概要
 
-カメラ機能は、複数の回転ロジックや追従ロジックを独立した Application クラスとして実装し、それらを `CameraSystemApplication` で統合・選択して実行する構造になっています。
-
 ### 1. Domain
-- **CameraParameter**: 単一のカメラ設定（FOV、距離など）。
-- **CameraSystemParameter**: カメラシステム全体の設定データ。
+- **CameraParameter / CameraSystemParameter**: カメラ関連の各種設定。
+- **ILockOnTarget**: ロックオン対象の抽象。
 
 ### 2. Application
-- **CameraSystemApplication**: 各種カメラロジック（回転、追従）を管理し、最終的なカメラの姿勢を計算する司令塔。
-- **CameraRotationApplication**: カメラの回転ロジックの基底。
-- **CameraBoneFreeLookRotationApplication**: プレイヤーの入力に基づいた自由な視点回転。
-- **CameraBoneLockOnRotationApplication**: 特定のターゲットを注視し続ける回転。
-- **CameraFollowApplication**: ターゲットへの追従ロジック。
-- **CameraFollowVelocityApplication**: 速度に基づいた追従（ラグや慣性）の計算。
+- **CameraSystemApplication**: カメラ全体の司令塔。
+- **CameraFollowApplication**: 注視対象への追従オフセット更新。
+- **CameraRotationApplication**: カメラ回転の補正。
+- **CameraBoneFreeLookRotationApplication**: 通常時の入力回転。
+- **CameraBoneLockOnRotationApplication**: ロックオン時の向き制御。
+- **TargetSelector**: 対象選択ロジック。
+- **CameraSystemContext**: 1 フレーム分の入力文脈。
 
 ### 3. Adaptor
-- **CameraSystemController**: 入力（スティック操作、ターゲット切り替え）を受け取り、CameraSystemApplication へ伝達。
+- **CameraSystemController**: View からの更新要求を `CameraSystemApplication` へ橋渡し。
+- **TargetManager / LockOnTarget**: 対象管理。
 
 ### 4. View
-- **CameraSystemView**: 計算されたトランスフォームを実際の Unity の Camera や Cinemachine などのオブジェクトに適用する。
+- **CameraSystemView**: 実際の Camera Transform 反映。
+
+### 5. InfraStructure
+- **CameraSystemConfig**: Inspector からパラメータを供給する ScriptableObject / 設定元。
 
 ### 6. Composition
-- **CameraSystemInitializer**: カメラシステムの各コンポーネントを組み立てる。
-- **CameraSystemParameterDebug**: インスペクター等からカメラパラメータをライブ編集するためのデバッグ支援。
+- **CameraSystemInitializer**: 各 Application を組み立てて View と接続。
+- **CameraSystemParameterDebug**: Editor 用のパラメータ調整。
 
-## カメラ計算のパイプライン (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-graph TD
-    Input[Input/Controller] --> CSA[CameraSystemApplication]
-    CSA --> FRA[FreeLook Rotation]
-    CSA --> LRA[LockOn Rotation]
-    CSA --> FA[Follow Application]
-    FRA --> Result[Position/Rotation]
-    LRA --> Result
-    FA --> Result
-    Result --> CSV[CameraSystemView]
-```
+- `CameraSystemApplication` は `CameraLockOnState` を内部に持ち、入力が入るとオートロックオンを解除します。
+- 距離補正には `Physics.SphereCast` を使い、遮蔽物があるとカメラ距離を短縮します。
