@@ -34,7 +34,6 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
-        [SerializeField] private MusicSyncService _musicSyncService;
         [SerializeField] private int _bpm;
 
         [Space]
