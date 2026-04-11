@@ -34,9 +34,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [Header("View")][SerializeField] private PlayerAttackInputView _playerAttackInputView;
         [SerializeField] private AttackResultView _attackResultView;
 
-#if UNITY_EDITOR
         [SerializeField] private int _bpm = 60;
-#endif
+
         private bool ValidateSerializedReferences()
         {
             if (_playerData == null || _enemyData == null ||
