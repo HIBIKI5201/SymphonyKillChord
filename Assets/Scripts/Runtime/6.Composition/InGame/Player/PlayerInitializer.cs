@@ -55,6 +55,12 @@ namespace KillChord.Runtime.Composition
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
             _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawner>();
+            if (_enemyTestSpawner == null)
+            {
+                Debug.LogError($"{nameof(EnemyTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
+
 
             CharacterEntity player = CharacterFactory.Create(_playerData);
             _enemyTestSpawner.SetTargetEntity(player);
@@ -72,6 +78,11 @@ namespace KillChord.Runtime.Composition
 
 
             TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
+            if(targetSelectorController == null)
+            {
+                Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
             IMusicSyncService _musicSyncService = new MusicSyncService(new(_bpm));
             SkillController skillController = new SkillController(_skillRepository, _musicSyncService);
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();

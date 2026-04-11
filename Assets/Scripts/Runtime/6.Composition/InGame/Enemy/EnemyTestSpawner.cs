@@ -31,6 +31,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void SetTargetManager(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             _targetManager = targetManager;
+            _targetManagerController = new(targetManager);
             _targetEntityRegistryController = new(targetEntityRegistry);
         }
 
@@ -54,8 +55,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         public void Init()
         {
-            _targetManagerController = new(_targetManager);
-
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
             _musicSyncService = initializer.MusicSyncService;
             MusicSyncView view = FindAnyObjectByType<MusicSyncView>();
