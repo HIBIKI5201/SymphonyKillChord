@@ -21,9 +21,8 @@ namespace KillChord.Runtime.Structure.InGame.Camera
                 _lockOnLookAtRatio,
                 _lockOnRotationSpeed,
                 _collisionRadius,
+                _collisionMask,
                 _pitchRange);
-
-        public LayerMask CollisionMask => _collisionMask;
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;

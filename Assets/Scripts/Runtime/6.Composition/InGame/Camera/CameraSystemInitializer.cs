@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
-        public void Initialize(TargetManager targetManager,TargetEntityRegistry targetEntityRegistry)
+        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Composition
             ServiceLocator.RegisterInstance(targetSelectorController);
 
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
-                freeLookRotationSystem, rotationSystem, targetSelector, _config.CollisionMask);
+                freeLookRotationSystem, rotationSystem, targetSelector);
 
             CameraSystemController controller = new(application);
 

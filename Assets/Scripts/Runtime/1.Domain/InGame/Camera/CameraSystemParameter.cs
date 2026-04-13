@@ -19,6 +19,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             float lockOnLookAtRatio,
             float lockOnRotationSpeed,
             float collisionRadius,
+            LayerMask collisionLayerMask,
             Vector2 pitchRange)
         {
             _cameraOffset = cameraOffset;
@@ -31,6 +32,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             _lockOnLookAtRatio = lockOnLookAtRatio;
             _lockOnRotationSpeed = lockOnRotationSpeed;
             _collisionRadius = collisionRadius;
+            _collisionMask = collisionLayerMask;
             _pitchRange = pitchRange;
         }
         public Vector3 Offset => _cameraOffset;
@@ -46,6 +48,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
         public float LockOnRotationSpeed => _lockOnRotationSpeed;
 
         public float CollisionRadius => _collisionRadius;
+        public int CollisionMask => _collisionMask;
 
         public Vector2 PitchRange => _pitchRange;
 
@@ -69,6 +72,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
 
         [Header("Collision")]
         [SerializeField] private float _collisionRadius;
+        [SerializeField] private LayerMask _collisionMask;
 
         [Header("Limits")]
         [SerializeField] private Vector2 _pitchRange;
