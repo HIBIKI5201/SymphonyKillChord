@@ -13,10 +13,10 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <summary> プレイヤーの入力履歴のうち拍情報を取得する </summary>
         ReadOnlySpan<int> GetBeatTypeHistory();
 
-        /// <summary> プレイヤーの入力履歴のうち、入力したunscaledTimeを保存する </summary>
+        /// <summary> プレイヤーの入力履歴のうち、入力したunscaledTimeを取得する </summary>
         ReadOnlySpan<float> GetBeatTypeTiming();
 
-        /// <summary> プレイヤーの入力履歴のうち、アクションの種類を保存する </summary>
+        /// <summary> プレイヤーの入力履歴のうち、アクションの種類を取得する </summary>
         ReadOnlySpan<BattleActionType> GetActionHistory();
 
         /// <summary>
@@ -32,7 +32,12 @@ namespace KillChord.Runtime.Application.InGame.Music
             Action action,
             CancellationToken ct);
 
+        /// <summary> 現在のタイミング（Time.unscaledTime）が何拍子相当かを取得する </summary>
+        int GetCurrentBeatType();
+
         /// <summary> プレイヤーの行動履歴を保存する </summary>
-        void RegisterBattleActionHistory(BattleActionType actionType);
+        /// <param name="actionType">アクションの種類</param>
+        /// <param name="beatType">計算済みの拍子</param>
+        void RegisterBattleActionHistory(BattleActionType actionType, int beatType);
     }
 }

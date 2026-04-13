@@ -83,14 +83,21 @@ namespace KillChord.Runtime.Composition
                 Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
-            IMusicSyncService _musicSyncService = new MusicSyncService(new(_bpm));
-            SkillController skillController = new SkillController(_skillRepository, _musicSyncService);
+
+            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<IMusicSyncService>();
+            if (musicSyncService == null)
+            {
+                Debug.LogError($"{nameof(IMusicSyncService)}が見つかりません。MusicSyncInitializerが先に実行されているか確認してください。");
+                return;
+            }
+
+            SkillController skillController = new SkillController(_skillRepository, musicSyncService);
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
             PlayerBattleState playerBattleState = new PlayerBattleState(player);
 
-            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController);
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController, musicSyncService);
 
             _player.Init(playerMovementController, playerAttackController, ct);
 
