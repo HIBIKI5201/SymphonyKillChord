@@ -17,35 +17,37 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _musicSyncService = musicSyncService;
             skillId ??= new[] { 0 };
-            _skillCash = new SkillDefinition[skillId.Length];
+            _skillCache = new SkillDefinition[skillId.Length];
 
             for (int i = 0; i < skillId.Length; i++)
             {
-                _skillCash[i] = skillRepository.GetSkill(skillId[i]);
+                _skillCache[i] = skillRepository.GetSkill(skillId[i]);
             }
         }
 
         /// <summary>
-        ///　スキルが成立しているかどうかを調べる
+        ///     アクションを履歴に登録し、スキルが成立しているかチェックする。
         /// </summary>
-        /// <param name="actionType"></param>
-        /// <returns>登録した</returns>
-        public int CheckSkill(BattleActionType actionType)
+        /// <param name="actionType">登録するアクションの種類</param>
+        /// <param name="beatType">計算済みの拍子</param>
+        /// <returns>スキルが発動したか</returns>
+        public bool TryExecuteSkill(BattleActionType actionType, int beatType)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType);
-
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
+            
             if (SkillCheckService.TryCheckSkills(
-                    _skillCash,
+                    _skillCache,
                     _musicSyncService.GetBeatTypeHistory(),
-                    out var index, out var type))
+                    out var index, out _))
             {
-                _skillCash[index].SkillExecute();
+                _skillCache[index].SkillExecute();
+                return true;
             }
 
-            return type;
+            return false;
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly SkillDefinition[] _skillCash;
+        private readonly SkillDefinition[] _skillCache;
     }
 }

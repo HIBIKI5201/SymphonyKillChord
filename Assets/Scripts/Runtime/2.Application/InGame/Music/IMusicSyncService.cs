@@ -13,10 +13,10 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <summary> プレイヤーの入力履歴のうち拍情報を取得する </summary>
         ReadOnlySpan<int> GetBeatTypeHistory();
 
-        /// <summary> プレイヤーの入力履歴のうち、入力したunscaledTimeを保存する </summary>
+        /// <summary> プレイヤーの入力履歴のうち、入力したunscaledTimeを取得する </summary>
         ReadOnlySpan<float> GetBeatTypeTiming();
 
-        /// <summary> プレイヤーの入力履歴のうち、アクションの種類を保存する </summary>
+        /// <summary> プレイヤーの入力履歴のうち、アクションの種類を取得する </summary>
         ReadOnlySpan<BattleActionType> GetActionHistory();
 
         /// <summary>

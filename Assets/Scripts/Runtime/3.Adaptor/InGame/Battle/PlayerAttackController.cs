@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using System;
 using UnityEngine;
@@ -23,17 +24,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
             SkillController skillController,
-            TargetSelectorController targetSelectorController
+            TargetSelectorController targetSelectorController,
+            IMusicSyncService musicSyncService
         )
         {
             _presenter = presenter;
             _battleState = battleState;
             _skillController = skillController;
             _targetSelectorController = targetSelectorController;
+            _musicSyncService = musicSyncService;
         }
 
         /// <summary>
-        ///     現在の戦闘状態と押された拍情報に基づいて攻撃処理を実行しする。
+        ///     現在の戦闘状態と音楽のタイミングに基づいて攻撃処理を実行する。
         /// </summary>
         public bool ExecuteAttack()
         {
@@ -48,9 +51,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
             _battleState.ChangeTarget(targetEntity);
-
-            int beatType = _skillController.CheckSkill(BattleActionType.Attack);
-
+            
+            int beatType = _musicSyncService.GetCurrentBeatType();
+            
+            bool isSkillTriggered = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType);
+            
             AttackDefinition attackDefinition;
             try
             {
@@ -61,7 +66,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 Debug.LogWarning(ex.Message);
                 return false;
             }
-
+            
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
                 _battleState.Target);
@@ -74,5 +79,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly PlayerBattleState _battleState;
         private readonly SkillController _skillController;
         private readonly TargetSelectorController _targetSelectorController;
+        private readonly IMusicSyncService _musicSyncService;
     }
 }
