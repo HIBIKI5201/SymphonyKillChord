@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
-    /// <summary>
-    /// 音楽同期のタイミング管理やアクション実行を行うサービス。
-    /// </summary>
     public class MusicSyncService : IMusicSyncService
     {
         private const int BUFFER_SIZE = 64;
@@ -24,10 +21,6 @@ namespace KillChord.Runtime.Application.InGame.Music
             _rhythmDefinition = rhythmDefinition;
         }
 
-        /// <summary>
-        /// 毎フレーム処理。
-        /// </summary>
-        /// <param name="playTime">音楽の再生時間</param>
         public void Update(double playTime)
         {
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
@@ -54,16 +47,12 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmState.Count;
         }
 
-        /// <summary>
-        /// 現在のタイミングが何拍子相当かを取得する。Time.unscaledTimeを利用する
-        /// </summary>
-        public int GetCurrentBeatType()
+        public int GetCurrentBeatType(float unscaledTime)
         {
             if (_rhythmState.Count == 0) return 1;
 
-            float currentTime = Time.unscaledTime;
             float lastTime = _rhythmState.LastTiming;
-            double duration = currentTime - lastTime;
+            double duration = (double)(unscaledTime - lastTime);
 
             return _rhythmDefinition.CalculateBeatType(duration);
         }
@@ -93,12 +82,9 @@ namespace KillChord.Runtime.Application.InGame.Music
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
-        /// <summary>
-        /// 計算済みの拍子を履歴に登録する。
-        /// </summary>
-        public void RegisterBattleActionHistory(BattleActionType actionType, int beatType)
+        public void RegisterBattleActionHistory(BattleActionType actionType, int beatType, float unscaledTime)
         {
-            _rhythmState.Enqueue(beatType, Time.unscaledTime, actionType);
+            _rhythmState.Enqueue(beatType, unscaledTime, actionType);
         }
     }
 }

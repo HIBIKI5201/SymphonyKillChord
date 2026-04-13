@@ -7,19 +7,8 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
-    /// <summary>
-    ///     Viewの押された拍情報の入力を受け取り、攻撃処理の実行と結果の表示を仲介するクラス。
-    /// </summary>
     public class PlayerAttackController
     {
-        /// <summary>
-        ///     コンストラクタ。
-        /// </summary>
-        /// <param name="attackExecutor"></param>
-        /// <param name="presenter"></param>
-        /// <param name="commandState"></param>
-        /// <param name="battleState"></param>
-        /// <param name="skillController"></param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
@@ -35,9 +24,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _musicSyncService = musicSyncService;
         }
 
-        /// <summary>
-        ///     現在の戦闘状態と音楽のタイミングに基づいて攻撃処理を実行する。
-        /// </summary>
         public bool ExecuteAttack()
         {
             if (_targetSelectorController == null)
@@ -51,11 +37,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
             _battleState.ChangeTarget(targetEntity);
-            
-            int beatType = _musicSyncService.GetCurrentBeatType();
-            
-            bool isSkillTriggered = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType);
-            
+
+            float now = Time.unscaledTime;
+            int beatType = _musicSyncService.GetCurrentBeatType(now);
+
+            _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
+
             AttackDefinition attackDefinition;
             try
             {
@@ -66,7 +53,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 Debug.LogWarning(ex.Message);
                 return false;
             }
-            
+
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
                 _battleState.Target);
