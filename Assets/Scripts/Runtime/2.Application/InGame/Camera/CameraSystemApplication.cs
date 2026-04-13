@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _collisionMask = collisionMask;
             _targetSelector = targetSelector;
 
-            _distance = _parameter.Offset.magnitude;
+            _distance = _parameter.Distance;
         }
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
@@ -95,14 +95,11 @@ namespace KillChord.Runtime.Application.InGame.Camera
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CalculateCameraPlacement(in CameraSystemContext context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result)
         {
-            result.CameraAnchorPosition = context.FollowPosition + _cameraCenterOffset;
+            result.CameraAnchorPosition = context.FollowPosition + _cameraCenterOffset + _parameter.Offset;
 
-            Vector3 idealOffset = _cameraBoneRotation * _parameter.Offset;
-            float maxDistance = idealOffset.magnitude;
-            result.Direction = idealOffset / maxDistance;
+            result.Direction = _cameraBoneRotation * Vector3.back;
 
-            result.Distance = GetDistance(result.CameraAnchorPosition, result.Direction, maxDistance);
-
+            result.Distance = GetDistance(result.CameraAnchorPosition, result.Direction, _parameter.Distance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

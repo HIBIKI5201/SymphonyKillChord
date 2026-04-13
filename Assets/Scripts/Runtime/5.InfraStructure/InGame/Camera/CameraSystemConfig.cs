@@ -12,6 +12,7 @@ namespace KillChord.Runtime.Structure.InGame.Camera
         public CameraSystemParameter ToDomain()
             => new(
                 _cameraOffset,
+                _distance,
                 _followOffsetPower,
                 _followLerpSpeed,
                 _boneRotateSpeed,
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.Structure.InGame.Camera
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
+        [SerializeField] private float _distance = 5f;
 
         [Header("Follow")]
         [SerializeField] private float _followOffsetPower = 2f;
