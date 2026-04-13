@@ -5,9 +5,6 @@ using KillChord.Runtime.Domain.InGame.Skill;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
-    /// <summary>
-    ///     スキルの発動条件の判定や実行を制御するコントローラークラス。
-    /// </summary>
     public class SkillController
     {
         public SkillController(
@@ -25,16 +22,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
-        /// <summary>
-        ///     アクションを履歴に登録し、スキルが成立しているかチェックする。
-        /// </summary>
-        /// <param name="actionType">登録するアクションの種類</param>
-        /// <param name="beatType">計算済みの拍子</param>
-        /// <returns>スキルが発動したか</returns>
-        public bool TryExecuteSkill(BattleActionType actionType, int beatType)
+        public bool CheckSkill(BattleActionType actionType, int beatType, float unscaledTime)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
-            
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
+
             if (SkillCheckService.TryCheckSkills(
                     _skillCache,
                     _musicSyncService.GetBeatTypeHistory(),
