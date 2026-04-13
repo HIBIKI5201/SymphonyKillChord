@@ -5,53 +5,34 @@ using KillChord.Runtime.Utility;
 namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
-    ///     リズム入力の履歴を管理するクラス。
+    /// リズム入力の履歴を管理するクラス。
     /// </summary>
     public class RhythmState
     {
         public int Count => _typeBuffer.Count;
 
+        /// <summary>
+        /// 最後に登録されたタイミング（unscaledTime）を取得する。
+        /// </summary>
+        public float LastTiming => Count > 0 ? _timingBuffer.PeekLast() : 0f;
+
         private readonly RingBuffer<BattleActionType> _typeBuffer;
         private readonly RingBuffer<int> _beatTypeBuffer;
         private readonly RingBuffer<float> _timingBuffer;
 
-        private RhythmDefinition _rhythmDefinition;
-
-        public RhythmState(RhythmDefinition rhythmDefinition, int capacity)
+        public RhythmState(int capacity)
         {
             _typeBuffer = new RingBuffer<BattleActionType>(capacity);
             _beatTypeBuffer = new RingBuffer<int>(capacity);
             _timingBuffer = new RingBuffer<float>(capacity);
-            _rhythmDefinition = rhythmDefinition;
-        }
-
-        public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
-        {
-            return _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
         }
 
         /// <summary>
-        ///     入力登録。
+        ///  計算済みの値をバッファに登録する。
         /// </summary>
-        public void RegisterActionQueue(BattleActionType type, float unscaledTime)
-        {
-            int signature = 1;
-
-            if (Count != 0)
-            {
-                var lastTiming = _timingBuffer.PeekLast();
-                var actionLength = unscaledTime - lastTiming;
-                signature = _rhythmDefinition.GetNearestSignature(actionLength);
-            }
-
-            Enqueue(signature, unscaledTime, type);
-        }
-
-        public void Enqueue(ActionParams param)
-        {
-            Enqueue(param.BeatType, param.Timing, param.ActionType);
-        }
-
+        /// <param name="beatType">計算済みの拍子</param>
+        /// <param name="timing">登録時のタイミング(Time.unscaledTimeなど)</param>
+        /// <param name="actionType">アクションの種類</param>
         public void Enqueue(int beatType, float timing, BattleActionType actionType)
         {
             _beatTypeBuffer.Enqueue(beatType);
@@ -59,9 +40,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             _timingBuffer.Enqueue(timing);
         }
 
-        /// <summary>
-        /// 古い順に取得（Spanコピー）
-        /// </summary>
+        /// <summary> 古い順に取得</summary>
         public ReadOnlySpan<int> GetHistoryBeatType()
         {
             return _beatTypeBuffer.AsReadonlySpan();
