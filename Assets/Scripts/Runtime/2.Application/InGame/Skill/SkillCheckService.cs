@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
         public static bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
             ReadOnlySpan<int> history,
-            out int skillIndex)
+            out int skillIndex, out int lastAttackType)
         {
             const int MAX_STACKALLOC_SIZE = 256; //入力履歴の最大長　
             if (history.Length > MAX_STACKALLOC_SIZE)
@@ -31,11 +31,13 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 if (equipmentSkills[i].IsMatch(reversInput))
                 {
                     skillIndex = i;
+                    lastAttackType = reversInput[0];
                     return true;
                 }
             }
 
             skillIndex = -1;
+            lastAttackType = reversInput[0];
             return false;
         }
     }

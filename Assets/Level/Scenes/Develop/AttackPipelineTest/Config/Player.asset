@@ -17,4 +17,11 @@ MonoBehaviour:
   _moveSpeed: 5
   _attackPower: 3
   _attackDifinitions:
-  - {fileID: 11400000, guid: 1119c366324871145b5c08ecd5b9ebaa, type: 2}
+  - {fileID: 11400000, guid: 54de395a4c3a70f4cbeb57c92fab0d24, type: 2}
+  - {fileID: 11400000, guid: a0248d99b3395974a9ecc1ecda9d5933, type: 2}
+  - {fileID: 11400000, guid: c26fd88cae2866f4088caebb442ab2d1, type: 2}
+  - {fileID: 11400000, guid: ff7935e7b63178f42b43ba2bd2404864, type: 2}
+  - {fileID: 11400000, guid: 9e8a505a04d274f47a30036a1ac90c37, type: 2}
+  - {fileID: 11400000, guid: 5178ef70675b7ce458b25b4b20912e86, type: 2}
+  - {fileID: 11400000, guid: a674e95e8e45e364ab0762c29bd4423b, type: 2}
+  - {fileID: 11400000, guid: 76d96cd6c886b214bae3e375e97b1274, type: 2}

@@ -25,17 +25,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
-        public void CheckSkill(BattleActionType actionType)
+        /// <summary>
+        ///　スキルが成立しているかどうかを調べる
+        /// </summary>
+        /// <param name="actionType"></param>
+        /// <returns>登録した</returns>
+        public int CheckSkill(BattleActionType actionType)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType);
 
             if (SkillCheckService.TryCheckSkills(
                     _skillCash,
                     _musicSyncService.GetBeatTypeHistory(),
-                    out var index))
+                    out var index, out var type))
             {
                 _skillCash[index].SkillExecute();
             }
+
+            return type;
         }
 
         private readonly IMusicSyncService _musicSyncService;

@@ -16,8 +16,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
             CameraBoneLockOnRotationApplication boneRotationSystem,
             CameraBoneFreeLookRotationApplication freeLookRotationSystem,
             CameraRotationApplication cameraRotationSystem,
-            TargetSelector targetSelector,
-            int collisionMask
+            TargetSelector targetSelector
         )
         {
             _parameter = parameter;
@@ -25,10 +24,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _boneRotationSystem = boneRotationSystem;
             _freeLookRotationSystem = freeLookRotationSystem;
             _cameraRotationSystem = cameraRotationSystem;
-            _collisionMask = collisionMask;
             _targetSelector = targetSelector;
 
-            _distance = _parameter.Offset.magnitude;
+            _distance = _parameter.Distance;
         }
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
@@ -95,14 +93,11 @@ namespace KillChord.Runtime.Application.InGame.Camera
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CalculateCameraPlacement(in CameraSystemContext context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result)
         {
-            result.CameraAnchorPosition = context.FollowPosition + _cameraCenterOffset;
+            result.CameraAnchorPosition = context.FollowPosition + _cameraCenterOffset + _parameter.Offset;
 
-            Vector3 idealOffset = _cameraBoneRotation * _parameter.Offset;
-            float maxDistance = idealOffset.magnitude;
-            result.Direction = idealOffset / maxDistance;
+            result.Direction = _cameraBoneRotation * Vector3.back;
 
-            result.Distance = GetDistance(result.CameraAnchorPosition, result.Direction, maxDistance);
-
+            result.Distance = GetDistance(result.CameraAnchorPosition, result.Direction, _parameter.Distance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,7 +112,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private float GetDistance(in Vector3 center, in Vector3 direction, float maxDistance)
         {
-            if (Physics.SphereCast(center, _parameter.CollisionRadius, direction, out RaycastHit hit, maxDistance, _collisionMask))
+            if (Physics.SphereCast(center, _parameter.CollisionRadius, direction, out RaycastHit hit, maxDistance, _parameter.CollisionMask))
             {
                 return Mathf.Max(0.1f, hit.distance);
             }
@@ -131,8 +126,6 @@ namespace KillChord.Runtime.Application.InGame.Camera
         private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
         private readonly CameraRotationApplication _cameraRotationSystem;
         private readonly TargetSelector _targetSelector;
-
-        private readonly int _collisionMask;
 
         private float _distance;
         private Vector3 _cameraCenterOffset;

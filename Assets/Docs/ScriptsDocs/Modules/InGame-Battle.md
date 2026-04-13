@@ -1,55 +1,39 @@
 # InGame-Battle
 
-InGame カテゴリーにおけるバトル機能のモジュール詳細。
+InGame における戦闘処理のモジュールです。現在の主フローは、攻撃入力を `AttackController` が受けて `AttackExecutor` でダメージを計算し、`AttackResultPresenter` で View に渡す流れです。
 
 ## 構造概要
 
-バトル機能は、攻撃の定義（AttackDefinition）、攻撃の実行（AttackExecutor）、および攻撃プロセスの制御（AttackPipeline）を中心に構成されています。
-
 ### 1. Domain
-- **AttackId**: 攻撃を識別するための値。
-- **AttackDefinition**: 攻撃のパラメータ（威力、範囲など）を定義するエンティティ。
-- **AttackResult**: 攻撃の結果（ダメージ量、ヒットの成否など）を表す値オブジェクト。
-- **IHitTarget**: 攻撃対象が実装すべきインターフェース。
+- **AttackId / AttackDefinition**: 攻撃種別と攻撃性能。
+- **AttackResult / Damage**: 計算結果。
+- **AttackStepContext / IAttackPipeline**: パイプライン処理用の文脈と抽象。
+- **IAttacker / IDefender**: 攻撃側と被攻撃側の抽象。
 
 ### 2. Application
-- **BattleApplication**: バトル関連の主要なユースケースを提供。
-- **AttackExecutor**: 実際に攻撃を実行し、ダメージ計算などを行う。
-- **AttackPipeline**: 攻撃の一連の流れ（予備動作、ヒット、硬直など）を制御する。
-- **IAttackStep**: パイプライン内の各ステップを表すインターフェース。
+- **AttackCalculator**: ダメージ計算。
+- **AttackExecutor**: `AttackDefinition`, `IAttacker`, `IDefender` を受けて攻撃を実行。
+- **AttackPipeline / IAttackStep / CriticalStep**: 段階的な攻撃処理を表現する仕組み。
 
 ### 3. Adaptor
-- **BattleController**: バトルアクションの実行、状態遷移の管理。
-- **AttackController**: 攻撃コマンドの受付と Application レイヤーへの委譲。
-- **AttackResultPresenter**: バトル結果を View 用の DTO（AttackResultDTO）に変換。
-- **AttackCommandState**: 現在の攻撃コマンドの状態を管理。
+- **AttackController**: 現行の主な攻撃入口。スキル判定と攻撃実行を担当。
+- **AttackCommandState**: 選択中の `AttackId` を保持。
+- **AttackBattleState**: 攻撃者とターゲットを保持。
+- **BattleController**: 旧フロー寄りの補助コントローラー。
+- **AttackResultPresenter / DamagePresenter**: ViewModel へ変換。
 
 ### 4. View
-- **AttackResultView**: 攻撃結果（ヒット演出、ダメージ数値表示など）の描画。
-- **AttackResultViewModel**: View が表示に使用するデータの保持。
+- **AttackResultView / AttackResultViewModel**: 攻撃結果の表示。
 
 ### 5. InfraStructure
-- **AttackDefinitionData**: ScriptableObject 等を用いた攻撃定義の実装。
-- **AttackPipelineResolver**: 攻撃 ID に対応するパイプラインを解決する。
+- **AttackPipelineResolver**: `AttackId` ごとの `AttackPipeline` を引く。
+- **AttackDefinitionData / AttackDefinitionFactory / AttackParameterSetData**: 攻撃定義のデータソース。
+- **AttackPilpelineAsset**: パイプライン生成用 Asset。
 
 ### 6. Composition
-- **BattleCompositionInitializer**: バトル関連のコンポーネントの生成と依存性注入を行う。
+- **BattleCompositionInitializer**: キャラ生成、戦闘状態、Presenter、Controller の結線。
 
-## クラス間連携図 (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-sequenceDiagram
-    participant AC as AttackController
-    participant BA as BattleApplication
-    participant AE as AttackExecutor
-    participant AP as AttackPipeline
-    participant CE as CharacterEntity
-
-    AC->>BA: Attack(target)
-    BA->>AE: Execute(target, attackId)
-    AE->>AP: StartPipeline()
-    AP->>CE: ApplyDamage()
-    CE-->>AP: Result
-    AP-->>AE: Finish
-    AE-->>BA: AttackResult
-```
+- `BattleCompositionInitializer` では `AttackPipelineResolver` を生成していますが、`AttackController` の実行フローにはまだ接続されていません。
+- `AttackController.ExecuteAttack()` は `AttackBattleState.Attacker.CombatSpec.GetAttackDifinition(0)` を用いて固定的に攻撃定義を取得しています。

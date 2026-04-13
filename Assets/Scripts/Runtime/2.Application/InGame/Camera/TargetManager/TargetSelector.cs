@@ -31,6 +31,24 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             return true;
         }
+        public bool TryGetCurrentTarget(out ILockOnTarget result)
+        {
+            result = _currentTarget;
+            
+            if(result is null)
+            {
+                return false;
+            }
+
+            if (!result.IsAlive)
+            {
+                _currentTarget = null;
+                result = null;
+                return false;
+            }
+
+            return true;
+        }
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
             GetTargetPosition(playerPosition, direction, out _currentTarget);

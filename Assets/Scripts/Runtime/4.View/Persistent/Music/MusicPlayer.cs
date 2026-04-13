@@ -7,7 +7,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     /// <summary>
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
-    [RequireComponent(typeof(CriAtomSource))]
+    [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
     public class MusicPlayer : MonoBehaviour
     {
         public MusicViewModel MusicVM => _musicVm;
@@ -21,7 +21,7 @@ namespace KillChord.Runtime.View.Persistent.Music
             musicViewModel.CueName.Subscribe(ChangeBgm).RegisterTo(destroyCancellationToken);
         }
 
-        public void Awake()
+        public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
         }

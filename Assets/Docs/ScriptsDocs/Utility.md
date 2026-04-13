@@ -1,43 +1,20 @@
 # Utility 機能構造
 
-Utility は、プロジェクト全体で利用される汎用的なクラスやデータ、定数を担当します。
+`Utility` はプロジェクト全体から参照される汎用コードをまとめた層です。
 
 ## モジュール詳細
 
-- **[Utility-Collections](./Modules/Utility-Collections.md)**: `PriorityQueue` や `RingBuffer` などの汎用データ構造。
-- **[Utility-Constant](./Modules/Utility-Constant.md)**: パス、実行順序、共通の列挙型などの定数定義。
+- **[Utility-Collections](./Modules/Utility-Collections.md)**: `PriorityQueue`、`RingBuffer`。
+- **[Utility-Constant](./Modules/Utility-Constant.md)**: `PathConst`、`ExecutionOrderConst`、共通列挙型。
 
 ## レイヤー構造
 
-### 0. Utility (直下)
-- **Collections**: `PriorityQueue` (優先度付きキュー), `RingBuffer` (リングバッファ)。
-- **Constant**: `PathConst` (ファイルパスの定数), `ExecutionOrderConst` (Unity の実行順)。
-- **InGame**: `UpdateModeEnum` (更新モードの列挙型)。
+### 0. Utility
+- **Collections**: `PriorityQueue<TElement, TPriority>`, `RingBuffer<T>`。
+- **Constant**: `PathConst`, `ExecutionOrderConst`。
+- **InGame 用列挙型**: `UpdateModeEnum`, `CameraLockOnState`。
 
-## 主なクラス解説
+## 現在の実装メモ
 
-- **PriorityQueue<T, TPriority>**: `MusicSyncService` などで使用され、時間順にアクションを処理する際に利用されます。
-- **RingBuffer<T>**: `InputBufferingQueue` で使用され、最新の入力を一定数保持するために利用されます。
-
-## 構造図 (Mermaid)
-
-### 汎用コレクションの利用例
-
-```mermaid
-graph LR
-    subgraph Utility
-        PQ[PriorityQueue]
-        RB[RingBuffer]
-    end
-
-    subgraph Application
-        MSS[MusicSyncService]
-    end
-
-    subgraph Domain
-        IBQ[InputBufferingQueue]
-    end
-
-    MSS --> PQ
-    IBQ --> RB
-```
+- `PriorityQueue` は .NET の優先度付きキュー実装を持ち込んだ形です。
+- `RingBuffer<T>` は `where T : unmanaged` 制約付きで、`BufferedInput` のような値型履歴を GC を抑えて扱う用途に使われています。

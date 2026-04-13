@@ -12,13 +12,11 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
-        public void Initialize(EnemyAIController enemyAIController, Transform target, TargetManagerController targetManagerController)
+        public void Initialize(EnemyAIController enemyAIController,
+            Transform target)
         {
-            _lockOnTargetGateway = new(transform);
             _enemyAIController = enemyAIController;
             _target = target;
-            _targetManagerController = targetManagerController;
-            _targetManagerController.Register(_lockOnTargetGateway);
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
         }
@@ -26,8 +24,6 @@ namespace KillChord.Runtime.View.InGame
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
-        private TargetManagerController _targetManagerController;
-        private LockOnTargetGateway _lockOnTargetGateway;
 
         private void Awake()
         {
@@ -50,8 +46,6 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
-            _targetManagerController.Unregister(_lockOnTargetGateway);
-            _lockOnTargetGateway.Dispose();
         }
 
         private void ApplyMove(EnemyMoveInstruction intruction)
