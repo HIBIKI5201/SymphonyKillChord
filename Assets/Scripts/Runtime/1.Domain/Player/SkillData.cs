@@ -1,5 +1,5 @@
 using System;
-using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
@@ -13,19 +13,19 @@ namespace KillChord.Runtime.Domain.Player
     public class SkillData
     {
         public int Id => _id;
-        public int[] Pattern => _pattern;
+        public BeatType[] Pattern => _pattern;
 
         [SerializeReference, SubclassSelector] ISkillEffect _skillEffect;
         [SerializeReference, SubclassSelector] ISkillVisual _skillVisual;
 
         [SerializeField] private int _id;
-        [SerializeField] private int[] _pattern;
+        [SerializeField] private BeatType[] _pattern;
 
         public SkillDefinition ToSkillDefinition()
         {
             return new SkillDefinition(
                 new SkillId(_id),
-                new SkillPattern(_pattern),
+                new SkillPattern(new(_pattern)),
                 _skillEffect,
                 _skillVisual);
         }
