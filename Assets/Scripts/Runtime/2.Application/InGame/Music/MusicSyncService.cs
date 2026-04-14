@@ -47,9 +47,9 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmState.Count;
         }
 
-        public int GetCurrentBeatType(float unscaledTime)
+        public BeatType GetCurrentBeatType(float unscaledTime)
         {
-            if (_rhythmState.Count == 0) return 1;
+            if (_rhythmState.Count == 0) return BeatType.One;
 
             float lastTime = _rhythmState.LastTiming;
             double duration = (double)(unscaledTime - lastTime);
@@ -57,7 +57,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmDefinition.CalculateBeatType(duration);
         }
 
-        public ReadOnlySpan<int> GetBeatTypeHistory()
+        public ReadOnlySpan<BeatType> GetBeatTypeHistory()
         {
             return _rhythmState.GetHistoryBeatType();
         }
@@ -82,7 +82,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
-        public void RegisterBattleActionHistory(BattleActionType actionType, int beatType, float unscaledTime)
+        public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
             _rhythmState.Enqueue(beatType, unscaledTime, actionType);
         }

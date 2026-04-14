@@ -1,7 +1,9 @@
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Persistent.Music;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
@@ -22,7 +24,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
-        public bool CheckSkill(BattleActionType actionType, int beatType, float unscaledTime)
+        public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
