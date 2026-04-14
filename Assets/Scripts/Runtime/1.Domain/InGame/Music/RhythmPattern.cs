@@ -16,9 +16,6 @@ namespace KillChord.Runtime.Domain
 
         public bool Equals(RhythmPattern other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-
             if (_signatures.Length != other._signatures.Length)
             {
                 return false;
@@ -38,6 +35,23 @@ namespace KillChord.Runtime.Domain
         public override bool Equals(object obj)
         {
             return obj is RhythmPattern other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_signatures == null)
+            {
+                return 0;
+            }
+
+            HashCode hash = new HashCode();
+
+            for (int i = 0; i < _signatures.Length; i++)
+            {
+                hash.Add(_signatures[i]);
+            }
+
+            return hash.ToHashCode();
         }
 
         public ReadOnlySpan<BeatType> AsSpan()

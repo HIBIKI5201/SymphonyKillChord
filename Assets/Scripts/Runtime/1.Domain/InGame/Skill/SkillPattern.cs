@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         public SkillPattern(RhythmPattern signatures)
         {
-            _signatures = signatures;//受け取ったデータは変わらない為そのまま利用する
+            _signatures = signatures;
         }
 
         public static bool operator ==(SkillPattern left, SkillPattern right)
@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         public static bool operator ==(ReadOnlySpan<BeatType> left, SkillPattern right)
         {
-            return left.Equals(right);
+            return right.Equals(left);
         }
 
         public static bool operator !=(ReadOnlySpan<BeatType> left, SkillPattern right)
@@ -45,14 +45,14 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         {
             ReadOnlySpan<BeatType> signaturesSpan = _signatures.AsSpan();
 
-            if (_signatures.Length != other.Length)
+            if (_signatures.Signatures.Length != other.Length)
             {
                 return false;
             }
 
-            for (int i = 0; i < _signatures.Length; i++)
+            for (int i = 0; i < _signatures.Signatures.Length; i++)
             {
-                if (_signatures[i] != other[i])
+                if (_signatures.Signatures[i] != other[i])
                 {
                     return false;
                 }

@@ -9,7 +9,9 @@ namespace KillChord.Runtime.Application.InGame.Battle
     {
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            float beatType = context.AttackDefinition.BeatType ?? 0;
+            float beatType = context.AttackDefinition.BeatType.HasValue
+                ? (float)context.AttackDefinition.BeatType.Value
+                : 0;
 
             if (beatType == 0)
                 return context;
