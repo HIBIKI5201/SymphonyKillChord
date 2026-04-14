@@ -44,8 +44,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender);
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
-
-            _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack);
+            
             return result;
         }
 
