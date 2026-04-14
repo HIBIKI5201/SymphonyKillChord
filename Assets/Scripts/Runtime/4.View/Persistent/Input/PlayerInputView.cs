@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using System;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -16,6 +17,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         public void Initialize(InputTimestampProvider timestampProvider)
         {
             _timestampProvider = timestampProvider;
+            ServiceLocator.RegisterInstance(this);
         }
 
         // イベント群。
