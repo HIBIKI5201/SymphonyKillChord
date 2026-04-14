@@ -11,20 +11,23 @@ namespace KillChord.Runtime.Domain.InGame.Music
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             Bpm = bpm;
-            BeatLength = 60000d / Bpm;
+            BeatLength = 60d / Bpm;
         }
 
         public readonly int Bpm;
         public readonly double BeatLength;
 
         /// <summary>
-        ///     1~8拍子の中で最も近いものを取得する
+        /// 1~8拍子の中で、指定された秒数に最も近い拍子を算出する
         /// </summary>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
-        public int GetNearestSignature(double seconds)
+        /// <param name="durationSeconds">前回のアクションからの経過秒数</param>
+        /// <returns>1~8の拍子</returns>
+        public int CalculateBeatType(double durationSeconds)
         {
-            if (Bpm <= 0) { return 4; }
+            if (Bpm <= 0)
+            {
+                return 4;
+            }
 
             double beatSeconds = 60d / Bpm;
             double barSeconds = beatSeconds * 4d;
@@ -35,7 +38,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             for (int i = 1; i <= 8; i++)
             {
                 double targetSeconds = barSeconds / i;
-                double diff = Math.Abs(seconds - targetSeconds);
+                double diff = Math.Abs(durationSeconds - targetSeconds);
 
                 if (diff < minDiff)
                 {

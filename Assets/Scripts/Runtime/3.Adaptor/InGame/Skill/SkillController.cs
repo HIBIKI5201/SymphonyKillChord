@@ -14,28 +14,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _musicSyncService = musicSyncService;
             skillId ??= new[] { 0 };
-            _skillCash = new SkillDefinition[skillId.Length];
+            _skillCache = new SkillDefinition[skillId.Length];
 
             for (int i = 0; i < skillId.Length; i++)
             {
-                _skillCash[i] = skillRepository.GetSkill(skillId[i]);
+                _skillCache[i] = skillRepository.GetSkill(skillId[i]);
             }
         }
 
-        public void CheckSkill(BattleActionType actionType)
+        public bool CheckSkill(BattleActionType actionType, int beatType, float unscaledTime)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType);
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
             if (SkillCheckService.TryCheckSkills(
-                    _skillCash,
+                    _skillCache,
                     _musicSyncService.GetBeatTypeHistory(),
-                    out var index))
+                    out var index, out _))
             {
-                _skillCash[index].SkillExecute();
+                _skillCache[index].SkillExecute();
+                return true;
             }
+
+            return false;
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly SkillDefinition[] _skillCash;
+        private readonly SkillDefinition[] _skillCache;
     }
 }

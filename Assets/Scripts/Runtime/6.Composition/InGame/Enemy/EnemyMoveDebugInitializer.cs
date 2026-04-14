@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
@@ -11,7 +12,6 @@ using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,49 +26,60 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField] private EnemyMoveData _moveData;
         [SerializeField] private EnemyMusicData _encounterMusicData;
         [SerializeField] private EnemyMusicData _battleMusicData;
-        [SerializeField] private AttackPipelineAsset _attackPipelineAsset;
+
+        [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
 
+        private TargetEntityRegistryController _targetEntityRegistryController;
+        private TargetManagerController _targetManagerController;
+        private LockOnTargetGateway _lockOnTargetGateway;
+
         public void Initialize(
             Transform target,
-            IHitTarget targetEntity,
+            CharacterEntity targetEntity,
             IMusicSyncViewModel musicSyncViewModel,
-            IMusicSyncService musicSyncService
+            IMusicSyncService musicSyncService,
+            TargetManagerController targetManagerController,
+            TargetEntityRegistryController targetEntityRegistryController
             )
         {
-            // Factory
-            CharacterFactory characterFactory = new CharacterFactory();
-            EnemyFactory factory = new EnemyFactory();
-
-            CharacterEntity enemyEntity = characterFactory.Create(_enemyData);
+            _targetManagerController = targetManagerController;
+            _targetEntityRegistryController = targetEntityRegistryController;
+            CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
 
             // Domain生成
-            EnemyMoveSpec spec = factory.CreateEnemyMoveSpec(_moveData);
-            EnemyAttackMusicSpec attackMusicSpec = factory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
+            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
+            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
 
-            Dictionary<AttackId, AttackPipeline> attackPipelines = new Dictionary<AttackId, AttackPipeline>
-            {
-                // テスト段階のもので最初の攻撃定義のみパイプラインを作成している。
-                {_enemyData.AttackDifinitions[0].AttackId, _attackPipelineAsset.Create() }
-            };
-
-            IAttackPipelineResolver attackPipelineResolver = new AttackPipelineResolver(attackPipelines);
-            AttackExecutor attackExecutor = new AttackExecutor(attackPipelineResolver);
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(attackExecutor, musicSyncService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService);
 
-            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, _enemyData.AttackDifinitions[0].AttackId);
+            AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
+
+            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, attackDefinition);
 
             // Controller
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
 
+            _lockOnTargetGateway = new LockOnTargetGateway(transform);
+
+            _targetManagerController.Register(_lockOnTargetGateway);
+
+            _targetEntityRegistryController.RegisterTargetEntity(_lockOnTargetGateway,enemyEntity);
+
             // View接続
             _view.Initialize(controller, target);
+        }
+        private void OnDestroy()
+        {
+            _targetManagerController?.Unregister(_lockOnTargetGateway);
+            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _lockOnTargetGateway?.Dispose();
         }
     }
 }

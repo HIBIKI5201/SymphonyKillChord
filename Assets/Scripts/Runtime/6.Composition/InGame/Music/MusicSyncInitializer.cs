@@ -1,12 +1,17 @@
+using System;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
 {
+    /// <summary>
+    ///     音楽同期機能の初期化を行うクラス。
+    /// </summary>
     public class MusicSyncInitializer : MonoBehaviour
     {
         [SerializeField] private MusicSyncView _musicSyncView;
@@ -16,10 +21,10 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public MusicSyncController MusicSyncController;
         public MusicSyncService MusicSyncService;
 
-        private void Start()
+        public void Initialize()
         {
             MusicSyncViewModel msvm = new();
-            var mp = FindFirstObjectByType<MusicPlayer>();
+            var mp = ServiceLocator.GetInstance<MusicPlayer>();
             _musicSyncView.Bind(
                 mp,
                 msvm
@@ -28,6 +33,12 @@ namespace KillChord.Runtime.Composition.InGame.Music
             mp.MusicVM.UpdateMusicCue(_testCue);
             MusicSyncService = new(new(_testBpm));
             MusicSyncController = new(msvm, MusicSyncService);
+            ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
+        }
+
+        public void OnDestroy()
+        {
+            MusicSyncController.Dispose();
         }
     }
 }

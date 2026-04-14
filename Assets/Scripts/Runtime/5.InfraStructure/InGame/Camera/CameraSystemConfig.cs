@@ -3,12 +3,16 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Structure.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステムの各種パラメータを設定するためのScriptableObject。
+    /// </summary>
     [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject
     {
         public CameraSystemParameter ToDomain()
             => new(
                 _cameraOffset,
+                _distance,
                 _followOffsetPower,
                 _followLerpSpeed,
                 _boneRotateSpeed,
@@ -17,12 +21,12 @@ namespace KillChord.Runtime.Structure.InGame.Camera
                 _lockOnLookAtRatio,
                 _lockOnRotationSpeed,
                 _collisionRadius,
+                _collisionMask,
                 _pitchRange);
-
-        public LayerMask CollisionMask => _collisionMask;
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
+        [SerializeField] private float _distance = 5f;
 
         [Header("Follow")]
         [SerializeField] private float _followOffsetPower = 2f;

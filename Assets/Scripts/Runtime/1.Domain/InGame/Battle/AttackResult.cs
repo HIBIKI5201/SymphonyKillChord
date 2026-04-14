@@ -6,7 +6,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     public readonly struct AttackResult
     {
         /// <summary>
-        ///     コンストラクタ。
+        ///     攻撃結果のインスタンスを初期化するコンストラクタ。
+        ///     値を直接指定して初期化するためのコンストラクタ。
         /// </summary>
         /// <param name="finalDamage"></param>
         /// <param name="isCritical"></param>
@@ -14,6 +15,17 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         {
             FinalDamage = finalDamage;
             IsCritical = isCritical;
+        }
+
+        /// <summary>
+        ///     攻撃結果のインスタンスを初期化するコンストラクタ。
+        ///     攻撃処理の文脈から値を抽出して初期化するためのコンストラクタ。
+        /// </summary>
+        /// <param name="attackStepContext"></param>
+        public AttackResult(in AttackStepContext attackStepContext)
+        {
+            FinalDamage = attackStepContext.Damage;
+            IsCritical = attackStepContext.CriticalCount > 0;
         }
 
         /// <summary> 最終的なダメージ量。 </summary>

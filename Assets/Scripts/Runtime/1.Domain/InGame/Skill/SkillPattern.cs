@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
 {
+    /// <summary>
+    ///     スキルの発動に必要な入力パターンを表す構造体。
+    /// </summary>
     public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
         public ReadOnlySpan<int> Signatures => _signatures;

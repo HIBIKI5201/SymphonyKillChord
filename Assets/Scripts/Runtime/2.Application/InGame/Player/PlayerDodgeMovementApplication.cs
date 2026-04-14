@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Player
 {
+    /// <summary>
+    ///     プレイヤーの回避行動の移動計算を担当するクラス。
+    /// </summary>
     public sealed class PlayerDodgeMovementApplication
     {
         public PlayerDodgeMovementApplication(PlayerMoveParameter parameter)

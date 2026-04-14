@@ -1,43 +1,25 @@
 # Player 機能構造
 
-Player は、プレイヤーの永続的なデータ（スキル、成長要素など）や、プレイヤーに関連する抽象的な概念を担当します。
+このカテゴリは、プレイヤーが保持するスキル定義データをまとめています。現在の実装では「進行データ全般」ではなく、主にスキル定義とその保存元が対象です。
+
+## モジュール詳細
+
+- **[Player-Skill](./Modules/Player-Skill.md)**: スキル定義データとリポジトリ。
 
 ## レイヤー構造
 
 ### 1. Domain
-- **Skill**: `SkillData` (スキルの基本情報), `ISkillEffect` (スキル効果の抽象), `ISkillVisual` (スキル演出の抽象)。
+- **SkillData**: ScriptableObject などに載せるための設定用データ。
+- **ISkillEffect / ISkillVisual**: スキル発動時の処理と演出の抽象。
 
 ### 2. Application
-- **SkillEffect**: スキル効果の具象クラス (`TestSkillEffect` など)。
-- **SkillVisual**: スキル演出の具象クラス (`SkillVisualTest` など)。
+- このカテゴリ直下の Application はありません。
+- スキル判定や利用側のロジックは `InGame/Skill` にあります。
 
 ### 5. InfraStructure
-- **Repository**: `SkillRepository` (スキルの保存・取得ロジック)。
+- **SkillRepository**: `SkillData` 配列を保持し、`SkillDefinition` を返す ScriptableObject 実装。
 
-## 構造図 (Mermaid)
+## 現在の実装メモ
 
-### スキルシステムの抽象構造
-
-```mermaid
-graph TD
-    subgraph Domain
-        SD[SkillData]
-        ISE[ISkillEffect]
-        ISV[ISkillVisual]
-    end
-
-    subgraph Application
-        TSE[TestSkillEffect]
-        SVT[SkillVisualTest]
-    end
-
-    subgraph InfraStructure
-        SR[SkillRepository]
-    end
-
-    SD --> ISE
-    SD --> ISV
-    ISE <|-- TSE
-    ISV <|-- SVT
-    SR --> SD
-```
+- `SkillData` 自体は `KillChord.Runtime.Domain.Player` 名前空間にありますが、変換先は `InGame/Skill` の `SkillDefinition` です。
+- `TestSkillEffect` と `SkillVisualTest` は具象実装ですが、カテゴリとしては `Player` よりも「スキル利用側」に近い位置づけです。

@@ -11,6 +11,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
         ///     攻撃処理の1ステップを実行するメソッド。
         /// </summary>
         /// <param name="context"></param>
-        void Execute(ref AttackContext context);
+        public AttackStepContext Execute(in AttackStepContext context);
     }
 }

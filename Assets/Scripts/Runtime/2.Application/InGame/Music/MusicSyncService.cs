@@ -12,17 +12,15 @@ namespace KillChord.Runtime.Application.InGame.Music
         private const int BUFFER_SIZE = 64;
 
         private readonly RhythmState _rhythmState;
+        private readonly RhythmDefinition _rhythmDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
         public MusicSyncService(RhythmDefinition rhythmDefinition)
         {
-            _rhythmState = new(rhythmDefinition, BUFFER_SIZE);
+            _rhythmState = new(BUFFER_SIZE);
+            _rhythmDefinition = rhythmDefinition;
         }
 
-        /// <summary>
-        ///     毎フレーム処理。
-        /// </summary>
-        /// <param name="playTime">音楽の再生時間</param>
         public void Update(double playTime)
         {
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
@@ -49,6 +47,16 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmState.Count;
         }
 
+        public int GetCurrentBeatType(float unscaledTime)
+        {
+            if (_rhythmState.Count == 0) return 1;
+
+            float lastTime = _rhythmState.LastTiming;
+            double duration = (double)(unscaledTime - lastTime);
+
+            return _rhythmDefinition.CalculateBeatType(duration);
+        }
+
         public ReadOnlySpan<int> GetBeatTypeHistory()
         {
             return _rhythmState.GetHistoryBeatType();
@@ -70,13 +78,13 @@ namespace KillChord.Runtime.Application.InGame.Music
             Action action,
             CancellationToken ct)
         {
-            var executeTime = _rhythmState.GetExecuteTime(timing, accurateBeat);
+            var executeTime = _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
             _scheduledActions.Enqueue(new(action, ct), executeTime);
         }
 
-        public void RegisterBattleActionHistory(BattleActionType actionType)
+        public void RegisterBattleActionHistory(BattleActionType actionType, int beatType, float unscaledTime)
         {
-            _rhythmState.RegisterActionQueue(actionType, Time.unscaledTime);
+            _rhythmState.Enqueue(beatType, unscaledTime, actionType);
         }
     }
 }

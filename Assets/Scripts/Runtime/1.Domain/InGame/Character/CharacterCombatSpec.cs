@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         ///     コンストラクタ。
         /// </summary>
         /// <param name="attackDifinitions"></param>
-        public CharacterCombatSpec(IReadOnlyDictionary<AttackId, AttackDefinition> attackDifinitions)
+        public CharacterCombatSpec(IReadOnlyList<AttackDefinition> attackDifinitions)
         {
             if (attackDifinitions == null)
             {
@@ -22,21 +22,44 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackDifinitions = attackDifinitions;
         }
 
+        public bool TryGetAttackDefinitionByBeatType(int beatType, out AttackDefinition attackDefinition)
+        {
+            foreach (var attack in _attackDifinitions)
+            {
+                if (attack.BeatType.HasValue && attack.BeatType.Value == beatType)
+                {
+                    attackDefinition = attack;
+                    return true;
+                }
+            }
+            attackDefinition = null;
+            return false;
+        }
+
+        public AttackDefinition GetAttackDefinitionByBeatType(int beatType)
+        {
+            if (TryGetAttackDefinitionByBeatType(beatType, out var attackDefinition))
+            {
+                return attackDefinition;
+            }
+            throw new InvalidOperationException($"ビートタイプ{beatType}に対応する攻撃定義が見つかりませんでした。");
+        }
+
         /// <summary>
         ///     指定した攻撃IDに対応する攻撃定義を取得する。
         /// </summary>
         /// <param name="id"> 取得したい攻撃ID。 </param>
         /// <returns>　対応する攻撃定義。　</returns>
-        public AttackDefinition GetAttackDifinition(AttackId id)
+        public AttackDefinition GetAttackDifinition(int index)
         {
-            if (_attackDifinitions.TryGetValue(id, out var difinition))
+            if (index < 0 || index >= _attackDifinitions.Count)
             {
-                return difinition;
+                throw new ArgumentOutOfRangeException(nameof(index), $"攻撃IDは0以上{_attackDifinitions.Count - 1}以下でなければなりません。");
             }
 
-            throw new InvalidOperationException($"AttackId {id} is not defined in this CharacterCombatSpec.");
+            return _attackDifinitions[index];
         }
 
-        private readonly IReadOnlyDictionary<AttackId, AttackDefinition> _attackDifinitions;
+        private readonly IReadOnlyList<AttackDefinition> _attackDifinitions;
     }
 }

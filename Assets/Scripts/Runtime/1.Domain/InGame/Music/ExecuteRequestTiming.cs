@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Music
 {
+    /// <summary>
+    ///     アクションの実行タイミング（小節と拍）を指定するための構造体。
+    /// </summary>
     public readonly struct ExecuteRequestTiming
     {
         /// <param name="barFlag">現在からの相対を指定</param>

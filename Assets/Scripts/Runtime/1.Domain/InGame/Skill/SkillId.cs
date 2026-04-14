@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
 {
+    /// <summary>
+    ///     スキルを一意識別するためのIDを表す構造体。
+    /// </summary>
     public readonly struct SkillId : IEquatable<SkillId>
     {
         public int Value => _value;

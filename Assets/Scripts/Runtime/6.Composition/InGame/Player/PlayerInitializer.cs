@@ -1,80 +1,105 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
-using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Enemy;
-using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Player;
-using System.Collections.Generic;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using KillChord.Runtime.Composition.InGame.Debugger;
+#endif
 
 namespace KillChord.Runtime.Composition
 {
+    /// <summary>
+    ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class PlayerInitializer : MonoBehaviour
     {
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
+        [SerializeField] private SkillRepository _skillRepository;
+        [SerializeField] private int _bpm;
 
         [Space]
-
         [Header("キャラクターデータ（テスト用）")]
-        [SerializeField] private CharacterData _playerData;
+        [SerializeField]
+        private CharacterData _playerData;
+
         [SerializeField] private CharacterData _enemyData;
 
-        [Header("アタックパイプライン（テスト用）")]
-        [SerializeField] private AttackPipelineAsset _normalPipelineAsset;
-        [SerializeField] private AttackPipelineAsset _skillAPipelineAsset;
-        [SerializeField] private AttackPipelineAsset _skillBPipelineAsset;
-        [SerializeField] private AttackPipelineAsset _ultimatePipelineAsset;
-
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        private EnemyTestSpawner _enemyTestSpawner;
 
         private void Awake()
         {
+            ServiceLocator.RegisterInstance(this);
+        }
+
+        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
-
-
-
-            CharacterFactory characterFactory = new CharacterFactory();
-
-            CharacterEntity player = characterFactory.Create(_playerData);
-            _enemyTestSpawner.SetTargetEntity(player);
-
-            Dictionary<AttackId, AttackPipeline> pipelines = new Dictionary<AttackId, AttackPipeline>
+            _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawner>();
+            if (_enemyTestSpawner == null)
             {
-                { AttackId.Normal, _normalPipelineAsset.Create() },
-                { AttackId.SkillA, _skillAPipelineAsset.Create() },
-                { AttackId.SkillB, _skillBPipelineAsset.Create() },
-                { AttackId.Ultimate, _ultimatePipelineAsset.Create() },
-            };
+                Debug.LogError($"{nameof(EnemyTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
 
 
+            CharacterEntity player = CharacterFactory.Create(_playerData);
+            _enemyTestSpawner.SetTargetEntity(player);
+            _enemyTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
-            AttackPipelineResolver attackPipelineResolver = new(pipelines);
-            AttackExecutor attackExecutor = new(attackPipelineResolver);
-
-
-
-            BattleApplication battleApplication = new(player, attackExecutor);
-            BattleController battleController = new(battleApplication, new(), null);
 
             PlayerDodgeMovementApplication dodge = new(parameter);
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application);
-            _player.Init(playerMovementController, battleController);
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
+
+
+            TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
+            if(targetSelectorController == null)
+            {
+                Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
+
+            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<IMusicSyncService>();
+            if (musicSyncService == null)
+            {
+                Debug.LogError($"{nameof(IMusicSyncService)}が見つかりません。MusicSyncInitializerが先に実行されているか確認してください。");
+                return;
+            }
+
+            SkillController skillController = new SkillController(_skillRepository, musicSyncService);
+            AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
+            AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
+
+            PlayerBattleState playerBattleState = new PlayerBattleState(player);
+
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController, musicSyncService);
+
+            _player.Init(playerMovementController, playerAttackController, ct);
 
 
 #if UNITY_EDITOR

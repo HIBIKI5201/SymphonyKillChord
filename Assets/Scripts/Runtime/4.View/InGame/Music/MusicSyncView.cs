@@ -5,6 +5,9 @@ using KillChord.Runtime.View.Persistent.Music;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
+    /// <summary>
+    ///     音楽との同期タイミングを管理するViewクラス。
+    /// </summary>
     public class MusicSyncView : MonoBehaviour
     {
         public MusicSyncViewModel MusicSyncViewModel => _musicSyncViewModel;
@@ -29,7 +32,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
         private void Update()
         {
-            if (_mp == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
+            if (_mp == null || _musicSyncViewModel == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
 
             _musicSyncViewModel.Update(_mp.Time);
 

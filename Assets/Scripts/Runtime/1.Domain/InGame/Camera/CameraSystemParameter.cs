@@ -2,11 +2,15 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Camera
 {
+    /// <summary>
+    ///     カメラシステム全体の動作パラメータを保持するドメインクラス。
+    /// </summary>
     [System.Serializable]
     public sealed class CameraSystemParameter
     {
         public CameraSystemParameter(
             in Vector3 cameraOffset,
+            float distance,
             float followOffsetPower,
             float followLerpSpeed,
             float boneRotateSpeed,
@@ -15,9 +19,11 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             float lockOnLookAtRatio,
             float lockOnRotationSpeed,
             float collisionRadius,
+            LayerMask collisionLayerMask,
             Vector2 pitchRange)
         {
             _cameraOffset = cameraOffset;
+            _distance = distance;
             _followOffsetPower = followOffsetPower;
             _followLerpSpeed = followLerpSpeed;
             _boneRotateSpeed = boneRotateSpeed;
@@ -26,9 +32,11 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             _lockOnLookAtRatio = lockOnLookAtRatio;
             _lockOnRotationSpeed = lockOnRotationSpeed;
             _collisionRadius = collisionRadius;
+            _collisionMask = collisionLayerMask;
             _pitchRange = pitchRange;
         }
         public Vector3 Offset => _cameraOffset;
+        public float Distance => _distance;
         public float FollowOffsetPower => _followOffsetPower;
         public float FollowLerpSpeed => _followLerpSpeed;
 
@@ -40,11 +48,13 @@ namespace KillChord.Runtime.Domain.InGame.Camera
         public float LockOnRotationSpeed => _lockOnRotationSpeed;
 
         public float CollisionRadius => _collisionRadius;
+        public int CollisionMask => _collisionMask;
 
         public Vector2 PitchRange => _pitchRange;
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
+        [SerializeField] private float _distance;
 
         [Header("Follow")]
         [SerializeField] private float _followOffsetPower;
@@ -62,6 +72,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
 
         [Header("Collision")]
         [SerializeField] private float _collisionRadius;
+        [SerializeField] private LayerMask _collisionMask;
 
         [Header("Limits")]
         [SerializeField] private Vector2 _pitchRange;

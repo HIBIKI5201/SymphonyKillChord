@@ -1,9 +1,23 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Character
 {
+    /// <summary>
+    ///     移動速度を表す値オブジェクト。
+    /// </summary>
     public readonly struct MoveSpeed
     {
         public MoveSpeed(float value)
         {
+            if (value < 0)
+            {
+                throw new ArgumentException("value must be non-negative.", nameof(value));
+            }
+            if (!float.IsFinite(value))
+            {
+                throw new ArgumentException("Damage must be finite.", nameof(value));
+            }
+
             Value = value;
         }
 

@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.Player
 {
+    /// <summary>
+    ///     スキルのデータを保持し、提供するためのリポジトリクラス。
+    /// </summary>
     [CreateAssetMenu(fileName = "SkillRepository", menuName = "Scriptable Objects/SkillRepository")]
     public class SkillRepository : ScriptableObject, ISkillRepository
     {
