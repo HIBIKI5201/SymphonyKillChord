@@ -40,11 +40,12 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <returns></returns>
         public bool IsMatch(ReadOnlySpan<BeatType> reversInput)
         {
-            if (SkillPattern.Signatures.Length < MIN_PATTERN_LENGTH) return false;
-            if (reversInput.Length < SkillPattern.Signatures.Length) return false;
+            var length = SkillPattern.Signatures.Length;
+            if (length < MIN_PATTERN_LENGTH) return false;
+            if (reversInput.Length < length) return false;
 
-            ReadOnlySpan<BeatType> pattern = reversInput.Slice(0, SkillPattern.Signatures.Length);
-            return pattern.SequenceEqual(SkillPattern.Signatures);
+            ReadOnlySpan<BeatType> pattern = reversInput.Slice(0, length);
+            return SkillPattern.Equals(pattern);
         }
 
         public bool Equals(SkillDefinition other)
