@@ -9,14 +9,12 @@ using DevelopProducts.BehaviorGraph.Runtime.Application.InGame.Player;
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Battle;
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Character;
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Enemy;
-using DevelopProducts.BehaviorGraph.Runtime.InfraStructure;
-using DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Character;
-using DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using EnemyFactory = DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Enemy.EnemyFactory;
 using UnityEngine;
+using CharacterFactory = DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Character.CharacterFactory;
+using EnemyFactory = DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Enemy.EnemyFactory;
 
 namespace DevelopProducts.BehaviorGraph.Runtime.View.InGame.Enemy
 {

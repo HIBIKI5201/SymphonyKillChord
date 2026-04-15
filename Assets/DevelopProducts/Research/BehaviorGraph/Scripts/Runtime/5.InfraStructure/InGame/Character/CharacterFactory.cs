@@ -1,9 +1,8 @@
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Battle;
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Character;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using System;
-using System.Collections.Generic;
 
 namespace DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Character
 {
