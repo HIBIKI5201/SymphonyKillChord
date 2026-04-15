@@ -15,6 +15,6 @@ MonoBehaviour:
   _attackName: 4
   _baseDamage: 4
   _attackParameterSetData: {fileID: 11400000, guid: e2c3f53fe5d600640a2d03efd0f75ebd, type: 2}
-  _attackPipelineAsset: {fileID: 11400000, guid: ab4ff7fb7cf808b48aec5f14a474dc2e, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: 608a519a5b68ea14da6d9cfae10df92c, type: 2}
   _useBeatType: 1
   _beatType: 4
