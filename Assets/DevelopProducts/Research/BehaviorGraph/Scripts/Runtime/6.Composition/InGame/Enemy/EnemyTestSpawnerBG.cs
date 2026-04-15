@@ -7,7 +7,7 @@ using DevelopProducts.BehaviorGraph.Runtime.Composition.InGame.Music;
 using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Battle;
 using DevelopProducts.BehaviorGraph.Runtime.View.InGame.Enemy;
 using DevelopProducts.BehaviorGraph.Runtime.View.InGame.Music;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 

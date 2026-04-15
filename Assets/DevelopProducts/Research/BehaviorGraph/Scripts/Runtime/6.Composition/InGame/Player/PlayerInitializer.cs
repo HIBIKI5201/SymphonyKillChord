@@ -15,9 +15,12 @@ using DevelopProducts.BehaviorGraph.Runtime.View;
 using DevelopProducts.BehaviorGraph.Runtime.View.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.InfraStructure.InGame.Character;
+using CharacterFactory = DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Character.CharacterFactory;
+
+
 
 #if UNITY_EDITOR
 using DevelopProducts.BehaviorGraph.Runtime.Composition.InGame.Debugger;
@@ -57,7 +60,7 @@ namespace DevelopProducts.BehaviorGraph.Runtime.Composition
             _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawnerBG>();
             if (_enemyTestSpawner == null)
             {
-                Debug.LogError($"{nameof(EnemyTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(EnemyTestSpawnerBG)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
 
