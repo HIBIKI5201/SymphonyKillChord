@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using UnityEngine;
 
@@ -39,7 +40,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _battleState.ChangeTarget(targetEntity);
 
             float now = Time.unscaledTime;
-            int beatType = _musicSyncService.GetCurrentBeatType(now);
+            BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
 
             _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
 

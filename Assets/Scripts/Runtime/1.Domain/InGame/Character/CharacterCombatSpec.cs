@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Collections.Generic;
 
@@ -22,7 +23,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackDifinitions = attackDifinitions;
         }
 
-        public bool TryGetAttackDefinitionByBeatType(int beatType, out AttackDefinition attackDefinition)
+        public bool TryGetAttackDefinitionByBeatType(BeatType beatType, out AttackDefinition attackDefinition)
         {
             foreach (var attack in _attackDifinitions)
             {
@@ -36,7 +37,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             return false;
         }
 
-        public AttackDefinition GetAttackDefinitionByBeatType(int beatType)
+        public AttackDefinition GetAttackDefinitionByBeatType(BeatType beatType)
         {
             if (TryGetAttackDefinitionByBeatType(beatType, out var attackDefinition))
             {
