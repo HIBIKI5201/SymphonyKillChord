@@ -1,0 +1,22 @@
+{
+    "name": "DevelopProduct-BehaviorGraph",
+    "rootNamespace": "",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:73907d139b13f8a43b7e3e95c329d30a",
+        "GUID:20ee76f6d94ae4b0595f3ceb1c5359a7",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:800597811bcc5d848b15e12807d6de45",
+        "GUID:d07e9a279d4339845a9adaacdd0a1727"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,48 @@
+using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Battle;
+using DevelopProducts.BehaviorGraph.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure;
+using System;
+using System.Collections.Generic;
+
+namespace DevelopProducts.BehaviorGraph.Runtime.InfraStructure.InGame.Character
+{
+    /// <summary>
+    ///     CharacterDataからCharacterEntityを生成するクラス。
+    /// </summary>
+    public static class CharacterFactory
+    {
+        /// <summary>
+        ///     CharacterDataからCharacterEntityを生成する。
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static CharacterEntity Create(CharacterData data)
+        {
+            AttackDefinitionData[] attackDefinitionDatas = data.AttackDifinitions;
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+            if (data.AttackDifinitions == null)
+            {
+                throw new ArgumentException("AttackDifinitions must not be null.", nameof(data));
+            }
+
+            AttackDefinition[] attackDefinitions = new AttackDefinition[attackDefinitionDatas.Length];
+            for (int i = 0; i < attackDefinitions.Length; i++)
+            {
+                attackDefinitions[i] = AttackDefinitionFactory.Create(attackDefinitionDatas[i]);
+            }
+
+            CharacterCombatSpec combatSpec = new CharacterCombatSpec(attackDefinitions);
+
+            return new CharacterEntity(
+                new CharacterName(data.CharacterName),
+                new HealthEntity(data.MaxHealth),
+                new MoveSpeed(data.MoveSpeed),
+                new AttackPower(data.AttackPower),
+                combatSpec);
+        }
+    }
+}
