@@ -1,10 +1,10 @@
-using UnityEngine;
+
 
 namespace KillChord.Runtime.Domain
 {
-    public class FadeBackgroudEvent : IScenalioEvent
+    public class FadeBackgroundEvent : IScenalioEvent
     {
-        public FadeBackgroudEvent(float duration)
+        public FadeBackgroundEvent(float duration)
         {
             Duration = duration;
         }

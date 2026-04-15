@@ -1,9 +1,8 @@
 
-
 namespace KillChord.Runtime.Domain
 {
-    public class IScenalioEvent
+    public interface IScenalioEvent
     {
-        
+
     }
 }
