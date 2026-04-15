@@ -46,7 +46,7 @@ namespace KillChord.Runtime.View
                 await Task.Yield();
             }
             Color result = _backGround.color;
-            result.a = 0f;
+            result.a = endAlpha;
             _backGround.color = result;
         }
     }
