@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -50,14 +51,17 @@ namespace KillChord.Runtime.Composition
                 Debug.LogError("[IngameComposition] MusicPlayer の取得に失敗しました。常駐シーンがロードされているか確認してください。");
                 return;
             }
+
             TargetManager targetManager = new();
             TargetEntityRegistry targetEntityRegistry = new();
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
 
+            var inputC = ServiceLocator.GetInstance<InputComposition>();
+            inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
             _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
-            _playerInitializer.Initialize(targetManager, targetEntityRegistry);
+            _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();

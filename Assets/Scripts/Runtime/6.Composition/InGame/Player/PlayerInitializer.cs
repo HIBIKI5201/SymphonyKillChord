@@ -16,6 +16,7 @@ using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Player;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -36,9 +37,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private int _bpm;
 
-        [Space]
-        [Header("キャラクターデータ（テスト用）")]
-        [SerializeField]
+        [Space] [Header("キャラクターデータ（テスト用）")] [SerializeField]
         private CharacterData _playerData;
 
         [SerializeField] private CharacterData _enemyData;
@@ -50,7 +49,10 @@ namespace KillChord.Runtime.Composition
             ServiceLocator.RegisterInstance(this);
         }
 
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        public void Initialize(
+            TargetManager targetManager,
+            TargetEntityRegistry targetEntityRegistry,
+            InputComposition inputComposition)
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
@@ -73,12 +75,13 @@ namespace KillChord.Runtime.Composition
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
-            PlayerController playerMovementController = new(application);
+            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
             var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
+            var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
             TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
-            if(targetSelectorController == null)
+            if (targetSelectorController == null)
             {
                 Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
@@ -97,9 +100,10 @@ namespace KillChord.Runtime.Composition
 
             PlayerBattleState playerBattleState = new PlayerBattleState(player);
 
-            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController, musicSyncService);
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
+                playerBattleState, skillController, targetSelectorController, musicSyncService);
 
-            _player.Init(playerMovementController, playerAttackController, ct);
+            _player.Initialize(playerMovementController, playerAttackController, ct, inputView);
 
 
 #if UNITY_EDITOR
