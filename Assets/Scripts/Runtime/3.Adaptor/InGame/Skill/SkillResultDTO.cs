@@ -1,3 +1,6 @@
+using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Music;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
@@ -7,14 +10,15 @@ namespace KillChord.Runtime.Adaptor
     /// </summary>
     public readonly struct SkillResultDTO
     {
-        public SkillResultDTO(int skillId, int[] skillPattern)
+        public SkillResultDTO(int skillId, ReadOnlySpan<BeatType> skillPattern)
         {
             SkillId = skillId;
-            SkillPattern = skillPattern;
+            SkillPattern = skillPattern.ToArray();
         }
 
         public int SkillId { get; }
 
-        public int[] SkillPattern { get; }
+        //非同期処理でも使えるため、ReadOnlyMemoryを使用している。
+        public ReadOnlyMemory<BeatType> SkillPattern { get; }
     }
 }

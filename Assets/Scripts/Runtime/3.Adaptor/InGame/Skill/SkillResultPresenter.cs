@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Adaptor
         {
             SkillResultDTO dto = new SkillResultDTO(
                 result.Id.Value,
-                result.SkillPattern.Signatures.ToArray()
+                result.SkillPattern.Signatures
                 );
             _viewModel.Push(in dto);
         }
