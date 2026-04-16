@@ -95,12 +95,10 @@ namespace KillChord.Runtime.View
         private float _raycastTimer = 0;
         private void Update()
         {
+            if (!_lineRenderer) return;
             // 敵の照準線を描画する
-            if (_lineRenderer)
-            {
-                _lineRenderer.SetPosition(0, transform.position);
-                _lineRenderer.SetPosition(1, _targetTransform.position);
-            }
+            _lineRenderer.SetPosition(0, transform.position);
+            _lineRenderer.SetPosition(1, _targetTransform.position);
             if (_raycastTimer > _raycastFrequency)
             {
                 bool rayHitsPlayer = CanRaycastHitTarget();
