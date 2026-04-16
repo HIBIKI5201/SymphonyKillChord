@@ -57,13 +57,19 @@ namespace SinfoniaStudio.SinfoniaOperator
             Console.WriteLine("[Main] 各リーダーによる情報の取得を開始します...");
             Task taskListTask = PushTaskList(taskReader, discordBot);
             Task sprintTask = PushSprint(sprintReader, discordBot);
-            
+
             await Task.WhenAll(taskListTask, sprintTask);
             Console.WriteLine("[Main] 全ての処理が完了しました。");
         }
 
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
         {
+            if (DateTimeUtility.IsTodayByDayOfWeek(DayOfWeek.Sunday))
+            {
+                Console.WriteLine("[PushTaskList] 日曜日はタスク表を通知しません。");
+                return;
+            }
+
             Console.WriteLine("[PushTaskList] タスクリストの取得を開始します...");
             string taskContent = await reader.GetTaskContent();
             if (string.IsNullOrEmpty(taskContent))
@@ -80,22 +86,21 @@ namespace SinfoniaStudio.SinfoniaOperator
             await discordBot.AwakeTask;
 
             DayOfWeek targetDay = DayOfWeek.Monday;
-            if (DateTimeUtility.IsTodayDayOfWeek(targetDay))
-            {
-                Console.WriteLine($"[PushSprint] 今日は {targetDay} なので、スプリントの内容も取得します。");
-                string sprintContent = await reader.GetSprintContent();
-                if (string.IsNullOrEmpty(sprintContent))
-                {
-                    Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
-                    return;
-                }
-                //return;
-                await discordBot.PushSprintChannelAsync(sprintContent);
-            }
-            else
+            if (!DateTimeUtility.IsTodayByDayOfWeek(targetDay))
             {
                 Console.WriteLine($"[PushSprint] 今日は {targetDay} ではないため、スプリントの処理をスキップします。 (今日は {DateTimeUtility.JstNow().DayOfWeek})");
+                return;
             }
+
+            Console.WriteLine($"[PushSprint] 今日は {targetDay} なので、スプリントの内容も取得します。");
+            string sprintContent = await reader.GetSprintContent();
+            if (string.IsNullOrEmpty(sprintContent))
+            {
+                Console.WriteLine("[PushSprint] 送信するスプリント情報がありませんでした。");
+                return;
+            }
+
+            await discordBot.PushSprintChannelAsync(sprintContent);
         }
     }
 }
