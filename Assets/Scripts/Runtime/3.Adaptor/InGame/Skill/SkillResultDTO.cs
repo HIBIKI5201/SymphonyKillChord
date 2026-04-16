@@ -7,17 +7,14 @@ namespace KillChord.Runtime.Adaptor
     /// </summary>
     public readonly struct SkillResultDTO
     {
-        public SkillResultDTO(int skillId, int[] skillPattern, string skillName)
+        public SkillResultDTO(int skillId, int[] skillPattern)
         {
             SkillId = skillId;
             SkillPattern = skillPattern;
-            SkillName = skillName;
         }
 
         public int SkillId { get; }
 
         public int[] SkillPattern { get; }
-
-        public string SkillName { get; }
     }
 }

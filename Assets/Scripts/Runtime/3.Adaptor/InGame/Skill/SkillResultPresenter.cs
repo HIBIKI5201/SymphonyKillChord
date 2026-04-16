@@ -1,19 +1,23 @@
-using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Skill;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public class SkillResultPresenter : MonoBehaviour
+    public class SkillResultPresenter
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        public SkillResultPresenter(ISkillResultViewModel viewModel)
         {
-        
+            _viewModel = viewModel;
         }
 
-        // Update is called once per frame
-        void Update()
+        public void Push(SkillDefinition result)
         {
-        
+            SkillResultDTO dto = new SkillResultDTO(
+                result.Id.Value,
+                result.SkillPattern.Signatures.ToArray()
+                );
+            _viewModel.Push(in dto);
         }
+
+        private readonly ISkillResultViewModel _viewModel;
     }
 }
