@@ -87,6 +87,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private void OnAttack(InputContext<float> input)
         {
+            if (input.Phase != InputActionPhase.Started) return;
             if (_playerAttackController == null)
             {
                 Debug.LogError("[PlayerView]AttackControllerがnull");
