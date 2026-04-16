@@ -1,8 +1,11 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility;
+using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.View.InGame.Player
 {
@@ -21,21 +24,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
         public PlayerAttackController PlayerAttackController => _playerAttackController;
 
-        public void Init(
-            PlayerController playerMovementController,
-            PlayerAttackController playerAttackController,
-            Transform cameraTransform)
-        {
-            _controller = playerMovementController;
-            _playerAttackController = playerAttackController;
-            _cameraTransform = cameraTransform;
-            _colliders = new Collider[8];
-            Debug.Assert(_rb != null, $"{nameof(_rb)}がNull", this);
-            Debug.Assert(_animator != null, $"{nameof(_animator)}がNull", this);
-            Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
-            _cacheTransform = transform;
-            _isInitialized = true;
-        }
+        private PlayerInputView _playerInputView;
+        private Vector2 _moveVector;
 
         void Update()
         {
@@ -55,19 +45,47 @@ namespace KillChord.Runtime.View.InGame.Player
                 //    Debug.Log($"{gameObject.name}から{_colliders[i].name}へ攻撃", this);
                 //}
                 bool attackExecuted = _playerAttackController.ExecuteAttack();
-                if (attackExecuted) 
+                if (attackExecuted)
                 {
                     Debug.Log($"{gameObject.name}が攻撃を実行", this);
                 }
             }
         }
 
+        public void Initialize(
+            PlayerController playerMovementController,
+            PlayerAttackController playerAttackController,
+            Transform cameraTransform,
+            PlayerInputView playerInputView)
+        {
+            _controller = playerMovementController;
+            _playerAttackController = playerAttackController;
+            _cameraTransform = cameraTransform;
+            _playerInputView = playerInputView;
+            _colliders = new Collider[8];
+            Debug.Assert(_rb != null, $"{nameof(_rb)}がNull", this);
+            Debug.Assert(_animator != null, $"{nameof(_animator)}がNull", this);
+            Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)}がNull", this);
+            _cacheTransform = transform;
+            _isInitialized = true;
+            
+            RegisterActions();
+        }
+
+        public void RegisterActions()
+        {
+            _playerInputView.OnMoveInput += OnMove;
+        }
+
+        private void OnMove(InputContext<Vector2> input)
+        {
+            _moveVector = input.Value;
+        }
+
         private void UpdateMovement()
         {
             if (_controller == null) return;
-            Vector2 dir = Vector2.zero;
-            dir.x = Input.GetAxis("Horizontal");
-            dir.y = Input.GetAxis("Vertical");
+            Vector2 dir = _moveVector;
 
             _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
 

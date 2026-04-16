@@ -50,6 +50,7 @@ namespace KillChord.Runtime.Composition
                 Debug.LogError("[IngameComposition] MusicPlayer の取得に失敗しました。常駐シーンがロードされているか確認してください。");
                 return;
             }
+
             TargetManager targetManager = new();
             TargetEntityRegistry targetEntityRegistry = new();
 
@@ -57,7 +58,8 @@ namespace KillChord.Runtime.Composition
             _musicSyncInitializer.Initialize();
 
             _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
-            _playerInitializer.Initialize(targetManager, targetEntityRegistry);
+            _playerInitializer.Initialize(targetManager, targetEntityRegistry,
+                ServiceLocator.GetInstance<InputComposition>());
 
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();

@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.Persistent.Input;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,8 +21,8 @@ namespace KillChord.Runtime.Composition
         public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
 
-        [Header("Bufferの最大容量")]
-        [SerializeField] private int _bufferCapacity;
+        [Header("Bufferの最大容量")] [SerializeField]
+        private int _bufferCapacity;
 
         private PlayerInput _playerInput;
         private InputBufferingQueue _bufferedInputBuffer;
@@ -38,6 +39,7 @@ namespace KillChord.Runtime.Composition
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
+            ServiceLocator.RegisterInstance(this);
         }
 
         private void OnDisable()
