@@ -14,8 +14,9 @@ GameObject:
   - component: {fileID: 3780914556809270319}
   - component: {fileID: 2601078670896065214}
   - component: {fileID: 6024709665745219317}
+  - component: {fileID: 8900643656970599263}
   - component: {fileID: 3385280616353316531}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -133,9 +134,9 @@ MonoBehaviour:
   _moveData: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
   _encounterMusicData: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
   _battleMusicData: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
-  _attackPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
+  _attackIndex: 0
   _view: {fileID: 6024709665745219317}
-  _navigationAgent: {fileID: 0}
+  _raycastView: {fileID: 8900643656970599263}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +149,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de89e5405d9b6c4aa1649b59b3b8281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
+--- !u!114 &8900643656970599263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bd1da382eb55ab42b2a0ff411fc1b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyRaycastDetectView
+  _lineMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  _resultArraySize: 8
+  _enemyMoveView: {fileID: 6024709665745219317}
+  _hitLayers:
+    serializedVersion: 2
+    m_Bits: 192
 --- !u!195 &3385280616353316531
 NavMeshAgent:
   m_ObjectHideFlags: 0

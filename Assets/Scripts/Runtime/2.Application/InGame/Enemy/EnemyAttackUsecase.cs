@@ -11,12 +11,14 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     public class EnemyAttackUsecase
     {
         /// <summary>
-        /// 敵の攻撃を実行するユースケースクラスのインスタンスを生成する。
+        ///     敵の攻撃を実行するユースケースクラスのインスタンスを生成する。
         /// </summary>
         /// <param name="musicSyncService"></param>
-        public EnemyAttackUsecase(IMusicSyncService musicSyncService)
+        /// <param name="raycastDectector"></param>
+        public EnemyAttackUsecase(IMusicSyncService musicSyncService, IEnemyRaycastDetector raycastDectector)
         {
             _musicSyncService = musicSyncService;
+            _raycastDetector = raycastDectector;
         }
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
-            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender);
+            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender, _raycastDetector.CanRaycastHitTarget());
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             
@@ -49,5 +51,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         private readonly IMusicSyncService _musicSyncService;
+        private readonly IEnemyRaycastDetector _raycastDetector;
     }
 }

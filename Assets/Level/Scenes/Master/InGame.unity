@@ -455,8 +455,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.EnemyTestSpawner
   _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
   _spawnPoint: {fileID: 1136649844}
-  _spawnInterval: 5
-  _maxSpawnCount: 10
+  _spawnInterval: 1
+  _maxSpawnCount: 1
   _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!4 &1136649844
 Transform:
@@ -467,7 +467,7 @@ Transform:
   m_GameObject: {fileID: 1136649842}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 0, z: 0}
+  m_LocalPosition: {x: -10, y: 0, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

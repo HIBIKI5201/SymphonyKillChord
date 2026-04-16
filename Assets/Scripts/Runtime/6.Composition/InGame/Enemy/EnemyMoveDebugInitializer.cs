@@ -11,6 +11,7 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame;
 using UnityEngine;
 
@@ -29,6 +30,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
+        [SerializeField] private EnemyRaycastDetectView _raycastView;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
@@ -54,9 +56,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec);
+            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, _raycastView);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, _raycastView);
 
             AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -73,6 +75,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             _view.Initialize(controller, target);
+            _raycastView.Initialize(target, spec.AttackRange.Value);
         }
         private void OnDestroy()
         {
