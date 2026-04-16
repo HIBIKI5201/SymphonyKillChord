@@ -2,6 +2,7 @@ using System;
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Utility;
 using SymphonyFrameWork.Debugger.HUD;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Camera
