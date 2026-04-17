@@ -1,19 +1,22 @@
-using UnityEngine;
+using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Domain.InGame.Music;
+using System;
 
 namespace KillChord.Runtime.View
 {
-    public class SkillResultViewModel : MonoBehaviour
+    public class SkillResultViewModel : ISkillResultViewModel
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
+        public event Action<int, ReadOnlyMemory<BeatType>> OnChanged;
 
-        // Update is called once per frame
-        void Update()
+        public int SkillId { get; private set; }
+
+        public ReadOnlyMemory<BeatType> SkillPattern { get; private set; }
+
+        public void Push(in SkillResultDTO dto)
         {
-        
+            SkillId = dto.SkillId;
+            SkillPattern = dto.SkillPattern;
+            OnChanged?.Invoke(SkillId, SkillPattern);
         }
     }
 }

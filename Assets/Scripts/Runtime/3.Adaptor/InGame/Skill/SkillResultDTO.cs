@@ -1,7 +1,5 @@
-using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
