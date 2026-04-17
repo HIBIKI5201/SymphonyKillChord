@@ -8,15 +8,15 @@ namespace KillChord.Runtime.Adaptor
     /// </summary>
     public readonly struct SkillResultDTO
     {
-        public SkillResultDTO(int skillId, ReadOnlySpan<BeatType> skillPattern)
+        public SkillResultDTO(int skillId, int[] skillPattern)
         {
             SkillId = skillId;
-            SkillPattern = skillPattern.ToArray();
+            SkillPattern = skillPattern;
         }
 
         public int SkillId { get; }
 
         //非同期処理でも使えるため、ReadOnlyMemoryを使用している。
-        public ReadOnlyMemory<BeatType> SkillPattern { get; }
+        public ReadOnlyMemory<int> SkillPattern { get; }
     }
 }
