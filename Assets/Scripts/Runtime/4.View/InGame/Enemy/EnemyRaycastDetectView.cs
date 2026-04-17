@@ -1,6 +1,5 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.View.InGame;
-using KillChord.Runtime.View.InGame.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -8,7 +7,7 @@ namespace KillChord.Runtime.View
     /// <summary>
     ///     敵から射線を通し、指定対象に直撃できるか判定するビュー。
     /// </summary>
-    public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetector
+    public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
     {
         public void Initialize(Transform targetTransform, float attackRange)
         {
@@ -16,19 +15,14 @@ namespace KillChord.Runtime.View
             _targetTransform = targetTransform; 
             _targetCollider = targetTransform.GetComponent<Collider>();
             _attackRange = attackRange;
-#if UNITY_EDITOR
-            _lineRenderer = gameObject.AddComponent<LineRenderer>();
-            _lineRenderer.material = _lineMaterial;
-            _lineRenderer.startWidth = 0.05f;
-            _lineRenderer.endWidth = 0.01f;
-#endif
         }
+        public bool CanRaycastHitTarget => CheckCanRaycastHitTarget();
 
         /// <summary>
         ///     敵からの射線が対象に直撃できるか判定する。
         /// </summary>
         /// <returns></returns>
-        public bool CanRaycastHitTarget()
+        public bool CheckCanRaycastHitTarget()
         {
             int hitCount = CastAndGetHitCount();
             if (hitCount > 0)
@@ -51,6 +45,7 @@ namespace KillChord.Runtime.View
         private Collider _targetCollider;
         private Transform _targetTransform;
         private float _attackRange;
+
 
         /// <summary>
         ///     射線判定を行い、当たった対象の数を返却。
@@ -89,26 +84,11 @@ namespace KillChord.Runtime.View
         }
 
 #if UNITY_EDITOR
-        [SerializeField] Material _lineMaterial;
-        private LineRenderer _lineRenderer;
-        private float _raycastFrequency = 0.2f;
-        private float _raycastTimer = 0;
-        private void Update()
+        private void OnDrawGizmos()
         {
-            if (!_lineRenderer) return;
-            // 敵の照準線を描画する
-            _lineRenderer.SetPosition(0, transform.position);
-            _lineRenderer.SetPosition(1, _targetTransform.position);
-            if (_raycastTimer > _raycastFrequency)
-            {
-                bool rayHitsPlayer = CanRaycastHitTarget();
-                _lineRenderer.startColor = rayHitsPlayer ? Color.red : Color.green;
-                _lineRenderer.endColor = rayHitsPlayer ? Color.red : Color.green;
-                _raycastTimer = 0;
-            }
-            _raycastTimer += Time.deltaTime;
+            Gizmos.color = CheckCanRaycastHitTarget() ? Color.red : Color.green;
+            Gizmos.DrawLine(transform.position, _targetTransform.position);
         }
 #endif
-
     }
 }

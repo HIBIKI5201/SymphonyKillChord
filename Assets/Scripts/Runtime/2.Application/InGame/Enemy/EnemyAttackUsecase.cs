@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         /// <param name="musicSyncService"></param>
         /// <param name="raycastDectector"></param>
-        public EnemyAttackUsecase(IMusicSyncService musicSyncService, IEnemyRaycastDetector raycastDectector)
+        public EnemyAttackUsecase(IMusicSyncService musicSyncService, EnemyRaycastDetectService raycastDectector)
         {
             _musicSyncService = musicSyncService;
             _raycastDetector = raycastDectector;
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
-            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender, _raycastDetector.CanRaycastHitTarget());
+            AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender, _raycastDetector.CanRaycastHitTarget);
 
             Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             
@@ -51,6 +51,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly IEnemyRaycastDetector _raycastDetector;
+        private readonly EnemyRaycastDetectService _raycastDetector;
     }
 }
