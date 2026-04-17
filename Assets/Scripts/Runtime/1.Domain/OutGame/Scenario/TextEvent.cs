@@ -12,5 +12,7 @@ namespace KillChord.Runtime.Domain
 
         public string Speaker { get; }
         public string Text { get; }
+
+        public bool RequirePlayerAdvance => true;
     }
 }

@@ -9,20 +9,30 @@ namespace KillChord.Runtime.Composition
 {
     public class ScenarioCom : MonoBehaviour
     {
+        [SerializeField]
+        private ScenarioView _chatText;
+        [SerializeField]
+        private ScenarioInputView _inputView;
 
-        private void Start()
+        private async void Start()
         {
-            Init();
+            await Init();
         }
         private async ValueTask Init()
         {
             Debug.Log(Time.time);
-            IOutPutPort outPutPort = new ViewModel();
+            ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
+            InputController controller = new InputController(gate);
+            ViewModel viewModel = new ViewModel();
             IScenarioRepository repo = new ScenarioRepository();
-            TextEventHandler textHandle = new TextEventHandler(outPutPort);
-            IScenarioEventHandler[] handlers = { textHandle };
-            ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo(handlers);
-            ScenarioUsecase usecase = new ScenarioUsecase(repo, handlerRepo);
+            TextEventHandler textHandle = new TextEventHandler(viewModel);
+            ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
+            handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
+            ScenarioUsecase usecase = new ScenarioUsecase(repo, handlerRepo, gate);
+            ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
+            view.Initilize(viewModel);
+            ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
+            inputView.Initilize(controller);
             await usecase.PlayScenario();
             Debug.Log(Time.time);
         }

@@ -7,25 +7,29 @@ namespace KillChord.Runtime.Application
 {
     public class ScenarioUsecase
     {
-        public ScenarioUsecase(IScenarioRepository repo, ScenarioHandlerRepo handlerRepo)
+        public ScenarioUsecase(IScenarioRepository repo, ScenarioHandlerRepo handlerRepo, ITextAdvanceWaiter textAdvanceWaiter)
         {
             _scenarioRepo = repo;
             _handleRepo = handlerRepo;
+            _textAdvanceWaiter = textAdvanceWaiter;
         }
 
         public async ValueTask PlayScenario()
         {
             ScenarioData data = _scenarioRepo.FindById("test");
-            CancellationTokenSource source = new CancellationTokenSource();
+            using CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
             foreach (IScenarioEvent e in data.Events)
             {
-                IScenarioEventHandler handler = _handleRepo.FindById(e.GetType());
-                if (handler == null) continue;
-                await handler.HandleAsync(e, token);
+                await _handleRepo.HandleAsync(e, token);
+                if (e.RequirePlayerAdvance)
+                {
+                    await _textAdvanceWaiter.WaitNextAsync(token);
+                }
             }
 
         }
+        private readonly ITextAdvanceWaiter _textAdvanceWaiter;
         private readonly ScenarioHandlerRepo _handleRepo;
         private readonly IScenarioRepository _scenarioRepo;
     }
