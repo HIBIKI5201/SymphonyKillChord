@@ -18,10 +18,11 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="result"></param>
         public void Push(SkillDefinition result)
         {
-            SkillResultDTO dto = new SkillResultDTO(
-                result.Id.Value,
-                result.SkillPattern.Signatures
-                );
+            var span = result.SkillPattern.Signatures;
+            int[] arr = new int[span.Length];
+            for (int i = 0; i < span.Length; i++) 
+                arr[i] = (int)span[i];
+            var dto = new SkillResultDTO(result.Id.Value, arr); 
             _viewModel.Push(in dto);
         }
 
