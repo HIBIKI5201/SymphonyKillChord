@@ -1,0 +1,25 @@
+using UnityEngine;
+
+namespace KillChord.Runtime.Adaptor
+{
+    /// <summary>
+    ///     敵AI用ファサード：状態判定系。
+    /// </summary>
+    public interface IEnemyStateFacade
+    {
+        /// <summary>
+        ///     目標が自分の攻撃範囲内か。
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTargetInAttackRange { get; }
+        /// <summary>
+        ///     目標と自分の間に障害物があるか。
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSightClearToAim { get; }
+        /// <summary>
+        ///     照準中であるか。
+        /// </summary>
+        public bool IsAttacking { get; }
+    }
+}

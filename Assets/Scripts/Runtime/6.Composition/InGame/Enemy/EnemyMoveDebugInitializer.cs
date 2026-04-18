@@ -14,6 +14,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame;
+using Unity.Behavior;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -32,6 +33,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
+        [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
+        [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
+        [SerializeField] private EnemyStateFacade _enemyStateFacade;
+        [SerializeField] private EnemySharedFacade _enemySharedFacade;
+        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
@@ -81,6 +87,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // View接続
             _view.Initialize(controller, target);
             _raycastView.Initialize(target, spec.AttackRange.Value);
+
+            // ファサード初期化
+            _enemyMovementAIFacade.Initialize(_view);
+            _enemyBattleAIFacade.Initialize(controller);
+            _enemyStateFacade.Initialize(controller, target, _raycastView);
+            _enemySharedFacade.Initialize(target);
+
+            // Behavior Graph Agent有効化
+            _behaviorGraphAgent.enabled = true;
         }
         private void OnDestroy()
         {

@@ -30,43 +30,71 @@ namespace KillChord.Runtime.Adaptor
         public event Action OnAttackReserved;
         public event Action OnAttack;
 
-        public EnemyMoveInstruction Tick(Vector3 enemyPosition, Vector3 targetPosition)
+        /// <summary> 敵が攻撃中か。 </summary>
+        public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
+
+        /// <summary>
+        ///     位置情報より行動意思を取得する。
+        /// </summary>
+        /// <param name="enemyPosition"></param>
+        /// <param name="targetPosition"></param>
+        /// <returns></returns>
+        public EnemyMoveInstruction GetMoveInstruction(Vector3 enemyPosition, Vector3 targetPosition)
         {
             EnemyMoveDecision moveDecision = _enemyMoveUsecase.Evaluate(enemyPosition, targetPosition);
-            Debug.Log($"[EnemyAIController] ShouldMove={moveDecision.ShouldMove}, IsInAttackRange={_enemyBattleState.IsInAttackRange}");
-
             if (moveDecision.ShouldMove)
             {
                 if (_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] 攻撃範囲から出たので予約キャンセル");
+                    Debug.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
-                    _enemyAttackReservationUsecase.Cancel();
                 }
-
-                return new EnemyMoveInstruction(
-                    moveDecision.ShouldMove,
-                    moveDecision.Destination,
-                    moveDecision.Speed);
             }
-
-            if (!_enemyBattleState.IsInAttackRange)
+            else
             {
-                Debug.Log("[EnemyAIController] 攻撃範囲に入った");
-                _enemyBattleState.EnterRange();
-
-                if (!_enemyAttackReservationUsecase.HasReservation)
+                if (!_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] Encounter予約開始");
-                    _enemyAttackReservationUsecase.ReserveEncounter();
-                    OnAttackReserved?.Invoke();
+                    Debug.Log("[EnemyAIController] 攻撃範囲に入った");
+                    _enemyBattleState.EnterRange();
                 }
             }
-
             return new EnemyMoveInstruction(
-                    moveDecision.ShouldMove,
-                    moveDecision.Destination,
-                    moveDecision.Speed);
+            moveDecision.ShouldMove,
+            moveDecision.Destination,
+            moveDecision.Speed);
+        }
+
+        /// <summary>
+        ///     攻撃を予約する。
+        /// </summary>
+        public void ReserveAttack()
+        {
+            if (!_enemyAttackReservationUsecase.HasReservation)
+            {
+                Debug.Log("[EnemyAIController] Encounter予約開始");
+                if (_enemyBattleState.FirstAttack)
+                {
+                    // 初回攻撃
+                    _enemyAttackReservationUsecase.ReserveEncounter();
+                }
+                else
+                {
+                    // 2回目以降の攻撃
+                    _enemyAttackReservationUsecase.ReserveBattle();
+                }
+                OnAttackReserved?.Invoke();
+            }
+        }
+
+        /// <summary>
+        ///     プレイヤーが敵の攻撃範囲内か取得する。
+        /// </summary>
+        /// <param name="enemyPosition"></param>
+        /// <param name="targetPosition"></param>
+        /// <returns></returns>
+        public bool IsPlayerInAttackRange(Vector3 enemyPosition, Vector3 targetPosition)
+        {
+            return _enemyMoveUsecase.IsPlayerInAttackRange(enemyPosition, targetPosition);
         }
 
         public void Dispose()
@@ -83,14 +111,9 @@ namespace KillChord.Runtime.Adaptor
                 _enemyBattleState.CurrentAttack,
                 _enemyBattleState.Attacker,
                 _enemyBattleState.Target);
+            _enemyBattleState.AttackExcuted();
 
             OnAttack?.Invoke();
-
-            if (_enemyBattleState.IsInAttackRange)
-            {
-                _enemyAttackReservationUsecase.ReserveBattle();
-                OnAttackReserved?.Invoke();
-            }
         }
 
         private readonly EnemyMoveUsecase _enemyMoveUsecase;

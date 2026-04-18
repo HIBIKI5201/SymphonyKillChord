@@ -1,0 +1,872 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1687900579865694322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
+  m_Name: EnemyAIGraph Blackboard
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.RuntimeBlackboardAsset
+  VersionTimestamp: 639120919808612039
+  AssetID:
+    m_Value0: 15298916761841218890
+    m_Value1: 10423536786047875179
+  m_Blackboard:
+    m_Variables:
+    - rid: 5112082935029432434
+    - rid: 5112082949080088721
+    - rid: 5112082949080088729
+    - rid: 5112082949080088739
+    - rid: 5112082949080088896
+  m_SharedBlackboardVariableGuids:
+  - m_Value0: 17569852969880927499
+    m_Value1: 10859535363759142801
+  references:
+    version: 2
+    RefIds:
+    - rid: 5112082935029432434
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088721
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5211698399387829366
+          m_Value1: 6142912991580524478
+        Name: EnemyMovementAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088729
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088739
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088896
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17569852969880927499
+          m_Value1: 10859535363759142801
+        Name: EnemySharedFacade
+        m_Value: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bad8f2220607dac4db5082ff333fafb8, type: 3}
+  m_Name: EnemyAIGraph
+  m_EditorClassIdentifier: Unity.Behavior.Authoring::Unity.Behavior.BehaviorAuthoringGraph
+  Blackboard: {fileID: 3023340878292519551}
+  m_Description: 
+  m_Nodes:
+  - rid: 5112082935029432435
+  - rid: 5112082949080088804
+  - rid: 5112082949080088805
+  - rid: 5112082949080088806
+  - rid: 5112082949080088926
+  - rid: 5112082949080088954
+  m_VersionTimestamp: 639120921706436246
+  m_SerializedVersion: 2
+  m_DebugInfo: {fileID: 6394660027214620352}
+  m_RuntimeGraph: {fileID: 4520507370308768518}
+  AssetID:
+    m_Value0: 15298916761841218890
+    m_Value1: 10423536786047875179
+  Story:
+    Story: 
+    StoryVariableNames: []
+    Variables: []
+  m_NodeModelsInfo:
+  - Name: On Start
+    Story: 
+    RuntimeTypeString: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    RuntimeTypeID:
+      m_Value0: 3335272451348827663
+      m_Value1: 11549843281177505721
+    Variables: []
+    NamedChildren: []
+    IsPlaceholder: 0
+  - Name: Conditional Branch
+    Story: 
+    RuntimeTypeString: Unity.Behavior.BranchingConditionComposite, Unity.Behavior,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuntimeTypeID:
+      m_Value0: 12334964803190848789
+      m_Value1: 14608808926743427008
+    Variables: []
+    NamedChildren:
+    - True
+    - False
+    IsPlaceholder: 0
+  - Name: ChaseTarget
+    Story: 'Agent Chase Target [Movement] [State]'
+    RuntimeTypeString: ChaseTargetAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    RuntimeTypeID:
+      m_Value0: 11012707323019231883
+      m_Value1: 3135116920785934511
+    Variables:
+    - Name: Movement
+      Type:
+        m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      Tooltip: 
+    - Name: State
+      Type:
+        m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      Tooltip: 
+    NamedChildren: []
+    IsPlaceholder: 0
+  - Name: AttackTarget
+    Story: 'Agent Attack Target [Battle] [State]'
+    RuntimeTypeString: AttackTargetAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    RuntimeTypeID:
+      m_Value0: 2102089666372246625
+      m_Value1: 10926511086557285780
+    Variables:
+    - Name: Battle
+      Type:
+        m_SerializableType: KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      Tooltip: 
+    - Name: State
+      Type:
+        m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      Tooltip: 
+    NamedChildren: []
+    IsPlaceholder: 0
+  m_Blackboards: []
+  m_MainBlackboardAuthoringAsset: {fileID: 3023340878292519551}
+  m_CommandBuffer:
+    m_Commands: []
+  m_SubgraphsInfo: []
+  m_BlackboardMissingManagedRef: 0
+  m_GraphMissingManagedRef: 0
+  m_HasMissingTypeInManagedRef: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5112082935029432435
+      type: {class: StartNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 143.20004, y: -81.600006}
+        ID:
+          m_Value0: 9255006646967890623
+          m_Value1: 16097553234003318985
+        Parents: []
+        PortModels:
+        - rid: 5112082935029432436
+        NodeType:
+          m_SerializableType: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 3335272451348827663
+          m_Value1: 11549843281177505721
+        m_FieldValues: []
+        Repeat: 1
+        AllowMultipleRepeatsPerTick: 0
+    - rid: 5112082935029432436
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082935029432435
+        m_Connections:
+        - rid: 5112082949080088811
+    - rid: 5112082949080088804
+      type: {class: FloatingPortNodeModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        Position: {x: -177.59995, y: 182.60011}
+        ID:
+          m_Value0: 1253986713310225826
+          m_Value1: 1692226843953352110
+        Parents: []
+        PortModels:
+        - rid: 5112082949080088807
+        - rid: 5112082949080088808
+        ParentNodeID:
+          m_Value0: 8582675853128266760
+          m_Value1: 8290896797681136742
+        PortName: True
+    - rid: 5112082949080088805
+      type: {class: FloatingPortNodeModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        Position: {x: 144.00002, y: 182.59999}
+        ID:
+          m_Value0: 8959389161376162663
+          m_Value1: 11645325177948572702
+        Parents: []
+        PortModels:
+        - rid: 5112082949080088809
+        - rid: 5112082949080088810
+        ParentNodeID:
+          m_Value0: 8582675853128266760
+          m_Value1: 8290896797681136742
+        PortName: False
+    - rid: 5112082949080088806
+      type: {class: BranchingConditionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 144.00008, y: 29.200005}
+        ID:
+          m_Value0: 8582675853128266760
+          m_Value1: 8290896797681136742
+        Parents: []
+        PortModels:
+        - rid: 5112082949080088811
+        - rid: 5112082949080088812
+        - rid: 5112082949080088813
+        NodeType:
+          m_SerializableType: Unity.Behavior.BranchingConditionComposite, Unity.Behavior,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 12334964803190848789
+          m_Value1: 14608808926743427008
+        m_FieldValues: []
+        <ConditionModels>k__BackingField:
+        - ConditionType:
+            m_SerializableType: IsStunnedCondition, KillChord.View, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          ConditionTypeID:
+            m_Value0: 15470212617122557828
+            m_Value1: 14770888291135841713
+          NodeModel:
+            rid: 5112082949080088806
+          m_FieldValues:
+          - rid: 5112082949080088815
+          OperatorFieldModel:
+            rid: -2
+        - ConditionType:
+            m_SerializableType: IsAttackingCondition, KillChord.View, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          ConditionTypeID:
+            m_Value0: 10161038469285207466
+            m_Value1: 13687708551416583149
+          NodeModel:
+            rid: 5112082949080088806
+          m_FieldValues:
+          - rid: 5112082949080088835
+          OperatorFieldModel:
+            rid: -2
+        <RequiresAllConditionsTrue>k__BackingField: 0
+        <ShouldTruncateNodeUI>k__BackingField: 0
+        <ObserverType>k__BackingField: 0
+    - rid: 5112082949080088807
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 1
+        m_NodeModel:
+          rid: 5112082949080088804
+        m_Connections:
+        - rid: 5112082949080088812
+    - rid: 5112082949080088808
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088804
+        m_Connections: []
+    - rid: 5112082949080088809
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 1
+        m_NodeModel:
+          rid: 5112082949080088805
+        m_Connections:
+        - rid: 5112082949080088813
+    - rid: 5112082949080088810
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088805
+        m_Connections:
+        - rid: 5112082949080088927
+    - rid: 5112082949080088811
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088806
+        m_Connections:
+        - rid: 5112082935029432436
+    - rid: 5112082949080088812
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: True
+        m_PortDataFlowType: 1
+        m_IsFloating: 1
+        m_NodeModel:
+          rid: 5112082949080088806
+        m_Connections:
+        - rid: 5112082949080088807
+    - rid: 5112082949080088813
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: False
+        m_PortDataFlowType: 1
+        m_IsFloating: 1
+        m_NodeModel:
+          rid: 5112082949080088806
+        m_Connections:
+        - rid: 5112082949080088809
+    - rid: 5112082949080088815
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: State
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080088816
+        LinkedVariable:
+          rid: 5112082949080088818
+    - rid: 5112082949080088816
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088818
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088835
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: State
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080088836
+        LinkedVariable:
+          rid: 5112082949080088818
+    - rid: 5112082949080088836
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088926
+      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 143.20006, y: 281.19998}
+        ID:
+          m_Value0: 2617725138129330875
+          m_Value1: 6836317177621401305
+        Parents: []
+        PortModels:
+        - rid: 5112082949080088927
+        - rid: 5112082949080088928
+        NodeType:
+          m_SerializableType: ChaseTargetAction, KillChord.View, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 11012707323019231883
+          m_Value1: 3135116920785934511
+        m_FieldValues:
+        - rid: 5112082949080089029
+        - rid: 5112082949080089030
+    - rid: 5112082949080088927
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088926
+        m_Connections:
+        - rid: 5112082949080088810
+    - rid: 5112082949080088928
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088926
+        m_Connections:
+        - rid: 5112082949080088955
+    - rid: 5112082949080088954
+      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 143.99995, y: 386}
+        ID:
+          m_Value0: 11633906688026609887
+          m_Value1: 10843661146392222460
+        Parents: []
+        PortModels:
+        - rid: 5112082949080088955
+        - rid: 5112082949080088956
+        NodeType:
+          m_SerializableType: AttackTargetAction, KillChord.View, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 2102089666372246625
+          m_Value1: 10926511086557285780
+        m_FieldValues:
+        - rid: 5112082949080089063
+        - rid: 5112082949080089064
+    - rid: 5112082949080088955
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088954
+        m_Connections:
+        - rid: 5112082949080088928
+    - rid: 5112082949080088956
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 5112082949080088954
+        m_Connections: []
+    - rid: 5112082949080089029
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: Movement
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080089031
+        LinkedVariable:
+          rid: 5112082949080089033
+    - rid: 5112082949080089030
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: State
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080089032
+        LinkedVariable:
+          rid: 5112082949080089048
+    - rid: 5112082949080089031
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089032
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089033
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 5211698399387829366
+          m_Value1: 6142912991580524478
+        Name: EnemyMovementAIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089048
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089063
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: Battle
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080089065
+        LinkedVariable:
+          rid: 5112082949080089067
+    - rid: 5112082949080089064
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: State
+        Type:
+          m_SerializableType: KillChord.Runtime.View.EnemyStateFacade, KillChord.View,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 5112082949080089066
+        LinkedVariable:
+          rid: 5112082949080089081
+    - rid: 5112082949080089065
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089066
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089067
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089081
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+--- !u!114 &3023340878292519551
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd922ae02c94c87a66e46a10a7319b9, type: 3}
+  m_Name: EnemyAIGraph Blackboard
+  m_EditorClassIdentifier: Unity.Behavior.Authoring::Unity.Behavior.BehaviorBlackboardAuthoringAsset
+  AssetID:
+    m_Value0: 15298916761841218890
+    m_Value1: 10423536786047875179
+  m_Variables:
+  - rid: 5112082935029432437
+  - rid: 5112082949080088720
+  - rid: 5112082949080088728
+  - rid: 5112082949080088738
+  - rid: 5112082949080088895
+  m_VersionTimestamp: 639120919808612039
+  m_CommandBuffer:
+    m_Commands: []
+  m_RuntimeBlackboardAsset: {fileID: -1687900579865694322}
+  references:
+    version: 2
+    RefIds:
+    - rid: 5112082935029432437
+      type: {class: 'TypedVariableModel`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088720
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 5211698399387829366
+          m_Value1: 6142912991580524478
+        Name: EnemyMovementAIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088728
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088738
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 5112082949080088895
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 17569852969880927499
+          m_Value1: 10859535363759142801
+        Name: EnemySharedFacade
+        IsExposed: 1
+        m_IsShared: 1
+        m_Value: {fileID: 0}
+--- !u!114 &4520507370308768518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db920e62f70f420bb33c771449926fa4, type: 3}
+  m_Name: EnemyAIGraph
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraph
+  Graphs:
+  - rid: 5112082935029432438
+  m_DebugInfo: {fileID: 6394660027214620352}
+  m_WasCompileWithPlaceholderNode: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5112082935029432438
+      type: {class: BehaviorGraphModule, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        AuthoringAssetID:
+          m_Value0: 15298916761841218890
+          m_Value1: 10423536786047875179
+        m_DebugInfo: {fileID: 6394660027214620352}
+        BlackboardReference:
+          rid: 5112082935029432439
+        BlackboardGroupReferences: []
+        Root:
+          rid: 5112082949080089105
+        m_VersionTimestamp: 639120921706436246
+    - rid: 5112082935029432439
+      type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        m_Blackboard:
+          rid: 5112082935029432441
+        m_Source: {fileID: -1687900579865694322}
+    - rid: 5112082935029432441
+      type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        m_Variables:
+        - rid: 5112082949080089084
+        - rid: 5112082949080089085
+        - rid: 5112082949080089086
+        - rid: 5112082949080089087
+        - rid: 5112082949080089088
+    - rid: 5112082949080089084
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089085
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5211698399387829366
+          m_Value1: 6142912991580524478
+        Name: EnemyMovementAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089086
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089087
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        m_Value: {fileID: 0}
+    - rid: 5112082949080089088
+      type: {class: 'SharedBlackboardVariable`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17569852969880927499
+          m_Value1: 10859535363759142801
+        Name: EnemySharedFacade
+        m_Value: {fileID: 0}
+        m_SharedVariablesRuntimeAsset: {fileID: -1687900579865694322}
+    - rid: 5112082949080089105
+      type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 9255006646967890623
+          m_Value1: 16097553234003318985
+        Graph:
+          rid: 5112082935029432438
+        m_Parent:
+          rid: -2
+        m_Child:
+          rid: 5112082949080089106
+        Repeat: 1
+        AllowMultipleRepeatsPerTick: 0
+    - rid: 5112082949080089106
+      type: {class: BranchingConditionComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 8582675853128266760
+          m_Value1: 8290896797681136742
+        Graph:
+          rid: 5112082935029432438
+        m_Parent:
+          rid: 5112082949080089105
+        m_Children:
+        - rid: 5112082949080089107
+        m_RegisteredObservers: []
+        m_Conditions:
+        - rid: 5112082949080089108
+        - rid: 5112082949080089109
+        m_RequiresAllConditions: 0
+        True:
+          rid: -2
+        False:
+          rid: 5112082949080089107
+        m_CurrentChild:
+          rid: -2
+        m_ObserverType: 0
+    - rid: 5112082949080089107
+      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 2617725138129330875
+          m_Value1: 6836317177621401305
+        Graph:
+          rid: 5112082935029432438
+        m_Parent:
+          rid: 5112082949080089106
+        m_Children:
+        - rid: 5112082949080089110
+        - rid: 5112082949080089111
+        m_RegisteredObservers: []
+    - rid: 5112082949080089108
+      type: {class: IsStunnedCondition, ns: , asm: KillChord.View}
+      data:
+        Graph:
+          rid: 5112082935029432438
+        State:
+          rid: 5112082949080089087
+    - rid: 5112082949080089109
+      type: {class: IsAttackingCondition, ns: , asm: KillChord.View}
+      data:
+        Graph:
+          rid: 5112082935029432438
+        State:
+          rid: 5112082949080089087
+    - rid: 5112082949080089110
+      type: {class: ChaseTargetAction, ns: , asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 2617725138129330875
+          m_Value1: 6836317177621401305
+        Graph:
+          rid: 5112082935029432438
+        m_Parent:
+          rid: 5112082949080089107
+        Movement:
+          rid: 5112082949080089085
+        State:
+          rid: 5112082949080089087
+    - rid: 5112082949080089111
+      type: {class: AttackTargetAction, ns: , asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 11633906688026609887
+          m_Value1: 10843661146392222460
+        Graph:
+          rid: 5112082935029432438
+        m_Parent:
+          rid: 5112082949080089107
+        Battle:
+          rid: 5112082949080089086
+        State:
+          rid: 5112082949080089087
+--- !u!114 &6394660027214620352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b27bb6d9a2c8d540a10dff10acc543e, type: 3}
+  m_Name: EnemyAIGraph Debug Info
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraphDebugInfo
+  m_CodeBreakPointsList: []
