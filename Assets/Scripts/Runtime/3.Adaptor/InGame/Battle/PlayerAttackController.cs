@@ -57,7 +57,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
-                _battleState.Target);
+                _battleState.Target,
+                true); // TODO 敵側で射線判定の結果が追加されたため、プレイヤー側は一旦固定値で書く
 
             _presenter.Push(result);
             return true;
