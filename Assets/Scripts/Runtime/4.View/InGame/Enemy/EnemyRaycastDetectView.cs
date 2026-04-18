@@ -20,7 +20,7 @@ namespace KillChord.Runtime.View
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
                 return;
             }
-            if (targetTransform.TryGetComponent<Collider>(out _targetCollider))
+            if (!targetTransform.TryGetComponent<Collider>(out _targetCollider))
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象がColliderを持っていない。");
             }
