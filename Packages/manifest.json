@@ -32,6 +32,7 @@
     "com.unity.visualeffectgraph": "17.3.0",
     "com.unity.visualscripting": "1.9.11",
     "symphonyframework": "https://github.com/HIBIKI5201/SymphonyFramework.git",
+    "taremin.copy-components-by-regex": "https://github.com/Taremin/CopyComponentsByRegex.git",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",

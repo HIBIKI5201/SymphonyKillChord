@@ -584,6 +584,13 @@
       },
       "hash": "6d4b158f4152cb1502da585f41fb6dd6793ffdda"
     },
+    "taremin.copy-components-by-regex": {
+      "version": "https://github.com/Taremin/CopyComponentsByRegex.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "8c31644257ed25cb6636aaa36af4540441568c86"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
