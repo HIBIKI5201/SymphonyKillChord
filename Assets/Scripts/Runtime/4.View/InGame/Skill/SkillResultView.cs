@@ -56,5 +56,11 @@ namespace KillChord.Runtime.View
                 _viewModel.OnChanged -= HandleChanged;
 
         }
+
+        private void Start()
+        {
+            _skillIdText.text = "Skill ID: N/A";
+            _skillPatternText.text = "Pattern: N/A";
+        }
     }
 }
