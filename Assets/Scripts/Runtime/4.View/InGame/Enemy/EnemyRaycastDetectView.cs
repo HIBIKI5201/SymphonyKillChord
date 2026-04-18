@@ -13,8 +13,20 @@ namespace KillChord.Runtime.View
         {
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform; 
-            _targetCollider = targetTransform.GetComponent<Collider>();
             _attackRange = attackRange;
+
+            if(targetTransform == null)
+            {
+                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
+                return;
+            }
+            if (targetTransform.TryGetComponent<Collider>(out _targetCollider))
+            {
+                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象がColliderを持っていない。");
+            }
+#if UNITY_EDITOR
+            _initializedFlg = true;
+#endif
         }
         public bool CanRaycastHitTarget => CheckCanRaycastHitTarget();
 
@@ -45,6 +57,9 @@ namespace KillChord.Runtime.View
         private Collider _targetCollider;
         private Transform _targetTransform;
         private float _attackRange;
+#if UNITY_EDITOR
+        private bool _initializedFlg = false;
+#endif
 
 
         /// <summary>
@@ -86,6 +101,7 @@ namespace KillChord.Runtime.View
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
+            if (!_initializedFlg) return;
             Gizmos.color = CheckCanRaycastHitTarget() ? Color.red : Color.green;
             Gizmos.DrawLine(transform.position, _targetTransform.position);
         }
