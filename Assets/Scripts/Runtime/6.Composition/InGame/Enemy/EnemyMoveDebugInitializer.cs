@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
@@ -49,6 +50,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetEntityRegistryController = targetEntityRegistryController;
             CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
 
+            // 敵射線判定
+            EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
+            EnemyRaycastDetectService raycastDetectService = new EnemyRaycastDetectService(raycastController);
+
             // Domain生成
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
@@ -56,9 +61,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, _raycastView);
+            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, _raycastView);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
 
             AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
