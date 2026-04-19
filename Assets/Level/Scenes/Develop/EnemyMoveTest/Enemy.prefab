@@ -137,6 +137,7 @@ MonoBehaviour:
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
   _raycastView: {fileID: 8900643656970599263}
+  _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,7 +162,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bd1da382eb55ab42b2a0ff411fc1b5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyRaycastDetectView
-  _lineMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   _resultArraySize: 8
   _enemyMoveView: {fileID: 6024709665745219317}
   _hitLayers:
