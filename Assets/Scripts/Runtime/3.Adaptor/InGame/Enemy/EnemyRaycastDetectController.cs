@@ -1,0 +1,19 @@
+using KillChord.Runtime.Application;
+using UnityEngine;
+
+namespace KillChord.Runtime.Adaptor
+{
+    /// <summary>
+    ///     敵から射線を通し、目標に直撃できるか判定する。
+    /// </summary>
+    public class EnemyRaycastDetectController : IEnemyRaycastDetectRepository
+    {
+        public EnemyRaycastDetectController(IEnemyRaycastDetectViewModel model)
+        {
+            _model = model;
+        }
+        public bool CanRaycastHitTarget => _model.CanRaycastHitTarget;
+
+        private IEnemyRaycastDetectViewModel _model;
+    }
+}

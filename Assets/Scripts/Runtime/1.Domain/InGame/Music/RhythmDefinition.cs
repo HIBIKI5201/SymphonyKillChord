@@ -18,33 +18,37 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public readonly double BeatLength;
 
         /// <summary>
-        ///     1~8拍子の中で最も近いものを取得する
+        /// 1~8拍子の中で、指定された秒数に最も近い拍子を算出する
         /// </summary>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
-        public int GetNearestSignature(double seconds)
+        /// <param name="durationSeconds">前回のアクションからの経過秒数</param>
+        /// <returns>1~8の拍子</returns>
+        public BeatType CalculateBeatType(double durationSeconds)
         {
-            if (Bpm <= 0) { return 4; }
+            if (Bpm <= 0)
+            {
+                return BeatType.Four;
+            }
 
             double beatSeconds = 60d / Bpm;
             double barSeconds = beatSeconds * 4d;
 
-            int nearestSignature = 1;
+            BeatType nearestBeatType = BeatType.Four;
             double minDiff = double.MaxValue;
 
-            for (int i = 1; i <= 8; i++)
+            foreach (BeatType beatType in SupportedBeatTypes)
             {
-                double targetSeconds = barSeconds / i;
-                double diff = Math.Abs(seconds - targetSeconds);
+                int signature = (int)beatType;
+                double targetSeconds = barSeconds / signature;
+                double diff = Math.Abs(durationSeconds - targetSeconds);
 
                 if (diff < minDiff)
                 {
                     minDiff = diff;
-                    nearestSignature = i;
+                    nearestBeatType = beatType;
                 }
             }
 
-            return nearestSignature;
+            return nearestBeatType;
         }
 
         public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
@@ -64,5 +68,15 @@ namespace KillChord.Runtime.Domain.InGame.Music
             double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
             return targetBarStartTimingMs + offsetInBarMs;
         }
+
+        private static readonly BeatType[] SupportedBeatTypes =
+        {
+            BeatType.One,
+            BeatType.Two,
+            BeatType.Three,
+            BeatType.Four,
+            BeatType.Six,
+            BeatType.Eight
+        };
     }
 }

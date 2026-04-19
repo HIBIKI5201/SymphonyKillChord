@@ -1,8 +1,11 @@
+using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
-using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -14,6 +17,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
+        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -48,15 +52,21 @@ namespace KillChord.Runtime.Composition
                 return;
             }
 
+            TargetManager targetManager = new();
+            TargetEntityRegistry targetEntityRegistry = new();
+
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
 
-            _playerInitializer.Initialize();
+            var inputC = ServiceLocator.GetInstance<InputComposition>();
+            inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();
 
-            _camerasystemInitializer.Initialize();
+            _enemyTestSpawner.Init();
         }
     }
 }

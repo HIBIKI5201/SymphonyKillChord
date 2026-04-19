@@ -1,13 +1,12 @@
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Persistent.Music;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
-    /// <summary>
-    ///     スキルの発動条件の判定や実行を制御するコントローラークラス。
-    /// </summary>
     public class SkillController
     {
         public SkillController(
@@ -17,35 +16,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _musicSyncService = musicSyncService;
             skillId ??= new[] { 0 };
-            _skillCash = new SkillDefinition[skillId.Length];
+            _skillCache = new SkillDefinition[skillId.Length];
 
             for (int i = 0; i < skillId.Length; i++)
             {
-                _skillCash[i] = skillRepository.GetSkill(skillId[i]);
+                _skillCache[i] = skillRepository.GetSkill(skillId[i]);
             }
         }
 
-        /// <summary>
-        ///　スキルが成立しているかどうかを調べる
-        /// </summary>
-        /// <param name="actionType"></param>
-        /// <returns>登録した</returns>
-        public int CheckSkill(BattleActionType actionType)
+        public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType);
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
             if (SkillCheckService.TryCheckSkills(
-                    _skillCash,
+                    _skillCache,
                     _musicSyncService.GetBeatTypeHistory(),
-                    out var index, out var type))
+                    out var index, out _))
             {
-                _skillCash[index].SkillExecute();
+                _skillCache[index].SkillExecute();
+                return true;
             }
 
-            return type;
+            return false;
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly SkillDefinition[] _skillCash;
+        private readonly SkillDefinition[] _skillCache;
     }
 }
