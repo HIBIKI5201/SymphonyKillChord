@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
@@ -9,13 +10,13 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using System.Collections.Generic;
+using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame;
 using UnityEngine;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
     ///     敵移動の依存関係を構築する。
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
+        [SerializeField] private EnemyRaycastDetectView _raycastView;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
@@ -48,6 +50,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _targetEntityRegistryController = targetEntityRegistryController;
             CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
 
+            // 敵射線判定
+            EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
+            EnemyRaycastDetectService raycastDetectService = new EnemyRaycastDetectService(raycastController);
+
             // Domain生成
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
@@ -55,9 +61,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec);
+            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
 
             AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -70,10 +76,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _targetManagerController.Register(_lockOnTargetGateway);
 
-            _targetEntityRegistryController.RegisterTargetEntity(_lockOnTargetGateway,enemyEntity);
+            _targetEntityRegistryController.RegisterTargetEntity(_lockOnTargetGateway, enemyEntity);
 
             // View接続
             _view.Initialize(controller, target);
+            _raycastView.Initialize(target, spec.AttackRange.Value);
         }
         private void OnDestroy()
         {

@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         void Update(double playTime);
         int GetHistoryLength();
 
-        ReadOnlySpan<int> GetBeatTypeHistory();
+        ReadOnlySpan<BeatType> GetBeatTypeHistory();
         ReadOnlySpan<float> GetBeatTypeTiming();
         ReadOnlySpan<BattleActionType> GetActionHistory();
 
@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             Action action,
             CancellationToken ct);
 
-        int GetCurrentBeatType(float unscaledTime);
-        void RegisterBattleActionHistory(BattleActionType actionType, int beatType, float unscaledTime);
+        BeatType GetCurrentBeatType(float unscaledTime);
+        void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime);
     }
 }

@@ -17,13 +17,13 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public float LastTiming => Count > 0 ? _timingBuffer.PeekLast() : 0f;
 
         private readonly RingBuffer<BattleActionType> _typeBuffer;
-        private readonly RingBuffer<int> _beatTypeBuffer;
+        private readonly RingBuffer<BeatType> _beatTypeBuffer;
         private readonly RingBuffer<float> _timingBuffer;
 
         public RhythmState(int capacity)
         {
             _typeBuffer = new RingBuffer<BattleActionType>(capacity);
-            _beatTypeBuffer = new RingBuffer<int>(capacity);
+            _beatTypeBuffer = new RingBuffer<BeatType>(capacity);
             _timingBuffer = new RingBuffer<float>(capacity);
         }
 
@@ -33,7 +33,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="beatType">計算済みの拍子</param>
         /// <param name="timing">登録時のタイミング(Time.unscaledTimeなど)</param>
         /// <param name="actionType">アクションの種類</param>
-        public void Enqueue(int beatType, float timing, BattleActionType actionType)
+        public void Enqueue(BeatType beatType, float timing, BattleActionType actionType)
         {
             _beatTypeBuffer.Enqueue(beatType);
             _typeBuffer.Enqueue(actionType);
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         }
 
         /// <summary> 古い順に取得</summary>
-        public ReadOnlySpan<int> GetHistoryBeatType()
+        public ReadOnlySpan<BeatType> GetHistoryBeatType()
         {
             return _beatTypeBuffer.AsReadonlySpan();
         }

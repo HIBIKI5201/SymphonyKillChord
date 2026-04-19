@@ -5,4 +5,6 @@
     OutGame = 2,
     InGame = 3,
     Stage_01 = 4,
+    SkillTest = 5,
+    SkillTest2 = 6,
 }

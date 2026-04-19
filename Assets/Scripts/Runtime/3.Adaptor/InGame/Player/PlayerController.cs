@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Domain.Persistent.Input;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Player
@@ -8,9 +9,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
     /// </summary>
     public class PlayerController
     {
-        public PlayerController(PlayerApplication playerApplication)
+        public PlayerController(PlayerApplication playerApplication, InputBufferingQueue inputBufferingQueue)
         {
             _playerApplication = playerApplication;
+            _inputBufferingQueue = inputBufferingQueue;
         }
 
         public bool TryDodge(Vector2 input, float time)
@@ -21,6 +23,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
         }
 
         private readonly PlayerApplication _playerApplication;
-
+        private readonly InputBufferingQueue _inputBufferingQueue;
     }
 }

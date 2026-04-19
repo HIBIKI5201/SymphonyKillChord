@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
@@ -7,15 +8,12 @@ namespace KillChord.Runtime.Domain.InGame.Skill
     /// </summary>
     public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
-        public ReadOnlySpan<int> Signatures => _signatures;
-        private readonly int[] _signatures;
+        public ReadOnlySpan<BeatType> Signatures => _signatures.AsSpan();
+        private readonly RhythmPattern _signatures;
 
-        public SkillPattern(int[] signatures)
+        public SkillPattern(RhythmPattern signatures)
         {
-            if (signatures == null) { throw new ArgumentNullException(nameof(signatures)); }
-            if (signatures.Length == 0)
-                { throw new ArgumentException("signatures must not be empty.", nameof(signatures)); }
-            _signatures = signatures;//受け取ったデータは変わらない為そのまま利用する
+            _signatures = signatures;
         }
 
         public static bool operator ==(SkillPattern left, SkillPattern right)
@@ -28,9 +26,39 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             return !(left == right);
         }
 
+        public static bool operator ==(ReadOnlySpan<BeatType> left, SkillPattern right)
+        {
+            return right.Equals(left);
+        }
+
+        public static bool operator !=(ReadOnlySpan<BeatType> left, SkillPattern right)
+        {
+            return !(left == right);
+        }
+
         public bool Equals(SkillPattern other)
         {
-            return Equals(_signatures[^1], other._signatures[^1]);
+            return Equals(_signatures, other._signatures);
+        }
+
+        public bool Equals(ReadOnlySpan<BeatType> other)
+        {
+            ReadOnlySpan<BeatType> signaturesSpan = _signatures.AsSpan();
+
+            if (_signatures.Signatures.Length != other.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _signatures.Signatures.Length; i++)
+            {
+                if (_signatures.Signatures[i] != other[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override bool Equals(object obj)
@@ -40,7 +68,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         public override int GetHashCode()
         {
-            return (_signatures != null ? _signatures[^1].GetHashCode() : 0);
+            return (_signatures.GetHashCode());
         }
     }
 }
