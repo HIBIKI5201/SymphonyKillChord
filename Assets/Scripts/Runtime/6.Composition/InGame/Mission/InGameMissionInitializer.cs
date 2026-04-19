@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private MissionHudView _missionHudView;
         [SerializeField] private MissionLoopView _missionLoopView;
 
-        private void Awake()
+        public void Initialize()
         {
             SelectedMissionState selectedMissionState =
                 ServiceLocator.GetInstance<SelectedMissionState>();
