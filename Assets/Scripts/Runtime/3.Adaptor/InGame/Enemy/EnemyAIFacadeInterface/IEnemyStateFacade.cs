@@ -21,5 +21,9 @@ namespace KillChord.Runtime.Adaptor
         ///     照準中であるか。
         /// </summary>
         public bool IsAttacking { get; }
+        /// <summary>
+        ///     被弾硬直中か。
+        /// </summary>
+        public bool IsStunned { get; }
     }
 }

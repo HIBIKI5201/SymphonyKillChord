@@ -4,15 +4,15 @@ using Unity.Behavior;
 using UnityEngine;
 
 [Serializable, Unity.Properties.GeneratePropertyBag]
-[Condition(name: "IsAttacking", story: "攻撃中 [Bool] [State] ", category: "Conditions", id: "aaddd2fea642038ded13432c6882f4bd")]
-public partial class IsAttackingCondition : Condition
+[Condition(name: "IsAimSightClear", story: "攻撃目標との間に障害物がない [Bool] [State]", category: "Conditions", id: "fb7f79905d34791230533bf26dd2e567")]
+public partial class IsAimSightClearCondition : Condition
 {
     [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
     [SerializeReference] public BlackboardVariable<bool> Bool;
 
     public override bool IsTrue()
     {
-        return State.Value.IsAttacking == Bool.Value;
+        return State.Value.IsSightClearToAim == Bool.Value;
     }
 
     public override void OnStart()

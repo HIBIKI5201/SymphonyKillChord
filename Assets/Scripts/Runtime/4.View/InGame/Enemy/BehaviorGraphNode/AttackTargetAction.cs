@@ -6,7 +6,7 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "AttackTarget", story: "Agent Attack Target [Battle] [State]", category: "Action", id: "611c230a6a1f2c1d944d9d2cf1c3a297")]
+[NodeDescription(name: "AttackTarget", story: "攻撃対象を攻撃する [Battle] [State]", category: "Action", id: "611c230a6a1f2c1d944d9d2cf1c3a297")]
 public partial class AttackTargetAction : Action
 {
     [SerializeReference] public BlackboardVariable<EnemyBattleAIFacade> Battle;
