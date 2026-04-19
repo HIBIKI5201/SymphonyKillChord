@@ -76,7 +76,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, attackDefinition);
 
             // Controller
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -91,7 +91,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // ファサード初期化
             _enemyMovementAIFacade.Initialize(_view);
             _enemyBattleAIFacade.Initialize(controller);
-            _enemyStateFacade.Initialize(controller, target, _raycastView);
+            _enemyStateFacade.Initialize(controller, target, _raycastView, battleState);
             _enemySharedFacade.Initialize(target);
 
             // Behavior Graph Agent有効化

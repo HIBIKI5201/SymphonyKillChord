@@ -15,5 +15,9 @@ namespace KillChord.Runtime.Adaptor
         ///     指示：被弾硬直アニメーションを開始する。
         /// </summary>
         public void StartStunAnimation();
+        /// <summary>
+        ///     指示：進行中の攻撃をキャンセルする。
+        /// </summary>
+        public void CancelAttack();
     }
 }

@@ -20,6 +20,11 @@ namespace KillChord.Runtime.View
             Debug.Log("被弾アニメーション実装待ち");
         }
 
+        public void CancelAttack()
+        {
+            _aiController.CanelAttack();
+        }
+
         private EnemyAIController _aiController;
     }
 }

@@ -18,28 +18,27 @@ namespace KillChord.Runtime.View
         public bool IsSightClearToAim => _raycastDetectView.CanRaycastHitTarget;
 
         public bool IsAttacking => _aiController.IsAttacking;
-        // 実装待ち
-        public bool IsStunned => _isStunned;
+        public bool IsStunned => _battleState.IsStunned;
 
         private EnemyAIController _aiController;
         private Transform _target;
         private EnemyRaycastDetectView _raycastDetectView;
         private EnemyBattleState _battleState;
 
-        private bool _isStunned = false;
         /// <summary>
-        ///     【デバッグ用】被弾硬直回復。
-        /// </summary>
-        public void HitStunRecover()
-        {
-            _isStunned = false;
-        }
-        /// <summary>
-        ///     【デバッグ用】被弾硬直発生。
+        ///     【デバッグ用】硬直発生。
         /// </summary>
         public void Stunned()
         {
-            _isStunned = true;
+            // 2秒後回復
+            Invoke(nameof(StunRecover), 2f);
+        }
+        /// <summary>
+        ///     【デバッグ用】硬直回復。
+        /// </summary>
+        public void StunRecover()
+        {
+            _battleState.StunRecover();
         }
     }
 }

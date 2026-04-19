@@ -30,13 +30,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(attacker));
             if (defender == null)
                 throw new ArgumentNullException(nameof(defender));
-            if (!canAttackHit)
-            {
-                Debug.Log("[Attack]障害物あり／対象が射程外のため、攻撃が無効。");
-                return new AttackResult(new Damage(0), false);
-            }
             // 計算を行い、ダメージを適用する。
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender);
+            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, canAttackHit);
 
             defender.TakeDamage(result.FinalDamage);
 
