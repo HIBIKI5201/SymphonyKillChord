@@ -35,6 +35,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
             CombatSpec = combatSpec;
         }
 
+        public event Action<CharacterEntity> OnDied;
+
         public CharacterName Name { get; }
         public HealthEntity Health { get; }
         public MoveSpeed MoveSpeed { get; }
@@ -42,6 +44,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterCombatSpec CombatSpec { get; }
         public Health CurrentHealth => Health.CurrentHealth;
         public Health MaxHealth => Health.MaxHealth;
+        public bool IsDead => CurrentHealth.Value <= 0f;
 
         /// <summary>
         ///     ダメージを受ける処理。
@@ -50,9 +53,20 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage)
         {
+            if (IsDead)
+            {
+                return;
+            }
+
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
             Health.ChangeHealth(nextHealth);
+
+            if (CurrentHealth.Value <= 0f && !_isDeadNotified)
+            {
+                _isDeadNotified = true;
+                OnDied?.Invoke(this);
+            }
         }
 
         /// <summary>
@@ -64,5 +78,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             Health nextHealth = new Health(CurrentHealth.Value + healAmount.Value);
             Health.ChangeHealth(nextHealth);
         }
+
+        private bool _isDeadNotified = false;
     }
 }
