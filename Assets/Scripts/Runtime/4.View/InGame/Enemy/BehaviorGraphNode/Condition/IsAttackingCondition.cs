@@ -12,6 +12,7 @@ public partial class IsAttackingCondition : Condition
 
     public override bool IsTrue()
     {
+        if (State?.Value == null) return false;
         return State.Value.IsAttacking == Bool.Value;
     }
 

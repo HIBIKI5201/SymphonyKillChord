@@ -138,7 +138,7 @@ namespace KillChord.Runtime.Adaptor
 
         private void HandleOnDamageTaken(EOnTakeDamage eventParam)
         {
-            if (eventParam.HashCode != _enemyBattleState.Attacker.GetHashCode()) return;
+            if (eventParam.DefenderHashCode != _enemyBattleState.Attacker.GetHashCode()) return;
             if (eventParam.Critical)
             {
                 Debug.Log("[EnemyAIController]クリティカル発生");

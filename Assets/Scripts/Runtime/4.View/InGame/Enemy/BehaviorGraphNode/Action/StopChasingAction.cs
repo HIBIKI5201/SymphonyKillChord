@@ -14,6 +14,8 @@ public partial class StopChasingAction : Action
 
     protected override Status OnStart()
     {
+        if (Movement?.Value == null
+            || State?.Value == null) return Status.Failure;
         Movement.Value.StopChasing();
         return Status.Success;
     }

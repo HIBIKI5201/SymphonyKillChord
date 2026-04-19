@@ -10,10 +10,10 @@ namespace KillChord.Runtime.Utility
     {
         public readonly float Damage;
         public readonly bool Critical;
-        public readonly int HashCode;
+        public readonly int DefenderHashCode;
         public EOnTakeDamage(float damage, bool critical, int hash)
         {
-            HashCode = hash;
+            DefenderHashCode = hash;
             Damage = damage;
             Critical = critical;
         }

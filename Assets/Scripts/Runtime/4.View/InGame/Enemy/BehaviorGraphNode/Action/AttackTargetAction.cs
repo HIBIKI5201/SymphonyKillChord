@@ -13,6 +13,7 @@ public partial class AttackTargetAction : Action
     [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
     protected override Status OnStart()
     {
+        if (Battle?.Value == null) return Status.Failure;
         Battle.Value.StartAttack();
         return Status.Running;
     }

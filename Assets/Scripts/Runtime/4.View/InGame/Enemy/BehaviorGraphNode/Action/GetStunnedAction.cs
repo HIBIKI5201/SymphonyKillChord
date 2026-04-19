@@ -18,10 +18,8 @@ public partial class GetStunnedAction : Action
     private static readonly int s_Talking = Animator.StringToHash("Talking"); 
     protected override Status OnStart()
     {
-        if (!State?.Value?.gameObject)
-        {
-            return Status.Failure;
-        }
+        if (State?.Value?.gameObject == null
+            || Battle?.Value == null) return Status.Failure;
 
         GameObject agent = State.Value.gameObject;
         EnemyStateFacade state = State.Value;

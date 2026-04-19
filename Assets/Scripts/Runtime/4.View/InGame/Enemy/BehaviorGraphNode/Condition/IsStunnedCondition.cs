@@ -12,6 +12,7 @@ public partial class IsStunnedCondition : Condition
 
     public override bool IsTrue()
     {
+        if (State?.Value == null) return false;
         return State.Value.IsStunned == Bool.Value;
     }
     public override void OnStart()
