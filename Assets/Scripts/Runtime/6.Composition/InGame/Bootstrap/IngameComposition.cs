@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private MobileInput _mobileInput;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
