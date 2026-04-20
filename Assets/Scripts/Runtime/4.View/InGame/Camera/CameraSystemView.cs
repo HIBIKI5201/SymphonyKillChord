@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
 
 namespace KillChord.Runtime.View.InGame.Camera
 {
@@ -20,12 +21,18 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Transform _playerT;
         private Vector2 _input;
 
-        public void Init(CameraSystemController controller, Transform playerT, PlayerInputView playerInputView)
+        public void InitializeAndroid(CameraSystemController controller, Transform playerT)
+        {
+            _controller = controller;
+            _playerT = playerT;
+        }
+
+        public void InitializePC(CameraSystemController controller, Transform playerT, PlayerInputView playerInputView)
         {
             _controller = controller;
             _playerT = playerT;
             _inputView = playerInputView;
-
+            
             _inputView.OnLookInput += OnLook;
         }
 

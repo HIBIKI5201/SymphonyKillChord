@@ -51,7 +51,7 @@ namespace KillChord.Runtime.Composition
             CameraSystemController controller = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform,
+            _cameraSystem.InitializePC(controller, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
 #if UNITY_EDITOR
