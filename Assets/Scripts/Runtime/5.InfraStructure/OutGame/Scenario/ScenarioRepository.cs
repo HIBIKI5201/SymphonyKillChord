@@ -15,29 +15,30 @@ namespace KillChord.Runtime.InfraStructure
 
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
-                new TextEvent("misa", "Hello", CreateTriggers(_fadeIn, backgroundRoom)),
-                new TextEvent("misa", "World danger", CreateTriggers(heroIdle, backgroundStreet)),
-                new TextEvent("satoru", "Goodbye", CreateTriggers(_fadeOut)),
+                new TextEvent("misa", "Hello", CreateTriggers(
+                    TextTimingTrigger.AtCharIndex(0, _fadeIn),
+                    TextTimingTrigger.AtKeyword("danger", backgroundRoom))),
+                new TextEvent("misa", "World danger", CreateTriggers(
+                    TextTimingTrigger.AtCharIndex(5, heroIdle),
+                    TextTimingTrigger.AtKeyword("danger", backgroundStreet))),
+                new TextEvent("satoru", "Goodbye", CreateTriggers(
+                    TextTimingTrigger.AtCharIndex(1, _fadeOut))),
             };
 
             return new ScenarioData(events);
         }
 
-        private static IReadOnlyList<TextTimingTrigger> CreateTriggers(IScenarioEvent charIndexEvent, IScenarioEvent keywordEvent = null)
+        private static IReadOnlyList<TextTimingTrigger> CreateTriggers(params TextTimingTrigger[] triggers)
         {
-            var triggers = new List<TextTimingTrigger>();
+            if (triggers == null || triggers.Length == 0) return Array.Empty<TextTimingTrigger>();
 
-            if (charIndexEvent != null)
+            var result = new List<TextTimingTrigger>(triggers.Length);
+            for (int i = 0; i < triggers.Length; i++)
             {
-                triggers.Add(TextTimingTrigger.AtCharIndex(5, charIndexEvent));
+                if (triggers[i] == null) continue;
+                result.Add(triggers[i]);
             }
-
-            if (keywordEvent != null)
-            {
-                triggers.Add(TextTimingTrigger.AtKeyword("danger", keywordEvent));
-            }
-
-            return triggers;
+            return result;
         }
 
         private readonly FadeEvent _fadeIn = new(0f, 1f, 1.0f);
