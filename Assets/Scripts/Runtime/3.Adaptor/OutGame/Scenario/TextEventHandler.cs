@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Adaptor
                     await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
                 }
 
-                await Task.Delay(30, ct);
+                await Task.Delay(200, ct);
             }
         }
 

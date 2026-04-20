@@ -25,18 +25,25 @@ namespace KillChord.Runtime.Adaptor
 
     public class BackgroundEventHandler : IScenarioEventHandler<BackgroundEvent>
     {
-        public BackgroundEventHandler(IOutPutPort outPutPort)
+        public BackgroundEventHandler(IOutPutPort outPutPort, IBackgroundRepository backgroundRepository)
         {
             _outPort = outPutPort;
+            _backgroundRepository = backgroundRepository;
         }
 
         public Type EventType => typeof(BackgroundEvent);
 
-        public ValueTask HandleAsync(BackgroundEvent e, CancellationToken ct)
+        public async ValueTask HandleAsync(BackgroundEvent e, CancellationToken ct)
         {
-            return _outPort.ShowBackgroundAsync(e.BackgroundId, ct);
+            if (!_backgroundRepository.TryFindById(e.BackgroundId, out BackgroundDefinition definition))
+            {
+                return;
+            }
+
+            await _outPort.ShowBackgroundAsync(definition.AssetKey, ct);
         }
 
         private readonly IOutPutPort _outPort;
+        private readonly IBackgroundRepository _backgroundRepository;
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 
-namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
+namespace KillChord.Runtime.InfraStructure
 {
     public class ScenarioRepository : IScenarioRepository
     {
