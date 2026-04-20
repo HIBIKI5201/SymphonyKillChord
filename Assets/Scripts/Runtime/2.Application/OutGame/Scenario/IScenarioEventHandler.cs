@@ -7,8 +7,14 @@ namespace KillChord.Runtime.Application
 {
     public interface IScenarioEventHandler<in TEvent> where TEvent : IScenarioEvent
     {
-        Type EventType { get; }
-        ValueTask HandleAsync(TEvent e, CancellationToken ct);
+        public Type EventType { get; }
+        public ValueTask HandleAsync(TEvent e, CancellationToken ct);
+    }
+
+    public interface IScenarioEventHandler
+    {
+        public Type EventType { get; }
+        public ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
     }
 
 }

@@ -7,5 +7,6 @@ namespace KillChord.Runtime.Adaptor
     public interface IOutPutPort
     {
         public ValueTask ShowTextAsync(string message, CancellationToken ct);
+        public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct);
     }
 }

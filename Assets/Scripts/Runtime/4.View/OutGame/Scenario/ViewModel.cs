@@ -8,10 +8,16 @@ namespace KillChord.Runtime.View
     {
         public async ValueTask ShowTextAsync(string message, CancellationToken ct)
         {
-            ChangeChat?.Invoke(message);
+            OnChat?.Invoke(message);
         }
 
-        public Action<string> ChangeChat;
+        public async ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct)
+        {
+            OnFade?.Invoke(start, end, duration);
+        }
+
+        public Action<string> OnChat;
+        public Action<float, float, float> OnFade;
 
     }
 }
