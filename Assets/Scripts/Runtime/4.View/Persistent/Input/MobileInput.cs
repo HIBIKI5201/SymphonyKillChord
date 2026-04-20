@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View
 
         private readonly List<RaycastResult> _raycastResults = new();
 
-        private void Initialize(PlayerInputView playerInputView)
+        public void Initialize(PlayerInputView playerInputView)
         {
             _initialized = true;
             _playerInputView = playerInputView;

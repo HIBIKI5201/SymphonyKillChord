@@ -257,10 +257,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be24e48ffe8c5d4891751ddbd8377b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.IngameComposition
+  _mobileBuild: 1
   _musicSyncInitializer: {fileID: 1249666141}
   _camerasystemInitializer: {fileID: 533730526}
   _ingameSceneView: {fileID: 58835740}
   _enemyTestSpawner: {fileID: 1136649843}
+  _mobileInput: {fileID: 1196221231}
   _backgroundSceneName: Stage_01
 --- !u!4 &438459090
 Transform:
@@ -435,7 +437,6 @@ GameObject:
   - component: {fileID: 975436872}
   - component: {fileID: 975436874}
   - component: {fileID: 975436873}
-  - component: {fileID: 975436875}
   m_Layer: 5
   m_Name: TouchArea
   m_TagString: TouchArea
@@ -500,19 +501,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 975436871}
   m_CullTransparentMesh: 1
---- !u!114 &975436875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 975436871}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d54531977ecb194c95e2d3aa7a5d72a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.OnScreen.OnScreenButton
-  m_ControlPath: 
 --- !u!1 &1136649842
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,6 +699,7 @@ GameObject:
   - component: {fileID: 1196221229}
   - component: {fileID: 1196221228}
   - component: {fileID: 1196221227}
+  - component: {fileID: 1196221231}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -803,6 +792,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1196221231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196221226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00dafdea7818d9c439d79a7e9a48a481, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MobileInput
+  _rayCaster: {fileID: 1196221227}
 --- !u!1 &1249666140
 GameObject:
   m_ObjectHideFlags: 0
