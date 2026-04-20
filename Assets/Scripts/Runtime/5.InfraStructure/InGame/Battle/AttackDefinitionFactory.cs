@@ -1,5 +1,7 @@
+using System;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Music;
 
 namespace KillChord.Runtime.InfraStructure
 {
@@ -11,10 +13,12 @@ namespace KillChord.Runtime.InfraStructure
             {
                 throw new System.ArgumentNullException(nameof(data));
             }
+
             if (data.AttackParameterSetData == null)
             {
                 throw new System.ArgumentNullException(nameof(data.AttackParameterSetData));
             }
+
             if (data.AttackPipelineAsset == null)
             {
                 throw new System.ArgumentNullException(nameof(data.AttackPipelineAsset));
@@ -24,14 +28,19 @@ namespace KillChord.Runtime.InfraStructure
                 new CriticalChance(data.AttackParameterSetData.CriticalChance),
                 new CriticalMultiplier(data.AttackParameterSetData.CriticalDamageMultiplier),
                 new Damage(data.AttackParameterSetData.ConfirmedDamage)
-                );
+            );
+
+            int? beatType = data.UseBeatType ? data.BeatType : null;
 
             return new AttackDefinition(
                 data.AttackName,
                 new Damage(data.BaseDamage),
                 attackParameterSet,
-                data.AttackPipelineAsset.Create()
-                );
+                data.AttackPipelineAsset.Create(),
+                beatType.HasValue && Enum.IsDefined(typeof(BeatType), beatType.Value)
+                    ? (BeatType)beatType.Value
+                    : null
+            );
         }
     }
 }

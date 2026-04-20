@@ -42,7 +42,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <summary>
         ///     曜日を取得する。
         /// </summary>
-        public static bool IsTodayDayOfWeek(DayOfWeek dayOfWeek)
+        public static bool IsTodayByDayOfWeek(DayOfWeek dayOfWeek)
         {
             DateTime date = JstNow();
             return date.DayOfWeek == dayOfWeek;

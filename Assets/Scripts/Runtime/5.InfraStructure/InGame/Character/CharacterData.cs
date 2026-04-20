@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure.InGame.Battle
+namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
     /// <summary>
     ///     キャラクターの基本的なデータを保持するScriptableObject。
     /// </summary>
     [CreateAssetMenu(fileName = nameof(CharacterData),
-    menuName = "KillChord/Character?CharacterData")]
+    menuName = "KillChord/Character/CharacterData")]
     public class CharacterData : ScriptableObject
     {
         public string CharacterName => _characterName;

@@ -9,9 +9,9 @@ namespace KillChord.Develop
     public class EnemySample : MonoBehaviour, IDamageable, IViewModelDamage
     {
         [SerializeField] private Transform _view;
-        public BattleController BattleController => _battleController;
+        public PlayerAttackController PlayerAttackController => _battleController;
 
-        public void Init(BattleController battleController)
+        public void Init(PlayerAttackController battleController)
         {
             _battleController = battleController;
         }
@@ -51,6 +51,6 @@ namespace KillChord.Develop
 
         private MotionHandle _handle;
         private Health _currentHealth;
-        private BattleController _battleController;
+        private PlayerAttackController _battleController;
     }
 }

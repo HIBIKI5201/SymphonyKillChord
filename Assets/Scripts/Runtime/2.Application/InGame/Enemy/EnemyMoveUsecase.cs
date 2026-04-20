@@ -12,9 +12,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         ///     敵の移動に関する仕様を受け取るコンストラクタ。
         /// </summary>
         /// <param name="enemyMoveSpec"></param>
-        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec)
+        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec, EnemyRaycastDetectService raycastDetector)
         {
             _enemyMoveSpec = enemyMoveSpec;
+            _raycastDetector = raycastDetector;
         }
 
         /// <summary>
@@ -37,8 +38,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                     _enemyMoveSpec.MoveSpeed.Value
                 );
             }
+            // 攻撃範囲内、かつプレイヤーとの間に障害物がある場合、迂回して移動し続ける
+            else if(!_raycastDetector.CanRaycastHitTarget)
+            {
+                return new EnemyMoveDecision(
+                    true,
+                    playerPosition,
+                    _enemyMoveSpec.MoveSpeed.Value
+                );
+            }
 
-            // 攻撃範囲内であれば、移動しない。
+            // 攻撃範囲内、かつプレイヤーとの間に障害物がない場合、移動しない。
             return new EnemyMoveDecision(
                 false,
                 enemyPosition,
@@ -47,5 +57,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         private readonly EnemyMoveSpec _enemyMoveSpec;
+        private readonly EnemyRaycastDetectService _raycastDetector;
     }
 }
