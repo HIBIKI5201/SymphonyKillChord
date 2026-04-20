@@ -8,8 +8,10 @@ using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 #if UNITY_EDITOR
 using KillChord.Runtime.Composition.InGame.Debugger;
@@ -49,7 +51,8 @@ namespace KillChord.Runtime.Composition
             CameraSystemController controller = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform);
+            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform,
+                ServiceLocator.GetInstance<PlayerInputView>());
 
 #if UNITY_EDITOR
             _cameraSystem.gameObject
