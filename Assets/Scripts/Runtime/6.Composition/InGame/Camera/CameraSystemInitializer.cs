@@ -52,15 +52,8 @@ namespace KillChord.Runtime.Composition
             CameraSystemController controller = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            if (mobileBuild)
-            {
-                _cameraSystem.InitializeAndroid(controller, stageSceneObj.PlayerTransform);
-            }
-            else
-            {
-                _cameraSystem.InitializePC(controller, stageSceneObj.PlayerTransform,
-                    ServiceLocator.GetInstance<PlayerInputView>());
-            }
+            _cameraSystem.InitializePC(controller, stageSceneObj.PlayerTransform,
+                ServiceLocator.GetInstance<PlayerInputView>(), mobileBuild);
 
 
 #if UNITY_EDITOR

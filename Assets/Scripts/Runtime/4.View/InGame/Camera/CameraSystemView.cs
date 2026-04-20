@@ -21,19 +21,24 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Transform _playerT;
         private Vector2 _input;
 
-        public void InitializeAndroid(CameraSystemController controller, Transform playerT)
-        {
-            _controller = controller;
-            _playerT = playerT;
-        }
-
-        public void InitializePC(CameraSystemController controller, Transform playerT, PlayerInputView playerInputView)
+        public void InitializePC(
+            CameraSystemController controller,
+            Transform playerT,
+            PlayerInputView playerInputView,
+            bool mobileBuild)
         {
             _controller = controller;
             _playerT = playerT;
             _inputView = playerInputView;
 
-            _inputView.OnLookInput += OnLook;
+            if (mobileBuild)
+            {
+                _inputView.OnMobileLookInput += OnLook;
+            }
+            else
+            {
+                _inputView.OnLookInput += OnLook;
+            }
         }
 
         private void FixedUpdate()
@@ -83,7 +88,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _cameraT.SetPositionAndRotation(position, rotation);
         }
 
-        
+
         private void TestChangeLockOn()
         {
             //ロックオンを一時的に無効化している
