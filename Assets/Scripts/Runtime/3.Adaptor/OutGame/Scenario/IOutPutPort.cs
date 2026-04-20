@@ -1,13 +1,7 @@
-using System.Threading;
-using System.Threading.Tasks;
-using KillChord.Runtime.Domain;
-
 namespace KillChord.Runtime.Adaptor
 {
-    public interface IOutPutPort
+    // Aggregate port used by composition and legacy call sites.
+    public interface IOutPutPort : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort
     {
-        public ValueTask ShowTextAsync(string message, CancellationToken ct);
-        public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct);
-        public ValueTask ShowBackgroundAsync(string backgroundId, CancellationToken ct);
     }
 }

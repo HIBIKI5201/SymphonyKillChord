@@ -9,9 +9,9 @@ namespace KillChord.Runtime.Adaptor
 {
     public class TextEventHandler : IScenarioEventHandler<TextEvent>
     {
-        public TextEventHandler(IOutPutPort outPutPort, IScenarioEventEmitter eventEmitter)
+        public TextEventHandler(ITextOutputPort textOutputPort, IScenarioEventEmitter eventEmitter)
         {
-            _outPort = outPutPort;
+            _textOutputPort = textOutputPort;
             _eventEmitter = eventEmitter;
         }
         public Type EventType => typeof(TextEvent);
@@ -22,13 +22,13 @@ namespace KillChord.Runtime.Adaptor
 
             for (int i = 1; i <= e.Text.Length; i++)
             {
-                await _outPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
+                await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
                 string visibleText = e.Text[..i];
 
                 foreach (TextTimingTrigger trigger in e.Triggers)
                 {
                     if (fired.Contains(trigger)) continue;
-                    if (!ShouldFire(trigger, i, visibleText)) continue;
+                    if (!TextTimingTrigger.ShouldFire(trigger, i, visibleText)) continue;
 
                     fired.Add(trigger);
                     await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
@@ -38,18 +38,8 @@ namespace KillChord.Runtime.Adaptor
             }
         }
 
-        private readonly IOutPutPort _outPort;
+        private readonly ITextOutputPort _textOutputPort;
         private readonly IScenarioEventEmitter _eventEmitter;
 
-        private static bool ShouldFire(TextTimingTrigger trigger, int visibleCharCount, string visibleText)
-        {
-            return trigger.Kind switch
-            {
-                TextTriggerKind.CharIndex => trigger.CharIndex == visibleCharCount,
-                TextTriggerKind.Keyword => !string.IsNullOrEmpty(trigger.Keyword) &&
-                                           visibleText.Contains(trigger.Keyword, StringComparison.Ordinal),
-                _ => false
-            };
-        }
     }
 }
