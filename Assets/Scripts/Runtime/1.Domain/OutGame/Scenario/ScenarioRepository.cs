@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain
 
         public ScenarioData FindById(string id)
         {
-            List<IScenarioEvent> events = new List<IScenarioEvent>
+            IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
               new TextEvent("misa","Hello",CreateTriggers(fade)),
               new TextEvent("misa","World",Array.Empty<TextTimingTrigger>()),

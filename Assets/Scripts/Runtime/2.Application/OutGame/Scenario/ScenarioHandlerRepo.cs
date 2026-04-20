@@ -8,13 +8,13 @@ namespace KillChord.Runtime.Application
 {
     public class ScenarioHandlerRepo
     {
-        public void Register<TEvent>(Func<TEvent, CancellationToken, ValueTask> handler)
+        public void Register<TEvent>(Func<TEvent, CancellationToken, ValueTask<ScenarioHandleResult>> handler)
             where TEvent : IScenarioEvent
         {
             _map[typeof(TEvent)] = (e, token) => handler((TEvent)e, token);
         }
 
-        public ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct)
+        public ValueTask<ScenarioHandleResult> HandleAsync(IScenarioEvent e, CancellationToken ct)
         {
             if (e == null) throw new ArgumentNullException(nameof(e));
 
@@ -26,6 +26,6 @@ namespace KillChord.Runtime.Application
             return handler(e, ct);
         }
 
-        private readonly Dictionary<Type, Func<IScenarioEvent, CancellationToken, ValueTask>> _map = new();
+        private readonly Dictionary<Type, Func<IScenarioEvent, CancellationToken, ValueTask<ScenarioHandleResult>>> _map = new();
     }
 }

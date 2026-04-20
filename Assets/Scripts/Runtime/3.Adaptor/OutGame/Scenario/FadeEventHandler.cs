@@ -14,9 +14,10 @@ namespace KillChord.Runtime.Adaptor
         }
         public Type EventType => typeof(FadeEvent);
 
-        public async ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
+        public async ValueTask<ScenarioHandleResult> HandleAsync(FadeEvent e, CancellationToken ct)
         {
             await _outPort.FadeAsync(e.Start, e.End, e.DurationSec, ct);
+            return ScenarioHandleResult.Empty;
         }
 
         private readonly IOutPutPort _outPort;

@@ -5,10 +5,11 @@ namespace KillChord.Runtime.Domain
 {
     public class ScenarioData
     {
-        public ScenarioData(List<IScenarioEvent> events)
+
+        public ScenarioData(IReadOnlyList<IScenarioEvent> events)
         {
             Events = events;
         }
-        public List<IScenarioEvent> Events { get; }
+        public IReadOnlyList<IScenarioEvent> Events { get; }
     }
 }

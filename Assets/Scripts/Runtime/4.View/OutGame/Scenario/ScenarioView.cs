@@ -45,7 +45,7 @@ namespace KillChord.Runtime.View
 
             _chat.alpha = Mathf.Lerp(_start, _end, t);
 
-            if (t >= _duration) _onFade = false;
+            if (t >= 1f) _onFade = false;
             _time = 0;
 
         }
