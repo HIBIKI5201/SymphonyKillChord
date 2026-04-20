@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.BackgroundCatalogAsset
   _entries:
   - Id: genki_pose
-    AssetKey: Assets/Scripts/Runtime/4.View/OutGame/Scenario/genki_pose_schoolboy.png
+    Asset: {fileID: 21300000, guid: 16fbe600d89dab043a8409bfae78a0fa, type: 3}
