@@ -1,7 +1,7 @@
-using System;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace KillChord.Runtime.View
 {
@@ -17,11 +17,16 @@ namespace KillChord.Runtime.View
         private void Update()
         {
             if (!_initialized) return;
+
+            foreach (var touch in Touch.activeTouches)
+            {
+                
+            }
         }
 
         private void OnDestroy()
         {
-            
+            EnhancedTouchSupport.Disable();
         }
 
         private bool _initialized = false;
