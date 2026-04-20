@@ -8,5 +8,6 @@ namespace KillChord.Runtime.Adaptor
     {
         public ValueTask ShowTextAsync(string message, CancellationToken ct);
         public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct);
+        public ValueTask ShowBackgroundAsync(string backgroundId, CancellationToken ct);
     }
 }

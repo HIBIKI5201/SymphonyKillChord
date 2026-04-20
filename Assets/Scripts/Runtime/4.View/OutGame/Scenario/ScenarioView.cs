@@ -8,10 +8,13 @@ namespace KillChord.Runtime.View
         {
             viewModel.OnChat += InputViewModel;
             viewModel.OnFade += InputViewModel;
+            viewModel.OnBackground += InputBackground;
         }
 
         [SerializeField]
         private TMP_Text _chat;
+        [SerializeField]
+        private TMP_Text _backgroundLabel;
 
         private bool _onFade;
         private float _time;
@@ -31,9 +34,18 @@ namespace KillChord.Runtime.View
         private void InputViewModel(float start, float end, float duration)
         {
             _onFade = true;
+            _time = 0f;
             _start = start;
             _end = end;
             _duration = duration;
+        }
+
+        private void InputBackground(string backgroundId)
+        {
+            if (_backgroundLabel != null)
+            {
+                _backgroundLabel.text = backgroundId;
+            }
         }
 
         private void Fade()
@@ -46,8 +58,6 @@ namespace KillChord.Runtime.View
             _chat.alpha = Mathf.Lerp(_start, _end, t);
 
             if (t >= 1f) _onFade = false;
-            _time = 0;
-
         }
 
     }

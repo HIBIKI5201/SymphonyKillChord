@@ -1,12 +1,10 @@
-
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
-    public class ScenarioUsecase
+    public class ScenarioUsecase : IScenarioEventEmitter
     {
         public ScenarioUsecase(IScenarioRepository repo, ScenarioHandlerRepo handlerRepo, ITextAdvanceWaiter textAdvanceWaiter)
         {
@@ -18,38 +16,26 @@ namespace KillChord.Runtime.Application
         public async ValueTask PlayScenario()
         {
             ScenarioData data = _scenarioRepo.FindById("test");
-            using CancellationTokenSource cts = new CancellationTokenSource();
+            using CancellationTokenSource source = new CancellationTokenSource();
+            CancellationToken token = source.Token;
+
             foreach (IScenarioEvent e in data.Events)
             {
-                // await _handlerRepo.HandleAsync(e, token);
-                await ExecuteWithEmitsAsync(e, cts.Token);
-
+                await _handlerRepo.HandleAsync(e, token);
                 if (e.RequirePlayerAdvance)
                 {
-                    await _textAdvanceWaiter.WaitNextAsync(cts.Token);
+                    await _textAdvanceWaiter.WaitNextAsync(token);
                 }
             }
-
         }
+
+        public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
+        {
+            return _handlerRepo.HandleAsync(scenarioEvent, ct);
+        }
+
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
-
-        private async ValueTask ExecuteWithEmitsAsync(IScenarioEvent root, CancellationToken ct)
-        {
-            var queue = new Queue<IScenarioEvent>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                IScenarioEvent current = queue.Dequeue();
-                ScenarioHandleResult result = await _handlerRepo.HandleAsync(current, ct);
-
-                foreach (IScenarioEvent emitted in result.EmittedEvents)
-                {
-                    queue.Enqueue(emitted);
-                }
-            }
-        }
     }
 }

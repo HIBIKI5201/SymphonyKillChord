@@ -5,16 +5,26 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
+    public interface IScenarioRepository
+    {
+        ScenarioData FindById(string id);
+    }
+
+    public interface IScenarioEventEmitter
+    {
+        ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct);
+    }
+
     public interface IScenarioEventHandler<in TEvent> where TEvent : IScenarioEvent
     {
         public Type EventType { get; }
-        public ValueTask<ScenarioHandleResult> HandleAsync(TEvent e, CancellationToken ct);
+        public ValueTask HandleAsync(TEvent e, CancellationToken ct);
     }
 
     public interface IScenarioEventHandler
     {
         public Type EventType { get; }
-        public ValueTask<ScenarioHandleResult> HandleAsync(IScenarioEvent e, CancellationToken ct);
+        public ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
     }
 
 }

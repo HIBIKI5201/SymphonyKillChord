@@ -14,13 +14,29 @@ namespace KillChord.Runtime.Adaptor
         }
         public Type EventType => typeof(FadeEvent);
 
-        public async ValueTask<ScenarioHandleResult> HandleAsync(FadeEvent e, CancellationToken ct)
+        public ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
         {
-            await _outPort.FadeAsync(e.Start, e.End, e.DurationSec, ct);
-            return ScenarioHandleResult.Empty;
+            return _outPort.FadeAsync(e.Start, e.End, e.DurationSec, ct);
         }
 
         private readonly IOutPutPort _outPort;
 
+    }
+
+    public class BackgroundEventHandler : IScenarioEventHandler<BackgroundEvent>
+    {
+        public BackgroundEventHandler(IOutPutPort outPutPort)
+        {
+            _outPort = outPutPort;
+        }
+
+        public Type EventType => typeof(BackgroundEvent);
+
+        public ValueTask HandleAsync(BackgroundEvent e, CancellationToken ct)
+        {
+            return _outPort.ShowBackgroundAsync(e.BackgroundId, ct);
+        }
+
+        private readonly IOutPutPort _outPort;
     }
 }
