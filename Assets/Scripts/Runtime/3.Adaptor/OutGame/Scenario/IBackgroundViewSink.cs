@@ -1,7 +1,9 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.Adaptor
 {
     public interface IBackgroundViewSink
     {
-        void SetBackground(string backgroundId);
+        void SetBackground(Sprite background);
     }
 }

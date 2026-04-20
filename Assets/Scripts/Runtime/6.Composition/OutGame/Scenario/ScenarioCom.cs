@@ -33,14 +33,22 @@ namespace KillChord.Runtime.Composition
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_backgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_animationCatalog);
-            _ = animationRepository;
+
+            TextPresenter textPresenter = new TextPresenter(viewModel);
+            FadePresenter fadePresenter = new FadePresenter(viewModel);
+            BackgroundPresenter backgroundPresenter = new BackgroundPresenter(viewModel);
+            AnimationPresenter animationPresenter = new AnimationPresenter(viewModel);
+            ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(textPresenter, fadePresenter, backgroundPresenter, animationPresenter);
+
             ScenarioUsecase usecase = new ScenarioUsecase(repository, handlerRepo, gate);
-            TextEventHandler textHandle = new TextEventHandler(viewModel, usecase);
-            FadeEventHandler fadeEventHandle = new FadeEventHandler(viewModel);
-            BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(viewModel, backgroundRepository);
+            TextEventHandler textHandle = new TextEventHandler(presenterFacade, usecase);
+            FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
+            BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
+            AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);
             handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
             handlerRepo.Register<FadeEvent>(fadeEventHandle.HandleAsync);
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
+            handlerRepo.Register<KillChord.Runtime.Domain.AnimationEvent>(animationEventHandle.HandleAsync);
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             view.Initilize(viewModel);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);

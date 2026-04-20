@@ -1,10 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
     public interface IAnimationOutputPort
     {
-        ValueTask PlayAnimationAsync(string animationKey, CancellationToken ct);
+        ValueTask PlayAnimationAsync(AnimationClip animationClip, CancellationToken ct);
     }
 }

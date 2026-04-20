@@ -1,32 +1,34 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using KillChord.Runtime.Adaptor;
+using UnityEngine;
 namespace KillChord.Runtime.View
 {
-    public class ViewModel : IOutPutPort
+    public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink
     {
-        public ValueTask ShowTextAsync(string message, CancellationToken ct)
+        public void SetText(string message)
         {
             OnChat?.Invoke(message);
-            return default;
         }
 
-        public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct)
+        public void SetFade(float start, float end, float duration)
         {
             OnFade?.Invoke(start, end, duration);
-            return default;
         }
 
-        public ValueTask ShowBackgroundAsync(string backgroundId, CancellationToken ct)
+        public void SetBackground(Sprite background)
         {
-            OnBackground?.Invoke(backgroundId);
-            return default;
+            OnBackground?.Invoke(background);
+        }
+
+        public void SetAnimation(AnimationClip animationClip)
+        {
+            OnAnimation?.Invoke(animationClip);
         }
 
         public Action<string> OnChat;
         public Action<float, float, float> OnFade;
-        public Action<string> OnBackground;
+        public Action<Sprite> OnBackground;
+        public Action<AnimationClip> OnAnimation;
 
     }
 }

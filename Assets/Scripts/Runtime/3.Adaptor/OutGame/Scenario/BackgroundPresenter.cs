@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -10,9 +11,9 @@ namespace KillChord.Runtime.Adaptor
             _viewSink = viewSink;
         }
 
-        public ValueTask ShowBackgroundAsync(string backgroundId, CancellationToken ct)
+        public ValueTask ShowBackgroundAsync(Sprite background, CancellationToken ct)
         {
-            _viewSink.SetBackground(backgroundId);
+            _viewSink.SetBackground(background);
             return default;
         }
 

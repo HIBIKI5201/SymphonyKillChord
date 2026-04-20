@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 namespace KillChord.Runtime.View
 {
     public class ScenarioView : MonoBehaviour
@@ -9,12 +10,17 @@ namespace KillChord.Runtime.View
             viewModel.OnChat += InputViewModel;
             viewModel.OnFade += InputViewModel;
             viewModel.OnBackground += InputBackground;
+            viewModel.OnAnimation += InputAnimation;
         }
 
         [SerializeField]
         private TMP_Text _chat;
         [SerializeField]
-        private TMP_Text _backgroundLabel;
+        private Image _backgroundImage;
+        [SerializeField]
+        private Animation _animationPlayer;
+        [SerializeField]
+        private GameObject _fadeObj;
 
         private bool _onFade;
         private float _time;
@@ -40,12 +46,17 @@ namespace KillChord.Runtime.View
             _duration = duration;
         }
 
-        private void InputBackground(string backgroundId)
+        private void InputBackground(Sprite background)
         {
-            if (_backgroundLabel != null)
-            {
-                _backgroundLabel.text = backgroundId;
-            }
+            if (_backgroundImage == null || background == null) return;
+            _backgroundImage.sprite = background;
+        }
+
+        private void InputAnimation(AnimationClip animationClip)
+        {
+            if (_animationPlayer == null || animationClip == null) return;
+            _animationPlayer.clip = animationClip;
+            _animationPlayer.Play();
         }
 
         private void Fade()

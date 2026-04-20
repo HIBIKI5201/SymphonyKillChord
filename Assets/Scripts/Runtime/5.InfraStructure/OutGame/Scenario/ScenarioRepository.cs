@@ -10,12 +10,13 @@ namespace KillChord.Runtime.InfraStructure
         public ScenarioData FindById(string id)
         {
             var backgroundRoom = new BackgroundEvent("bg_room");
-            var backgroundStreet = new BackgroundEvent("bg_street");
+            var backgroundStreet = new BackgroundEvent("genki_pose");
+            var heroIdle = new AnimationEvent("anim_hero_idle");
 
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
                 new TextEvent("misa", "Hello", CreateTriggers(_fadeIn, backgroundRoom)),
-                new TextEvent("misa", "World danger", CreateTriggers(_fadeIn, backgroundStreet)),
+                new TextEvent("misa", "World danger", CreateTriggers(heroIdle, backgroundStreet)),
                 new TextEvent("satoru", "Goodbye", CreateTriggers(_fadeOut)),
             };
 

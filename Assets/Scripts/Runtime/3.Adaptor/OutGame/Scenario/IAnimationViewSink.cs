@@ -1,7 +1,9 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.Adaptor
 {
     public interface IAnimationViewSink
     {
-        void SetAnimation(string animationKey);
+        void SetAnimation(AnimationClip animationClip);
     }
 }

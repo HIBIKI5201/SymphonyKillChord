@@ -6,7 +6,7 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public class AnimationEventHandler : IScenarioEventHandler<AnimationEvent>
+    public class AnimationEventHandler : IScenarioEventHandler<KillChord.Runtime.Domain.AnimationEvent>
     {
         public AnimationEventHandler(IAnimationOutputPort animationOutputPort, IAnimationRepository animationRepository)
         {
@@ -14,16 +14,16 @@ namespace KillChord.Runtime.Adaptor
             _animationRepository = animationRepository;
         }
 
-        public Type EventType => typeof(AnimationEvent);
+        public Type EventType => typeof(KillChord.Runtime.Domain.AnimationEvent);
 
-        public async ValueTask HandleAsync(AnimationEvent e, CancellationToken ct)
+        public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
         {
-            if (!_animationRepository.TryFindById(e.AnimationId, out AnimationDefinition definition))
+            if (!_animationRepository.TryFindById(e.AnimationId, out UnityEngine.AnimationClip animationClip))
             {
                 return;
             }
 
-            await _animationOutputPort.PlayAnimationAsync(definition.AssetKey, ct);
+            await _animationOutputPort.PlayAnimationAsync(animationClip, ct);
         }
 
         private readonly IAnimationOutputPort _animationOutputPort;
