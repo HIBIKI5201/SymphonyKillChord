@@ -32,6 +32,16 @@ namespace KillChord.Runtime.Domain
             if (string.IsNullOrWhiteSpace(keyword)) throw new ArgumentException("keyword is empty.", nameof(keyword));
             return new TextTimingTrigger(TextTriggerKind.Keyword, -1, keyword, fireEvent);
         }
+        public static bool ShouldFire(TextTimingTrigger trigger, int visibleCharCount, string visibleText)
+        {
+            return trigger.Kind switch
+            {
+                TextTriggerKind.CharIndex => trigger.CharIndex == visibleCharCount,
+                TextTriggerKind.Keyword => !string.IsNullOrEmpty(trigger.Keyword) &&
+                                           visibleText.Contains(trigger.Keyword, StringComparison.Ordinal),
+                _ => false
+            };
+        }
     }
     public enum TextTriggerKind
     {

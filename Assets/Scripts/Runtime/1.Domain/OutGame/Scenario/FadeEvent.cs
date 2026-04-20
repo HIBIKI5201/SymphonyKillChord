@@ -16,17 +16,4 @@ namespace KillChord.Runtime.Domain
         public float DurationSec { get; }
         public bool RequirePlayerAdvance => false;
     }
-
-    public class BackgroundEvent : IScenarioEvent
-    {
-        public BackgroundEvent(string backgroundId)
-        {
-            BackgroundId = string.IsNullOrWhiteSpace(backgroundId)
-                ? throw new ArgumentException("backgroundId is empty.", nameof(backgroundId))
-                : backgroundId;
-        }
-
-        public string BackgroundId { get; }
-        public bool RequirePlayerAdvance => false;
-    }
 }

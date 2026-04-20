@@ -5,9 +5,9 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
-    public interface IScenarioEventHandler
+    public interface IScenarioEventHandler<in TEvent> where TEvent : IScenarioEvent
     {
         Type EventType { get; }
-        ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
+        ValueTask HandleAsync(TEvent e, CancellationToken ct);
     }
 }
