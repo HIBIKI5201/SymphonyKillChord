@@ -32,7 +32,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _controller = controller;
             _playerT = playerT;
             _inputView = playerInputView;
-            
+
             _inputView.OnLookInput += OnLook;
         }
 
@@ -83,13 +83,17 @@ namespace KillChord.Runtime.View.InGame.Camera
             _cameraT.SetPositionAndRotation(position, rotation);
         }
 
+        
         private void TestChangeLockOn()
         {
+            //ロックオンを一時的に無効化している
+            /*
             if (Input.GetKeyDown(KeyCode.Mouse2))
                 _controller.ToggleLockOnState(_playerT.position);
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
                 _controller.TryActiveAutoLockOn(_playerT.position);
+                */
         }
     }
 }

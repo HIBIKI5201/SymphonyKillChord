@@ -34,6 +34,13 @@ namespace KillChord.Runtime.View
             _eventData = new PointerEventData(_eventSystem);
 
             EnhancedTouchSupport.Enable();
+
+#if UNITY_EDITOR
+            //Unity上ではクリックをタッチとしてシミュレーションを有効化する必要がある
+            TouchSimulation.Enable();
+#endif
+
+            Debug.Log("MobileInput Initialize");
         }
 
         private void Update()
@@ -71,7 +78,7 @@ namespace KillChord.Runtime.View
 
                 return;
             }
-
+            
             //新規のタッチがないか検出
             foreach (var touch in touches)
             {
@@ -80,7 +87,7 @@ namespace KillChord.Runtime.View
                 Vector2 pos = touch.screenPosition;
 
                 if (!IsInsideTouchArea(pos)) continue;
-
+                
                 _trackedTouchID = touch.touchId;
                 _isTracking = true;
 
