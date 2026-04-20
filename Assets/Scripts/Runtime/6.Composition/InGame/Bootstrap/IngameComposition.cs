@@ -70,6 +70,7 @@ namespace KillChord.Runtime.Composition
             else
             {
                 _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+                Cursor.lockState = CursorLockMode.Locked;
             }
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
