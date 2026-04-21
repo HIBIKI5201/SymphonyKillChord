@@ -29,12 +29,14 @@ namespace KillChord.Runtime.Application
 
             try
             {
-                foreach (IScenarioEvent e in data.Events)
+                for (int i = 0; i < data.Events.Count; i++)
                 {
+                    IScenarioEvent e = data.Events[i];
                     token.ThrowIfCancellationRequested();
 
                     await _handlerRepo.HandleAsync(e, token);
-                    if (e.RequirePlayerAdvance)
+                    bool isLastEvent = i == data.Events.Count - 1;
+                    if (e.RequirePlayerAdvance && !isLastEvent)
                     {
                         await _textAdvanceWaiter.WaitNextAsync(token);
                     }
