@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Application.InGame.Player
         /// <summary>
         ///     回避終了時のイベント。
         /// </summary>
-        public Action OnDodgeEnd;
+        public Action OnDodgeEnded;
 
         public bool IsDodhing => _isDodging;
 
@@ -55,7 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Player
                 if (!_hasNotifiedDodgeEnd)
                 {
                     _hasNotifiedDodgeEnd = true;
-                    OnDodgeEnd?.Invoke();
+                    OnDodgeEnded?.Invoke();
                 }
                 return;
             }

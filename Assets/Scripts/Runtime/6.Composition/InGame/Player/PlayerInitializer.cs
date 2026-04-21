@@ -72,6 +72,9 @@ namespace KillChord.Runtime.Composition
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
             PlayerDodgeMovementApplication dodge = new(parameter);
+            dodge.OnDodgeStarted += (duration) => player.SetInvincible(true);
+            dodge.OnDodgeEnded += () => player.SetInvincible(false);
+
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
 

@@ -70,7 +70,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             Health.ChangeHealth(nextHealth);
         }
 
-        public void SetInvincibility(bool isInvincible)
+        public void SetInvincible(bool isInvincible)
         {
             _isInvincible = isInvincible;
         }
