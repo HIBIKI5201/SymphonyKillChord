@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure
 
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
-                new TextEvent("misa", "Hello", CreateTriggers(
+                new TextEvent("misa", "HelloAAAAAAAAAAAAAAAAAAAAA", CreateTriggers(
                     TextTimingTrigger.AtCharIndex(0, _fadeIn),
                     TextTimingTrigger.AtKeyword("danger", backgroundRoom))),
                 new TextEvent("misa", "World danger", CreateTriggers(
