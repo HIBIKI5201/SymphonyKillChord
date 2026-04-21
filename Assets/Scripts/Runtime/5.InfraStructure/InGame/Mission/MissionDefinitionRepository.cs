@@ -20,7 +20,13 @@ namespace KillChord.Runtime.InfraStructure
                 }
 
                 MissionDefinition definition = assets[i].Create();
-                _missionDefinitions[definition.MissionId] = definition;
+                if (_missionDefinitions.ContainsKey(definition.MissionId))
+                {
+                    throw new System.InvalidOperationException(
+                    $"Duplicate MissionId is registered: {definition.MissionId}");
+                }
+
+                _missionDefinitions.Add(definition.MissionId, definition);
             }
         }
 

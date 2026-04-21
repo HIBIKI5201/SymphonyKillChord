@@ -1,11 +1,13 @@
 using KillChord.Runtime.Domain.InGame.Mission.FailCondition;
 using SymphonyFrameWork.Attribute;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
 {
+    [Serializable]
     public class AndFailConditionGroupAsset : MissionFailConditionAssetBase
     {
         public override IMissionFailCondition Create()
