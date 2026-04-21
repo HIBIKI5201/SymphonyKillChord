@@ -15,6 +15,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             Attacker = attacker;
             Target = target;
             CurrentAttack = currentAttack;
+            FirstAttack = false;
+            IsStunned = false;
         }
 
         public CharacterEntity Attacker { get; }
@@ -22,8 +24,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public AttackDefinition CurrentAttack { get; }
 
         public bool IsInAttackRange { get; private set; }
+        public bool FirstAttack { get; private set; }
+        public bool IsStunned { get; private set; }
 
         public void EnterRange() => IsInAttackRange = true;
         public void ExitRange() => IsInAttackRange = false;
+        public void AttackExcuted() => FirstAttack = false;
+        public void Stunned() => IsStunned = true;
+        public void StunRecover() => IsStunned = false;
     }
 }
