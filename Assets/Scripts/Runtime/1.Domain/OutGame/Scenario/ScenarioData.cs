@@ -1,14 +1,16 @@
 using System.Collections.Generic;
+using System;
 
 
 namespace KillChord.Runtime.Domain
 {
     public class ScenarioData
     {
-        public ScenarioData(List<IScenarioEvent> events)
+
+        public ScenarioData(IReadOnlyList<IScenarioEvent> events)
         {
-            Events = events;
+            Events = events ?? throw new ArgumentNullException(nameof(events));
         }
-        public List<IScenarioEvent> Events { get; }
+        public IReadOnlyList<IScenarioEvent> Events { get; }
     }
 }

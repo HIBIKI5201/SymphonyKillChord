@@ -1,33 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
     public class ScenarioHandlerRepo
     {
-        public ScenarioHandlerRepo(IScenarioEventHandler[] scenarioEventHandlers)
+        public void Register<TEvent>(Func<TEvent, CancellationToken, ValueTask> handler)
+            where TEvent : IScenarioEvent
         {
-            foreach (IScenarioEventHandler handle in scenarioEventHandlers)
-            {
-                if (_handlers.TryGetValue(handle.EventType, out var result))
-                {
-                    continue;
-                }
-                else
-                {
-                    _handlers[handle.EventType] = handle;
-                }
-            }
-        }
-        public IScenarioEventHandler FindById(Type type)
-        {
-            if (_handlers.TryGetValue(type, out var result))
-            {
-                return result;
-            }
-            return null;
+            _map[typeof(TEvent)] = (e, token) => handler((TEvent)e, token);
         }
 
-        private readonly Dictionary<Type, IScenarioEventHandler> _handlers = new();
+        public ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+
+            if (!_map.TryGetValue(e.GetType(), out var handler))
+            {
+                throw new InvalidOperationException($"Handler not found: {e.GetType().Name}");
+            }
+
+            return handler(e, ct);
+        }
+
+        private readonly Dictionary<Type, Func<IScenarioEvent, CancellationToken, ValueTask>> _map = new();
     }
 }

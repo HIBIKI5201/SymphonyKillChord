@@ -1,17 +1,40 @@
 using System;
-using UnityEngine;
-using System.Threading;
-using System.Threading.Tasks;
 using KillChord.Runtime.Adaptor;
 namespace KillChord.Runtime.View
 {
-    public class ViewModel : IOutPutPort
+    public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink
+        , IScenarioCompletionViewSink
     {
-        public async ValueTask ShowTextAsync(CancellationToken ct)
+        public void SetText(string message)
         {
-            await Task.Delay(TimeSpan.FromSeconds(1f), ct);
-            Debug.Log("ViewModel Complete");
+            OnChat?.Invoke(message);
         }
+
+        public void SetFade(float start, float end, float duration)
+        {
+            OnFade?.Invoke(start, end, duration);
+        }
+
+        public void SetBackground(string assetKey)
+        {
+            OnBackground?.Invoke(assetKey);
+        }
+
+        public void SetAnimation(string assetKey)
+        {
+            OnAnimation?.Invoke(assetKey);
+        }
+
+        public void SetScenarioCompleted(bool skipped)
+        {
+            OnScenarioCompleted?.Invoke(skipped);
+        }
+
+        public Action<string> OnChat;
+        public Action<float, float, float> OnFade;
+        public Action<string> OnBackground;
+        public Action<string> OnAnimation;
+        public Action<bool> OnScenarioCompleted;
 
     }
 }

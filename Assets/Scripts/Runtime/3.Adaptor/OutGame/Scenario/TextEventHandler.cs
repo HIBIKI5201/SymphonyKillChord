@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
@@ -6,20 +7,69 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public class TextEventHandler : IScenarioEventHandler
+    public class TextEventHandler : IScenarioEventHandler<TextEvent>
     {
-        public TextEventHandler(IOutPutPort outPutPort)
+        public TextEventHandler(
+            ITextOutputPort textOutputPort,
+            IScenarioEventEmitter eventEmitter,
+            IScenarioPlaybackState playbackState,
+            IScenarioSettingsRepository settingsRepository)
         {
-            _outPort = outPutPort;
+            _textOutputPort = textOutputPort;
+            _eventEmitter = eventEmitter;
+            _playbackState = playbackState;
+            _settingsRepository = settingsRepository;
         }
         public Type EventType => typeof(TextEvent);
 
-        public async ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct)
+        public async ValueTask HandleAsync(TextEvent e, CancellationToken ct)
         {
-            await _outPort.ShowTextAsync(ct);
+            var fired = new HashSet<TextTimingTrigger>();
+            await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
+
+            for (int i = 1; i <= e.Text.Length; i++)
+            {
+                while (_playbackState.IsPaused)
+                {
+                    await Task.Delay(_settingsRepository.PausePollInterval, ct);
+                }
+
+                await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
+                string visibleText = e.Text[..i];
+
+                await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);
+
+                TimeSpan delay = _playbackState.IsFastForward
+                    ? _settingsRepository.FastForwardTextCharInterval
+                    : _settingsRepository.NormalTextCharInterval;
+                if (delay > TimeSpan.Zero)
+                {
+                    await Task.Delay(delay, ct);
+                }
+            }
         }
 
-        private readonly IOutPutPort _outPort;
+        private async ValueTask TryFireTriggersAsync(
+            IReadOnlyList<TextTimingTrigger> triggers,
+            HashSet<TextTimingTrigger> fired,
+            int visibleCharCount,
+            string visibleText,
+            CancellationToken ct)
+        {
+            foreach (TextTimingTrigger trigger in triggers)
+            {
+                if (fired.Contains(trigger)) continue;
+                if (!TextTimingTrigger.ShouldFire(trigger, visibleCharCount, visibleText)) continue;
+
+                fired.Add(trigger);
+                await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
+            }
+        }
+
+        private readonly ITextOutputPort _textOutputPort;
+        private readonly IScenarioEventEmitter _eventEmitter;
+        private readonly IScenarioPlaybackState _playbackState;
+        private readonly IScenarioSettingsRepository _settingsRepository;
 
     }
 }

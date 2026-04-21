@@ -1,32 +1,101 @@
-
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
-    public class ScenarioUsecase
+    public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState
     {
-        public ScenarioUsecase(IScenarioRepository repo, ScenarioHandlerRepo handlerRepo)
+        public ScenarioUsecase(
+            IScenarioRepository repo,
+            ScenarioHandlerRepo handlerRepo,
+            ITextAdvanceWaiter textAdvanceWaiter,
+            IScenarioCompletionNotifier completionNotifier,
+            IScenarioSettingsRepository settingsRepository)
         {
             _scenarioRepo = repo;
-            _handleRepo = handlerRepo;
+            _handlerRepo = handlerRepo;
+            _textAdvanceWaiter = textAdvanceWaiter;
+            _completionNotifier = completionNotifier;
+            _settingsRepository = settingsRepository;
         }
 
         public async ValueTask PlayScenario()
         {
-            ScenarioData data = _scenarioRepo.FindById("test");
-            CancellationTokenSource source = new CancellationTokenSource();
+            ScenarioData data = _scenarioRepo.FindById(_settingsRepository.DefaultScenarioId);
+            using CancellationTokenSource source = new CancellationTokenSource();
+            _playCts = source;
             CancellationToken token = source.Token;
-            foreach (IScenarioEvent e in data.Events)
-            {
-                IScenarioEventHandler handler = _handleRepo.FindById(e.GetType());
-                if (handler == null) continue;
-                await handler.HandleAsync(e, token);
-            }
+            bool skipped = false;
 
+            try
+            {
+                for (int i = 0; i < data.Events.Count; i++)
+                {
+                    IScenarioEvent e = data.Events[i];
+                    token.ThrowIfCancellationRequested();
+
+                    await _handlerRepo.HandleAsync(e, token);
+                    bool isLastEvent = i == data.Events.Count - 1;
+                    bool shouldWaitForAdvance = e.RequirePlayerAdvance
+                        && (!isLastEvent || _settingsRepository.WaitForInputOnLastText);
+                    if (shouldWaitForAdvance)
+                    {
+                        await _textAdvanceWaiter.WaitNextAsync(token);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Skip requested: end scenario gracefully.
+                skipped = true;
+            }
+            finally
+            {
+                bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
+                if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
+                {
+                    await Task.Delay(_settingsRepository.CloseDelayAfterComplete, CancellationToken.None);
+                }
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                IsFastForward = false;
+                IsPaused = false;
+                if (ReferenceEquals(_playCts, source))
+                {
+                    _playCts = null;
+                }
+            }
         }
-        private readonly ScenarioHandlerRepo _handleRepo;
+
+        public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
+        {
+            return _handlerRepo.HandleAsync(scenarioEvent, ct);
+        }
+
+        public void SetFastForward(bool enabled)
+        {
+            IsFastForward = enabled;
+        }
+
+        public void TogglePause()
+        {
+            IsPaused = !IsPaused;
+        }
+
+        public void RequestSkip()
+        {
+            _playCts?.Cancel();
+        }
+
+        public bool IsFastForward { get; private set; }
+        public bool IsPaused { get; private set; }
+
+        private CancellationTokenSource _playCts;
+        private readonly ITextAdvanceWaiter _textAdvanceWaiter;
+        private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
+        private readonly IScenarioCompletionNotifier _completionNotifier;
+        private readonly IScenarioSettingsRepository _settingsRepository;
     }
 }

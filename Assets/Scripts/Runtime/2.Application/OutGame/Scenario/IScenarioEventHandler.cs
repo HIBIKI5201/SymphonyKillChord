@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +7,7 @@ namespace KillChord.Runtime.Application
 {
     public interface IScenarioEventHandler
     {
-        public Type EventType { get; }
-        public ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
+        Type EventType { get; }
+        ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
     }
 }
