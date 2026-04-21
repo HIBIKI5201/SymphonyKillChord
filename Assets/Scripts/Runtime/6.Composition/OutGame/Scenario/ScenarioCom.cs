@@ -18,6 +18,8 @@ namespace KillChord.Runtime.Composition
         private BackgroundCatalogAsset _backgroundCatalog;
         [SerializeField]
         private AnimationCatalogAsset _animationCatalog;
+        [SerializeField]
+        private ScenarioSettingsAsset _scenarioSettings;
 
         private async void Start()
         {
@@ -32,6 +34,7 @@ namespace KillChord.Runtime.Composition
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_backgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_animationCatalog);
+            IScenarioSettingsRepository scenarioSettingsRepository = new ScenarioSettingsRepository(_scenarioSettings);
 
             TextPresenter textPresenter = new TextPresenter(viewModel);
             FadePresenter fadePresenter = new FadePresenter(viewModel);
@@ -44,9 +47,18 @@ namespace KillChord.Runtime.Composition
                 animationPresenter,
                 viewModel);
 
-            ScenarioUsecase usecase = new ScenarioUsecase(repository, handlerRepo, gate, presenterFacade);
+            ScenarioUsecase usecase = new ScenarioUsecase(
+                repository,
+                handlerRepo,
+                gate,
+                presenterFacade,
+                scenarioSettingsRepository);
             InputController controller = new InputController(gate, usecase);
-            TextEventHandler textHandle = new TextEventHandler(presenterFacade, usecase, usecase);
+            TextEventHandler textHandle = new TextEventHandler(
+                presenterFacade,
+                usecase,
+                usecase,
+                scenarioSettingsRepository);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);

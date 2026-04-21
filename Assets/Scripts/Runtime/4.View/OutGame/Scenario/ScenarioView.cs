@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -73,12 +72,8 @@ namespace KillChord.Runtime.View
             if (t >= 1f) _onFade = false;
         }
 
-        private async void InputScenarioCompleted(bool skipped)
+        private void InputScenarioCompleted(bool skipped)
         {
-            if (!skipped)
-            {
-                await Task.Delay(3000);
-            }
             gameObject.SetActive(false);
         }
 

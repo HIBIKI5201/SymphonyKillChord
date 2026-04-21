@@ -9,11 +9,16 @@ namespace KillChord.Runtime.Adaptor
 {
     public class TextEventHandler : IScenarioEventHandler<TextEvent>
     {
-        public TextEventHandler(ITextOutputPort textOutputPort, IScenarioEventEmitter eventEmitter, IScenarioPlaybackState playbackState)
+        public TextEventHandler(
+            ITextOutputPort textOutputPort,
+            IScenarioEventEmitter eventEmitter,
+            IScenarioPlaybackState playbackState,
+            IScenarioSettingsRepository settingsRepository)
         {
             _textOutputPort = textOutputPort;
             _eventEmitter = eventEmitter;
             _playbackState = playbackState;
+            _settingsRepository = settingsRepository;
         }
         public Type EventType => typeof(TextEvent);
 
@@ -25,7 +30,7 @@ namespace KillChord.Runtime.Adaptor
             {
                 while (_playbackState.IsPaused)
                 {
-                    await Task.Delay(50, ct);
+                    await Task.Delay(_settingsRepository.PausePollInterval, ct);
                 }
 
                 await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
@@ -40,14 +45,20 @@ namespace KillChord.Runtime.Adaptor
                     await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
                 }
 
-                int delayMs = _playbackState.IsFastForward ? 20 : 200;
-                await Task.Delay(delayMs, ct);
+                TimeSpan delay = _playbackState.IsFastForward
+                    ? _settingsRepository.FastForwardTextCharInterval
+                    : _settingsRepository.NormalTextCharInterval;
+                if (delay > TimeSpan.Zero)
+                {
+                    await Task.Delay(delay, ct);
+                }
             }
         }
 
         private readonly ITextOutputPort _textOutputPort;
         private readonly IScenarioEventEmitter _eventEmitter;
         private readonly IScenarioPlaybackState _playbackState;
+        private readonly IScenarioSettingsRepository _settingsRepository;
 
     }
 }

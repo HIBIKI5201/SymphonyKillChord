@@ -11,17 +11,19 @@ namespace KillChord.Runtime.Application
             IScenarioRepository repo,
             ScenarioHandlerRepo handlerRepo,
             ITextAdvanceWaiter textAdvanceWaiter,
-            IScenarioCompletionNotifier completionNotifier)
+            IScenarioCompletionNotifier completionNotifier,
+            IScenarioSettingsRepository settingsRepository)
         {
             _scenarioRepo = repo;
             _handlerRepo = handlerRepo;
             _textAdvanceWaiter = textAdvanceWaiter;
             _completionNotifier = completionNotifier;
+            _settingsRepository = settingsRepository;
         }
 
         public async ValueTask PlayScenario()
         {
-            ScenarioData data = _scenarioRepo.FindById("test");
+            ScenarioData data = _scenarioRepo.FindById(_settingsRepository.DefaultScenarioId);
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
@@ -36,7 +38,9 @@ namespace KillChord.Runtime.Application
 
                     await _handlerRepo.HandleAsync(e, token);
                     bool isLastEvent = i == data.Events.Count - 1;
-                    if (e.RequirePlayerAdvance && !isLastEvent)
+                    bool shouldWaitForAdvance = e.RequirePlayerAdvance
+                        && (!isLastEvent || _settingsRepository.WaitForInputOnLastText);
+                    if (shouldWaitForAdvance)
                     {
                         await _textAdvanceWaiter.WaitNextAsync(token);
                     }
@@ -49,6 +53,11 @@ namespace KillChord.Runtime.Application
             }
             finally
             {
+                bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
+                if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
+                {
+                    await Task.Delay(_settingsRepository.CloseDelayAfterComplete, CancellationToken.None);
+                }
                 await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
                 IsFastForward = false;
                 IsPaused = false;
@@ -87,5 +96,6 @@ namespace KillChord.Runtime.Application
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
+        private readonly IScenarioSettingsRepository _settingsRepository;
     }
 }
