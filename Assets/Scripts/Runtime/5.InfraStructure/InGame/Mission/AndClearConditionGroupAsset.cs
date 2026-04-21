@@ -14,11 +14,14 @@ namespace KillChord.Runtime.InfraStructure
         {
             List<IMissionClearCondition> children = new();
 
-            for (int i = 0; i < _childConditionAssets.Count; i++)
+            if (_childConditionAssets != null)
             {
-                if (children[i] != null)
+                for (int i = 0; i < _childConditionAssets.Count; i++)
                 {
-                    children.Add(_childConditionAssets[i].Create());
+                    if (_childConditionAssets[i] != null)
+                    {
+                        children.Add(_childConditionAssets[i].Create());
+                    }
                 }
             }
 
