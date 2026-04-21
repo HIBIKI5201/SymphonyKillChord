@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine.Networking;
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace DevelopProducts.TicketSystem
 {
@@ -21,10 +21,9 @@ namespace DevelopProducts.TicketSystem
         {
             public string id;
             public string sceneName;
-            public int isInUse;
+            public bool isInUse;
             public string userName;
             public string masterPath;
-            public string status;
             public string timestamp;
         }
 
@@ -35,11 +34,10 @@ namespace DevelopProducts.TicketSystem
         }
 
         private string savedUserName = "";
-        private string inputNameBuffer = ""; // 入力確定前の保持用
+        private string inputNameBuffer = "";
         private int currentTab;
         private List<TicketData> ticketList = new();
         private bool isLoading;
-        private string newDescription = "";
 
         [MenuItem("Window/MasterTicketWindow")]
         public static void ShowWindow()
@@ -50,7 +48,7 @@ namespace DevelopProducts.TicketSystem
         private void OnEnable()
         {
             savedUserName = EditorPrefs.GetString("TicketSystem_UserName", "");
-            inputNameBuffer = savedUserName; // 初期値を同期
+            inputNameBuffer = savedUserName;
             if (!string.IsNullOrEmpty(savedUserName)) RefreshList();
         }
 
@@ -123,24 +121,37 @@ namespace DevelopProducts.TicketSystem
             GUILayout.Label("シーン名", GUILayout.Width(150));
             GUILayout.Label("状態", GUILayout.Width(60));
             GUILayout.Label("担当者", GUILayout.Width(100));
-            GUILayout.Label("操作", GUILayout.ExpandWidth(true));
+            GUILayout.Label("操作", GUILayout.Width(150));
+            GUILayout.Label("最終更新時刻", GUILayout.ExpandWidth(true));
             EditorGUILayout.EndHorizontal();
 
             foreach (var ticket in ticketList)
             {
-                EditorGUILayout.BeginHorizontal();
+                var rowRect = EditorGUILayout.BeginHorizontal();
                 GUILayout.Label(ticket.sceneName, GUILayout.Width(150));
-
-                GUI.color = ticket.isInUse == 1 ? Color.red : Color.green;
-                GUILayout.Label(ticket.isInUse == 1 ? "使用中" : "空き", GUILayout.Width(60));
-                GUI.color = Color.white;
+                
+                Color rectColor = new Color(0.2f, 0.6f, 0.2f, 0.3f);
+                if (ticket.isInUse)
+                {
+                    rectColor = ticket.userName == savedUserName ? new Color(0.2f, 0.4f, 0.6f, 0.3f) : new Color(0.6f, 0.2f, 0.2f, 0.3f);
+                }
+                EditorGUI.DrawRect(rowRect, rectColor);
+                GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
 
                 GUILayout.Label(ticket.userName, GUILayout.Width(100));
-
-                if (GUILayout.Button(ticket.isInUse == 1 ? "解放する" : "使用する"))
+                
+                bool isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == savedUserName);
+                
+                // 他者のチケットを勝手に解放できないようにする。
+                EditorGUI.BeginDisabledGroup(!isMyTicket && ticket.isInUse);
+        
+                if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する"))
                 {
-                    UpdateTicketStatus(ticket, ticket.isInUse == 1 ? 0 : 1);
+                    UpdateTicketStatus(ticket);
                 }
+        
+                EditorGUI.EndDisabledGroup();
+                GUILayout.Label(ticket.timestamp, GUILayout.ExpandWidth(true));
 
                 EditorGUILayout.EndHorizontal();
             }
@@ -148,10 +159,9 @@ namespace DevelopProducts.TicketSystem
 
         private void DrawCreateTab()
         {
-            var activeScene = EditorSceneManager.GetActiveScene();
+            var activeScene = SceneManager.GetActiveScene();
             EditorGUILayout.LabelField("対象シーン", activeScene.name);
             EditorGUILayout.LabelField("パス", activeScene.path);
-            newDescription = EditorGUILayout.TextField("作業内容・備考", newDescription);
 
             if (GUILayout.Button("チケットを発行して使用開始", GUILayout.Height(40)))
             {
@@ -166,12 +176,11 @@ namespace DevelopProducts.TicketSystem
             isLoading = true;
             var request = UnityWebRequest.Get(GAS_URL);
             var operation = request.SendWebRequest();
-            operation.completed += (op) =>
+            operation.completed += (_) =>
             {
                 if (request.result == UnityWebRequest.Result.Success)
                 {
                     string json = "{\"items\":" + request.downloadHandler.text + "}";
-                    Debug.Log(json);
                     ticketList = JsonUtility.FromJson<TicketListWrapper>(json).items;
                 }
 
@@ -183,32 +192,30 @@ namespace DevelopProducts.TicketSystem
         private void CreateTicket(string sceneName, string path)
         {
             isLoading = true;
-            var data = new TicketData
+            var ticket = new TicketData
             {
                 id = Guid.NewGuid().ToString(),
                 sceneName = sceneName,
-                isInUse = 1,
+                isInUse = true,
                 userName = savedUserName,
-                masterPath = path,
-                status = "New"
+                masterPath = path
             };
             
-            SendPost("create", data, true); // 発行時はダイアログを出す
+            SendPost("create", ticket); // 発行時はダイアログを出す
         }
 
-        private void UpdateTicketStatus(TicketData ticket, int nextUseState)
+        private void UpdateTicketStatus(TicketData ticket)
         {
             isLoading = true;
-            ticket.isInUse = nextUseState;
-            ticket.status = nextUseState == 1 ? "In Progress" : "Done";
-            SendPost("update", ticket, false);
+            ticket.userName = ticket.isInUse ? "" : savedUserName;
+            ticket.isInUse = !ticket.isInUse;
+            SendPost("update", ticket);
         }
 
-        private void SendPost(string action, TicketData data, bool showDialog)
+        private void SendPost(string action, TicketData data)
         {
             string json = JsonUtility.ToJson(data);
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{API_KEY}\",");
-            Debug.Log(json);
 
             var request = new UnityWebRequest(GAS_URL, "POST");
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -217,14 +224,27 @@ namespace DevelopProducts.TicketSystem
             request.SetRequestHeader("Content-Type", "application/json");
 
             var operation = request.SendWebRequest();
-            operation.completed += (op) =>
+            operation.completed += (_) =>
             {
                 isLoading = false;
-                if (showDialog)
+                string response = request.downloadHandler.text;
+
+                if (response.StartsWith("ERROR_ALREADY_IN_USE"))
+                {
+                    string occupant = response.Replace("ERROR_ALREADY_IN_USE:", "");
+                    EditorUtility.DisplayDialog("発行失敗", 
+                        $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
+                }
+                else if (response == "SUCCESS")
                 {
                     EditorUtility.DisplayDialog("完了", "チケットの発行が完了しました。", "OK");
+                    currentTab = 0; // 発行後は一覧タブに切り替える
                 }
-
+                else
+                {
+                    Debug.Log(response);
+                }
+    
                 RefreshList();
             };
         }
