@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -57,6 +58,7 @@ namespace KillChord.Runtime.Composition
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
+            _inGameMissionInitializer.Initialize();
 
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
