@@ -42,6 +42,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterCombatSpec CombatSpec { get; }
         public Health CurrentHealth => Health.CurrentHealth;
         public Health MaxHealth => Health.MaxHealth;
+        /// <summary>
+        ///     無敵状態かどうかを示すプロパティ。回避以外にもあるかもなので、変数は無敵にした。
+        /// </summary>
+        public bool IsInvincible => _isInvincible;
 
         /// <summary>
         ///     ダメージを受ける処理。
@@ -50,6 +54,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage)
         {
+            if (_isInvincible) return;
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
             Health.ChangeHealth(nextHealth);
@@ -64,5 +69,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
             Health nextHealth = new Health(CurrentHealth.Value + healAmount.Value);
             Health.ChangeHealth(nextHealth);
         }
+
+        public void SetInvincibility(bool isInvincible)
+        {
+            _isInvincible = isInvincible;
+        }
+
+        private bool _isInvincible = false;
     }
 }
