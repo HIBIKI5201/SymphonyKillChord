@@ -9,10 +9,11 @@ namespace KillChord.Runtime.Adaptor
 {
     public class TextEventHandler : IScenarioEventHandler<TextEvent>
     {
-        public TextEventHandler(ITextOutputPort textOutputPort, IScenarioEventEmitter eventEmitter)
+        public TextEventHandler(ITextOutputPort textOutputPort, IScenarioEventEmitter eventEmitter, IScenarioPlaybackState playbackState)
         {
             _textOutputPort = textOutputPort;
             _eventEmitter = eventEmitter;
+            _playbackState = playbackState;
         }
         public Type EventType => typeof(TextEvent);
 
@@ -22,6 +23,11 @@ namespace KillChord.Runtime.Adaptor
 
             for (int i = 1; i <= e.Text.Length; i++)
             {
+                while (_playbackState.IsPaused)
+                {
+                    await Task.Delay(50, ct);
+                }
+
                 await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
                 string visibleText = e.Text[..i];
 
@@ -34,12 +40,14 @@ namespace KillChord.Runtime.Adaptor
                     await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
                 }
 
-                await Task.Delay(200, ct);
+                int delayMs = _playbackState.IsFastForward ? 20 : 200;
+                await Task.Delay(delayMs, ct);
             }
         }
 
         private readonly ITextOutputPort _textOutputPort;
         private readonly IScenarioEventEmitter _eventEmitter;
+        private readonly IScenarioPlaybackState _playbackState;
 
     }
 }

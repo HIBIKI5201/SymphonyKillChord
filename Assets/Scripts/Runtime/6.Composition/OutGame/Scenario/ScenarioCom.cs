@@ -27,7 +27,6 @@ namespace KillChord.Runtime.Composition
         {
             Debug.Log(Time.time);
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
-            InputController controller = new InputController(gate);
             ViewModel viewModel = new ViewModel();
             ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
             IScenarioRepository repository = new ScenarioRepository();
@@ -41,7 +40,8 @@ namespace KillChord.Runtime.Composition
             ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(textPresenter, fadePresenter, backgroundPresenter, animationPresenter);
 
             ScenarioUsecase usecase = new ScenarioUsecase(repository, handlerRepo, gate);
-            TextEventHandler textHandle = new TextEventHandler(presenterFacade, usecase);
+            InputController controller = new InputController(gate, usecase);
+            TextEventHandler textHandle = new TextEventHandler(presenterFacade, usecase, usecase);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);

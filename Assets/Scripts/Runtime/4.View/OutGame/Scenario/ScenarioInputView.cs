@@ -16,6 +16,26 @@ namespace KillChord.Runtime.View
             {
                 _inputController.MouseClick();
             }
+
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                _inputController.SetFastForward(true);
+            }
+
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                _inputController.SetFastForward(false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _inputController.TogglePause();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                _inputController.Skip();
+            }
         }
         private InputController _inputController;
     }
