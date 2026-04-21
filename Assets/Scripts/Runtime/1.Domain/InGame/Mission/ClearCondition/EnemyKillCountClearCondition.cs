@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
@@ -7,6 +9,14 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     {
         public EnemyKillCountClearCondition(EnemyMissionKey key, int requiredKillCount, string desplayName)
         {
+            if (requiredKillCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(requiredKillCount),
+                    requiredKillCount,
+                    "必要撃破数は1以上である必要があります。");
+            }
+
             _key = key;
             _requiredKillCount = requiredKillCount;
             _desplayName = desplayName;
