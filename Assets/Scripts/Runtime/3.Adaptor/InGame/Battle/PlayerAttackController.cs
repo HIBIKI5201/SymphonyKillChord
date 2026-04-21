@@ -61,7 +61,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Target,
                 true); // TODO 敵側で射線判定の結果が追加されたため、プレイヤー側は一旦固定値で書く
 
-            // TODO 攻撃対象を特定するため一時的な手段
+            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
             Debug.Log($"[PlayerAttackController]攻撃対象のHashCode：{targetEntity.GetHashCode()}");
             EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.GetHashCode()));
 

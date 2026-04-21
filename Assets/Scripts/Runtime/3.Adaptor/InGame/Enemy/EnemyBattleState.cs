@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             Attacker = attacker;
             Target = target;
             CurrentAttack = currentAttack;
-            FirstAttack = false;
+            FirstAttack = true;
             IsStunned = false;
         }
 
