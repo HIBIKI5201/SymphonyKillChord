@@ -11,6 +11,8 @@ namespace KillChord.Runtime.View
         }
         private void Update()
         {
+            if (_inputController == null) return;
+
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
                 _inputController.MouseClick();

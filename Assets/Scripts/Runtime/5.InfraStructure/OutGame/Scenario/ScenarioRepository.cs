@@ -55,7 +55,11 @@ namespace KillChord.Runtime.InfraStructure
                     continue;
                 }
 
-                int step = ParseOptionalInt(GetValue(values, headerIndex, "Step"), autoStep);
+                int step = ParseOptionalInt(
+                    GetValue(values, headerIndex, "Step"),
+                    autoStep,
+                    "Step",
+                    lineNo);
                 autoStep = Math.Max(autoStep + 1, step + 1);
                 eventRows.Add(new EventRow(lineNo, step, type, values));
             }
@@ -120,45 +124,45 @@ namespace KillChord.Runtime.InfraStructure
             switch (row.Type.Trim().ToLowerInvariant())
             {
                 case "text":
-                {
-                    string speaker = GetValue(values, headerIndex, "Speaker");
-                    string text = GetValue(values, headerIndex, "Text");
-                    var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
-
-                    // 互換: Event行に直接書かれた単一トリガーも受け入れる
-                    TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
-                    if (inlineTrigger != null)
                     {
-                        def.AddTrigger(inlineTrigger);
-                    }
+                        string speaker = GetValue(values, headerIndex, "Speaker");
+                        string text = GetValue(values, headerIndex, "Text");
+                        var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
 
-                    return def;
-                }
+                        // 互換: Event行に直接書かれた単一トリガーも受け入れる
+                        TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
+                        if (inlineTrigger != null)
+                        {
+                            def.AddTrigger(inlineTrigger);
+                        }
+
+                        return def;
+                    }
                 case "background":
-                {
-                    string backgroundId = GetValue(values, headerIndex, "BackgroundId");
-                    if (string.IsNullOrWhiteSpace(backgroundId))
                     {
-                        throw new FormatException($"line {row.LineNo}: BackgroundId is required for Background event.");
+                        string backgroundId = GetValue(values, headerIndex, "BackgroundId");
+                        if (string.IsNullOrWhiteSpace(backgroundId))
+                        {
+                            throw new FormatException($"line {row.LineNo}: BackgroundId is required for Background event.");
+                        }
+                        return new PlainEventDefinition(row.Step, new BackgroundEvent(backgroundId));
                     }
-                    return new PlainEventDefinition(row.Step, new BackgroundEvent(backgroundId));
-                }
                 case "animation":
-                {
-                    string animationId = GetValue(values, headerIndex, "AnimationId");
-                    if (string.IsNullOrWhiteSpace(animationId))
                     {
-                        throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
+                        string animationId = GetValue(values, headerIndex, "AnimationId");
+                        if (string.IsNullOrWhiteSpace(animationId))
+                        {
+                            throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
+                        }
+                        return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
                     }
-                    return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
-                }
                 case "fade":
-                {
-                    float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
-                    float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", row.LineNo);
-                    float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
-                    return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration));
-                }
+                    {
+                        float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
+                        float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", row.LineNo);
+                        float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
+                        return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration));
+                    }
                 default:
                     throw new FormatException($"line {row.LineNo}: unknown Type '{row.Type}'.");
             }
@@ -201,37 +205,37 @@ namespace KillChord.Runtime.InfraStructure
             switch (triggerType.ToLowerInvariant())
             {
                 case "atcharindex":
-                {
-                    string indexRaw = GetValue(values, headerIndex, "TriggerIndex");
-                    if (!int.TryParse(indexRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int charIndex))
                     {
-                        throw new FormatException($"line {lineNo}: TriggerIndex must be int for AtCharIndex.");
+                        string indexRaw = GetValue(values, headerIndex, "TriggerIndex");
+                        if (!int.TryParse(indexRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int charIndex))
+                        {
+                            throw new FormatException($"line {lineNo}: TriggerIndex must be int for AtCharIndex.");
+                        }
+                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
                     }
-                    return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
-                }
                 case "atkeyword":
-                {
-                    string keyword = GetValue(values, headerIndex, "TriggerKeyword");
-                    if (string.IsNullOrWhiteSpace(keyword))
                     {
-                        throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtKeyword.");
+                        string keyword = GetValue(values, headerIndex, "TriggerKeyword");
+                        if (string.IsNullOrWhiteSpace(keyword))
+                        {
+                            throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtKeyword.");
+                        }
+                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
                     }
-                    return TextTimingTrigger.AtKeyword(keyword, fireEvent);
-                }
                 case "atsuffix":
-                {
-                    string suffix = GetValue(values, headerIndex, "TriggerKeyword");
-                    if (string.IsNullOrWhiteSpace(suffix))
                     {
-                        throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtSuffix.");
+                        string suffix = GetValue(values, headerIndex, "TriggerKeyword");
+                        if (string.IsNullOrWhiteSpace(suffix))
+                        {
+                            throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtSuffix.");
+                        }
+                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
                     }
-                    return TextTimingTrigger.AtSuffix(suffix, fireEvent);
-                }
                 case "attextend":
-                {
-                    int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
-                    return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
-                }
+                    {
+                        int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
+                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                    }
                 default:
                     throw new FormatException($"line {lineNo}: unknown TriggerType '{triggerTypeRaw}'.");
             }
@@ -246,30 +250,30 @@ namespace KillChord.Runtime.InfraStructure
             switch (onTriggerType.ToLowerInvariant())
             {
                 case "fade":
-                {
-                    float start = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
-                    float end = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg2"), "OnTriggerArg2", lineNo);
-                    float duration = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg3"), "OnTriggerArg3", lineNo);
-                    return new FadeEvent(start, end, duration);
-                }
+                    {
+                        float start = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
+                        float end = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg2"), "OnTriggerArg2", lineNo);
+                        float duration = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg3"), "OnTriggerArg3", lineNo);
+                        return new FadeEvent(start, end, duration);
+                    }
                 case "background":
-                {
-                    string backgroundId = GetValue(values, headerIndex, "OnTriggerArg1");
-                    if (string.IsNullOrWhiteSpace(backgroundId))
                     {
-                        throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Background.");
+                        string backgroundId = GetValue(values, headerIndex, "OnTriggerArg1");
+                        if (string.IsNullOrWhiteSpace(backgroundId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Background.");
+                        }
+                        return new BackgroundEvent(backgroundId);
                     }
-                    return new BackgroundEvent(backgroundId);
-                }
                 case "animation":
-                {
-                    string animationId = GetValue(values, headerIndex, "OnTriggerArg1");
-                    if (string.IsNullOrWhiteSpace(animationId))
                     {
-                        throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
+                        string animationId = GetValue(values, headerIndex, "OnTriggerArg1");
+                        if (string.IsNullOrWhiteSpace(animationId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
+                        }
+                        return new KillChord.Runtime.Domain.AnimationEvent(animationId);
                     }
-                    return new KillChord.Runtime.Domain.AnimationEvent(animationId);
-                }
                 default:
                     throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");
             }
@@ -314,12 +318,16 @@ namespace KillChord.Runtime.InfraStructure
             return value;
         }
 
-        private static int ParseOptionalInt(string raw, int defaultValue)
+        private static int ParseOptionalInt(string raw, int defaultValue, string columnName, int lineNo)
         {
             if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
-            return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
-                ? value
-                : defaultValue;
+
+            if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} must be int.");
+            }
+
+            return value;
         }
 
         private static List<string> ParseCsvLine(string line)

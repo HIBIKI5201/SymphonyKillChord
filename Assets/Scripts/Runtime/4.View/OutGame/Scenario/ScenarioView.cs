@@ -12,11 +12,9 @@ namespace KillChord.Runtime.View
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey)
         {
-            viewModel.OnChat += InputViewModel;
-            viewModel.OnFade += InputViewModel;
-            viewModel.OnBackground += InputBackground;
-            viewModel.OnAnimation += InputAnimation;
-            viewModel.OnScenarioCompleted += InputScenarioCompleted;
+            UnsubscribeFromViewModel();
+            _viewModel = viewModel;
+            SubscribeToViewModel();
             BuildCatalogMaps(backgroundByKey, animationByKey);
         }
 
@@ -37,6 +35,7 @@ namespace KillChord.Runtime.View
 
         private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
+        private ViewModel _viewModel;
 
         private void Update()
         {
@@ -126,6 +125,34 @@ namespace KillChord.Runtime.View
                     _animationByKey[entry.Key] = entry.Value;
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeFromViewModel();
+        }
+
+        private void SubscribeToViewModel()
+        {
+            if (_viewModel == null) return;
+
+            _viewModel.OnChat += InputViewModel;
+            _viewModel.OnFade += InputViewModel;
+            _viewModel.OnBackground += InputBackground;
+            _viewModel.OnAnimation += InputAnimation;
+            _viewModel.OnScenarioCompleted += InputScenarioCompleted;
+        }
+
+        private void UnsubscribeFromViewModel()
+        {
+            if (_viewModel == null) return;
+
+            _viewModel.OnChat -= InputViewModel;
+            _viewModel.OnFade -= InputViewModel;
+            _viewModel.OnBackground -= InputBackground;
+            _viewModel.OnAnimation -= InputAnimation;
+            _viewModel.OnScenarioCompleted -= InputScenarioCompleted;
+            _viewModel = null;
         }
     }
 }

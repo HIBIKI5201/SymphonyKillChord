@@ -24,7 +24,15 @@ namespace KillChord.Runtime.Composition
 
         private async void Start()
         {
-            await Init();
+            try
+            {
+                await Init();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex, this);
+                enabled = false;
+            }
         }
         private async ValueTask Init()
         {
@@ -66,7 +74,9 @@ namespace KillChord.Runtime.Composition
             handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
             handlerRepo.Register<FadeEvent>(fadeEventHandle.HandleAsync);
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
-            handlerRepo.Register<KillChord.Runtime.Domain.AnimationEvent>(animationEventHandle.HandleAsync);
+            handlerRepo.Register<Domain.AnimationEvent>(animationEventHandle.HandleAsync);
+
+            //View生成
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
             var animationMap = BuildAnimationMap(_animationCatalog);
