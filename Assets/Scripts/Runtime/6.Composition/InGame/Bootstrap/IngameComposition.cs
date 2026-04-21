@@ -14,10 +14,12 @@ namespace KillChord.Runtime.Composition
     [DefaultExecutionOrder(-100)]
     public class IngameComposition : MonoBehaviour
     {
+        [SerializeField] private bool _mobileBuild;
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private MobileInput _mobileInput;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -60,7 +62,17 @@ namespace KillChord.Runtime.Composition
 
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
-            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            if (_mobileInput)
+            {
+                _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry, true);
+                _mobileInput.Initialize(inputC.GetInputView);
+            }
+            else
+            {
+                _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
             ServiceInjector.Inject(_skillInitializer);
