@@ -1,9 +1,9 @@
-using UnityEngine;
+using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Application
 {
     public interface IAnimationRepository
     {
-        bool TryFindById(string id, out AnimationClip animationClip);
+        bool TryFindById(string id, out AnimationDefinition animation);
     }
 }

@@ -455,6 +455,11 @@ namespace KillChord.Runtime.InfraStructure
     {
         public ScenarioData FindById(string id)
         {
+            if (!string.Equals(id, "test", StringComparison.Ordinal))
+            {
+                throw new KeyNotFoundException($"Scenario not found: {id}");
+            }
+
             var backgroundRoom = new BackgroundEvent("bg_room");
             var backgroundStreet = new BackgroundEvent("genki_pose");
             var heroIdle = new KillChord.Runtime.Domain.AnimationEvent("anim_hero_idle");

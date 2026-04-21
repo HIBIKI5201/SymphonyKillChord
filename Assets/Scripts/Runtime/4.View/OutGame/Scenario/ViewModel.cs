@@ -1,6 +1,5 @@
 using System;
 using KillChord.Runtime.Adaptor;
-using UnityEngine;
 namespace KillChord.Runtime.View
 {
     public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink
@@ -16,14 +15,14 @@ namespace KillChord.Runtime.View
             OnFade?.Invoke(start, end, duration);
         }
 
-        public void SetBackground(Sprite background)
+        public void SetBackground(string assetKey)
         {
-            OnBackground?.Invoke(background);
+            OnBackground?.Invoke(assetKey);
         }
 
-        public void SetAnimation(AnimationClip animationClip)
+        public void SetAnimation(string assetKey)
         {
-            OnAnimation?.Invoke(animationClip);
+            OnAnimation?.Invoke(assetKey);
         }
 
         public void SetScenarioCompleted(bool skipped)
@@ -33,8 +32,8 @@ namespace KillChord.Runtime.View
 
         public Action<string> OnChat;
         public Action<float, float, float> OnFade;
-        public Action<Sprite> OnBackground;
-        public Action<AnimationClip> OnAnimation;
+        public Action<string> OnBackground;
+        public Action<string> OnAnimation;
         public Action<bool> OnScenarioCompleted;
 
     }

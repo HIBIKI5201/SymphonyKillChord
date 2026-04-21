@@ -25,6 +25,7 @@ namespace KillChord.Runtime.Adaptor
         public async ValueTask HandleAsync(TextEvent e, CancellationToken ct)
         {
             var fired = new HashSet<TextTimingTrigger>();
+            await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
 
             for (int i = 1; i <= e.Text.Length; i++)
             {
@@ -36,14 +37,7 @@ namespace KillChord.Runtime.Adaptor
                 await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
                 string visibleText = e.Text[..i];
 
-                foreach (TextTimingTrigger trigger in e.Triggers)
-                {
-                    if (fired.Contains(trigger)) continue;
-                    if (!TextTimingTrigger.ShouldFire(trigger, i, visibleText)) continue;
-
-                    fired.Add(trigger);
-                    await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
-                }
+                await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);
 
                 TimeSpan delay = _playbackState.IsFastForward
                     ? _settingsRepository.FastForwardTextCharInterval
@@ -52,6 +46,23 @@ namespace KillChord.Runtime.Adaptor
                 {
                     await Task.Delay(delay, ct);
                 }
+            }
+        }
+
+        private async ValueTask TryFireTriggersAsync(
+            IReadOnlyList<TextTimingTrigger> triggers,
+            HashSet<TextTimingTrigger> fired,
+            int visibleCharCount,
+            string visibleText,
+            CancellationToken ct)
+        {
+            foreach (TextTimingTrigger trigger in triggers)
+            {
+                if (fired.Contains(trigger)) continue;
+                if (!TextTimingTrigger.ShouldFire(trigger, visibleCharCount, visibleText)) continue;
+
+                fired.Add(trigger);
+                await _eventEmitter.EmitAsync(trigger.FireEvent, ct);
             }
         }
 

@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.Persistent.Input;
 using UnityEngine;
 
 namespace KillChord.Runtime.View

@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Domain
         {
             Start = Math.Clamp(start, 0f, 1f);
             End = Math.Clamp(end, 0f, 1f);
-            DurationSec = duration;
+            DurationSec = Math.Max(0f, duration);
         }
 
         public float Start { get; }

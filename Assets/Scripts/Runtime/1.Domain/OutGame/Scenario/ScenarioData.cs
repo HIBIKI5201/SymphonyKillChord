@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 
 namespace KillChord.Runtime.Domain
@@ -8,7 +9,7 @@ namespace KillChord.Runtime.Domain
 
         public ScenarioData(IReadOnlyList<IScenarioEvent> events)
         {
-            Events = events;
+            Events = events ?? throw new ArgumentNullException(nameof(events));
         }
         public IReadOnlyList<IScenarioEvent> Events { get; }
     }

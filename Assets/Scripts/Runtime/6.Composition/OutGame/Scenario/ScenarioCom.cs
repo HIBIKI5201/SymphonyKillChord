@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
@@ -67,11 +68,43 @@ namespace KillChord.Runtime.Composition
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
             handlerRepo.Register<KillChord.Runtime.Domain.AnimationEvent>(animationEventHandle.HandleAsync);
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
-            view.Initilize(viewModel);
+            var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
+            var animationMap = BuildAnimationMap(_animationCatalog);
+            view.Initilize(viewModel, backgroundMap, animationMap);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
             inputView.Initilize(controller);
             await usecase.PlayScenario();
             Debug.Log(Time.time);
+        }
+
+        private static IReadOnlyDictionary<string, Sprite> BuildBackgroundMap(BackgroundCatalogAsset catalog)
+        {
+            var map = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
+            if (catalog == null) return map;
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                var entry = catalog.Entries[i];
+                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                map[entry.Id] = entry.Asset;
+            }
+
+            return map;
+        }
+
+        private static IReadOnlyDictionary<string, AnimationClip> BuildAnimationMap(AnimationCatalogAsset catalog)
+        {
+            var map = new Dictionary<string, AnimationClip>(System.StringComparer.Ordinal);
+            if (catalog == null) return map;
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                var entry = catalog.Entries[i];
+                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                map[entry.Id] = entry.Asset;
+            }
+
+            return map;
         }
     }
 }

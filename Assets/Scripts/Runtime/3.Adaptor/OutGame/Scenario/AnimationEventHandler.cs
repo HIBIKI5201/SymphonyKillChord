@@ -18,12 +18,12 @@ namespace KillChord.Runtime.Adaptor
 
         public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
         {
-            if (!_animationRepository.TryFindById(e.AnimationId, out UnityEngine.AnimationClip animationClip))
+            if (!_animationRepository.TryFindById(e.AnimationId, out AnimationDefinition animation))
             {
                 return;
             }
 
-            await _animationOutputPort.PlayAnimationAsync(animationClip, ct);
+            await _animationOutputPort.PlayAnimationAsync(animation.AssetKey, ct);
         }
 
         private readonly IAnimationOutputPort _animationOutputPort;

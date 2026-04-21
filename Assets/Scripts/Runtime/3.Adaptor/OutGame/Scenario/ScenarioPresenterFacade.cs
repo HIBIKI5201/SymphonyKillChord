@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
-using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -27,11 +26,11 @@ namespace KillChord.Runtime.Adaptor
         public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct)
             => _fadeOutputPort.FadeAsync(start, end, duration, ct);
 
-        public ValueTask ShowBackgroundAsync(Sprite background, CancellationToken ct)
-            => _backgroundOutputPort.ShowBackgroundAsync(background, ct);
+        public ValueTask ShowBackgroundAsync(string assetKey, CancellationToken ct)
+            => _backgroundOutputPort.ShowBackgroundAsync(assetKey, ct);
 
-        public ValueTask PlayAnimationAsync(AnimationClip animationClip, CancellationToken ct)
-            => _animationOutputPort.PlayAnimationAsync(animationClip, ct);
+        public ValueTask PlayAnimationAsync(string assetKey, CancellationToken ct)
+            => _animationOutputPort.PlayAnimationAsync(assetKey, ct);
 
         public ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct)
         {

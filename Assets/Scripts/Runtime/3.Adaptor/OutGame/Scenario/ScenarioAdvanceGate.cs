@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
-using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -17,7 +16,7 @@ namespace KillChord.Runtime.Adaptor
             }
             if (ct.IsCancellationRequested)
             {
-                return new ValueTask(_tcs.Task);
+                return new ValueTask(Task.FromCanceled(ct));
             }
 
             return new ValueTask(_tcs.Task.WaitAsync(Timeout.InfiniteTimeSpan, TimeProvider.System, ct));

@@ -1,17 +1,18 @@
 using System;
 using KillChord.Runtime.Application;
+using KillChord.Runtime.Domain;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
 {
-    public class BackgroundRepository : CatalogRepositoryBase<Sprite, BackgroundCatalogAsset.Entry>, IBackgroundRepository
+    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogAsset.Entry>, IBackgroundRepository
     {
         public BackgroundRepository(BackgroundCatalogAsset catalog)
             : base(catalog != null ? catalog.Entries : null)
         {
         }
 
-        protected override bool TryBuild(BackgroundCatalogAsset.Entry entry, out string id, out Sprite definition)
+        protected override bool TryBuild(BackgroundCatalogAsset.Entry entry, out string id, out BackgroundDefinition definition)
         {
             id = entry.Id;
             if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)
@@ -20,7 +21,7 @@ namespace KillChord.Runtime.InfraStructure
                 return false;
             }
 
-            definition = entry.Asset;
+            definition = new BackgroundDefinition(entry.Id, entry.Id);
             return true;
         }
     }

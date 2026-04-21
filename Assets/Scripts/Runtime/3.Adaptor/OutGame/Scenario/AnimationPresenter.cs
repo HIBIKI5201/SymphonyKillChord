@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
@@ -11,9 +10,9 @@ namespace KillChord.Runtime.Adaptor
             _viewSink = viewSink;
         }
 
-        public ValueTask PlayAnimationAsync(AnimationClip animationClip, CancellationToken ct)
+        public ValueTask PlayAnimationAsync(string assetKey, CancellationToken ct)
         {
-            _viewSink.SetAnimation(animationClip);
+            _viewSink.SetAnimation(assetKey);
             return default;
         }
 
