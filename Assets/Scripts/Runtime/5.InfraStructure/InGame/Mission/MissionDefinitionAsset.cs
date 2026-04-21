@@ -24,7 +24,6 @@ namespace KillChord.Runtime.InfraStructure
             return new MissionDefinition(
                 new MissionId(_missionId),
                 _displayName,
-                _description,
                 _mainMissionText,
                 _clearCondition?.Create(),
                 _failCondition?.Create(),
@@ -32,10 +31,13 @@ namespace KillChord.Runtime.InfraStructure
             );
         }
 
+#if UNITY_EDITOR
+        [Header("プランナーメモ")]
+        [SerializeField, TextArea] private string _plannerMemo;
+#endif
         [Header("基礎情報")]
         [SerializeField] private string _missionId;
         [SerializeField] private string _displayName;
-        [SerializeField, TextArea] private string _description;
 
         [Header("UI情報")]
         [SerializeField, TextArea] private string _mainMissionText;
