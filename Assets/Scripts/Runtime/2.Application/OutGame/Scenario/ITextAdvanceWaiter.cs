@@ -9,4 +9,9 @@ namespace KillChord.Runtime.Application
     {
         public ValueTask WaitNextAsync(CancellationToken ct);
     }
+
+    public interface IScenarioCompletionNotifier
+    {
+        ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct);
+    }
 }

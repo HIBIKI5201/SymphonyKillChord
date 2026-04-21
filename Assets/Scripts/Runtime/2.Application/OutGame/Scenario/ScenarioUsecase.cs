@@ -7,11 +7,16 @@ namespace KillChord.Runtime.Application
 {
     public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState
     {
-        public ScenarioUsecase(IScenarioRepository repo, ScenarioHandlerRepo handlerRepo, ITextAdvanceWaiter textAdvanceWaiter)
+        public ScenarioUsecase(
+            IScenarioRepository repo,
+            ScenarioHandlerRepo handlerRepo,
+            ITextAdvanceWaiter textAdvanceWaiter,
+            IScenarioCompletionNotifier completionNotifier)
         {
             _scenarioRepo = repo;
             _handlerRepo = handlerRepo;
             _textAdvanceWaiter = textAdvanceWaiter;
+            _completionNotifier = completionNotifier;
         }
 
         public async ValueTask PlayScenario()
@@ -20,6 +25,7 @@ namespace KillChord.Runtime.Application
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
+            bool skipped = false;
 
             try
             {
@@ -37,9 +43,11 @@ namespace KillChord.Runtime.Application
             catch (OperationCanceledException)
             {
                 // Skip requested: end scenario gracefully.
+                skipped = true;
             }
             finally
             {
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
                 IsFastForward = false;
                 IsPaused = false;
                 if (ReferenceEquals(_playCts, source))
@@ -76,5 +84,6 @@ namespace KillChord.Runtime.Application
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
+        private readonly IScenarioCompletionNotifier _completionNotifier;
     }
 }

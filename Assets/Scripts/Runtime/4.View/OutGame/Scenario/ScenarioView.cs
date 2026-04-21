@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View
             viewModel.OnFade += InputViewModel;
             viewModel.OnBackground += InputBackground;
             viewModel.OnAnimation += InputAnimation;
+            viewModel.OnScenarioCompleted += InputScenarioCompleted;
         }
 
         [SerializeField]
@@ -69,6 +70,11 @@ namespace KillChord.Runtime.View
             _chat.alpha = Mathf.Lerp(_start, _end, t);
 
             if (t >= 1f) _onFade = false;
+        }
+
+        private void InputScenarioCompleted(bool skipped)
+        {
+            gameObject.SetActive(false);
         }
 
     }

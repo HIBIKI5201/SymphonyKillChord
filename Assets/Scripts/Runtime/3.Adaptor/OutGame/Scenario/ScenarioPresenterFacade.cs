@@ -1,21 +1,24 @@
 using System.Threading;
 using System.Threading.Tasks;
+using KillChord.Runtime.Application;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public sealed class ScenarioPresenterFacade : IOutPutPort
+    public sealed class ScenarioPresenterFacade : IOutPutPort, IScenarioCompletionNotifier
     {
         public ScenarioPresenterFacade(
             ITextOutputPort textOutputPort,
             IFadeOutputPort fadeOutputPort,
             IBackgroundOutputPort backgroundOutputPort,
-            IAnimationOutputPort animationOutputPort)
+            IAnimationOutputPort animationOutputPort,
+            IScenarioCompletionViewSink scenarioCompletionViewSink)
         {
             _textOutputPort = textOutputPort;
             _fadeOutputPort = fadeOutputPort;
             _backgroundOutputPort = backgroundOutputPort;
             _animationOutputPort = animationOutputPort;
+            _scenarioCompletionViewSink = scenarioCompletionViewSink;
         }
 
         public ValueTask ShowTextAsync(string message, CancellationToken ct)
@@ -30,9 +33,16 @@ namespace KillChord.Runtime.Adaptor
         public ValueTask PlayAnimationAsync(AnimationClip animationClip, CancellationToken ct)
             => _animationOutputPort.PlayAnimationAsync(animationClip, ct);
 
+        public ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct)
+        {
+            _scenarioCompletionViewSink.SetScenarioCompleted(skipped);
+            return default;
+        }
+
         private readonly ITextOutputPort _textOutputPort;
         private readonly IFadeOutputPort _fadeOutputPort;
         private readonly IBackgroundOutputPort _backgroundOutputPort;
         private readonly IAnimationOutputPort _animationOutputPort;
+        private readonly IScenarioCompletionViewSink _scenarioCompletionViewSink;
     }
 }

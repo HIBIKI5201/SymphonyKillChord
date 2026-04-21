@@ -4,6 +4,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View
 {
     public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink
+        , IScenarioCompletionViewSink
     {
         public void SetText(string message)
         {
@@ -25,10 +26,16 @@ namespace KillChord.Runtime.View
             OnAnimation?.Invoke(animationClip);
         }
 
+        public void SetScenarioCompleted(bool skipped)
+        {
+            OnScenarioCompleted?.Invoke(skipped);
+        }
+
         public Action<string> OnChat;
         public Action<float, float, float> OnFade;
         public Action<Sprite> OnBackground;
         public Action<AnimationClip> OnAnimation;
+        public Action<bool> OnScenarioCompleted;
 
     }
 }

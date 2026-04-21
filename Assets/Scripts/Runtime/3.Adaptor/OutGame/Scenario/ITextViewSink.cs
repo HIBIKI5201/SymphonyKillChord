@@ -4,4 +4,9 @@ namespace KillChord.Runtime.Adaptor
     {
         void SetText(string message);
     }
+
+    public interface IScenarioCompletionViewSink
+    {
+        void SetScenarioCompleted(bool skipped);
+    }
 }

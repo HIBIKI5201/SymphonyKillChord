@@ -37,9 +37,14 @@ namespace KillChord.Runtime.Composition
             FadePresenter fadePresenter = new FadePresenter(viewModel);
             BackgroundPresenter backgroundPresenter = new BackgroundPresenter(viewModel);
             AnimationPresenter animationPresenter = new AnimationPresenter(viewModel);
-            ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(textPresenter, fadePresenter, backgroundPresenter, animationPresenter);
+            ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(
+                textPresenter,
+                fadePresenter,
+                backgroundPresenter,
+                animationPresenter,
+                viewModel);
 
-            ScenarioUsecase usecase = new ScenarioUsecase(repository, handlerRepo, gate);
+            ScenarioUsecase usecase = new ScenarioUsecase(repository, handlerRepo, gate, presenterFacade);
             InputController controller = new InputController(gate, usecase);
             TextEventHandler textHandle = new TextEventHandler(presenterFacade, usecase, usecase);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
