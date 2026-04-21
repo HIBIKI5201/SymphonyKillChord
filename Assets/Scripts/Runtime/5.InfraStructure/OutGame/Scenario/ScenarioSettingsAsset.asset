@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbc8065f2671a841b110549a652fc11, type: 3}
   m_Name: ScenarioSettingsAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.ScenarioSettingsAsset
-  _normalTextCharIntervalSec: 0.4
-  _fastForwardTextCharIntervalSec: 0.2
+  _normalTextCharIntervalSec: 0.2
+  _fastForwardTextCharIntervalSec: 0.1
   _pausePollIntervalSec: 0.05
   _closeDelayAfterCompleteSec: 3
   _skipClosesImmediately: 1

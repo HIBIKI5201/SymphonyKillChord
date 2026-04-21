@@ -31,7 +31,9 @@ namespace KillChord.Runtime.InfraStructure
 
             List<string> headers = ParseCsvLine(lines[0]);
             var headerIndex = BuildHeaderIndex(headers);
-            var events = new List<IScenarioEvent>(Math.Max(4, lines.Length - 1));
+            var eventRows = new List<EventRow>(Math.Max(4, lines.Length - 1));
+            var triggerRows = new List<TriggerRow>(Math.Max(2, lines.Length / 2));
+            int autoStep = 1;
 
             for (int lineNo = 2; lineNo <= lines.Length; lineNo++)
             {
@@ -46,8 +48,52 @@ namespace KillChord.Runtime.InfraStructure
                     continue;
                 }
 
-                IScenarioEvent scenarioEvent = CreateEvent(type, values, headerIndex, lineNo);
-                events.Add(scenarioEvent);
+                if (type.Equals("Trigger", StringComparison.OrdinalIgnoreCase))
+                {
+                    int parentStep = ParseRequiredInt(GetValue(values, headerIndex, "ParentStep"), "ParentStep", lineNo);
+                    triggerRows.Add(new TriggerRow(lineNo, parentStep, values));
+                    continue;
+                }
+
+                int step = ParseOptionalInt(GetValue(values, headerIndex, "Step"), autoStep);
+                autoStep = Math.Max(autoStep + 1, step + 1);
+                eventRows.Add(new EventRow(lineNo, step, type, values));
+            }
+
+            var definitions = new Dictionary<int, EventDefinition>();
+            var orderedSteps = new List<int>(eventRows.Count);
+
+            foreach (EventRow row in eventRows)
+            {
+                if (definitions.ContainsKey(row.Step))
+                {
+                    throw new FormatException($"line {row.LineNo}: duplicated Step '{row.Step}'.");
+                }
+
+                EventDefinition definition = CreateEventDefinition(row, headerIndex);
+                definitions.Add(row.Step, definition);
+                orderedSteps.Add(row.Step);
+            }
+
+            foreach (TriggerRow row in triggerRows)
+            {
+                if (!definitions.TryGetValue(row.ParentStep, out EventDefinition parent))
+                {
+                    throw new FormatException($"line {row.LineNo}: ParentStep '{row.ParentStep}' was not found.");
+                }
+                if (parent is not TextEventDefinition textParent)
+                {
+                    throw new FormatException($"line {row.LineNo}: ParentStep '{row.ParentStep}' must point Text event.");
+                }
+
+                TextTimingTrigger trigger = CreateTrigger(row.Values, headerIndex, row.LineNo, textParent.Text);
+                textParent.AddTrigger(trigger);
+            }
+
+            var events = new List<IScenarioEvent>(orderedSteps.Count);
+            foreach (int step in orderedSteps)
+            {
+                events.Add(definitions[step].ToEvent());
             }
 
             return new ScenarioData(events);
@@ -66,54 +112,59 @@ namespace KillChord.Runtime.InfraStructure
             return index;
         }
 
-        private static IScenarioEvent CreateEvent(
-            string type,
-            IReadOnlyList<string> values,
-            IReadOnlyDictionary<string, int> headerIndex,
-            int lineNo)
+        private static EventDefinition CreateEventDefinition(
+            EventRow row,
+            IReadOnlyDictionary<string, int> headerIndex)
         {
-            switch (type.Trim().ToLowerInvariant())
+            IReadOnlyList<string> values = row.Values;
+            switch (row.Type.Trim().ToLowerInvariant())
             {
                 case "text":
                 {
                     string speaker = GetValue(values, headerIndex, "Speaker");
                     string text = GetValue(values, headerIndex, "Text");
-                    TextTimingTrigger trigger = CreateTextTrigger(values, headerIndex, lineNo, text);
-                    IReadOnlyList<TextTimingTrigger> triggers =
-                        trigger == null ? Array.Empty<TextTimingTrigger>() : new[] { trigger };
-                    return new TextEvent(speaker ?? string.Empty, text ?? string.Empty, triggers);
+                    var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
+
+                    // 互換: Event行に直接書かれた単一トリガーも受け入れる
+                    TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
+                    if (inlineTrigger != null)
+                    {
+                        def.AddTrigger(inlineTrigger);
+                    }
+
+                    return def;
                 }
                 case "background":
                 {
                     string backgroundId = GetValue(values, headerIndex, "BackgroundId");
                     if (string.IsNullOrWhiteSpace(backgroundId))
                     {
-                        throw new FormatException($"line {lineNo}: BackgroundId is required for Background event.");
+                        throw new FormatException($"line {row.LineNo}: BackgroundId is required for Background event.");
                     }
-                    return new BackgroundEvent(backgroundId);
+                    return new PlainEventDefinition(row.Step, new BackgroundEvent(backgroundId));
                 }
                 case "animation":
                 {
                     string animationId = GetValue(values, headerIndex, "AnimationId");
                     if (string.IsNullOrWhiteSpace(animationId))
                     {
-                        throw new FormatException($"line {lineNo}: AnimationId is required for Animation event.");
+                        throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
                     }
-                    return new KillChord.Runtime.Domain.AnimationEvent(animationId);
+                    return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
                 }
                 case "fade":
                 {
-                    float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", lineNo);
-                    float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", lineNo);
-                    float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", lineNo);
-                    return new FadeEvent(start, end, duration);
+                    float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
+                    float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", row.LineNo);
+                    float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
+                    return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration));
                 }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown Type '{type}'.");
+                    throw new FormatException($"line {row.LineNo}: unknown Type '{row.Type}'.");
             }
         }
 
-        private static TextTimingTrigger CreateTextTrigger(
+        private static TextTimingTrigger TryCreateTrigger(
             IReadOnlyList<string> values,
             IReadOnlyDictionary<string, int> headerIndex,
             int lineNo,
@@ -127,6 +178,15 @@ namespace KillChord.Runtime.InfraStructure
                 return null;
             }
 
+            return CreateTrigger(values, headerIndex, lineNo, text);
+        }
+
+        private static TextTimingTrigger CreateTrigger(
+            IReadOnlyList<string> values,
+            IReadOnlyDictionary<string, int> headerIndex,
+            int lineNo,
+            string text)
+        {
             string onTriggerTypeRaw = GetValue(values, headerIndex, "OnTriggerType");
             string onTriggerType = onTriggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(onTriggerType))
@@ -135,6 +195,8 @@ namespace KillChord.Runtime.InfraStructure
             }
 
             IScenarioEvent fireEvent = CreateTriggerEvent(values, headerIndex, lineNo, onTriggerType);
+            string triggerTypeRaw = GetValue(values, headerIndex, "TriggerType");
+            string triggerType = triggerTypeRaw?.Trim();
 
             switch (triggerType.ToLowerInvariant())
             {
@@ -155,6 +217,15 @@ namespace KillChord.Runtime.InfraStructure
                         throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtKeyword.");
                     }
                     return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                }
+                case "atsuffix":
+                {
+                    string suffix = GetValue(values, headerIndex, "TriggerKeyword");
+                    if (string.IsNullOrWhiteSpace(suffix))
+                    {
+                        throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtSuffix.");
+                    }
+                    return TextTimingTrigger.AtSuffix(suffix, fireEvent);
                 }
                 case "attextend":
                 {
@@ -229,6 +300,28 @@ namespace KillChord.Runtime.InfraStructure
             return value;
         }
 
+        private static int ParseRequiredInt(string raw, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} is required.");
+            }
+
+            if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} must be int.");
+            }
+            return value;
+        }
+
+        private static int ParseOptionalInt(string raw, int defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
+            return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
+                ? value
+                : defaultValue;
+        }
+
         private static List<string> ParseCsvLine(string line)
         {
             var fields = new List<string>();
@@ -284,6 +377,77 @@ namespace KillChord.Runtime.InfraStructure
 
             fields.Add(current.ToString());
             return fields;
+        }
+
+        private readonly struct EventRow
+        {
+            public EventRow(int lineNo, int step, string type, IReadOnlyList<string> values)
+            {
+                LineNo = lineNo;
+                Step = step;
+                Type = type;
+                Values = values;
+            }
+
+            public int LineNo { get; }
+            public int Step { get; }
+            public string Type { get; }
+            public IReadOnlyList<string> Values { get; }
+        }
+
+        private readonly struct TriggerRow
+        {
+            public TriggerRow(int lineNo, int parentStep, IReadOnlyList<string> values)
+            {
+                LineNo = lineNo;
+                ParentStep = parentStep;
+                Values = values;
+            }
+
+            public int LineNo { get; }
+            public int ParentStep { get; }
+            public IReadOnlyList<string> Values { get; }
+        }
+
+        private abstract class EventDefinition
+        {
+            protected EventDefinition(int step) => Step = step;
+            public int Step { get; }
+            public abstract IScenarioEvent ToEvent();
+        }
+
+        private sealed class PlainEventDefinition : EventDefinition
+        {
+            public PlainEventDefinition(int step, IScenarioEvent scenarioEvent) : base(step)
+            {
+                _scenarioEvent = scenarioEvent;
+            }
+
+            public override IScenarioEvent ToEvent() => _scenarioEvent;
+            private readonly IScenarioEvent _scenarioEvent;
+        }
+
+        private sealed class TextEventDefinition : EventDefinition
+        {
+            public TextEventDefinition(int step, string speaker, string text) : base(step)
+            {
+                Speaker = speaker;
+                Text = text;
+            }
+
+            public string Speaker { get; }
+            public string Text { get; }
+
+            public void AddTrigger(TextTimingTrigger trigger) => _triggers.Add(trigger);
+
+            public override IScenarioEvent ToEvent()
+            {
+                _cached ??= new TextEvent(Speaker, Text, _triggers.ToArray());
+                return _cached;
+            }
+
+            private readonly List<TextTimingTrigger> _triggers = new();
+            private IScenarioEvent _cached;
         }
     }
 

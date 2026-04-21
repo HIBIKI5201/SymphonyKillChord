@@ -75,6 +75,7 @@ namespace KillChord.Runtime.View
         private void InputScenarioCompleted(bool skipped)
         {
             //テキスト終了後の処理
+            Debug.Log("Scenario Clear");
         }
 
     }

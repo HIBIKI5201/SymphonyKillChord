@@ -32,6 +32,13 @@ namespace KillChord.Runtime.Domain
             if (string.IsNullOrWhiteSpace(keyword)) throw new ArgumentException("keyword is empty.", nameof(keyword));
             return new TextTimingTrigger(TextTriggerKind.Keyword, -1, keyword, fireEvent);
         }
+
+        public static TextTimingTrigger AtSuffix(string suffix, IScenarioEvent fireEvent)
+        {
+            if (string.IsNullOrWhiteSpace(suffix)) throw new ArgumentException("suffix is empty.", nameof(suffix));
+            return new TextTimingTrigger(TextTriggerKind.Suffix, -1, suffix, fireEvent);
+        }
+
         public static bool ShouldFire(TextTimingTrigger trigger, int visibleCharCount, string visibleText)
         {
             return trigger.Kind switch
@@ -39,6 +46,8 @@ namespace KillChord.Runtime.Domain
                 TextTriggerKind.CharIndex => trigger.CharIndex == visibleCharCount,
                 TextTriggerKind.Keyword => !string.IsNullOrEmpty(trigger.Keyword) &&
                                            visibleText.Contains(trigger.Keyword, StringComparison.Ordinal),
+                TextTriggerKind.Suffix => !string.IsNullOrEmpty(trigger.Keyword) &&
+                                          visibleText.EndsWith(trigger.Keyword, StringComparison.Ordinal),
                 _ => false
             };
         }
@@ -46,6 +55,7 @@ namespace KillChord.Runtime.Domain
     public enum TextTriggerKind
     {
         CharIndex,
-        Keyword
+        Keyword,
+        Suffix
     }
 }
