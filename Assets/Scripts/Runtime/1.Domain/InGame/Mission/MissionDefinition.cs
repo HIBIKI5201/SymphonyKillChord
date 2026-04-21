@@ -13,7 +13,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public MissionDefinition(
             MissionId missionId,
             string desplayName,
-            string description,
             string mainMissionText,
             IMissionClearCondition clearCondition,
             IMissionFailCondition failCondition,
@@ -21,7 +20,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         {
             MissionId = missionId;
             DesplayName = desplayName;
-            Description = description;
             MainMissionText = mainMissionText;
             ClearCondition = clearCondition;
             FailCondition = failCondition;
@@ -30,7 +28,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         public MissionId MissionId { get; }
         public string DesplayName { get; }
-        public string Description { get; }
         public string MainMissionText { get; }
 
         public IMissionClearCondition ClearCondition { get; }
