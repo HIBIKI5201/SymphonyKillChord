@@ -79,10 +79,6 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 _isDodge = true;
             }
-            else if (input.Phase == InputActionPhase.Canceled)
-            {
-                _isDodge = false;
-            }
         }
 
         private void OnAttack(InputContext<float> input)
@@ -112,6 +108,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (_isDodge)
             {
                 _controller.TryDodge(dir, Time.time);
+                _isDodge = false;
             }
 
             Quaternion rotation = _cacheTransform.rotation;
