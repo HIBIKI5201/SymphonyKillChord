@@ -74,7 +74,7 @@ namespace KillChord.Runtime.View
 
         private void InputScenarioCompleted(bool skipped)
         {
-            gameObject.SetActive(false);
+            //テキスト終了後の処理
         }
 
     }

@@ -1,0 +1,6 @@
+Type,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
+Background,,,bg_room,,,,,None,,,,,,
+Fade,,,,,1,0,0.5,None,,,,,,
+Text,Hero,"......Hello sekai?",,,,,,AtCharIndex,5,,Fade,0,1,0.5
+Animation,,,,anim_hero_idle,,,,None,,,,,,
+Text,Tatuki,"danger is coming",,,,,,AtKeyword,,danger,Background,bg_alert,,

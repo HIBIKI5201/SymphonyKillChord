@@ -18,4 +18,4 @@ MonoBehaviour:
   _closeDelayAfterCompleteSec: 3
   _skipClosesImmediately: 1
   _waitForInputOnLastText: 0
-  _defaultScenarioId: test
+  _defaultScenarioId: ScenarioTest
