@@ -13,7 +13,7 @@ namespace KillChord.Runtime.View
             _raycastDetectView = raycastDetectView;
             _battleState = battleState;
         }
-        public bool IsTargetInAttackRange => _aiController.IsPlayerInAttackRange(transform.position, _target.transform.position);
+        public bool IsTargetInAttackRange => _aiController.IsPlayerInAttackRange(transform.position, _target.position);
 
         public bool IsSightClearToAim => _raycastDetectView.CanRaycastHitTarget;
 
@@ -30,7 +30,8 @@ namespace KillChord.Runtime.View
         /// </summary>
         public void Stunned()
         {
-            // 2秒後回復
+            CancelInvoke(nameof(StunRecover));
+            // TODO 2秒後回復。一時。今後はAnimation Controllerで制御するはず
             Invoke(nameof(StunRecover), 2f);
         }
         /// <summary>
