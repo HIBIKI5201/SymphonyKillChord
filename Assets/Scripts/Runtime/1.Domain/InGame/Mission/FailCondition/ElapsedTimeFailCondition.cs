@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.FailCondition
 {
@@ -9,6 +9,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.FailCondition
     {
         public ElapsedTimeFailCondition(float timeLimit)
         {
+            if (timeLimit <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(timeLimit),
+                    "制限時間は0より大きい値を指定してください。");
+            }
+
             _timeLimit = timeLimit;
         }
 

@@ -17,6 +17,10 @@ namespace KillChord.Runtime.InfraStructure
         {
             List<IMissionClearCondition> children = new();
 
+            if (_children == null)
+            {
+                return new OrClearConditionGroup(children);
+            }
             for (int i = 0; i < _children.Count; i++)
             {
                 if (_children[i] != null)

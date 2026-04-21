@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
 {
     /// <summary>
@@ -7,6 +9,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
     {
         public ClearTimeEvaluationCondition(float thresholdTime)
         {
+            if (thresholdTime < 0f || float.IsNaN(thresholdTime) || float.IsInfinity(thresholdTime))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(thresholdTime),
+                    "thresholdTime must be non-negative and finite.");
+            }
+
             _thresholdTime = thresholdTime;
         }
 

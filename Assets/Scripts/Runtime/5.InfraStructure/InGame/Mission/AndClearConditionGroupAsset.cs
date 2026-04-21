@@ -14,7 +14,7 @@ namespace KillChord.Runtime.InfraStructure
         {
             List<IMissionClearCondition> children = new();
 
-            for (int i = 0; i < children.Count; i++)
+            for (int i = 0; i < _childConditionAssets.Count; i++)
             {
                 if (children[i] != null)
                 {

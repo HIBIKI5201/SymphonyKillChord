@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
@@ -8,6 +10,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     {
         public ElapsedTimeClearCondition(float requiredTime)
         {
+            if (requiredTime < 0f || float.IsNaN(requiredTime) || float.IsInfinity(requiredTime))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(requiredTime),
+                    "requiredTime must be non-negative and finite.");
+            }
+
             _requiredTime = requiredTime;
         }
 

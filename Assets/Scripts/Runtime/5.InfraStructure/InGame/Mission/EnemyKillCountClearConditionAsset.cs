@@ -9,6 +9,16 @@ namespace KillChord.Runtime.InfraStructure
     {
         public override IMissionClearCondition Create()
         {
+            if (_enemyMissionKeyAsset == null)
+            {
+                throw new InvalidOperationException($"{nameof(_enemyMissionKeyAsset)} is required.");
+            }
+
+            if (_requiredKillCount <= 0)
+            {
+                throw new InvalidOperationException($"{nameof(_requiredKillCount)} must be greater than 0.");
+            }
+
             return new EnemyKillCountClearCondition(
                 _enemyMissionKeyAsset.Id,
                 _requiredKillCount,
