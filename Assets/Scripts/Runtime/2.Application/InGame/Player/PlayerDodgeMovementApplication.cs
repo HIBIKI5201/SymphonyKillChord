@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Player;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Player
@@ -15,6 +16,15 @@ namespace KillChord.Runtime.Application.InGame.Player
             _previousDodgedTime = float.NegativeInfinity;
         }
 
+        /// <summary>
+        ///     回避開始時のイベント。
+        /// </summary>
+        public Action<float> OnDodgeStarted;
+        /// <summary>
+        ///     回避終了時のイベント。
+        /// </summary>
+        public Action OnDodgeEnd;
+
         public bool IsDodhing => _isDodging;
 
         public bool TryDodge(Vector2 input, float currentTime)
@@ -28,7 +38,9 @@ namespace KillChord.Runtime.Application.InGame.Player
             _previousDodgedTime = currentTime;
             _direction = new Vector3(input.x, 0, input.y).normalized;
             _isDodging = true;
+            _hasNotifiedDodgeEnd = false;
 
+            OnDodgeStarted?.Invoke(_parameter.DodgeDuration);
             return true;
         }
         public void Update(ref Quaternion rotaition, float time, out Vector3 velocity)
@@ -40,6 +52,11 @@ namespace KillChord.Runtime.Application.InGame.Player
             if (time > _previousDodgedTime + _parameter.DodgeDuration)
             {
                 _isDodging = false;
+                if (!_hasNotifiedDodgeEnd)
+                {
+                    _hasNotifiedDodgeEnd = true;
+                    OnDodgeEnd?.Invoke();
+                }
                 return;
             }
 
@@ -52,5 +69,7 @@ namespace KillChord.Runtime.Application.InGame.Player
         private Vector3 _direction;
         private float _previousDodgedTime;
         private bool _isDodging;
+        // 回避終了イベントが複数回呼び出されないようにするフラグ。
+        private bool _hasNotifiedDodgeEnd;
     }
 }
