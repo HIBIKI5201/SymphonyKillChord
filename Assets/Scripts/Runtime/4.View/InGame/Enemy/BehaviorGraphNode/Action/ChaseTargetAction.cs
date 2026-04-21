@@ -13,7 +13,7 @@ public partial class ChaseTargetAction : Action
     [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
     protected override Status OnStart()
     {
-        if (Movement?.Value == null) return Status.Failure;
+        if (Movement?.Value == null || State?.Value == null) return Status.Failure;
         Movement.Value.ChaseTarget();
         return Status.Running;
     }

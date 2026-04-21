@@ -64,7 +64,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <returns></returns>
         public bool IsPlayerInAttackRange(Vector3 enemyPosition, Vector3 playerPosition)
         {
-            return Vector3.Distance(playerPosition, enemyPosition) < _enemyMoveSpec.AttackRange.Value;
+            return Vector3.Distance(playerPosition, enemyPosition) <= _enemyMoveSpec.AttackRange.Value;
         }
 
         private readonly EnemyMoveSpec _enemyMoveSpec;

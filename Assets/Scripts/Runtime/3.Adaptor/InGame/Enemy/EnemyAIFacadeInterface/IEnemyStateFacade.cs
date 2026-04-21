@@ -13,12 +13,12 @@ namespace KillChord.Runtime.Adaptor
         /// <returns></returns>
         public bool IsTargetInAttackRange { get; }
         /// <summary>
-        ///     目標と自分の間に障害物があるか。
+        ///     目標と自分の間に障害物がないか。
         /// </summary>
         /// <returns></returns>
         public bool IsSightClearToAim { get; }
         /// <summary>
-        ///     照準中であるか。
+        ///     攻撃中であるか。
         /// </summary>
         public bool IsAttacking { get; }
         /// <summary>

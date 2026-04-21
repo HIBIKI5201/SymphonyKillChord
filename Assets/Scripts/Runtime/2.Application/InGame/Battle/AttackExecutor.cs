@@ -33,6 +33,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, canAttackHit);
 
+            // 攻撃が命中しない場合、ダメージを適用せずに結果を返す
+            if (!canAttackHit)
+            {
+                return result;
+            }
+
             defender.TakeDamage(result.FinalDamage);
 
             Debug.Log(
