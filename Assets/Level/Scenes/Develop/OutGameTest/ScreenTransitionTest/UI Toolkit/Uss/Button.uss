@@ -1,0 +1,20 @@
+:root {
+}
+
+.button {
+    height: 100px;
+    width: 200px;
+    -unity-text-align: middle-center;
+    font-size: 36px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    background-color: rgba(188, 188, 188, 0);
+}
+
+.button:hover {
+    scale: 1.2 1.2 1.2;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out-circ;
+}
+
+
