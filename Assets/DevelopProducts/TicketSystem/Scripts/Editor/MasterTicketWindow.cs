@@ -39,6 +39,7 @@ namespace DevelopProducts.TicketSystem
         private int currentTab;
         private List<TicketData> ticketList = new();
         private bool isLoading;
+        private Vector2 scrollPos;
 
         [MenuItem("Window/MasterTicketWindow")]
         public static void ShowWindow()
@@ -48,6 +49,7 @@ namespace DevelopProducts.TicketSystem
 
         private void OnEnable()
         {
+            this.minSize = new Vector2(800f, 200f);
             savedUserName = EditorPrefs.GetString("TicketSystem_UserName", "");
             inputNameBuffer = savedUserName;
             if (!string.IsNullOrEmpty(savedUserName)) RefreshList();
@@ -71,7 +73,7 @@ namespace DevelopProducts.TicketSystem
             EditorGUILayout.HelpBox("ユーザー名を設定してください。設定するまでメイン機能は使えません。", MessageType.Info);
             inputNameBuffer = EditorGUILayout.TextField("ユーザー名", inputNameBuffer);
 
-            if (GUILayout.Button("保存して開始", GUILayout.Height(30)))
+            if (GUILayout.Button("保存して開始", GUILayout.Height(50)))
             {
                 if (!string.IsNullOrEmpty(inputNameBuffer))
                 {
@@ -85,7 +87,7 @@ namespace DevelopProducts.TicketSystem
                 }
             }
         }
-
+                                                                                    
         private void DrawMainUI()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -114,22 +116,23 @@ namespace DevelopProducts.TicketSystem
 
         private void DrawListTab()
         {
-            if (GUILayout.Button("更新", GUILayout.Height(25))) RefreshList();
+            if (GUILayout.Button("更新", GUILayout.Height(35))) RefreshList();
 
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-            GUILayout.Label("シーン名", GUILayout.Width(150));
+            GUILayout.Label("シーン名", GUILayout.Width(100));
             GUILayout.Label("状態", GUILayout.Width(60));
             GUILayout.Label("担当者", GUILayout.Width(100));
-            GUILayout.Label("最終更新時刻", GUILayout.Width(150));
+            GUILayout.Label("最終更新時刻", GUILayout.Width(200));
             GUILayout.Label("操作", GUILayout.ExpandWidth(true));
             EditorGUILayout.EndHorizontal();
 
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            
             foreach (var ticket in ticketList)
             {
-                var rowRect = EditorGUILayout.BeginHorizontal();
-                GUILayout.Label(ticket.sceneName, GUILayout.Width(150));
+                var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
                 
                 Color rectColor = new Color(0.2f, 0.6f, 0.2f, 0.3f);
                 if (ticket.isInUse)
@@ -137,28 +140,31 @@ namespace DevelopProducts.TicketSystem
                     rectColor = ticket.userName == savedUserName ? new Color(0.2f, 0.4f, 0.6f, 0.3f) : new Color(0.6f, 0.2f, 0.2f, 0.3f);
                 }
                 EditorGUI.DrawRect(rowRect, rectColor);
+                GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
                 GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
                 GUILayout.Label(ticket.userName, GUILayout.Width(100));
-                GUILayout.Label(ticket.timestamp, GUILayout.ExpandWidth(true));
+                GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
                 
                 bool isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == savedUserName);
                 
                 // 他者のチケットを勝手に解放できないようにする。
                 EditorGUI.BeginDisabledGroup(!isMyTicket && ticket.isInUse);
         
-                if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する"))
+                if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する", GUILayout.Width(70)))
                 {
                     UpdateTicketStatus(ticket);
                 }
         
                 EditorGUI.EndDisabledGroup();
-                if (GUILayout.Button("シーンの位置まで移動"))
+                if (GUILayout.Button("シーンの位置まで移動", GUILayout.Width(150)))
                 {
                     JumpToAsset(ticket.masterPath);
                 }
 
                 EditorGUILayout.EndHorizontal();
             }
+            
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawCreateTab()
