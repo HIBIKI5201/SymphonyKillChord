@@ -76,9 +76,9 @@ namespace DevelopProducts.AnimationControl.Blender
 
             _currentClip = clip;
             _currentBlendClip = blendClip;
-
-            _enterDuration = Mathf.Max(blendClip.EnterDuration, 0.0001f);
-            _exitDuration = Mathf.Max(blendClip.ExitDuration, 0.0001f);
+            // Enter/Exit時間をBPMに応じた速度で調整。
+            _enterDuration = Mathf.Max(blendClip.EnterDuration * _speed, 0.0001f);
+            _exitDuration = Mathf.Max(blendClip.ExitDuration * _speed, 0.0001f);
             // ブレンド時間リセット。
             _blendTime = 0f;
             // ブレンド開始。
