@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
+#if UNITY_EDITOR
 namespace DevelopProducts.TicketSystem
 {
     public class MasterTicketWindow : EditorWindow
@@ -42,7 +43,7 @@ namespace DevelopProducts.TicketSystem
         [MenuItem("Window/MasterTicketWindow")]
         public static void ShowWindow()
         {
-            GetWindow<MasterTicketWindow>("Master Ticket");
+            GetWindow<MasterTicketWindow>("Master Ticket Window");
         }
 
         private void OnEnable()
@@ -100,7 +101,7 @@ namespace DevelopProducts.TicketSystem
 
             if (isLoading)
             {
-                EditorGUILayout.HelpBox("通信中...", MessageType.None);
+                EditorGUILayout.HelpBox("通信中...", MessageType.Info);
                 return;
             }
 
@@ -121,8 +122,8 @@ namespace DevelopProducts.TicketSystem
             GUILayout.Label("シーン名", GUILayout.Width(150));
             GUILayout.Label("状態", GUILayout.Width(60));
             GUILayout.Label("担当者", GUILayout.Width(100));
-            GUILayout.Label("操作", GUILayout.Width(150));
-            GUILayout.Label("最終更新時刻", GUILayout.ExpandWidth(true));
+            GUILayout.Label("最終更新時刻", GUILayout.Width(150));
+            GUILayout.Label("操作", GUILayout.ExpandWidth(true));
             EditorGUILayout.EndHorizontal();
 
             foreach (var ticket in ticketList)
@@ -137,8 +138,8 @@ namespace DevelopProducts.TicketSystem
                 }
                 EditorGUI.DrawRect(rowRect, rectColor);
                 GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
-
                 GUILayout.Label(ticket.userName, GUILayout.Width(100));
+                GUILayout.Label(ticket.timestamp, GUILayout.ExpandWidth(true));
                 
                 bool isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == savedUserName);
                 
@@ -151,7 +152,10 @@ namespace DevelopProducts.TicketSystem
                 }
         
                 EditorGUI.EndDisabledGroup();
-                GUILayout.Label(ticket.timestamp, GUILayout.ExpandWidth(true));
+                if (GUILayout.Button("シーンの位置まで移動"))
+                {
+                    JumpToAsset(ticket.masterPath);
+                }
 
                 EditorGUILayout.EndHorizontal();
             }
@@ -237,7 +241,7 @@ namespace DevelopProducts.TicketSystem
                 }
                 else if (response == "SUCCESS")
                 {
-                    EditorUtility.DisplayDialog("完了", "チケットの発行が完了しました。", "OK");
+                    EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
                     currentTab = 0; // 発行後は一覧タブに切り替える
                 }
                 else
@@ -248,5 +252,22 @@ namespace DevelopProducts.TicketSystem
                 RefreshList();
             };
         }
+        
+        public static void JumpToAsset(string assetPath)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+
+            if (asset != null)
+            {
+                EditorGUIUtility.PingObject(asset);
+                Selection.activeObject = asset;
+            }
+            else
+            {
+                Debug.LogError($"アセットが見つかりませんでした: {assetPath}");
+            }
+        }
     }
 }
+
+#endif
