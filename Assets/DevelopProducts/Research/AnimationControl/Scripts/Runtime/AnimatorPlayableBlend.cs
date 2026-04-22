@@ -7,6 +7,9 @@ using UnityEngine.Playables;
 
 namespace DevelopProducts.AnimationControl.Blender
 {
+    /// <summary>
+    ///     AnimatorControllerとAnimationClipをPlayableでブレンドするクラス。
+    /// </summary>
     public class AnimatorPlayableBlend : IDisposable
     {
         public AnimatorPlayableBlend(AnimationAdaptor adaptor)
@@ -29,9 +32,9 @@ namespace DevelopProducts.AnimationControl.Blender
             {
                 return;
             }
-
+            // AnimationClip → Playable化。
             AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_graph, clip);
-
+            // ルートモーションやIKの影響を受けないように設定。
             clipPlayable.SetApplyFootIK(false);
             clipPlayable.SetApplyPlayableIK(false);
 
@@ -62,10 +65,11 @@ namespace DevelopProducts.AnimationControl.Blender
             }
 
             var playable = blendClip.ClipPlayable;
-
+            // PlayableGraphに接続。
             _graph.Connect(playable, 0, _mixer, 1);
-
+            // 再生開始位置をリセット。
             playable.SetTime(0);
+            // 「再生終了扱い」を解除（再利用対策）。
             playable.SetDone(false);
 
             _currentClip = clip;
@@ -73,8 +77,9 @@ namespace DevelopProducts.AnimationControl.Blender
 
             _enterDuration = Mathf.Max(blendClip.EnterDuration, 0.0001f);
             _exitDuration = Mathf.Max(blendClip.ExitDuration, 0.0001f);
-
+            // ブレンド時間リセット。
             _blendTime = 0f;
+            // ブレンド開始。
             _state = BlendState.Enter;
         }
 
@@ -86,55 +91,55 @@ namespace DevelopProducts.AnimationControl.Blender
             if (!_currentBlendClip.IsValid) { return; }
 
             float deltaTime = Time.deltaTime;
-            
+
             switch (_state)
             {
                 case BlendState.Enter:
-                {
-                    _blendTime += deltaTime;
-
-                    float t = Mathf.Clamp01(_blendTime / _enterDuration);
-
-                    // Controller → Clip
-                    _mixer.SetInputWeight(0, 1f - t);
-                    _mixer.SetInputWeight(1, t);
-
-                    if (t >= 1f)
                     {
-                        _state = BlendState.Play;
+                        _blendTime += deltaTime;
+
+                        float t = Mathf.Clamp01(_blendTime / _enterDuration);
+
+                        // Controller → Clip
+                        _mixer.SetInputWeight(0, 1f - t);
+                        _mixer.SetInputWeight(1, t);
+
+                        if (t >= 1f)
+                        {
+                            _state = BlendState.Play;
+                        }
+                        break;
                     }
-                    break;
-                }
 
                 case BlendState.Play:
-                {
-                    double time = _currentBlendClip.ClipPlayable.GetTime();
-                    float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
-
-                    if (time >= exitStartTime)
                     {
-                        _blendTime = 0f;
-                        _state = BlendState.Exit;
+                        double time = _currentBlendClip.ClipPlayable.GetTime();
+                        float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
+
+                        if (time >= exitStartTime)
+                        {
+                            _blendTime = 0f;
+                            _state = BlendState.Exit;
+                        }
+                        break;
                     }
-                    break;
-                }
 
                 case BlendState.Exit:
-                {
-                    _blendTime += deltaTime;
-
-                    float t = Mathf.Clamp01(_blendTime / _exitDuration);
-
-                    // Clip → Controller
-                    _mixer.SetInputWeight(0, t);
-                    _mixer.SetInputWeight(1, 1f - t);
-
-                    if (t >= 1f)
                     {
-                        _state = BlendState.None;
+                        _blendTime += deltaTime;
+
+                        float t = Mathf.Clamp01(_blendTime / _exitDuration);
+
+                        // Clip → Controller
+                        _mixer.SetInputWeight(0, t);
+                        _mixer.SetInputWeight(1, 1f - t);
+
+                        if (t >= 1f)
+                        {
+                            _state = BlendState.None;
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
 
