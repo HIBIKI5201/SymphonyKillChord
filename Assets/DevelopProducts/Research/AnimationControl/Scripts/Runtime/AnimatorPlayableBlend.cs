@@ -106,6 +106,7 @@ namespace DevelopProducts.AnimationControl.Blender
 
                         if (t >= 1f)
                         {
+                            // ブレンド完了 → Clip再生状態へ。
                             _state = BlendState.Play;
                         }
                         break;
@@ -113,7 +114,9 @@ namespace DevelopProducts.AnimationControl.Blender
 
                 case BlendState.Play:
                     {
+                        // Clipの再生時間を監視して、Exit開始タイミングを判断。
                         double time = _currentBlendClip.ClipPlayable.GetTime();
+                        // Clipの長さからExit開始までの時間を引いた値が、現在の再生時間を超えたらExit開始。
                         float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
 
                         if (time >= exitStartTime)
@@ -136,6 +139,7 @@ namespace DevelopProducts.AnimationControl.Blender
 
                         if (t >= 1f)
                         {
+                            // ブレンド完了 → Clip停止＆状態リセット。
                             _state = BlendState.None;
                         }
                         break;
