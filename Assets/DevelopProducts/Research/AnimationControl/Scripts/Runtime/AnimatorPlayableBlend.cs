@@ -65,6 +65,8 @@ namespace DevelopProducts.AnimationControl.Blender
             }
 
             var playable = blendClip.ClipPlayable;
+            // BPMに応じた速度適用
+            playable.SetSpeed(_speed);
             // PlayableGraphに接続。
             _graph.Connect(playable, 0, _mixer, 1);
             // 再生開始位置をリセット。
@@ -114,10 +116,12 @@ namespace DevelopProducts.AnimationControl.Blender
 
                 case BlendState.Play:
                     {
-                        // Clipの再生時間を監視して、Exit開始タイミングを判断。
+                        // Clipの再生時間を取得。
                         double time = _currentBlendClip.ClipPlayable.GetTime();
-                        // Clipの長さからExit開始までの時間を引いた値が、現在の再生時間を超えたらExit開始。
-                        float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
+                        // Clipの長さを再生速度で調整。
+                        float adjustedLength = _currentClip.length / _speed;
+                        // Exit開始時間 = 調整後の長さ - Exit時間。  
+                        float exitStartTime = Mathf.Max(0f, adjustedLength - _exitDuration);
 
                         if (time >= exitStartTime)
                         {
@@ -160,8 +164,18 @@ namespace DevelopProducts.AnimationControl.Blender
             _clipMap.Clear();
         }
 
+        /// <summary>
+        ///     BPM（テンポ）に応じた再生速度の設定。
+        /// </summary>
+        /// <param name="bpm"></param>
+        public void SetBPM(float bpm)
+        {
+            _speed = bpm / BASE_BPM;
+        }
+
         private const string ANIMATION_OUTPUT_NAME = "AnimationOutput";
         private const string GRAPH_NAME = "AnimatorPlayableBlend";
+        private const float BASE_BPM = 60f;
 
         private readonly Animator _animator;
         private readonly RuntimeAnimatorController _controller;
@@ -178,6 +192,7 @@ namespace DevelopProducts.AnimationControl.Blender
         private float _enterDuration;
         private float _exitDuration;
         private float _blendTime;
+        private float _speed;
 
         private BlendState _state;
 
