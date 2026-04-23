@@ -56,6 +56,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             );
         }
 
+        /// <summary>
+        ///     プレイヤーが敵の攻撃範囲内か判定する。
+        /// </summary>
+        /// <param name="enemyPosition"></param>
+        /// <param name="playerPosition"></param>
+        /// <returns></returns>
+        public bool IsPlayerInAttackRange(Vector3 enemyPosition, Vector3 playerPosition)
+        {
+            return Vector3.Distance(playerPosition, enemyPosition) <= _enemyMoveSpec.AttackRange.Value;
+        }
+
         private readonly EnemyMoveSpec _enemyMoveSpec;
         private readonly EnemyRaycastDetectService _raycastDetector;
     }
