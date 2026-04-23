@@ -6,20 +6,35 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     ///     ミッションの経過時間を管理するクラス。
     ///     ミッション開始からの経過時間を追跡し、必要に応じて更新することができます。
     /// </summary>
-    public class MissionElapsedTime
+    public readonly struct MissionElapsedTime : IEquatable<MissionElapsedTime>
     {
+        public MissionElapsedTime(float second)
+        {
+            _value = second < 0f ? 0f : second;
+        }
+
         public float Value => _value;
 
-        public void AdvanceTime(float deltaTime)
+        public bool IsOver(float targetTime)
+        {
+            return _value >= targetTime;
+        }
+
+        public MissionElapsedTime AdvanceTime(float deltaTime)
         {
             if (deltaTime < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(deltaTime), "deltaTime must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(deltaTime));
             }
 
-            _value += deltaTime;
+            return new MissionElapsedTime(_value + deltaTime);
         }
 
-        private float _value;
+        public bool Equals(MissionElapsedTime other)
+        {
+            return _value.Equals(other._value);
+        }
+
+        private readonly float _value;
     }
 }

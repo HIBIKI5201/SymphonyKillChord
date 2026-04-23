@@ -16,6 +16,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame;
 using SymphonyFrameWork.System.ServiceLocate;
+using Unity.Behavior;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -34,8 +35,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
-
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
+        [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
+        [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
+        [SerializeField] private EnemyStateFacade _enemyStateFacade;
+        [SerializeField] private EnemySharedFacade _enemySharedFacade;
+        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
@@ -62,6 +67,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
 
+
             // 敵射線判定
             EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
             EnemyRaycastDetectService raycastDetectService = new EnemyRaycastDetectService(raycastController);
@@ -82,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
             // Controller
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -93,6 +99,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // View接続
             _view.Initialize(controller, target);
             _raycastView.Initialize(target, spec.AttackRange.Value);
+
+            // ファサード初期化
+            _enemyMovementAIFacade.Initialize(_view);
+            _enemyBattleAIFacade.Initialize(controller);
+            _enemyStateFacade.Initialize(controller, target, _raycastView, battleState);
+            _enemySharedFacade.Initialize(target);
+
+            // Behavior Graph Agent有効化
+            _behaviorGraphAgent.enabled = true;
         }
 
         private void HandleEnemyDied(CharacterEntity _)

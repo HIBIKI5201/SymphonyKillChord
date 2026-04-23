@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Mission;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Mission
@@ -10,7 +9,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     {
         public MissionProgress()
         {
-            _elapsedTime = new MissionElapsedTime();
+            _elapsedTime = new MissionElapsedTime(0f);
             _enemyKillRecord = new EnemyKillRecord();
             _endReason = MissionEndReason.None;
         }
@@ -21,6 +20,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public bool IsPlayerDead => _isPlayerDead;
         public bool IsFinished => _endReason != MissionEndReason.None;
         public MissionEndReason EndReason => _endReason;
+
+        public void AdvanceTime(float deltaTime)
+        {
+            _elapsedTime.AdvanceTime(deltaTime);
+        }
 
         public void MarkPlayerDead()
         {
@@ -37,7 +41,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _endReason = reason;
         }
 
-        private readonly MissionElapsedTime _elapsedTime;
+        private MissionElapsedTime _elapsedTime;
         private readonly EnemyKillRecord _enemyKillRecord;
 
         private bool _isPlayerDead;

@@ -31,6 +31,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<Vector2>> OnMoveInput;
         public event Action<InputContext<Vector2>> OnLookInput;
 
+        public event Action<InputContext<Vector2>> OnMobileLookInput;
+
         public void OnOption(InputAction.CallbackContext context)
         {
             float time = _timestampProvider.GetCurrentTimestamp();
@@ -124,7 +126,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, value, phase, time);
-            OnLookInput?.Invoke(inputContext);
+            OnMobileLookInput?.Invoke(inputContext);
         }
 
         private const string OPTION_ACTION_NAME = "Option";
