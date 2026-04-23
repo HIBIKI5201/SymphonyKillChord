@@ -205,6 +205,8 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         private void RefreshList()
         {
+            ticketList.Clear();
+            
             if (TicketSystemSettings.instance == null)
             {
                 Debug.LogError("TicketSystemSettingsのインスタンスがありません。");
