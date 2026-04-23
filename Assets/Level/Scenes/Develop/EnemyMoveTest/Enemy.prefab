@@ -142,6 +142,7 @@ MonoBehaviour:
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
   _raycastView: {fileID: 8900643656970599263}
+  _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
