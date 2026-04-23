@@ -30,13 +30,13 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         public static async Task RefreshList()
         {
-            if (CachedTicketDataSingleton.instance == null || CachedTicketDataSingleton.instance.CachedTickets == null)
+            if (CachedTicketDataSingleton.instance == null)
             {
                 Debug.LogError("CachedTicketDataSingletonのインスタンスがありません。");
                 return;
             }
             
-            CachedTicketDataSingleton.instance.CachedTickets.Clear();
+            CachedTicketDataSingleton.instance.Clear();
 
             if (TicketSystemSettings.instance == null)
             {
@@ -77,7 +77,7 @@ namespace DevelopProducts.TicketSystem
 
                 foreach (var ticketData in wrapper.items)
                 {
-                    CachedTicketDataSingleton.instance.CachedTickets.Add(ticketData);
+                    CachedTicketDataSingleton.instance.Add(ticketData);
                 }
             }
             else

@@ -142,7 +142,7 @@ namespace DevelopProducts.TicketSystem
                 return;
             }
 
-            foreach (var ticket in CachedTicketDataSingleton.instance.Get())
+            foreach (var ticket in CachedTicketDataSingleton.instance.GetAll())
             {
                 var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
 
