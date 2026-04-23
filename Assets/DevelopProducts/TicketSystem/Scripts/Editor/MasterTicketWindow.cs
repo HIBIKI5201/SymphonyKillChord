@@ -12,8 +12,6 @@ namespace DevelopProducts.TicketSystem
 {
     public class MasterTicketWindow : EditorWindow
     {
-        // --- 設定項目 ---
-
         // --- 内部データ構造 ---
         [Serializable]
         public class TicketData
@@ -43,8 +41,10 @@ namespace DevelopProducts.TicketSystem
         private readonly Color occupiedByOtherColor = new(0.6f, 0.2f, 0.2f, 0.3f);
         private readonly Color occupiedBySelfColor = new(0.2f, 0.4f, 0.6f, 0.3f);
         private readonly Vector2 minWindowSize = new(800f, 200f);
+        
+        // --- ウィンドウの描画部分 ---
 
-        [MenuItem("Window/MasterTicketWindow")]
+        [MenuItem("Window/Master Ticket Window")]
         public static void ShowWindow()
         {
             GetWindow<MasterTicketWindow>("Master Ticket Window");
@@ -198,25 +198,6 @@ namespace DevelopProducts.TicketSystem
             }
         }
 
-        /// <summary>
-        /// アセットのパスを受け取って、そのアセットをプロジェクトウィンドウで選択状態にする。
-        /// </summary>
-        /// <param name="assetPath"></param>
-        public static void JumpToAsset(string assetPath)
-        {
-            var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
-
-            if (asset != null)
-            {
-                EditorGUIUtility.PingObject(asset);
-                Selection.activeObject = asset;
-            }
-            else
-            {
-                Debug.LogError($"アセットが見つかりませんでした: {assetPath}");
-            }
-        }
-
         // --- 通信処理 ---
 
         /// <summary>
@@ -226,7 +207,7 @@ namespace DevelopProducts.TicketSystem
         {
             isLoading = true;
             var request = UnityWebRequest.Get(TicketSystemSettings.instance.gasUrl);
-
+            
             var operation = request.SendWebRequest();
             operation.completed += (_) =>
             {
@@ -320,6 +301,27 @@ namespace DevelopProducts.TicketSystem
 
                 RefreshList();
             };
+        }
+        
+        // --- その他の機能 ---
+
+        /// <summary>
+        /// アセットのパスを受け取って、そのアセットをプロジェクトウィンドウで選択状態にする。
+        /// </summary>
+        /// <param name="assetPath"></param>
+        public static void JumpToAsset(string assetPath)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+
+            if (asset != null)
+            {
+                EditorGUIUtility.PingObject(asset);
+                Selection.activeObject = asset;
+            }
+            else
+            {
+                Debug.LogError($"アセットが見つかりませんでした: {assetPath}");
+            }
         }
 
         /// <summary>
