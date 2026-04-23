@@ -10,6 +10,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     {
         public MissionElapsedTime(float second)
         {
+            if (float.IsNaN(second) || float.IsInfinity(second))
+            {
+                throw new ArgumentOutOfRangeException(
+                nameof(second),
+                "second must be finite.");
+            }
+
             _value = second < 0f ? 0f : second;
         }
 
@@ -22,9 +29,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         public MissionElapsedTime AdvanceTime(float deltaTime)
         {
-            if (deltaTime < 0)
+            if (deltaTime < 0f || float.IsNaN(deltaTime) || float.IsInfinity(deltaTime))
             {
-                throw new ArgumentOutOfRangeException(nameof(deltaTime));
+                throw new ArgumentOutOfRangeException(
+                nameof(deltaTime),
+                "deltaTime must be non-negative and finite.");
             }
 
             return new MissionElapsedTime(_value + deltaTime);
