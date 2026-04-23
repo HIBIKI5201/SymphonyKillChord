@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
     {
         public void Execute(MissionProgress progress, float deltaTime)
         {
-            progress.ElapsedTime.AdvanceTime(deltaTime);
+            progress.AdvanceTime(deltaTime);
         }
     }
 }
