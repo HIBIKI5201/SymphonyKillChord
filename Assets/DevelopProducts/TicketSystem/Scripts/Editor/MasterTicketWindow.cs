@@ -33,7 +33,7 @@ namespace DevelopProducts.TicketSystem
         private string savedUserName = "";
         private string inputNameBuffer = "";
         private int currentTab;
-        private List<TicketData> ticketList = new();
+        private readonly List<TicketData> ticketList = new();
         private bool isLoading;
         private Vector2 scrollPos;
 
@@ -41,7 +41,7 @@ namespace DevelopProducts.TicketSystem
         private readonly Color occupiedByOtherColor = new(0.6f, 0.2f, 0.2f, 0.3f);
         private readonly Color occupiedBySelfColor = new(0.2f, 0.4f, 0.6f, 0.3f);
         private readonly Vector2 minWindowSize = new(800f, 200f);
-        
+
         // --- ウィンドウの描画部分 ---
 
         [MenuItem("Window/Master Ticket Window")]
@@ -205,20 +205,55 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         private void RefreshList()
         {
+            if (TicketSystemSettings.instance == null)
+            {
+                Debug.LogError("TicketSystemSettingsのインスタンスがありません。");
+                return;
+            }
+
+            var url = TicketSystemSettings.instance.gasUrl;
+            if (string.IsNullOrEmpty(url))
+            {
+                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystemSettings]からURLを設定してください。");
+                return;
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            {
+                Debug.LogError("無効なGAS URLです。URLは有効なHTTPS形式である必要があります。");
+                return;
+            }
+
             isLoading = true;
-            var request = UnityWebRequest.Get(TicketSystemSettings.instance.gasUrl);
-            
+            var request = UnityWebRequest.Get(url);
             var operation = request.SendWebRequest();
             operation.completed += (_) =>
             {
                 if (request.result == UnityWebRequest.Result.Success)
                 {
                     var json = "{\"items\":" + request.downloadHandler.text + "}";
-                    ticketList = JsonUtility.FromJson<TicketListWrapper>(json).items;
+                    var wrapper = JsonUtility.FromJson<TicketListWrapper>(json);
+                    if (wrapper?.items == null)
+                    {
+                        Debug.LogError("JSONのパースに失敗しました。レスポンスが正しい形式ではありません。");
+                        isLoading = false;
+                        Repaint();
+                        return;
+                    }
+                        
+                    if (wrapper.items.Count == 0)
+                    {
+                        Debug.LogWarning("取得したチケットはありませんでした。");
+                    }
+
+                    foreach (var ticketData in wrapper.items)
+                    {
+                        ticketList.Add(ticketData);
+                    }
                 }
                 else
                 {
-                    Debug.LogError(request.result);
+                    Debug.LogError($"チケットの取得に失敗しました。HTTPエラーコード: {request.responseCode}");
                 }
 
                 isLoading = false;
@@ -302,7 +337,7 @@ namespace DevelopProducts.TicketSystem
                 RefreshList();
             };
         }
-        
+
         // --- その他の機能 ---
 
         /// <summary>
