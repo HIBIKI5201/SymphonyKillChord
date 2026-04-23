@@ -3,6 +3,8 @@ using UnityEditor;
 using UnityEngine.Networking;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
@@ -11,10 +13,6 @@ namespace DevelopProducts.TicketSystem
     public class MasterTicketWindow : EditorWindow
     {
         // --- 設定項目 ---
-        private const string GAS_URL =
-            "https://script.google.com/macros/s/AKfycbxbz52y03Es5s6tzkHP7CUUFEPQR4KWhoaV0i_IbCfkwhSISjgzgSJ6izuAF-GRBJxy/exec";
-
-        private const string API_KEY = "1234";
 
         // --- 内部データ構造 ---
         [Serializable]
@@ -40,7 +38,7 @@ namespace DevelopProducts.TicketSystem
         private List<TicketData> ticketList = new();
         private bool isLoading;
         private Vector2 scrollPos;
-        
+
         private readonly Color emptyColor = new(0.2f, 0.6f, 0.2f, 0.3f);
         private readonly Color occupiedByOtherColor = new(0.6f, 0.2f, 0.2f, 0.3f);
         private readonly Color occupiedBySelfColor = new(0.2f, 0.4f, 0.6f, 0.3f);
@@ -111,7 +109,7 @@ namespace DevelopProducts.TicketSystem
             EditorGUILayout.EndHorizontal();
 
             currentTab = GUILayout.Toolbar(currentTab, new[] { "一覧表示 (List)", "新規作成 (Create)" });
-            
+
             if (isLoading)
             {
                 EditorGUILayout.HelpBox("通信中...", MessageType.Info);
@@ -227,7 +225,8 @@ namespace DevelopProducts.TicketSystem
         private void RefreshList()
         {
             isLoading = true;
-            var request = UnityWebRequest.Get(GAS_URL);
+            var request = UnityWebRequest.Get(TicketSystemSettings.instance.gasUrl);
+
             var operation = request.SendWebRequest();
             operation.completed += (_) =>
             {
@@ -235,6 +234,10 @@ namespace DevelopProducts.TicketSystem
                 {
                     var json = "{\"items\":" + request.downloadHandler.text + "}";
                     ticketList = JsonUtility.FromJson<TicketListWrapper>(json).items;
+                }
+                else
+                {
+                    Debug.LogError(request.result);
                 }
 
                 isLoading = false;
@@ -269,7 +272,7 @@ namespace DevelopProducts.TicketSystem
         private void UpdateTicketStatus(TicketData ticket)
         {
             isLoading = true;
-            ticket.userName = ticket.isInUse ? "" : savedUserName;
+            ticket.userName = savedUserName;
             ticket.isInUse = !ticket.isInUse;
             SendPost("update", ticket);
         }
@@ -282,10 +285,11 @@ namespace DevelopProducts.TicketSystem
         private void SendPost(string action, TicketData data)
         {
             var json = JsonUtility.ToJson(data);
-            json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{API_KEY}\",");
+            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apyKey);
+            json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
 
-            var request = new UnityWebRequest(GAS_URL, "POST");
-            var bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+            var request = new UnityWebRequest(TicketSystemSettings.instance.gasUrl, "POST");
+            var bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
@@ -316,6 +320,24 @@ namespace DevelopProducts.TicketSystem
 
                 RefreshList();
             };
+        }
+
+        /// <summary>
+        /// 文字列を受け取って、その文字列のSHA256ハッシュを返す。
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string GetSha256Hash(string input)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+            var sb = new StringBuilder();
+            foreach (var b in bytes)
+            {
+                sb.Append(b.ToString("x2"));
+            }
+
+            return sb.ToString();
         }
     }
 }
