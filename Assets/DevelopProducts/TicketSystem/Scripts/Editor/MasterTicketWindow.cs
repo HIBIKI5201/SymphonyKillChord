@@ -285,7 +285,7 @@ namespace DevelopProducts.TicketSystem
         private void SendPost(string action, TicketData data)
         {
             var json = JsonUtility.ToJson(data);
-            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apyKey);
+            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apiKey);
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
 
             var request = new UnityWebRequest(TicketSystemSettings.instance.gasUrl, "POST");

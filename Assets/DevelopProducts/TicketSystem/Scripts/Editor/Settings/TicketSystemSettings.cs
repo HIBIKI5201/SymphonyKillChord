@@ -7,7 +7,7 @@ namespace DevelopProducts.TicketSystem
     public class TicketSystemSettings : ScriptableSingleton<TicketSystemSettings>
     {
         public string gasUrl;
-        public string apyKey;
+        public string apiKey;
         
         public void Save()
         {
