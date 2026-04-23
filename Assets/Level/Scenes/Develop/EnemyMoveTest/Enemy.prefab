@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -7434688505541404117}
   - component: {fileID: 3390705430803442452}
   - component: {fileID: -4884515779302669640}
+  - component: {fileID: -117008544252888282}
   - component: {fileID: 2029437041226520640}
   - component: {fileID: 3385280616353316531}
   m_Layer: 8
@@ -142,6 +143,7 @@ MonoBehaviour:
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
   _raycastView: {fileID: 8900643656970599263}
+  _nearestAttackPositionSearchView: {fileID: -117008544252888282}
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
@@ -224,6 +226,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5a2a21d028db5249907b5089a9abb9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemySharedFacade
+--- !u!114 &-117008544252888282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb301460f23ceb4487a40ab685fb704, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.NearestAttackPositionSearchView
+  _samplingCount: 24
+  _searchInterval: 0.16
+  _agent: {fileID: 3385280616353316531}
+  _raycastView: {fileID: 8900643656970599263}
 --- !u!114 &2029437041226520640
 MonoBehaviour:
   m_ObjectHideFlags: 0

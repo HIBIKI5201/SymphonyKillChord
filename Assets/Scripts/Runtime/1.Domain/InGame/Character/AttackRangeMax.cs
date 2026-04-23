@@ -1,13 +1,13 @@
 using System;
 
-namespace KillChord.Runtime.Domain.InGame.Character
+namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
-    ///     射程距離を表す値オブジェクト。
+    ///     最小射程距離を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackRange
+    public readonly struct AttackRangeMax
     {
-        public AttackRange(float value)
+        public AttackRangeMax(float value)
         {
             if (value < 0)
             {
@@ -23,14 +23,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         public float Value => _value;
 
-        public bool Equals(AttackRange other)
+        public bool Equals(AttackRangeMax other)
         {
             return _value.Equals(other._value);
         }
 
         public override bool Equals(object obj)
         {
-            return obj is AttackRange other && Equals(other);
+            return obj is AttackRangeMax other && Equals(other);
         }
 
         public override int GetHashCode()

@@ -12,7 +12,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         {
             return new EnemyMoveSpec(
                 new MoveSpeed(enemyMoveData.MoveSpeed),
-                new AttackRange(enemyMoveData.AttackRange));
+                new AttackRangeMin(enemyMoveData.AttackRangeMin),
+                new AttackRangeMax(enemyMoveData.AttackRangeMax));
         }
 
         public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)

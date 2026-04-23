@@ -69,7 +69,7 @@ public partial class GetStunnedAction : Action
         // 【TODO End】
     }
 
-    // 【TODO START】文字表示処理
+    // 【TODO START】文字表示処理。開発段階用のもので、アニメーション実装できたらこの辺を削除する。
     public void CreateTextObject(string text, GameObject parent)
     {
         Vector3 pos = GetBoundsOffset(parent);

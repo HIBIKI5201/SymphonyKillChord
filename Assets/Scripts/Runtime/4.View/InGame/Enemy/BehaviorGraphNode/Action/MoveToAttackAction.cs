@@ -6,15 +6,15 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "ChaseTarget", story: "攻撃対象を追跡する [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
-public partial class ChaseTargetAction : Action
+[NodeDescription(name: "ChaseTarget", story: "攻撃可能な位置まで移動 [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
+public partial class MoveToAttackAction : Action
 {
     [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;
     [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
     protected override Status OnStart()
     {
         if (Movement?.Value == null || State?.Value == null) return Status.Failure;
-        Movement.Value.ChaseTarget();
+        Movement.Value.MoveToAttack();
         return Status.Running;
     }
 
@@ -27,7 +27,7 @@ public partial class ChaseTargetAction : Action
         }
         else
         {
-            Movement.Value.ChaseTarget();
+            Movement.Value.MoveToAttack();
             return Status.Running;
         }
     }
