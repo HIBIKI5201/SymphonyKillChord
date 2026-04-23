@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         public void AdvanceTime(float deltaTime)
         {
-            _elapsedTime.AdvanceTime(deltaTime);
+            _elapsedTime = _elapsedTime.AdvanceTime(deltaTime);
         }
 
         public void MarkPlayerDead()
