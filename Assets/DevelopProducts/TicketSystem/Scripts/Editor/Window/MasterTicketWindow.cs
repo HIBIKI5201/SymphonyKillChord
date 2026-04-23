@@ -38,9 +38,14 @@ namespace DevelopProducts.TicketSystem
             
             if (!string.IsNullOrEmpty(savedUserName))
             {
-                isLoading = true;
-                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+                UpdateTickets();
             }
+        }
+
+        private void UpdateTickets()
+        {
+            isLoading = true;
+            TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
         }
 
         private void OnGUI()
@@ -70,8 +75,7 @@ namespace DevelopProducts.TicketSystem
                 {
                     savedUserName = inputNameBuffer;
                     EditorPrefs.SetString("TicketSystem_UserName", savedUserName);
-                    isLoading = true;
-                    TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+                    UpdateTickets();
                 }
                 else
                 {
@@ -117,8 +121,7 @@ namespace DevelopProducts.TicketSystem
         {
             if (GUILayout.Button("更新", GUILayout.Height(35)))
             {
-                isLoading = true;
-                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+                UpdateTickets();
             }
 
             EditorGUILayout.Space();
@@ -133,13 +136,13 @@ namespace DevelopProducts.TicketSystem
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
             
-            if (CachedTicketDataSingleton.instance == null || CachedTicketDataSingleton.instance.CachedTickets == null)
+            if (CachedTicketDataSingleton.instance == null)
             {
                 EditorGUILayout.HelpBox("チケットデータが利用できません。", MessageType.Warning);
                 return;
             }
 
-            foreach (var ticket in CachedTicketDataSingleton.instance.CachedTickets)
+            foreach (var ticket in CachedTicketDataSingleton.instance.Get())
             {
                 var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
 
