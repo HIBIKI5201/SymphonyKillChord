@@ -1,39 +1,19 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.Networking;
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 namespace DevelopProducts.TicketSystem
 {
+    /// <summary>
+    /// チケットシステムのメインウィンドウを管理するクラス。
+    /// ユーザー名の入力と保存、タブ切り替え、チケットの一覧表示UIを担当する。
+    /// </summary>
     public class MasterTicketWindow : EditorWindow
     {
-        // --- 内部データ構造 ---
-        [Serializable]
-        public class TicketData
-        {
-            public string id;
-            public string sceneName;
-            public bool isInUse;
-            public string userName;
-            public string masterPath;
-            public string timestamp;
-        }
-
-        [Serializable]
-        public class TicketListWrapper
-        {
-            public List<TicketData> items;
-        }
-
         private string savedUserName = "";
         private string inputNameBuffer = "";
         private int currentTab;
-        private readonly List<TicketData> ticketList = new();
         private bool isLoading;
         private Vector2 scrollPos;
 
@@ -55,7 +35,12 @@ namespace DevelopProducts.TicketSystem
             minSize = minWindowSize;
             savedUserName = EditorPrefs.GetString("TicketSystem_UserName", "");
             inputNameBuffer = savedUserName;
-            if (!string.IsNullOrEmpty(savedUserName)) RefreshList();
+            
+            if (!string.IsNullOrEmpty(savedUserName))
+            {
+                isLoading = true;
+                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+            }
         }
 
         private void OnGUI()
@@ -85,7 +70,8 @@ namespace DevelopProducts.TicketSystem
                 {
                     savedUserName = inputNameBuffer;
                     EditorPrefs.SetString("TicketSystem_UserName", savedUserName);
-                    RefreshList();
+                    isLoading = true;
+                    TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
                 }
                 else
                 {
@@ -129,7 +115,11 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         private void DrawListTab()
         {
-            if (GUILayout.Button("更新", GUILayout.Height(35))) RefreshList();
+            if (GUILayout.Button("更新", GUILayout.Height(35)))
+            {
+                isLoading = true;
+                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+            }
 
             EditorGUILayout.Space();
 
@@ -142,8 +132,14 @@ namespace DevelopProducts.TicketSystem
             EditorGUILayout.EndHorizontal();
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            
+            if (CachedTicketDataSingleton.instance == null || CachedTicketDataSingleton.instance.CachedTickets == null)
+            {
+                EditorGUILayout.HelpBox("チケットデータが利用できません。", MessageType.Warning);
+                return;
+            }
 
-            foreach (var ticket in ticketList)
+            foreach (var ticket in CachedTicketDataSingleton.instance.CachedTickets)
             {
                 var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
 
@@ -167,7 +163,9 @@ namespace DevelopProducts.TicketSystem
 
                 if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する", GUILayout.Width(70)))
                 {
-                    UpdateTicketStatus(ticket);
+                    isLoading = true;
+                    TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
+                        .ContinueWith(_ => isLoading = false);
                 }
 
                 EditorGUI.EndDisabledGroup();
@@ -194,150 +192,10 @@ namespace DevelopProducts.TicketSystem
 
             if (GUILayout.Button("チケットを発行して使用開始", GUILayout.Height(40)))
             {
-                CreateTicket(activeScene.name, activeScene.path);
+                isLoading = true;
+                TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, savedUserName)
+                    .ContinueWith(_ => isLoading = false);
             }
-        }
-
-        // --- 通信処理 ---
-
-        /// <summary>
-        /// GASにリクエストを送ってチケットの最新一覧を取得し、ローカルのticketListを更新する。通信中はisLoadingをtrueにしてUIに反映させる。
-        /// </summary>
-        private void RefreshList()
-        {
-            ticketList.Clear();
-            
-            if (TicketSystemSettings.instance == null)
-            {
-                Debug.LogError("TicketSystemSettingsのインスタンスがありません。");
-                return;
-            }
-
-            var url = TicketSystemSettings.instance.gasUrl;
-            if (string.IsNullOrEmpty(url))
-            {
-                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystemSettings]からURLを設定してください。");
-                return;
-            }
-
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
-            {
-                Debug.LogError("無効なGAS URLです。URLは有効なHTTPS形式である必要があります。");
-                return;
-            }
-
-            isLoading = true;
-            var request = UnityWebRequest.Get(url);
-            var operation = request.SendWebRequest();
-            operation.completed += (_) =>
-            {
-                if (request.result == UnityWebRequest.Result.Success)
-                {
-                    var json = "{\"items\":" + request.downloadHandler.text + "}";
-                    var wrapper = JsonUtility.FromJson<TicketListWrapper>(json);
-                    if (wrapper?.items == null)
-                    {
-                        Debug.LogError("JSONのパースに失敗しました。レスポンスが正しい形式ではありません。");
-                        isLoading = false;
-                        Repaint();
-                        return;
-                    }
-                        
-                    if (wrapper.items.Count == 0)
-                    {
-                        Debug.LogWarning("取得したチケットはありませんでした。");
-                    }
-
-                    foreach (var ticketData in wrapper.items)
-                    {
-                        ticketList.Add(ticketData);
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"チケットの取得に失敗しました。HTTPエラーコード: {request.responseCode}");
-                }
-
-                isLoading = false;
-                Repaint();
-            };
-        }
-
-        /// <summary>
-        /// チケットを新規作成して使用開始する。GASにリクエストを送る前に、ローカルのticketオブジェクトの状態を使用中にしておく。
-        /// </summary>
-        /// <param name="sceneName"></param>
-        /// <param name="path"></param>
-        private void CreateTicket(string sceneName, string path)
-        {
-            isLoading = true;
-            var ticket = new TicketData
-            {
-                id = Guid.NewGuid().ToString(),
-                sceneName = sceneName,
-                isInUse = true,
-                userName = savedUserName,
-                masterPath = path
-            };
-
-            SendPost("create", ticket);
-        }
-
-        /// <summary>
-        /// チケットの使用開始・解放を切り替える。GASに更新リクエストを送る前に、ローカルのticketオブジェクトの状態を切り替えておく。
-        /// </summary>
-        /// <param name="ticket"></param>
-        private void UpdateTicketStatus(TicketData ticket)
-        {
-            isLoading = true;
-            ticket.userName = savedUserName;
-            ticket.isInUse = !ticket.isInUse;
-            SendPost("update", ticket);
-        }
-
-        /// <summary>
-        /// GASに対してチケットの作成・更新リクエストを送る共通関数。レスポンスの内容に応じてダイアログを出したり、一覧を更新したりする。
-        /// </summary>
-        /// <param name="action"></param>
-        /// <param name="data"></param>
-        private void SendPost(string action, TicketData data)
-        {
-            var json = JsonUtility.ToJson(data);
-            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apiKey);
-            json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
-
-            var request = new UnityWebRequest(TicketSystemSettings.instance.gasUrl, "POST");
-            var bodyRaw = Encoding.UTF8.GetBytes(json);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            var operation = request.SendWebRequest();
-            operation.completed += (_) =>
-            {
-                isLoading = false;
-                var response = request.downloadHandler.text;
-
-                if (response.StartsWith("ERROR_ALREADY_IN_USE"))
-                {
-                    var occupant = response.Replace("ERROR_ALREADY_IN_USE:", "");
-                    EditorUtility.DisplayDialog("発行失敗",
-                        $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
-                }
-                else if (response == "SUCCESS")
-                {
-                    EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
-
-                    // 発行後は一覧タブに切り替える
-                    currentTab = 0;
-                }
-                else
-                {
-                    Debug.Log(response);
-                }
-
-                RefreshList();
-            };
         }
 
         // --- その他の機能 ---
@@ -346,9 +204,9 @@ namespace DevelopProducts.TicketSystem
         /// アセットのパスを受け取って、そのアセットをプロジェクトウィンドウで選択状態にする。
         /// </summary>
         /// <param name="assetPath"></param>
-        public static void JumpToAsset(string assetPath)
+        private static void JumpToAsset(string assetPath)
         {
-            var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+            var asset = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
 
             if (asset != null)
             {
@@ -359,24 +217,6 @@ namespace DevelopProducts.TicketSystem
             {
                 Debug.LogError($"アセットが見つかりませんでした: {assetPath}");
             }
-        }
-
-        /// <summary>
-        /// 文字列を受け取って、その文字列のSHA256ハッシュを返す。
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public string GetSha256Hash(string input)
-        {
-            using var sha256 = SHA256.Create();
-            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-            var sb = new StringBuilder();
-            foreach (var b in bytes)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-
-            return sb.ToString();
         }
     }
 }
