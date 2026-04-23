@@ -67,10 +67,11 @@ namespace SinfoniaStudio.SinfoniaOperator
                         continue;
                     }
 
+                    string status = statusProperty.Status.Name;
                     // ステータスが完了済みなら終了。
-                    if (statusProperty.Status.Name == _env.TaskDoneStatusName)
+                    if (_env.TaskDoneStatusName.Contains(status))
                     {
-                        Console.WriteLine($"[TaskReader] {pageName}: ステータスが完了済みのためスキップします。");
+                        Console.WriteLine($"[TaskReader] {pageName}: ステータスが{status}のためスキップします。");
                         continue;
                     }
 
