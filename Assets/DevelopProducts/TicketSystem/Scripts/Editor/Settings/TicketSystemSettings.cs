@@ -1,9 +1,8 @@
 using UnityEditor;
-using UnityEngine;
 
 namespace DevelopProducts.TicketSystem
 {
-    [FilePath("ProjectSettings/TicketWindowSettings.asset", FilePathAttribute.Location.ProjectFolder)]
+    [FilePath("UserSettings/TicketWindowSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     public class TicketSystemSettings : ScriptableSingleton<TicketSystemSettings>
     {
         public string gasUrl;
@@ -13,6 +12,5 @@ namespace DevelopProducts.TicketSystem
         {
             Save(false);
         }
-    
     }
 }
