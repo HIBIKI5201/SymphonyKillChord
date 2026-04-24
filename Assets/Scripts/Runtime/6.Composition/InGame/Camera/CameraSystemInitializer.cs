@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private CameraSystemConfig _config;
 
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
 
         public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry,
             bool mobileBuild = false)

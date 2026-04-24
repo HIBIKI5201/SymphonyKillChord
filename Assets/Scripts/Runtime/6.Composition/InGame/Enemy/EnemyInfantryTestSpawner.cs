@@ -13,9 +13,9 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     テスト用のスポナー。
+    ///     テスト用の歩兵スポナー。
     /// </summary>
-    public class EnemyTestSpawner : MonoBehaviour
+    public class EnemyInfantryTestSpawner : MonoBehaviour
     {
         private void Awake()
         {

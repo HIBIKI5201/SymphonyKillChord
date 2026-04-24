@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -19,6 +19,11 @@ namespace KillChord.Runtime.View.InGame
             _target = target;
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+        }
+
+        public Transform GetTargetTransform()
+        {
+            return _target;
         }
 
         /// <summary>

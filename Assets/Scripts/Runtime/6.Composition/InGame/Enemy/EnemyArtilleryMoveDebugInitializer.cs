@@ -23,10 +23,7 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
-    /// <summary>
-    ///     敵移動の依存関係を構築する。
-    /// </summary>
-    public class EnemyMoveDebugInitializer : MonoBehaviour
+    public class EnemyArtilleryMoveDebugInitializer : MonoBehaviour
     {
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
@@ -38,6 +35,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
+        [SerializeField] private ShellSpawner _shellSpawner;
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
@@ -95,8 +93,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
             // Controller
-            EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
+            EnemyArtilleryAttackController attackController = new EnemyArtilleryAttackController(_shellSpawner, battleState);
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
+            attackController.InjectEnemyAIController(controller);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 

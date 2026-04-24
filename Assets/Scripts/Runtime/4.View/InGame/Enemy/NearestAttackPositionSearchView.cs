@@ -3,7 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     最も近い攻撃可能な場所を検索するViewクラス。
