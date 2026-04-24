@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Application.InGame.Player
         /// </summary>
         public Action OnDodgeEnded;
 
-        public bool IsDodhing => _isDodging;
+        public bool IsDodging => _isDodging;
 
         public bool TryDodge(Vector2 input, float currentTime)
         {
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             OnDodgeStarted?.Invoke(_parameter.DodgeDuration);
             return true;
         }
-        public void Update(ref Quaternion rotaition, float time, out Vector3 velocity)
+        public void Update(ref Quaternion rotation, float time, out Vector3 velocity)
         {
             velocity = Vector3.zero;
             if (!_isDodging)
@@ -61,7 +61,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             }
 
             velocity = (float)_parameter.DodgeSpeed * _direction;
-            rotaition = Quaternion.LookRotation(_direction, Vector3.up);
+            rotation = Quaternion.LookRotation(_direction, Vector3.up);
         }
 
         private readonly PlayerMoveParameter _parameter;
