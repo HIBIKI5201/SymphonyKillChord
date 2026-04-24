@@ -149,8 +149,6 @@ namespace DevelopProducts.TicketSystem
         /// <param name="data"></param>
         private static async UniTask SendPost(string action, TicketData data)
         {
-            // チケット情報が更新される際、キャッシュを事前にクリアする。
-            CachedTicketDataSingleton.instance.Clear();
             var json = JsonUtility.ToJson(data);
             var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apiKey);
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
@@ -168,37 +166,52 @@ namespace DevelopProducts.TicketSystem
                 return;
             }
 
-            using var request = new UnityWebRequest(url, "POST");
-            var bodyRaw = Encoding.UTF8.GetBytes(json);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
+            // GASにアクセスする直前に、チケット情報のキャッシュをクリアする。
+            CachedTicketDataSingleton.instance.Clear();
 
-            await request.SendWebRequest();
+            try
+            {
+                using var request = new UnityWebRequest(url, "POST");
+                var bodyRaw = Encoding.UTF8.GetBytes(json);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
 
-            var response = request.downloadHandler.text;
+                await request.SendWebRequest();
 
-            if (response.StartsWith("ERROR_ALREADY_IN_USE"))
-            {
-                var occupant = response.Replace("ERROR_ALREADY_IN_USE:", "");
-                EditorDialog.DisplayAlertDialog("発行失敗",
-                    $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
-            }
-            else if (response.StartsWith("ERROR_APIKEY_MISMATCH"))
-            {
-                EditorDialog.DisplayAlertDialog("発行失敗",
-                    "APIキーが正しくありません。URLとAPIキーの両方が正しいことを確認してください。", "了解");
-            }
-            else if (response == "SUCCESS")
-            {
-                EditorDialog.DisplayAlertDialog("完了", "チケットの更新が完了しました。", "OK");
-            }
-            else
-            {
-                Debug.Log(response);
-            }
+                var response = request.downloadHandler.text;
 
-            await RefreshList();
+                if (response.StartsWith("ERROR_ALREADY_IN_USE"))
+                {
+                    var occupant = response.Replace("ERROR_ALREADY_IN_USE:", "");
+                    EditorDialog.DisplayAlertDialog("発行失敗",
+                        $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
+                }
+                else if (response.StartsWith("ERROR_APIKEY_MISMATCH"))
+                {
+                    EditorDialog.DisplayAlertDialog("発行失敗",
+                        "APIキーが正しくありません。URLとAPIキーの両方が正しいことを確認してください。", "了解");
+                }
+                else if (response == "SUCCESS")
+                {
+                    EditorDialog.DisplayAlertDialog("完了", "チケットの更新が完了しました。", "OK");
+                }
+                else
+                {
+                    // 未定義のGASからのログ処理をデバッグ用に出力。
+                    Debug.Log(response);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"チケットの更新に失敗しました: {e.Message}");
+                EditorDialog.DisplayAlertDialog("通信エラー", "サーバーとの通信に失敗しました。ネットワーク状態を確認してください。", "了解");
+            }
+            finally
+            {
+                // 成否に関わらず最新の状態を取得し、キャッシュを整合させる。
+                await RefreshList();
+            }
         }
 
         /// <summary>
