@@ -57,7 +57,7 @@ namespace DevelopProducts.TicketSystem
                 return;
             }
 
-            var request = UnityWebRequest.Get(url);
+            using var request = UnityWebRequest.Get(url);
             await request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
@@ -168,7 +168,7 @@ namespace DevelopProducts.TicketSystem
                 return;
             }
 
-            var request = new UnityWebRequest(url, "POST");
+            using var request = new UnityWebRequest(url, "POST");
             var bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
