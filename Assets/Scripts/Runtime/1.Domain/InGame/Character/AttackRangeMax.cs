@@ -3,7 +3,7 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
-    ///     最小射程距離を表す値オブジェクト。
+    ///     最大射程距離を表す値オブジェクト。
     /// </summary>
     public readonly struct AttackRangeMax
     {
@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             }
             if (!float.IsFinite(value))
             {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
+                throw new ArgumentException("value must be finite.", nameof(value));
             }
 
             _value = value < 0f ? 0f : value;

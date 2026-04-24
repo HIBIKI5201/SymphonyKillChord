@@ -45,8 +45,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             for (int i = 0; i < _positionSamples.Length; i++)
             {
                 // ここの1fは、NavMesh上でのサンプリングの半径。敵身長の2倍が推奨な値らしい 
-                NavMesh.SamplePosition(_positionSamples[i], out NavMeshHit hit, 1f, NavMesh.AllAreas);
-
+                if (!NavMesh.SamplePosition(_positionSamples[i], out NavMeshHit hit, 1f, NavMesh.AllAreas))
+                {
+                    continue;
+                }
+                _positionSamples[i] = hit.position;
                 // サンプリングポイントからプレイヤーへのパスを計算
                 if (_agent.CalculatePath(_positionSamples[i], _path))
                 {

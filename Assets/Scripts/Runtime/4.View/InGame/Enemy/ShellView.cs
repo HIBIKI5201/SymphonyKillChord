@@ -12,7 +12,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _enemyAIController = enemyAIController;
 
             _overlapResults = new Collider[1];
-            _indicator.material.color = new Color(200, 0, 0, 0.1f);
+            _indicator.material.color = new Color(1, 0, 0, 0.1f);
             _indicator.transform.localScale = new Vector3(_damageRadius * 2, _indicator.transform.localScale.y, _damageRadius * 2);
         }
 

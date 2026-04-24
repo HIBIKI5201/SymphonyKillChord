@@ -7,7 +7,7 @@ using UnityEngine;
 using Action = Unity.Behavior.Action;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "ChaseTarget", story: "攻撃可能な位置まで移動 [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
+[NodeDescription(name: "MoveToAttack", story: "攻撃可能な位置まで移動 [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
 public partial class MoveToAttackAction : Action
 {
     [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;
