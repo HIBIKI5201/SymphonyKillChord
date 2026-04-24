@@ -181,17 +181,17 @@ namespace DevelopProducts.TicketSystem
             if (response.StartsWith("ERROR_ALREADY_IN_USE"))
             {
                 var occupant = response.Replace("ERROR_ALREADY_IN_USE:", "");
-                EditorUtility.DisplayDialog("発行失敗",
+                EditorDialog.DisplayAlertDialog("発行失敗",
                     $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
             }
             else if (response.StartsWith("ERROR_APIKEY_MISMATCH"))
             {
-                EditorUtility.DisplayDialog("発行失敗",
+                EditorDialog.DisplayAlertDialog("発行失敗",
                     "APIキーが正しくありません。URLとAPIキーの両方が正しいことを確認してください。", "了解");
             }
             else if (response == "SUCCESS")
             {
-                EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
+                EditorDialog.DisplayAlertDialog("完了", "チケットの更新が完了しました。", "OK");
             }
             else
             {
