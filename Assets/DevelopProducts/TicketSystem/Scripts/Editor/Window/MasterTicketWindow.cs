@@ -107,7 +107,7 @@ namespace DevelopProducts.TicketSystem
             }
 
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
-            
+
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
             foreach (var ticket in cachedTickets)

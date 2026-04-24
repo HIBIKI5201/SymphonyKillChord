@@ -197,7 +197,7 @@ namespace DevelopProducts.TicketSystem
             {
                 Debug.Log(response);
             }
-            
+
             await RefreshList();
         }
 

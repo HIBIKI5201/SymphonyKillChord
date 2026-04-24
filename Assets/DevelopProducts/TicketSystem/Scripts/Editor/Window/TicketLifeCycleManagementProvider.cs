@@ -14,7 +14,8 @@ namespace DevelopProducts.TicketSystem
         private string currentUserName;
         private Vector2 scrollPos;
 
-        private TicketLifeCycleManagementProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null)
+        private TicketLifeCycleManagementProvider(string path, SettingsScope scopes,
+            IEnumerable<string> keywords = null)
             :
             base(path, scopes, keywords)
         {
@@ -49,6 +50,9 @@ namespace DevelopProducts.TicketSystem
             }
         }
 
+        /// <summary>
+        /// チケットの破棄用UI。現在キャッシュされているチケットの一覧を表示し、各チケットに対して破棄ボタンを置く。
+        /// </summary>
         private void DrawDisposeTab()
         {
             EditorGUILayout.HelpBox("削除するチケットのシーンを選択", MessageType.Warning);
