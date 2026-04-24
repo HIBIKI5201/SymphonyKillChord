@@ -10,8 +10,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     砲弾を生成する。
         /// </summary>
-        /// <param name="spawnPosition"></param>
-        /// <param name="targetPosition"></param>
+        /// <param name="enemyAIController"></param>
         public void SpawnShell(EnemyAIController enemyAIController);
     }
 }
