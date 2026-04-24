@@ -38,7 +38,6 @@ namespace DevelopProducts.TicketSystem
             cachedTickets.Clear();
             cachedTickets.AddRange(ticketDataList);
             Sort(cachedTickets);
-            OnTicketAdded?.Invoke();
         }
 
         /// <summary>
@@ -72,12 +71,6 @@ namespace DevelopProducts.TicketSystem
                 return string.Compare(a.sceneName, b.sceneName, StringComparison.Ordinal);
             });
         }
-
-        /// <summary>
-        /// チケットが追加されたときに呼ばれるイベント。
-        /// UI側でこのイベントを購読しておけば、チケットが追加されたときに自動的にUIを更新できる。
-        /// </summary>
-        public event Action OnTicketAdded;
     }
 
     // --- 内部データ構造 ---
