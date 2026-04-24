@@ -88,7 +88,10 @@ namespace DevelopProducts.TicketSystem
                 GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
                 GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
                 GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
-                if (GUILayout.Button("破棄", GUILayout.Width(200)))
+                var isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
+                EditorGUILayout.EndHorizontal();
+
+                if (isDispose)
                 {
                     var result = EditorDialog.DisplayDecisionDialog(
                         "チケット破棄の確認",
@@ -96,19 +99,19 @@ namespace DevelopProducts.TicketSystem
                         "破棄する",
                         "キャンセル");
 
-                    if (!result) return;
-                    isLoading = true;
-                    TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                        .ContinueWith(() =>
-                        {
-                            isLoading = false;
-                            EditorApplication.delayCall += Repaint;
-                        });
+                    if (result)
+                    {
+                        isLoading = true;
+                        TicketSystemWebClient.DisposeTicket(ticket.sceneName)
+                            .ContinueWith(() =>
+                            {
+                                isLoading = false;
+                                EditorApplication.delayCall += Repaint;
+                            });
+                    }
 
                     break;
                 }
-
-                EditorGUILayout.EndHorizontal();
             }
 
             EditorGUILayout.EndScrollView();
