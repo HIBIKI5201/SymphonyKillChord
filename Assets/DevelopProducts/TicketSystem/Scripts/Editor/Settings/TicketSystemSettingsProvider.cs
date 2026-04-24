@@ -7,10 +7,11 @@ namespace DevelopProducts.TicketSystem
 {
     public class TicketSystemSettingsProvider : SettingsProvider
     {
-        private const string SETTINGS_PATH = "Project/TicketWindowSettings/Editor";
+        private const string SETTINGS_PATH = "Project/TicketSystem/Editor";
         private Editor _editor;
 
-        private TicketSystemSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords)
+        private TicketSystemSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) :
+            base(path, scopes, keywords)
         {
         }
 
