@@ -43,7 +43,11 @@ namespace DevelopProducts.TicketSystem
         private void UpdateTickets()
         {
             isLoading = true;
-            TicketSystemWebClient.RefreshList().ContinueWith(() => isLoading = false);
+            TicketSystemWebClient.RefreshList().ContinueWith(() =>
+            {
+                isLoading = false;
+                EditorApplication.delayCall += Repaint;
+            });
         }
 
         private void OnGUI()
@@ -137,7 +141,11 @@ namespace DevelopProducts.TicketSystem
                 {
                     isLoading = true;
                     TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
-                        .ContinueWith(() => isLoading = false);
+                        .ContinueWith(() =>
+                        {
+                            isLoading = false;
+                            EditorApplication.delayCall += Repaint;
+                        });
                 }
 
                 EditorGUI.EndDisabledGroup();

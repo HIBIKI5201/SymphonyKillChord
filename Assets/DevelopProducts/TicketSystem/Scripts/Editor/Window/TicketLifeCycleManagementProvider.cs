@@ -99,7 +99,11 @@ namespace DevelopProducts.TicketSystem
                     if (!result) return;
                     isLoading = true;
                     TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                        .ContinueWith(() => isLoading = false);
+                        .ContinueWith(() =>
+                        {
+                            isLoading = false;
+                            EditorApplication.delayCall += Repaint;
+                        });
 
                     break;
                 }
@@ -125,7 +129,11 @@ namespace DevelopProducts.TicketSystem
             {
                 isLoading = true;
                 TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, currentUserName)
-                    .ContinueWith(() => isLoading = false);
+                    .ContinueWith(() =>
+                    {
+                        isLoading = false;
+                        EditorApplication.delayCall += Repaint;
+                    });
             }
         }
     }
