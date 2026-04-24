@@ -9,9 +9,11 @@ namespace KillChord.Runtime.InfraStructure
     public class EnemyMoveData : ScriptableObject
     {
         public float MoveSpeed => _moveSpeed;
-        public float AttackRange => _attackRange;
+        public float AttackRangeMin => _attackRangeMin;
+        public float AttackRangeMax => _attackRangeMax;
 
         [SerializeField] private float _moveSpeed;
-        [SerializeField] private float _attackRange;
+        [SerializeField] private float _attackRangeMin;
+        [SerializeField] private float _attackRangeMax;
     }
 }

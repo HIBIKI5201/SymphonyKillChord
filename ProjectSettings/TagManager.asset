@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - GameSystem
+  - TouchArea
   layers:
   - Default
   - TransparentFX

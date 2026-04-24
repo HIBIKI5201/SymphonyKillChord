@@ -8,8 +8,10 @@ using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 #if UNITY_EDITOR
 using KillChord.Runtime.Composition.InGame.Debugger;
@@ -27,9 +29,10 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private CameraSystemConfig _config;
 
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
 
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry,
+            bool mobileBuild = false)
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -49,7 +52,9 @@ namespace KillChord.Runtime.Composition
             CameraSystemController controller = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.Init(controller, stageSceneObj.PlayerTransform);
+            _cameraSystem.InitializePC(controller, stageSceneObj.PlayerTransform,
+                ServiceLocator.GetInstance<PlayerInputView>(), mobileBuild);
+
 
 #if UNITY_EDITOR
             _cameraSystem.gameObject

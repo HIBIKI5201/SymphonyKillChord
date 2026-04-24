@@ -10,13 +10,13 @@ namespace KillChord.Runtime.View
         {
             _moveView = moveView;
         }
-        public void ChaseTarget()
+        public void MoveToAttack()
         {
-            _moveView.ChaseTarget();
+            _moveView.MoveToAttack();
         }
-        public void StopChasing()
+        public void StopMoving()
         {
-            _moveView.StopChasing();
+            _moveView.StopMoving();
         }
 
         private EnemyMoveView _moveView;
