@@ -77,8 +77,8 @@ namespace DevelopProducts.AnimationControl.Blender
             _currentClip = clip;
             _currentBlendClip = blendClip;
             // Enter/Exit時間をBPMに応じた速度で調整。
-            _enterDuration = Mathf.Max(blendClip.EnterDuration * _speed, 0.0001f);
-            _exitDuration = Mathf.Max(blendClip.ExitDuration * _speed, 0.0001f);
+            _enterDuration = Mathf.Max(blendClip.EnterDuration / _speed, 0.0001f);
+            _exitDuration = Mathf.Max(blendClip.ExitDuration / _speed, 0.0001f);
             // ブレンド時間リセット。
             _blendTime = 0f;
             // ブレンド開始。
@@ -173,6 +173,11 @@ namespace DevelopProducts.AnimationControl.Blender
             _speed = bpm / BASE_BPM;
         }
 
+        public void SetDiffTime(double diffTime)
+        {
+            _diffTime = diffTime;
+        }
+
         private const string ANIMATION_OUTPUT_NAME = "AnimationOutput";
         private const string GRAPH_NAME = "AnimatorPlayableBlend";
         private const float BASE_BPM = 60f;
@@ -193,6 +198,7 @@ namespace DevelopProducts.AnimationControl.Blender
         private float _exitDuration;
         private float _blendTime;
         private float _speed;
+        private double _diffTime;
 
         private BlendState _state;
 
