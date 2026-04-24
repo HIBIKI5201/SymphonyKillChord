@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 namespace DevelopProducts.TicketSystem
@@ -106,6 +107,7 @@ namespace DevelopProducts.TicketSystem
             }
 
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
             foreach (var ticket in cachedTickets)
@@ -135,7 +137,6 @@ namespace DevelopProducts.TicketSystem
                     isLoading = true;
                     TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
                         .ContinueWith(_ => isLoading = false);
-                    break;
                 }
 
                 EditorGUI.EndDisabledGroup();

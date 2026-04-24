@@ -31,7 +31,7 @@ namespace DevelopProducts.TicketSystem
         /// <param name="path"></param>
         private static void OnSceneSaving(Scene scene, string path)
         {
-            var currentUserName = EditorPrefs.GetString("TicketSystem_UserName", "");
+            var currentUserName = TicketSystemSettings.instance.userName;
             if (string.IsNullOrEmpty(currentUserName))
             {
                 Debug.LogWarning($"ユーザー名が設定されていません。{nameof(SceneSaveObserver)}は現在利用できません。");
