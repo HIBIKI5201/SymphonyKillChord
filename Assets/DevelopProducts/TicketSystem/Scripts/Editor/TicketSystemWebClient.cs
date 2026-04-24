@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Cysharp.Threading.Tasks;
 
 namespace DevelopProducts.TicketSystem
 {
@@ -28,7 +28,7 @@ namespace DevelopProducts.TicketSystem
         /// <summary>
         /// GASにリクエストを送ってチケットの最新一覧を取得し、ローカルのticketListを更新する。
         /// </summary>
-        public static async Task RefreshList()
+        public static async UniTask RefreshList()
         {
             if (CachedTicketDataSingleton.instance == null)
             {
@@ -89,7 +89,7 @@ namespace DevelopProducts.TicketSystem
         /// <param name="sceneName"></param>
         /// <param name="path"></param>
         /// <param name="currentUserName"></param>
-        public static async Task CreateTicket(string sceneName, string path, string currentUserName)
+        public static async UniTask CreateTicket(string sceneName, string path, string currentUserName)
         {
             if (string.IsNullOrEmpty(currentUserName))
             {
@@ -115,7 +115,7 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         /// <param name="ticket"></param>
         /// <param name="currentUserName"></param>
-        public static async Task UpdateTicketStatus(TicketData ticket, string currentUserName)
+        public static async UniTask UpdateTicketStatus(TicketData ticket, string currentUserName)
         {
             if (string.IsNullOrEmpty(currentUserName))
             {
@@ -133,7 +133,7 @@ namespace DevelopProducts.TicketSystem
         /// 指定されたチケットを一覧から完全に削除する。
         /// </summary>
         /// <param name="sceneName"></param>
-        public static async Task DisposeTicket(string sceneName)
+        public static async UniTask DisposeTicket(string sceneName)
         {
             var ticket = new TicketData
             {
@@ -147,7 +147,7 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         /// <param name="action"></param>
         /// <param name="data"></param>
-        private static async Task SendPost(string action, TicketData data)
+        private static async UniTask SendPost(string action, TicketData data)
         {
             // チケット情報が更新される際、キャッシュを事前にクリアする。
             CachedTicketDataSingleton.instance.Clear();

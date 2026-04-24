@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace DevelopProducts.TicketSystem
             EditorSceneManager.sceneSaving += OnSceneSaving;
 
             // エディタ起動時にチケットデータの初期ロードを行う。
-            TicketSystemWebClient.RefreshList().ContinueWith(_ => { Debug.Log("チケットデータの初期ロードが完了しました。"); });
+            TicketSystemWebClient.RefreshList().ContinueWith(() => Debug.Log("チケットデータの初期ロードが完了しました。"));
         }
 
         /// <summary>

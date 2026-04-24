@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -60,7 +61,7 @@ namespace DevelopProducts.TicketSystem
             if (GUILayout.Button("更新", GUILayout.Height(35)))
             {
                 isLoading = true;
-                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+                TicketSystemWebClient.RefreshList().ContinueWith(() => isLoading = false);
             }
 
             EditorGUILayout.Space();
@@ -98,7 +99,7 @@ namespace DevelopProducts.TicketSystem
                     if (!result) return;
                     isLoading = true;
                     TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                        .ContinueWith(_ => isLoading = false);
+                        .ContinueWith(() => isLoading = false);
 
                     break;
                 }
@@ -124,7 +125,7 @@ namespace DevelopProducts.TicketSystem
             {
                 isLoading = true;
                 TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, currentUserName)
-                    .ContinueWith(_ => isLoading = false);
+                    .ContinueWith(() => isLoading = false);
             }
         }
     }
