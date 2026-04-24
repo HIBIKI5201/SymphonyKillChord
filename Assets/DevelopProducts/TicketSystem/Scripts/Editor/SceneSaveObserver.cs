@@ -46,7 +46,7 @@ namespace DevelopProducts.TicketSystem
             {
                 if (ticketData.sceneName != scene.name) continue;
 
-                // 自信が使用中のチケットは無視する。
+                // 自身が使用中のチケットは無視する。
                 if (ticketData.userName == currentUserName) continue;
 
                 // 見つかったチケットの使用状況に応じて、警告ダイアログを表示する。
