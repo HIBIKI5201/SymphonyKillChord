@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 namespace DevelopProducts.TicketSystem
@@ -12,8 +11,6 @@ namespace DevelopProducts.TicketSystem
     public class MasterTicketWindow : EditorWindow
     {
         private string savedUserName = "";
-        private string inputNameBuffer = "";
-        private int currentTab;
         private bool isLoading;
         private Vector2 scrollPos;
 
@@ -33,9 +30,8 @@ namespace DevelopProducts.TicketSystem
         private void OnEnable()
         {
             minSize = minWindowSize;
-            savedUserName = EditorPrefs.GetString("TicketSystem_UserName", "");
-            inputNameBuffer = savedUserName;
-            
+            savedUserName = TicketSystemSettings.instance.userName;
+
             if (!string.IsNullOrEmpty(savedUserName))
             {
                 UpdateTickets();
@@ -50,38 +46,18 @@ namespace DevelopProducts.TicketSystem
 
         private void OnGUI()
         {
-            // savedUserNameが空の間だけ、入力用UIを表示し続ける
+            if (savedUserName != null && savedUserName != TicketSystemSettings.instance.userName)
+            {
+                savedUserName = TicketSystemSettings.instance.userName;
+            }
+
             if (string.IsNullOrEmpty(savedUserName))
             {
-                DrawSetupUI();
+                EditorGUILayout.HelpBox("ユーザー名を設定してください。設定するまでメイン機能は使えません。", MessageType.Warning);
+                return;
             }
-            else
-            {
-                DrawMainUI();
-            }
-        }
 
-        /// <summary>
-        /// ユーザー名の入力と保存のUIを描画する。ユーザー名が保存されるまでは、他のUIは表示しないようにする。
-        /// </summary>
-        private void DrawSetupUI()
-        {
-            EditorGUILayout.HelpBox("ユーザー名を設定してください。設定するまでメイン機能は使えません。", MessageType.Info);
-            inputNameBuffer = EditorGUILayout.TextField("ユーザー名", inputNameBuffer);
-
-            if (GUILayout.Button("保存して開始", GUILayout.Height(50)))
-            {
-                if (!string.IsNullOrEmpty(inputNameBuffer))
-                {
-                    savedUserName = inputNameBuffer;
-                    EditorPrefs.SetString("TicketSystem_UserName", savedUserName);
-                    UpdateTickets();
-                }
-                else
-                {
-                    EditorUtility.DisplayDialog("エラー", "名前を入力してください。", "OK");
-                }
-            }
+            DrawMainUI();
         }
 
         /// <summary>
@@ -90,15 +66,8 @@ namespace DevelopProducts.TicketSystem
         private void DrawMainUI()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            GUILayout.Label($"ユーザー: {savedUserName}");
-            if (GUILayout.Button("名前変更", EditorStyles.toolbarButton))
-            {
-                savedUserName = "";
-            }
-
+            EditorGUILayout.LabelField($"ユーザー: {savedUserName}");
             EditorGUILayout.EndHorizontal();
-
-            currentTab = GUILayout.Toolbar(currentTab, new[] { "一覧表示 (List)", "新規作成 (Create)" });
 
             if (isLoading)
             {
@@ -106,11 +75,7 @@ namespace DevelopProducts.TicketSystem
                 return;
             }
 
-            switch (currentTab)
-            {
-                case 0: DrawListTab(); break;
-                case 1: DrawCreateTab(); break;
-            }
+            DrawListTab();
         }
 
         /// <summary>
@@ -134,20 +99,14 @@ namespace DevelopProducts.TicketSystem
             GUILayout.Label("操作", GUILayout.ExpandWidth(true));
             EditorGUILayout.EndHorizontal();
 
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            
             if (CachedTicketDataSingleton.instance == null)
             {
                 EditorGUILayout.HelpBox("チケットデータが利用できません。", MessageType.Warning);
                 return;
             }
-            
+
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
-            if (cachedTickets.Count == 0)
-            {
-                Debug.LogWarning("キャッシュされたチケットがありませんでした。");
-                return;
-            }
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
             foreach (var ticket in cachedTickets)
             {
@@ -189,23 +148,6 @@ namespace DevelopProducts.TicketSystem
             }
 
             EditorGUILayout.EndScrollView();
-        }
-
-        /// <summary>
-        /// チケットの新規作成用UI。現在アクティブなシーンの情報を表示して、そのシーンに対するチケットを発行するボタンを置く。
-        /// </summary>
-        private void DrawCreateTab()
-        {
-            var activeScene = SceneManager.GetActiveScene();
-            EditorGUILayout.LabelField("対象シーン", activeScene.name);
-            EditorGUILayout.LabelField("パス", activeScene.path);
-
-            if (GUILayout.Button("チケットを発行して使用開始", GUILayout.Height(40)))
-            {
-                isLoading = true;
-                TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, savedUserName)
-                    .ContinueWith(_ => isLoading = false);
-            }
         }
 
         // --- その他の機能 ---

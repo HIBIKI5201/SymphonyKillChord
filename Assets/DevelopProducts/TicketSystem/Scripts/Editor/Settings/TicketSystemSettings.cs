@@ -7,7 +7,8 @@ namespace DevelopProducts.TicketSystem
     {
         public string gasUrl;
         public string apiKey;
-        
+        public string userName;
+
         public void Save()
         {
             Save(false);

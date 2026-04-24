@@ -35,7 +35,7 @@ namespace DevelopProducts.TicketSystem
                 Debug.LogError("CachedTicketDataSingletonのインスタンスがありません。");
                 return;
             }
-            
+
             CachedTicketDataSingleton.instance.Clear();
 
             if (TicketSystemSettings.instance == null)
@@ -47,7 +47,7 @@ namespace DevelopProducts.TicketSystem
             var url = TicketSystemSettings.instance.gasUrl;
             if (string.IsNullOrEmpty(url))
             {
-                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystemSettings]からURLを設定してください。");
+                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystem]からURLを設定してください。");
                 return;
             }
 
@@ -91,6 +91,13 @@ namespace DevelopProducts.TicketSystem
         /// <param name="currentUserName"></param>
         public static async Task CreateTicket(string sceneName, string path, string currentUserName)
         {
+            if (string.IsNullOrEmpty(currentUserName))
+            {
+                Debug.LogWarning(
+                    "ユーザー名が設定されていません。チケットを作成する前に、[Edit > ProjectSettings > TicketSystem]からユーザー名を設定してください。");
+                return;
+            }
+
             var ticket = new TicketData
             {
                 id = Guid.NewGuid().ToString(),
@@ -110,6 +117,13 @@ namespace DevelopProducts.TicketSystem
         /// <param name="currentUserName"></param>
         public static async Task UpdateTicketStatus(TicketData ticket, string currentUserName)
         {
+            if (string.IsNullOrEmpty(currentUserName))
+            {
+                Debug.LogWarning(
+                    "ユーザー名が設定されていません。チケットを作成する前に、[Edit > ProjectSettings > TicketSystem]からユーザー名を設定してください。");
+                return;
+            }
+
             ticket.userName = currentUserName;
             ticket.isInUse = !ticket.isInUse;
             await SendPost("update", ticket);
@@ -129,7 +143,7 @@ namespace DevelopProducts.TicketSystem
             var url = TicketSystemSettings.instance.gasUrl;
             if (string.IsNullOrEmpty(url))
             {
-                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystemSettings]からURLを設定してください。");
+                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystem]からURLを設定してください。");
                 return;
             }
 
@@ -138,7 +152,7 @@ namespace DevelopProducts.TicketSystem
                 Debug.LogError("無効なGAS URLです。URLは有効なHTTPS形式である必要があります。");
                 return;
             }
-            
+
             var request = new UnityWebRequest(url, "POST");
             var bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -163,13 +177,12 @@ namespace DevelopProducts.TicketSystem
             else if (response == "SUCCESS")
             {
                 EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
+                await RefreshList();
             }
             else
             {
                 Debug.Log(response);
             }
-
-            await RefreshList();
         }
 
         /// <summary>
