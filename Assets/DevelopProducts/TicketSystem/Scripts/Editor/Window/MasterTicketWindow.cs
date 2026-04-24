@@ -52,9 +52,16 @@ namespace DevelopProducts.TicketSystem
 
         private void OnGUI()
         {
-            if (savedUserName != null && savedUserName != TicketSystemSettings.instance.userName)
+            var currentUserName = TicketSystemSettings.instance.userName;
+            if (currentUserName != savedUserName)
             {
-                savedUserName = TicketSystemSettings.instance.userName;
+                var isUserNameEmpty = string.IsNullOrEmpty(savedUserName);
+                savedUserName = currentUserName;
+                if (isUserNameEmpty && !string.IsNullOrEmpty(savedUserName))
+                {
+                    // ユーザー名が新たに設定された場合は、チケットデータを更新する。
+                    UpdateTickets();
+                }
             }
 
             if (string.IsNullOrEmpty(savedUserName))
