@@ -12,4 +12,5 @@ public enum TagsEnum : int
     Player = 1 << 6,
     GameController = 1 << 7,
     GameSystem = 1 << 8,
+    TouchArea = 1 << 9,
 }

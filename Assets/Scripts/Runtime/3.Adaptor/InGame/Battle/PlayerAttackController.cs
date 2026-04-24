@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Utility;
 using System;
 using UnityEngine;
 
@@ -59,6 +60,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Attacker,
                 _battleState.Target,
                 true); // TODO 敵側で射線判定の結果が追加されたため、プレイヤー側は一旦固定値で書く
+
+            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
+            Debug.Log($"[PlayerAttackController]攻撃対象のHashCode：{targetEntity.GetHashCode()}");
+            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.GetHashCode()));
 
             _presenter.Push(result);
             return true;
