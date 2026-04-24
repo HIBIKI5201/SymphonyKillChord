@@ -1,9 +1,9 @@
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Enemy;
 using System;
 using Unity.Behavior;
+using Unity.Properties;
 using UnityEngine;
 using Action = Unity.Behavior.Action;
-using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
 [NodeDescription(name: "GetStunned", story: "被弾硬直を開始する [State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]

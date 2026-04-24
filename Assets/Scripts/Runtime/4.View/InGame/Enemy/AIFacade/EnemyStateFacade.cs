@@ -1,8 +1,9 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     public class EnemyStateFacade : MonoBehaviour, IEnemyStateFacade
     {
