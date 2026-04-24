@@ -141,8 +141,15 @@ namespace DevelopProducts.TicketSystem
                 EditorGUILayout.HelpBox("チケットデータが利用できません。", MessageType.Warning);
                 return;
             }
+            
+            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            if (cachedTickets.Count == 0)
+            {
+                Debug.LogWarning("キャッシュされたチケットがありませんでした。");
+                return;
+            }
 
-            foreach (var ticket in CachedTicketDataSingleton.instance.GetAll())
+            foreach (var ticket in cachedTickets)
             {
                 var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
 

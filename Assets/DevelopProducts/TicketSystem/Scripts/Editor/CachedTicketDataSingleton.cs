@@ -7,7 +7,6 @@ namespace DevelopProducts.TicketSystem
     /// <summary>
     /// 外部APIから取得したチケットデータをキャッシュするクラス
     /// </summary>
-    [FilePath("UserSettings/CachedTicketData.asset", FilePathAttribute.Location.ProjectFolder)]
     public class CachedTicketDataSingleton : ScriptableSingleton<CachedTicketDataSingleton>
     {
         private readonly List<TicketData> cachedTickets = new();
@@ -21,10 +20,11 @@ namespace DevelopProducts.TicketSystem
         {
             cachedTickets.Clear();
         }
-
-        public void Add(TicketData ticketData)
+        
+        public void Set(IEnumerable<TicketData> ticketDataList)
         {
-            cachedTickets.Add(ticketData);
+            cachedTickets.Clear();
+            cachedTickets.AddRange(ticketDataList);
             OnTicketAdded?.Invoke();
         }
 

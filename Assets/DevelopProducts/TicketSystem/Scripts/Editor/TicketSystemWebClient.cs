@@ -24,9 +24,9 @@ namespace DevelopProducts.TicketSystem
         {
             public List<TicketData> items;
         }
-        
+
         /// <summary>
-        /// GASにリクエストを送ってチケットの最新一覧を取得し、ローカルのticketListを更新する。通信中はisLoadingをtrueにしてUIに反映させる。
+        /// GASにリクエストを送ってチケットの最新一覧を取得し、ローカルのticketListを更新する。
         /// </summary>
         public static async Task RefreshList()
         {
@@ -75,10 +75,7 @@ namespace DevelopProducts.TicketSystem
                     Debug.LogWarning("取得したチケットはありませんでした。");
                 }
 
-                foreach (var ticketData in wrapper.items)
-                {
-                    CachedTicketDataSingleton.instance.Add(ticketData);
-                }
+                CachedTicketDataSingleton.instance.Set(wrapper.items);
             }
             else
             {
@@ -129,7 +126,20 @@ namespace DevelopProducts.TicketSystem
             var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apiKey);
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
 
-            var request = new UnityWebRequest(TicketSystemSettings.instance.gasUrl, "POST");
+            var url = TicketSystemSettings.instance.gasUrl;
+            if (string.IsNullOrEmpty(url))
+            {
+                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystemSettings]からURLを設定してください。");
+                return;
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            {
+                Debug.LogError("無効なGAS URLです。URLは有効なHTTPS形式である必要があります。");
+                return;
+            }
+            
+            var request = new UnityWebRequest(url, "POST");
             var bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -145,6 +155,11 @@ namespace DevelopProducts.TicketSystem
                 EditorUtility.DisplayDialog("発行失敗",
                     $"このシーンは現在 {occupant} さんが使用中です。\n作業を始める前に本人に確認してください。", "了解");
             }
+            else if (response.StartsWith("ERROR_APIKEY_MISMATCH"))
+            {
+                EditorUtility.DisplayDialog("発行失敗",
+                    "APIキーが正しくありません。URLとAPIキーの両方が正しいことを確認してください。", "了解");
+            }
             else if (response == "SUCCESS")
             {
                 EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
@@ -159,6 +174,7 @@ namespace DevelopProducts.TicketSystem
 
         /// <summary>
         /// 文字列を受け取って、その文字列のSHA256ハッシュを返す。
+        /// 簡易的なセキュリティ対策用。
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
