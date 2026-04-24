@@ -130,12 +130,27 @@ namespace DevelopProducts.TicketSystem
         }
 
         /// <summary>
+        /// 指定されたチケットを一覧から完全に削除する。
+        /// </summary>
+        /// <param name="sceneName"></param>
+        public static async Task DisposeTicket(string sceneName)
+        {
+            var ticket = new TicketData
+            {
+                sceneName = sceneName,
+            };
+            await SendPost("dispose", ticket);
+        }
+
+        /// <summary>
         /// GASに対してチケットの作成・更新リクエストを送る共通関数。レスポンスの内容に応じてダイアログを出したり、一覧を更新したりする。
         /// </summary>
         /// <param name="action"></param>
         /// <param name="data"></param>
         private static async Task SendPost(string action, TicketData data)
         {
+            // チケット情報が更新される際、キャッシュを事前にクリアする。
+            CachedTicketDataSingleton.instance.Clear();
             var json = JsonUtility.ToJson(data);
             var hashedKey = GetSha256Hash(TicketSystemSettings.instance.apiKey);
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
@@ -177,12 +192,13 @@ namespace DevelopProducts.TicketSystem
             else if (response == "SUCCESS")
             {
                 EditorUtility.DisplayDialog("完了", "チケットの更新が完了しました。", "OK");
-                await RefreshList();
             }
             else
             {
                 Debug.Log(response);
             }
+            
+            await RefreshList();
         }
 
         /// <summary>

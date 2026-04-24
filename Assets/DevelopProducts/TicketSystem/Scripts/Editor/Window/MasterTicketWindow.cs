@@ -135,6 +135,7 @@ namespace DevelopProducts.TicketSystem
                     isLoading = true;
                     TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
                         .ContinueWith(_ => isLoading = false);
+                    break;
                 }
 
                 EditorGUI.EndDisabledGroup();

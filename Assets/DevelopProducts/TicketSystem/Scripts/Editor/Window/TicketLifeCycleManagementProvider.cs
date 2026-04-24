@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -13,8 +12,10 @@ namespace DevelopProducts.TicketSystem
         private bool isLoading;
         private int currentTab;
         private string currentUserName;
+        private Vector2 scrollPos;
 
-        private TicketLifeCycleManagementProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) :
+        private TicketLifeCycleManagementProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null)
+            :
             base(path, scopes, keywords)
         {
         }
@@ -35,11 +36,11 @@ namespace DevelopProducts.TicketSystem
         {
             if (isLoading)
             {
-                EditorGUILayout.LabelField("通信中...");
+                EditorGUILayout.HelpBox("通信中...", MessageType.Info);
                 return;
             }
 
-            currentTab = GUILayout.Toolbar(currentTab, new[] { "チケットの発行", "チケットの返却" });
+            currentTab = GUILayout.Toolbar(currentTab, new[] { "チケットの発行", "チケットの破棄" });
 
             switch (currentTab)
             {
@@ -50,7 +51,58 @@ namespace DevelopProducts.TicketSystem
 
         private void DrawDisposeTab()
         {
-            return;
+            EditorGUILayout.HelpBox("削除するチケットのシーンを選択", MessageType.Warning);
+
+            if (GUILayout.Button("更新", GUILayout.Height(35)))
+            {
+                isLoading = true;
+                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+            }
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            GUILayout.Label("シーン名", GUILayout.Width(100));
+            GUILayout.Label("状態", GUILayout.Width(60));
+            GUILayout.Label("最終更新時刻", GUILayout.Width(200));
+            GUILayout.Label("操作", GUILayout.ExpandWidth(true));
+            EditorGUILayout.EndHorizontal();
+
+            if (CachedTicketDataSingleton.instance == null)
+            {
+                EditorGUILayout.HelpBox("チケットデータが利用できません。", MessageType.Warning);
+                return;
+            }
+
+            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+            foreach (var ticket in cachedTickets)
+            {
+                EditorGUILayout.BeginHorizontal(GUILayout.Height(20));
+                GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
+                GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
+                GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
+                if (GUILayout.Button("破棄", GUILayout.Width(200)))
+                {
+                    var result = EditorDialog.DisplayDecisionDialog(
+                        "チケット破棄の確認",
+                        $"シーン: [{ticket.sceneName}] のチケットを破棄しますか？\nこの操作は元に戻せません。",
+                        "破棄する",
+                        "キャンセル");
+
+                    if (!result) return;
+                    isLoading = true;
+                    TicketSystemWebClient.DisposeTicket(ticket.sceneName)
+                        .ContinueWith(_ => isLoading = false);
+
+                    break;
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.EndScrollView();
         }
 
         /// <summary>
@@ -58,6 +110,7 @@ namespace DevelopProducts.TicketSystem
         /// </summary>
         private void DrawCreateTab()
         {
+            EditorGUILayout.LabelField("新しく作成するチケットの情報", EditorStyles.boldLabel);
             var activeScene = SceneManager.GetActiveScene();
             EditorGUILayout.LabelField("対象シーン", activeScene.name);
             EditorGUILayout.LabelField("パス", activeScene.path);
