@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace DevelopProducts.TicketSystem
             EditorSceneManager.sceneSaving += OnSceneSaving;
 
             // エディタ起動時にチケットデータの初期ロードを行う。
-            TicketSystemWebClient.RefreshList().ContinueWith(_ => { Debug.Log("チケットデータの初期ロードが完了しました。"); });
+            TicketSystemWebClient.RefreshList().ContinueWith(() => Debug.Log("チケットデータの初期ロードが完了しました。"));
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace DevelopProducts.TicketSystem
             {
                 if (ticketData.sceneName != scene.name) continue;
 
-                // 自信が使用中のチケットは無視する。
+                // 自身が使用中のチケットは無視する。
                 if (ticketData.userName == currentUserName) continue;
 
                 // 見つかったチケットの使用状況に応じて、警告ダイアログを表示する。
@@ -54,7 +55,7 @@ namespace DevelopProducts.TicketSystem
                     ? $"編集中のシーン: [{scene.name}] は現在 {ticketData.userName} さんによって使用中です。保存した内容はSourceTreeから破棄することを推奨します。"
                     : $"編集中のシーン: [{scene.name}] は現在チケットとして登録されていますが、使用中になっていません。編集する場合、[Window > Master Ticket Window] からチケット登録をしてください。";
 
-                EditorUtility.DisplayDialog("シーン保存の警告", dialogMessage, "OK");
+                EditorDialog.DisplayAlertDialog("シーン保存の警告", dialogMessage, "OK");
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -60,7 +61,7 @@ namespace DevelopProducts.TicketSystem
             if (GUILayout.Button("更新", GUILayout.Height(35)))
             {
                 isLoading = true;
-                TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+                TicketSystemWebClient.RefreshList().ContinueWith(() => isLoading = false);
             }
 
             EditorGUILayout.Space();
@@ -87,7 +88,10 @@ namespace DevelopProducts.TicketSystem
                 GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
                 GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
                 GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
-                if (GUILayout.Button("破棄", GUILayout.Width(200)))
+                var isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
+                EditorGUILayout.EndHorizontal();
+
+                if (isDispose)
                 {
                     var result = EditorDialog.DisplayDecisionDialog(
                         "チケット破棄の確認",
@@ -95,15 +99,19 @@ namespace DevelopProducts.TicketSystem
                         "破棄する",
                         "キャンセル");
 
-                    if (!result) return;
-                    isLoading = true;
-                    TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                        .ContinueWith(_ => isLoading = false);
+                    if (result)
+                    {
+                        isLoading = true;
+                        TicketSystemWebClient.DisposeTicket(ticket.sceneName)
+                            .ContinueWith(() =>
+                            {
+                                isLoading = false;
+                                EditorApplication.delayCall += Repaint;
+                            });
+                    }
 
                     break;
                 }
-
-                EditorGUILayout.EndHorizontal();
             }
 
             EditorGUILayout.EndScrollView();
@@ -124,7 +132,11 @@ namespace DevelopProducts.TicketSystem
             {
                 isLoading = true;
                 TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, currentUserName)
-                    .ContinueWith(_ => isLoading = false);
+                    .ContinueWith(() =>
+                    {
+                        isLoading = false;
+                        EditorApplication.delayCall += Repaint;
+                    });
             }
         }
     }

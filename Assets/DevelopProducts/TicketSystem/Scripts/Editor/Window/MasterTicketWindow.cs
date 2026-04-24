@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
@@ -42,7 +43,11 @@ namespace DevelopProducts.TicketSystem
         private void UpdateTickets()
         {
             isLoading = true;
-            TicketSystemWebClient.RefreshList().ContinueWith(_ => isLoading = false);
+            TicketSystemWebClient.RefreshList().ContinueWith(() =>
+            {
+                isLoading = false;
+                EditorApplication.delayCall += Repaint;
+            });
         }
 
         private void OnGUI()
@@ -136,7 +141,11 @@ namespace DevelopProducts.TicketSystem
                 {
                     isLoading = true;
                     TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
-                        .ContinueWith(_ => isLoading = false);
+                        .ContinueWith(() =>
+                        {
+                            isLoading = false;
+                            EditorApplication.delayCall += Repaint;
+                        });
                 }
 
                 EditorGUI.EndDisabledGroup();
