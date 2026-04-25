@@ -10,9 +10,6 @@ namespace KillChord.Runtime.View
             _inputController = inputController;
         }
 
-        [System.Obsolete("Use Initialize")]
-        public void Initilize(InputController inputController) => Initialize(inputController);
-
         private void Update()
         {
             if (_inputController == null) return;
