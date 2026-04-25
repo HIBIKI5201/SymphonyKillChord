@@ -21,6 +21,7 @@ namespace KillChord.Runtime.Composition
         private AnimationCatalogAsset _animationCatalog;
         [SerializeField]
         private ScenarioSettingsAsset _scenarioSettings;
+        private ScenarioUsecase _usecase;
 
         private async void Start()
         {
@@ -56,17 +57,17 @@ namespace KillChord.Runtime.Composition
                 animationPresenter,
                 viewModel);
 
-            ScenarioUsecase usecase = new ScenarioUsecase(
+            _usecase = new ScenarioUsecase(
                 repository,
                 handlerRepo,
                 gate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            InputController controller = new InputController(gate, usecase);
+            InputController controller = new InputController(gate, _usecase);
             TextEventHandler textHandle = new TextEventHandler(
                 presenterFacade,
-                usecase,
-                usecase,
+                _usecase,
+                _usecase,
                 scenarioSettingsRepository);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
@@ -80,11 +81,21 @@ namespace KillChord.Runtime.Composition
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
             var animationMap = BuildAnimationMap(_animationCatalog);
-            view.Initilize(viewModel, backgroundMap, animationMap);
+            view.Initialize(viewModel, backgroundMap, animationMap);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
-            inputView.Initilize(controller);
-            await usecase.PlayScenario();
+            inputView.Initialize(controller);
+            await _usecase.PlayScenario();
             Debug.Log(Time.time);
+        }
+
+        private void OnDisable()
+        {
+            _usecase?.RequestSkip();
+        }
+
+        private void OnDestroy()
+        {
+            _usecase?.RequestSkip();
         }
 
         private static IReadOnlyDictionary<string, Sprite> BuildBackgroundMap(BackgroundCatalogAsset catalog)
@@ -96,7 +107,8 @@ namespace KillChord.Runtime.Composition
             {
                 var entry = catalog.Entries[i];
                 if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
-                map[entry.Id] = entry.Asset;
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
             }
 
             return map;
@@ -111,7 +123,8 @@ namespace KillChord.Runtime.Composition
             {
                 var entry = catalog.Entries[i];
                 if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
-                map[entry.Id] = entry.Asset;
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
             }
 
             return map;

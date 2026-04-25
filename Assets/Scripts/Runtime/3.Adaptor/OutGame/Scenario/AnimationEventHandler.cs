@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
@@ -13,8 +12,6 @@ namespace KillChord.Runtime.Adaptor
             _animationOutputPort = animationOutputPort;
             _animationRepository = animationRepository;
         }
-
-        public Type EventType => typeof(KillChord.Runtime.Domain.AnimationEvent);
 
         public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
         {

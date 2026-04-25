@@ -7,11 +7,12 @@ namespace KillChord.Runtime.Adaptor
     {
         public FadePresenter(IFadeViewSink viewSink)
         {
-            _viewSink = viewSink;
+            _viewSink = viewSink ?? throw new System.ArgumentNullException(nameof(viewSink));
         }
 
         public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             _viewSink.SetFade(start, end, duration);
             return default;
         }

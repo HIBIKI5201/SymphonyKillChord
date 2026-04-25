@@ -20,7 +20,8 @@ namespace KillChord.Runtime.InfraStructure
                 return false;
             }
 
-            definition = new BackgroundDefinition(entry.Id, entry.Id);
+            string assetKey = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+            definition = new BackgroundDefinition(entry.Id, assetKey);
             return true;
         }
     }
