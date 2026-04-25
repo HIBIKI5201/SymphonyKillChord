@@ -18,13 +18,6 @@ namespace KillChord.Runtime.View
             BuildCatalogMaps(backgroundByKey, animationByKey);
         }
 
-        [System.Obsolete("Use Initialize")]
-        public void Initilize(
-            ViewModel viewModel,
-            IReadOnlyDictionary<string, Sprite> backgroundByKey,
-            IReadOnlyDictionary<string, AnimationClip> animationByKey)
-            => Initialize(viewModel, backgroundByKey, animationByKey);
-
         [SerializeField]
         private TMP_Text _chat;
         [SerializeField]

@@ -37,7 +37,6 @@ namespace KillChord.Runtime.Composition
         }
         private async ValueTask Init()
         {
-            Debug.Log(Time.time);
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
             ViewModel viewModel = new ViewModel();
             ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
@@ -85,7 +84,6 @@ namespace KillChord.Runtime.Composition
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
             inputView.Initialize(controller);
             await _usecase.PlayScenario();
-            Debug.Log(Time.time);
         }
 
         private void OnDisable()

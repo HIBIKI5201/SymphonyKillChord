@@ -51,41 +51,6 @@ namespace KillChord.Runtime.Application
                 // Skip requested: end scenario gracefully.
                 skipped = true;
             }
-            finally
-            {
-                try
-                {
-                    bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
-                    if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
-                    {
-                        await Task.Delay(_settingsRepository.CloseDelayAfterComplete, token);
-                    }
-                }
-                catch (OperationCanceledException) when (token.IsCancellationRequested)
-                {
-                    // Skip cancellation should end immediately.
-                }
-
-                try
-                {
-                    await _completionNotifier.NotifyCompletedAsync(skipped, token);
-                }
-                catch (OperationCanceledException) when (token.IsCancellationRequested)
-                {
-                    // Skip cancellation should end immediately.
-                }
-                catch (Exception ex)
-                {
-                    UnityEngine.Debug.LogException(ex);
-                }
-
-                IsFastForward = false;
-                IsPaused = false;
-                if (ReferenceEquals(_playCts, source))
-                {
-                    _playCts = null;
-                }
-            }
         }
 
         public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
