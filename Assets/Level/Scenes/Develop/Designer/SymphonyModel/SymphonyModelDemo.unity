@@ -1469,6 +1469,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AK47_0418
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: def2b33e5a35a404eac0633b7628e69f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1685,6 +1689,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 1c2a1b72327a7064aad290eac5f4abd4, type: 3}
       propertyPath: m_Name
       value: Knife
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1c2a1b72327a7064aad290eac5f4abd4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4447,6 +4455,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WWII_SMG_0418
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 41e4343dba003b84ba2aa59e2ab7ab93, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5108,6 +5120,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WWII_AR_0418
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 083542f989e23164791478d5ef1727ad, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5428,7 +5444,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9237935d7f2fd3446b269a347dd7597e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -6854,6 +6870,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 91dee382fb6ff40429a9070510321f00, type: 3}
       propertyPath: m_Name
       value: A3500X silver_0418
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 91dee382fb6ff40429a9070510321f00, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9649,6 +9669,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -5557439695665466429, guid: 9237935d7f2fd3446b269a347dd7597e, type: 3}
   m_PrefabInstance: {fileID: 581528268}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1158190894
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.289
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
+      propertyPath: m_Name
+      value: Symphony_ARpose_0425
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af4bfbae616476a4d9b8a54c2175cc1c, type: 3}
 --- !u!4 &1160061062 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -9102504168864137110, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
@@ -10598,7 +10675,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b3f0b8d7b9835244b8d09886b0daff37, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b3f0b8d7b9835244b8d09886b0daff37, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10635,6 +10712,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: b3f0b8d7b9835244b8d09886b0daff37, type: 3}
       propertyPath: m_Name
       value: WWII_Recon_0418
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b3f0b8d7b9835244b8d09886b0daff37, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12605,6 +12686,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: d3808d3dfd5f10b46ba9e981c2ab1754, type: 3}
       propertyPath: m_Name
       value: Makarova_0418
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d3808d3dfd5f10b46ba9e981c2ab1754, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17838,6 +17923,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 625e9c3b94e3dc64ea82f6e29062b3d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: com.unity.animations.springbone::Unity.Animations.SpringBones.SpringBonePivot
+--- !u!1001 &2086796565
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
+      propertyPath: m_Name
+      value: Symphony_HGpose_0425
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a56e86c4b48a13241a9acd4e1260af43, type: 3}
 --- !u!4 &2086817611 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6305924484387893451, guid: 3a73ce5eae10df641a13b12f49dc0716, type: 3}
@@ -18193,3 +18335,5 @@ SceneRoots:
   - {fileID: 179036184}
   - {fileID: 533489382}
   - {fileID: 204513135}
+  - {fileID: 1158190894}
+  - {fileID: 2086796565}
