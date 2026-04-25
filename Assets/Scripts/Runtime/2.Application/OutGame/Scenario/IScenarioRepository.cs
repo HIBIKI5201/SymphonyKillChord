@@ -1,9 +1,11 @@
 using KillChord.Runtime.Domain;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application
 {
     public interface IScenarioRepository
     {
-        ScenarioData FindById(string id);
+        ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct);
     }
 }

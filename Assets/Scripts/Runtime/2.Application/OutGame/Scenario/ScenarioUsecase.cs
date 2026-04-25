@@ -23,11 +23,11 @@ namespace KillChord.Runtime.Application
 
         public async ValueTask PlayScenario()
         {
-            ScenarioData data = _scenarioRepo.FindById(_settingsRepository.DefaultScenarioId);
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
+            ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token);
 
             try
             {
@@ -46,19 +46,39 @@ namespace KillChord.Runtime.Application
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex) when (ex.CancellationToken == token)
             {
                 // Skip requested: end scenario gracefully.
                 skipped = true;
             }
             finally
             {
-                bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
-                if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
+                try
                 {
-                    await Task.Delay(_settingsRepository.CloseDelayAfterComplete, CancellationToken.None);
+                    bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
+                    if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
+                    {
+                        await Task.Delay(_settingsRepository.CloseDelayAfterComplete, token);
+                    }
                 }
-                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    // Skip cancellation should end immediately.
+                }
+
+                try
+                {
+                    await _completionNotifier.NotifyCompletedAsync(skipped, token);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    // Skip cancellation should end immediately.
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogException(ex);
+                }
+
                 IsFastForward = false;
                 IsPaused = false;
                 if (ReferenceEquals(_playCts, source))

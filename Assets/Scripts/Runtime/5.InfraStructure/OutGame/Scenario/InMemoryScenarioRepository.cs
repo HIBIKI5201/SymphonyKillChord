@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 
@@ -7,8 +9,10 @@ namespace KillChord.Runtime.InfraStructure
 {
     public class InMemoryScenarioRepository : IScenarioRepository
     {
-        public ScenarioData FindById(string id)
+        public ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             if (!string.Equals(id, "test", StringComparison.Ordinal))
             {
                 throw new KeyNotFoundException($"Scenario not found: {id}");
@@ -30,7 +34,7 @@ namespace KillChord.Runtime.InfraStructure
                     TextTimingTrigger.AtCharIndex(1, _fadeOut))),
             };
 
-            return new ScenarioData(events);
+            return new ValueTask<ScenarioData>(new ScenarioData(events));
         }
 
         private static IReadOnlyList<TextTimingTrigger> CreateTriggers(params TextTimingTrigger[] triggers)
