@@ -35,6 +35,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
             CombatSpec = combatSpec;
         }
 
+        public event Action<CharacterEntity> OnDied;
+
         public CharacterName Name { get; }
         public HealthEntity Health { get; }
         public MoveSpeed MoveSpeed { get; }
@@ -42,10 +44,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterCombatSpec CombatSpec { get; }
         public Health CurrentHealth => Health.CurrentHealth;
         public Health MaxHealth => Health.MaxHealth;
-        /// <summary>
-        ///     無敵状態かどうかを示すプロパティ。回避以外にもあるかもなので、変数は無敵にした。
-        /// </summary>
-        public bool IsInvincible => _isInvincible;
+        public bool IsDead => CurrentHealth.Value <= 0f;
 
         /// <summary>
         ///     ダメージを受ける処理。
@@ -54,10 +53,20 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage)
         {
-            if (_isInvincible) return;
+            if (IsDead)
+            {
+                return;
+            }
+
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
             Health.ChangeHealth(nextHealth);
+
+            if (CurrentHealth.Value <= 0f && !_isDeadNotified)
+            {
+                _isDeadNotified = true;
+                OnDied?.Invoke(this);
+            }
         }
 
         /// <summary>
@@ -70,11 +79,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
             Health.ChangeHealth(nextHealth);
         }
 
-        public void SetInvincible(bool isInvincible)
-        {
-            _isInvincible = isInvincible;
-        }
-
-        private bool _isInvincible = false;
+        private bool _isDeadNotified = false;
     }
 }

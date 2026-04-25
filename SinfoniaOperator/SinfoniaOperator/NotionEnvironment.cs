@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 
 namespace SinfoniaStudio.SinfoniaOperator
@@ -40,7 +41,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             DatePropertyName = datePropertyName;
             NamePropertyName = namePropertyName;
             StatusPropertyName = statusPropertyName;
-            TaskDoneStatusName = taskDoneStatusName;
+            TaskDoneStatusName = GetTaskDoneStatuses(taskDoneStatusName);
         }
 
         public readonly string NotionToken;
@@ -49,7 +50,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         public readonly string DatePropertyName;
         public readonly string NamePropertyName;
         public readonly string StatusPropertyName;
-        public readonly string TaskDoneStatusName;
+        public readonly string[] TaskDoneStatusName;
 
         public override string ToString()
         {
@@ -62,6 +63,11 @@ namespace SinfoniaStudio.SinfoniaOperator
             sb.AppendLine($"StatusPropertyName: {StatusPropertyName}");
             sb.AppendLine($"TaskDoneStatusName: {TaskDoneStatusName}");
             return sb.ToString();
+        }
+
+        private string[] GetTaskDoneStatuses(string value)
+        {
+            return value.Split(',').Select(s => s.Trim()).ToArray();
         }
     }
 }
