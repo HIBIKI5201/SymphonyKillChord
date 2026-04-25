@@ -31,8 +31,7 @@ namespace KillChord.Runtime.Composition
 
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
 
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry,
-            bool mobileBuild = false)
+        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
 
@@ -52,8 +51,8 @@ namespace KillChord.Runtime.Composition
             CameraSystemController controller = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.InitializePC(controller, stageSceneObj.PlayerTransform,
-                ServiceLocator.GetInstance<PlayerInputView>(), mobileBuild);
+            _cameraSystem.Initialize(controller, stageSceneObj.PlayerTransform,
+                ServiceLocator.GetInstance<PlayerInputView>());
 
 
 #if UNITY_EDITOR
