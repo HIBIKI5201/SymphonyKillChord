@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
@@ -14,6 +15,8 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame;
+using SymphonyFrameWork.System.ServiceLocate;
+using Unity.Behavior;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -32,10 +35,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
+        [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
+        [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
+        [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
+        [SerializeField] private EnemyStateFacade _enemyStateFacade;
+        [SerializeField] private EnemySharedFacade _enemySharedFacade;
+        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
         private LockOnTargetGateway _lockOnTargetGateway;
+        private MissionEventController _missionEventController;
+        private CharacterEntity _enemyEntity;
 
         public void Initialize(
             Transform target,
@@ -48,7 +59,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
-            CharacterEntity enemyEntity = CharacterFactory.Create(_enemyData);
+            _enemyEntity = CharacterFactory.Create(_enemyData);
+
+            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (_missionEventController != null && _missionKeyAsset != null)
+            {
+                _enemyEntity.OnDied += HandleEnemyDied;
+            }
+
 
             // 敵射線判定
             EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
@@ -65,25 +83,50 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
 
-            AttackDefinition attackDefinition = enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
+            AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
-            EnemyBattleState battleState = new EnemyBattleState(enemyEntity, targetEntity, attackDefinition);
+            EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
             // Controller
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
             _targetManagerController.Register(_lockOnTargetGateway);
 
-            _targetEntityRegistryController.RegisterTargetEntity(_lockOnTargetGateway, enemyEntity);
+            _targetEntityRegistryController.RegisterTargetEntity(_lockOnTargetGateway, _enemyEntity);
 
             // View接続
             _view.Initialize(controller, target);
             _raycastView.Initialize(target, spec.AttackRange.Value);
+
+            // ファサード初期化
+            _enemyMovementAIFacade.Initialize(_view);
+            _enemyBattleAIFacade.Initialize(controller);
+            _enemyStateFacade.Initialize(controller, target, _raycastView, battleState);
+            //_enemySharedFacade.Initialize(target);
+
+            // Behavior Graph Agent有効化
+            _behaviorGraphAgent.enabled = true;
         }
+
+        private void HandleEnemyDied(CharacterEntity _)
+        {
+            if (_missionKeyAsset == null)
+            {
+                return;
+            }
+
+            _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
+        }
+
         private void OnDestroy()
         {
+            if (_enemyEntity != null)
+            {
+                _enemyEntity.OnDied -= HandleEnemyDied;
+            }
+
             _targetManagerController?.Unregister(_lockOnTargetGateway);
             _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
             _lockOnTargetGateway?.Dispose();

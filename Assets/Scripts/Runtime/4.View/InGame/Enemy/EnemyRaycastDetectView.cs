@@ -20,9 +20,10 @@ namespace KillChord.Runtime.View
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
                 return;
             }
-            if (targetTransform.TryGetComponent<Collider>(out _targetCollider))
+            if (!targetTransform.TryGetComponent<Collider>(out _targetCollider))
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象がColliderを持っていない。");
+                return;
             }
 #if UNITY_EDITOR
             _initializedFlg = true;
@@ -36,6 +37,11 @@ namespace KillChord.Runtime.View
         /// <returns></returns>
         public bool CheckCanRaycastHitTarget()
         {
+            if(_targetTransform == null || _targetCollider == null)
+            {
+                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象の取得が出来ていない。");
+                return false;
+            }
             int hitCount = CastAndGetHitCount();
             if (hitCount > 0)
             {

@@ -9,7 +9,6 @@ using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.Player;
@@ -19,6 +18,8 @@ using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+using KillChord.Runtime.Adaptor.InGame.Mission;
+
 
 #if UNITY_EDITOR
 using KillChord.Runtime.Composition.InGame.Debugger;
@@ -37,12 +38,14 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private int _bpm;
 
-        [Space] [Header("キャラクターデータ（テスト用）")] [SerializeField]
+        [Space]
+        [Header("キャラクターデータ（テスト用）")]
+        [SerializeField]
         private CharacterData _playerData;
 
-        [SerializeField] private CharacterData _enemyData;
-
         private EnemyTestSpawner _enemyTestSpawner;
+        private CharacterEntity _playerEntity;
+        private MissionEventController _missionEventController;
 
         private void Awake()
         {
@@ -64,14 +67,24 @@ namespace KillChord.Runtime.Composition
             }
 
 
-            CharacterEntity player = CharacterFactory.Create(_playerData);
-            _enemyTestSpawner.SetTargetEntity(player);
+            _playerEntity = CharacterFactory.Create(_playerData);
+
+            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (_missionEventController != null)
+            {
+                _playerEntity.OnDied += HandlePlayerDied;
+            }
+
+            _enemyTestSpawner.SetTargetEntity(_playerEntity);
             _enemyTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
             PlayerDodgeMovementApplication dodge = new(parameter);
+            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
+            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+
             PlayerMovement move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
@@ -98,7 +111,7 @@ namespace KillChord.Runtime.Composition
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
-            PlayerBattleState playerBattleState = new PlayerBattleState(player);
+            PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
                 playerBattleState, skillController, targetSelectorController, musicSyncService);
@@ -111,6 +124,19 @@ namespace KillChord.Runtime.Composition
                 .AddComponent<PlayerMoveParameterDebug>()
                 .SetPlayerMoveParameter(parameter);
 #endif
+        }
+
+        private void HandlePlayerDied(CharacterEntity _)
+        {
+            _missionEventController?.NotifyPlayerDead();
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerEntity != null)
+            {
+                _playerEntity.OnDied -= HandlePlayerDied;
+            }
         }
     }
 }
