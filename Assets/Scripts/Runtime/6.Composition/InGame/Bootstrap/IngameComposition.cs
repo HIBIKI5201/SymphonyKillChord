@@ -18,6 +18,8 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
+        [SerializeField] private MobileInput _mobileInput;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -57,10 +59,18 @@ namespace KillChord.Runtime.Composition
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
+            _inGameMissionInitializer.Initialize();
 
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
+#if UNITY_ANDROID
             _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _mobileInput.Initialize(inputC.GetInputView);
+#else
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            Cursor.lockState = CursorLockMode.Locked;
+#endif
+
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
             ServiceInjector.Inject(_skillInitializer);

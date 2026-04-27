@@ -21,6 +21,29 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack += PlayEffectHit;
         }
 
+        /// <summary>
+        ///     攻撃対象を追跡する。
+        /// </summary>
+        public void ChaseTarget()
+        {
+            if (!_navMeshAgent.isOnNavMesh || _target == null) return;
+            EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
+            if (intruction.ShouldMove)
+            {
+                _navMeshAgent.speed = intruction.MoveSpeed;
+                _navMeshAgent.isStopped = false;
+                _navMeshAgent.SetDestination(intruction.Destination);
+            }
+        }
+
+        /// <summary>
+        ///     攻撃対象への追跡を停止する。
+        /// </summary>
+        public void StopChasing()
+        {
+            _navMeshAgent.isStopped = true;
+        }
+
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
@@ -30,15 +53,6 @@ namespace KillChord.Runtime.View.InGame
             _navMeshAgent = GetComponent<NavMeshAgent>();
         }
 
-        private void Update()
-        {
-            if (_enemyAIController != null && _target != null)
-            {
-                EnemyMoveInstruction intruction = _enemyAIController.Tick(transform.position, _target.position);
-                ApplyMove(intruction);
-            }
-        }
-
         private void OnDestroy()
         {
             if (_enemyAIController == null) return;
@@ -46,21 +60,6 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
-        }
-
-        private void ApplyMove(EnemyMoveInstruction intruction)
-        {
-            if (!_navMeshAgent.isOnNavMesh) return;
-
-            if (intruction.ShouldMove)
-            {
-                _navMeshAgent.speed = intruction.MoveSpeed;
-                _navMeshAgent.isStopped = false;
-                _navMeshAgent.SetDestination(intruction.Destination);
-                return;
-            }
-
-            _navMeshAgent.isStopped = true;
         }
 
         private void PlayEffectReserved()

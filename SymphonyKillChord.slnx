@@ -4,14 +4,15 @@
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="KillChord.Structure.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="KillChord.Adaptor.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="DevelopProducts-Achievement.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
+  <Project Path="KillChord.View.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
   <Project Path="UniGLTF.Editor.csproj" />
@@ -23,7 +24,6 @@
   <Project Path="DevelopProducts-ToonShader.Editor.csproj" />
   <Project Path="DevelopProducts-ToonShader.csproj" />
   <Project Path="UniGLTF.UniUnlit.csproj" />
-  <Project Path="KillChord.View.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="KillChord.Composition.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
@@ -38,6 +38,7 @@
   <Project Path="DevelopProducts-SpringBone.csproj" />
   <Project Path="DevelopProductsUtility.csproj" />
   <Project Path="MusicSync_Mock.csproj" />
+  <Project Path="DevelopProducts-TicketSystem.csproj" />
   <Project Path="TPS_Mock.csproj" />
   <Project Path="FastSpringBone10.csproj" />
   <Project Path="UniHumanoid.Editor.Tests.csproj" />
