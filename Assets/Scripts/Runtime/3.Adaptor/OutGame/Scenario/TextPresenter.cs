@@ -7,12 +7,11 @@ namespace KillChord.Runtime.Adaptor
     {
         public TextPresenter(ITextViewSink viewSink)
         {
-            _viewSink = viewSink ?? throw new System.ArgumentNullException(nameof(viewSink));
+            _viewSink = viewSink;
         }
 
         public ValueTask ShowTextAsync(string message, CancellationToken ct)
         {
-            ct.ThrowIfCancellationRequested();
             _viewSink.SetText(message);
             return default;
         }

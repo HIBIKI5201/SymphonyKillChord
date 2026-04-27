@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
@@ -12,6 +13,8 @@ namespace KillChord.Runtime.Adaptor
             _backgroundOutputPort = backgroundOutputPort;
             _backgroundRepository = backgroundRepository;
         }
+
+        public Type EventType => typeof(BackgroundEvent);
 
         public async ValueTask HandleAsync(BackgroundEvent e, CancellationToken ct)
         {

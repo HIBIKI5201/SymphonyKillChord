@@ -1,3 +1,4 @@
+using System;
 using KillChord.Runtime.Application;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,8 +10,9 @@ namespace KillChord.Runtime.Adaptor
     {
         public FadeEventHandler(IFadeOutputPort fadeOutputPort)
         {
-            _fadeOutputPort = fadeOutputPort ?? throw new System.ArgumentNullException(nameof(fadeOutputPort));
+            _fadeOutputPort = fadeOutputPort;
         }
+        public Type EventType => typeof(FadeEvent);
 
         public ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
         {

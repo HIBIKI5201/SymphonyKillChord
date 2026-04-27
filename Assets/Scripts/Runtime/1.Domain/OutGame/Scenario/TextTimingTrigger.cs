@@ -41,15 +41,12 @@ namespace KillChord.Runtime.Domain
 
         public static bool ShouldFire(TextTimingTrigger trigger, int visibleCharCount, string visibleText)
         {
-            if (trigger == null) return false;
             return trigger.Kind switch
             {
                 TextTriggerKind.CharIndex => trigger.CharIndex == visibleCharCount,
                 TextTriggerKind.Keyword => !string.IsNullOrEmpty(trigger.Keyword) &&
-                                           !string.IsNullOrEmpty(visibleText) &&
                                            visibleText.Contains(trigger.Keyword, StringComparison.Ordinal),
                 TextTriggerKind.Suffix => !string.IsNullOrEmpty(trigger.Keyword) &&
-                                          !string.IsNullOrEmpty(visibleText) &&
                                           visibleText.EndsWith(trigger.Keyword, StringComparison.Ordinal),
                 _ => false
             };

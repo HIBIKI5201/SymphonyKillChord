@@ -5,11 +5,10 @@ namespace KillChord.Runtime.View
 {
     public class ScenarioInputView : MonoBehaviour
     {
-        public void Initialize(InputController inputController)
+        public void Initilize(InputController inputController)
         {
             _inputController = inputController;
         }
-
         private void Update()
         {
             if (_inputController == null) return;

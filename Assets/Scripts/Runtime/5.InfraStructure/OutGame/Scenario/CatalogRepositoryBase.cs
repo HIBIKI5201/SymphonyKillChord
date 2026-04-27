@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
 {
@@ -14,15 +13,7 @@ namespace KillChord.Runtime.InfraStructure
             for (int i = 0; i < entries.Count; i++)
             {
                 TEntry entry = entries[i];
-                if (!TryBuild(entry, out string id, out TDefinition definition))
-                {
-                    Debug.LogWarning($"{GetType().Name}: skipped invalid catalog entry at index {i}.");
-                    continue;
-                }
-                if (_map.ContainsKey(id))
-                {
-                    Debug.LogWarning($"{GetType().Name}: duplicated id '{id}' at index {i}. Existing value will be overwritten.");
-                }
+                if (!TryBuild(entry, out string id, out TDefinition definition)) continue;
                 _map[id] = definition;
             }
         }

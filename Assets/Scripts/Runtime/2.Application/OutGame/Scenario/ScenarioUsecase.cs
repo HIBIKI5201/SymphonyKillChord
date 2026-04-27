@@ -23,11 +23,11 @@ namespace KillChord.Runtime.Application
 
         public async ValueTask PlayScenario()
         {
+            ScenarioData data = _scenarioRepo.FindById(_settingsRepository.DefaultScenarioId);
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
-            ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token);
 
             try
             {
@@ -46,10 +46,25 @@ namespace KillChord.Runtime.Application
                     }
                 }
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == token)
+            catch (OperationCanceledException)
             {
                 // Skip requested: end scenario gracefully.
                 skipped = true;
+            }
+            finally
+            {
+                bool shouldDelayClose = !skipped || !_settingsRepository.SkipClosesImmediately;
+                if (shouldDelayClose && _settingsRepository.CloseDelayAfterComplete > TimeSpan.Zero)
+                {
+                    await Task.Delay(_settingsRepository.CloseDelayAfterComplete, CancellationToken.None);
+                }
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                IsFastForward = false;
+                IsPaused = false;
+                if (ReferenceEquals(_playCts, source))
+                {
+                    _playCts = null;
+                }
             }
         }
 

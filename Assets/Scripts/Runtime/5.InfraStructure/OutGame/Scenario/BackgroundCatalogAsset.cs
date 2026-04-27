@@ -18,7 +18,6 @@ namespace KillChord.Runtime.InfraStructure
         public struct Entry
         {
             public string Id;
-            public string AssetKey;
             public Sprite Asset;
         }
     }

@@ -4,7 +4,7 @@ using KillChord.Runtime.Application;
 
 namespace KillChord.Runtime.Adaptor
 {
-    public sealed class ScenarioPresenterFacade : IOutputPort, IScenarioCompletionNotifier
+    public sealed class ScenarioPresenterFacade : IOutPutPort, IScenarioCompletionNotifier
     {
         public ScenarioPresenterFacade(
             ITextOutputPort textOutputPort,

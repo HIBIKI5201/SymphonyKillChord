@@ -3,30 +3,27 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
-using UnityEngine.Networking;
 
 namespace KillChord.Runtime.InfraStructure
 {
     public class ScenarioRepository : IScenarioRepository
     {
-        public async ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
+        public ScenarioData FindById(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentException("scenario id is empty.", nameof(id));
             }
 
-            string root = UnityEngine.Application.streamingAssetsPath;
-            bool isUrlPath = root.Contains("://", StringComparison.Ordinal);
-            string path = isUrlPath
-                ? $"{root.TrimEnd('/')}/Scenario/{id}.csv"
-                : Path.Combine(root, "Scenario", $"{id}.csv");
+            string path = Path.Combine(UnityEngine.Application.streamingAssetsPath, "Scenario", $"{id}.csv");
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException($"Scenario CSV not found. id={id}, path={path}", path);
+            }
 
-            string[] lines = await ReadAllLinesAsync(path, isUrlPath, ct);
+            string[] lines = File.ReadAllLines(path, Encoding.UTF8);
             if (lines.Length <= 1)
             {
                 return new ScenarioData(Array.Empty<IScenarioEvent>());
@@ -104,36 +101,6 @@ namespace KillChord.Runtime.InfraStructure
             }
 
             return new ScenarioData(events);
-        }
-
-        private static async ValueTask<string[]> ReadAllLinesAsync(string path, bool isUrlPath, CancellationToken ct)
-        {
-            if (!isUrlPath)
-            {
-                if (!File.Exists(path))
-                {
-                    throw new FileNotFoundException($"Scenario CSV not found. path={path}", path);
-                }
-                return await File.ReadAllLinesAsync(path, Encoding.UTF8, ct);
-            }
-
-            using var request = UnityWebRequest.Get(path);
-            using var ctr = ct.Register(static s => ((UnityWebRequest)s).Abort(), request);
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-            while (!operation.isDone)
-            {
-                ct.ThrowIfCancellationRequested();
-                await Task.Yield();
-            }
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                throw new IOException($"Scenario CSV request failed. path={path}, error={request.error}");
-            }
-
-            string text = request.downloadHandler != null ? request.downloadHandler.text : string.Empty;
-            string normalized = text.Replace("\r\n", "\n").Replace('\r', '\n');
-            return normalized.Split('\n');
         }
 
         private static Dictionary<string, int> BuildHeaderIndex(IReadOnlyList<string> headers)

@@ -9,44 +9,32 @@ namespace KillChord.Runtime.Adaptor
     {
         public ValueTask WaitNextAsync(CancellationToken ct)
         {
-            Task waitTask;
-            lock (_sync)
+            if (_pending)
             {
-                if (_pending)
-                {
-                    _pending = false;
-                    return default;
-                }
-
-                waitTask = _tcs.Task;
+                _pending = false;
+                return new ValueTask();
             }
-
             if (ct.IsCancellationRequested)
             {
                 return new ValueTask(Task.FromCanceled(ct));
             }
 
-            return new ValueTask(waitTask.WaitAsync(Timeout.InfiniteTimeSpan, TimeProvider.System, ct));
+            return new ValueTask(_tcs.Task.WaitAsync(Timeout.InfiniteTimeSpan, TimeProvider.System, ct));
         }
-
         public void NotifyNext()
         {
-            lock (_sync)
+            if (_tcs.Task.IsCanceled)
             {
-                bool accepted = _tcs.TrySetResult(true);
-                if (!accepted)
-                {
-                    _pending = true;
-                }
-
+                _pending = true;
                 _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                return;
             }
+            _tcs.TrySetResult(true);
+            _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
-
         private TaskCompletionSource<bool> _tcs =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         private bool _pending;
-        private readonly object _sync = new();
     }
 }
