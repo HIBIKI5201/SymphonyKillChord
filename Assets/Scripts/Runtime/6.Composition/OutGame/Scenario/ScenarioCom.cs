@@ -76,9 +76,9 @@ namespace KillChord.Runtime.Composition
             //View生成
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
-            view.Initilize(viewModel, backgroundMap);
+            view.Initialize(viewModel, backgroundMap);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
-            inputView.Initilize(controller);
+            inputView.Initialize(controller);
             await usecase.PlayScenario();
             Debug.Log(Time.time);
         }
