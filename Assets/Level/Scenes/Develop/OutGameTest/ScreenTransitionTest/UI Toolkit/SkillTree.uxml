@@ -1,0 +1,8 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <Style src="project://database/Assets/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
+    <ui:VisualElement style="flex-grow: 1; background-color: rgb(55, 164, 164);">
+        <ui:Label text="研究" name="HeadLine" selectable="true" focusable="true" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center;"/>
+        <ui:Button text="戻る" name="BackButton" class="button" style="width: 200px; height: 100px; align-self: flex-end; justify-content: flex-start; align-items: flex-end; align-content: auto; color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px;"/>
+    </ui:VisualElement>
+</ui:UXML>
