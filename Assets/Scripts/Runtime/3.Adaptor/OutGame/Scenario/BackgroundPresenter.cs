@@ -7,11 +7,12 @@ namespace KillChord.Runtime.Adaptor
     {
         public BackgroundPresenter(IBackgroundViewSink viewSink)
         {
-            _viewSink = viewSink;
+            _viewSink = viewSink ?? throw new System.ArgumentNullException(nameof(viewSink));
         }
 
         public ValueTask ShowBackgroundAsync(string assetKey, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             _viewSink.SetBackground(assetKey);
             return default;
         }

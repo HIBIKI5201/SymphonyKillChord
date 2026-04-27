@@ -30,11 +30,11 @@ namespace KillChord.Runtime.View
             OnScenarioCompleted?.Invoke(skipped);
         }
 
-        public Action<string> OnChat;
-        public Action<float, float, float> OnFade;
-        public Action<string> OnBackground;
-        public Action<string> OnAnimation;
-        public Action<bool> OnScenarioCompleted;
+        public event Action<string> OnChat;
+        public event Action<float, float, float> OnFade;
+        public event Action<string> OnBackground;
+        public event Action<string> OnAnimation;
+        public event Action<bool> OnScenarioCompleted;
 
     }
 }

@@ -20,7 +20,8 @@ namespace KillChord.Runtime.InfraStructure
                 return false;
             }
 
-            definition = new AnimationDefinition(entry.Id, entry.Id);
+            string assetKey = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+            definition = new AnimationDefinition(entry.Id, assetKey);
             return true;
         }
     }

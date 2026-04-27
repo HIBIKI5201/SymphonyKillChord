@@ -20,8 +20,6 @@ namespace KillChord.Runtime.Adaptor
             _playbackState = playbackState;
             _settingsRepository = settingsRepository;
         }
-        public Type EventType => typeof(TextEvent);
-
         public async ValueTask HandleAsync(TextEvent e, CancellationToken ct)
         {
             var fired = new HashSet<TextTimingTrigger>();
@@ -31,7 +29,10 @@ namespace KillChord.Runtime.Adaptor
             {
                 while (_playbackState.IsPaused)
                 {
-                    await Task.Delay(_settingsRepository.PausePollInterval, ct);
+                    TimeSpan pauseDelay = _settingsRepository.PausePollInterval < TimeSpan.FromMilliseconds(10)
+                        ? TimeSpan.FromMilliseconds(10)
+                        : _settingsRepository.PausePollInterval;
+                    await Task.Delay(pauseDelay, ct);
                 }
 
                 await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);

@@ -7,7 +7,7 @@ namespace KillChord.Runtime.View
 {
     public class ScenarioView : MonoBehaviour
     {
-        public void Initilize(
+        public void Initialize(
             ViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey)
         {
@@ -43,6 +43,11 @@ namespace KillChord.Runtime.View
 
         private void InputViewModel(string chat)
         {
+            if (_chat == null)
+            {
+                Debug.LogWarning("ScenarioView: _chat is not assigned.");
+                return;
+            }
             _chat.text = chat;
         }
 
@@ -113,6 +118,12 @@ namespace KillChord.Runtime.View
 
             if (_duration <= 0f)
             {
+                if (_chat == null)
+                {
+                    Debug.LogWarning("ScenarioView: _chat is not assigned.");
+                    _onFade = false;
+                    return;
+                }
                 _chat.alpha = _end;
                 _onFade = false;
                 return;
@@ -120,6 +131,12 @@ namespace KillChord.Runtime.View
 
             float t = _time / _duration;
             t = Mathf.Clamp01(t);
+            if (_chat == null)
+            {
+                Debug.LogWarning("ScenarioView: _chat is not assigned.");
+                _onFade = false;
+                return;
+            }
             _chat.alpha = Mathf.Lerp(_start, _end, t);
 
             if (t >= 1f) _onFade = false;
