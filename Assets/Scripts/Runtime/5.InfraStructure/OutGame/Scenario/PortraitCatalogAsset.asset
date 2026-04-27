@@ -9,13 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6ff3151c72d35242b3412ee1610a6ce, type: 3}
-  m_Name: BackgroundCatalogAsset
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.BackgroundCatalogAsset
+  m_Script: {fileID: 11500000, guid: dfedb1bc6acd8f042b5670402640476f, type: 3}
+  m_Name: PortraitCatalogAsset
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.PortraitCatalogAsset
   _entries:
-  - Id: genki_pose
-    AssetKey: genki_pose
-    Asset: {fileID: 21300000, guid: 16fbe600d89dab043a8409bfae78a0fa, type: 3}
-  - Id: vrm
-    AssetKey: vrm
+  - Id: test
+    AssetKey: test
     Asset: {fileID: 6030036341472440576, guid: 61f6e8cb774d8114dba8363bdb1214be, type: 3}

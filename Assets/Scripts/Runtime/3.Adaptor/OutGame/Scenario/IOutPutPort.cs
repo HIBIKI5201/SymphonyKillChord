@@ -1,6 +1,6 @@
 namespace KillChord.Runtime.Adaptor
 {
-    public interface IOutputPort : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort
+    public interface IOutputPort : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort, IPortraitOutputPort
     {
     }
 

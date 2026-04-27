@@ -11,12 +11,14 @@ namespace KillChord.Runtime.Adaptor
             IFadeOutputPort fadeOutputPort,
             IBackgroundOutputPort backgroundOutputPort,
             IAnimationOutputPort animationOutputPort,
+            IPortraitOutputPort portraitOutputPort,
             IScenarioCompletionViewSink scenarioCompletionViewSink)
         {
             _textOutputPort = textOutputPort;
             _fadeOutputPort = fadeOutputPort;
             _backgroundOutputPort = backgroundOutputPort;
             _animationOutputPort = animationOutputPort;
+            _portraitOutputPort = portraitOutputPort;
             _scenarioCompletionViewSink = scenarioCompletionViewSink;
         }
 
@@ -32,6 +34,9 @@ namespace KillChord.Runtime.Adaptor
         public ValueTask PlayAnimationAsync(string animationId, CancellationToken ct)
             => _animationOutputPort.PlayAnimationAsync(animationId, ct);
 
+        public ValueTask ShowPortraitAsync(string slotId, string assetKey, CancellationToken ct)
+            => _portraitOutputPort.ShowPortraitAsync(slotId, assetKey, ct);
+
         public ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct)
         {
             _scenarioCompletionViewSink.SetScenarioCompleted(skipped);
@@ -42,6 +47,7 @@ namespace KillChord.Runtime.Adaptor
         private readonly IFadeOutputPort _fadeOutputPort;
         private readonly IBackgroundOutputPort _backgroundOutputPort;
         private readonly IAnimationOutputPort _animationOutputPort;
+        private readonly IPortraitOutputPort _portraitOutputPort;
         private readonly IScenarioCompletionViewSink _scenarioCompletionViewSink;
     }
 }

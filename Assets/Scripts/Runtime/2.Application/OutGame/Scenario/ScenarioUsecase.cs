@@ -51,6 +51,11 @@ namespace KillChord.Runtime.Application
                 // Skip requested: end scenario gracefully.
                 skipped = true;
             }
+            finally
+            {
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                _playCts = null;
+            }
         }
 
         public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)

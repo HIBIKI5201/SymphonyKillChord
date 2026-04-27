@@ -189,6 +189,16 @@ namespace KillChord.Runtime.InfraStructure
                         }
                         return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
                     }
+                case "portrait":
+                    {
+                        string portraitId = GetValue(values, headerIndex, "PortraitId");
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {row.LineNo}: PortraitId is required for Portrait event.");
+                        }
+                        string portraitSlot = GetValue(values, headerIndex, "PortraitSlot");
+                        return new PlainEventDefinition(row.Step, new PortraitEvent(portraitId, portraitSlot));
+                    }
                 case "fade":
                     {
                         float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
@@ -306,6 +316,16 @@ namespace KillChord.Runtime.InfraStructure
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
                         }
                         return new KillChord.Runtime.Domain.AnimationEvent(animationId);
+                    }
+                case "portrait":
+                    {
+                        string portraitId = GetValue(values, headerIndex, "OnTriggerArg1");
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Portrait.");
+                        }
+                        string portraitSlot = GetValue(values, headerIndex, "OnTriggerArg2");
+                        return new PortraitEvent(portraitId, portraitSlot);
                     }
                 default:
                     throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");

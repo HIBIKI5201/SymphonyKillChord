@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View
@@ -9,18 +10,25 @@ namespace KillChord.Runtime.View
     {
         public void Initialize(
             ViewModel viewModel,
-            IReadOnlyDictionary<string, Sprite> backgroundByKey)
+            IReadOnlyDictionary<string, Sprite> backgroundByKey,
+            IReadOnlyDictionary<string, Sprite> portraitByKey)
         {
             UnsubscribeFromViewModel();
             _viewModel = viewModel;
             SubscribeToViewModel();
-            BuildCatalogMaps(backgroundByKey);
+            BuildCatalogMaps(backgroundByKey, portraitByKey);
         }
 
         [SerializeField]
         private TMP_Text _chat;
         [SerializeField]
         private Image _backgroundImage;
+        [SerializeField]
+        private PortraitSlotBinding[] _portraitSlots = System.Array.Empty<PortraitSlotBinding>();
+        // Compatibility only: keep old serialized reference but hide it from inspector.
+        [FormerlySerializedAs("_portraitImage")]
+        [SerializeField, HideInInspector]
+        private Image _legacyPortraitImage;
         [SerializeField]
         private Animator _animator;
         [SerializeField]
@@ -33,6 +41,8 @@ namespace KillChord.Runtime.View
         private float _duration;
 
         private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, Image> _portraitImageBySlot = new(System.StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<int> _animatorTriggerHashes = new();
         private ViewModel _viewModel;
 
@@ -80,6 +90,16 @@ namespace KillChord.Runtime.View
             }
 
             Debug.LogWarning($"[ScenarioView] Animation id not found in Animator: {animationId}", this);
+        }
+
+        private void InputPortrait(string slotId, string assetKey)
+        {
+            if (string.IsNullOrWhiteSpace(assetKey)) return;
+            if (!_portraitByKey.TryGetValue(assetKey, out Sprite portrait)) return;
+            if (portrait == null) return;
+
+            if (!TryResolvePortraitImage(slotId, out Image targetImage)) return;
+            targetImage.sprite = portrait;
         }
 
         private bool TryPlayByAnimator(string animationId)
@@ -147,10 +167,15 @@ namespace KillChord.Runtime.View
             gameObject.SetActive(false);
         }
 
-        private void BuildCatalogMaps(IReadOnlyDictionary<string, Sprite> backgroundByKey)
+        private void BuildCatalogMaps(
+            IReadOnlyDictionary<string, Sprite> backgroundByKey,
+            IReadOnlyDictionary<string, Sprite> portraitByKey)
         {
             _backgroundByKey.Clear();
+            _portraitByKey.Clear();
+            _portraitImageBySlot.Clear();
             _animatorTriggerHashes.Clear();
+            BuildPortraitSlotMap();
 
             if (backgroundByKey != null)
             {
@@ -170,6 +195,15 @@ namespace KillChord.Runtime.View
                     _animatorTriggerHashes.Add(parameter.nameHash);
                 }
             }
+
+            if (portraitByKey != null)
+            {
+                foreach (var entry in portraitByKey)
+                {
+                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
+                    _portraitByKey[entry.Key] = entry.Value;
+                }
+            }
         }
 
         private void OnDestroy()
@@ -185,6 +219,7 @@ namespace KillChord.Runtime.View
             _viewModel.OnFade += InputViewModel;
             _viewModel.OnBackground += InputBackground;
             _viewModel.OnAnimation += InputAnimation;
+            _viewModel.OnPortrait += InputPortrait;
             _viewModel.OnScenarioCompleted += InputScenarioCompleted;
         }
 
@@ -196,8 +231,69 @@ namespace KillChord.Runtime.View
             _viewModel.OnFade -= InputViewModel;
             _viewModel.OnBackground -= InputBackground;
             _viewModel.OnAnimation -= InputAnimation;
+            _viewModel.OnPortrait -= InputPortrait;
             _viewModel.OnScenarioCompleted -= InputScenarioCompleted;
             _viewModel = null;
+        }
+
+        private bool TryResolvePortraitImage(string slotId, out Image image)
+        {
+            string normalizedSlot = string.IsNullOrWhiteSpace(slotId)
+                ? ViewModel.DefaultPortraitSlotId
+                : slotId;
+
+            if (_portraitImageBySlot.TryGetValue(normalizedSlot, out image) && image != null)
+            {
+                return true;
+            }
+
+            if (_portraitImageBySlot.TryGetValue(ViewModel.DefaultPortraitSlotId, out image) && image != null)
+            {
+                return true;
+            }
+
+            if (_legacyPortraitImage != null)
+            {
+                image = _legacyPortraitImage;
+                return true;
+            }
+
+            foreach (var slot in _portraitImageBySlot)
+            {
+                if (slot.Value == null) continue;
+                image = slot.Value;
+                return true;
+            }
+
+            image = null;
+            return false;
+        }
+
+        private void BuildPortraitSlotMap()
+        {
+            if (_portraitSlots != null)
+            {
+                for (int i = 0; i < _portraitSlots.Length; i++)
+                {
+                    PortraitSlotBinding slot = _portraitSlots[i];
+                    if (slot.Image == null) continue;
+                    if (string.IsNullOrWhiteSpace(slot.SlotId)) continue;
+                    _portraitImageBySlot[slot.SlotId] = slot.Image;
+                }
+            }
+
+            // Migrate old single-image setup to Default slot if slots are not configured yet.
+            if (_portraitImageBySlot.Count == 0 && _legacyPortraitImage != null)
+            {
+                _portraitImageBySlot[ViewModel.DefaultPortraitSlotId] = _legacyPortraitImage;
+            }
+        }
+
+        [System.Serializable]
+        private struct PortraitSlotBinding
+        {
+            public string SlotId;
+            public Image Image;
         }
     }
 }
