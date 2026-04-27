@@ -2,6 +2,6 @@ namespace KillChord.Runtime.Adaptor
 {
     public interface IAnimationViewSink
     {
-        void SetAnimation(string assetKey);
+        void SetAnimation(string animationId);
     }
 }

@@ -2,31 +2,23 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.Adaptor
 {
     public class AnimationEventHandler : IScenarioEventHandler<KillChord.Runtime.Domain.AnimationEvent>
     {
-        public AnimationEventHandler(IAnimationOutputPort animationOutputPort, IAnimationRepository animationRepository)
+        public AnimationEventHandler(IAnimationOutputPort animationOutputPort)
         {
             _animationOutputPort = animationOutputPort;
-            _animationRepository = animationRepository;
         }
 
         public Type EventType => typeof(KillChord.Runtime.Domain.AnimationEvent);
 
-        public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
+        public ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
         {
-            if (!_animationRepository.TryFindById(e.AnimationId, out AnimationDefinition animation))
-            {
-                return;
-            }
-
-            await _animationOutputPort.PlayAnimationAsync(animation.AssetKey, ct);
+            return _animationOutputPort.PlayAnimationAsync(e.AnimationId, ct);
         }
 
         private readonly IAnimationOutputPort _animationOutputPort;
-        private readonly IAnimationRepository _animationRepository;
     }
 }

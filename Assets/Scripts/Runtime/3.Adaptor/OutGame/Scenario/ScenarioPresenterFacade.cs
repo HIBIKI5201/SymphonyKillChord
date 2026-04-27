@@ -29,8 +29,8 @@ namespace KillChord.Runtime.Adaptor
         public ValueTask ShowBackgroundAsync(string assetKey, CancellationToken ct)
             => _backgroundOutputPort.ShowBackgroundAsync(assetKey, ct);
 
-        public ValueTask PlayAnimationAsync(string assetKey, CancellationToken ct)
-            => _animationOutputPort.PlayAnimationAsync(assetKey, ct);
+        public ValueTask PlayAnimationAsync(string animationId, CancellationToken ct)
+            => _animationOutputPort.PlayAnimationAsync(animationId, ct);
 
         public ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct)
         {

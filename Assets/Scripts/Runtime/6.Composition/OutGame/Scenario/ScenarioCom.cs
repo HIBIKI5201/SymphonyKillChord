@@ -18,8 +18,6 @@ namespace KillChord.Runtime.Composition
         [SerializeField]
         private BackgroundCatalogAsset _backgroundCatalog;
         [SerializeField]
-        private AnimationCatalogAsset _animationCatalog;
-        [SerializeField]
         private ScenarioSettingsAsset _scenarioSettings;
 
         private async void Start()
@@ -42,7 +40,6 @@ namespace KillChord.Runtime.Composition
             ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_backgroundCatalog);
-            IAnimationRepository animationRepository = new AnimationRepository(_animationCatalog);
             IScenarioSettingsRepository scenarioSettingsRepository = new ScenarioSettingsRepository(_scenarioSettings);
 
             TextPresenter textPresenter = new TextPresenter(viewModel);
@@ -70,7 +67,7 @@ namespace KillChord.Runtime.Composition
                 scenarioSettingsRepository);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
-            AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);
+            AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade);
             handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
             handlerRepo.Register<FadeEvent>(fadeEventHandle.HandleAsync);
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
@@ -79,8 +76,7 @@ namespace KillChord.Runtime.Composition
             //View生成
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
-            var animationMap = BuildAnimationMap(_animationCatalog);
-            view.Initilize(viewModel, backgroundMap, animationMap);
+            view.Initilize(viewModel, backgroundMap);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
             inputView.Initilize(controller);
             await usecase.PlayScenario();
@@ -102,19 +98,5 @@ namespace KillChord.Runtime.Composition
             return map;
         }
 
-        private static IReadOnlyDictionary<string, AnimationClip> BuildAnimationMap(AnimationCatalogAsset catalog)
-        {
-            var map = new Dictionary<string, AnimationClip>(System.StringComparer.Ordinal);
-            if (catalog == null) return map;
-
-            for (int i = 0; i < catalog.Entries.Count; i++)
-            {
-                var entry = catalog.Entries[i];
-                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
-                map[entry.Id] = entry.Asset;
-            }
-
-            return map;
-        }
     }
 }

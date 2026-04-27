@@ -10,9 +10,9 @@ namespace KillChord.Runtime.Adaptor
             _viewSink = viewSink;
         }
 
-        public ValueTask PlayAnimationAsync(string assetKey, CancellationToken ct)
+        public ValueTask PlayAnimationAsync(string animationId, CancellationToken ct)
         {
-            _viewSink.SetAnimation(assetKey);
+            _viewSink.SetAnimation(animationId);
             return default;
         }
 
