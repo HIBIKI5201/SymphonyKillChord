@@ -1,0 +1,7 @@
+1,Background,genki_pose
+2,Fade,1,1,0.5
+3,Text,Hero,......Hello sekai?
+4,Animation,anim_hero_idle
+5,Text,Tatuki,danger is coming
+6,Background,vrm
+7,Text,Tatuki,danger is coming

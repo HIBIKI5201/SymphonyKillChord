@@ -9,13 +9,12 @@ namespace KillChord.Runtime.View
     {
         public void Initialize(
             ViewModel viewModel,
-            IReadOnlyDictionary<string, Sprite> backgroundByKey,
-            IReadOnlyDictionary<string, AnimationClip> animationByKey)
+            IReadOnlyDictionary<string, Sprite> backgroundByKey)
         {
             UnsubscribeFromViewModel();
             _viewModel = viewModel;
             SubscribeToViewModel();
-            BuildCatalogMaps(backgroundByKey, animationByKey);
+            BuildCatalogMaps(backgroundByKey);
         }
 
         [SerializeField]
@@ -23,7 +22,7 @@ namespace KillChord.Runtime.View
         [SerializeField]
         private Image _backgroundImage;
         [SerializeField]
-        private Animation _animationPlayer;
+        private Animator _animator;
         [SerializeField]
         private GameObject _fadeObj;
 
@@ -34,7 +33,7 @@ namespace KillChord.Runtime.View
         private float _duration;
 
         private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
-        private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
+        private readonly HashSet<int> _animatorTriggerHashes = new();
         private ViewModel _viewModel;
 
         private void Update()
@@ -71,15 +70,45 @@ namespace KillChord.Runtime.View
             _backgroundImage.sprite = background;
         }
 
-        private void InputAnimation(string assetKey)
+        private void InputAnimation(string animationId)
         {
-            if (_animationPlayer == null) return;
-            if (string.IsNullOrWhiteSpace(assetKey)) return;
-            if (!_animationByKey.TryGetValue(assetKey, out AnimationClip animationClip)) return;
-            if (animationClip == null) return;
+            if (string.IsNullOrWhiteSpace(animationId)) return;
 
-            _animationPlayer.clip = animationClip;
-            _animationPlayer.Play();
+            if (TryPlayByAnimator(animationId))
+            {
+                return;
+            }
+
+            Debug.LogWarning($"[ScenarioView] Animation id not found in Animator: {animationId}", this);
+        }
+
+        private bool TryPlayByAnimator(string animationId)
+        {
+            if (_animator == null)
+            {
+                return false;
+            }
+
+            int hash = Animator.StringToHash(animationId);
+            if (_animatorTriggerHashes.Contains(hash))
+            {
+                _animator.SetTrigger(hash);
+                return true;
+            }
+
+            for (int layer = 0; layer < _animator.layerCount; layer++)
+            {
+                if (!_animator.HasState(layer, hash))
+                {
+                    continue;
+                }
+
+                // String id can be either a trigger parameter name or a state name.
+                _animator.CrossFade(hash, 0.05f, layer);
+                return true;
+            }
+
+            return false;
         }
 
         private void Fade()
@@ -118,12 +147,10 @@ namespace KillChord.Runtime.View
             gameObject.SetActive(false);
         }
 
-        private void BuildCatalogMaps(
-            IReadOnlyDictionary<string, Sprite> backgroundByKey,
-            IReadOnlyDictionary<string, AnimationClip> animationByKey)
+        private void BuildCatalogMaps(IReadOnlyDictionary<string, Sprite> backgroundByKey)
         {
             _backgroundByKey.Clear();
-            _animationByKey.Clear();
+            _animatorTriggerHashes.Clear();
 
             if (backgroundByKey != null)
             {
@@ -134,12 +161,13 @@ namespace KillChord.Runtime.View
                 }
             }
 
-            if (animationByKey != null)
+            if (_animator != null)
             {
-                foreach (var entry in animationByKey)
+                for (int i = 0; i < _animator.parameters.Length; i++)
                 {
-                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
-                    _animationByKey[entry.Key] = entry.Value;
+                    AnimatorControllerParameter parameter = _animator.parameters[i];
+                    if (parameter.type != AnimatorControllerParameterType.Trigger) continue;
+                    _animatorTriggerHashes.Add(parameter.nameHash);
                 }
             }
         }

@@ -4,6 +4,6 @@ namespace KillChord.Runtime.Adaptor
 {
     public interface IAnimationOutputPort
     {
-        ValueTask PlayAnimationAsync(string assetKey, CancellationToken ct);
+        ValueTask PlayAnimationAsync(string animationId, CancellationToken ct);
     }
 }

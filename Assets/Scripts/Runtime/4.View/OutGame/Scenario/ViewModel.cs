@@ -20,9 +20,9 @@ namespace KillChord.Runtime.View
             OnBackground?.Invoke(assetKey);
         }
 
-        public void SetAnimation(string assetKey)
+        public void SetAnimation(string animationId)
         {
-            OnAnimation?.Invoke(assetKey);
+            OnAnimation?.Invoke(animationId);
         }
 
         public void SetScenarioCompleted(bool skipped)
