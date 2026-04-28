@@ -1,6 +1,12 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/Runtime/4.View/InGame/Skill.meta
+guid: 81e51c7f762b0a34aa8e3fef0b3b1d8a
+folderAsset: yes
+DefaultImporter:
+========
 guid: 608a519a5b68ea14da6d9cfae10df92c
 NativeFormatImporter:
+>>>>>>>> 6f186b6fe859aff2145071d95b57494451614c2b:Assets/Level/Data/Master/InGame/Battle/ExamplePlayerAttackPipeline.asset.meta
   externalObjects: {}
   mainObjectFileID: 11400000
   userData: 

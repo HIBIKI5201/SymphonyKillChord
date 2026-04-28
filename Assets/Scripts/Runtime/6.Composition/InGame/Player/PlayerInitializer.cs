@@ -107,7 +107,16 @@ namespace KillChord.Runtime.Composition
                 return;
             }
 
-            SkillController skillController = new SkillController(_skillRepository, musicSyncService);
+            SkillResultViewModel skillResultViewModel = new SkillResultViewModel();
+            Debug.Log($"{skillResultViewModel}作成。");
+            SkillResultPresenter skillResultPresenter = new SkillResultPresenter(skillResultViewModel);
+            Debug.Log($"{skillResultPresenter}作成。");
+            // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
+            SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
+            skillResultView?.Bind(skillResultViewModel);
+            SkillController skillController = new SkillController(_skillRepository, musicSyncService, null, skillResultPresenter);
+
+
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
