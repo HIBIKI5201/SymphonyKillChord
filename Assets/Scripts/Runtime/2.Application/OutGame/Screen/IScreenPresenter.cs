@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Application.OutGame.Screen
 {
     /// <summary>
@@ -8,6 +11,6 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         /// <summary>
         ///     画面遷移結果を出力します。
         /// </summary>
-        void Present(ScreenTransitionResult result);
+        Task Present(ScreenTransitionResult result, CancellationToken token);
     }
 }

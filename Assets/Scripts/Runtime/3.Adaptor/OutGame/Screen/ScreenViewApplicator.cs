@@ -1,3 +1,7 @@
+using KillChord.Runtime.Domain.OutGame.Screen;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
     /// <summary>
@@ -16,14 +20,21 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///     画面遷移結果を適用します。
         /// </summary>
-        public void Apply(in ScreenViewDTO screenViewDTO)
+        public Task Apply(in ScreenViewDTO screenViewDTO, CancellationToken token)
         {
-            if (screenViewDTO.ScreenToHideId.HasValue)
+            var hideId = screenViewDTO.ScreenToHideId;
+            var showId = screenViewDTO.ScreenToShowId;
+            return ApplyInternalAsync(hideId, showId, token);
+        }
+
+        private async Task ApplyInternalAsync(ScreenId? hideId, ScreenId showId, CancellationToken token)
+        {
+            if (hideId.HasValue)
             {
-                _screenViewRegistry.Hide(screenViewDTO.ScreenToHideId.Value);
+                await _screenViewRegistry.Hide(hideId.Value, token);
             }
 
-            _screenViewRegistry.Show(screenViewDTO.ScreenToShowId);
+            await _screenViewRegistry.Show(showId, token);
         }
 
         private readonly IScreenViewRegistry _screenViewRegistry;
