@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.InGame.Music
@@ -6,6 +7,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
     {
         public RhythmGuideDefinition(IReadOnlyList<RhythmGuideRange> guideRanges)
         {
+            if (guideRanges == null) throw new ArgumentNullException(nameof(guideRanges));
             _guideRanges = guideRanges;
         }
 

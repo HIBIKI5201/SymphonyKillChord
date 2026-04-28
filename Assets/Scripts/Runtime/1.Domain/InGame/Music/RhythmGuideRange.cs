@@ -6,8 +6,8 @@ namespace KillChord.Runtime.Domain.InGame.Music
     {
         public RhythmGuideRange(BeatType beatType, float startNormalized, float endNormalized)
         {
-            if (startNormalized < 0f) throw new ArgumentOutOfRangeException(nameof(startNormalized));
-            if (endNormalized < startNormalized) throw new ArgumentOutOfRangeException(nameof(endNormalized));
+            if (startNormalized < 0f || startNormalized > 1f) throw new ArgumentOutOfRangeException(nameof(startNormalized));
+            if (endNormalized < startNormalized || endNormalized > 1f) throw new ArgumentOutOfRangeException(nameof(endNormalized));
 
             _beatType = beatType;
             _startNormalized = startNormalized;
