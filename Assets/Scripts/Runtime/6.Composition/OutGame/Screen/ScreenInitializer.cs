@@ -35,7 +35,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private void OnDisable()
         {
             Unsubscribe();
-            _screenViewRegistry.Dispose();
+            _screenViewRegistry?.Dispose();
         }
 
         /// <summary>
