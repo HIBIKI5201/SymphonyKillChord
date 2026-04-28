@@ -17,10 +17,10 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
+        [SerializeField] private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
-        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -77,8 +77,8 @@ namespace KillChord.Runtime.Composition
             ServiceInjector.Inject(_skillInitializer);
             _skillInitializer.Initialize();
 
-            _enemyTestSpawner.Init();
-            _rhythmGuideInitializer.Initialize();
+            _enemyInfantryTestSpawner.Init();
+            _enemyArtilleryTestSpawner.Init();
         }
     }
 }

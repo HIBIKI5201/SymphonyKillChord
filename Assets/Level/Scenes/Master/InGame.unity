@@ -163,6 +163,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &219233514
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 219233515}
+  - component: {fileID: 219233516}
+  m_Layer: 0
+  m_Name: ShellInitializeer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &219233515
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219233514}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -25.59384, y: 4.91708, z: -20.99003}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &219233516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219233514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f94c494d6fcab574f9f0d986d2eeb5c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.ShellInitializer
 --- !u!1 &419177558
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,7 +305,8 @@ MonoBehaviour:
   _musicSyncInitializer: {fileID: 1249666141}
   _camerasystemInitializer: {fileID: 533730526}
   _ingameSceneView: {fileID: 58835740}
-  _enemyTestSpawner: {fileID: 1136649843}
+  _enemyInfantryTestSpawner: {fileID: 1136649845}
+  _enemyArtilleryTestSpawner: {fileID: 1772279158}
   _inGameMissionInitializer: {fileID: 866643817}
   _mobileInput: {fileID: 1196221231}
   _backgroundSceneName: Stage_01
@@ -495,7 +540,7 @@ PrefabInstance:
     - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: _enemyTestSpawner
       value: 
-      objectReference: {fileID: 1136649843}
+      objectReference: {fileID: 0}
     - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: Lens.ModeOverride
       value: 0
@@ -723,31 +768,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1136649844}
-  - component: {fileID: 1136649843}
+  - component: {fileID: 1136649845}
   m_Layer: 0
-  m_Name: EnemySpawer
+  m_Name: EnemyInfantrySpawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1136649843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1136649842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77da4ab235a41f34dace987f1698ea43, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.EnemyTestSpawner
-  _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
-  _spawnPoint: {fileID: 1136649844}
-  _spawnInterval: 1
-  _maxSpawnCount: 1
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!4 &1136649844
 Transform:
   m_ObjectHideFlags: 0
@@ -763,6 +791,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1136649845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136649842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb76d31aed150974e926b35db6e4acc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyInfantryTestSpawner
+  _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
+  _spawnPoint: {fileID: 1136649844}
+  _spawnInterval: 3
+  _maxSpawnCount: 0
+  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!1 &1155406111
 GameObject:
   m_ObjectHideFlags: 0
@@ -1411,6 +1456,55 @@ RectTransform:
   m_AnchoredPosition: {x: 268, y: -148}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1772279155
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1772279157}
+  - component: {fileID: 1772279158}
+  m_Layer: 0
+  m_Name: EnemyArtillerySpawer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1772279157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772279155}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10, y: 0, z: -7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1772279158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772279155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4951324db1e6bb64dbc57ee260f51bde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyIArtilleryTestSpawner
+  _enemyPrefab: {fileID: 4106329999906055556, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _spawnPoint: {fileID: 1772279157}
+  _spawnInterval: 3
+  _maxSpawnCount: 1
+  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!1001 &1898526996
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1654,6 +1748,7 @@ SceneRoots:
   - {fileID: 533730524}
   - {fileID: 1196221230}
   - {fileID: 1136649844}
+  - {fileID: 1772279157}
   - {fileID: 456552177}
   - {fileID: 1898526996}
   - {fileID: 2031779337}
@@ -1662,3 +1757,4 @@ SceneRoots:
   - {fileID: 58835741}
   - {fileID: 419177560}
   - {fileID: 866643818}
+  - {fileID: 219233515}

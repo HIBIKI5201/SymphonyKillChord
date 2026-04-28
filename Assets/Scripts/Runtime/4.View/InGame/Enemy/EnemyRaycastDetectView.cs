@@ -29,20 +29,20 @@ namespace KillChord.Runtime.View
             _initializedFlg = true;
 #endif
         }
-        public bool CanRaycastHitTarget => CheckCanRaycastHitTarget();
+        public bool CanRaycastHitTarget => CheckCanRaycastHitTarget(transform.position);
 
         /// <summary>
-        ///     敵からの射線が対象に直撃できるか判定する。
+        ///     始点からの射線が対象に直撃できるか判定する。
         /// </summary>
         /// <returns></returns>
-        public bool CheckCanRaycastHitTarget()
+        public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
             if(_targetTransform == null || _targetCollider == null)
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象の取得が出来ていない。");
                 return false;
             }
-            int hitCount = CastAndGetHitCount();
+            int hitCount = CastAndGetHitCount(sourcePosition);
             if (hitCount > 0)
             {
                 RaycastHit hit = FindClosestHit(hitCount);
@@ -72,9 +72,9 @@ namespace KillChord.Runtime.View
         ///     射線判定を行い、当たった対象の数を返却。
         /// </summary>
         /// <returns></returns>
-        private int CastAndGetHitCount()
+        private int CastAndGetHitCount(Vector3 sourcePosition)
         {
-            Ray ray = new Ray(transform.position, (_targetTransform.position - transform.position).normalized);
+            Ray ray = new Ray(sourcePosition, (_targetTransform.position - sourcePosition).normalized);
             return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
         }
 
@@ -108,8 +108,13 @@ namespace KillChord.Runtime.View
         private void OnDrawGizmos()
         {
             if (!_initializedFlg) return;
-            Gizmos.color = CheckCanRaycastHitTarget() ? Color.red : Color.green;
+            Gizmos.color = CheckCanRaycastHitTarget(transform.position) ? Color.red : Color.green;
             Gizmos.DrawLine(transform.position, _targetTransform.position);
+        }
+        public void DrawGizmoLineToTarget(Vector3 source)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(source, _targetTransform.position);
         }
 #endif
     }

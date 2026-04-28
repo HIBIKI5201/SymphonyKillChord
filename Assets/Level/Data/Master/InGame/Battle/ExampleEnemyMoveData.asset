@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: ExampleEnemyMoveData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.EnemyMoveData
   _moveSpeed: 3
-  _attackRange: 4
+  _attackRangeMin: 7
+  _attackRangeMax: 12

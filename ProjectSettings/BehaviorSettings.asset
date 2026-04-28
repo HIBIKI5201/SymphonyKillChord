@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Behavior.Authoring::Unity.Behavior.BehaviorProjectSettings
   m_GraphOwnerName: Self
   m_AutoSaveLastSaveLocation: 1
-  m_SaveFolder: Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode
+  m_SaveFolder: Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition
   m_UseSeparateSaveFolders: 0
   m_SaveFolderAction: 
   m_SaveFolderModifier: 

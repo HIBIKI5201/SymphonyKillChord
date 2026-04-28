@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Battle;
@@ -15,6 +16,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.View.InGame.Enemy;
 using SymphonyFrameWork.System.ServiceLocate;
 using Unity.Behavior;
 using UnityEngine;
@@ -35,6 +37,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
+        [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
@@ -72,6 +75,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
             EnemyRaycastDetectService raycastDetectService = new EnemyRaycastDetectService(raycastController);
 
+            // 攻撃位置探索
+            NearestAttackPositionSearchController attackPositionSearchController = new NearestAttackPositionSearchController(_attackPositionSearchView);
+            NearestAttackPositionSearchService attackPositionSearchService = new NearestAttackPositionSearchService(attackPositionSearchController);
+
             // Domain生成
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
@@ -79,7 +86,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService);
+            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
 
@@ -88,7 +95,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
             // Controller
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade);
+            EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -98,7 +106,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             _view.Initialize(controller, target);
-            _raycastView.Initialize(target, spec.AttackRange.Value);
+            _raycastView.Initialize(target, spec.AttackRangeMax.Value);
+            _attackPositionSearchView.Initialize();
 
             // ファサード初期化
             _enemyMovementAIFacade.Initialize(_view);
@@ -106,8 +115,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyStateFacade.Initialize(controller, target, _raycastView, battleState);
             //_enemySharedFacade.Initialize(target);
 
-            // Behavior Graph Agent有効化
+            // コンポーネント有効化
             _behaviorGraphAgent.enabled = true;
+            _attackPositionSearchView.enabled = true;
         }
 
         private void HandleEnemyDied(CharacterEntity _)
