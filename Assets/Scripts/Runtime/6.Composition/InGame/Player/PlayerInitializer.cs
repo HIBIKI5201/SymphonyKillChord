@@ -43,7 +43,8 @@ namespace KillChord.Runtime.Composition
         [SerializeField]
         private CharacterData _playerData;
 
-        private EnemyTestSpawner _enemyTestSpawner;
+        private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
+        private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
 
@@ -59,11 +60,17 @@ namespace KillChord.Runtime.Composition
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
-            _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawner>();
-            if (_enemyTestSpawner == null)
+            _enemyInfantryTestSpawner = ServiceLocator.GetInstance<EnemyInfantryTestSpawner>();
+            if (_enemyInfantryTestSpawner == null)
             {
-                Debug.LogError($"{nameof(EnemyTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(EnemyInfantryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
+            }
+            _enemyArtilleryTestSpawner = ServiceLocator.GetInstance<EnemyArtilleryTestSpawner>();
+            if (_enemyArtilleryTestSpawner == null)
+            {
+                Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return; 
             }
 
 
@@ -75,9 +82,10 @@ namespace KillChord.Runtime.Composition
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
-            _enemyTestSpawner.SetTargetEntity(_playerEntity);
-            _enemyTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
-
+            _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
+            _enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
+            _enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
+            _enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 

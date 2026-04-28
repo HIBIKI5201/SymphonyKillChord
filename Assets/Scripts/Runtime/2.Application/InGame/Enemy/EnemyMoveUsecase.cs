@@ -12,10 +12,11 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         ///     敵の移動に関する仕様を受け取るコンストラクタ。
         /// </summary>
         /// <param name="enemyMoveSpec"></param>
-        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec, EnemyRaycastDetectService raycastDetector)
+        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec, EnemyRaycastDetectService raycastDetector, NearestAttackPositionSearchService nearestAttackPositionSearcher)
         {
             _enemyMoveSpec = enemyMoveSpec;
             _raycastDetector = raycastDetector;
+            _nearestAttackPositionSearcher = nearestAttackPositionSearcher;
         }
 
         /// <summary>
@@ -29,8 +30,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             float distance = Vector3.Distance(enemyPosition, playerPosition);
 
-            // 攻撃範囲外であれば、プレイヤーに向かって移動する。
-            if (distance > _enemyMoveSpec.AttackRange.Value)
+            // 攻撃範囲外の場合、プレイヤーに向かって移動する。
+            if (distance > _enemyMoveSpec.AttackRangeMax.Value)
             {
                 return new EnemyMoveDecision(
                     true,
@@ -38,8 +39,21 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                     _enemyMoveSpec.MoveSpeed.Value
                 );
             }
+            // 攻撃範囲内、かつプレイヤーに近すぎる場合、最も近い攻撃位置を探索して移動する
+            if (distance < _enemyMoveSpec.AttackRangeMin.Value)
+            {
+                Vector3 nearestAttackPosition = _nearestAttackPositionSearcher.FindNearestAttackPosition(
+                    enemyPosition,
+                    playerPosition,
+                    _enemyMoveSpec.AttackRangeMin.Value);
+                return new EnemyMoveDecision(
+                    true,
+                    nearestAttackPosition,
+                    _enemyMoveSpec.MoveSpeed.Value
+                );
+            }
             // 攻撃範囲内、かつプレイヤーとの間に障害物がある場合、迂回して移動し続ける
-            else if(!_raycastDetector.CanRaycastHitTarget)
+            if(!_raycastDetector.CanRaycastHitTarget)
             {
                 return new EnemyMoveDecision(
                     true,
@@ -64,10 +78,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <returns></returns>
         public bool IsPlayerInAttackRange(Vector3 enemyPosition, Vector3 playerPosition)
         {
-            return Vector3.Distance(playerPosition, enemyPosition) <= _enemyMoveSpec.AttackRange.Value;
+            float distance = Vector3.Distance(enemyPosition, playerPosition);
+            return distance <= _enemyMoveSpec.AttackRangeMax.Value
+                && distance >= _enemyMoveSpec.AttackRangeMin.Value;
         }
 
         private readonly EnemyMoveSpec _enemyMoveSpec;
         private readonly EnemyRaycastDetectService _raycastDetector;
+        private readonly NearestAttackPositionSearchService _nearestAttackPositionSearcher;
     }
 }
