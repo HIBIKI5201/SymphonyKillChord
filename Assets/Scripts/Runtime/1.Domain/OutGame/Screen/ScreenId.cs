@@ -5,8 +5,6 @@ namespace KillChord.Runtime.Domain.OutGame.Screen
     /// </summary>
     public enum ScreenId
     {
-        /// <summary> 定義なし。 </summary>
-        None,
         /// <summary> ホーム画面。 </summary>
         Home,
         /// <summary> 作戦画面。 </summary>

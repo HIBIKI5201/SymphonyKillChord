@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: ScreenRuleData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.Screen.ScreenRuleData
   _entries:
-  - _screenId: 1
+  - _screenId: 0
     _transitionType: 2
     _isAddToHistory: 0
+  - _screenId: 1
+    _transitionType: 0
+    _isAddToHistory: 1
   - _screenId: 2
     _transitionType: 0
     _isAddToHistory: 1
@@ -23,8 +26,5 @@ MonoBehaviour:
     _transitionType: 0
     _isAddToHistory: 1
   - _screenId: 4
-    _transitionType: 0
-    _isAddToHistory: 1
-  - _screenId: 5
     _transitionType: 1
     _isAddToHistory: 1
