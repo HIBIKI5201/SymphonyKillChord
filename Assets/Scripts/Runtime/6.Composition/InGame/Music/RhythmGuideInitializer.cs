@@ -13,6 +13,12 @@ namespace KillChord.Runtime.Composition.InGame.Music
     {
         public void Initialize()
         {
+            if (_rhythmGuideDefinitionAsset == null || _rhythmGuideView == null || _rhythmGuideUpdateView == null)
+            {
+                Debug.LogError("RhythmGuideInitializer の参照が未設定です。RhythmGuideDefinitionAsset / RhythmGuideView / RhythmGuideUpdeteView を設定してください。");
+                return;
+            }
+
             IMusicSyncService musicSyncService =
                 ServiceLocator.GetInstance<IMusicSyncService>();
 

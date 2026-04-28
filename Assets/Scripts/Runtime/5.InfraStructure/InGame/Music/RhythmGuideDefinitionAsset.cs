@@ -2,6 +2,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Music
 {
@@ -10,10 +11,20 @@ namespace KillChord.Runtime.InfraStructure.InGame.Music
     {
         public RhythmGuideDefinition ToDefinition()
         {
-            List<RhythmGuideRange> guideRanges = new();
-
-            foreach (RhythmGuideRangeData range in _rangeData)
+            if (_rangeData == null || _rangeData.Length == 0)
             {
+                return new RhythmGuideDefinition(Array.Empty<RhythmGuideRange>());
+            }
+
+            List<RhythmGuideRange> guideRanges = new(_rangeData.Length);
+
+            for (int i = 0; i < _rangeData.Length; i++)
+            {
+                RhythmGuideRangeData range = _rangeData[i];
+                if (range == null)
+                {
+                    throw new InvalidOperationException($"_rangeData[{i}] is null.");
+                }
                 guideRanges.Add(new RhythmGuideRange(range.BeatType, range.StartNormalized, range.EndNormalized));
             }
 
