@@ -20,6 +20,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
+        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
 
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
@@ -77,6 +78,7 @@ namespace KillChord.Runtime.Composition
             _skillInitializer.Initialize();
 
             _enemyTestSpawner.Init();
+            _rhythmGuideInitializer.Initialize();
         }
     }
 }
