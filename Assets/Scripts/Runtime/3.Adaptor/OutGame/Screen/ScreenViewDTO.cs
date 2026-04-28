@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     /// <summary>
     ///     View へ渡す画面遷移 DTO。
     /// </summary>
-    public readonly struct ScreenViewDTO
+    public readonly ref struct ScreenViewDTO
     {
         /// <summary>
         ///     DTO を初期化します。

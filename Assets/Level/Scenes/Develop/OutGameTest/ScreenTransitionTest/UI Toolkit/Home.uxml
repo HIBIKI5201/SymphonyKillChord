@@ -1,7 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
-    <ui:VisualElement class="screen-visible screen-hidden">
+    <ui:VisualElement class="screen-visible">
         <ui:VisualElement name="ButtonRoot" style="flex-grow: 1; justify-content: flex-start; align-items: flex-end; padding-right: 50px; padding-top: 50px; flex-direction: column;">
             <ui:Button text="作戦" name="StageSelect" class="button" style="color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
             <ui:Button text="研究" name="SkillTree" class="button" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(255, 255, 255, 0); color: rgb(209, 209, 209); display: flex; opacity: 1;"/>

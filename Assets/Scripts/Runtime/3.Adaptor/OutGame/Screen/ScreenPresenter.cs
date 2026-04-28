@@ -1,4 +1,7 @@
 using KillChord.Runtime.Application.OutGame.Screen;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
@@ -18,13 +21,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///     画面遷移結果を出力します。
         /// </summary>
-        public void Present(ScreenTransitionResult result)
+        public Task Present(ScreenTransitionResult result, CancellationToken token)
         {
             ScreenViewDTO screenViewDTO = new(
                 result.ScreenToHideId,
                 result.ScreenToShowId);
 
-            _screenViewModel.Apply(in screenViewDTO);
+             return _screenViewModel.Apply(in screenViewDTO, token);
         }
 
         private readonly IScreenTransitionApplicable _screenViewModel;

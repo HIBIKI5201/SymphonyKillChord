@@ -3,6 +3,8 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
@@ -30,19 +32,19 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///     指定画面を表示します。
+        ///     指定画面を表示し、トランジションの完了を待機します。
         /// </summary>
-        public void Show(ScreenId screenId)
+        public async Task Show(ScreenId screenId, CancellationToken token)
         {
-            _views[screenId].Show();
+            await _views[screenId].Show(token);
         }
 
         /// <summary>
-        ///     指定画面を非表示にします。
+        ///     指定画面を非表示にし、トランジションの完了を待機します。
         /// </summary>
-        public void Hide(ScreenId screenId)
+        public async Task Hide(ScreenId screenId, CancellationToken token)
         {
-            _views[screenId].Hide();
+            await _views[screenId].Hide(token);
         }
 
         /// <summary>

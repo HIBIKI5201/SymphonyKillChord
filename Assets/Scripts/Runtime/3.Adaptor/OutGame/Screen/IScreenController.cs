@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
     /// <summary>
@@ -6,21 +9,21 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     public interface IScreenController
     {
         /// <summary> ホーム画面を表示します。 </summary>
-        void ShowHome();
+        Task ShowHome(CancellationToken token);
 
         /// <summary> ステージ選択画面を表示します。 </summary>
-        void ShowStageSelect();
+        Task ShowStageSelect(CancellationToken token);
 
         /// <summary> スキルツリー画面を表示します。 </summary>
-        void ShowSkillTree();
+        Task ShowSkillTree(CancellationToken token);
 
         /// <summary> スキル選択画面を表示します。 </summary>
-        void ShowSkillBuild();
+        Task ShowSkillBuild(CancellationToken token);
 
         /// <summary> 設定画面を表示します。 </summary>
-        void ShowSetting();
+        Task ShowSetting(CancellationToken token);
 
         /// <summary> 現在画面を閉じます。 </summary>
-        void CloseCurrent();
+        Task CloseCurrent(CancellationToken token);
     }
 }

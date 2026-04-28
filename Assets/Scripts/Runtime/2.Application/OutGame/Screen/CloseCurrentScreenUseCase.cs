@@ -1,4 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Screen
 {
@@ -21,7 +23,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         /// <summary>
         ///     現在開いている画面を閉じます。
         /// </summary>
-        public void Execute()
+        public async Task Execute(CancellationToken token)
         {
             ScreenTransitionState transitionState = _screenStateRepository.TransitionState;
             ScreenId? currentScreenId = transitionState.CurrentScreenId;
@@ -41,7 +43,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
                 previousScreenId,
                 clearHistory: false);
 
-            _screenPresenter.Present(result);
+            await _screenPresenter.Present(result, token);
         }
 
         private readonly IScreenPresenter _screenPresenter;
