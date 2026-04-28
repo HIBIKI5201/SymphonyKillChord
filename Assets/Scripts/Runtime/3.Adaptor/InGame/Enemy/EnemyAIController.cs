@@ -1,14 +1,12 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
-using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Player;
-using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Utility;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     敵の動きを制御するコントローラークラス。
@@ -20,7 +18,8 @@ namespace KillChord.Runtime.Adaptor
             EnemyAttackReservationUsecase enemyAttackReservationUsecase,
             EnemyAttackUsecase enemyAttackUsecase,
             EnemyBattleState enemyBattleState,
-            IEnemyStateFacade stateFacade
+            IEnemyStateFacade stateFacade,
+            IEnemyAttackController attackController
             )
         {
             _enemyMoveUsecase = enemyMoveUsecase;
@@ -28,6 +27,7 @@ namespace KillChord.Runtime.Adaptor
             _enemyAttackUsecase = enemyAttackUsecase;
             _enemyBattleState = enemyBattleState;
             _stateFacade = stateFacade;
+            _attackController = attackController;
 
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
@@ -123,25 +123,31 @@ namespace KillChord.Runtime.Adaptor
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
         }
 
-        private void HandleReservedTimingReached()
+        /// <summary>
+        ///     TODO 砲弾爆発のダメージを処理するためのメソッド。ShellControllerから呼び出される。
+        ///     今後リファクタリングして、砲弾専用の処理に移す予想。
+        /// </summary>
+        public void DealProjectileDamage()
         {
-            Debug.Log("[EnemyAIController] HandleReservedTimingReached 呼ばれた");
-
             _enemyAttackUsecase.ExecuteAttack(
                 _enemyBattleState.CurrentAttack,
                 _enemyBattleState.Attacker,
                 _enemyBattleState.Target);
-            _enemyBattleState.AttackExcuted();
+        }
 
+        private void HandleReservedTimingReached()
+        {
+            _attackController.ExecuteAttack();
+            _enemyBattleState.AttackExcuted();
             OnAttack?.Invoke();
         }
 
         private void HandleOnDamageTaken(EOnTakeDamage eventParam)
         {
             if (eventParam.DefenderHashCode != _enemyBattleState.Attacker.GetHashCode()) return;
+            // クリティカル発生時、硬直行動をする
             if (eventParam.Critical)
             {
-                Debug.Log("[EnemyAIController]クリティカル発生");
                 _enemyBattleState.Stunned();
                 _stateFacade.Stunned();
             }
@@ -152,5 +158,6 @@ namespace KillChord.Runtime.Adaptor
         private readonly EnemyAttackUsecase _enemyAttackUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
+        private readonly IEnemyAttackController _attackController;
     }
 }

@@ -3,11 +3,11 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
-    ///     射程距離を表す値オブジェクト。
+    ///     最小射程距離を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackRange
+    public readonly struct AttackRangeMin
     {
-        public AttackRange(float value)
+        public AttackRangeMin(float value)
         {
             if (value < 0)
             {
@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             }
             if (!float.IsFinite(value))
             {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
+                throw new ArgumentException("value must be finite.", nameof(value));
             }
 
             _value = value < 0f ? 0f : value;
@@ -23,14 +23,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         public float Value => _value;
 
-        public bool Equals(AttackRange other)
+        public bool Equals(AttackRangeMin other)
         {
             return _value.Equals(other._value);
         }
 
         public override bool Equals(object obj)
         {
-            return obj is AttackRange other && Equals(other);
+            return obj is AttackRangeMin other && Equals(other);
         }
 
         public override int GetHashCode()

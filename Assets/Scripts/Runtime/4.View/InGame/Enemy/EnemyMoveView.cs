@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,10 +21,15 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack += PlayEffectHit;
         }
 
+        public Transform GetTargetTransform()
+        {
+            return _target;
+        }
+
         /// <summary>
-        ///     攻撃対象を追跡する。
+        ///     攻撃可能な位置まで移動する。
         /// </summary>
-        public void ChaseTarget()
+        public void MoveToAttack()
         {
             if (!_navMeshAgent.isOnNavMesh || _target == null) return;
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
@@ -37,9 +42,9 @@ namespace KillChord.Runtime.View.InGame
         }
 
         /// <summary>
-        ///     攻撃対象への追跡を停止する。
+        ///     移動を停止する。
         /// </summary>
-        public void StopChasing()
+        public void StopMoving()
         {
             _navMeshAgent.isStopped = true;
         }

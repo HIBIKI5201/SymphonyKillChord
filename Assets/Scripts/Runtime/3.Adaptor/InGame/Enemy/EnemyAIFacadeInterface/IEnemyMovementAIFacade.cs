@@ -8,12 +8,12 @@ namespace KillChord.Runtime.Adaptor
     public interface IEnemyMovementAIFacade
     {
         /// <summary>
-        ///     指示：目標を追跡する。
+        ///     指示：攻撃可能な位置に移動する。
         /// </summary>
-        public void ChaseTarget();
+        public void MoveToAttack();
         /// <summary>
-        ///     指示：追跡を停止する。
+        ///     指示：移動を停止する。
         /// </summary>
-        public void StopChasing();
+        public void StopMoving();
     }
 }
