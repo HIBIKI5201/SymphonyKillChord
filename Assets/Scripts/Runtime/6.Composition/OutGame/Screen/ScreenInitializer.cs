@@ -61,14 +61,53 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
+            if (_screenRuleData == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] ScreenRuleData が設定されていません。", this);
+                return;
+            }
+
             // View 層
             VisualElement rootElement = _uiDocument.rootVisualElement;
 
-            HomeScreenView homeScreenView = new(rootElement.Q<VisualElement>(HOMESCREEN_NAME), _outGameUIEvent);
-            StageSelectScreenView stageSelectScreenView = new(rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME), _outGameUIEvent);
-            SkillTreeScreenView skillTreeScreenView = new(rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME), _outGameUIEvent);
-            SkillBuildScreenView skillBuildScreenView = new(rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME), _outGameUIEvent);
-            SettingScreenView settingScreenView = new(rootElement.Q<VisualElement>(SETTINGSCREEN_NAME), _outGameUIEvent);
+            VisualElement homeRoot = rootElement.Q<VisualElement>(HOMESCREEN_NAME);
+            VisualElement stageSelectRott = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
+            VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
+            VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
+            VisualElement settingRoot = rootElement.Q<VisualElement>(SETTINGSCREEN_NAME);
+
+            // 各画面のルート要素が見つからない場合は、エラーログを出力して初期化を中断します。
+            if (homeRoot == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {HOMESCREEN_NAME} が見つかりませんでした。", this);
+                return;
+            }
+            if (stageSelectRott == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this); 
+                return;
+            }
+            if (skillTreeRoot == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLTREESCREEN_NAME} が見つかりませんでした。", this);
+                return;
+            }
+            if (skillBuildRoot == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLBUILDSCREEN_NAME} が見つかりませんでした。", this);
+                return;
+            }
+            if (settingRoot == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {SETTINGSCREEN_NAME} が見つかりませんでした。", this);
+                return;
+            }
+
+            HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
+            StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRott, _outGameUIEvent);
+            SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
+            SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -110,7 +149,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _ctsShow = new();
             _ctsHide = new();
 
-            _ = _screenController.ShowHome(_ctsShow.Token);
+            _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             _isInitialized = true;
         }
 

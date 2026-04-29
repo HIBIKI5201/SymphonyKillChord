@@ -35,7 +35,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void RegisterOutGameUIEvent()
         {
+            if (_isRegistered) { return; }
             ServiceLocator.RegisterInstance(this);
+            _isRegistered = true;
         }
 
         /// <summary>
@@ -43,7 +45,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void UnregisterOutGameUIEvent()
         {
+            if (!_isRegistered) { return; }
             ServiceLocator.UnregisterInstance(this);
+            _isRegistered = false;
         }
 
         /// <summary>
@@ -62,5 +66,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             //UnregisterOutGameUIEvent();
         }
+
+        private bool _isRegistered;
     }
 }

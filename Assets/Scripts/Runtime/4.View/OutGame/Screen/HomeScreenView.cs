@@ -14,13 +14,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
             : base(rootElement, outGameUIEvent)
         {
             _stageSelectButton = RootElement.Q<Button>(STAGE_SELECT_BUTTON_NAME)
-                ?? throw new System.ArgumentNullException($"{STAGE_SELECT_BUTTON_NAME} が見つかりません。");
+                ?? throw new System.InvalidOperationException(
+                    $"{STAGE_SELECT_BUTTON_NAME} が見つかりません。");
+
             _skillTreeButton = RootElement.Q<Button>(SKILL_TREE_BUTTON_NAME)
-                ?? throw new System.ArgumentNullException($"{SKILL_TREE_BUTTON_NAME} が見つかりません。");
+                ?? throw new System.InvalidOperationException(
+                    $"{SKILL_TREE_BUTTON_NAME} が見つかりません。");
+
             _skillBuildButton = RootElement.Q<Button>(SKILL_BUILD_BUTTON_NAME)
-                ?? throw new System.ArgumentNullException($"{SKILL_BUILD_BUTTON_NAME} が見つかりません。");
+                ?? throw new System.InvalidOperationException(
+                    $"{SKILL_BUILD_BUTTON_NAME} が見つかりません。");
+
             _settingButton = RootElement.Q<Button>(SETTING_BUTTON_NAME)
-                ?? throw new System.ArgumentNullException($"{SETTING_BUTTON_NAME} が見つかりません。");
+                ?? throw new System.InvalidOperationException(
+                    $"{SETTING_BUTTON_NAME} が見つかりません。");
 
             RegisterButtonCallbacks();
         }
@@ -40,11 +47,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void RegisterButtonCallbacks()
         {
             _stageSelectButton.RegisterCallback<ClickEvent>(OnStageSelectClicked);
-
             _skillTreeButton.RegisterCallback<ClickEvent>(OnSkillTreeClicked);
-
             _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildClicked);
-
             _settingButton.RegisterCallback<ClickEvent>(OnSettingClicked);
         }
 
