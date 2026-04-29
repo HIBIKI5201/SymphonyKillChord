@@ -3,7 +3,6 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility;
 using System;
 using System.Threading;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
@@ -85,6 +84,16 @@ namespace KillChord.Runtime.Application.InGame.Music
         public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
             _rhythmState.Enqueue(beatType, unscaledTime, actionType);
+        }
+
+        public float GetBarProgress(float unscaledTime)
+        {
+            if (_rhythmState.Count == 0) return 0f;
+
+            float lastTime = _rhythmState.LastTiming;
+            float duration = unscaledTime - lastTime;
+
+            return (float)_rhythmDefinition.CalculateBarProgress(duration);
         }
     }
 }
