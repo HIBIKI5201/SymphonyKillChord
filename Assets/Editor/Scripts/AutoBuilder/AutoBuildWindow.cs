@@ -1,6 +1,6 @@
-using CodiceApp;
 using DevelopProducts.TicketSystem;
 using KillChord.Editor.Utility;
+using SymphonyFrameWork.Attribute;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,7 +20,31 @@ namespace KillChord.Editor.AutoBuilder
 
         private void OnGUI()
         {
+            AutoBuilderSettings settings = AutoBuilderSettings.instance;
 
+            if (!AutoBuilderSettings.IsPathValid(settings.MasterPath))
+            {
+                EditorGUILayout.HelpBox("MasterPathが不正です。", MessageType.Error);
+            }
+            else
+            {
+                if (GUILayout.Button("Master Build"))
+                {
+                    AutoBuildExecuter.Run(settings.MasterBuildProfiles);
+                }
+            }
+
+            if (!AutoBuilderSettings.IsPathValid(settings.DevelopPath))
+            {
+                EditorGUILayout.HelpBox("DevelopPathが不正です。", MessageType.Error);
+            }
+            else
+            {
+                if (GUILayout.Button("Develop Build"))
+                {
+                    AutoBuildExecuter.Run(settings.DevelopBuildProfiles);
+                }
+            }
         }
     }
 }
