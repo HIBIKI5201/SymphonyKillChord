@@ -22,9 +22,15 @@ namespace KillChord.Editor.AutoBuilder
         public override void OnGUI(string searchContext)
         {
             SerializedObject so = new SerializedObject(AutoBuilderSettings.instance);
-            SerializedProperty prop = so.FindProperty("BuildProfiles");
+            SerializedProperty masterProp = so.FindProperty(nameof(AutoBuilderSettings.instance.MasterBuildProfiles));
+            SerializedProperty devProp = so.FindProperty(nameof(AutoBuilderSettings.instance.DevelopBuildProfiles));
 
-            EditorGUILayout.PropertyField(prop, true);
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUILayout.PropertyField(masterProp, true);
+            EditorGUILayout.PropertyField(devProp, true);
+
+            if (EditorGUI.EndChangeCheck()) { AutoBuilderSettings.Save(); }
 
             so.ApplyModifiedProperties();
         }
