@@ -11,7 +11,7 @@ namespace KillChord.Editor.AutoBuilder
         [MenuItem(ToolConst.TOOLS_PATH + "AutoBuilder")]
         public static void ShowWindow()
         {
-            GetWindow<MasterTicketWindow>("AutoBuilder");
+            GetWindow<AutoBuildWindow>("AutoBuilder");
         }
 
         private void OnEnable()
