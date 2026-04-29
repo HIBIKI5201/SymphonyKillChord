@@ -33,13 +33,13 @@ namespace KillChord.Editor.AutoBuilder
 
             masterPath.stringValue = EditorGUILayout.TextField(masterPath.stringValue);
             if (AutoBuilderSettings.IsPathNullOrEmpty(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathが空です。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsPathEndsWithSlash(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathの末尾にスラッシュがありません。", MessageType.Warning); }
+            if (!AutoBuilderSettings.IsPathEndsWithSlash(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathの末尾にスラッシュがありません。", MessageType.Warning); }
             EditorGUILayout.PropertyField(masterProp, true);
 
             EditorGUILayout.Space(10);
             devPath.stringValue = EditorGUILayout.TextField(devPath.stringValue);
             if (AutoBuilderSettings.IsPathNullOrEmpty(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathが空です。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsPathEndsWithSlash(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathの末尾にスラッシュがありません。", MessageType.Warning); }
+            if (!AutoBuilderSettings.IsPathEndsWithSlash(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathの末尾にスラッシュがありません。", MessageType.Warning); }
 
             EditorGUILayout.PropertyField(devProp, true);
 
