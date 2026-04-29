@@ -30,7 +30,9 @@ namespace KillChord.Editor.AutoBuilder
             {
                 if (GUILayout.Button("Master Build"))
                 {
-                    AutoBuildExecuter.Run(settings.MasterBuildProfiles);
+                    AutoBuildExecuter.Run(
+                        settings.MasterPath,
+                        settings.MasterBuildProfiles);
                 }
             }
 
@@ -42,7 +44,9 @@ namespace KillChord.Editor.AutoBuilder
             {
                 if (GUILayout.Button("Develop Build"))
                 {
-                    AutoBuildExecuter.Run(settings.DevelopBuildProfiles);
+                    AutoBuildExecuter.Run(
+                        settings.DevelopPath,
+                        settings.DevelopBuildProfiles);
                 }
             }
         }

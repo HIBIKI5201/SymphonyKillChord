@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
@@ -7,7 +9,7 @@ namespace KillChord.Editor.AutoBuilder
 {
     public static class AutoBuildExecuter
     {
-        public static void Run(params BuildProfile[] profiles)
+        public static void Run(string path, params BuildProfile[] profiles)
         {
             if (profiles == null || profiles.Length == 0)
             {
@@ -25,7 +27,24 @@ namespace KillChord.Editor.AutoBuilder
 
                 Debug.Log($"Start Build: {profile.name}");
 
-                BuildPlayerWithProfileOptions options = new() { buildProfile = profile };
+                BuildProfile.SetActiveBuildProfile(profile);
+
+                string[] scenes = profile.GetScenesForBuild()
+                    .Where(s => s.enabled)
+                    .Select(s => s.path)
+                    .ToArray();
+
+                BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+
+                BuildPlayerOptions options = new()
+                {
+                    scenes = scenes,
+                    target = target,                     
+                    locationPathName = path + profile.name + GetExtension(target)
+                };
+
+                if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+
                 BuildReport report = BuildPipeline.BuildPlayer(options);
 
                 if (report.summary.result != BuildResult.Succeeded)
@@ -37,6 +56,18 @@ namespace KillChord.Editor.AutoBuilder
                     Debug.Log($"Build Succeeded: {profile.name}");
                 }
             }
+        }
+
+        private static string GetExtension(BuildTarget target)
+        {
+            return target switch
+            {
+                BuildTarget.StandaloneWindows => ".exe",
+                BuildTarget.StandaloneWindows64 => ".exe",
+                BuildTarget.Android => ".apk",
+                BuildTarget.StandaloneOSX => ".app",
+                _ => ""
+            };
         }
     }
 }
