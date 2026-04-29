@@ -1,21 +1,41 @@
 using UnityEditor;
+using UnityEditor.Build.Profile;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
 {
     public static class AutoBuildExecuter
     {
-        public static void BuildMaster()
+        public static void Run(params BuildProfile[] profiles)
         {
-            var settings = AutoBuilderSettings.instance;
-            if (settings.MasterBuildProfiles == null || settings.MasterBuildProfiles.Length == 0)
+            if (profiles == null || profiles.Length == 0)
             {
-                UnityEngine.Debug.LogError("Master Build Profiles are not set.");
+                Debug.LogError("Master Build Profiles are not set.");
                 return;
             }
 
-            foreach (var profile in settings.MasterBuildProfiles)
+            foreach (BuildProfile profile in profiles)
             {
-                BuildPipeline.BuildPlayer(profile);
+                if (profile == null)
+                {
+                    Debug.LogWarning("BuildProfile is null. Skipping.");
+                    continue;
+                }
+
+                Debug.Log($"Start Build: {profile.name}");
+
+                BuildPlayerWithProfileOptions options = new() { buildProfile = profile };
+                BuildReport report = BuildPipeline.BuildPlayer(options);
+
+                if (report.summary.result != BuildResult.Succeeded)
+                {
+                    Debug.LogError($"Build Failed: {profile.name}");
+                }
+                else
+                {
+                    Debug.Log($"Build Succeeded: {profile.name}");
+                }
             }
         }
     }
