@@ -8,7 +8,7 @@ namespace KillChord.Editor.AutoBuilder
 {
     public class AutoBuildWindow : EditorWindow
     {
-        [MenuItem(ToolConst.WINDOW_PATH + "AutoBuilder")]
+        [MenuItem(ToolConst.TOOLS_PATH + "AutoBuilder")]
         public static void ShowWindow()
         {
             GetWindow<MasterTicketWindow>("AutoBuilder");
