@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Editor.Utility
 {
+    /// <summary>
+    ///     プロバイダー向けの定数クラス。
+    /// </summary>
     public static class ProviderConst
     {
         public const string PROJECT_PATH = "Project/";
