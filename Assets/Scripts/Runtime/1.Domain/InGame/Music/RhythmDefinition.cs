@@ -17,6 +17,14 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public readonly int Bpm;
         public readonly double BeatLength;
 
+        public double CalculateBarProgress(double durationSeconds)
+        {
+            if (Bpm <= 0) return 0d;
+
+            double barSeconds = BeatLength * 4d;
+            return durationSeconds / barSeconds;
+        }
+
         /// <summary>
         /// 1~8拍子の中で、指定された秒数に最も近い拍子を算出する
         /// </summary>

@@ -21,24 +21,20 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Transform _playerT;
         private Vector2 _input;
 
-        public void InitializePC(
+        public void Initialize(
             CameraSystemController controller,
             Transform playerT,
-            PlayerInputView playerInputView,
-            bool mobileBuild)
+            PlayerInputView playerInputView)
         {
             _controller = controller;
             _playerT = playerT;
             _inputView = playerInputView;
 
-            if (mobileBuild)
-            {
-                _inputView.OnMobileLookInput += OnLook;
-            }
-            else
-            {
-                _inputView.OnLookInput += OnLook;
-            }
+#if UNITY_ANDROID
+            _inputView.OnMobileLookInput += OnLook;
+#else
+            _inputView.OnLookInput += OnLook;
+#endif
         }
 
         private void FixedUpdate()
@@ -91,14 +87,13 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         private void TestChangeLockOn()
         {
-            //ロックオンを一時的に無効化している
-            /*
+#if UNITY_STANDALONE_WIN
             if (Input.GetKeyDown(KeyCode.Mouse2))
                 _controller.ToggleLockOnState(_playerT.position);
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
                 _controller.TryActiveAutoLockOn(_playerT.position);
-                */
+#endif
         }
     }
 }

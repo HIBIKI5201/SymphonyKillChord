@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application.InGame.Player
         public void Update(ref Quaternion rotation, Vector2 input, float time, out Vector3 velocity)
         {
             velocity = Vector3.zero;
-            if (_dodge.IsDodhing)
+            if (_dodge.IsDodging)
             {
                 _dodge.Update(ref rotation, time, out velocity);
             }

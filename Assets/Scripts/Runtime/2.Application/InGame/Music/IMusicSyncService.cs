@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Application.InGame.Music
     {
         void Update(double playTime);
         int GetHistoryLength();
+        float GetBarProgress(float unscaledTime);
 
         ReadOnlySpan<BeatType> GetBeatTypeHistory();
         ReadOnlySpan<float> GetBeatTypeTiming();
