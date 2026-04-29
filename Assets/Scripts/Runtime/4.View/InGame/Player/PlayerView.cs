@@ -26,7 +26,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private PlayerInputView _playerInputView;
         private Vector2 _moveVector;
-        private bool _isSprint;
+        private bool _isDodge;
 
         void Update()
         {
@@ -77,11 +77,7 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             if (input.Phase == InputActionPhase.Started)
             {
-                _isSprint = true;
-            }
-            else if (input.Phase == InputActionPhase.Canceled)
-            {
-                _isSprint = false;
+                _isDodge = true;
             }
         }
 
@@ -109,9 +105,10 @@ namespace KillChord.Runtime.View.InGame.Player
 
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
-            if (_isSprint)
+            if (_isDodge)
             {
                 _controller.TryDodge(dir, Time.time);
+                _isDodge = false;
             }
 
             Quaternion rotation = _cacheTransform.rotation;

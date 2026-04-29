@@ -113,7 +113,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyMovementAIFacade.Initialize(_view);
             _enemyBattleAIFacade.Initialize(controller);
             _enemyStateFacade.Initialize(controller, target, _raycastView, battleState);
-            _enemySharedFacade.Initialize(target);
+            //_enemySharedFacade.Initialize(target);
 
             // コンポーネント有効化
             _behaviorGraphAgent.enabled = true;

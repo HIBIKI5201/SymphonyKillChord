@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cd809c71f001dd4fa08e46580c963da, type: 3}
+  m_Name: RhythmGuideDefinitionAsset
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.RhythmGuideDefinitionAsset
+  _rangeData:
+  - BeatType: 8
+    StartNormalized: 0
+    EndNormalized: 0.148
+  - BeatType: 6
+    StartNormalized: 0.1458
+    EndNormalized: 0.2083
+  - BeatType: 4
+    StartNormalized: 0.2083
+    EndNormalized: 0.2917
+  - BeatType: 3
+    StartNormalized: 0.2917
+    EndNormalized: 0.4167
+  - BeatType: 2
+    StartNormalized: 0.4167
+    EndNormalized: 0.75
+  - BeatType: 1
+    StartNormalized: 0.75
+    EndNormalized: 1

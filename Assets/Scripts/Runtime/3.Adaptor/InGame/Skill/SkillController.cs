@@ -3,7 +3,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using KillChord.Runtime.Domain.Persistent.Music;
+using System.Diagnostics;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
@@ -12,7 +12,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         public SkillController(
             ISkillRepository skillRepository,
             IMusicSyncService musicSyncService,
-            int[] skillId = null)
+            int[] skillId = null,
+            SkillResultPresenter presenter = null)
         {
             _musicSyncService = musicSyncService;
             skillId ??= new[] { 0 };
@@ -22,6 +23,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             {
                 _skillCache[i] = skillRepository.GetSkill(skillId[i]);
             }
+
+            _presenter = presenter;
         }
 
         public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
@@ -34,6 +37,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     out var index, out _))
             {
                 _skillCache[index].SkillExecute();
+                _presenter?.Push(_skillCache[index]);
                 return true;
             }
 
@@ -42,5 +46,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         private readonly IMusicSyncService _musicSyncService;
         private readonly SkillDefinition[] _skillCache;
+        private readonly SkillResultPresenter _presenter;
     }
 }
