@@ -12,10 +12,10 @@ public partial class GetStunnedAction : Action
     [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
     [SerializeReference] public BlackboardVariable<EnemyBattleAIFacade> Battle;
 
-    private Animator m_Animator;
-    private GameObject m_TextObject;
-    private GameObject m_TextMeshAsset;
-    private static readonly int s_Talking = Animator.StringToHash("Talking"); 
+    //private Animator m_Animator;
+    //private GameObject m_TextObject;
+    //private GameObject m_TextMeshAsset;
+    //private static readonly int s_Talking = Animator.StringToHash("Talking"); 
     protected override Status OnStart()
     {
         if (State?.Value?.gameObject == null
@@ -26,17 +26,17 @@ public partial class GetStunnedAction : Action
         EnemyBattleAIFacade battle = Battle.Value;
 
         // 【TODO START】文字表示処理
-        if (m_TextMeshAsset == null)
-        {
-            m_TextMeshAsset = Resources.Load<GameObject>("TextMesh Speech Preset");
-        }
-        CreateTextObject("CRITICAL!!", agent);
+        //if (m_TextMeshAsset == null)
+        //{
+        //    m_TextMeshAsset = Resources.Load<GameObject>("TextMesh Speech Preset");
+        //}
+        //CreateTextObject("CRITICAL!!", agent);
 
-        m_Animator = agent.GetComponent<Animator>();
-        if (m_Animator != null)
-        {
-            m_Animator.SetBool(s_Talking, true);
-        }
+        //m_Animator = agent.GetComponent<Animator>();
+        //if (m_Animator != null)
+        //{
+        //    m_Animator.SetBool(s_Talking, true);
+        //}
         // 【TODO End】
 
         battle.CancelAttack();
@@ -47,7 +47,7 @@ public partial class GetStunnedAction : Action
     protected override Status OnUpdate()
     {
         // 【TODO START】文字表示処理
-        m_TextObject.transform.rotation = GetTextLookRotation();
+        //m_TextObject.transform.rotation = GetTextLookRotation();
         // 【TODO END】
 
         if (State.Value.IsStunned) return Status.Running;
@@ -57,56 +57,56 @@ public partial class GetStunnedAction : Action
     protected override void OnEnd()
     {
         // 【TODO START】文字表示処理
-        if (m_TextObject != null)
-        {
-            UnityEngine.Object.Destroy(m_TextObject);
-            m_TextObject = null;
-        }
-        if (m_Animator != null)
-        {
-            m_Animator.SetBool(s_Talking, false);
-        }
+        //if (m_TextObject != null)
+        //{
+        //    UnityEngine.Object.Destroy(m_TextObject);
+        //    m_TextObject = null;
+        //}
+        //if (m_Animator != null)
+        //{
+        //    m_Animator.SetBool(s_Talking, false);
+        //}
         // 【TODO End】
     }
 
     // 【TODO START】文字表示処理。開発段階用のもので、アニメーション実装できたらこの辺を削除する。
-    public void CreateTextObject(string text, GameObject parent)
-    {
-        Vector3 pos = GetBoundsOffset(parent);
-        m_TextObject = UnityEngine.Object.Instantiate(m_TextMeshAsset, parent.transform, true);
-        m_TextObject.GetComponent<TMPro.TextMeshPro>().text = text;
+    //public void CreateTextObject(string text, GameObject parent)
+    //{
+    //    Vector3 pos = GetBoundsOffset(parent);
+    //    m_TextObject = UnityEngine.Object.Instantiate(m_TextMeshAsset, parent.transform, true);
+    //    m_TextObject.GetComponent<TMPro.TextMeshPro>().text = text;
 
-        m_TextObject.transform.localPosition = pos;
-        m_TextObject.transform.rotation = GetTextLookRotation();
-    }
+    //    m_TextObject.transform.localPosition = pos;
+    //    m_TextObject.transform.rotation = GetTextLookRotation();
+    //}
 
-    private Vector3 GetBoundsOffset(GameObject gameObject)
-    {
-        MeshFilter parentMesh = gameObject.GetComponent<MeshFilter>();
-        if (parentMesh != null)
-        {
-            return GetBoundsOffset(parentMesh.mesh.bounds);
-        }
-        Collider parentCollider = gameObject.GetComponent<Collider>();
-        if (parentCollider != null)
-        {
-            return GetBoundsOffset(parentCollider.bounds);
-        }
-        return Vector3.zero;
-    }
+    //private Vector3 GetBoundsOffset(GameObject gameObject)
+    //{
+    //    MeshFilter parentMesh = gameObject.GetComponent<MeshFilter>();
+    //    if (parentMesh != null)
+    //    {
+    //        return GetBoundsOffset(parentMesh.mesh.bounds);
+    //    }
+    //    Collider parentCollider = gameObject.GetComponent<Collider>();
+    //    if (parentCollider != null)
+    //    {
+    //        return GetBoundsOffset(parentCollider.bounds);
+    //    }
+    //    return Vector3.zero;
+    //}
 
-    private Vector3 GetBoundsOffset(Bounds bounds)
-    {
-        return new Vector3(0.0f, bounds.max.y + 0.05f);
-    }
+    //private Vector3 GetBoundsOffset(Bounds bounds)
+    //{
+    //    return new Vector3(0.0f, bounds.max.y + 0.05f);
+    //}
 
-    private Quaternion GetTextLookRotation()
-    {
-        Vector3 cameraForward = Camera.main.transform.forward;
-        cameraForward.y = 0.0f;
-        cameraForward.Normalize();
-        return Quaternion.LookRotation(cameraForward);
-    }
+    //private Quaternion GetTextLookRotation()
+    //{
+    //    Vector3 cameraForward = Camera.main.transform.forward;
+    //    cameraForward.y = 0.0f;
+    //    cameraForward.Normalize();
+    //    return Quaternion.LookRotation(cameraForward);
+    //}
     // 【TODO End】
 }
 
