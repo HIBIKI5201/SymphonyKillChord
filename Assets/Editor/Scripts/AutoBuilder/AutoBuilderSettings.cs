@@ -13,8 +13,9 @@ namespace KillChord.Editor.AutoBuilder
         FilePathAttribute.Location.ProjectFolder)]
     public class AutoBuilderSettings : ScriptableSingleton<AutoBuilderSettings>
     {
-        public BuildProfile[] BuildProfiles;
+        public BuildProfile[] MasterBuildProfiles;
+        public BuildProfile[] DevelopBuildProfiles;
 
-        public void Save() => Save(true);
+        public static void Save() => instance.Save(true);
     }
 }
