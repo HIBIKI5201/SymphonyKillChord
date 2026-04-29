@@ -1,7 +1,11 @@
 1,Background,genki_pose
-2,Fade,1,1,0.5
-3,Text,Hero,......Hello sekai?
-4,Animation,anim_hero_idle
-5,Text,Tatuki,danger is coming
-6,Background,vrm
-7,Text,Tatuki,danger is coming
+2,Portrait,hero_normal,Left
+3,Portrait,hero_smile,Right
+4,Text,Hero,左と右の立ち絵表示テスト
+5,Portrait,hero_focus,Center
+6,Text,Hero,センタースロット差し替え
+7,Fade,1,0,0.3
+8,Text,Hero,Defaultスロット表示テスト
+9,Portrait,hero_default
+10,Text,Hero,トリガー発火を確認
+11,Text,Tatuki,危険だ

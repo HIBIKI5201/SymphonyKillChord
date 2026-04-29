@@ -1,4 +1,4 @@
-3,AtCharIndex,5,Fade,0,1,0.5
-3,AtCharIndex,1,Fade,1,0,2
-5,AtKeyword,danger,Background,bg_alert
-7,AtCharIndex,5,Fade,1,0,0.5
+10,AtCharIndex,3,Portrait,hero_surprised,Left
+11,AtKeyword,危険,Portrait,hero_angry,Right
+11,AtTextEnd,Portrait,hero_neutral,Center
+11,AtTextEnd,Fade,0,1,0.2

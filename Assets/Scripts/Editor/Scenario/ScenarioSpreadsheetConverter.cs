@@ -10,19 +10,19 @@ using UnityEngine;
 namespace KillChord.Editor.Scenario
 {
     /// <summary>
-    /// Converts lightweight authoring CSVs (events/triggers) to the legacy 17-column runtime CSV.
+    /// Converts lightweight authoring CSVs (events/triggers) to the legacy runtime CSV.
     /// </summary>
     public static class ScenarioSpreadsheetConverter
     {
         private static readonly string[] LegacyHeaders =
         {
-            "Type", "Step", "ParentStep", "Speaker", "Text", "BackgroundId", "AnimationId",
+            "Type", "Step", "ParentStep", "Speaker", "Text", "BackgroundId", "AnimationId", "PortraitId", "PortraitSlot",
             "FadeStart", "FadeEnd", "FadeDuration", "TriggerType", "TriggerIndex", "TriggerKeyword",
             "OnTriggerType", "OnTriggerArg1", "OnTriggerArg2", "OnTriggerArg3",
         };
         private static readonly string[] EventHeaders =
         {
-            "Step", "Type", "Speaker", "Text", "BackgroundId", "AnimationId", "FadeStart", "FadeEnd", "FadeDuration",
+            "Step", "Type", "Speaker", "Text", "BackgroundId", "AnimationId", "PortraitId", "PortraitSlot", "FadeStart", "FadeEnd", "FadeDuration",
         };
         private static readonly string[] TriggerHeaders =
         {
@@ -134,6 +134,7 @@ namespace KillChord.Editor.Scenario
                             string.Empty,
                             string.Empty,
                             string.Empty,
+                            string.Empty,
                             string.Empty));
                         break;
                     case "background":
@@ -150,6 +151,7 @@ namespace KillChord.Editor.Scenario
                                 string.Empty,
                                 string.Empty,
                                 backgroundId,
+                                string.Empty,
                                 string.Empty,
                                 string.Empty,
                                 string.Empty,
@@ -171,6 +173,30 @@ namespace KillChord.Editor.Scenario
                                 string.Empty,
                                 string.Empty,
                                 animationId,
+                                string.Empty,
+                                string.Empty,
+                                string.Empty,
+                                string.Empty));
+                            break;
+                        }
+                    case "portrait":
+                        {
+                            string portraitId = RequireString(
+                                GetValue(row.Values, table.HeaderIndex, "PortraitId"),
+                                "PortraitId",
+                                path,
+                                row.LineNo);
+                            string portraitSlot = GetValue(row.Values, table.HeaderIndex, "PortraitSlot");
+                            result.Add(new EventRow(
+                                row.LineNo,
+                                step,
+                                "Portrait",
+                                string.Empty,
+                                string.Empty,
+                                string.Empty,
+                                string.Empty,
+                                portraitId,
+                                portraitSlot ?? string.Empty,
                                 string.Empty,
                                 string.Empty,
                                 string.Empty));
@@ -197,6 +223,7 @@ namespace KillChord.Editor.Scenario
                                 row.LineNo,
                                 step,
                                 "Fade",
+                                string.Empty,
                                 string.Empty,
                                 string.Empty,
                                 string.Empty,
@@ -319,6 +346,14 @@ namespace KillChord.Editor.Scenario
                             path,
                             row.LineNo);
                         break;
+                    case "portrait":
+                        arg1 = RequireString(
+                            GetValue(row.Values, table.HeaderIndex, "Arg1"),
+                            "Arg1",
+                            path,
+                            row.LineNo);
+                        arg2 = GetValue(row.Values, table.HeaderIndex, "Arg2")?.Trim() ?? string.Empty;
+                        break;
                     default:
                         throw new FormatException($"{path}:{row.LineNo} unknown OnTriggerType '{onTriggerTypeRaw}'.");
                 }
@@ -389,9 +424,11 @@ namespace KillChord.Editor.Scenario
                 row[4] = e.Text;
                 row[5] = e.BackgroundId;
                 row[6] = e.AnimationId;
-                row[7] = e.FadeStart;
-                row[8] = e.FadeEnd;
-                row[9] = e.FadeDuration;
+                row[7] = e.PortraitId;
+                row[8] = e.PortraitSlot;
+                row[9] = e.FadeStart;
+                row[10] = e.FadeEnd;
+                row[11] = e.FadeDuration;
                 lines.Add(ToCsvRow(row));
 
                 foreach (TriggerRow t in triggerLookup[e.Step])
@@ -399,13 +436,13 @@ namespace KillChord.Editor.Scenario
                     string[] triggerRow = new string[LegacyHeaders.Length];
                     triggerRow[0] = "Trigger";
                     triggerRow[2] = t.ParentStep.ToString(CultureInfo.InvariantCulture);
-                    triggerRow[10] = t.TriggerType;
-                    triggerRow[11] = t.TriggerIndex;
-                    triggerRow[12] = t.TriggerKeyword;
-                    triggerRow[13] = t.OnTriggerType;
-                    triggerRow[14] = t.Arg1;
-                    triggerRow[15] = t.Arg2;
-                    triggerRow[16] = t.Arg3;
+                    triggerRow[12] = t.TriggerType;
+                    triggerRow[13] = t.TriggerIndex;
+                    triggerRow[14] = t.TriggerKeyword;
+                    triggerRow[15] = t.OnTriggerType;
+                    triggerRow[16] = t.Arg1;
+                    triggerRow[17] = t.Arg2;
+                    triggerRow[18] = t.Arg3;
                     lines.Add(ToCsvRow(triggerRow));
                 }
             }
@@ -528,6 +565,7 @@ namespace KillChord.Editor.Scenario
                                 string.Empty,
                                 string.Empty,
                                 string.Empty,
+                                string.Empty,
                                 string.Empty));
                             break;
                         }
@@ -543,6 +581,7 @@ namespace KillChord.Editor.Scenario
                             string.Empty,
                             string.Empty,
                             tokens[2],
+                            string.Empty,
                             string.Empty,
                             string.Empty,
                             string.Empty,
@@ -563,6 +602,27 @@ namespace KillChord.Editor.Scenario
                             tokens[2],
                             string.Empty,
                             string.Empty,
+                            string.Empty,
+                            string.Empty));
+                        break;
+                    case "portrait":
+                        if (tokens.Count < 3)
+                        {
+                            throw new FormatException($"{path}:{lines[i].LineNo} Portrait requires PortraitId.");
+                        }
+                        string commandPortraitSlot = tokens.Count >= 4 ? tokens[3] : string.Empty;
+                        events.Add(new EventRow(
+                            lines[i].LineNo,
+                            step,
+                            "Portrait",
+                            string.Empty,
+                            string.Empty,
+                            string.Empty,
+                            string.Empty,
+                            tokens[2],
+                            commandPortraitSlot,
+                            string.Empty,
+                            string.Empty,
                             string.Empty));
                         break;
                     case "fade":
@@ -574,6 +634,7 @@ namespace KillChord.Editor.Scenario
                             lines[i].LineNo,
                             step,
                             "Fade",
+                            string.Empty,
                             string.Empty,
                             string.Empty,
                             string.Empty,
@@ -650,6 +711,7 @@ namespace KillChord.Editor.Scenario
                                 string.Empty,
                                 string.Empty,
                                 string.Empty,
+                                string.Empty,
                                 string.Empty));
                             break;
                         }
@@ -665,6 +727,7 @@ namespace KillChord.Editor.Scenario
                             string.Empty,
                             string.Empty,
                             cols[2].Trim(),
+                            string.Empty,
                             string.Empty,
                             string.Empty,
                             string.Empty,
@@ -685,6 +748,27 @@ namespace KillChord.Editor.Scenario
                             cols[2].Trim(),
                             string.Empty,
                             string.Empty,
+                            string.Empty,
+                            string.Empty));
+                        break;
+                    case "portrait":
+                        if (cols.Count < 3)
+                        {
+                            throw new FormatException($"{path}:{line.LineNo} Portrait requires PortraitId.");
+                        }
+                        string compactPortraitSlot = cols.Count >= 4 ? cols[3].Trim() : string.Empty;
+                        events.Add(new EventRow(
+                            line.LineNo,
+                            step,
+                            "Portrait",
+                            string.Empty,
+                            string.Empty,
+                            string.Empty,
+                            string.Empty,
+                            cols[2].Trim(),
+                            compactPortraitSlot,
+                            string.Empty,
+                            string.Empty,
                             string.Empty));
                         break;
                     case "fade":
@@ -696,6 +780,7 @@ namespace KillChord.Editor.Scenario
                             line.LineNo,
                             step,
                             "Fade",
+                            string.Empty,
                             string.Empty,
                             string.Empty,
                             string.Empty,
@@ -808,6 +893,14 @@ namespace KillChord.Editor.Scenario
                         }
                         arg1 = tokens[cursor];
                         break;
+                    case "portrait":
+                        if (tokens.Count < cursor + 1)
+                        {
+                            throw new FormatException($"{path}:{lines[i].LineNo} {onTriggerTypeRaw} trigger requires Arg1.");
+                        }
+                        arg1 = tokens[cursor];
+                        arg2 = tokens.Count >= cursor + 2 ? tokens[cursor + 1] : string.Empty;
+                        break;
                     default:
                         throw new FormatException($"{path}:{lines[i].LineNo} unknown OnTriggerType '{onTriggerTypeRaw}'.");
                 }
@@ -907,6 +1000,14 @@ namespace KillChord.Editor.Scenario
                         }
                         arg1 = RequireString(cols[cursor], "Arg1", path, line.LineNo);
                         break;
+                    case "portrait":
+                        if (cols.Count < cursor + 1)
+                        {
+                            throw new FormatException($"{path}:{line.LineNo} {onTriggerTypeRaw} trigger requires Arg1.");
+                        }
+                        arg1 = RequireString(cols[cursor], "Arg1", path, line.LineNo);
+                        arg2 = cols.Count >= cursor + 2 ? cols[cursor + 1].Trim() : string.Empty;
+                        break;
                     default:
                         throw new FormatException($"{path}:{line.LineNo} unknown OnTriggerType '{onTriggerTypeRaw}'.");
                 }
@@ -966,6 +1067,7 @@ namespace KillChord.Editor.Scenario
                 case "text":
                 case "background":
                 case "animation":
+                case "portrait":
                 case "fade":
                     return true;
                 default:
@@ -1159,6 +1261,7 @@ namespace KillChord.Editor.Scenario
                 "text" => "Text",
                 "background" => "Background",
                 "animation" => "Animation",
+                "portrait" => "Portrait",
                 "fade" => "Fade",
                 "trigger" => "Trigger",
                 "atcharindex" => "AtCharIndex",
@@ -1287,6 +1390,36 @@ namespace KillChord.Editor.Scenario
                 string text,
                 string backgroundId,
                 string animationId,
+                string portraitId,
+                string fadeStart,
+                string fadeEnd,
+                string fadeDuration)
+                : this(
+                    lineNo,
+                    step,
+                    type,
+                    speaker,
+                    text,
+                    backgroundId,
+                    animationId,
+                    portraitId,
+                    string.Empty,
+                    fadeStart,
+                    fadeEnd,
+                    fadeDuration)
+            {
+            }
+
+            public EventRow(
+                int lineNo,
+                int step,
+                string type,
+                string speaker,
+                string text,
+                string backgroundId,
+                string animationId,
+                string portraitId,
+                string portraitSlot,
                 string fadeStart,
                 string fadeEnd,
                 string fadeDuration)
@@ -1298,6 +1431,8 @@ namespace KillChord.Editor.Scenario
                 Text = text;
                 BackgroundId = backgroundId;
                 AnimationId = animationId;
+                PortraitId = portraitId;
+                PortraitSlot = portraitSlot;
                 FadeStart = fadeStart;
                 FadeEnd = fadeEnd;
                 FadeDuration = fadeDuration;
@@ -1310,6 +1445,8 @@ namespace KillChord.Editor.Scenario
             public string Text { get; }
             public string BackgroundId { get; }
             public string AnimationId { get; }
+            public string PortraitId { get; }
+            public string PortraitSlot { get; }
             public string FadeStart { get; }
             public string FadeEnd { get; }
             public string FadeDuration { get; }

@@ -1,10 +1,16 @@
-Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
-Background,1,,,,genki_pose,,,,,,,,,,,
-Fade,2,,,,,,1,1,0.5,,,,,,,
-Text,3,,Hero,......Hello sekai?,,,,,,,,,,,,
-Animation,4,,,,,anim_hero_idle,,,,,,,,,,
-Text,5,,Tatuki,danger is coming,,,,,,,,,,,,
-Trigger,,5,,,,,,,,AtKeyword,,danger,Background,bg_alert,,
-Background,6,,,,vrm,,,,,,,,,,,
-Text,7,,Tatuki,danger is coming,,,,,,,,,,,,
-Trigger,,7,,,,,,,,AtCharIndex,5,,Fade,1,0,0.5
+Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,PortraitId,PortraitSlot,FadeStart,FadeEnd,FadeDuration,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
+Background,1,,,,genki_pose,,,,,,,,,,,,,
+Portrait,2,,,,,,hero_normal,Left,,,,,,,,,,
+Portrait,3,,,,,,hero_smile,Right,,,,,,,,,,
+Text,4,,Hero,左と右の立ち絵表示テスト,,,,,,,,,,,,,,
+Portrait,5,,,,,,hero_focus,Center,,,,,,,,,,
+Text,6,,Hero,センタースロット差し替え,,,,,,,,,,,,,,
+Fade,7,,,,,,,,1,0,0.300000012,,,,,,,
+Text,8,,Hero,Defaultスロット表示テスト,,,,,,,,,,,,,,
+Portrait,9,,,,,,hero_default,,,,,,,,,,,
+Text,10,,Hero,トリガー発火を確認,,,,,,,,,,,,,,
+Trigger,,10,,,,,,,,,,AtCharIndex,3,,Portrait,hero_surprised,Left,
+Text,11,,Tatuki,危険だ,,,,,,,,,,,,,,
+Trigger,,11,,,,,,,,,,AtKeyword,,危険,Portrait,hero_angry,Right,
+Trigger,,11,,,,,,,,,,AtTextEnd,,,Portrait,hero_neutral,Center,
+Trigger,,11,,,,,,,,,,AtTextEnd,,,Fade,0,1,0.200000003
