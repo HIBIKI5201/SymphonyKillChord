@@ -32,10 +32,15 @@ namespace KillChord.Editor.AutoBuilder
             EditorGUI.BeginChangeCheck();
 
             masterPath.stringValue = EditorGUILayout.TextField(masterPath.stringValue);
+            if (string.IsNullOrEmpty(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathが空です。", MessageType.Warning); }
+            if (0 < masterPath.stringValue.Length && masterPath.stringValue[^1] != '/') { EditorGUILayout.HelpBox("MasterPathの末尾にスラッシュがありません。", MessageType.Warning); }
             EditorGUILayout.PropertyField(masterProp, true);
 
             EditorGUILayout.Space(10);
             devPath.stringValue = EditorGUILayout.TextField(devPath.stringValue);
+            if (string.IsNullOrEmpty(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathが空です。", MessageType.Warning); }
+            if (0 < devPath.stringValue.Length && devPath.stringValue[^1] != '/') { EditorGUILayout.HelpBox("DevelopPathの末尾にスラッシュがありません。", MessageType.Warning); }
+
             EditorGUILayout.PropertyField(devProp, true);
 
             if (EditorGUI.EndChangeCheck()) { AutoBuilderSettings.Save(); }
