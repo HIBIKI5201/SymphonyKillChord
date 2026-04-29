@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.View.OutGame.Screen
 {
     /// <summary>
-    ///     画面 のインターフェース。
+    ///     画面のインターフェース。
     /// </summary>
     public interface IScreenView
     {

@@ -8,5 +8,5 @@
     <ui:Instance template="StageSelect" name="StageSelectContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
     <ui:Instance template="SkillTree" name="SkillTreeContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
     <ui:Instance template="SkillConfiguration" name="SkillBuildContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
-    <ui:Instance template="Setting" name="SettingContainer" style="display: none;"/>
+    <ui:Instance template="Setting" name="SettingContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
 </ui:UXML>

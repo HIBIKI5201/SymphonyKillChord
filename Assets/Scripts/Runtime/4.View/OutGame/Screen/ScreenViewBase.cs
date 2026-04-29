@@ -69,7 +69,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     リソースを解放します。
         /// </summary>
-        public virtual void Dispose(){}
+        public virtual void Dispose() { }
 
         /// <summary> USSの画面表示用クラス名。 </summary>
         protected const string VISIBLE_CLASS = "screen-visible";
@@ -93,21 +93,28 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <returns></returns>
         private async Task WaitForTransitionEndAsync(CancellationToken token)
         {
-            var tcs = new TaskCompletionSource<bool>();
-
-            void OnTarnsitionEnd(TransitionEndEvent _)
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void OnTransitionEnd(TransitionEndEvent _)
             {
-                RootElement.UnregisterCallback<TransitionEndEvent>(OnTarnsitionEnd);
                 tcs.TrySetResult(true);
             }
 
-            RootElement.RegisterCallback<TransitionEndEvent>(OnTarnsitionEnd);
+            RootElement.RegisterCallback<TransitionEndEvent>(OnTransitionEnd);
+            // token がキャンセルされた時、 tcs を完了させる。
+            // これにより、キャンセルされた場合も待機が終了する。
+            using CancellationTokenRegistration registration = token.Register(() => tcs.TrySetResult(true));
 
-            await Task.WhenAny(
-                tcs.Task,
-                Task.Delay(TimeSpan.FromSeconds(TRANSITION_TIMEOUT_SEC)));
-
-            RootElement.UnregisterCallback<TransitionEndEvent>(OnTarnsitionEnd);
+            try
+            {
+                await Task.WhenAny(
+                    tcs.Task,
+                    // タイムアウトはキャンセルトークンの影響を受けないようにする。
+                    Task.Delay(TimeSpan.FromSeconds(TRANSITION_TIMEOUT_SEC), CancellationToken.None));  
+            }
+            finally
+            {
+                RootElement.UnregisterCallback<TransitionEndEvent>(OnTransitionEnd);
+            }
         }
 
         /// <summary>

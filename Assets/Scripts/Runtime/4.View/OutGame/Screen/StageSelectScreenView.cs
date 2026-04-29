@@ -13,7 +13,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
                 ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageSelectScreenView)}] {_backButton} が見つかりませんでした。");
+                    $"[{nameof(StageSelectScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
             RegisterButtonCallback();
         }

@@ -11,13 +11,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary> ホーム画面を表示します。 </summary>
         Task ShowHome(CancellationToken token);
 
-        /// <summary> ステージ選択画面を表示します。 </summary>
+        /// <summary> 作戦画面を表示します。 </summary>
         Task ShowStageSelect(CancellationToken token);
 
-        /// <summary> スキルツリー画面を表示します。 </summary>
+        /// <summary> 研究画面を表示します。 </summary>
         Task ShowSkillTree(CancellationToken token);
 
-        /// <summary> スキル選択画面を表示します。 </summary>
+        /// <summary> 改造画面を表示します。 </summary>
         Task ShowSkillBuild(CancellationToken token);
 
         /// <summary> 設定画面を表示します。 </summary>
