@@ -19,6 +19,22 @@ namespace KillChord.Editor.AutoBuilder
         public string DevelopPath;
         public BuildProfile[] DevelopBuildProfiles;
 
+        public static bool IsPathValid(string path)
+        {
+            return !IsPathNullOrEmpty(path) && IsPathEndsWithSlash(path);
+        }
+
+        public static bool IsPathNullOrEmpty(string path)
+        {
+            return string.IsNullOrEmpty(path);
+        }
+
+        public static bool IsPathEndsWithSlash(string path)
+        {
+            if (path.Length < 1) { return false; }
+            return path[^1] == '/';
+        }
+
         public static void Save() => instance.Save(true);
     }
 }
