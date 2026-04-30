@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 53
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e76e186e7fba8934bbca508e0ccef074, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::KillChord.Editor.AutoBuilder.AutoBuilderSettings
+  MasterPath: Build/Master/
+  MasterBuildProfiles:
+  - {fileID: 11400000, guid: ec564668221479542b778d87ad6ee300, type: 2}
+  - {fileID: 11400000, guid: 718556651b4db624aa295a29d17b95f0, type: 2}
+  DevelopPath: 
+  DevelopBuildProfiles:
+  - {fileID: 11400000, guid: aabb031a04f29104d849df9a66761df9, type: 2}
+  - {fileID: 11400000, guid: e1201efd627c4bd4892d9d572a8da719, type: 2}
