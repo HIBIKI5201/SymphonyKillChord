@@ -13,7 +13,7 @@ namespace KillChord.Editor.AutoBuilder
         {
             if (profiles == null || profiles.Length == 0)
             {
-                Debug.LogError("Master Build Profiles are not set.");
+                Debug.LogError("Build Profiles are not set.");
                 return;
             }
 
