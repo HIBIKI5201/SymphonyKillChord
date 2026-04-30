@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain.InGame.Parameter
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     回避の持続時間を表すVO。

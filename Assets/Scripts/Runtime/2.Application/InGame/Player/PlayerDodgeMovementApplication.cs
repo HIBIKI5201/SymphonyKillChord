@@ -40,7 +40,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             if (input.sqrMagnitude <= float.Epsilon)
                 return false;
             // クールダウン中は回避不可。
-            if (currentTime - _previousDodgedTime < _parameter.DodgeCooldown)
+            if (currentTime - _previousDodgedTime < _parameter.DodgeCooldown.Value)
                 return false;
 
             _previousDodgedTime = currentTime;
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             _isDodging = true;
             _hasNotifiedDodgeEnd = false;
 
-            OnDodgeStarted?.Invoke(_parameter.DodgeDuration);
+            OnDodgeStarted?.Invoke(_parameter.DodgeDuration.Value);
             return true;
         }
 
@@ -65,7 +65,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             if (!_isDodging)
                 return;
 
-            if (time > _previousDodgedTime + _parameter.DodgeDuration)
+            if (time > _previousDodgedTime + _parameter.DodgeDuration.Value)
             {
                 _isDodging = false;
                 if (!_hasNotifiedDodgeEnd)

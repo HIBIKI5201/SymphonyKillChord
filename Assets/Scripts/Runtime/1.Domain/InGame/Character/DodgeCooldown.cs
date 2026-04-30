@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     回避クールダウンを表すVO。
