@@ -43,9 +43,9 @@ namespace KillChord.Editor.AutoBuilder
 
             EditorGUILayout.PropertyField(devProp, true);
 
-            if (EditorGUI.EndChangeCheck()) { AutoBuilderSettings.Save(); }
-
             so.ApplyModifiedProperties();
+
+            if (EditorGUI.EndChangeCheck()) { AutoBuilderSettings.Save(); }
         }
 
         private const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + "AutoBuilder";
