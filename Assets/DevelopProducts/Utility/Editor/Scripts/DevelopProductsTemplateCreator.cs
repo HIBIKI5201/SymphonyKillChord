@@ -76,6 +76,7 @@ namespace DevelopProducts.Utility.Editor
 
             private void CreateAssembly(string path, string name)
             {
+                name = $"DevelopProducts-{name}";
                 string asmdefPath = Path.Combine(path, name + ".asmdef");
 
                 if (!Directory.Exists(path))
@@ -83,7 +84,7 @@ namespace DevelopProducts.Utility.Editor
                     Directory.CreateDirectory(path);
                 }
 
-                var data = new AssemblyDefinitionData($"DevelopProducts-{name}");
+                var data = new AssemblyDefinitionData(name);
                 data.rootNamespace = $"DevelopProducts.{name}";
 
                 string json = JsonUtility.ToJson(data, true);
