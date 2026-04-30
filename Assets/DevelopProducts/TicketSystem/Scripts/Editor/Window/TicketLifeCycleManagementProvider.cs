@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DevelopProducts.Utility;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,7 +10,7 @@ namespace DevelopProducts.TicketSystem
 {
     public class TicketLifeCycleManagementProvider : SettingsProvider
     {
-        private const string SETTINGS_PATH = "Project/TicketSystem/Management";
+        private const string SETTINGS_PATH = DevelopProductsConst.DEVELOP_PRODUCTS_PROJECT_PATH + "TicketSystem/Management";
         private bool isLoading;
         private int currentTab;
         private string currentUserName;
