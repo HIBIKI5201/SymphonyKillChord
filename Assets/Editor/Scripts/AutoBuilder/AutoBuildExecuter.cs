@@ -36,14 +36,15 @@ namespace KillChord.Editor.AutoBuilder
 
                 BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
+                string buildPath = $"{path}{profile.name}/";
                 BuildPlayerOptions options = new()
                 {
                     scenes = scenes,
                     target = target,                     
-                    locationPathName = path + profile.name + GetExtension(target)
+                    locationPathName = buildPath + profile.name + GetExtension(target)
                 };
 
-                if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+                if (!Directory.Exists(buildPath)) { Directory.CreateDirectory(buildPath); }
 
                 BuildReport report = BuildPipeline.BuildPlayer(options);
 
