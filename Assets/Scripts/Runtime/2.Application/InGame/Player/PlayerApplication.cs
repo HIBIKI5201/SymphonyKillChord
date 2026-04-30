@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Application.InGame.Player
     /// <summary>
     ///     プレイヤーの移動や回避といったアクションを管理するアプリケーション層のクラス。
     /// </summary>
-    public sealed class PlayerApplication
+    public sealed class PlayerApplication : IPlayerApplication
     {
         public PlayerApplication(PlayerMovementApplication movement, PlayerDodgeMovementApplication dodge)
         {
