@@ -11,6 +11,10 @@
 - **[Player.md](./Player.md)**: プレイヤースキルのデータ定義とリポジトリ。
 - **[Utility.md](./Utility.md)**: 汎用コレクション、定数、列挙型。
 
+## レビュー / 補足ドキュメント
+
+- **[Runtime-DesignReview-2026-04-24.md](./Runtime-DesignReview-2026-04-24.md)**: `Assets/Scripts/Runtime` 全体の設計レビューと問題点の整理。
+
 ## レイヤー定義
 
 | レイヤー名 | 役割 |

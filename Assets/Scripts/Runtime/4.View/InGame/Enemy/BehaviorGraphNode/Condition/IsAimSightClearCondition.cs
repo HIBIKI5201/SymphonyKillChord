@@ -1,4 +1,4 @@
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Enemy;
 using System;
 using Unity.Behavior;
 using UnityEngine;

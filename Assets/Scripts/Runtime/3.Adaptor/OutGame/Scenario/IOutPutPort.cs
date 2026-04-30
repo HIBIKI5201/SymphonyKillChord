@@ -1,0 +1,11 @@
+namespace KillChord.Runtime.Adaptor
+{
+    public interface IOutputPort : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort
+    {
+    }
+
+    [System.Obsolete("Use IOutputPort")]
+    public interface IOutPutPort : IOutputPort
+    {
+    }
+}

@@ -66,6 +66,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.GetHashCode()));
 
             _presenter.Push(result);
+
+            _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack, beatType, now);
             return true;
         }
 
