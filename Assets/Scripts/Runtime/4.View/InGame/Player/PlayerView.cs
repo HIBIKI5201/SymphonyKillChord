@@ -35,7 +35,7 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         public void Initialize(
-            PlayerController playerMovementController,
+            IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             Transform cameraTransform,
             PlayerInputView playerInputView)
@@ -124,7 +124,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private Collider[] _colliders;
         private Transform _cacheTransform;
-        private PlayerController _controller;
+        private IPlayerController _controller;
         private PlayerAttackController _playerAttackController;
     }
 }
