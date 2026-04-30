@@ -1,70 +1,59 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
-using DevelopProducts.Utility;
 
-namespace DevelopProducts.TicketSystem
+namespace KillChord.Editor.TicketSystem
 {
     /// <summary>
-    /// チケットシステムのメインウィンドウを管理するクラス。
-    /// ユーザー名の入力と保存、タブ切り替え、チケットの一覧表示UIを担当する。
+    ///     チケットシステムのメインウィンドウを管理するクラス。
+    ///     ユーザー名の入力と保存、タブ切り替え、チケットの一覧表示UIを担当する。
     /// </summary>
     public class MasterTicketWindow : EditorWindow
     {
-        private string savedUserName = "";
-        private bool isLoading;
-        private Vector2 scrollPos;
-
-        private readonly Color emptyColor = new(0.2f, 0.6f, 0.2f, 0.3f);
-        private readonly Color occupiedByOtherColor = new(0.6f, 0.2f, 0.2f, 0.3f);
-        private readonly Color occupiedBySelfColor = new(0.2f, 0.4f, 0.6f, 0.3f);
-        private readonly Vector2 minWindowSize = new(800f, 200f);
-
         // --- ウィンドウの描画部分 ---
 
-        [MenuItem(DevelopProductsConst.DEVELOP_PRODUCTS_WINDOW_PATH  + "Master Ticket Window")]
+        [MenuItem("Window/Master Ticket Window")]
         public static void ShowWindow()
         {
             GetWindow<MasterTicketWindow>("Master Ticket Window");
         }
 
+        private readonly Color _emptyColor = new(0.2f, 0.6f, 0.2f, 0.3f);
+        private readonly Color _occupiedByOtherColor = new(0.6f, 0.2f, 0.2f, 0.3f);
+        private readonly Color _occupiedBySelfColor = new(0.2f, 0.4f, 0.6f, 0.3f);
+        private readonly Vector2 _minWindowSize = new(800f, 200f);
+
+        private string _savedUserName = "";
+        private bool _isLoading;
+        private Vector2 _scrollPos;
+
         private void OnEnable()
         {
-            minSize = minWindowSize;
-            savedUserName = TicketSystemSettings.instance.userName;
+            minSize = _minWindowSize;
+            _savedUserName = TicketSystemSettings.instance.UserName;
 
-            if (!string.IsNullOrEmpty(savedUserName))
+            if (!string.IsNullOrEmpty(_savedUserName))
             {
                 UpdateTickets();
             }
         }
 
-        private void UpdateTickets()
-        {
-            isLoading = true;
-            TicketSystemWebClient.RefreshList().ContinueWith(() =>
-            {
-                isLoading = false;
-                EditorApplication.delayCall += Repaint;
-            });
-        }
-
         private void OnGUI()
         {
-            var currentUserName = TicketSystemSettings.instance.userName;
-            if (currentUserName != savedUserName)
+            var currentUserName = TicketSystemSettings.instance.UserName;
+            if (currentUserName != _savedUserName)
             {
-                var isUserNameEmpty = string.IsNullOrEmpty(savedUserName);
-                savedUserName = currentUserName;
-                if (isUserNameEmpty && !string.IsNullOrEmpty(savedUserName))
+                var isUserNameEmpty = string.IsNullOrEmpty(_savedUserName);
+                _savedUserName = currentUserName;
+                if (isUserNameEmpty && !string.IsNullOrEmpty(_savedUserName))
                 {
                     // ユーザー名が新たに設定された場合は、チケットデータを更新する。
                     UpdateTickets();
                 }
             }
 
-            if (string.IsNullOrEmpty(savedUserName))
+            if (string.IsNullOrEmpty(_savedUserName))
             {
                 EditorGUILayout.HelpBox("ユーザー名を設定してください。設定するまでメイン機能は使えません。", MessageType.Warning);
                 return;
@@ -73,16 +62,26 @@ namespace DevelopProducts.TicketSystem
             DrawMainUI();
         }
 
+        private void UpdateTickets()
+        {
+            _isLoading = true;
+            TicketSystemWebClient.RefreshList().ContinueWith(() =>
+            {
+                _isLoading = false;
+                EditorApplication.delayCall += Repaint;
+            });
+        }
+
         /// <summary>
         /// ユーザー名の表示と変更ボタン、タブ切り替えのUIを描画する。通信中は通信中のメッセージを表示して、タブの内容は描画しない。
         /// </summary>
         private void DrawMainUI()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            EditorGUILayout.LabelField($"ユーザー: {savedUserName}");
+            EditorGUILayout.LabelField($"ユーザー: {_savedUserName}");
             EditorGUILayout.EndHorizontal();
 
-            if (isLoading)
+            if (_isLoading)
             {
                 EditorGUILayout.HelpBox("通信中...", MessageType.Info);
                 return;
@@ -120,7 +119,7 @@ namespace DevelopProducts.TicketSystem
 
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
 
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
             foreach (var ticket in cachedTickets)
             {
@@ -128,9 +127,9 @@ namespace DevelopProducts.TicketSystem
 
                 var rectColor = ticket.isInUse switch
                 {
-                    false => emptyColor,
-                    true when ticket.userName == savedUserName => occupiedBySelfColor,
-                    _ => occupiedByOtherColor
+                    false => _emptyColor,
+                    true when ticket.userName == _savedUserName => _occupiedBySelfColor,
+                    _ => _occupiedByOtherColor
                 };
 
                 EditorGUI.DrawRect(rowRect, rectColor);
@@ -139,18 +138,18 @@ namespace DevelopProducts.TicketSystem
                 GUILayout.Label(ticket.userName, GUILayout.Width(100));
                 GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
 
-                var isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == savedUserName);
+                var isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == _savedUserName);
 
                 // 他者のチケットを勝手に解放できないようにする。
                 EditorGUI.BeginDisabledGroup(!isMyTicket && ticket.isInUse);
 
                 if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する", GUILayout.Width(70)))
                 {
-                    isLoading = true;
-                    TicketSystemWebClient.UpdateTicketStatus(ticket, savedUserName)
+                    _isLoading = true;
+                    TicketSystemWebClient.UpdateTicketStatus(ticket, _savedUserName)
                         .ContinueWith(() =>
                         {
-                            isLoading = false;
+                            _isLoading = false;
                             EditorApplication.delayCall += Repaint;
                         });
                 }

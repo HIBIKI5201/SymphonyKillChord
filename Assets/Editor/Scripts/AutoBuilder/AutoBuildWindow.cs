@@ -1,6 +1,4 @@
-using DevelopProducts.TicketSystem;
 using KillChord.Editor.Utility;
-using SymphonyFrameWork.Attribute;
 using UnityEditor;
 using UnityEngine;
 

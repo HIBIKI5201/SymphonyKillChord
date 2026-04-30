@@ -1,16 +1,14 @@
-using DevelopProducts.Utility;
+using KillChord.Editor.Utility;
 using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace DevelopProducts.TicketSystem
+namespace KillChord.Editor.TicketSystem
 {
     public class TicketSystemSettingsProvider : SettingsProvider
     {
-        private const string SETTINGS_PATH = DevelopProductsConst.DEVELOP_PRODUCTS_PROJECT_PATH + "TicketSystem/Editor";
-        private Editor _editor;
-
         private TicketSystemSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) :
             base(path, scopes, keywords)
         {
@@ -26,7 +24,7 @@ namespace DevelopProducts.TicketSystem
         {
             var settings = TicketSystemSettings.instance;
             settings.hideFlags = HideFlags.HideAndDontSave & ~HideFlags.NotEditable;
-            Editor.CreateCachedEditor(settings, null, ref _editor);
+            UnityEditor.Editor.CreateCachedEditor(settings, null, ref _editor);
         }
 
         public override void OnGUI(string searchContext)
@@ -38,5 +36,9 @@ namespace DevelopProducts.TicketSystem
                 TicketSystemSettings.instance.Save();
             }
         }
+
+        private const string SETTINGS_PATH = TicketSystemConst.TICKET_SYSTEM_PROJECT_PATH + "Editor";
+
+        private UnityEditor.Editor _editor;
     }
 }

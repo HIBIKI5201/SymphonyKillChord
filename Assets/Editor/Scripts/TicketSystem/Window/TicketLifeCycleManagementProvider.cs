@@ -1,22 +1,15 @@
-using Cysharp.Threading.Tasks;
-using DevelopProducts.Utility;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-namespace DevelopProducts.TicketSystem
+namespace KillChord.Editor.TicketSystem
 {
     public class TicketLifeCycleManagementProvider : SettingsProvider
     {
-        private const string SETTINGS_PATH = DevelopProductsConst.DEVELOP_PRODUCTS_PROJECT_PATH + "TicketSystem/Management";
-        private bool isLoading;
-        private int currentTab;
-        private string currentUserName;
-        private Vector2 scrollPos;
-
-        private TicketLifeCycleManagementProvider(string path, SettingsScope scopes,
+        public TicketLifeCycleManagementProvider(string path, SettingsScope scopes,
             IEnumerable<string> keywords = null)
             :
             base(path, scopes, keywords)
@@ -31,26 +24,32 @@ namespace DevelopProducts.TicketSystem
 
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
-            currentUserName = TicketSystemSettings.instance.userName;
+            _currentUserName = TicketSystemSettings.instance.UserName;
             base.OnActivate(searchContext, rootElement);
         }
 
         public override void OnGUI(string searchContext)
         {
-            if (isLoading)
+            if (_isLoading)
             {
                 EditorGUILayout.HelpBox("通信中...", MessageType.Info);
                 return;
             }
 
-            currentTab = GUILayout.Toolbar(currentTab, new[] { "チケットの発行", "チケットの破棄" });
+            _currentTab = GUILayout.Toolbar(_currentTab, new[] { "チケットの発行", "チケットの破棄" });
 
-            switch (currentTab)
+            switch (_currentTab)
             {
                 case 0: DrawCreateTab(); break;
                 case 1: DrawDisposeTab(); break;
             }
         }
+
+        private const string SETTINGS_PATH = TicketSystemConst.TICKET_SYSTEM_PROJECT_PATH + "Management";
+        private bool _isLoading;
+        private int _currentTab;
+        private string _currentUserName;
+        private Vector2 _scrollPos;
 
         /// <summary>
         /// チケットの破棄用UI。現在キャッシュされているチケットの一覧を表示し、各チケットに対して破棄ボタンを置く。
@@ -61,8 +60,8 @@ namespace DevelopProducts.TicketSystem
 
             if (GUILayout.Button("更新", GUILayout.Height(35)))
             {
-                isLoading = true;
-                TicketSystemWebClient.RefreshList().ContinueWith(() => isLoading = false);
+                _isLoading = true;
+                TicketSystemWebClient.RefreshList().ContinueWith(() => _isLoading = false);
             }
 
             EditorGUILayout.Space();
@@ -81,7 +80,7 @@ namespace DevelopProducts.TicketSystem
             }
 
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
             foreach (var ticket in cachedTickets)
             {
@@ -102,11 +101,11 @@ namespace DevelopProducts.TicketSystem
 
                     if (result)
                     {
-                        isLoading = true;
+                        _isLoading = true;
                         TicketSystemWebClient.DisposeTicket(ticket.sceneName)
                             .ContinueWith(() =>
                             {
-                                isLoading = false;
+                                _isLoading = false;
                                 EditorApplication.delayCall += Repaint;
                             });
                     }
@@ -127,15 +126,15 @@ namespace DevelopProducts.TicketSystem
             var activeScene = SceneManager.GetActiveScene();
             EditorGUILayout.LabelField("対象シーン", activeScene.name);
             EditorGUILayout.LabelField("パス", activeScene.path);
-            EditorGUILayout.LabelField("ユーザー名", currentUserName);
+            EditorGUILayout.LabelField("ユーザー名", _currentUserName);
 
             if (GUILayout.Button("チケットを発行して使用開始", GUILayout.Height(40)))
             {
-                isLoading = true;
-                TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, currentUserName)
+                _isLoading = true;
+                TicketSystemWebClient.CreateTicket(activeScene.name, activeScene.path, _currentUserName)
                     .ContinueWith(() =>
                     {
-                        isLoading = false;
+                        _isLoading = false;
                         EditorApplication.delayCall += Repaint;
                     });
             }
