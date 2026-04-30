@@ -13,7 +13,7 @@ namespace KillChord.Editor.AutoBuilder
         {
             if (profiles == null || profiles.Length == 0)
             {
-                Debug.LogError("Master Build Profiles are not set.");
+                Debug.LogError("Build Profiles are not set.");
                 return;
             }
 
@@ -34,17 +34,27 @@ namespace KillChord.Editor.AutoBuilder
                     .Select(s => s.path)
                     .ToArray();
 
+                if (scenes.Length > 0)
+                {
+                    Debug.LogWarning($"No enabled scenes found in profile: {profile.name}. Skipping build.");
+                    continue;
+                }
+
                 BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
-                string buildPath = $"{path}{profile.name}/";
+                string buildDir = Path.Combine(path, profile.name);
+                string fileName = profile.name + GetExtension(target);
+
+                string locationPath = Path.Combine(buildDir, fileName);
                 BuildPlayerOptions options = new()
                 {
                     scenes = scenes,
                     target = target,                     
-                    locationPathName = buildPath + profile.name + GetExtension(target)
+                    locationPathName = locationPath
                 };
 
-                if (!Directory.Exists(buildPath)) { Directory.CreateDirectory(buildPath); }
+
+                if (!Directory.Exists(buildDir)) { Directory.CreateDirectory(buildDir); }
 
                 BuildReport report = BuildPipeline.BuildPlayer(options);
 
