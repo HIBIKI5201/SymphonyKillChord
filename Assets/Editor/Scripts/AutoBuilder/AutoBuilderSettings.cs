@@ -32,7 +32,7 @@ namespace KillChord.Editor.AutoBuilder
         public static bool IsPathEndsWithSlash(string path)
         {
             if (path.Length < 1) { return false; }
-            return path[^1] == '/';
+            return path[^1] == '/' || path[^1] == '\\';
         }
 
         public static void Save() => instance.Save(true);
