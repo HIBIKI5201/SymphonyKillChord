@@ -34,6 +34,12 @@ namespace KillChord.Editor.AutoBuilder
                     .Select(s => s.path)
                     .ToArray();
 
+                if (scenes.Length > 0)
+                {
+                    Debug.LogWarning($"No enabled scenes found in profile: {profile.name}. Skipping build.");
+                    continue;
+                }
+
                 BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
                 string buildPath = $"{path}{profile.name}/";
