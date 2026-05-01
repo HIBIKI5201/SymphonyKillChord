@@ -2,8 +2,8 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
+using DevelopProducts.Utility;
 
-#if UNITY_EDITOR
 namespace DevelopProducts.TicketSystem
 {
     /// <summary>
@@ -23,7 +23,7 @@ namespace DevelopProducts.TicketSystem
 
         // --- ウィンドウの描画部分 ---
 
-        [MenuItem("Window/Master Ticket Window")]
+        [MenuItem(DevelopProductsConst.DEVELOP_PRODUCTS_WINDOW_PATH  + "Master Ticket Window")]
         public static void ShowWindow()
         {
             GetWindow<MasterTicketWindow>("Master Ticket Window");
@@ -190,5 +190,3 @@ namespace DevelopProducts.TicketSystem
         }
     }
 }
-
-#endif

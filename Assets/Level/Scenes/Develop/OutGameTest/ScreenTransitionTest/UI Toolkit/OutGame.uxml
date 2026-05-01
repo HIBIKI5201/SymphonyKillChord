@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="Home" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Home.uxml?fileID=9197481963319205126&amp;guid=d6056ed1cde932548a8de79a607b99c6&amp;type=3#Home"/>
+    <ui:Template name="Setting" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Setting.uxml?fileID=9197481963319205126&amp;guid=c0bfd75645ca6fd4e95372f8837c05d5&amp;type=3#Setting"/>
+    <ui:Template name="SkillConfiguration" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/SkillBuild.uxml?fileID=9197481963319205126&amp;guid=d25d21c4589e34248aa3ead41ca37903&amp;type=3#SkillBuild"/>
+    <ui:Template name="SkillTree" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/SkillTree.uxml?fileID=9197481963319205126&amp;guid=71fa5cfbe14c0f24a9c468147eb5fef7&amp;type=3#SkillTree"/>
+    <ui:Template name="StageSelect" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/StageSelect.uxml?fileID=9197481963319205126&amp;guid=6114da1f8d46b1a48ab03c626ed1d9e9&amp;type=3#StageSelect"/>
+    <ui:Instance template="Home" name="HomeContainer" style="height: 100%; width: 100%; position: absolute;"/>
+    <ui:Instance template="StageSelect" name="StageSelectContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
+    <ui:Instance template="SkillTree" name="SkillTreeContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
+    <ui:Instance template="SkillConfiguration" name="SkillBuildContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
+    <ui:Instance template="Setting" name="SettingContainer" style="position: absolute; width: 100%; height: 100%; display: none;"/>
+</ui:UXML>

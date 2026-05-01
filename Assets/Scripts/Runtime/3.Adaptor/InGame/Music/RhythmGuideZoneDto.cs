@@ -1,5 +1,3 @@
-using System.Drawing;
-
 namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     public readonly struct RhythmGuideZoneDto

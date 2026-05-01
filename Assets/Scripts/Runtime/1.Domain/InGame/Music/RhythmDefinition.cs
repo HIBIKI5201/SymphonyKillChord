@@ -7,22 +7,23 @@ namespace KillChord.Runtime.Domain.InGame.Music
     /// </summary>
     public readonly struct RhythmDefinition
     {
-        public RhythmDefinition(int bpm)
+        public RhythmDefinition(double bpm)
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
-            Bpm = bpm;
-            BeatLength = 60d / Bpm;
+            _bpm = bpm;
+            _beatLength = SECONDS_PER_MINUTE / _bpm;
+            _barLength = _beatLength * FOUR_FOUR_BEAT_COUNT;
         }
 
-        public readonly int Bpm;
-        public readonly double BeatLength;
+        public double Bpm => _bpm;
+        public double BeatLength => _beatLength;
+        public double BarLength => _barLength;
 
-        public double CalculateBarProgress(double durationSeconds)
+        public double CalculateElapsedBarCount(double durationSeconds)
         {
             if (Bpm <= 0) return 0d;
 
-            double barSeconds = BeatLength * 4d;
-            return durationSeconds / barSeconds;
+            return durationSeconds / _barLength;
         }
 
         /// <summary>
@@ -37,16 +38,13 @@ namespace KillChord.Runtime.Domain.InGame.Music
                 return BeatType.Four;
             }
 
-            double beatSeconds = 60d / Bpm;
-            double barSeconds = beatSeconds * 4d;
-
             BeatType nearestBeatType = BeatType.Four;
             double minDiff = double.MaxValue;
 
             foreach (BeatType beatType in SupportedBeatTypes)
             {
                 int signature = (int)beatType;
-                double targetSeconds = barSeconds / signature;
+                double targetSeconds = _barLength / signature;
                 double diff = Math.Abs(durationSeconds - targetSeconds);
 
                 if (diff < minDiff)
@@ -59,23 +57,8 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return nearestBeatType;
         }
 
-        public double GetExecuteTime(ExecuteRequestTiming timing, double accurateBeat)
-        {
-            if (Bpm <= 0) return 0;
-            if (timing.Beat.Signature <= 0 || timing.Beat.Count <= 0 || timing.Beat.Count > timing.Beat.Signature)
-            {
-                throw new ArgumentOutOfRangeException(nameof(timing), "Beat must be within the bar.");
-            }
-
-            const double propTimeSignature = 4d;
-            double currentBar = Math.Floor(accurateBeat / propTimeSignature);
-            double targetBar = currentBar + timing.BarFlag;
-
-            double barLengthMs = BeatLength * propTimeSignature;
-            double targetBarStartTimingMs = targetBar * barLengthMs;
-            double offsetInBarMs = (barLengthMs / timing.Beat.Signature) * (timing.Beat.Count - 1);
-            return targetBarStartTimingMs + offsetInBarMs;
-        }
+        private const double SECONDS_PER_MINUTE = 60d;
+        private const double FOUR_FOUR_BEAT_COUNT = 4d;
 
         private static readonly BeatType[] SupportedBeatTypes =
         {
@@ -86,5 +69,9 @@ namespace KillChord.Runtime.Domain.InGame.Music
             BeatType.Six,
             BeatType.Eight
         };
+
+        private readonly double _bpm;
+        private readonly double _beatLength;
+        private readonly double _barLength;
     }
 }

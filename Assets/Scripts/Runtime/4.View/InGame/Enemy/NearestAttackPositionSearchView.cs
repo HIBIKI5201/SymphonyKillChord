@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor;
-using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -15,7 +14,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _timer = 0;
             Vector3 initPos = transform.position;
             _positionSamples = new Vector3[_samplingCount];
-            for(int i = 0; i < _positionSamples.Length; i++)
+            for (int i = 0; i < _positionSamples.Length; i++)
             {
                 _positionSamples[i] = initPos;
             }
@@ -82,15 +81,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _timer += Time.deltaTime;
         }
-        
+
         private void OnDrawGizmos()
         {
-            if(_positionSamples == null) return;
+            if (_positionSamples == null) return;
             for (int i = 0; i < _positionSamples.Length; i++)
             {
                 Gizmos.color = new Color(0, 200, 200, 50);
                 Gizmos.DrawSphere(_positionSamples[i], 0.1f);
+#if UNITY_EDITOR
                 _raycastView.DrawGizmoLineToTarget(_positionSamples[i]);
+#endif
             }
             Gizmos.color = new Color(200, 0, 0, 50);
             Gizmos.DrawSphere(_destinationCache, 0.2f);
@@ -98,7 +99,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [Header("性能調整")]
         [SerializeField, Tooltip("探索の侯選ポジション数")] private int _samplingCount;
-        [SerializeField, Tooltip("探索間隔(秒)"), Range(0f,1f)] private float _searchInterval;
+        [SerializeField, Tooltip("探索間隔(秒)"), Range(0f, 1f)] private float _searchInterval;
         [Space]
         [SerializeField] private NavMeshAgent _agent;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
