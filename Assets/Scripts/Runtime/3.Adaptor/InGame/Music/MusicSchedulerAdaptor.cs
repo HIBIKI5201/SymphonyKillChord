@@ -5,18 +5,17 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Persistent.Music;
 using System;
 using System.Threading;
-using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     /// <summary>
     ///     音楽同期に合わせたアクションのスケジュールを管理するアダプタークラス。
     /// </summary>
     public class MusicSchedulerAdaptor : IMusicActionScheduler
     {
-        public MusicSchedulerAdaptor(IMusicSyncViewModel syncViewModel, IMusicSyncService musicSyncService)
+        public MusicSchedulerAdaptor(MusicSyncState syncState, IMusicSyncService musicSyncService)
         {
-            _syncViewModel = syncViewModel;
+            _musicSyncState = syncState;
             _musicSyncService = musicSyncService;
         }
 
@@ -24,13 +23,8 @@ namespace KillChord.Runtime.Adaptor
             Action action,
             CancellationToken cancellationToken)
         {
-            Debug.Log($"[MusicSchedulerAdaptor] syncViewModel null? {_syncViewModel == null}");
-            Debug.Log($"[MusicSchedulerAdaptor] musicSyncService null? {_musicSyncService == null}");
-
-            Debug.Log("攻撃予約: " + musicSpec);
             ExecuteRequestTiming timing = Convert(musicSpec);
-
-            double accurateBeat = _syncViewModel.AccurateBeat;
+            double accurateBeat = _musicSyncState.AccurateBeat;
 
             _musicSyncService.RegisterAction(
                 accurateBeat,
@@ -40,13 +34,13 @@ namespace KillChord.Runtime.Adaptor
                 );
         }
 
+        private readonly MusicSyncState _musicSyncState;
+        private readonly IMusicSyncService _musicSyncService;
+
         private ExecuteRequestTiming Convert(in EnemyMusicSpec musicSpec)
         {
             Beat beat = new Beat(musicSpec.TimeSignature, musicSpec.TargetBeat);
             return new ExecuteRequestTiming((byte)musicSpec.BarFlag, beat);
         }
-
-        private readonly IMusicSyncViewModel _syncViewModel;
-        private readonly IMusicSyncService _musicSyncService;
     }
 }
