@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMusicSpec
     {
-        public EnemyMusicSpec(byte barFlag, long timeSignature, long targetBeat)
+        public EnemyMusicSpec(byte barFlag, double timeSignature, double targetBeat)
         {
             BarFlag = barFlag;
             TimeSignature = timeSignature;
@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         }
 
         public byte BarFlag { get; }
-        public long TimeSignature { get; }
-        public long TargetBeat { get; }
+        public double TimeSignature { get; }
+        public double TargetBeat { get; }
     }
 }
