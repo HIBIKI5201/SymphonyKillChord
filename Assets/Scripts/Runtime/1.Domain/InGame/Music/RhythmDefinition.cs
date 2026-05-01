@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
 
         public double Bpm => _bpm;
         public double BeatLength => _beatLength;
-        public double BarLength => _beatLength;
+        public double BarLength => _barLength;
 
         public double CalculateElapsedBarCount(double durationSeconds)
         {
