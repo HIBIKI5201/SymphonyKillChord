@@ -1,6 +1,6 @@
-using System;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Utility;
+using System;
 
 namespace KillChord.Runtime.Domain.InGame.Music
 {
