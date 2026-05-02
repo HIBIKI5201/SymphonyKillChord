@@ -1,20 +1,20 @@
+using KillChord.Runtime.Utility;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Music
 {
-
     /// <summary>
     ///     音楽の同期状態を表すStateクラス。
     /// </summary>
     public class MusicSyncState
     {
-        public double PlayTime { get; set; }
+        public double PlayTime { get; private set; }
 
-        public int Bpm { get; set; }
-        public int CurrentBeat { get; set; }
-        public int NearestBeat { get; set; }
-        public double AccurateBeat { get; set; }
-        public double BeatLength { get; set; }
+        public int Bpm { get; private set; }
+        public int CurrentBeat { get; private set; }
+        public int NearestBeat { get; private set; }
+        public double AccurateBeat { get; private set; }
+        public double BeatLength { get; private set; }
 
         public void SetBpm(int bpm)
         {
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             }
 
             Bpm = bpm;
-            BeatLength = SECOND_PER_MINUTE / Bpm;
+            BeatLength = MusicConstants.SECONDS_PER_MINUTE / Bpm;
         }
 
         public void UpdatePlayTime(double playTime)
@@ -43,10 +43,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             AccurateBeat = PlayTime / BeatLength;
             CurrentBeat = (int)Math.Floor(AccurateBeat);
-            NearestBeat = (int)Math.Round(AccurateBeat + HALF_BEAT_THRESHOLD);
+            NearestBeat = (int)Math.Round(AccurateBeat + MusicConstants.HALF_BEAT_THRESHOLD);
         }
-
-        private const double SECOND_PER_MINUTE = 60d;
-        private const double HALF_BEAT_THRESHOLD = 0.5d;
     }
 }

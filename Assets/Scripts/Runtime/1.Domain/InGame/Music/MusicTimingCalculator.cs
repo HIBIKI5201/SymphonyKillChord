@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Utility;
 using System;
 
 namespace KillChord.Runtime.Domain
@@ -17,14 +18,12 @@ namespace KillChord.Runtime.Domain
                 throw new ArgumentOutOfRangeException(nameof(executeRequestTiming));
             }
 
-            double currentBar = Math.Floor(accurateBeat / FOUR_FOUR_BEAT_COUNT);
+            double currentBar = Math.Floor(accurateBeat / MusicConstants.STANDARD_BEATS_PER_BAR);
             double targetBar = currentBar + executeRequestTiming.BarFlag;
             double targetBarStartTime = targetBar * rhythmDefinition.BarLength;
             double offsetInBar = rhythmDefinition.BarLength / executeRequestTiming.Beat.Signature * (executeRequestTiming.Beat.Count - 1d);
 
             return targetBarStartTime + offsetInBar;
         }
-
-        private const double FOUR_FOUR_BEAT_COUNT = 4d;
     }
 }
