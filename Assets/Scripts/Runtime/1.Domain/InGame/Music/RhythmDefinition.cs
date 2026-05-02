@@ -1,3 +1,4 @@
+using KillChord.Runtime.Utility;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Music
@@ -11,8 +12,8 @@ namespace KillChord.Runtime.Domain.InGame.Music
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             _bpm = bpm;
-            _beatLength = SECONDS_PER_MINUTE / _bpm;
-            _barLength = _beatLength * FOUR_FOUR_BEAT_COUNT;
+            _beatLength = MusicConstants.SECONDS_PER_MINUTE / _bpm;
+            _barLength = _beatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
         }
 
         public double Bpm => _bpm;
@@ -56,9 +57,6 @@ namespace KillChord.Runtime.Domain.InGame.Music
 
             return nearestBeatType;
         }
-
-        private const double SECONDS_PER_MINUTE = 60d;
-        private const double FOUR_FOUR_BEAT_COUNT = 4d;
 
         private static readonly BeatType[] SupportedBeatTypes =
         {
