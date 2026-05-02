@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Music;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {

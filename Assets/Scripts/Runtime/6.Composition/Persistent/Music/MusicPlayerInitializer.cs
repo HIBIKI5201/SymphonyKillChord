@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;

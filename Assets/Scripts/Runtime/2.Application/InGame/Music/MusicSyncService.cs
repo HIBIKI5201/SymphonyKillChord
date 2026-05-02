@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility;
@@ -8,16 +9,11 @@ namespace KillChord.Runtime.Application.InGame.Music
 {
     public class MusicSyncService : IMusicSyncService
     {
-        private const int BUFFER_SIZE = 64;
-
-        private readonly RhythmState _rhythmState;
-        private readonly RhythmDefinition _rhythmDefinition;
-        private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
-
         public MusicSyncService(RhythmDefinition rhythmDefinition)
         {
             _rhythmState = new(BUFFER_SIZE);
             _rhythmDefinition = rhythmDefinition;
+            _scheduledActions = new PriorityQueue<ScheduledAction, double>();
         }
 
         public void Update(double playTime)
@@ -51,7 +47,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             if (_rhythmState.Count == 0) return BeatType.One;
 
             float lastTime = _rhythmState.LastTiming;
-            double duration = (double)(unscaledTime - lastTime);
+            double duration = unscaledTime - lastTime;
 
             return _rhythmDefinition.CalculateBeatType(duration);
         }
@@ -77,8 +73,8 @@ namespace KillChord.Runtime.Application.InGame.Music
             Action action,
             CancellationToken ct)
         {
-            var executeTime = _rhythmDefinition.GetExecuteTime(timing, accurateBeat);
-            _scheduledActions.Enqueue(new(action, ct), executeTime);
+            double executeTime = MusicTimingCalculator.CalculateExecutionTime(_rhythmDefinition, timing, accurateBeat);
+            _scheduledActions.Enqueue(new ScheduledAction(action, ct), executeTime);
         }
 
         public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime)
@@ -93,7 +89,14 @@ namespace KillChord.Runtime.Application.InGame.Music
             float lastTime = _rhythmState.LastTiming;
             float duration = unscaledTime - lastTime;
 
-            return (float)_rhythmDefinition.CalculateBarProgress(duration);
+            return (float)_rhythmDefinition.CalculateElapsedBarCount(duration);
         }
+
+        private const int BUFFER_SIZE = 64;
+
+        private readonly RhythmState _rhythmState;
+        private readonly RhythmDefinition _rhythmDefinition;
+        private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
+
     }
 }
