@@ -20,7 +20,6 @@ namespace KillChord.Runtime.View.InGame.Music
             _root.anchoredPosition = position;
         }
 
-
         [SerializeField] private RectTransform _root;
         [SerializeField] private TMP_Text _beatText;
     }
