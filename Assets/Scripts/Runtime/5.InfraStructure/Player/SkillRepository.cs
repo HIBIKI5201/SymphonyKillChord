@@ -15,17 +15,6 @@ namespace KillChord.Runtime.InfraStructure.Player
     {
         [SerializeField] private SkillData[] _skillDatas;
         
-        private List<SkillDefinition> ConvertSkillDefinitions()
-        {
-            var skills = new List<SkillDefinition>();
-            foreach (var skillData in _skillDatas)
-            {
-                skills.Add(skillData.ToSkillDefinition());
-            }
-
-            return skills;
-        }
-
         public SkillDefinition GetSkill(int id)
         {
             return Array.Find(_skillDatas, x => x.Id == id).ToSkillDefinition();
