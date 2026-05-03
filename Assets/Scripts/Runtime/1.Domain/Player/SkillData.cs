@@ -1,33 +1,40 @@
-using System;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using SymphonyFrameWork.Attribute;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Player
 {
     /// <summary>
     ///     スキルの設定データを保持するドメインクラス。
     /// </summary>
-    [Serializable]
     public class SkillData
     {
-        public int Id => _id;
-        public BeatType[] Pattern => _pattern;
+        public int Id { get; }
+        public BeatType[] Pattern { get; }
+        public ISkillEffect SkillEffect { get; }
+        public ISkillVisual SkillVisual { get; }
 
-        [SerializeReference, SubclassSelector] ISkillEffect _skillEffect;
-        [SerializeReference, SubclassSelector] ISkillVisual _skillVisual;
+        public SkillData(
+            int id,
+            BeatType[] pattern,
+            ISkillEffect skillEffect,
+            ISkillVisual skillVisual)
+        {
+            Id = id;
+            Pattern = pattern;
+            SkillEffect = skillEffect;
+            SkillVisual = skillVisual;
+        }
 
-        [SerializeField] private int _id;
-        [SerializeField] private BeatType[] _pattern;
-
+        /// <summary>
+        ///     SkillDefinitionに変換する。
+        /// </summary>
         public SkillDefinition ToSkillDefinition()
         {
             return new SkillDefinition(
-                new SkillId(_id),
-                new SkillPattern(new(_pattern)),
-                _skillEffect,
-                _skillVisual);
+                new SkillId(Id),
+                new SkillPattern(new(Pattern)),
+                SkillEffect,
+                SkillVisual);
         }
     }
 }
