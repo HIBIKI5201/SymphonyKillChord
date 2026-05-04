@@ -3,7 +3,6 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
 namespace KillChord.Runtime.View.InGame.Camera
 {
@@ -15,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.Camera
     {
         [SerializeField] private Transform _cameraT;
         [SerializeField] private UpdateModeEnum _updateMode;
+        [SerializeField] private int _cameraSensitivity = 5;
 
         private CameraSystemController _controller;
         private PlayerInputView _inputView;
@@ -71,7 +71,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void Tick(float deltaTime)
         {
             if (_controller == null || _playerT == null) return;
-            Vector2 input = _input * 200;
+            Vector2 input = _input * _cameraSensitivity;
             _input = Vector2.zero;
 
             _controller.Update(
