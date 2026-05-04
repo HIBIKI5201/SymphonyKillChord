@@ -12,14 +12,14 @@ namespace KillChord.Runtime.Application.InGame
         public void Register(ILockOnTarget target)
         {
             if (_targets.Add(target))
-                return;
+            { return; }
             Debug.LogWarning($"Target {target} is already registered.");
         }
 
         public void Unregister(ILockOnTarget target)
         {
             if (_targets.Remove(target))
-                return;
+            { return; }
             Debug.LogWarning($"Target {target} is not registered.");
         }
 

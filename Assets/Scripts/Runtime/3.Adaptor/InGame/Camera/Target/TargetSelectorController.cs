@@ -21,8 +21,8 @@ namespace KillChord.Runtime.Adaptor
         {
             entity = null;
 
-            if(!_selector.TryGetCurrentTarget(out var target))
-                return false;
+            if (!_selector.TryGetCurrentTarget(out var target))
+            { return false; }
 
             return _registryController.GetTargetEntity(target, out entity);
         }

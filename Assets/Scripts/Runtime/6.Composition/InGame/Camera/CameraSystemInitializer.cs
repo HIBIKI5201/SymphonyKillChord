@@ -11,7 +11,6 @@ using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 #if UNITY_EDITOR
 using KillChord.Runtime.Composition.InGame.Debugger;

@@ -39,7 +39,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
             if (_lockOnState == CameraLockOnState.LockOnManual)
-                return;
+            { return; }
             _lockOnState = CameraLockOnState.LockOnAuto;
 
             Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
@@ -56,7 +56,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 _targetSelector.ChangeTarget(currentPosition, dir);
             }
             else
+            {
                 _lockOnState = CameraLockOnState.Free;
+            }
         }
 
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
@@ -134,9 +136,13 @@ namespace KillChord.Runtime.Application.InGame.Camera
         private void UpdateCameraBone(in CameraSystemContext context, in Vector3 targetPosition)
         {
             if (_lockOnState != CameraLockOnState.Free)
+            {
                 _boneRotationSystem.Update(ref _cameraBoneRotation, context, targetPosition);
+            }
             else
+            {
                 _freeLookRotationSystem.Update(ref _cameraBoneRotation, context);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
