@@ -12,6 +12,11 @@ namespace SymphonyKillChord.InfraStructure.Player
     [CreateAssetMenu(fileName = "SkillData", menuName = "Game/SkillData")]
     public class SkillDataAsset : ScriptableObject
     {
+        public int Id => _id;
+        public BeatType[] Pattern => _pattern;
+        public ISkillEffect SkillEffect => _skillEffect;
+        public ISkillVisual SkillVisual => _skillVisual;
+
         /// <summary>
         ///     Domain層のSkillDataに変換する。
         /// </summary>
@@ -19,11 +24,6 @@ namespace SymphonyKillChord.InfraStructure.Player
         {
             return new SkillData(_id, _pattern, _skillEffect, _skillVisual);
         }
-
-        public int Id => _id;
-        public BeatType[] Pattern => _pattern;
-        public ISkillEffect SkillEffect => _skillEffect;
-        public ISkillVisual SkillVisual => _skillVisual;
 
         [SerializeField] private int _id;
         [SerializeField] private BeatType[] _pattern;
