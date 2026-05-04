@@ -30,6 +30,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
         public event Action<InputContext<Vector2>> OnLookInput;
+        /// <summary> ロックオン入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnLockOnInput;
 
         public event Action<InputContext<Vector2>> OnMobileLookInput;
 
@@ -89,6 +91,14 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnLookInput?.Invoke(inputContext);
         }
 
+        public void OnLockOn(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.LockOn, context, time);
+            OnLockOnInput?.Invoke(inputContext);
+        }
+
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
             Action<InputContext<float>> action = actionId switch
@@ -136,6 +146,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string ATTACK_ACTION_NAME = "Attack";
         private const string MOVE_ACTION_NAME = "Move";
         private const string LOOK_ACTION_NAME = "Look";
+        private const string LOCK_ON_ACTION_NAME = "LockOn";
 
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
@@ -149,6 +160,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _attackAction;
         private InputAction _moveAction;
         private InputAction _lookAction;
+        private InputAction _lockOnAction;
 
         private void Awake()
         {
@@ -178,6 +190,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_attackAction, OnAttack);
             RegisterAction(_moveAction, OnMove);
             RegisterAction(_lookAction, OnLook);
+            RegisterAction(_lockOnAction, OnLockOn);
         }
 
         private void OnDisable()
@@ -189,6 +202,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             UnregisterAction(_attackAction, OnAttack);
             UnregisterAction(_moveAction, OnMove);
             UnregisterAction(_lookAction, OnLook);
+            UnregisterAction(_lockOnAction, OnLockOn);
         }
 
         /// <summary>
@@ -205,6 +219,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             _attackAction = actions.FindAction($"{InputMapNames.InGame}/{ATTACK_ACTION_NAME}", true);
             _moveAction = actions.FindAction($"{InputMapNames.InGame}/{MOVE_ACTION_NAME}", true);
             _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
+            _lockOnAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_ACTION_NAME}", true);
         }
 
         /// <summary>

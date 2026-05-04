@@ -31,6 +31,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             return true;
         }
+
         public bool TryGetCurrentTarget(out ILockOnTarget result)
         {
             result = _currentTarget;
@@ -49,9 +50,25 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             return true;
         }
+
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
             GetTargetPosition(playerPosition, direction, out _currentTarget);
+        }
+
+        private readonly TargetManager _manager;
+        private ILockOnTarget _currentTarget;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float NormalizeDot(in Vector3 from, in Vector3 to)
+        {
+            float num = Mathf.Sqrt(from.sqrMagnitude * to.sqrMagnitude);
+            if (num < 1E-15f)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp(Vector3.Dot(from, to) / num, -1f, 1f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,20 +107,5 @@ namespace KillChord.Runtime.Application.InGame.Camera
             }
             result = (bestDot < 0f) ? shortestTarget : bestAlignedTarget;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float NormalizeDot(in Vector3 from, in Vector3 to)
-        {
-            float num = Mathf.Sqrt(from.sqrMagnitude * to.sqrMagnitude);
-            if (num < 1E-15f)
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp(Vector3.Dot(from, to) / num, -1f, 1f);
-        }
-
-        private ILockOnTarget _currentTarget;
-
-        private readonly TargetManager _manager;
     }
 }

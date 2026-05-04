@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Adaptor.InGame
         {
             _manager.Register(gateway);
         }
+
         public void Unregister(LockOnTargetGateway gateway)
         {
             _manager.Unregister(gateway);
