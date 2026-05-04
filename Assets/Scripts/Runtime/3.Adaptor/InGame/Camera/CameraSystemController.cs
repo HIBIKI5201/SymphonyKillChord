@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Camera;
 using UnityEngine;
 
@@ -22,22 +21,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         public void ToggleLockOnState(in Vector3 currentPosition)
         {
             _application.ToggleLockOnState(currentPosition);
-        }
-
-        public void Update(
-            in Vector3 followPosition,
-            in Vector2 input,
-            float deltaTime,
-            out Quaternion resultRotation,
-            out Vector3 resultPosition
-            )
-        {
-            CameraSystemContext context = new(
-                 followPosition,
-                 input,
-                 deltaTime
-            );
-            _application.Update(context, out resultRotation, out resultPosition);
         }
 
         private readonly CameraSystemApplication _application;

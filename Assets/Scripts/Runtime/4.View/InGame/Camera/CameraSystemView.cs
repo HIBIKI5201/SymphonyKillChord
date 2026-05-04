@@ -14,10 +14,12 @@ namespace KillChord.Runtime.View.InGame.Camera
     {
         public void Initialize(
             CameraSystemController controller,
+            CameraSystemPresenter presenter,
             Transform playerT,
             PlayerInputView playerInputView)
         {
             _controller = controller;
+            _presenter = presenter;
             _playerT = playerT;
             _inputView = playerInputView;
 
@@ -33,6 +35,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField] private int _cameraSensitivity = 5;
 
         private CameraSystemController _controller;
+        private CameraSystemPresenter _presenter;
         private PlayerInputView _inputView;
         private Transform _playerT;
         private Vector2 _input;
@@ -74,7 +77,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Vector2 input = _input * _cameraSensitivity;
             _input = Vector2.zero;
 
-            _controller.Update(
+            _presenter.Update(
                 _playerT.position,
                 input,
                 deltaTime,

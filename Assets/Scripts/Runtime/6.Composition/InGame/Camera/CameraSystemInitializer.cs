@@ -43,9 +43,10 @@ namespace KillChord.Runtime.Composition
                 freeLookRotationSystem, rotationSystem, targetSelector);
 
             CameraSystemController controller = new(application);
+            CameraSystemPresenter presenter = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.Initialize(controller, stageSceneObj.PlayerTransform,
+            _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
 
