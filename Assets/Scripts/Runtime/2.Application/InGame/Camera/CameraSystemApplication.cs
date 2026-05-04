@@ -28,6 +28,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _distance = _parameter.Distance;
         }
+
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
             if (_lockOnState == CameraLockOnState.LockOnManual)
@@ -37,6 +38,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
             Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
             _targetSelector.ChangeTarget(currentPosition, dir);
         }
+
         public void ToggleLockOnState(in Vector3 currentPosition)
         {
             if (!IsLockOn())
@@ -49,6 +51,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
             else
                 _lockOnState = CameraLockOnState.Free;
         }
+
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
         {
             if (_lockOnState == CameraLockOnState.LockOnAuto && context.Input.sqrMagnitude > float.Epsilon)
@@ -78,11 +81,28 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _previousCameraPosition = resultPosition;
         }
+
+        private readonly CameraSystemParameter _parameter;
+
+        private readonly CameraFollowApplication _followSystem;
+        private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
+        private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
+        private readonly CameraRotationApplication _cameraRotationSystem;
+        private readonly TargetSelector _targetSelector;
+
+        private float _distance;
+        private Vector3 _cameraCenterOffset;
+        private Vector3 _previousCameraPosition;
+        private Quaternion _cameraRotation = Quaternion.identity;
+        private Quaternion _cameraBoneRotation = Quaternion.identity;
+        private CameraLockOnState _lockOnState;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsLockOn()
         {
             return _lockOnState != CameraLockOnState.Free;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdateDistance(ref float currentDistance, float targetDistance, float deltaTime)
         {
@@ -118,20 +138,5 @@ namespace KillChord.Runtime.Application.InGame.Camera
             }
             return maxDistance;
         }
-
-        private readonly CameraSystemParameter _parameter;
-
-        private readonly CameraFollowApplication _followSystem;
-        private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
-        private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
-        private readonly CameraRotationApplication _cameraRotationSystem;
-        private readonly TargetSelector _targetSelector;
-
-        private float _distance;
-        private Vector3 _cameraCenterOffset;
-        private Vector3 _previousCameraPosition;
-        private Quaternion _cameraRotation = Quaternion.identity;
-        private Quaternion _cameraBoneRotation = Quaternion.identity;
-        private CameraLockOnState _lockOnState;
     }
 }

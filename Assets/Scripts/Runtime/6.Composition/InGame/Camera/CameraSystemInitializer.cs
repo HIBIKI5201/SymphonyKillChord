@@ -25,12 +25,6 @@ namespace KillChord.Runtime.Composition
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class CameraSystemInitializer : MonoBehaviour
     {
-        [SerializeField] private CameraSystemView _cameraSystem;
-
-        [SerializeField] private CameraSystemConfig _config;
-
-        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
-
         public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
@@ -61,5 +55,12 @@ namespace KillChord.Runtime.Composition
                 .SetCameraParameter(parameter);
 #endif
         }
+
+
+        [SerializeField] private CameraSystemView _cameraSystem;
+
+        [SerializeField] private CameraSystemConfig _config;
+
+        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
     }
 }

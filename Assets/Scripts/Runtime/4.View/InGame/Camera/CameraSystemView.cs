@@ -12,15 +12,6 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
-        [SerializeField] private Transform _cameraT;
-        [SerializeField] private UpdateModeEnum _updateMode;
-        [SerializeField] private int _cameraSensitivity = 5;
-
-        private CameraSystemController _controller;
-        private PlayerInputView _inputView;
-        private Transform _playerT;
-        private Vector2 _input;
-
         public void Initialize(
             CameraSystemController controller,
             Transform playerT,
@@ -36,6 +27,15 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLookInput += OnLook;
 #endif
         }
+
+        [SerializeField] private Transform _cameraT;
+        [SerializeField] private UpdateModeEnum _updateMode;
+        [SerializeField] private int _cameraSensitivity = 5;
+
+        private CameraSystemController _controller;
+        private PlayerInputView _inputView;
+        private Transform _playerT;
+        private Vector2 _input;
 
         private void FixedUpdate()
         {
