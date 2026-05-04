@@ -28,6 +28,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 #else
             _inputView.OnLookInput += OnLook;
 #endif
+            _inputView.OnMoveInput += OnMove;
         }
 
         [SerializeField] private Transform _cameraT;
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private PlayerInputView _inputView;
         private Transform _playerT;
         private Vector2 _input;
+        private Vector2 _moveInput;
 
         private void FixedUpdate()
         {
@@ -71,6 +73,16 @@ namespace KillChord.Runtime.View.InGame.Camera
             _input = context.Value;
         }
 
+        /// <summary>
+        ///     移動入力を受け取り、入力値を更新する。
+        /// </summary>
+        /// <param name="context"></param>
+        private void OnMove(InputContext<Vector2> context)
+        {
+            _moveInput = context.Value;
+        }
+
+
         private void Tick(float deltaTime)
         {
             if (_controller == null || _playerT == null) return;
@@ -80,6 +92,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _presenter.Update(
                 _playerT.position,
                 input,
+                _moveInput,
                 deltaTime,
                 out Quaternion rotation,
                 out Vector3 position
