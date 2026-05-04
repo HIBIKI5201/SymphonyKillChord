@@ -22,7 +22,12 @@ namespace KillChord.Runtime.Structure.InGame.Camera
                 _lockOnRotationSpeed,
                 _collisionRadius,
                 _collisionMask,
-                _pitchRange);
+                _pitchRange,
+#if UNITY_STANDALONE_WIN
+                _invertVertical,
+                _invertHorizontal
+#endif
+                );
 
         [Header("Main")]
         [SerializeField] private Vector3 _cameraOffset;
@@ -48,5 +53,14 @@ namespace KillChord.Runtime.Structure.InGame.Camera
 
         [Header("Limits")]
         [SerializeField] private Vector2 _pitchRange = new Vector2(-45f, 75f);
+
+#if UNITY_STANDALONE_WIN
+        [Header("Input Invert")]
+        [SerializeField, Tooltip("垂直方向の入力を反転するフラグ。")]
+        private bool _invertVertical = false;
+
+        [SerializeField, Tooltip("水平方向の入力を反転するフラグ。")]
+        private bool _invertHorizontal = false;
+#endif
     }
 }
