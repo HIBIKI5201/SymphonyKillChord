@@ -27,10 +27,10 @@ namespace KillChord.Runtime.View.InGame.Camera
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += OnLook;
 #else
-            _inputView.OnLookInput += OnLook;
+            _inputView.OnLookInput += LookHandler;
 #endif
-            _inputView.OnMoveInput += OnMove;
-            _inputView.OnLockOnInput += OnLockOn;
+            _inputView.OnMoveInput += MoveHandler;
+            _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
         }
 
@@ -69,7 +69,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Tick(Time.deltaTime);
         }
 
-        private void OnLook(InputContext<Vector2> context)
+        private void LookHandler(InputContext<Vector2> context)
         {
             _input = context.Value;
         }
@@ -78,7 +78,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     移動入力を受け取り、入力値を更新する。
         /// </summary>
         /// <param name="context"></param>
-        private void OnMove(InputContext<Vector2> context)
+        private void MoveHandler(InputContext<Vector2> context)
         {
             _moveInput = context.Value;
         }
@@ -87,7 +87,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     ロックオン入力を受け取り、マニュアルロックオン状態をトグルする。
         /// </summary>
         /// /// <param name="context"></param>
-        private void OnLockOn(InputContext<float> context)
+        private void LockOnHandler(InputContext<float> context)
         {
             if (context.Phase == InputActionPhase.Started)
             {
