@@ -61,8 +61,8 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
         {
-            if (_lockOnState == CameraLockOnState.LockOnAuto && context.Input.sqrMagnitude > float.Epsilon
-                || context.MoveInput.sqrMagnitude > float.Epsilon)
+            if (_lockOnState == CameraLockOnState.LockOnAuto && (context.Input.sqrMagnitude > float.Epsilon
+                || context.MoveInput.sqrMagnitude > float.Epsilon))
             {
                 _lockOnState = CameraLockOnState.Free;
             }
