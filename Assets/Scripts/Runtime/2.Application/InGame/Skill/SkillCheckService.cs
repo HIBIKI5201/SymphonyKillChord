@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
     /// </summary>
     public class SkillCheckService
     {
-        public static bool TryCheckSkills(
+        public bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
             ReadOnlySpan<BeatType> history,
             out int skillIndex, out BeatType lastAttackType)

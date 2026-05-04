@@ -1,6 +1,7 @@
 using System;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
 using SymphonyFrameWork;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -13,10 +14,11 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private SkillRepository _skillRepository;
         private SkillController _skillController;
         private IMusicSyncService _musicSyncService;
-        
+
         public void Initialize()
         {
-            _skillController = new SkillController(_skillRepository, _musicSyncService);
+            SkillCheckService skillCheckService = new SkillCheckService();
+            _skillController = new SkillController(_skillRepository, _musicSyncService, skillCheckService);
         }
 
         public void Inject(IMusicSyncService arg0)

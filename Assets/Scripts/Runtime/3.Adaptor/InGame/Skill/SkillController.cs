@@ -12,10 +12,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         public SkillController(
             ISkillRepository skillRepository,
             IMusicSyncService musicSyncService,
+            SkillCheckService skillCheckService,
             int[] skillId = null,
             SkillResultPresenter presenter = null)
         {
             _musicSyncService = musicSyncService;
+            _skillCheckService = skillCheckService;
             skillId ??= new[] { 0 };
             _skillCache = new SkillDefinition[skillId.Length];
 
@@ -31,7 +33,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
-            if (SkillCheckService.TryCheckSkills(
+            if (_skillCheckService.TryCheckSkills(
                     _skillCache,
                     _musicSyncService.GetBeatTypeHistory(),
                     out var index, out _))
@@ -47,5 +49,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly IMusicSyncService _musicSyncService;
         private readonly SkillDefinition[] _skillCache;
         private readonly SkillResultPresenter _presenter;
+        private readonly SkillCheckService _skillCheckService;
     }
 }
