@@ -70,7 +70,7 @@ namespace KillChord.Runtime.Composition
             if (_enemyArtilleryTestSpawner == null)
             {
                 Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return; 
+                return;
             }
 
 
@@ -93,7 +93,7 @@ namespace KillChord.Runtime.Composition
             dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
             dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
 
-            PlayerMovement move = new(parameter);
+            PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);

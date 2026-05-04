@@ -6,9 +6,9 @@ namespace KillChord.Runtime.Application.InGame.Player
     /// <summary>
     ///     プレイヤーの移動計算を行うクラス。
     /// </summary>
-    public sealed class PlayerMovement
+    public sealed class PlayerMovementApplication
     {
-        public PlayerMovement(PlayerMoveParameter parameter)
+        public PlayerMovementApplication(PlayerMoveParameter parameter)
         {
             _parameter = parameter;
         }
