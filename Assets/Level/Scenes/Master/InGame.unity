@@ -805,7 +805,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 1249666142}
   _testCue: Cyber
-  _testBpm: 60
+  _testBpm: 105
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0
