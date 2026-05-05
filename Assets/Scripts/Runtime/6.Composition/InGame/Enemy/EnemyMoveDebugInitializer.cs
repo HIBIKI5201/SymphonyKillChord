@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     敵歩兵移動の依存関係を構築する。
     /// </summary>
-    public class EnemyInfantryMoveDebugInitializer : MonoBehaviour
+    public class EnemyMoveDebugInitializer : MonoBehaviour
     {
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
@@ -46,11 +46,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemySharedFacade _enemySharedFacade;
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
+        [Header("砲兵のみ設定する")]
+        [SerializeField] private ShellSpawner _shellSpawner;
+
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
         private LockOnTargetGateway _lockOnTargetGateway;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
+        private IEnemyAttackControllerGenerator _attackControllerGenerator;
 
         public void Initialize(
             Transform target,
@@ -58,7 +62,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
             TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController
+            TargetEntityRegistryController targetEntityRegistryController,
+            IEnemyAttackControllerGenerator attackControllerGenerator
             )
         {
             _targetManagerController = targetManagerController;
@@ -66,6 +71,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity = CharacterFactory.Create(_enemyData);
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            _attackControllerGenerator = attackControllerGenerator;
             if (_missionEventController != null && _missionKeyAsset != null)
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
@@ -95,8 +101,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
+            // AttackController生成用コンテキスト
+            EnemyAttackControllerContext attackControllerContext = new EnemyAttackControllerContext(attackUsecase, battleState, _shellSpawner);
+
             // Controller
-            EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
+            IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
