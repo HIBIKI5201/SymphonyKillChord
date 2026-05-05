@@ -11,7 +11,6 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         public readonly SkillId Id;
         public readonly SkillPattern SkillPattern;
         public readonly ISkillEffect Effect;
-        public readonly ISkillVisual Visual;
 
         #region 定数
 
@@ -19,12 +18,11 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         #endregion
 
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, ISkillVisual visual)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect)
         {
             Id = id;
             SkillPattern = skillPattern;
             Effect = effect;
-            Visual = visual;
         }
 
         /// <summary>

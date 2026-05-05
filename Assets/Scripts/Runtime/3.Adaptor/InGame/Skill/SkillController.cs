@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     {
         public SkillController(
             ISkillRepository skillRepository,
-            SkillCheckService skillCheckService,
+            ISkillVisual[] skillVisuals,
             int[] skillId = null,
             SkillResultPresenter presenter = null)
         {
@@ -23,6 +23,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             for (int i = 0; i < skillId.Length; i++)
             {
                 _skillCache[i] = skillRepository.GetSkill(skillId[i]);
+            }
+
+            _skillVisuals = new Dictionary<int, ISkillVisual>();
+            if (skillVisuals != null)
+            {
+                foreach (var visual in skillVisuals)
+                {
+                    _skillVisuals[visual.Id] = visual;
+                }
             }
 
             _presenter = presenter;
