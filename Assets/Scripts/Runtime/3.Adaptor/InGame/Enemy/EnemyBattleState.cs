@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Adaptor.InGame.Battle
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     敵Aiの攻撃に関する戦闘状態をまとめたクラス。

@@ -1,5 +1,3 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 

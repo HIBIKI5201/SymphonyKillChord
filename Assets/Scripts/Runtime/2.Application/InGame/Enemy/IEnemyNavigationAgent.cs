@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
     ///     敵の移動操作を表すインターフェース。
