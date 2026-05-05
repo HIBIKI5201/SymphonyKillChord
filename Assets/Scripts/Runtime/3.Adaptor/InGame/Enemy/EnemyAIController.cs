@@ -129,7 +129,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private void HandleOnDamageTaken(EOnTakeDamage eventParam)
         {
-            if (eventParam.DefenderHashCode != _enemyBattleState.Attacker.GetHashCode()) return;
+            if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;
             // クリティカル発生時、硬直行動をする
             if (eventParam.Critical)
             {
