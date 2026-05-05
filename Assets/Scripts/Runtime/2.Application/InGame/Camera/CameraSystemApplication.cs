@@ -28,15 +28,24 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _distance = _parameter.Distance;
         }
+
+#if UNITY_STANDALONE_WIN
+        /// <summary> 垂直方向の入力反転フラグ。 </summary>
+        public bool IsInvertVertical => _parameter.IsInvertVertical;
+        /// <summary> 水平方向の入力反転フラグ。 </summary>
+        public bool IsInvertHorizontal => _parameter.IsInvertHorizontal;
+#endif
+
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
             if (_lockOnState == CameraLockOnState.LockOnManual)
-                return;
+            { return; }
             _lockOnState = CameraLockOnState.LockOnAuto;
 
             Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
             _targetSelector.ChangeTarget(currentPosition, dir);
         }
+
         public void ToggleLockOnState(in Vector3 currentPosition)
         {
             if (!IsLockOn())
@@ -47,12 +56,18 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 _targetSelector.ChangeTarget(currentPosition, dir);
             }
             else
+            {
                 _lockOnState = CameraLockOnState.Free;
+            }
         }
+
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
         {
-            if (_lockOnState == CameraLockOnState.LockOnAuto && context.Input.sqrMagnitude > float.Epsilon)
+            if (_lockOnState == CameraLockOnState.LockOnAuto && (context.Input.sqrMagnitude > float.Epsilon
+                || context.MoveInput.sqrMagnitude > float.Epsilon))
+            {
                 _lockOnState = CameraLockOnState.Free;
+            }
 
             Vector3 targetPosition = Vector3.zero;
             if (IsLockOn())
@@ -78,11 +93,28 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             _previousCameraPosition = resultPosition;
         }
+
+        private readonly CameraSystemParameter _parameter;
+
+        private readonly CameraFollowApplication _followSystem;
+        private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
+        private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
+        private readonly CameraRotationApplication _cameraRotationSystem;
+        private readonly TargetSelector _targetSelector;
+
+        private float _distance;
+        private Vector3 _cameraCenterOffset;
+        private Vector3 _previousCameraPosition;
+        private Quaternion _cameraRotation = Quaternion.identity;
+        private Quaternion _cameraBoneRotation = Quaternion.identity;
+        private CameraLockOnState _lockOnState;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsLockOn()
         {
             return _lockOnState != CameraLockOnState.Free;
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdateDistance(ref float currentDistance, float targetDistance, float deltaTime)
         {
@@ -104,9 +136,13 @@ namespace KillChord.Runtime.Application.InGame.Camera
         private void UpdateCameraBone(in CameraSystemContext context, in Vector3 targetPosition)
         {
             if (_lockOnState != CameraLockOnState.Free)
+            {
                 _boneRotationSystem.Update(ref _cameraBoneRotation, context, targetPosition);
+            }
             else
+            {
                 _freeLookRotationSystem.Update(ref _cameraBoneRotation, context);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,20 +154,5 @@ namespace KillChord.Runtime.Application.InGame.Camera
             }
             return maxDistance;
         }
-
-        private readonly CameraSystemParameter _parameter;
-
-        private readonly CameraFollowApplication _followSystem;
-        private readonly CameraBoneLockOnRotationApplication _boneRotationSystem;
-        private readonly CameraBoneFreeLookRotationApplication _freeLookRotationSystem;
-        private readonly CameraRotationApplication _cameraRotationSystem;
-        private readonly TargetSelector _targetSelector;
-
-        private float _distance;
-        private Vector3 _cameraCenterOffset;
-        private Vector3 _previousCameraPosition;
-        private Quaternion _cameraRotation = Quaternion.identity;
-        private Quaternion _cameraBoneRotation = Quaternion.identity;
-        private CameraLockOnState _lockOnState;
     }
 }

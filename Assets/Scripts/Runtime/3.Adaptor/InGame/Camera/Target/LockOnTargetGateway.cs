@@ -24,6 +24,7 @@ namespace KillChord.Runtime.Adaptor.InGame
             _cache = null;
             _isDisposed = true;
         }
+
         private Transform _cache;
         private bool _isDisposed;
     }

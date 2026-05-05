@@ -11,7 +11,6 @@ using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 #if UNITY_EDITOR
 using KillChord.Runtime.Composition.InGame.Debugger;
@@ -25,12 +24,6 @@ namespace KillChord.Runtime.Composition
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class CameraSystemInitializer : MonoBehaviour
     {
-        [SerializeField] private CameraSystemView _cameraSystem;
-
-        [SerializeField] private CameraSystemConfig _config;
-
-        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
-
         public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             CameraSystemParameter parameter = _config.ToDomain();
@@ -49,9 +42,10 @@ namespace KillChord.Runtime.Composition
                 freeLookRotationSystem, rotationSystem, targetSelector);
 
             CameraSystemController controller = new(application);
+            CameraSystemPresenter presenter = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            _cameraSystem.Initialize(controller, stageSceneObj.PlayerTransform,
+            _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
 
@@ -61,5 +55,12 @@ namespace KillChord.Runtime.Composition
                 .SetCameraParameter(parameter);
 #endif
         }
+
+
+        [SerializeField] private CameraSystemView _cameraSystem;
+
+        [SerializeField] private CameraSystemConfig _config;
+
+        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
     }
 }
