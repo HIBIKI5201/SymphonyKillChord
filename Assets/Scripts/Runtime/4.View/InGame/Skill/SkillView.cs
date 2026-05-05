@@ -5,12 +5,12 @@ namespace KillChord.Runtime.View
 {
     public class SkillView : MonoBehaviour, ISkillVisual
     {
-        public int Id => id;
+        public int Id => _id;
         public void Execute()
         {
             //実際のViewで起こる演出など
         }
 
-        [SerializeField] private int id;
+        [SerializeField] private int _id;
     }
 }
