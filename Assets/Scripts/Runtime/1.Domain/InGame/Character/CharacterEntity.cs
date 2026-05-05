@@ -1,6 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Character
 {
@@ -35,7 +34,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public event Action<CharacterEntity> OnDied;
 
         public CharacterName Name => _name;
-        public EntityId Id { get; }
+        public Guid Id { get; } = Guid.NewGuid();
         public CharacterCombatSpec CombatSpec => _combatSpec;
         public Health CurrentHealth => _health.CurrentHealth;
         public Health MaxHealth => _health.MaxHealth;

@@ -10,9 +10,9 @@ namespace KillChord.Runtime.Utility
     {
         public readonly float Damage;
         public readonly bool Critical;
-        public readonly EntityId DefenderId;
+        public readonly Guid DefenderId;
 
-        public EOnTakeDamage(float damage, bool critical, EntityId defenderId)
+        public EOnTakeDamage(float damage, bool critical, Guid defenderId)
         {
             DefenderId = defenderId;
             Damage = damage;
