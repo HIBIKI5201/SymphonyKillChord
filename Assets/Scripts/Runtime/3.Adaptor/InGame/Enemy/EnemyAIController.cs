@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
-using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Utility;
 using System;
@@ -107,7 +106,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     進行中の攻撃をキャンセルする。
         /// </summary>
-        public void CanelAttack()
+        public void CancelAttack()
         {
             if (_enemyAttackReservationUsecase.HasReservation)
             {
