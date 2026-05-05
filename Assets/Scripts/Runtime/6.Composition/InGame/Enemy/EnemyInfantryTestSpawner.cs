@@ -33,7 +33,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetEntityRegistryController = new(targetEntityRegistry);
         }
 
-        [SerializeField] private EnemyMoveDebugInitializer _enemyPrefab;
+        [SerializeField] private EnemyInfantryMoveDebugInitializer _enemyPrefab;
         [SerializeField] private Transform _spawnPoint;
         [SerializeField] private float _spawnInterval;
         [SerializeField] private int _maxSpawnCount;
@@ -98,7 +98,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
-            EnemyMoveDebugInitializer enemyInstance =
+            EnemyInfantryMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
             enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,

@@ -25,9 +25,9 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     敵移動の依存関係を構築する。
+    ///     敵歩兵移動の依存関係を構築する。
     /// </summary>
-    public class EnemyMoveDebugInitializer : MonoBehaviour
+    public class EnemyInfantryMoveDebugInitializer : MonoBehaviour
     {
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
@@ -89,7 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -97,7 +97,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // Controller
             EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
