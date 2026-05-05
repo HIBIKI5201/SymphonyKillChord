@@ -30,12 +30,10 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _distance = _parameter.Distance;
         }
 
-#if UNITY_STANDALONE_WIN
         /// <summary> 垂直方向の入力反転フラグ。 </summary>
         public bool IsInvertVertical => _parameter.IsInvertVertical;
         /// <summary> 水平方向の入力反転フラグ。 </summary>
         public bool IsInvertHorizontal => _parameter.IsInvertHorizontal;
-#endif
 
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {

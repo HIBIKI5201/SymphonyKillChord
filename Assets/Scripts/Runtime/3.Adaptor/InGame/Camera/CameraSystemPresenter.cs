@@ -37,11 +37,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
             out Vector3 resultPosition
             )
         {
-#if UNITY_STANDALONE_WIN
             Vector2 input = ApplyInvert(rawInput);
-#else
-            Vector2 Input = rawInput;
-#endif
 
             CameraSystemContext context = new(
                  followPosition,
@@ -52,7 +48,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
             _application.Update(context, out resultRotation, out resultPosition);
         }
 
-#if UNITY_STANDALONE_WIN
         /// <summary>
         ///     設定に基づき入力の垂直・水平反転を適用する。
         /// </summary>
@@ -70,7 +65,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
             }
             return input;
         }
-#endif
 
         private readonly CameraSystemApplication _application;
     }
