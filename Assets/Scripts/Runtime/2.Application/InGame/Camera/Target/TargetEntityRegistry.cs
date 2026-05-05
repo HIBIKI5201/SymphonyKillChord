@@ -1,9 +1,9 @@
-using KillChord.Runtime.Domain.InGame;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Character;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Camera.Target
 {
     public class TargetEntityRegistry
     {

@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -8,6 +8,7 @@ using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;

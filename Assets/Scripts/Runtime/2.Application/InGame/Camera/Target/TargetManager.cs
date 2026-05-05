@@ -1,8 +1,8 @@
-using KillChord.Runtime.Domain.InGame;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application.InGame
+namespace KillChord.Runtime.Application.InGame.Camera.Target
 {
     public sealed class TargetManager
     {

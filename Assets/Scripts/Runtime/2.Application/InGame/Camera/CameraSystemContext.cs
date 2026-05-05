@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Camera
 {
     public readonly ref struct CameraSystemContext
     {

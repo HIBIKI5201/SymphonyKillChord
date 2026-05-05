@@ -1,8 +1,8 @@
-using KillChord.Runtime.Domain.InGame;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor.InGame
+namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
 {
     public sealed class LockOnTargetGateway : ILockOnTarget, IDisposable
     {

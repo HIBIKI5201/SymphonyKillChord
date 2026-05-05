@@ -1,6 +1,6 @@
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 
-namespace KillChord.Runtime.Adaptor.InGame
+namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
 {
     public sealed class TargetManagerController
     {
