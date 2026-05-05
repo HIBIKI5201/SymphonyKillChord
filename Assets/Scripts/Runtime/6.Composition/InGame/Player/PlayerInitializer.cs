@@ -19,6 +19,8 @@ using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Application.InGame.Skill;
+
 
 
 #if UNITY_EDITOR
@@ -70,7 +72,7 @@ namespace KillChord.Runtime.Composition
             if (_enemyArtilleryTestSpawner == null)
             {
                 Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return; 
+                return;
             }
 
 
@@ -122,7 +124,13 @@ namespace KillChord.Runtime.Composition
             // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
             SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
             skillResultView?.Bind(skillResultViewModel);
-            SkillController skillController = new SkillController(_skillRepository, musicSyncService, null, skillResultPresenter);
+
+            SkillCheckService skillCheckService = new SkillCheckService();
+            //一旦ヌル。
+            ISkillVisual[] skillVisuals = null;
+            SkillController skillController = new SkillController(_skillRepository, skillVisuals, null, skillResultPresenter);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
+            skillController?.SetUsecase(skillUsecase);
 
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();

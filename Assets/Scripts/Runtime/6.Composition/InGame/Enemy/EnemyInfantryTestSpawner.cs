@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame;
 using KillChord.Runtime.Application.InGame.Music;
@@ -41,7 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField] private CharacterData _enemyData;
 
-        private IMusicSyncViewModel _musicSyncViewModel;
+        private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
         private IDefender _targetEntity;
         private TargetManager _targetManager;
@@ -57,12 +58,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
             _musicSyncService = initializer.MusicSyncService;
             MusicSyncView view = FindAnyObjectByType<MusicSyncView>();
-            if (view.MusicSyncViewModel == null)
+            if (view.MusicSyncState == null)
             {
                 Debug.LogError("MusicSyncViewが見つかりません。", this);
                 return;
             }
-            _musicSyncViewModel = view.MusicSyncViewModel;
+            _musicSyncState = view.MusicSyncState;
         }
 
         private void Update()
@@ -89,11 +90,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             _target = playerInitializer.transform;
 
-            if (_targetEntity == null || _musicSyncViewModel == null ||
+            if (_targetEntity == null || _musicSyncState == null ||
                 _musicSyncService == null || _targetEntityRegistryController == null)
             {
                 if (_targetEntity == null) Debug.LogError("ターゲットエンティティが設定されていません。", this);
-                if (_musicSyncViewModel == null) Debug.LogError("MusicSyncViewModelが見つかりません。", this);
+                if (_musicSyncState == null) Debug.LogError("MusicSyncStateが見つかりません。", this);
                 if (_musicSyncService == null) Debug.LogError("MusicSyncServiceが見つかりません。", this);
                 if (_targetEntityRegistryController == null) Debug.LogError("TargetEntityRegistryControllerが見つかりません。", this);
                 return;
@@ -103,7 +104,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
             enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,
-            _musicSyncViewModel, _musicSyncService, _targetManagerController, _targetEntityRegistryController);
+            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController);
 
             _spawnCount++;
         }

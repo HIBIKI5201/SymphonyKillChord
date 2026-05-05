@@ -11,11 +11,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     public class EnemyMusicData : ScriptableObject
     {
         public byte BarFlag => _barFlag;
-        public long TimeSignature => _timeSignature;
-        public long TargetBeat => _targetBeat;
+        public double TimeSignature => _timeSignature;
+        public double TargetBeat => _targetBeat;
 
         [SerializeField] private byte _barFlag;
-        [SerializeField] private long _timeSignature;
-        [SerializeField] private long _targetBeat;
+        [SerializeField] private double _timeSignature;
+        [SerializeField] private double _targetBeat;
     }
 }
