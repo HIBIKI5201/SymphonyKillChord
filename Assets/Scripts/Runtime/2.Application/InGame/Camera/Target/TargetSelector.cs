@@ -1,8 +1,8 @@
-using KillChord.Runtime.Domain.InGame;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application.InGame.Camera
+namespace KillChord.Runtime.Application.InGame.Camera.Target
 {
     public sealed class TargetSelector
     {

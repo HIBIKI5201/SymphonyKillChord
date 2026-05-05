@@ -1,8 +1,6 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
