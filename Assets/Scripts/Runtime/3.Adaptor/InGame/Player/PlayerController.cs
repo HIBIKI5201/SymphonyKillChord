@@ -7,9 +7,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
     /// <summary>
     ///     プレイヤーの操作要求をアプリケーション層へ仲介するコントローラークラス。
     /// </summary>
-    public class PlayerController
+    public class PlayerController : IPlayerController
     {
-        public PlayerController(PlayerApplication playerApplication, InputBufferingQueue inputBufferingQueue)
+        public PlayerController(IPlayerApplication playerApplication, InputBufferingQueue inputBufferingQueue)
         {
             _playerApplication = playerApplication;
             _inputBufferingQueue = inputBufferingQueue;
@@ -22,7 +22,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
             _playerApplication.Update(ref rotation, input, time, out velocity);
         }
 
-        private readonly PlayerApplication _playerApplication;
+        private readonly IPlayerApplication _playerApplication;
         private readonly InputBufferingQueue _inputBufferingQueue;
     }
 }

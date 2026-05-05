@@ -1,7 +1,7 @@
-using KillChord.Runtime.View;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using R3;
 
-namespace KillChord.Runtime.View.Persistent.Music
+namespace KillChord.Runtime.View.InGame.Music
 {
     /// <summary>
     ///     音楽再生の状態を管理するViewModelクラス。

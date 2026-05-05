@@ -3,11 +3,11 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
-    ///     移動速度を表す値オブジェクト。
+    ///     回避の持続時間を表すVO。
     /// </summary>
-    public readonly struct MoveSpeed
+    public readonly struct DodgeDuration
     {
-        public MoveSpeed(float value)
+        public DodgeDuration(float value)
         {
             if (value < 0)
             {
@@ -20,20 +20,22 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
             Value = value;
         }
-
+        /// <summary>
+        ///    回避の持続時間の値。  
+        /// </summary>
         public readonly float Value;
 
-        public static explicit operator float(MoveSpeed value)
+        public static explicit operator float(DodgeDuration value)
             => value.Value;
-        public static bool operator ==(MoveSpeed left, MoveSpeed right)
+        public static bool operator ==(DodgeDuration left, DodgeDuration right)
             => left.Value == right.Value;
-        public static bool operator !=(MoveSpeed left, MoveSpeed right)
+        public static bool operator !=(DodgeDuration left, DodgeDuration right)
             => left.Value != right.Value;
         public override bool Equals(object obj)
         {
-            return obj is MoveSpeed moveSpeed && moveSpeed.Value == Value;
+            return obj is DodgeDuration dodgeDuration && dodgeDuration.Value == Value;
         }
-        public bool Equals(MoveSpeed other)
+        public bool Equals(DodgeDuration other)
         {
             return other.Value == Value;
         }

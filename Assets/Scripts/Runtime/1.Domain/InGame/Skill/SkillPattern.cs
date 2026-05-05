@@ -43,16 +43,16 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         public bool Equals(ReadOnlySpan<BeatType> other)
         {
-            ReadOnlySpan<BeatType> signaturesSpan = _signatures.AsSpan();
+            ReadOnlySpan<BeatType> signatures = _signatures.AsSpan();
 
-            if (_signatures.Signatures.Length != other.Length)
+            if (signatures.Length != other.Length)
             {
                 return false;
             }
 
-            for (int i = 0; i < _signatures.Signatures.Length; i++)
+            for (int i = 0; i < signatures.Length; i++)
             {
-                if (_signatures.Signatures[i] != other[i])
+                if (signatures[i] != other[i])
                 {
                     return false;
                 }

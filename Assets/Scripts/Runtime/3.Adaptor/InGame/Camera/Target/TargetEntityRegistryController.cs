@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain.InGame;
+using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
 {
     public class TargetEntityRegistryController
     {

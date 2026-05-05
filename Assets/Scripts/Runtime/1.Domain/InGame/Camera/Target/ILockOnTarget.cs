@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain.InGame
+namespace KillChord.Runtime.Domain.InGame.Camera.Target
 {
     public interface ILockOnTarget
     {
