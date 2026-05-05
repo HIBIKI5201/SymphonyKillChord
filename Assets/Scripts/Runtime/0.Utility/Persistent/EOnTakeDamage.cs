@@ -10,11 +10,11 @@ namespace KillChord.Runtime.Utility
     {
         public readonly float Damage;
         public readonly bool Critical;
-        // TODO EntityのHashCodeは一時的な手段。将来的に、別途でIDを割り当てるか、Colliderの参照を持つようにするなどを検討すべき
-        public readonly int DefenderHashCode;
-        public EOnTakeDamage(float damage, bool critical, int defenderHashCode)
+        public readonly EntityId DefenderId;
+
+        public EOnTakeDamage(float damage, bool critical, EntityId defenderId)
         {
-            DefenderHashCode = defenderHashCode;
+            DefenderId = defenderId;
             Damage = damage;
             Critical = critical;
         }
