@@ -124,8 +124,13 @@ namespace KillChord.Runtime.Composition
             // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
             SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
             skillResultView?.Bind(skillResultViewModel);
+
             SkillCheckService skillCheckService = new SkillCheckService();
-            SkillController skillController = new SkillController(_skillRepository, musicSyncService, skillCheckService, null, skillResultPresenter);
+            //一旦ヌル。
+            ISkillVisual[] skillVisuals = null;
+            SkillController skillController = new SkillController(_skillRepository, skillVisuals, null, skillResultPresenter);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
+            skillController?.SetUsecase(skillUsecase);
 
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();

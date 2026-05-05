@@ -27,12 +27,6 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             Visual = visual;
         }
 
-        public void SkillExecute()
-        {
-            Effect.Execute();
-            Visual.Execute();
-        }
-
         /// <summary>
         /// 逆順にソートした入力を利用してスキルの成立をチェックする
         /// </summary>

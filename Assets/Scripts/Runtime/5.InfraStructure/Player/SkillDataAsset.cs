@@ -15,19 +15,17 @@ namespace SymphonyKillChord.InfraStructure.Player
         public int Id => _id;
         public BeatType[] Pattern => _pattern;
         public ISkillEffect SkillEffect => _skillEffect;
-        public ISkillVisual SkillVisual => _skillVisual;
 
         /// <summary>
         ///     Domain層のSkillDataに変換する。
         /// </summary>
         public SkillData ToDomain()
         {
-            return new SkillData(_id, _pattern, _skillEffect, _skillVisual);
+            return new SkillData(_id, _pattern, _skillEffect);
         }
 
         [SerializeField] private int _id;
         [SerializeField] private BeatType[] _pattern;
         [SerializeReference, SubclassSelector] private ISkillEffect _skillEffect;
-        [SerializeReference, SubclassSelector] private ISkillVisual _skillVisual;
     }
 }
