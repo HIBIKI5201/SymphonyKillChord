@@ -57,14 +57,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
+            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
-                _battleState.Target,
-                true); // TODO 敵側で射線判定の結果が追加されたため、プレイヤー側は一旦固定値で書く
+                _battleState.Target
+                );
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
-            Debug.Log($"[PlayerAttackController]攻撃対象のHashCode：{targetEntity.GetHashCode()}");
-            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.GetHashCode()));
+            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
+            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.Id));
 
             _presenter.Push(result);
 
