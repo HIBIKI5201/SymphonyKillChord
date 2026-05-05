@@ -15,7 +15,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public EnemyAIController(
             EnemyMoveUsecase enemyMoveUsecase,
             EnemyAttackReservationUsecase enemyAttackReservationUsecase,
-            EnemyAttackUsecase enemyAttackUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
             IEnemyAttackController attackController
@@ -23,7 +22,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _enemyMoveUsecase = enemyMoveUsecase;
             _enemyAttackReservationUsecase = enemyAttackReservationUsecase;
-            _enemyAttackUsecase = enemyAttackUsecase;
             _enemyBattleState = enemyBattleState;
             _stateFacade = stateFacade;
             _attackController = attackController;
@@ -122,18 +120,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
         }
 
-        /// <summary>
-        ///     TODO 砲弾爆発のダメージを処理するためのメソッド。ShellControllerから呼び出される。
-        ///     今後リファクタリングして、砲弾専用の処理に移す予想。
-        /// </summary>
-        public void DealProjectileDamage()
-        {
-            _enemyAttackUsecase.ExecuteAttack(
-                _enemyBattleState.CurrentAttack,
-                _enemyBattleState.Attacker,
-                _enemyBattleState.Target);
-        }
-
         private void HandleReservedTimingReached()
         {
             _attackController.ExecuteAttack();
@@ -154,7 +140,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private readonly EnemyMoveUsecase _enemyMoveUsecase;
         private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
-        private readonly EnemyAttackUsecase _enemyAttackUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
         private readonly IEnemyAttackController _attackController;

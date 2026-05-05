@@ -88,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -96,8 +96,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // Controller
             EnemyArtilleryAttackController attackController = new EnemyArtilleryAttackController(_shellSpawner, battleState);
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
-            attackController.InjectEnemyAIController(controller);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 

@@ -207,6 +207,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f94c494d6fcab574f9f0d986d2eeb5c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.ShellInitializer
+  _attackData: {fileID: 11400000, guid: 7abb1786189c6ab409df92032a7b3bb6, type: 2}
+  _musicData: {fileID: 11400000, guid: d69421e5dc9278446a38b4415677e2aa, type: 2}
 --- !u!1 &419177558
 GameObject:
   m_ObjectHideFlags: 0
@@ -805,7 +807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 1249666142}
   _testCue: Cyber
-  _testBpm: 105
+  _testBpm: 60
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0
