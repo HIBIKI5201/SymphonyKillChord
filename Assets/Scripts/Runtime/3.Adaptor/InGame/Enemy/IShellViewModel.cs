@@ -1,6 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>

@@ -101,8 +101,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
+            EnemyInfantryAttackControllerGenerator attackControllerGenerator = new EnemyInfantryAttackControllerGenerator();
+
             enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,
-            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController);
+            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController, attackControllerGenerator);
 
             _spawnCount++;
         }

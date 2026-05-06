@@ -1,9 +1,8 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace KillChord.Runtime.View.InGame
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     毎フレーム敵移動を更新するビュー。

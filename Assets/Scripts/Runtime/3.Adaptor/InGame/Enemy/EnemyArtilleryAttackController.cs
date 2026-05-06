@@ -1,5 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
-
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
@@ -13,17 +11,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyBattleState = enemyBattleState;
         }
 
-        public void InjectEnemyAIController(EnemyAIController enemyAIController)
-        {
-            _enemyAIController = enemyAIController;
-        }
         public void ExecuteAttack()
         {
-            _shellSpawner.SpawnShell(_enemyAIController);
+            _shellSpawner.SpawnShell(_enemyBattleState);
         }
 
         private IShellSpawner _shellSpawner;
         private EnemyBattleState _enemyBattleState;
-        private EnemyAIController _enemyAIController;
     }
 }

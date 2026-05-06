@@ -13,11 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary>
         ///     敵の攻撃を実行するユースケースクラスのインスタンスを生成する。
         /// </summary>
-        /// <param name="musicSyncService"></param>
         /// <param name="raycastDectector"></param>
-        public EnemyAttackUsecase(IMusicSyncService musicSyncService, EnemyRaycastDetectService raycastDectector)
+        public EnemyAttackUsecase(EnemyRaycastDetectService raycastDectector)
         {
-            _musicSyncService = musicSyncService;
             _raycastDetector = raycastDectector;
         }
 
@@ -50,7 +48,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             }
         }
 
-        private readonly IMusicSyncService _musicSyncService;
         private readonly EnemyRaycastDetectService _raycastDetector;
     }
 }
