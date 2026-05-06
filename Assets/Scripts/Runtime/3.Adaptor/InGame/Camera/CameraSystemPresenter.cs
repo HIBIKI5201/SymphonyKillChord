@@ -34,36 +34,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
             in Vector2 moveInput,
             float deltaTime,
             out Quaternion resultRotation,
-            out Vector3 resultPosition
-            )
+            out Vector3 resultPosition)
         {
-            Vector2 input = ApplyInvert(rawInput);
-
             CameraSystemContext context = new(
-                 followPosition,
-                 input,
-                 moveInput,
-                 deltaTime
+                followPosition,
+                rawInput,
+                moveInput,
+                deltaTime
             );
             _application.Update(context, out resultRotation, out resultPosition);
-        }
-
-        /// <summary>
-        ///     設定に基づき入力の垂直・水平反転を適用する。
-        /// </summary>
-        /// <param name="input">反転前の入力値。</param>
-        /// <returns>反転処理後の入力値。</returns>
-        private Vector2 ApplyInvert(Vector2 input)
-        {
-            if (_application.IsInvertVertical)
-            {
-                input.x = -input.x;
-            }
-            if (_application.IsInvertHorizontal)
-            {
-                input.y = -input.y;
-            }
-            return input;
         }
 
         private readonly CameraSystemApplication _application;
