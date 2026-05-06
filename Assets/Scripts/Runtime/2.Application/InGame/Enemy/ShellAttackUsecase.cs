@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <param name="defender"></param>
         public void ExecuteAttack(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender)
         {
-            AttackResult attackResult = AttackExecutor.Execute(attackDefinition, attacker, defender, true);
+            AttackResult attackResult = AttackExecutor.Execute(attackDefinition, attacker, defender);
             Debug.Log($"[ShellAttackUsecase] ExecuteAttack 完了 Damage={attackResult.FinalDamage.Value}");
         }
     }
