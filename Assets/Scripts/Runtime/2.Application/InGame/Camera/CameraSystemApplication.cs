@@ -30,13 +30,6 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _distance = _parameter.Distance;
         }
 
-#if UNITY_STANDALONE_WIN
-        /// <summary> 垂直方向の入力反転フラグ。 </summary>
-        public bool IsInvertVertical => _parameter.IsInvertVertical;
-        /// <summary> 水平方向の入力反転フラグ。 </summary>
-        public bool IsInvertHorizontal => _parameter.IsInvertHorizontal;
-#endif
-
         public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
             if (_lockOnState == CameraLockOnState.LockOnManual)
@@ -64,8 +57,16 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
         public void Update(in CameraSystemContext context, out Quaternion resultRotation, out Vector3 resultPosition)
         {
-            if (_lockOnState == CameraLockOnState.LockOnAuto && (context.Input.sqrMagnitude > float.Epsilon
-                || context.MoveInput.sqrMagnitude > float.Epsilon))
+            // 反転処理済みの Context
+            CameraSystemContext resolvedContext = new(
+                context.FollowPosition,
+                ApplyInvert(context.Input),
+                context.MoveInput,
+                context.DeltaTime
+            );
+
+            if (_lockOnState == CameraLockOnState.LockOnAuto && (resolvedContext.Input.sqrMagnitude > float.Epsilon
+                || resolvedContext.MoveInput.sqrMagnitude > float.Epsilon))
             {
                 _lockOnState = CameraLockOnState.Free;
             }
@@ -74,19 +75,19 @@ namespace KillChord.Runtime.Application.InGame.Camera
             if (IsLockOn())
             {
                 Vector3 dir = _cameraBoneRotation * _cameraRotation * Vector3.forward;
-                if (!_targetSelector.TryGetTargetPosition(context.FollowPosition, dir, out targetPosition))
+                if (!_targetSelector.TryGetTargetPosition(resolvedContext.FollowPosition, dir, out targetPosition))
                 {
                     _lockOnState = CameraLockOnState.Free;
                 }
             }
 
-            UpdateCameraBone(context, targetPosition);
-            _followSystem.Update(ref _cameraCenterOffset, context);
-            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, context, targetPosition);
+            UpdateCameraBone(resolvedContext, targetPosition);
+            _followSystem.Update(ref _cameraCenterOffset, resolvedContext);
+            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, resolvedContext, targetPosition);
 
 
-            CalculateCameraPlacement(context, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
-            UpdateDistance(ref _distance, result.Distance, context.DeltaTime);
+            CalculateCameraPlacement(resolvedContext, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
+            UpdateDistance(ref _distance, result.Distance, resolvedContext.DeltaTime);
 
 
             resultPosition = result.CameraAnchorPosition + result.Direction * _distance;
@@ -154,6 +155,26 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 return Mathf.Max(0.1f, hit.distance);
             }
             return maxDistance;
+        }
+
+        /// <summary>
+        ///     設定に基づき入力の垂直・水平反転を適用する。
+        /// </summary>
+        /// <param name="input">反転前の入力値。</param>
+        /// <returns>反転処理後の入力値。</returns>
+        private Vector2 ApplyInvert(Vector2 input)
+        {
+            if (_parameter.IsInvertVertical)
+            {
+                input.x = -input.x;
+            }
+
+            if (_parameter.IsInvertHorizontal)
+            {
+                input.y = -input.y;
+            }
+
+            return input;
         }
     }
 }
