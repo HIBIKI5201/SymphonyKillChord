@@ -21,10 +21,8 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             float collisionRadius,
             LayerMask collisionLayerMask,
             Vector2 pitchRange,
-#if UNITY_STANDALONE_WIN
              bool invertVertical = false,
             bool invertHorizontal = false
-#endif
             )
         {
             _cameraOffset = cameraOffset;
@@ -39,10 +37,8 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             _collisionRadius = collisionRadius;
             _collisionMask = collisionLayerMask;
             _pitchRange = pitchRange;
-#if UNITY_STANDALONE_WIN
             _invertVertical = invertVertical;
             _invertHorizontal = invertHorizontal;
-#endif
         }
         public Vector3 Offset => _cameraOffset;
         public float Distance => _distance;
