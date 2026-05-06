@@ -1,36 +1,9 @@
-Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
-# ========================= CSV記入ガイド =========================
-# 先頭にこのヘッダー行を書いてください（おまじない）
-# Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
-#
-# 【最重要】列数固定
-# ・このCSVは17列固定
-# ・各行のカンマ数は16個
-# ・使わない項目は空欄にする（列は消さない）
-#
-# 基本ルール
-# ・1行に1イベント
-# ・Type: Text / Background / Animation / Fade / Trigger
-# ・Trigger行は ParentStep に対象TextのStepを書く
-# ・コメント行は # から始める
-# ・最後の行はテキストイベントで終えること。
-#
-# 空欄列とカンマの見方
-# ・空欄列は「値なし」の意味。列の位置を保つためにカンマは必要
-# ・例: Trigger,,3,... は Step を空欄にして ParentStep=3 を入れている
-# ・つまり Trigger と 3 の間にカンマが2つある
-# ・3 と AtCharIndex の間は Speaker〜FadeDuration の7列を空欄にするため
-#   カンマが並ぶ
-#
-# 文字列ルール
-# ・Textにカンマを入れるときは "..." で囲む
-# ・" を文字として使うときは "" と二重にする
-# =================================================================
-Background,1,,,,genki_pose,,,,,,,,,,,
-Fade,2,,,,,,1,1,0.5,,,,,,,
-Text,3,,Hero,"......Hello sekai?",,,,,,,,,,,
-Trigger,,3,,,,,,,,AtCharIndex,5,,Fade,0,1,0.5
-Trigger,,3,,,,,,,,AtCharIndex,1,,Fade,1,0,2
-Animation,4,,,,,anim_hero_idle,,,,,,,,,,
-Trigger,,5,,,,,,,,AtKeyword,,danger,Background,bg_alert,,
-Text,5,,Tatuki,"danger is coming",,,,,,,,,,,
+Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,PortraitSlot,PortraitId,PortraitPosX,PortraitPosY,PortraitScale,PortraitVisible,LayerTarget,LayerOrder,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
+
+Background,1,,,,genki_pose,,,,,,,,,,,,,,,,,,,
+Layer,2,,,,,,,,,,,,,,,PortraitLeft,2,,,,,,,
+Portrait,3,,,,,,,,,Left,hello,-460,-120,1,true,,,,,,,,,
+Portrait,4,,,,,,,,,Right,good,460,-120,1,true,,,,,,,,,
+Text,5,,Hero,"......Hello sekai?",,,,,,,,,,,,,,AtCharIndex,5,,Fade,0,1,0.5
+Trigger,,5,,,,,,,,,,,,,,,,AtCharIndex,1,,Fade,1,0,2
+Text,7,,Tatuki,"danger is coming",,,,,,,,,,,,,,AtKeyword,,danger,Background,bg_alert,

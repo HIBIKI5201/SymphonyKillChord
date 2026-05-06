@@ -196,6 +196,35 @@ namespace KillChord.Runtime.InfraStructure
                         float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
                         return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration));
                     }
+                case "portrait":
+                    {
+                        PortraitSlot slot = ParsePortraitSlot(
+                            GetValue(values, headerIndex, "PortraitSlot"),
+                            "PortraitSlot",
+                            row.LineNo);
+                        string portraitId = GetValue(values, headerIndex, "PortraitId");
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {row.LineNo}: PortraitId is required for Portrait event.");
+                        }
+                        float posX = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitPosX"), 0f, "PortraitPosX", row.LineNo);
+                        float posY = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitPosY"), 0f, "PortraitPosY", row.LineNo);
+                        float scale = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitScale"), 1f, "PortraitScale", row.LineNo);
+                        bool visible = ParseOptionalBool(GetValue(values, headerIndex, "PortraitVisible"), true, "PortraitVisible", row.LineNo);
+
+                        return new PlainEventDefinition(
+                            row.Step,
+                            new PortraitEvent(slot, portraitId, posX, posY, scale, visible));
+                    }
+                case "layer":
+                    {
+                        LayerTarget target = ParseLayerTarget(
+                            GetValue(values, headerIndex, "LayerTarget"),
+                            "LayerTarget",
+                            row.LineNo);
+                        int order = ParseRequiredInt(GetValue(values, headerIndex, "LayerOrder"), "LayerOrder", row.LineNo);
+                        return new PlainEventDefinition(row.Step, new LayerEvent(target, order));
+                    }
                 default:
                     throw new FormatException($"line {row.LineNo}: unknown Type '{row.Type}'.");
             }
@@ -307,6 +336,23 @@ namespace KillChord.Runtime.InfraStructure
                         }
                         return new KillChord.Runtime.Domain.AnimationEvent(animationId);
                     }
+                case "portrait":
+                    {
+                        PortraitSlot slot = ParsePortraitSlot(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
+                        string portraitId = GetValue(values, headerIndex, "OnTriggerArg2");
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for OnTriggerType=Portrait.");
+                        }
+                        float posX = ParseOptionalFloat(GetValue(values, headerIndex, "OnTriggerArg3"), 0f, "OnTriggerArg3", lineNo);
+                        return new PortraitEvent(slot, portraitId, posX, 0f, 1f, true);
+                    }
+                case "layer":
+                    {
+                        LayerTarget target = ParseLayerTarget(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
+                        int order = ParseRequiredInt(GetValue(values, headerIndex, "OnTriggerArg2"), "OnTriggerArg2", lineNo);
+                        return new LayerEvent(target, order);
+                    }
                 default:
                     throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");
             }
@@ -361,6 +407,65 @@ namespace KillChord.Runtime.InfraStructure
             }
 
             return value;
+        }
+
+        private static float ParseOptionalFloat(string raw, float defaultValue, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
+
+            if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} must be number.");
+            }
+
+            return value;
+        }
+
+        private static bool ParseOptionalBool(string raw, bool defaultValue, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
+
+            if (bool.TryParse(raw, out bool boolValue))
+            {
+                return boolValue;
+            }
+
+            if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
+            {
+                return intValue != 0;
+            }
+
+            throw new FormatException($"line {lineNo}: {columnName} must be bool or 0/1.");
+        }
+
+        private static PortraitSlot ParsePortraitSlot(string raw, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} is required.");
+            }
+
+            if (!Enum.TryParse(raw.Trim(), true, out PortraitSlot slot))
+            {
+                throw new FormatException($"line {lineNo}: invalid {columnName} '{raw}'.");
+            }
+
+            return slot;
+        }
+
+        private static LayerTarget ParseLayerTarget(string raw, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                throw new FormatException($"line {lineNo}: {columnName} is required.");
+            }
+
+            if (!Enum.TryParse(raw.Trim(), true, out LayerTarget target))
+            {
+                throw new FormatException($"line {lineNo}: invalid {columnName} '{raw}'.");
+            }
+
+            return target;
         }
 
         private static List<string> ParseCsvLine(string line)
