@@ -41,6 +41,142 @@
 - **CameraSystemInitializer**: 各コンポーネントの生成と依存関係の注入。
 - **CameraSystemParameterDebug**: 実行中に GUI でパラメータを調整し、Domain モデルへ即時反映するためのデバッグ用コンポーネント。
 
+## クラス図
+
+```mermaid
+classDiagram
+    class CameraSystemInitializer {
+        -CameraSystemView _cameraSystem
+        -CameraSystemConfig _config
+        +Initialize(TargetManager, TargetEntityRegistry)
+    }
+
+    class CameraSystemConfig {
+        +ToDomain() CameraSystemParameter
+    }
+
+    class CameraSystemView {
+        -CameraSystemController _controller
+        -CameraSystemPresenter _presenter
+        -PlayerInputView _inputView
+        +Initialize(...)
+        -Tick(float)
+    }
+
+    class CameraSystemController {
+        -CameraSystemApplication _application
+        +TryActiveAutoLockOn(Vector3)
+        +ToggleLockOnState(Vector3)
+    }
+
+    class CameraSystemPresenter {
+        -CameraSystemApplication _application
+        +Update(...)
+    }
+
+    class CameraSystemApplication {
+        -CameraSystemParameter _parameter
+        -CameraFollowApplication _followSystem
+        -CameraBoneLockOnRotationApplication _boneRotationSystem
+        -CameraBoneFreeLookRotationApplication _boneFreeLookRotationSystem
+        -CameraRotationApplication _cameraRotationSystem
+        -TargetSelector _targetSelector
+        -CameraLockOnState _lockOnState
+        +Update(CameraSystemContext, ...)
+        +TryActiveAutoLockOn(Vector3)
+        +ToggleLockOnState(Vector3)
+    }
+
+    class CameraSystemParameter {
+        +Vector3 Offset
+        +float Distance
+        +float FollowRotationSpeed
+        +float CollisionRadius
+        +LayerMask CollisionMask
+    }
+
+    class CameraFollowApplication {
+        -CameraSystemParameter _parameter
+        -CameraFollowVelocityApplication _followVelocity
+        +Update(ref Vector3, CameraSystemContext)
+    }
+
+    class CameraFollowVelocityApplication {
+        <<struct>>
+        +UpdateFollowVelocity(Vector3, float) Vector3
+    }
+
+    class CameraBoneFreeLookRotationApplication {
+        -CameraSystemParameter _parameter
+        +Update(ref Quaternion, CameraSystemContext)
+    }
+
+    class CameraBoneLockOnRotationApplication {
+        -CameraSystemParameter _parameter
+        +Update(ref Quaternion, CameraSystemContext, Vector3)
+    }
+
+    class CameraRotationApplication {
+        -CameraSystemParameter _parameter
+        +Update(bool, ref Quaternion, ...)
+    }
+
+    class TargetSelector {
+        -TargetManager _manager
+        -ILockOnTarget _currentTarget
+        +ChangeTarget(Vector3, Vector3)
+        +TryGetTargetPosition(...) bool
+    }
+
+    class TargetManager {
+        +IEnumerable~ILockOnTarget~ GetTargets
+    }
+
+    class ILockOnTarget {
+        <<interface>>
+        +Vector3 Position
+        +bool IsAlive
+    }
+
+    class CameraSystemContext {
+        <<struct>>
+        +Vector3 FollowPosition
+        +Vector2 Input
+        +Vector2 MoveInput
+        +float DeltaTime
+    }
+
+    CameraSystemInitializer ..> CameraSystemApplication : creates
+    CameraSystemInitializer ..> CameraSystemController : creates
+    CameraSystemInitializer ..> CameraSystemPresenter : creates
+    CameraSystemInitializer --> CameraSystemView : initializes
+    CameraSystemInitializer --> CameraSystemConfig : uses
+
+    CameraSystemView --> CameraSystemController : uses
+    CameraSystemView --> CameraSystemPresenter : uses
+
+    CameraSystemController --> CameraSystemApplication : commands
+    CameraSystemPresenter --> CameraSystemApplication : queries
+
+    CameraSystemApplication --> CameraSystemParameter : uses
+    CameraSystemApplication --> CameraFollowApplication : delegates
+    CameraSystemApplication --> CameraBoneLockOnRotationApplication : delegates
+    CameraSystemApplication --> CameraBoneFreeLookRotationApplication : delegates
+    CameraSystemApplication --> CameraRotationApplication : delegates
+    CameraSystemApplication --> TargetSelector : uses
+    CameraSystemApplication ..> CameraSystemContext : uses
+
+    CameraFollowApplication --> CameraSystemParameter : uses
+    CameraFollowApplication --> CameraFollowVelocityApplication : uses
+
+    CameraBoneFreeLookRotationApplication --> CameraSystemParameter : uses
+    CameraBoneLockOnRotationApplication --> CameraSystemParameter : uses
+    CameraRotationApplication --> CameraSystemParameter : uses
+
+    TargetSelector --> TargetManager : uses
+    TargetSelector --> ILockOnTarget : targets
+```
+
 ## 実装の詳細メモ
 
 ### ロックオン状態の遷移
