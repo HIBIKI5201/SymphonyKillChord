@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView = playerInputView;
 
 #if UNITY_ANDROID
-            _inputView.OnMobileLookInput += OnLook;
+            _inputView.OnMobileLookInput += LookHandler;
 #else
             _inputView.OnLookInput += LookHandler;
 #endif
