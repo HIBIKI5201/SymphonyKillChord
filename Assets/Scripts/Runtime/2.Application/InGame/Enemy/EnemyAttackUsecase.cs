@@ -21,7 +21,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary>
         ///     攻撃を実行する。
-        ///     履歴の登録も行う。
         /// </summary>
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
