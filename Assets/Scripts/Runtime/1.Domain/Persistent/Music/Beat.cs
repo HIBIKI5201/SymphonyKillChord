@@ -9,6 +9,11 @@ namespace KillChord.Runtime.Domain.Persistent.Music
     [Serializable]
     public readonly struct Beat
     {
+        /// <summary>
+        ///     新しい拍の情報を生成する。
+        /// </summary>
+        /// <param name="signature"> 拍子。 </param>
+        /// <param name="count"> 拍数。 </param>
         public Beat(double signature, double count)
         {
             if (signature <= 0d)
@@ -25,9 +30,17 @@ namespace KillChord.Runtime.Domain.Persistent.Music
             _count = count;
         }
 
+        /// <summary> 拍子。 </summary>
         public double Signature => _signature;
+        /// <summary> 拍数。 </summary>
         public double Count => _count;
 
+        /// <summary>
+        ///     指定されたBPMにおける拍の長さを取得する。
+        /// </summary>
+        /// <param name="beat"> 拍の情報。 </param>
+        /// <param name="bpm"> BPM。 </param>
+        /// <returns> 拍の長さ（秒）。 </returns>
         public static double GetLength(Beat beat, double bpm)
         {
             if (bpm <= 0d)
