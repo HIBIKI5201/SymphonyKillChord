@@ -160,18 +160,18 @@ namespace KillChord.Runtime.Application.InGame.Camera
         /// <summary>
         ///     設定に基づき入力の垂直・水平反転を適用する。
         /// </summary>
-        /// <param name="input">反転前の入力値。</param>
-        /// <returns>反転処理後の入力値。</returns>
+        /// <param name="input"> 反転前の入力値。</param>
+        /// <returns> 反転処理後の入力値。</returns>
         private Vector2 ApplyInvert(Vector2 input)
         {
             if (_parameter.IsInvertVertical)
             {
-                input.x = -input.x;
+                input.y = -input.y;
             }
 
             if (_parameter.IsInvertHorizontal)
             {
-                input.y = -input.y;
+                input.x = -input.x;
             }
 
             return input;
