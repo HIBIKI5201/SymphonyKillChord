@@ -28,10 +28,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public double BarLength => _barLength;
 
         /// <summary>
-        ///     経過時間から小節内の進捗を計算する。
+        ///     経過時間から経過小節数を計算する。
         /// </summary>
         /// <param name="durationSeconds"> 経過時間（秒）。 </param>
-        /// <returns> 小節内の進捗（0.0〜1.0）。 </returns>
+        /// <returns> 経過小節数。 </returns>
         public double CalculateElapsedBarCount(double durationSeconds)
         {
             if (Bpm <= 0) return 0d;

@@ -66,6 +66,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [Tooltip("リズムガイドView。")]
         [SerializeField] private RhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイド更新View。")]
-        [SerializeField] private RhythmGuideUpdeteView _rhythmGuideUpdateView;
+        [SerializeField] private RhythmGuideUpdateView _rhythmGuideUpdateView;
     }
 }

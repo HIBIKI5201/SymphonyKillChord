@@ -6,7 +6,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     リズムガイドの更新を毎フレーム行うViewクラス。
     /// </summary>
-    public class RhythmGuideUpdeteView : MonoBehaviour
+    public class RhythmGuideUpdateView : MonoBehaviour
     {
         /// <summary>
         ///     更新用Viewを初期化する。

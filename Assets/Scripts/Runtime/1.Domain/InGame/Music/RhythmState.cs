@@ -15,6 +15,11 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="capacity"> バッファの容量。 </param>
         public RhythmState(int capacity)
         {
+            if (capacity <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity), "capacity must be greater than 0.");
+            }
+
             _recordBuffer = new RingBuffer<RhythmInputRecord>(capacity);
 
             _beatTypeCache = new BeatType[capacity];
