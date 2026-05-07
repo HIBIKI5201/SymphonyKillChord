@@ -9,6 +9,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// </summary>
     public class ConfirmedDamage : IAttackStep
     {
+        /// <summary>
+        ///     攻撃処理ステップを実行する。
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
             Damage confirmedDamage = context.AttackDefinition.AttackParameterSet.ConfirmedDamage;

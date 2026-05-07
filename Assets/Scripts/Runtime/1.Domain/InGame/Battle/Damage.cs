@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _value = value;
         }
 
-        /// <summary> ダメージ値。 </summary>
+        /// <summary> ダメージ値を取得する。 </summary>
         public float Value => _value;
 
         /// <summary>

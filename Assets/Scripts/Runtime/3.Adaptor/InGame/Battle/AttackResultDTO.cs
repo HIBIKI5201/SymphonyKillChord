@@ -18,7 +18,10 @@ namespace KillChord.Runtime.Adaptor
             IsCritical = isCritical;
         }
 
+        /// <summary> ダメージ量を取得する。 </summary>
         public float Damage { get; }
+
+        /// <summary> クリティカルヒットかどうかを取得する。 </summary>
         public bool IsCritical { get; }
     }
 }

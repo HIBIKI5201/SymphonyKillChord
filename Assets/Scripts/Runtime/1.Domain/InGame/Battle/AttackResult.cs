@@ -30,7 +30,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 最終的なダメージ量。 </summary>
         public Damage FinalDamage { get; }
-        /// <summary> クリティカルヒットかどうかを示すフラグ。 </summary>
+
+        /// <summary> クリティカルヒットかどうかを示すフラグを取得する。 </summary>
         public bool IsCritical { get; }
     }
 }
