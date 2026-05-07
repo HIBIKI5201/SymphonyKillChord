@@ -13,6 +13,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     {
         public ShellReservationUsecase(ShellEntity entity, IMusicActionScheduler musicActionScheduler)
         {
+            if(entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
             _entity = entity;
             _musicActionScheduler = musicActionScheduler;
         }
