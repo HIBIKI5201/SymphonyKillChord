@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
     /// <summary>
     ///     敵移動のデータを保持するScriptableObject。

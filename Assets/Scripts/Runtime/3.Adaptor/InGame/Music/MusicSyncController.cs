@@ -1,32 +1,25 @@
 using KillChord.Runtime.Application.InGame.Music;
-using System;
 
-namespace KillChord.Runtime.Adaptor.InGame.Battle
+namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     /// <summary>
     ///     音楽との同期タイミングの更新を制御するコントローラークラス。
     /// </summary>
-    public class MusicSyncController : IDisposable
+    public class MusicSyncController
     {
-        private readonly IMusicSyncViewModel _musicSyncViewModel;
-        private readonly IMusicSyncService _musicSyncService;
-
-        public MusicSyncController(IMusicSyncViewModel musicSyncViewModel, IMusicSyncService musicSyncService)
+        public MusicSyncController(MusicSyncState musicSyncState, IMusicSyncService musicSyncService)
         {
-            _musicSyncViewModel = musicSyncViewModel;
+            _musicSyncState = musicSyncState;
             _musicSyncService = musicSyncService;
-
-            _musicSyncViewModel.OnUpdate += Tick;
         }
 
-        public void Tick()
+        public void Tick(double playTime)
         {
-            _musicSyncService.Update(_musicSyncViewModel.PlayTime);
+            _musicSyncState.UpdatePlayTime(playTime);
+            _musicSyncService.Update(playTime);
         }
 
-        public void Dispose()
-        {
-            _musicSyncViewModel.OnUpdate -= Tick;
-        }
+        private readonly MusicSyncState _musicSyncState;
+        private readonly IMusicSyncService _musicSyncService;
     }
 }

@@ -1,7 +1,4 @@
-using KillChord.Runtime.Adaptor;
-using UnityEngine;
-
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     public interface IMusicViewModel
     {

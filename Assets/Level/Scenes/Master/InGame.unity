@@ -207,6 +207,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f94c494d6fcab574f9f0d986d2eeb5c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.ShellInitializer
+  _attackData: {fileID: 11400000, guid: 7abb1786189c6ab409df92032a7b3bb6, type: 2}
+  _musicData: {fileID: 11400000, guid: d69421e5dc9278446a38b4415677e2aa, type: 2}
 --- !u!1 &419177558
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,7 +773,7 @@ MonoBehaviour:
   _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
   _spawnPoint: {fileID: 1136649844}
   _spawnInterval: 3
-  _maxSpawnCount: 0
+  _maxSpawnCount: 1
   _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
 --- !u!1 &1249666140
 GameObject:
@@ -938,7 +940,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4951324db1e6bb64dbc57ee260f51bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyIArtilleryTestSpawner
-  _enemyPrefab: {fileID: 4106329999906055556, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _enemyPrefab: {fileID: 1517351015878630201, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
   _spawnPoint: {fileID: 1772279157}
   _spawnInterval: 3
   _maxSpawnCount: 1

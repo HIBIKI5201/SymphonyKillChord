@@ -1,4 +1,5 @@
 using CriWare;
+using KillChord.Runtime.View.InGame.Music;
 using R3;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         public MusicViewModel MusicVM => _musicVm;
 
         /// <summary> 現在の曲の累計再生時間を取得 </summary>
-        public double Time => _playback.time / 1000d;
+        public double Time => _playback.time / MILLISECONDS_PER_SECOND;
 
         public void Bind(MusicViewModel musicViewModel)
         {
@@ -26,14 +27,19 @@ namespace KillChord.Runtime.View.Persistent.Music
             _cri = GetComponent<CriAtomSource>();
         }
 
+        private const double MILLISECONDS_PER_SECOND = 1000d;
+
+        private CriAtomSource _cri;
+        private CriAtomExPlayback _playback;
+        private MusicViewModel _musicVm;
+
         private void ChangeBgm(string cueName)
         {
             string currentCueName = _cri.cueName;
 
-            StopBgm();
-
             if (string.IsNullOrEmpty(cueName))
             {
+                StopBgm();
                 Debug.Log("BGMの再生を停止します。");
                 return;
             }
@@ -44,6 +50,8 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
+            StopBgm();
+
             _cri.cueName = cueName;
             _playback = _cri.Play();
         }
@@ -53,9 +61,5 @@ namespace KillChord.Runtime.View.Persistent.Music
             _playback.Stop();
             _cri.cueName = string.Empty;
         }
-
-        private CriAtomSource _cri;
-        private CriAtomExPlayback _playback;
-        private MusicViewModel _musicVm;
     }
 }

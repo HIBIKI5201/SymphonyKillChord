@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application.InGame.Player
+namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
     ///     敵の攻撃を予約するユースケース。

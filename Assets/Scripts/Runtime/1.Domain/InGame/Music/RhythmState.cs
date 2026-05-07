@@ -1,6 +1,6 @@
-using System;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Utility;
+using System;
 
 namespace KillChord.Runtime.Domain.InGame.Music
 {
@@ -9,23 +9,21 @@ namespace KillChord.Runtime.Domain.InGame.Music
     /// </summary>
     public class RhythmState
     {
-        public int Count => _typeBuffer.Count;
+        public RhythmState(int capacity)
+        {
+            _recordBuffer = new RingBuffer<RhythmInputRecord>(capacity);
+
+            _beatTypeCache = new BeatType[capacity];
+            _timingCache = new float[capacity];
+            _actionTypeCache = new BattleActionType[capacity];
+        }
+
+        public int Count => _recordBuffer.Count;
 
         /// <summary>
         /// 最後に登録されたタイミング（unscaledTime）を取得する。
         /// </summary>
-        public float LastTiming => Count > 0 ? _timingBuffer.PeekLast() : 0f;
-
-        private readonly RingBuffer<BattleActionType> _typeBuffer;
-        private readonly RingBuffer<BeatType> _beatTypeBuffer;
-        private readonly RingBuffer<float> _timingBuffer;
-
-        public RhythmState(int capacity)
-        {
-            _typeBuffer = new RingBuffer<BattleActionType>(capacity);
-            _beatTypeBuffer = new RingBuffer<BeatType>(capacity);
-            _timingBuffer = new RingBuffer<float>(capacity);
-        }
+        public float LastTiming => Count > 0 ? _recordBuffer.PeekLast().Timing : 0f;
 
         /// <summary>
         ///  計算済みの値をバッファに登録する。
@@ -35,25 +33,64 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="actionType">アクションの種類</param>
         public void Enqueue(BeatType beatType, float timing, BattleActionType actionType)
         {
-            _beatTypeBuffer.Enqueue(beatType);
-            _typeBuffer.Enqueue(actionType);
-            _timingBuffer.Enqueue(timing);
+            RhythmInputRecord record = new RhythmInputRecord(beatType, timing, actionType);
+            _recordBuffer.Enqueue(record);
+        }
+
+        public ReadOnlySpan<RhythmInputRecord> GetHistoryRecord()
+        {
+            return _recordBuffer.AsReadonlySpan();
         }
 
         /// <summary> 古い順に取得</summary>
         public ReadOnlySpan<BeatType> GetHistoryBeatType()
         {
-            return _beatTypeBuffer.AsReadonlySpan();
+            ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
+
+            for (int i = 0; i < records.Length; i++)
+            {
+                _beatTypeCache[i] = records[i].BeatType;
+            }
+
+            return _beatTypeCache.AsSpan(0, records.Length);
         }
 
         public ReadOnlySpan<float> GetHistoryTiming()
         {
-            return _timingBuffer.AsReadonlySpan();
+            ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
+
+            for (int i = 0; i < records.Length; i++)
+            {
+                _timingCache[i] = records[i].Timing;
+            }
+
+            return _timingCache.AsSpan(0, records.Length);
         }
 
         public ReadOnlySpan<BattleActionType> GetHistoryActionType()
         {
-            return _typeBuffer.AsReadonlySpan();
+            ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
+
+            for (int i = 0; i < records.Length; i++)
+            {
+                _actionTypeCache[i] = records[i].ActionType;
+            }
+
+            return _actionTypeCache.AsSpan(0, records.Length);
         }
+
+        /// <summary>
+        ///     履歴をクリアする。
+        /// </summary>
+        public void Clear()
+        {
+            _recordBuffer.Clear();
+        }
+
+        private readonly RingBuffer<RhythmInputRecord> _recordBuffer;
+
+        private readonly BeatType[] _beatTypeCache;
+        private readonly float[] _timingCache;
+        private readonly BattleActionType[] _actionTypeCache;
     }
 }

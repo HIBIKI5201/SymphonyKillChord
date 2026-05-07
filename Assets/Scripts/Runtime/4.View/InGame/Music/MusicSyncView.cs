@@ -1,7 +1,7 @@
-using System;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.View.Persistent.Music;
 using R3;
 using UnityEngine;
-using KillChord.Runtime.View.Persistent.Music;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
@@ -10,43 +10,48 @@ namespace KillChord.Runtime.View.InGame.Music
     /// </summary>
     public class MusicSyncView : MonoBehaviour
     {
-        public MusicSyncViewModel MusicSyncViewModel => _musicSyncViewModel;
+        public MusicSyncState MusicSyncState => _musicSyncState;
+
+        public void Bind(
+            MusicPlayer musicPlayer,
+            MusicSyncState musicSyncState,
+            MusicSyncController musicSyncController)
+        {
+            _musicPlayer = musicPlayer;
+            _musicSyncState = musicSyncState;
+            _musicSyncController = musicSyncController;
+            _musicViewModel = _musicPlayer.MusicVM;
+
+            _musicViewModel.CueName
+                .Subscribe(PlayBgm)
+                .RegisterTo(destroyCancellationToken);
+        }
 
 #if UNITY_EDITOR
         [SerializeField] private int _testBpm;
 #endif
 
-        private MusicPlayer _mp;
+        private MusicPlayer _musicPlayer;
         private MusicViewModel _musicViewModel;
-        private MusicSyncViewModel _musicSyncViewModel;
-
-        public void Bind(
-            MusicPlayer musicPlayer,
-            MusicSyncViewModel syncViewModel)
-        {
-            _mp = musicPlayer;
-            _musicViewModel = _mp.MusicVM;
-            _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
-            _musicSyncViewModel = syncViewModel;
-        }
+        private MusicSyncState _musicSyncState;
+        private MusicSyncController _musicSyncController;
 
         private void Update()
         {
-            if (_mp == null || _musicSyncViewModel == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
+            if (_musicPlayer == null
+                || _musicSyncState == null
+                || _musicSyncController == null
+                || _musicSyncState.Bpm <= 0
+                || _musicSyncState.BeatLength <= 0) return;
 
-            _musicSyncViewModel.Update(_mp.Time);
-
-            _musicSyncViewModel.AccurateBeat = _mp.Time / _musicSyncViewModel.BeatLength;
-            _musicSyncViewModel.NearestBeat = (int)Math.Round(_musicSyncViewModel.AccurateBeat);
-            _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_musicSyncViewModel.AccurateBeat);
+            _musicSyncController.Tick(_musicPlayer.Time);
         }
 
         private void PlayBgm(string cueName)
         {
 #if UNITY_EDITOR
-            _musicSyncViewModel.Bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
+            _musicSyncState.SetBpm(_testBpm); //TODO : cueNameを引数にデータベースからBPMを取得するように変更
 #endif
-            _musicSyncViewModel.BeatLength = 60d / _musicSyncViewModel.Bpm;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         public void CancelAttack()
         {
-            _aiController.CanelAttack();
+            _aiController.CancelAttack();
         }
 
         private EnemyAIController _aiController;

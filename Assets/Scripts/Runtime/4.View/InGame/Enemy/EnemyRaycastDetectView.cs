@@ -1,8 +1,7 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     敵から射線を通し、指定対象に直撃できるか判定するビュー。

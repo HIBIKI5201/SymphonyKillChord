@@ -1,0 +1,28 @@
+using KillChord.Runtime.Domain.InGame.Camera.Target;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace KillChord.Runtime.Application.InGame.Camera.Target
+{
+    public sealed class TargetManager
+    {
+        public int Count => _targets.Count;
+        public IEnumerable<ILockOnTarget> GetTargets => _targets;
+
+        public void Register(ILockOnTarget target)
+        {
+            if (_targets.Add(target))
+            { return; }
+            Debug.LogWarning($"Target {target} is already registered.");
+        }
+
+        public void Unregister(ILockOnTarget target)
+        {
+            if (_targets.Remove(target))
+            { return; }
+            Debug.LogWarning($"Target {target} is not registered.");
+        }
+
+        private readonly HashSet<ILockOnTarget> _targets = new();
+    }
+}

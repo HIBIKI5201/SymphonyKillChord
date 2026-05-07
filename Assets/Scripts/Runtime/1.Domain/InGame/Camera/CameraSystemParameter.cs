@@ -20,7 +20,10 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             float lockOnRotationSpeed,
             float collisionRadius,
             LayerMask collisionLayerMask,
-            Vector2 pitchRange)
+            Vector2 pitchRange,
+             bool invertVertical = false,
+            bool invertHorizontal = false
+            )
         {
             _cameraOffset = cameraOffset;
             _distance = distance;
@@ -34,6 +37,8 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             _collisionRadius = collisionRadius;
             _collisionMask = collisionLayerMask;
             _pitchRange = pitchRange;
+            _invertVertical = invertVertical;
+            _invertHorizontal = invertHorizontal;
         }
         public Vector3 Offset => _cameraOffset;
         public float Distance => _distance;
@@ -52,30 +57,70 @@ namespace KillChord.Runtime.Domain.InGame.Camera
 
         public Vector2 PitchRange => _pitchRange;
 
+        /// <summary> 垂直方向の入力反転フラグ。 </summary>
+        public bool IsInvertVertical => _invertVertical;
+        /// <summary> 水平方向の入力反転フラグ。 </summary>
+        public bool IsInvertHorizontal => _invertHorizontal;
+
+
+
         [Header("Main")]
+
+        [Tooltip("追従先を中心としたカメラの基本的オフセット位置")]
         [SerializeField] private Vector3 _cameraOffset;
+        [Tooltip("追従先からカメラまでの距離")]
         [SerializeField] private float _distance;
 
+
+
         [Header("Follow")]
+
+        [Tooltip("プレイヤー移動中のカメラの追従オフセットの強さ")]
         [SerializeField] private float _followOffsetPower;
+        [Tooltip("プレイヤー移動中のカメラの追従オフセットの補間速度")]
         [SerializeField] private float _followLerpSpeed;
 
+
+
         [Header("Bone Rotation")]
+
+        [Tooltip("ロックオン時のカメラボーンの回転速度")]
         [SerializeField] private float _boneRotateSpeed;
+        [Tooltip("ロックオン状態でのカメラとターゲットの角度差の許容範囲")]
         [SerializeField] private float _lockOnAngleMargin;
+        [Tooltip("非ロックオン時のカメラボーンの回転速度")]
         [SerializeField] private float _followRotationSpeed;
 
+
+
         [Header("Camera Rotation")]
+
+        [Tooltip("ロックオン時のカメラが向けるプレイヤー位置とターゲット位置の補間比率")]
         [Range(0f, 1f)]
         [SerializeField] private float _lockOnLookAtRatio;
+
+        [Tooltip("ロックオン時のカメラの回転速度")]
         [SerializeField] private float _lockOnRotationSpeed;
 
+
+
         [Header("Collision")]
+
+        [Tooltip("カメラの衝突判定に使用する球の半径")]
         [SerializeField] private float _collisionRadius;
+        [Tooltip("カメラの衝突判定に使用するレイヤーマスク")]
         [SerializeField] private LayerMask _collisionMask;
 
+
         [Header("Limits")]
+        [Tooltip("カメラのピッチ角度(x角度)の最小値と最大値")]
         [SerializeField] private Vector2 _pitchRange;
 
+        [Header("Input Invert")]
+        [SerializeField, Tooltip("垂直方向の入力を反転するフラグ")]
+        private bool _invertVertical;
+
+        [SerializeField, Tooltip("水平方向の入力を反転するフラグ")]
+        private bool _invertHorizontal;
     }
 }

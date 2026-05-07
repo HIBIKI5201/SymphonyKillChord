@@ -18,6 +18,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
             {
                 throw new ArgumentException("value must be finite.", nameof(value));
             }
+
+            if (value < 0f || value > 1f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "CriticalChanceは0から1の間である必要があります。");
+            }
+
             _value = Mathf.Clamp01(value);
         }
 
