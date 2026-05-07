@@ -1,9 +1,0 @@
-Type,Step,ParentStep,Speaker,Text,BackgroundId,AnimationId,FadeStart,FadeEnd,FadeDuration,PortraitSlot,PortraitId,PortraitPosX,PortraitPosY,PortraitScale,PortraitVisible,LayerTarget,LayerOrder,TriggerType,TriggerIndex,TriggerKeyword,OnTriggerType,OnTriggerArg1,OnTriggerArg2,OnTriggerArg3
-
-Background,1,,,,genki_pose,,,,,,,,,,,,,,,,,,,
-Layer,2,,,,,,,,,,,,,,,PortraitLeft,2,,,,,,,
-Portrait,3,,,,,,,,,Left,hello,-460,-120,1,true,,,,,,,,,
-Portrait,4,,,,,,,,,Right,good,460,-120,1,true,,,,,,,,,
-Text,5,,Hero,"......Hello sekai?",,,,,,,,,,,,,,AtCharIndex,5,,Fade,0,1,0.5
-Trigger,,5,,,,,,,,,,,,,,,,AtCharIndex,1,,Fade,1,0,2
-Text,7,,Tatuki,"danger is coming",,,,,,,,,,,,,,AtKeyword,,danger,Background,bg_alert,
