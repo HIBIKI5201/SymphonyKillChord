@@ -18,7 +18,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (State?.Value?.gameObject == null
                 || Battle?.Value == null) return Status.Failure;
 
-            GameObject agent = State.Value.gameObject;
             EnemyStateFacade state = State.Value;
             EnemyBattleAIFacade battle = Battle.Value;
 
