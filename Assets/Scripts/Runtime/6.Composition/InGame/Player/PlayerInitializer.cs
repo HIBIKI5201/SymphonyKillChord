@@ -98,7 +98,7 @@ namespace KillChord.Runtime.Composition
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
-            var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
