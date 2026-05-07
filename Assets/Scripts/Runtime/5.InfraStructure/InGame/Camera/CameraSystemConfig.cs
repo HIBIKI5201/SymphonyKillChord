@@ -9,6 +9,10 @@ namespace KillChord.Runtime.Structure.InGame.Camera
     [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject
     {
+        /// <summary>
+        ///     設定値をもとにカメラシステムのドメインパラメータを生成して返す。
+        /// </summary>
+        /// <returns> 生成したカメラシステムパラメータ。</returns>
         public CameraSystemParameter ToDomain()
             => new(
                 _cameraOffset,
@@ -61,9 +65,9 @@ namespace KillChord.Runtime.Structure.InGame.Camera
         [SerializeField] private LayerMask _collisionMask;
 
         [Header("Limits")]
-        [Tooltip("カメラのピッチ角度(x角度)の最小値と最大値")]
+        [Tooltip("カメラのピッチ角度( x 角度)の最小値と最大値")]
         [SerializeField] private Vector2 _pitchRange = new Vector2(-45f, 75f);
-        
+
         [Header("Input Invert")]
         [SerializeField, Tooltip("垂直方向の入力を反転するフラグ。")]
         private bool _invertVertical = false;

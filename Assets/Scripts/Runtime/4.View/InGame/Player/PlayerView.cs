@@ -1,6 +1,6 @@
+using CriWare;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
-using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility;
 using KillChord.Runtime.View.Persistent.Input;
@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
+        [SerializeField] private CriAtomSource _seSource;
 
         private Transform _cameraTransform;
         private bool _isInitialized = false;
@@ -90,10 +91,28 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_playerAttackController.ExecuteAttack())
+            if (_playerAttackController.ExecuteAttack(out var resultBeatType))
             {
                 Debug.Log($"{gameObject.name}が攻撃を実行", this);
+                string cueName = resultBeatType switch
+                {
+                    1 => "HandgunShoot_3",
+                    2 => "RifleShoot_3",
+                    3 => "HandgunShoot_2",
+                    4 => "RifleShoot_1",
+                    6 => "HandgunShoot_1",
+                    8 => "RifleShoot_2",
+                    _ => null
+                };
+
+                Play(cueName);
             }
+        }
+
+        private void Play(string cueName)
+        {
+            _seSource.cueName = cueName;
+            _seSource.Play();
         }
 
         private void UpdateMovement()

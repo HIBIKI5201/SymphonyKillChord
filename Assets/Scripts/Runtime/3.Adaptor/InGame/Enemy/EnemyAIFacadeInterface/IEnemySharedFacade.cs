@@ -1,11 +1,11 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     敵AI用ファサード：共通情報。
     /// </summary>
-    public interface IEnemySharedFacede
+    public interface IEnemySharedFacade
     {
         /// <summary>
         ///     敵の攻撃対象。

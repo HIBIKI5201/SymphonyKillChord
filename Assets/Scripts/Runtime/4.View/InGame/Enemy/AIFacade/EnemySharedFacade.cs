@@ -1,9 +1,9 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
-    public class EnemySharedFacade : MonoBehaviour, IEnemySharedFacede
+    public class EnemySharedFacade : MonoBehaviour, IEnemySharedFacade
     {
         public void Initialize(Transform target)
         {

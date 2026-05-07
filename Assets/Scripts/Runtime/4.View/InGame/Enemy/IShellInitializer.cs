@@ -7,6 +7,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public interface IShellInitializer
     {
-        public ShellController InitAndGetShellController(ShellView shellView, EnemyAIController enemyAIController);
+        public void Initialize(ShellView shellView, EnemyBattleState enemyBattleState, EnemyMoveView enemyMoveView);
     }
 }

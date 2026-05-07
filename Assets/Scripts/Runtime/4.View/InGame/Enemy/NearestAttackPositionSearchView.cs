@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 using UnityEngine.AI;
 

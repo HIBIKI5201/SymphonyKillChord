@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     敵の移動指示に関するデータを保持する構造体。
