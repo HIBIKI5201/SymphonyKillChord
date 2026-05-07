@@ -10,8 +10,19 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
 {
+    /// <summary>
+    ///     プレイヤーの攻撃アクションを制御するクラス。
+    /// </summary>
     public class PlayerAttackController
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="presenter"></param>
+        /// <param name="battleState"></param>
+        /// <param name="skillController"></param>
+        /// <param name="targetSelectorController"></param>
+        /// <param name="musicSyncService"></param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
@@ -27,6 +38,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _musicSyncService = musicSyncService;
         }
 
+        /// <summary>
+        ///     攻撃を実行する。
+        /// </summary>
+        /// <param name="resultBeatType"></param>
+        /// <returns></returns>
         public bool ExecuteAttack(out int resultBeatType) //TODO : outでBeatTypeを返す構造を修正する
         {
             resultBeatType = 0;

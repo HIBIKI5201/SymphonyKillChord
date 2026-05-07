@@ -37,15 +37,19 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _defender = attackStepContext._defender;
         }
 
-        /// <summary> 攻撃定義を取得するプロパティ。 </summary>
+        /// <summary> 攻撃定義を取得する。 </summary>
         public AttackDefinition AttackDefinition => _attackDefinition;
-        /// <summary> ダメージ量を取得するプロパティ。 </summary>
+
+        /// <summary> ダメージ量を取得する。 </summary>
         public Damage Damage => _damage;
-        /// <summary> クリティカルヒットの回数を取得するプロパティ。 </summary>
+
+        /// <summary> クリティカルヒットの回数を取得する。 </summary>
         public int CriticalCount => _criticalCount;
-        /// <summary> 攻撃者を取得するプロパティ。 </summary>
+
+        /// <summary> 攻撃者を取得する。 </summary>
         public IAttacker Attacker => _attacker;
-        /// <summary> 防御者を取得するプロパティ。 </summary>
+
+        /// <summary> 防御者を取得する。 </summary>
         public IDefender Defender => _defender;
 
         private readonly AttackDefinition _attackDefinition;

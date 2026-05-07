@@ -23,6 +23,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackDifinitions = attackDifinitions;
         }
 
+        /// <summary>
+        ///     ビートタイプに対応する攻撃定義の取得を試みる。
+        /// </summary>
+        /// <param name="beatType"></param>
+        /// <param name="attackDefinition"></param>
+        /// <returns></returns>
         public bool TryGetAttackDefinitionByBeatType(BeatType beatType, out AttackDefinition attackDefinition)
         {
             foreach (var attack in _attackDifinitions)
@@ -37,6 +43,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
             return false;
         }
 
+        /// <summary>
+        ///     ビートタイプに対応する攻撃定義を取得する。
+        /// </summary>
+        /// <param name="beatType"></param>
+        /// <returns></returns>
         public AttackDefinition GetAttackDefinitionByBeatType(BeatType beatType)
         {
             if (TryGetAttackDefinitionByBeatType(beatType, out var attackDefinition))
@@ -47,10 +58,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
         }
 
         /// <summary>
-        ///     指定した攻撃IDに対応する攻撃定義を取得する。
+        ///     指定したインデックスに対応する攻撃定義を取得する。
         /// </summary>
-        /// <param name="id"> 取得したい攻撃ID。 </param>
-        /// <returns>　対応する攻撃定義。　</returns>
+        /// <param name="index"> 取得したい攻撃定義のインデックス。 </param>
+        /// <returns> 対応する攻撃定義。 </returns>
         public AttackDefinition GetAttackDifinition(int index)
         {
             if (index < 0 || index >= _attackDifinitions.Count)

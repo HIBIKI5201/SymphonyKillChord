@@ -9,13 +9,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
     /// </summary>
     public class PlayerBattleState
     {
+        /// <summary>
+        ///     コンストラクタ。
+        /// </summary>
+        /// <param name="attacker"></param>
         public PlayerBattleState(CharacterEntity attacker)
         {
             Attacker = attacker;
         }
-        /// <summary> 攻撃者。 </summary>
+        /// <summary> 攻撃者を取得する。 </summary>
         public CharacterEntity Attacker { get; }
-        /// <summary> 攻撃対象。 </summary>
+        /// <summary> 攻撃対象を取得する。 </summary>
         public IDefender Target { get; private set; }
 
         /// <summary>
