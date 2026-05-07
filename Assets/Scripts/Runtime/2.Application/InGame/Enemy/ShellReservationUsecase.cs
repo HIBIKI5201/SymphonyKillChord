@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             if(entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ArgumentNullException(nameof(entity), "ShellEntityがNULLです。");
             }
             _entity = entity;
             _musicActionScheduler = musicActionScheduler;
