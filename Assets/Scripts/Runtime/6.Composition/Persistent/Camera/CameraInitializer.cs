@@ -1,10 +1,9 @@
-using System;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
-    public class CameraInitialize : MonoBehaviour, ICameraTransform
+    public class CameraInitializer : MonoBehaviour, ICameraTransform
     {
         private void Awake()
         {
