@@ -46,7 +46,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemySharedFacade _enemySharedFacade;
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
-        [Header("砲兵のみ設定する")]
+        [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
         private TargetEntityRegistryController _targetEntityRegistryController;
@@ -130,6 +130,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _attackPositionSearchView.enabled = true;
         }
 
+        /// <summary>
+        ///     敵死亡時に実行する処理。
+        /// </summary>
+        /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
             if (_missionKeyAsset == null)

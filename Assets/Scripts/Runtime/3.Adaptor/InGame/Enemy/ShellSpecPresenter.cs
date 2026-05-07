@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -9,6 +10,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     {
         public ShellSpecPresenter(ShellEntity entity)
         {
+            if(entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity), "ShellEntityがNULLです。");
+            }
             _entity = entity;
         }
 

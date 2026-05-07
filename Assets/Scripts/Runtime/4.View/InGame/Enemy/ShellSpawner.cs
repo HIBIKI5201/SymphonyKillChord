@@ -9,6 +9,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class ShellSpawner : MonoBehaviour, IShellSpawner
     {
+        /// <summary>
+        ///     砲弾を生成する。
+        /// </summary>
+        /// <param name="enemyBattleState"></param>
         public void SpawnShell(EnemyBattleState enemyBattleState)
         {
             ShellView shellView = Instantiate(_shellPrefab, _enemyMoveView.GetTargetTransform().position, Quaternion.identity);

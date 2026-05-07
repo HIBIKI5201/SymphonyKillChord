@@ -11,7 +11,9 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             BattleTiming = battleTiming;
         }
 
+        /// <summary> 初回エンカウンター時の攻撃の音楽同期タイミング </summary>
         public EnemyMusicSpec EncounterTiming { get; }
+        /// <summary> 2回目以降の攻撃の音楽同期タイミング </summary>
         public EnemyMusicSpec BattleTiming { get; }
     }
 }

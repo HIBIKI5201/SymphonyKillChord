@@ -8,6 +8,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="targetTransform"></param>
+        /// <param name="attackRange"></param>
         public void Initialize(Transform targetTransform, float attackRange)
         {
             _hitResults = new RaycastHit[_resultArraySize];
@@ -28,6 +33,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _initializedFlg = true;
 #endif
         }
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => CheckCanRaycastHitTarget(transform.position);
 
         /// <summary>

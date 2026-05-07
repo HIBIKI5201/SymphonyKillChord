@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyBattleState = enemyBattleState;
         }
 
+        /// <summary>
+        ///     攻撃を実行する。
+        /// </summary>
         public void ExecuteAttack()
         {
             _shellSpawner.SpawnShell(_enemyBattleState);
