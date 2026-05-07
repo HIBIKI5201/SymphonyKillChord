@@ -18,7 +18,7 @@ namespace DevelopProducts.TicketSystem
             EditorSceneManager.sceneSaving += OnSceneSaving;
 
             // エディタ起動時にチケットデータの初期ロードを行う。
-            TicketSystemWebClient.RefreshList().ContinueWith(() => Debug.Log("チケットデータの初期ロードが完了しました。"));
+            _ = TicketSystemWebClient.RefreshList();
         }
 
         /// <summary>
