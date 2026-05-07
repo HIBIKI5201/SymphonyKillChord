@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     最も近い攻撃可能な場所を検索するViewModelインターフェース。

@@ -4,8 +4,15 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
+    /// <summary>
+    ///     リズムガイドの視覚的なレンダリングを行うViewクラス。
+    /// </summary>
     public class RhythmGuideView : MonoBehaviour
     {
+        /// <summary>
+        ///     ビューモデルの状態に基づいてレンダリングを行う。
+        /// </summary>
+        /// <param name="viewModel"> リズムガイドビューモデル。 </param>
         public void Render(RhythmGuideViewModel viewModel)
         {
             RenderIndicator(viewModel.IndicatorNormalized);
@@ -13,21 +20,34 @@ namespace KillChord.Runtime.View.InGame.Music
             RenderLabels(viewModel.Zones);
         }
 
+        [Tooltip("インジケーターのルート。")]
         [SerializeField] private RectTransform _indicatorRoot;
+        [Tooltip("リズム表示のCanvasGroup。")]
         [SerializeField] private CanvasGroup _rhythmCanvasGroup;
 
+        [Tooltip("ラベルのプレハブ。")]
         [SerializeField] private RhythmGuideLabelView _labelPrefab;
+        [Tooltip("ラベルの親要素。")]
         [SerializeField] private Transform _labelParent;
+        [Tooltip("ラベルの配置半径。")]
         [SerializeField] private float _labelRadius;
 
+        [Tooltip("開始角度。")]
         [SerializeField] private float _startAngle;
+        [Tooltip("回転角度。")]
         [SerializeField] private float _sweepAngle;
 
+        [Tooltip("ターゲット時の透明度。")]
         [SerializeField] private float _targetAlpha;
+        [Tooltip("非ターゲット時の透明度。")]
         [SerializeField] private float _noTargetAlpha;
 
         private readonly List<RhythmGuideLabelView> _labelViews = new();
 
+        /// <summary>
+        ///     インジケーターの回転を更新する。
+        /// </summary>
+        /// <param name="normalized"> 正規化された位置。 </param>
         private void RenderIndicator(float normalized)
         {
             if (_indicatorRoot == null) return;
@@ -36,6 +56,10 @@ namespace KillChord.Runtime.View.InGame.Music
             _indicatorRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 
+        /// <summary>
+        ///     CanvasGroupの透明度を更新する。
+        /// </summary>
+        /// <param name="hasTarget"> ターゲットの有無。 </param>
         private void RenderAlpha(bool hasTarget)
         {
             if (_rhythmCanvasGroup == null) return;
@@ -43,6 +67,10 @@ namespace KillChord.Runtime.View.InGame.Music
             _rhythmCanvasGroup.alpha = hasTarget ? _targetAlpha : _noTargetAlpha;
         }
 
+        /// <summary>
+        ///     ラベルの表示を更新する。
+        /// </summary>
+        /// <param name="zones"> 判定ゾーンのリスト。 </param>
         private void RenderLabels(IReadOnlyList<RhythmGuideZoneDto> zones)
         {
             if (zones == null) return;
@@ -65,6 +93,10 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
+        /// <summary>
+        ///     ラベルViewの数を調整する。
+        /// </summary>
+        /// <param name="count"> 必要なラベル数。 </param>
         private void EnsureLabelCount(int count)
         {
             while (_labelViews.Count < count)

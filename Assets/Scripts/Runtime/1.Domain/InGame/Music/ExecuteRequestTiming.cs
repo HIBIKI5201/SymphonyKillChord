@@ -7,18 +7,21 @@ namespace KillChord.Runtime.Domain.InGame.Music
     /// </summary>
     public readonly struct ExecuteRequestTiming
     {
-        /// <param name="barFlag">現在からの相対を指定</param>
-        /// <param name="beat">絶対を指定</param>
+        /// <summary>
+        ///     新しい実行要求タイミングを生成する。
+        /// </summary>
+        /// <param name="barFlag"> 現在からの相対的な小節数。 </param>
+        /// <param name="beat"> 絶対的な拍データ。 </param>
         public ExecuteRequestTiming(byte barFlag, Beat beat)
         {
             _barFlag = barFlag;
             _beat = beat;
         }
 
-        /// <summary> 小節 </summary>
+        /// <summary> 小節。 </summary>
         public byte BarFlag => _barFlag;
 
-        /// <summary> 拍データ </summary>
+        /// <summary> 拍データ。 </summary>
         public Beat Beat => _beat;
 
         private readonly byte _barFlag;

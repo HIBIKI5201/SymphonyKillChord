@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
     ///     敵の射線判定ViewModel。

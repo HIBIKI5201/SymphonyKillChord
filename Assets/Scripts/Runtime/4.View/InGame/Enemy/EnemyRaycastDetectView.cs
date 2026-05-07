@@ -1,14 +1,18 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     敵から射線を通し、指定対象に直撃できるか判定するビュー。
     /// </summary>
     public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="targetTransform"></param>
+        /// <param name="attackRange"></param>
         public void Initialize(Transform targetTransform, float attackRange)
         {
             _hitResults = new RaycastHit[_resultArraySize];
@@ -29,6 +33,7 @@ namespace KillChord.Runtime.View
             _initializedFlg = true;
 #endif
         }
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => CheckCanRaycastHitTarget(transform.position);
 
         /// <summary>

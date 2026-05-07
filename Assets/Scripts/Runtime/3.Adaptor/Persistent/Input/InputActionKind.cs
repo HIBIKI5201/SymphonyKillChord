@@ -13,5 +13,6 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
         Dodge = 101,
         Attack = 102,
         Look = 103,
+        LockOn = 104,
     }
 }
