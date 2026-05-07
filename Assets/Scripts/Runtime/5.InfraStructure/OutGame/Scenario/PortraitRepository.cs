@@ -3,14 +3,14 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.InfraStructure
 {
-    public class PortraitRepository : CatalogRepositoryBase<PortraitDefinition, PortraitCatalogAsset.Entry>, IPortraitRepository
+    public class PortraitRepository : CatalogRepositoryBase<PortraitDefinition, PortraitCatalogEntry>, IPortraitRepository
     {
         public PortraitRepository(PortraitCatalogAsset catalog)
             : base(catalog != null ? catalog.Entries : null)
         {
         }
 
-        protected override bool TryBuild(PortraitCatalogAsset.Entry entry, out string id, out PortraitDefinition definition)
+        protected override bool TryBuild(PortraitCatalogEntry entry, out string id, out PortraitDefinition definition)
         {
             id = entry.Id;
             if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)
