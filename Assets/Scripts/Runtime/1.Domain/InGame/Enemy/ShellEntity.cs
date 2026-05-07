@@ -14,8 +14,11 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             _attackDefinition = attackDefinition;
         }
 
+        /// <summary> 砲弾固有の攻撃能力 </summary>
         public ShellAttackSpec AttackSpec => _attackSpec;
+        /// <summary> 音楽同期タイミング情報 </summary>
         public EnemyMusicSpec MusicSpec => _musicSpec;
+        /// <summary> 攻撃情報 </summary>
         public AttackDefinition AttackDefinition => _attackDefinition;
 
         private ShellAttackSpec _attackSpec;

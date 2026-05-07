@@ -16,8 +16,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _shellSpawner = shellSpawner;
         }
 
+        /// <summary> 敵の攻撃ユースケース </summary>
         public EnemyAttackUsecase AttackUsecase => _attackUsecase;
+        /// <summary> 敵の戦闘関連状態 </summary>
         public EnemyBattleState BattleState => _battleState;
+        /// <summary> 砲弾のスポナー </summary>
         public ShellSpawner ShellSpawner => _shellSpawner;
 
         private readonly EnemyAttackUsecase _attackUsecase;

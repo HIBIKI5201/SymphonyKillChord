@@ -9,6 +9,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class NearestAttackPositionSearchView : MonoBehaviour, INearestAttackPositionSearchViewModel
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
         public void Initialize()
         {
             _timer = 0;
@@ -21,8 +24,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _destinationCache = transform.position;
             _path = new NavMeshPath();
         }
+        /// <summary>
+        ///     最も近い攻撃可能な位置を探索する。
+        /// </summary>
+        /// <param name="enemyPosition"></param>
+        /// <param name="playerPosition"></param>
+        /// <param name="attackRangeMin"></param>
+        /// <returns></returns>
         public Vector3 FindNearestAttackPosition(Vector3 enemyPosition, Vector3 playerPosition, float attackRangeMin)
         {
+            // 探索間隔最中の場合、キャッシュした位置を返却
             if (_timer < _searchInterval)
             {
                 return _destinationCache;

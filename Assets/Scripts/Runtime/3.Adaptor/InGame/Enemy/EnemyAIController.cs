@@ -31,7 +31,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         }
 
         // Debug用のイベント。
+        /// <summary> 攻撃を予約時に発火するイベント </summary>
         public event Action OnAttackReserved;
+        /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
 
         /// <summary> 敵が攻撃中か。 </summary>
@@ -120,6 +122,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
         }
 
+        /// <summary>
+        ///     予約タイミングが到達した時に実行される処理。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             _attackController.ExecuteAttack();
@@ -127,6 +132,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
+        /// <summary>
+        ///     ダメージを受ける時の処理。
+        /// </summary>
+        /// <param name="eventParam"></param>
         private void HandleOnDamageTaken(EOnTakeDamage eventParam)
         {
             if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;

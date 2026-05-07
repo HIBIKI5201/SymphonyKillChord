@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy
@@ -16,6 +17,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="shellSpecPresenter"></param>
         public void Initialize(Vector3 detonatePosition, ShellController controller, ShellSpecPresenter shellSpecPresenter)
         {
+            if (controller == null)
+                throw new ArgumentNullException(nameof(controller), "ShellControllerがNULLです。");
+            if (shellSpecPresenter == null)
+                throw new ArgumentNullException(nameof(shellSpecPresenter), "ShellSpecPresenterがNULLです。");
+
             _detonatePosition = detonatePosition;
             _controller = controller;
             _shellSpecPresenter = shellSpecPresenter;
@@ -46,9 +52,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return hits > 0;
         }
 
-        [SerializeField]
+        [SerializeField, Tooltip("ダメージ判定のレイヤー")]
         private LayerMask _damageLayer;
-        [SerializeField]
+        [SerializeField, Tooltip("爆発範囲表示用")]
         private Renderer _indicator;
 
         private ShellController _controller;
