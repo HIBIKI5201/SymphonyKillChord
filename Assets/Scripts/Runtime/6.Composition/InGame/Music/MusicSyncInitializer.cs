@@ -26,7 +26,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
             _musicSyncView.Bind(
                 musicPlayer,
                 musicSyncViewState,
-                MusicSyncController
+                MusicSyncController,
+                _testBpm
             );
 
             musicPlayer.MusicVM.UpdateMusicCue(_testCue);

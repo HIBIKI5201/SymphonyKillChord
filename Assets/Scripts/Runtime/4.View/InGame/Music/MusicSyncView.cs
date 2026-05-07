@@ -15,7 +15,8 @@ namespace KillChord.Runtime.View.InGame.Music
         public void Bind(
             MusicPlayer musicPlayer,
             MusicSyncState musicSyncState,
-            MusicSyncController musicSyncController)
+            MusicSyncController musicSyncController,
+            int testBpm)
         {
             _musicPlayer = musicPlayer;
             _musicSyncState = musicSyncState;
@@ -27,10 +28,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 .RegisterTo(destroyCancellationToken);
         }
 
-#if UNITY_EDITOR
-        [SerializeField] private int _testBpm;
-#endif
-
+        private int _testBpm;
         private MusicPlayer _musicPlayer;
         private MusicViewModel _musicViewModel;
         private MusicSyncState _musicSyncState;
@@ -49,9 +47,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
         private void PlayBgm(string cueName)
         {
-#if UNITY_EDITOR
-            _musicSyncState.SetBpm(_testBpm); //TODO : cueNameを引数にデータベースからBPMを取得するように変更
-#endif
+            _musicSyncState.SetBpm(_testBpm);
         }
     }
 }
