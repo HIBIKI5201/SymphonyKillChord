@@ -13,9 +13,14 @@ namespace KillChord.Runtime.Composition.InGame.Music
     /// </summary>
     public class MusicSyncInitializer : MonoBehaviour
     {
+        /// <summary> 音楽同期コントローラー。 </summary>
         public MusicSyncController MusicSyncController { get; private set; }
+        /// <summary> 音楽同期サービス。 </summary>
         public MusicSyncService MusicSyncService { get; private set; }
 
+        /// <summary>
+        ///     音楽同期機能を初期化する。
+        /// </summary>
         public void Initialize()
         {
             MusicSyncState musicSyncViewState = new();
@@ -26,15 +31,19 @@ namespace KillChord.Runtime.Composition.InGame.Music
             _musicSyncView.Bind(
                 musicPlayer,
                 musicSyncViewState,
-                MusicSyncController
+                MusicSyncController,
+                _testBpm
             );
 
             musicPlayer.MusicVM.UpdateMusicCue(_testCue);
             ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
         }
 
+        [Tooltip("音楽同期View。")]
         [SerializeField] private MusicSyncView _musicSyncView;
+        [Tooltip("テスト用のキュー名。")]
         [SerializeField] private string _testCue;
+        [Tooltip("テスト用のBPM。")]
         [SerializeField] private int _testBpm;
     }
 }
