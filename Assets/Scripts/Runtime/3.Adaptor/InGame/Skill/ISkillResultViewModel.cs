@@ -3,14 +3,14 @@ using UnityEngine;
 namespace KillChord.Runtime.Adaptor
 {
     /// <summary>
-    ///     スキルの結果を表示するためのインターフェース。
+    /// ViewModelへスキル結果DTOを渡すためのインターフェース。
     /// </summary>
     public interface ISkillResultViewModel
     {
         /// <summary>
-        ///     スキルの結果を表示するためのメソッド。
+        /// スキル結果DTOを受け取り、ViewModel側の状態を更新する。
         /// </summary>
-        /// <param name="dto"></param>
+        /// <param name="dto">スキル結果DTO（読み取り専用）</param>
         void Push(in SkillResultDTO dto);
     }
 }

@@ -9,8 +9,14 @@ using System.Diagnostics;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
+    /// <summary>
+    /// スキルの表示・入力チェックを仲介するコントローラクラス。
+    /// </summary>
     public class SkillController : IViewAction
     {
+        /// <summary>
+        /// コンストラクタ。リポジトリから指定されたスキルを読み込み、視覚演出を登録する。
+        /// </summary>
         public SkillController(
             ISkillRepository skillRepository,
             ISkillVisual[] skillVisuals,
@@ -37,14 +43,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             _presenter = presenter;
         }
 
+        /// <summary>
+        /// ユースケースを設定する。
+        /// </summary>
+        /// <param name="usecase">スキル処理のユースケース</param>
         public void SetUsecase(SkillUsecase usecase)
         {
             _skillUseCase = usecase;
         }
 
         /// <summary>
-        ///     スキル発動をチェックし、実行する。
+        /// 指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
         /// </summary>
+        /// <returns>スキルが発動した場合はtrue、それ以外はfalse</returns>
         public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
             if (_skillUseCase.TryExecuteSkill(
@@ -61,6 +72,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             return false;
         }
 
+        /// <summary>
+        /// 指定したスキルIDに対応する視覚演出を実行する。
+        /// </summary>
+        /// <param name="skillId">実行するスキルのID</param>
         public void Execute(int skillId)
         {
             if (_skillVisuals.TryGetValue(skillId, out var visual))
