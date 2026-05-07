@@ -8,24 +8,39 @@ namespace KillChord.Runtime.Application.InGame.Camera
     /// </summary>
     public sealed class CameraRotationApplication
     {
+        /// <summary>
+        ///     カメラシステムの設定パラメータを受け取り、カメラ回転制御を初期化するコンストラクタ。
+        /// </summary>
+        /// <param name="parameter"> カメラシステムの設定パラメータ。</param>
         public CameraRotationApplication(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
 
+        /// <summary>
+        ///     ロックオン状態に応じてカメラの注視点回転を更新する。
+        ///     ロックオン中はプレイヤーと対象の中間点を注視するよう補間する。
+        /// </summary>
+        /// <param name="isLockOn"> ロックオン中かどうか。</param>
+        /// <param name="rotation"> 更新対象のカメラ回転。参照渡しで更新される。</param>
+        /// <param name="boneRotation"> 現在のカメラボーン回転。</param>
+        /// <param name="cameraPosition"> 現在のカメラ位置。</param>
+        /// <param name="context"> 今フレームの更新コンテキスト。</param>
+        /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
         public void Update(
             bool isLockOn,
             ref Quaternion rotation,
             in Quaternion boneRotation,
             in Vector3 cameraPosition,
             in CameraSystemContext context,
-            in Vector3 TargetPosition
+            in Vector3 targetPosition
         )
         {
             Quaternion target = Quaternion.identity;
             if (isLockOn)
             {
-                Vector3 lerpPosition = Vector3.Lerp(context.FollowPosition, TargetPosition, _parameter.LockOnLookAtRatio);
+                // プレイヤーと対象の中間点を求める
+                Vector3 lerpPosition = Vector3.Lerp(context.FollowPosition, targetPosition, _parameter.LockOnLookAtRatio);
                 Vector3 dir = lerpPosition - cameraPosition;
                 if (dir.sqrMagnitude > float.Epsilon)
                 {
