@@ -69,6 +69,23 @@ namespace KillChord.Runtime.View.InGame.Camera
             Tick(Time.deltaTime);
         }
 
+        /// <summary>
+        ///     入力イベントの購読解除を行う。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_inputView == null) { return; }
+
+#if UNITY_ANDROID
+            _inputView.OnMobileLookInput -= LookHandler;
+#else
+            _inputView.OnLookInput -= LookHandler;
+#endif
+            _inputView.OnMoveInput -= MoveHandler;
+            _inputView.OnLockOnInput -= LockOnHandler;
+            _inputView.OnAttackInput -= OnAttack;
+        }
+
         private void LookHandler(InputContext<Vector2> context)
         {
             _input = context.Value;
