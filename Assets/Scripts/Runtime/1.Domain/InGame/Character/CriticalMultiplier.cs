@@ -8,8 +8,9 @@ namespace KillChord.Runtime.Domain.InGame.Character
     public readonly struct CriticalMultiplier
     {
         /// <summary>
-        ///     クリティカルダメージ倍率のインスタンスを初期化する。
+        ///     クリティカルダメージ倍率を初期化するコンストラクタ。
         /// </summary>
+        /// <param name="value"></param>
         public CriticalMultiplier(float value)
         {
             if (value <= 0f)
@@ -21,7 +22,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _value = value;
         }
 
-        /// <summary> クリティカルダメージ倍率。 </summary>
+        /// <summary> クリティカルダメージ倍率を取得する。 </summary>
         public float Value => _value;
 
         private readonly float _value;

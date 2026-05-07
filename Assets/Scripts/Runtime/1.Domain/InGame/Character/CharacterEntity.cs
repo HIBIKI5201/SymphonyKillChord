@@ -31,16 +31,29 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _combatSpec = combatSpec;
         }
 
+        /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
 
+        /// <summary> キャラクター名を取得する。 </summary>
         public CharacterName Name => _name;
+
+        /// <summary> キャラクター固有のIDを取得する。 </summary>
         public Guid Id { get; } = Guid.NewGuid();
+
+        /// <summary> コンバットスペックを取得する。 </summary>
         public CharacterCombatSpec CombatSpec => _combatSpec;
+
+        /// <summary> 現在のHPを取得する。 </summary>
         public Health CurrentHealth => _health.CurrentHealth;
+
+        /// <summary> 最大HPを取得する。 </summary>
         public Health MaxHealth => _health.MaxHealth;
+
+        /// <summary> 死亡しているかどうかを取得する。 </summary>
         public bool IsDead => CurrentHealth.Value <= 0f;
+
         /// <summary>
-        ///     無敵状態かどうかを示すプロパティ。回避以外にもあるかもなので、変数は無敵にした。
+        ///     無敵状態かどうかを示すプロパティ。
         /// </summary>
         public bool IsInvincible => _isInvincible;
 
@@ -82,6 +95,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _health.ChangeHealth(nextHealth);
         }
 
+        /// <summary>
+        ///     無敵状態を設定する。
+        /// </summary>
+        /// <param name="isInvincible"></param>
         public void SetInvincible(bool isInvincible)
         {
             _isInvincible = isInvincible;
