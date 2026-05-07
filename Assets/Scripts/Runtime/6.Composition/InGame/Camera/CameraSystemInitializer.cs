@@ -22,6 +22,11 @@ namespace KillChord.Runtime.Composition
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class CameraSystemInitializer : MonoBehaviour
     {
+        /// <summary>
+        ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
+        /// </summary>
+        /// <param name="targetManager"> ロックオン対象の一覧を管理するマネージャー。</param>
+        /// <param name="targetEntityRegistry"> ロックオン対象とキャラクターエンティティの対応を管理するレジストリ。</param>
         public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             if (_config == null)
@@ -64,7 +69,6 @@ namespace KillChord.Runtime.Composition
             _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
-
 #if UNITY_EDITOR
             _cameraSystem.gameObject
                 .AddComponent<CameraSystemParameterDebug>()
@@ -72,9 +76,10 @@ namespace KillChord.Runtime.Composition
 #endif
         }
 
+        [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
+        private CameraSystemView _cameraSystem;
 
-        [SerializeField] private CameraSystemView _cameraSystem;
-
-        [SerializeField] private CameraSystemConfig _config;
+        [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
+        private CameraSystemConfig _config;
     }
 }
