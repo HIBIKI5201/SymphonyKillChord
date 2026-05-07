@@ -2,7 +2,6 @@ using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.Structure.InGame.Camera;
 using KillChord.Runtime.Utility;
@@ -59,7 +58,5 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private CameraSystemView _cameraSystem;
 
         [SerializeField] private CameraSystemConfig _config;
-
-        [SerializeField] private EnemyInfantryTestSpawner _enemyTestSpawner;
     }
 }
