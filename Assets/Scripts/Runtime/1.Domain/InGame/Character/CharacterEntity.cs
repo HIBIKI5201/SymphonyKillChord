@@ -87,9 +87,9 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _isInvincible = isInvincible;
         }
 
-        private CharacterName _name;
-        private HealthEntity _health;
-        private CharacterCombatSpec _combatSpec;
+        private readonly CharacterName _name;
+        private readonly HealthEntity _health;
+        private readonly CharacterCombatSpec _combatSpec;
         private bool _isDeadNotified = false;
         private bool _isInvincible = false;
     }
