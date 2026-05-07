@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Camera
 {
     /// <summary>
     ///     追従対象の速度を計算する構造体。

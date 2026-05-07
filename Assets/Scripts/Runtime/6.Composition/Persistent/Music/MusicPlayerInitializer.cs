@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     [RequireComponent(typeof(MusicPlayer))]
     public class MusicPlayerInitializer : MonoBehaviour
     {
+        /// <summary>
+        ///     起動時に音楽プレイヤーの初期化を行う。
+        /// </summary>
         private void Awake()
         {
             MusicPlayer musicPlayer = GetComponent<MusicPlayer>();

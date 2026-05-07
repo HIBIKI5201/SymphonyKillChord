@@ -1,11 +1,21 @@
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Music
 {
+    /// <summary>
+    ///     リズムガイドの表示用データを生成するプレゼンタークラス。
+    /// </summary>
     public class RhythmGuidePresenter
     {
+        /// <summary>
+        ///     新しいプレゼンターを生成する。
+        /// </summary>
+        /// <param name="musicSyncService"> 音楽同期サービス。 </param>
+        /// <param name="rhythmGuideUsecase"> リズムガイドユースケース。 </param>
+        /// <param name="targetSelectorController"> ターゲット選択コントローラー。 </param>
         public RhythmGuidePresenter(IMusicSyncService musicSyncService, RhythmGuideUsecase rhythmGuideUsecase, TargetSelectorController targetSelectorController)
         {
             _musicSyncService = musicSyncService;
@@ -13,6 +23,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             _targetSelectorController = targetSelectorController;
         }
 
+        /// <summary>
+        ///     リズムガイドの表示用DTOを生成する。
+        /// </summary>
+        /// <param name="unscaledTime"> スケールされていない再生時間。 </param>
+        /// <returns> リズムガイドDTO。 </returns>
         public RhythmGuideDto CreateDto(float unscaledTime)
         {
             float barProgress = _musicSyncService.GetBarProgress(unscaledTime);

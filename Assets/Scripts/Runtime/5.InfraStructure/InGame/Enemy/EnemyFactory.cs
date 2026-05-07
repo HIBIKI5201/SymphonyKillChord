@@ -8,6 +8,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// </summary>
     public static class EnemyFactory
     {
+        /// <summary>
+        ///     敵の移動情報を生成する。
+        /// </summary>
+        /// <param name="enemyMoveData"></param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <exception cref="System.ArgumentException"></exception>
         public static EnemyMoveSpec CreateEnemyMoveSpec(EnemyMoveData enemyMoveData)
         {
             if(enemyMoveData == null)
@@ -24,6 +31,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 new AttackRangeMax(enemyMoveData.AttackRangeMax));
         }
 
+        /// <summary>
+        ///     敵の音楽同期タイミング情報を生成する。
+        /// </summary>
+        /// <param name="enemyMusicData"></param>
+        /// <returns></returns>
         public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)
         {
             return new EnemyMusicSpec(
@@ -32,6 +44,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 enemyMusicData.TargetBeat);
         }
 
+        /// <summary>
+        ///     敵の攻撃に関する音楽同期タイミング情報を生成する。
+        /// </summary>
+        /// <param name="encounterData"></param>
+        /// <param name="battleMusicData"></param>
+        /// <returns></returns>
         public static EnemyAttackMusicSpec CreateEnemyAttackMusicSpec(
             EnemyMusicData encounterData,
             EnemyMusicData battleMusicData)

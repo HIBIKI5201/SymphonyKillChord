@@ -1,5 +1,4 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.View;

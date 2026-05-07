@@ -8,6 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
     /// </summary>
     public readonly struct RhythmDefinition
     {
+        /// <summary>
+        ///     BPMを指定してリズム定義を生成する。
+        /// </summary>
+        /// <param name="bpm"> BPM。 </param>
         public RhythmDefinition(double bpm)
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
@@ -16,10 +20,18 @@ namespace KillChord.Runtime.Domain.InGame.Music
             _barLength = _beatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
         }
 
+        /// <summary> BPM。 </summary>
         public double Bpm => _bpm;
+        /// <summary> 1拍の長さ（秒）。 </summary>
         public double BeatLength => _beatLength;
+        /// <summary> 1小節の長さ（秒）。 </summary>
         public double BarLength => _barLength;
 
+        /// <summary>
+        ///     経過時間から小節内の進捗を計算する。
+        /// </summary>
+        /// <param name="durationSeconds"> 経過時間（秒）。 </param>
+        /// <returns> 小節内の進捗（0.0〜1.0）。 </returns>
         public double CalculateElapsedBarCount(double durationSeconds)
         {
             if (Bpm <= 0) return 0d;
@@ -28,10 +40,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
         }
 
         /// <summary>
-        /// 1~8拍子の中で、指定された秒数に最も近い拍子を算出する
+        ///     1〜8拍子の中で、指定された秒数に最も近い拍子を算出する。
         /// </summary>
-        /// <param name="durationSeconds">前回のアクションからの経過秒数</param>
-        /// <returns>1~8の拍子</returns>
+        /// <param name="durationSeconds"> 前回のアクションからの経過秒数。 </param>
+        /// <returns> 拍の種類。 </returns>
         public BeatType CalculateBeatType(double durationSeconds)
         {
             if (Bpm <= 0)
