@@ -3,8 +3,17 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
+    /// <summary>
+    ///     リズムガイドの更新を毎フレーム行うViewクラス。
+    /// </summary>
     public class RhythmGuideUpdeteView : MonoBehaviour
     {
+        /// <summary>
+        ///     更新用Viewを初期化する。
+        /// </summary>
+        /// <param name="view"> リズムガイドView。 </param>
+        /// <param name="presenter"> リズムガイドプレゼンター。 </param>
+        /// <param name="viewModel"> リズムガイドビューモデル。 </param>
         public void Initialize(RhythmGuideView view, RhythmGuidePresenter presenter, RhythmGuideViewModel viewModel)
         {
             _view = view;
@@ -16,6 +25,9 @@ namespace KillChord.Runtime.View.InGame.Music
         private RhythmGuideView _view;
         private RhythmGuidePresenter _presenter;
 
+        /// <summary>
+        ///     毎フレームの更新処理。プレゼンターからデータを受け取り、ビューモデルとViewを更新する。
+        /// </summary>
         private void Update()
         {
             if (_presenter == null || _viewModel == null || _view == null)

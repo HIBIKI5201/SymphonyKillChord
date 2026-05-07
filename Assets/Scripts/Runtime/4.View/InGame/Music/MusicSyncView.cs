@@ -10,8 +10,16 @@ namespace KillChord.Runtime.View.InGame.Music
     /// </summary>
     public class MusicSyncView : MonoBehaviour
     {
+        /// <summary> 音楽同期状態。 </summary>
         public MusicSyncState MusicSyncState => _musicSyncState;
 
+        /// <summary>
+        ///     依存オブジェクトをバインドする。
+        /// </summary>
+        /// <param name="musicPlayer"> 音楽プレイヤー。 </param>
+        /// <param name="musicSyncState"> 音楽同期状態。 </param>
+        /// <param name="musicSyncController"> 音楽同期コントローラー。 </param>
+        /// <param name="testBpm"> テスト用BPM。 </param>
         public void Bind(
             MusicPlayer musicPlayer,
             MusicSyncState musicSyncState,
@@ -34,6 +42,9 @@ namespace KillChord.Runtime.View.InGame.Music
         private MusicSyncState _musicSyncState;
         private MusicSyncController _musicSyncController;
 
+        /// <summary>
+        ///     毎フレームの更新処理。音楽同期コントローラーを更新する。
+        /// </summary>
         private void Update()
         {
             if (_musicPlayer == null
@@ -45,6 +56,10 @@ namespace KillChord.Runtime.View.InGame.Music
             _musicSyncController.Tick(_musicPlayer.Time);
         }
 
+        /// <summary>
+        ///     BGMを再生する際の処理。
+        /// </summary>
+        /// <param name="cueName"> キュー名。 </param>
         private void PlayBgm(string cueName)
         {
             _musicSyncState.SetBpm(_testBpm);
