@@ -1,7 +1,7 @@
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.Persistent.Camera
 {
     public class CameraInitializer : MonoBehaviour, ICameraTransform
     {
