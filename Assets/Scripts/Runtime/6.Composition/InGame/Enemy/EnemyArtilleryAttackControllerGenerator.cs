@@ -8,6 +8,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyArtilleryAttackControllerGenerator : IEnemyAttackControllerGenerator
     {
+        /// <summary>
+        ///     砲兵の攻撃コントローラーを生成する。
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public IEnemyAttackController Generate(EnemyAttackControllerContext ctx)
         {
             if(ctx == null)

@@ -25,9 +25,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _musicActionScheduler = musicActionScheduler;
         }
 
-        /// <summary> 予約が存在するかどうかを示すプロパティ。
+        /// <summary> 予約が存在するかどうかを示すプロパティ。 </summary>
         public bool HasReservation => _hasReservation;
 
+        /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
 
         /// <summary>
@@ -95,6 +96,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 _cancellationTokenSource.Token);
         }
 
+        /// <summary>
+        ///     予約タイミングが到達時の処理。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             Debug.Log("予約されたタイミングに到達しました。");

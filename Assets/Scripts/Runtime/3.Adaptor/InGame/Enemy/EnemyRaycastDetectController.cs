@@ -12,6 +12,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _model = model;
         }
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => _model.CanRaycastHitTarget;
 
         private IEnemyRaycastDetectViewModel _model;

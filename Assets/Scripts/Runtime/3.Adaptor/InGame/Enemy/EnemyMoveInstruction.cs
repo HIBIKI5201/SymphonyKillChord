@@ -14,8 +14,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             MoveSpeed = moveSpeed;
         }
 
+        /// <summary> 移動すべきか </summary>
         public bool ShouldMove { get; }
+        /// <summary> 目的位置 </summary>
         public Vector3 Destination { get; }
+        /// <summary> 移動速度 </summary>
         public float MoveSpeed { get; }
     }
 }
