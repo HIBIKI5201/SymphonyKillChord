@@ -20,6 +20,8 @@ namespace KillChord.Runtime.Composition
         [SerializeField]
         private AnimationCatalogAsset _animationCatalog;
         [SerializeField]
+        private PortraitCatalogAsset _portraitCatalog;
+        [SerializeField]
         private ScenarioSettingsAsset _scenarioSettings;
         private ScenarioUsecase _usecase;
 
@@ -43,17 +45,22 @@ namespace KillChord.Runtime.Composition
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_backgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_animationCatalog);
+            IPortraitRepository portraitRepository = new PortraitRepository(_portraitCatalog);
             IScenarioSettingsRepository scenarioSettingsRepository = new ScenarioSettingsRepository(_scenarioSettings);
 
             TextPresenter textPresenter = new TextPresenter(viewModel);
             FadePresenter fadePresenter = new FadePresenter(viewModel);
             BackgroundPresenter backgroundPresenter = new BackgroundPresenter(viewModel);
             AnimationPresenter animationPresenter = new AnimationPresenter(viewModel);
+            PortraitPresenter portraitPresenter = new PortraitPresenter(viewModel);
+            LayerPresenter layerPresenter = new LayerPresenter(viewModel);
             ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(
                 textPresenter,
                 fadePresenter,
                 backgroundPresenter,
                 animationPresenter,
+                portraitPresenter,
+                layerPresenter,
                 viewModel);
 
             _usecase = new ScenarioUsecase(
@@ -71,16 +78,21 @@ namespace KillChord.Runtime.Composition
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);
+            PortraitEventHandler portraitEventHandler = new PortraitEventHandler(presenterFacade, portraitRepository);
+            LayerEventHandler layerEventHandler = new LayerEventHandler(presenterFacade);
             handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
             handlerRepo.Register<FadeEvent>(fadeEventHandle.HandleAsync);
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
             handlerRepo.Register<Domain.AnimationEvent>(animationEventHandle.HandleAsync);
+            handlerRepo.Register<PortraitEvent>(portraitEventHandler.HandleAsync);
+            handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
 
             //View生成
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
             var animationMap = BuildAnimationMap(_animationCatalog);
-            view.Initialize(viewModel, backgroundMap, animationMap);
+            var portraitMap = BuildPortraitMap(_portraitCatalog);
+            view.Initialize(viewModel, backgroundMap, animationMap, portraitMap);
             ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
             inputView.Initialize(controller);
             await _usecase.PlayScenario();
@@ -115,6 +127,22 @@ namespace KillChord.Runtime.Composition
         private static IReadOnlyDictionary<string, AnimationClip> BuildAnimationMap(AnimationCatalogAsset catalog)
         {
             var map = new Dictionary<string, AnimationClip>(System.StringComparer.Ordinal);
+            if (catalog == null) return map;
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                var entry = catalog.Entries[i];
+                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
+            }
+
+            return map;
+        }
+
+        private static IReadOnlyDictionary<string, Sprite> BuildPortraitMap(PortraitCatalogAsset catalog)
+        {
+            var map = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
             if (catalog == null) return map;
 
             for (int i = 0; i < catalog.Entries.Count; i++)

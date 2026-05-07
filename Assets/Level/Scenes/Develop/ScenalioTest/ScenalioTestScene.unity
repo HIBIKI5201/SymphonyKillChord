@@ -495,6 +495,7 @@ MonoBehaviour:
   _inputView: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
   _backgroundCatalog: {fileID: 11400000, guid: 03ab59b5cc1893e4eaf97352ba51df87, type: 2}
   _animationCatalog: {fileID: 11400000, guid: 9c44a325b8ad84f498216394b6a9d584, type: 2}
+  _portraitCatalog: {fileID: 11400000, guid: f14fa8fb60db62e4cb2b1be4f9ed86f7, type: 2}
   _scenarioSettings: {fileID: 11400000, guid: 888c47664981fed459937f475b632964, type: 2}
 --- !u!4 &1897386736
 Transform:

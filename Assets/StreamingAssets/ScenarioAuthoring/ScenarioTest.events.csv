@@ -1,0 +1,8 @@
+1,Background,genki_pose
+2,Layer,PortraitLeft,2
+3,Portrait,Left,hello,-460,-120,1,true
+4,Portrait,Right,hello,460,-120,1,true
+5,Text,Hero,......Hello sekai?
+6,Portrait,Left,good,-460,-120,1,true
+7,Text,Tatuki,danger is coming
+

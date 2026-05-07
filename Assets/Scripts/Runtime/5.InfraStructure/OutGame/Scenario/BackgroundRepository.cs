@@ -4,14 +4,14 @@ using KillChord.Runtime.Domain;
 
 namespace KillChord.Runtime.InfraStructure
 {
-    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogAsset.Entry>, IBackgroundRepository
+    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogEntry>, IBackgroundRepository
     {
         public BackgroundRepository(BackgroundCatalogAsset catalog)
             : base(catalog != null ? catalog.Entries : null)
         {
         }
 
-        protected override bool TryBuild(BackgroundCatalogAsset.Entry entry, out string id, out BackgroundDefinition definition)
+        protected override bool TryBuild(BackgroundCatalogEntry entry, out string id, out BackgroundDefinition definition)
         {
             id = entry.Id;
             if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)

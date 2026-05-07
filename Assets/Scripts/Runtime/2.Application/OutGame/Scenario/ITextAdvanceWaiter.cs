@@ -4,8 +4,11 @@ using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application
 {
+    /// <summary>
+    /// テキスト送り待機の契約を定義します。
+    /// </summary>
     public interface ITextAdvanceWaiter
     {
-        public ValueTask WaitNextAsync(CancellationToken ct);
+        ValueTask WaitNextAsync(CancellationToken ct);
     }
 }

@@ -2,7 +2,7 @@ using System;
 using KillChord.Runtime.Adaptor;
 namespace KillChord.Runtime.View
 {
-    public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink
+    public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink, IPortraitViewSink, ILayerViewSink
         , IScenarioCompletionViewSink
     {
         public void SetText(string message)
@@ -25,6 +25,22 @@ namespace KillChord.Runtime.View
             OnAnimation?.Invoke(assetKey);
         }
 
+        public void SetPortrait(
+            string slot,
+            string assetKey,
+            float positionX,
+            float positionY,
+            float scale,
+            bool visible)
+        {
+            OnPortrait?.Invoke(slot, assetKey, positionX, positionY, scale, visible);
+        }
+
+        public void SetLayerOrder(string target, int order)
+        {
+            OnLayerOrder?.Invoke(target, order);
+        }
+
         public void SetScenarioCompleted(bool skipped)
         {
             OnScenarioCompleted?.Invoke(skipped);
@@ -34,6 +50,8 @@ namespace KillChord.Runtime.View
         public event Action<float, float, float> OnFade;
         public event Action<string> OnBackground;
         public event Action<string> OnAnimation;
+        public event Action<string, string, float, float, float, bool> OnPortrait;
+        public event Action<string, int> OnLayerOrder;
         public event Action<bool> OnScenarioCompleted;
 
     }
