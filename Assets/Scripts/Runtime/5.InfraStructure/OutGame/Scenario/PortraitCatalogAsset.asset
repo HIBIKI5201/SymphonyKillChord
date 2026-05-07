@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa23ed927bb11bf43865d11d0e7e3b19, type: 3}
   m_Name: PortraitCatalogAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.PortraitCatalogAsset
-  _entries: []
+  _entries:
+  - Id: hello
+    AssetKey: 
+    Asset: {fileID: 9140383256632175445, guid: a443f1123728b064bafea62b78616430, type: 3}
+  - Id: good
+    AssetKey: 
+    Asset: {fileID: 6641412011175210450, guid: baee454b10f31c34191a253e6e84e8e5, type: 3}

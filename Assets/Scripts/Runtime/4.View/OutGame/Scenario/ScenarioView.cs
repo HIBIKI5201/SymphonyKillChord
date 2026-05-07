@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +7,19 @@ namespace KillChord.Runtime.View
 {
     public class ScenarioView : MonoBehaviour
     {
+        private const string SlotLeft = "Left";
+        private const string SlotCenter = "Center";
+        private const string SlotRight = "Right";
+        private const string PortraitObjectLeft = "PortraitLeft";
+        private const string PortraitObjectCenter = "PortraitCenter";
+        private const string PortraitObjectRight = "PortraitRight";
+        private const string TargetCanvas = "Canvas";
+        private const string TargetBackground = "Background";
+        private const string TargetPortraitLeft = "PortraitLeft";
+        private const string TargetPortraitCenter = "PortraitCenter";
+        private const string TargetPortraitRight = "PortraitRight";
+        private const string TargetText = "Text";
+
         public void Initialize(
             ViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
@@ -18,6 +31,7 @@ namespace KillChord.Runtime.View
             SubscribeToViewModel();
             BuildCatalogMaps(backgroundByKey, animationByKey, portraitByKey);
             EnsurePortraitSlots();
+            ResetFadeState();
         }
 
         [SerializeField]
@@ -48,7 +62,7 @@ namespace KillChord.Runtime.View
             Fade();
         }
 
-        private void InputViewModel(string chat)
+        private void OnTextReceived(string chat)
         {
             if (_chat == null)
             {
@@ -58,7 +72,7 @@ namespace KillChord.Runtime.View
             _chat.text = chat;
         }
 
-        private void InputViewModel(float start, float end, float duration)
+        private void OnFadeReceived(float start, float end, float duration)
         {
             _onFade = true;
             _time = 0f;
@@ -113,7 +127,7 @@ namespace KillChord.Runtime.View
 
         private void InputLayerOrder(string target, int order)
         {
-            if (string.Equals(target, "Canvas", System.StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(target, TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
             {
                 Canvas canvas = GetComponent<Canvas>();
                 if (canvas == null) return;
@@ -123,28 +137,7 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            RectTransform targetRect = null;
-            if (string.Equals(target, "Background", System.StringComparison.OrdinalIgnoreCase))
-            {
-                targetRect = _backgroundImage != null ? _backgroundImage.rectTransform : null;
-            }
-            else if (string.Equals(target, "PortraitLeft", System.StringComparison.OrdinalIgnoreCase))
-            {
-                targetRect = GetPortraitRect("Left");
-            }
-            else if (string.Equals(target, "PortraitCenter", System.StringComparison.OrdinalIgnoreCase))
-            {
-                targetRect = GetPortraitRect("Center");
-            }
-            else if (string.Equals(target, "PortraitRight", System.StringComparison.OrdinalIgnoreCase))
-            {
-                targetRect = GetPortraitRect("Right");
-            }
-            else if (string.Equals(target, "Text", System.StringComparison.OrdinalIgnoreCase))
-            {
-                targetRect = _chat != null ? _chat.rectTransform : null;
-            }
-
+            RectTransform targetRect = ResolveLayerTargetRect(target);
             if (targetRect == null) return;
 
             int childCount = targetRect.parent != null ? targetRect.parent.childCount : 0;
@@ -187,8 +180,8 @@ namespace KillChord.Runtime.View
         private void InputScenarioCompleted(bool skipped)
         {
             Debug.Log(skipped
-                ? "Scenario completed event fired: skipped."
-                : "Scenario completed event fired: all text displayed.");
+                ? "シナリオ完了イベント発火: スキップ終了"
+                : "シナリオ完了イベント発火: 全テキスト表示完了");
             gameObject.SetActive(false);
         }
 
@@ -197,43 +190,16 @@ namespace KillChord.Runtime.View
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
             IReadOnlyDictionary<string, Sprite> portraitByKey)
         {
-            _backgroundByKey.Clear();
-            _animationByKey.Clear();
-            _portraitByKey.Clear();
-
-            if (backgroundByKey != null)
-            {
-                foreach (var entry in backgroundByKey)
-                {
-                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
-                    _backgroundByKey[entry.Key] = entry.Value;
-                }
-            }
-
-            if (animationByKey != null)
-            {
-                foreach (var entry in animationByKey)
-                {
-                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
-                    _animationByKey[entry.Key] = entry.Value;
-                }
-            }
-
-            if (portraitByKey != null)
-            {
-                foreach (var entry in portraitByKey)
-                {
-                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
-                    _portraitByKey[entry.Key] = entry.Value;
-                }
-            }
+            CopyCatalogEntries(backgroundByKey, _backgroundByKey);
+            CopyCatalogEntries(animationByKey, _animationByKey);
+            CopyCatalogEntries(portraitByKey, _portraitByKey);
         }
 
         private void EnsurePortraitSlots()
         {
-            EnsurePortraitSlot("Left", "PortraitLeft", new Vector2(-420f, -120f));
-            EnsurePortraitSlot("Center", "PortraitCenter", new Vector2(0f, -120f));
-            EnsurePortraitSlot("Right", "PortraitRight", new Vector2(420f, -120f));
+            EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, new Vector2(-420f, -120f));
+            EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
+            EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
         }
 
         private void EnsurePortraitSlot(string slot, string objectName, Vector2 defaultPosition)
@@ -271,6 +237,56 @@ namespace KillChord.Runtime.View
             return _portraitBySlot.TryGetValue(slot, out Image image) && image != null ? image.rectTransform : null;
         }
 
+        private RectTransform ResolveLayerTargetRect(string target)
+        {
+            if (string.Equals(target, TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return _backgroundImage != null ? _backgroundImage.rectTransform : null;
+            }
+            if (string.Equals(target, TargetPortraitLeft, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return GetPortraitRect(SlotLeft);
+            }
+            if (string.Equals(target, TargetPortraitCenter, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return GetPortraitRect(SlotCenter);
+            }
+            if (string.Equals(target, TargetPortraitRight, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return GetPortraitRect(SlotRight);
+            }
+            if (string.Equals(target, TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return _chat != null ? _chat.rectTransform : null;
+            }
+
+            return null;
+        }
+
+        private static void CopyCatalogEntries<T>(
+            IReadOnlyDictionary<string, T> source,
+            Dictionary<string, T> destination)
+            where T : class
+        {
+            destination.Clear();
+            if (source == null) return;
+
+            foreach (var entry in source)
+            {
+                if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null) continue;
+                destination[entry.Key] = entry.Value;
+            }
+        }
+
+        private void ResetFadeState()
+        {
+            _onFade = false;
+            _time = 0f;
+            _start = 0f;
+            _end = 0f;
+            _duration = 0f;
+        }
+
         private void OnDestroy()
         {
             UnsubscribeFromViewModel();
@@ -280,8 +296,8 @@ namespace KillChord.Runtime.View
         {
             if (_viewModel == null) return;
 
-            _viewModel.OnChat += InputViewModel;
-            _viewModel.OnFade += InputViewModel;
+            _viewModel.OnChat += OnTextReceived;
+            _viewModel.OnFade += OnFadeReceived;
             _viewModel.OnBackground += InputBackground;
             _viewModel.OnAnimation += InputAnimation;
             _viewModel.OnPortrait += InputPortrait;
@@ -293,8 +309,8 @@ namespace KillChord.Runtime.View
         {
             if (_viewModel == null) return;
 
-            _viewModel.OnChat -= InputViewModel;
-            _viewModel.OnFade -= InputViewModel;
+            _viewModel.OnChat -= OnTextReceived;
+            _viewModel.OnFade -= OnFadeReceived;
             _viewModel.OnBackground -= InputBackground;
             _viewModel.OnAnimation -= InputAnimation;
             _viewModel.OnPortrait -= InputPortrait;
@@ -304,3 +320,4 @@ namespace KillChord.Runtime.View
         }
     }
 }
+

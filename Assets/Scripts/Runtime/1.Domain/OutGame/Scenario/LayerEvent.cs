@@ -2,16 +2,6 @@ using System;
 
 namespace KillChord.Runtime.Domain
 {
-    public enum LayerTarget
-    {
-        Background,
-        PortraitLeft,
-        PortraitCenter,
-        PortraitRight,
-        Text,
-        Canvas,
-    }
-
     public class LayerEvent : IScenarioEvent
     {
         public LayerEvent(LayerTarget target, int order)

@@ -2,13 +2,6 @@ using System;
 
 namespace KillChord.Runtime.Domain
 {
-    public enum PortraitSlot
-    {
-        Left,
-        Center,
-        Right,
-    }
-
     public class PortraitEvent : IScenarioEvent
     {
         public PortraitEvent(

@@ -22,11 +22,35 @@ namespace KillChord.Runtime.InfraStructure
 
             string root = UnityEngine.Application.streamingAssetsPath;
             bool isUrlPath = root.Contains("://", StringComparison.Ordinal);
-            string path = isUrlPath
+            string authoringPath = isUrlPath
+                ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
+                : Path.Combine(root, "ScenarioAuthoring", $"{id}.events.csv");
+            string scenarioPath = isUrlPath
                 ? $"{root.TrimEnd('/')}/Scenario/{id}.csv"
                 : Path.Combine(root, "Scenario", $"{id}.csv");
 
-            string[] lines = await ReadAllLinesAsync(path, isUrlPath, ct);
+            string[] lines = await ReadScenarioLinesAsync(authoringPath, scenarioPath, isUrlPath, ct);
+            if (lines.Length == 0)
+            {
+                return new ScenarioData(Array.Empty<IScenarioEvent>());
+            }
+
+            string firstDataLine = FindFirstDataLine(lines);
+            if (string.IsNullOrWhiteSpace(firstDataLine))
+            {
+                return new ScenarioData(Array.Empty<IScenarioEvent>());
+            }
+
+            if (firstDataLine.TrimStart().StartsWith("Type,", StringComparison.OrdinalIgnoreCase))
+            {
+                return ParseNormalizedCsv(lines);
+            }
+
+            return ParseAuthoringCsv(lines);
+        }
+
+        private static ScenarioData ParseNormalizedCsv(string[] lines)
+        {
             if (lines.Length <= 1)
             {
                 return new ScenarioData(Array.Empty<IScenarioEvent>());
@@ -106,6 +130,276 @@ namespace KillChord.Runtime.InfraStructure
             return new ScenarioData(events);
         }
 
+        private static ScenarioData ParseAuthoringCsv(string[] lines)
+        {
+            var definitions = new Dictionary<int, EventDefinition>();
+            var orderedSteps = new List<int>(Math.Max(4, lines.Length));
+            var pendingTriggers = new List<AuthoringTriggerRow>(Math.Max(2, lines.Length / 2));
+
+            for (int lineNo = 1; lineNo <= lines.Length; lineNo++)
+            {
+                string raw = lines[lineNo - 1];
+                if (string.IsNullOrWhiteSpace(raw)) continue;
+                if (raw.TrimStart().StartsWith("#", StringComparison.Ordinal)) continue;
+
+                List<string> fields = ParseCsvLine(raw);
+                if (fields.Count < 2)
+                {
+                    throw new FormatException($"line {lineNo}: authoring csv requires at least Step and Type.");
+                }
+
+                int step = ParseRequiredInt(fields[0], "Step", lineNo);
+                string type = fields[1]?.Trim();
+                if (string.IsNullOrWhiteSpace(type))
+                {
+                    throw new FormatException($"line {lineNo}: Type is required.");
+                }
+
+                if (type.Equals("Trigger", StringComparison.OrdinalIgnoreCase))
+                {
+                    pendingTriggers.Add(new AuthoringTriggerRow(lineNo, fields));
+                    continue;
+                }
+
+                if (definitions.ContainsKey(step))
+                {
+                    throw new FormatException($"line {lineNo}: duplicated Step '{step}'.");
+                }
+
+                EventDefinition definition = CreateAuthoringEventDefinition(step, type, fields, lineNo);
+                definitions.Add(step, definition);
+                orderedSteps.Add(step);
+            }
+
+            foreach (AuthoringTriggerRow triggerRow in pendingTriggers)
+            {
+                int parentStep = ParseRequiredInt(GetAuthoringField(triggerRow.Fields, 2), "ParentStep", triggerRow.LineNo);
+                if (!definitions.TryGetValue(parentStep, out EventDefinition parent))
+                {
+                    throw new FormatException($"line {triggerRow.LineNo}: ParentStep '{parentStep}' was not found.");
+                }
+                if (parent is not TextEventDefinition textParent)
+                {
+                    throw new FormatException($"line {triggerRow.LineNo}: ParentStep '{parentStep}' must point Text event.");
+                }
+
+                TextTimingTrigger trigger = CreateAuthoringTrigger(triggerRow.Fields, triggerRow.LineNo, textParent.Text);
+                textParent.AddTrigger(trigger);
+            }
+
+            var events = new List<IScenarioEvent>(orderedSteps.Count);
+            foreach (int step in orderedSteps)
+            {
+                events.Add(definitions[step].ToEvent());
+            }
+
+            return new ScenarioData(events);
+        }
+
+        private static EventDefinition CreateAuthoringEventDefinition(int step, string type, IReadOnlyList<string> fields, int lineNo)
+        {
+            switch (type.Trim().ToLowerInvariant())
+            {
+                case "text":
+                    {
+                        string speaker = GetAuthoringField(fields, 2);
+                        string text = GetAuthoringField(fields, 3);
+                        return new TextEventDefinition(step, speaker ?? string.Empty, text ?? string.Empty);
+                    }
+                case "background":
+                    {
+                        string backgroundId = GetAuthoringField(fields, 2);
+                        if (string.IsNullOrWhiteSpace(backgroundId))
+                        {
+                            throw new FormatException($"line {lineNo}: BackgroundId is required.");
+                        }
+                        return new PlainEventDefinition(step, new BackgroundEvent(backgroundId));
+                    }
+                case "animation":
+                    {
+                        string animationId = GetAuthoringField(fields, 2);
+                        if (string.IsNullOrWhiteSpace(animationId))
+                        {
+                            throw new FormatException($"line {lineNo}: AnimationId is required.");
+                        }
+                        return new PlainEventDefinition(step, new AnimationEvent(animationId));
+                    }
+                case "fade":
+                    {
+                        float start = ParseRequiredFloat(GetAuthoringField(fields, 2), "FadeStart", lineNo);
+                        float end = ParseRequiredFloat(GetAuthoringField(fields, 3), "FadeEnd", lineNo);
+                        float duration = ParseRequiredFloat(GetAuthoringField(fields, 4), "FadeDuration", lineNo);
+                        return new PlainEventDefinition(step, new FadeEvent(start, end, duration));
+                    }
+                case "portrait":
+                    {
+                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 2), "PortraitSlot", lineNo);
+                        string portraitId = GetAuthoringField(fields, 3);
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {lineNo}: PortraitId is required.");
+                        }
+
+                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 4), 0f, "PortraitPosX", lineNo);
+                        float posY = ParseOptionalFloat(GetAuthoringField(fields, 5), 0f, "PortraitPosY", lineNo);
+                        float scale = ParseOptionalFloat(GetAuthoringField(fields, 6), 1f, "PortraitScale", lineNo);
+                        bool visible = ParseOptionalBool(GetAuthoringField(fields, 7), true, "PortraitVisible", lineNo);
+
+                        return new PlainEventDefinition(step, new PortraitEvent(slot, portraitId, posX, posY, scale, visible));
+                    }
+                case "layer":
+                    {
+                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 2), "LayerTarget", lineNo);
+                        int order = ParseRequiredInt(GetAuthoringField(fields, 3), "LayerOrder", lineNo);
+                        return new PlainEventDefinition(step, new LayerEvent(target, order));
+                    }
+                default:
+                    throw new FormatException($"line {lineNo}: unknown Type '{type}'.");
+            }
+        }
+
+        private static TextTimingTrigger CreateAuthoringTrigger(IReadOnlyList<string> fields, int lineNo, string text)
+        {
+            string triggerTypeRaw = GetAuthoringField(fields, 3);
+            string triggerType = triggerTypeRaw?.Trim();
+            if (string.IsNullOrWhiteSpace(triggerType))
+            {
+                throw new FormatException($"line {lineNo}: TriggerType is required.");
+            }
+
+            string onTriggerTypeRaw = GetAuthoringField(fields, 6);
+            string onTriggerType = onTriggerTypeRaw?.Trim();
+            if (string.IsNullOrWhiteSpace(onTriggerType))
+            {
+                throw new FormatException($"line {lineNo}: OnTriggerType is required.");
+            }
+
+            IScenarioEvent fireEvent = CreateAuthoringTriggerEvent(fields, lineNo, onTriggerType);
+            switch (triggerType.ToLowerInvariant())
+            {
+                case "atcharindex":
+                    {
+                        int charIndex = ParseRequiredInt(GetAuthoringField(fields, 4), "TriggerIndex", lineNo);
+                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                    }
+                case "atkeyword":
+                    {
+                        string keyword = GetAuthoringField(fields, 5);
+                        if (string.IsNullOrWhiteSpace(keyword))
+                        {
+                            throw new FormatException($"line {lineNo}: TriggerKeyword is required.");
+                        }
+                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                    }
+                case "atsuffix":
+                    {
+                        string suffix = GetAuthoringField(fields, 5);
+                        if (string.IsNullOrWhiteSpace(suffix))
+                        {
+                            throw new FormatException($"line {lineNo}: TriggerKeyword is required.");
+                        }
+                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
+                    }
+                case "attextend":
+                    {
+                        int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
+                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                    }
+                default:
+                    throw new FormatException($"line {lineNo}: unknown TriggerType '{triggerTypeRaw}'.");
+            }
+        }
+
+        private static IScenarioEvent CreateAuthoringTriggerEvent(IReadOnlyList<string> fields, int lineNo, string onTriggerType)
+        {
+            switch (onTriggerType.ToLowerInvariant())
+            {
+                case "fade":
+                    {
+                        float start = ParseRequiredFloat(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
+                        float end = ParseRequiredFloat(GetAuthoringField(fields, 8), "OnTriggerArg2", lineNo);
+                        float duration = ParseRequiredFloat(GetAuthoringField(fields, 9), "OnTriggerArg3", lineNo);
+                        return new FadeEvent(start, end, duration);
+                    }
+                case "background":
+                    {
+                        string backgroundId = GetAuthoringField(fields, 7);
+                        if (string.IsNullOrWhiteSpace(backgroundId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Background.");
+                        }
+                        return new BackgroundEvent(backgroundId);
+                    }
+                case "animation":
+                    {
+                        string animationId = GetAuthoringField(fields, 7);
+                        if (string.IsNullOrWhiteSpace(animationId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Animation.");
+                        }
+                        return new AnimationEvent(animationId);
+                    }
+                case "portrait":
+                    {
+                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
+                        string portraitId = GetAuthoringField(fields, 8);
+                        if (string.IsNullOrWhiteSpace(portraitId))
+                        {
+                            throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for Portrait.");
+                        }
+                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 9), 0f, "OnTriggerArg3", lineNo);
+                        return new PortraitEvent(slot, portraitId, posX, 0f, 1f, true);
+                    }
+                case "layer":
+                    {
+                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
+                        int order = ParseRequiredInt(GetAuthoringField(fields, 8), "OnTriggerArg2", lineNo);
+                        return new LayerEvent(target, order);
+                    }
+                default:
+                    throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");
+            }
+        }
+
+        private static string GetAuthoringField(IReadOnlyList<string> fields, int index)
+        {
+            return ScenarioCsvUtility.GetField(fields, index);
+        }
+
+        private static async ValueTask<string[]> ReadScenarioLinesAsync(
+            string authoringPath,
+            string scenarioPath,
+            bool isUrlPath,
+            CancellationToken ct)
+        {
+            try
+            {
+                return await ReadAllLinesAsync(authoringPath, isUrlPath, ct);
+            }
+            catch (FileNotFoundException)
+            {
+                return await ReadAllLinesAsync(scenarioPath, isUrlPath, ct);
+            }
+            catch (IOException)
+            {
+                return await ReadAllLinesAsync(scenarioPath, isUrlPath, ct);
+            }
+        }
+
+        private static string FindFirstDataLine(string[] lines)
+        {
+            if (lines == null) return string.Empty;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (line.TrimStart().StartsWith("#", StringComparison.Ordinal)) continue;
+                return line;
+            }
+
+            return string.Empty;
+        }
+
         private static async ValueTask<string[]> ReadAllLinesAsync(string path, bool isUrlPath, CancellationToken ct)
         {
             if (!isUrlPath)
@@ -138,15 +432,7 @@ namespace KillChord.Runtime.InfraStructure
 
         private static Dictionary<string, int> BuildHeaderIndex(IReadOnlyList<string> headers)
         {
-            var index = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            for (int i = 0; i < headers.Count; i++)
-            {
-                string key = headers[i]?.Trim();
-                if (string.IsNullOrEmpty(key)) continue;
-                index[key] = i;
-            }
-
-            return index;
+            return ScenarioCsvUtility.BuildHeaderIndex(headers);
         }
 
         private static EventDefinition CreateEventDefinition(
@@ -162,7 +448,7 @@ namespace KillChord.Runtime.InfraStructure
                         string text = GetValue(values, headerIndex, "Text");
                         var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
 
-                        // 互換: Event行に直接書かれた単一トリガーも受け入れる
+                        // 莠呈鋤: Event陦後↓逶ｴ謗･譖ｸ縺九ｌ縺溷腰荳繝医Μ繧ｬ繝ｼ繧ょ女縺大・繧後ｋ
                         TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
                         if (inlineTrigger != null)
                         {
@@ -363,79 +649,32 @@ namespace KillChord.Runtime.InfraStructure
             IReadOnlyDictionary<string, int> headerIndex,
             string key)
         {
-            if (!headerIndex.TryGetValue(key, out int idx)) return string.Empty;
-            if (idx < 0 || idx >= values.Count) return string.Empty;
-            return values[idx];
+            return ScenarioCsvUtility.GetValue(values, headerIndex, key);
         }
 
         private static float ParseRequiredFloat(string raw, string columnName, int lineNo)
         {
-            if (string.IsNullOrWhiteSpace(raw))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} is required.");
-            }
-
-            if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} must be number.");
-            }
-
-            return value;
+            return ScenarioCsvUtility.ParseRequiredFloat(raw, columnName, lineNo);
         }
 
         private static int ParseRequiredInt(string raw, string columnName, int lineNo)
         {
-            if (string.IsNullOrWhiteSpace(raw))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} is required.");
-            }
-
-            if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} must be int.");
-            }
-            return value;
+            return ScenarioCsvUtility.ParseRequiredInt(raw, columnName, lineNo);
         }
 
         private static int ParseOptionalInt(string raw, int defaultValue, string columnName, int lineNo)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
-
-            if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} must be int.");
-            }
-
-            return value;
+            return ScenarioCsvUtility.ParseOptionalInt(raw, defaultValue, columnName, lineNo);
         }
 
         private static float ParseOptionalFloat(string raw, float defaultValue, string columnName, int lineNo)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
-
-            if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
-            {
-                throw new FormatException($"line {lineNo}: {columnName} must be number.");
-            }
-
-            return value;
+            return ScenarioCsvUtility.ParseOptionalFloat(raw, defaultValue, columnName, lineNo);
         }
 
         private static bool ParseOptionalBool(string raw, bool defaultValue, string columnName, int lineNo)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return defaultValue;
-
-            if (bool.TryParse(raw, out bool boolValue))
-            {
-                return boolValue;
-            }
-
-            if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
-            {
-                return intValue != 0;
-            }
-
-            throw new FormatException($"line {lineNo}: {columnName} must be bool or 0/1.");
+            return ScenarioCsvUtility.ParseOptionalBool(raw, defaultValue, columnName, lineNo);
         }
 
         private static PortraitSlot ParsePortraitSlot(string raw, string columnName, int lineNo)
@@ -470,131 +709,9 @@ namespace KillChord.Runtime.InfraStructure
 
         private static List<string> ParseCsvLine(string line)
         {
-            var fields = new List<string>();
-            if (line == null)
-            {
-                fields.Add(string.Empty);
-                return fields;
-            }
-
-            var current = new StringBuilder(line.Length);
-            bool inQuote = false;
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                char c = line[i];
-                if (inQuote)
-                {
-                    if (c == '"')
-                    {
-                        bool escapedQuote = i + 1 < line.Length && line[i + 1] == '"';
-                        if (escapedQuote)
-                        {
-                            current.Append('"');
-                            i++;
-                        }
-                        else
-                        {
-                            inQuote = false;
-                        }
-                    }
-                    else
-                    {
-                        current.Append(c);
-                    }
-                }
-                else
-                {
-                    if (c == ',')
-                    {
-                        fields.Add(current.ToString());
-                        current.Clear();
-                    }
-                    else if (c == '"')
-                    {
-                        inQuote = true;
-                    }
-                    else
-                    {
-                        current.Append(c);
-                    }
-                }
-            }
-
-            fields.Add(current.ToString());
-            return fields;
+            return ScenarioCsvUtility.ParseCsvLine(line);
         }
 
-        private readonly struct EventRow
-        {
-            public EventRow(int lineNo, int step, string type, IReadOnlyList<string> values)
-            {
-                LineNo = lineNo;
-                Step = step;
-                Type = type;
-                Values = values;
-            }
-
-            public int LineNo { get; }
-            public int Step { get; }
-            public string Type { get; }
-            public IReadOnlyList<string> Values { get; }
-        }
-
-        private readonly struct TriggerRow
-        {
-            public TriggerRow(int lineNo, int parentStep, IReadOnlyList<string> values)
-            {
-                LineNo = lineNo;
-                ParentStep = parentStep;
-                Values = values;
-            }
-
-            public int LineNo { get; }
-            public int ParentStep { get; }
-            public IReadOnlyList<string> Values { get; }
-        }
-
-        private abstract class EventDefinition
-        {
-            protected EventDefinition(int step) => Step = step;
-            public int Step { get; }
-            public abstract IScenarioEvent ToEvent();
-        }
-
-        private sealed class PlainEventDefinition : EventDefinition
-        {
-            public PlainEventDefinition(int step, IScenarioEvent scenarioEvent) : base(step)
-            {
-                _scenarioEvent = scenarioEvent;
-            }
-
-            public override IScenarioEvent ToEvent() => _scenarioEvent;
-            private readonly IScenarioEvent _scenarioEvent;
-        }
-
-        private sealed class TextEventDefinition : EventDefinition
-        {
-            public TextEventDefinition(int step, string speaker, string text) : base(step)
-            {
-                Speaker = speaker;
-                Text = text;
-            }
-
-            public string Speaker { get; }
-            public string Text { get; }
-
-            public void AddTrigger(TextTimingTrigger trigger) => _triggers.Add(trigger);
-
-            public override IScenarioEvent ToEvent()
-            {
-                _cached ??= new TextEvent(Speaker, Text, _triggers.ToArray());
-                return _cached;
-            }
-
-            private readonly List<TextTimingTrigger> _triggers = new();
-            private IScenarioEvent _cached;
-        }
     }
 
 }
