@@ -24,6 +24,18 @@ namespace KillChord.Runtime.Composition
     {
         public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
+            if (_config == null)
+            {
+                Debug.LogError($"{nameof(_config)} がアサインされていません。");
+                return;
+            }
+
+            if (_cameraSystem == null)
+            {
+                Debug.LogError($"{nameof(_cameraSystem)} がアサインされていません。");
+                return;
+            }
+
             CameraSystemParameter parameter = _config.ToDomain();
 
             CameraBoneLockOnRotationApplication boneRotationSystem = new(parameter);
@@ -43,6 +55,12 @@ namespace KillChord.Runtime.Composition
             CameraSystemPresenter presenter = new(application);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
+            if (stageSceneObj == null)
+            {
+                Debug.LogError($"{nameof(IStageSceneInstance)} が見つかりません。");
+                return;
+            }
+
             _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
