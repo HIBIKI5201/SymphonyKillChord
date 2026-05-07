@@ -11,7 +11,6 @@ namespace KillChord.Runtime.Domain.Persistent.Music
     {
         public Beat(double signature, double count)
         {
-            // TODO: 後で相談。
             if (signature <= 0d)
             {
                 throw new ArgumentOutOfRangeException(nameof(signature), "拍子は正の数でなければなりません。");
@@ -22,7 +21,7 @@ namespace KillChord.Runtime.Domain.Persistent.Music
                 throw new ArgumentOutOfRangeException(nameof(count), "拍数は正の数でなければなりません。");
             }
 
-            _signature = Math.Max(signature, 1);
+            _signature = signature;
             _count = count;
         }
 
@@ -31,6 +30,11 @@ namespace KillChord.Runtime.Domain.Persistent.Music
 
         public static double GetLength(Beat beat, double bpm)
         {
+            if (bpm <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bpm), "BPMは正の数でなければなりません。");
+            }
+
             double beatSeconds = MusicConstants.SECONDS_PER_MINUTE / bpm;
             double barSeconds = beatSeconds * MusicConstants.STANDARD_BEATS_PER_BAR;
             double unitSeconds = barSeconds / beat._signature;
