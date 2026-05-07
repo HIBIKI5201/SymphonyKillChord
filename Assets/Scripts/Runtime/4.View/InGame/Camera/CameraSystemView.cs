@@ -126,7 +126,8 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         private void Tick(float deltaTime)
         {
-            if (_controller == null || _playerT == null) { return; }
+            if (_controller == null || _presenter == null||
+                _playerT == null || _cameraT == null) { return; }
             Vector2 input = _input * _cameraSensitivity;
             _input = Vector2.zero;
 
