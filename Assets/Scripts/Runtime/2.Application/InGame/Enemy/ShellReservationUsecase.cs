@@ -21,6 +21,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _musicActionScheduler = musicActionScheduler;
         }
 
+        /// <summary> 予約タイミングが到達した時発火するイベント </summary>
         public event Action OnReservedTimingReached;
 
         public void Dispose()
@@ -63,6 +64,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 _cancellationTokenSource.Token);
         }
 
+        /// <summary>
+        ///     予約タイミングが到達時の処理。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             Debug.Log("予約されたタイミングに到達しました。");
