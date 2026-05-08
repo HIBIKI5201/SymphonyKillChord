@@ -9,6 +9,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// </summary>
     public interface IMusicActionScheduler
     {
+        /// <summary>
+        ///     アクションをスケジュールする。
+        /// </summary>
+        /// <param name="musicSpec"> 敵の音楽スペック。 </param>
+        /// <param name="action"> 実行するアクション。 </param>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         void Schedule(
             in EnemyMusicSpec musicSpec,
             Action action,

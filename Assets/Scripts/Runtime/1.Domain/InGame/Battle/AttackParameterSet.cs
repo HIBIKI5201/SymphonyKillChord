@@ -28,6 +28,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public CriticalChance CriticalChance { get; }
         /// <summary> クリティカルヒットのダメージ倍率。 </summary>
         public CriticalMultiplier CriticalMultiplier { get; }
+
+        /// <summary> 確定ダメージ量を取得する。 </summary>
         public Damage ConfirmedDamage { get; }
     }
 }

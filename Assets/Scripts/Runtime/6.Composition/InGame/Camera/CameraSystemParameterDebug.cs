@@ -10,12 +10,17 @@ namespace KillChord.Runtime.Composition.InGame.Debugger
     /// </summary>
     public sealed class CameraSystemParameterDebug : MonoBehaviour
     {
-        [SerializeField] private CameraSystemParameter _parameter;
-
+        /// <summary>
+        ///     デバッグ表示対象のカメラシステムパラメータを設定する。
+        /// </summary>
+        /// <param name="parameter"> 表示対象のカメラシステムパラメータ。</param>
         public void SetCameraParameter(CameraSystemParameter parameter)
         {
             _parameter = parameter;
         }
+
+        [SerializeField, Tooltip("デバッグ表示対象のカメラシステムパラメータ。")]
+        private CameraSystemParameter _parameter;
     }
 }
 
