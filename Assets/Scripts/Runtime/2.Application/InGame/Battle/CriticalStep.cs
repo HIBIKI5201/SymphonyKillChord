@@ -8,6 +8,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// </summary>
     public class CriticalStep : IAttackStep
     {
+        /// <summary>
+        ///     攻撃処理ステップを実行する。
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
             float chance = context.AttackDefinition.AttackParameterSet.CriticalChance.Value;

@@ -1,26 +1,35 @@
+﻿using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Player
 {
     /// <summary>
-    ///     プレイヤーの移動や回避に関する設定値を保持するScriptableObject。
+    ///     プレイヤー移動と回避の設定値を保持するScriptableObject。
     /// </summary>
     [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "KillChord/InGame/PlayerConfig")]
     public sealed class PlayerConfig : ScriptableObject
     {
-        public PlayerMoveParameter ToDomain()
-            => new(
-                Mathf.Max(0f, _moveSpeed),
-                Mathf.Max(0f, _dodgeSpeed),
-                Mathf.Max(0f, _dodgeDuration),
-                Mathf.Max(0f, _dodgeCooldown)
-                );
+        [SerializeField, Tooltip("通常移動速度。")]
+        private float _moveSpeed;
 
-        [SerializeField] private float _moveSpeed;
         [Space]
-        [SerializeField] private float _dodgeSpeed;
-        [SerializeField] private float _dodgeDuration;
-        [SerializeField] private float _dodgeCooldown;
+        [SerializeField, Tooltip("回避移動速度。")]
+        private float _dodgeSpeed;
+
+        [SerializeField, Tooltip("回避継続時間。")]
+        private float _dodgeDuration;
+
+        [SerializeField, Tooltip("回避クールダウン時間。")]
+        private float _dodgeCooldown;
+
+        /// <summary> ScriptableObjectからドメインパラメータへ変換する。 </summary>
+        public PlayerMoveParameter ToDomain()
+            => new PlayerMoveParameter(
+                new MoveSpeed(_moveSpeed),
+                new DodgeSpeed(_dodgeSpeed),
+                new DodgeDuration(_dodgeDuration),
+                new DodgeCooldown(_dodgeCooldown)
+            );
     }
 }

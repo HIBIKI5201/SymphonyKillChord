@@ -8,6 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// </summary>
     public readonly struct CharacterName
     {
+        /// <summary>
+        ///     キャラクター名を初期化するコンストラクタ。
+        /// </summary>
+        /// <param name="value"></param>
         public CharacterName(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -18,6 +22,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _value = value;
         }
 
+        /// <summary> 名前を取得する。 </summary>
         public string Value => _value;
 
         private readonly string _value;

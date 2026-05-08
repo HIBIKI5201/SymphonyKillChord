@@ -14,18 +14,13 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        /// <returns></returns>
+        /// <returns> 攻撃結果。 </returns>
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
             IAttacker attacker,
-            IDefender defender,
-            bool canAttackHit)
+            IDefender defender
+            )
         {
-            if (!canAttackHit)
-            {
-                Debug.Log("[Attack]障害物あり／対象が射程外のため、攻撃が無効。");
-                return new AttackResult(new Damage(0), false);
-            }
             AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }

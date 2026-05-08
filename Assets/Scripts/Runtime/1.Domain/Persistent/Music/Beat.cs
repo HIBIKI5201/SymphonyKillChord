@@ -1,3 +1,4 @@
+using KillChord.Runtime.Utility;
 using System;
 
 namespace KillChord.Runtime.Domain.Persistent.Music
@@ -8,21 +9,47 @@ namespace KillChord.Runtime.Domain.Persistent.Music
     [Serializable]
     public readonly struct Beat
     {
-        public Beat(float signature, float count)
+        /// <summary>
+        ///     新しい拍の情報を生成する。
+        /// </summary>
+        /// <param name="signature"> 拍子。 </param>
+        /// <param name="count"> 拍数。 </param>
+        public Beat(double signature, double count)
         {
+            if (signature <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(signature), "拍子は正の数でなければなりません。");
+            }
 
-            _signature = Math.Max(signature, 1);
+            if (count <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), "拍数は正の数でなければなりません。");
+            }
+
+            _signature = signature;
             _count = count;
         }
 
+        /// <summary> 拍子。 </summary>
         public double Signature => _signature;
+        /// <summary> 拍数。 </summary>
         public double Count => _count;
 
+        /// <summary>
+        ///     指定されたBPMにおける拍の長さを取得する。
+        /// </summary>
+        /// <param name="beat"> 拍の情報。 </param>
+        /// <param name="bpm"> BPM。 </param>
+        /// <returns> 拍の長さ（秒）。 </returns>
         public static double GetLength(Beat beat, double bpm)
         {
-            double beatSeconds = 60d / bpm;
+            if (bpm <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bpm), "BPMは正の数でなければなりません。");
+            }
 
-            double barSeconds = beatSeconds * 4d; // 1小節は4/4固定。
+            double beatSeconds = MusicConstants.SECONDS_PER_MINUTE / bpm;
+            double barSeconds = beatSeconds * MusicConstants.STANDARD_BEATS_PER_BAR;
             double unitSeconds = barSeconds / beat._signature;
 
             return unitSeconds * beat._count;

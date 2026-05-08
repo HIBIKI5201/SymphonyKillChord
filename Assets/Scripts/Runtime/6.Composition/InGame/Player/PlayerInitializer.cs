@@ -2,11 +2,12 @@ using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
@@ -70,7 +71,7 @@ namespace KillChord.Runtime.Composition
             if (_enemyArtilleryTestSpawner == null)
             {
                 Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return; 
+                return;
             }
 
 
@@ -93,11 +94,11 @@ namespace KillChord.Runtime.Composition
             dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
             dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
 
-            PlayerMovement move = new(parameter);
+            PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
-            var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 

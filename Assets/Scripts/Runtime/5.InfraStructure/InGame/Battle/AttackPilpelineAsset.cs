@@ -15,13 +15,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         /// <summary>
         ///     設定済みの攻撃処理のパイプラインを生成する。
         /// </summary>
-        /// <returns></returns>
+        /// <returns> 生成された攻撃処理のパイプライン。 </returns>
         public AttackPipeline Create()
         {
             return new AttackPipeline(_attackSteps);
         }
 
-        [SerializeReference, SubclassSelector]
+        [SerializeReference, SubclassSelector, Tooltip("攻撃ステップの配列")] 
         private IAttackStep[] _attackSteps;
     }
 }

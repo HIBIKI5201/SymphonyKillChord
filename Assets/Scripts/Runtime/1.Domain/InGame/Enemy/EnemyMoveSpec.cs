@@ -14,8 +14,11 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             AttackRangeMax = attackRangeMax;
         }
 
+        /// <summary> 移動速度 </summary>
         public MoveSpeed MoveSpeed { get; }
+        /// <summary> 最小攻撃距離 </summary>
         public AttackRangeMin AttackRangeMin { get; }
+        /// <summary> 最大攻撃距離 </summary>
         public AttackRangeMax AttackRangeMax { get; }
     }
 }

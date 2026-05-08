@@ -26,14 +26,24 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _value = value;
         }
 
+        /// <summary> 攻撃力を取得する。 </summary>
         public float Value => _value;
 
+        /// <summary>
+        ///     floatへの明示的型変換を行う。
+        /// </summary>
         public static explicit operator float(AttackPower value)
             => value._value;
 
+        /// <summary>
+        ///     等価比較を行う。
+        /// </summary>
         public static bool operator ==(AttackPower left, AttackPower right)
             => left._value == right._value;
 
+        /// <summary>
+        ///     不等価比較を行う。
+        /// </summary>
         public static bool operator !=(AttackPower left, AttackPower right)
             => left._value != right._value;
 
@@ -55,12 +65,21 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public static AttackPower operator *(AttackPower left, float multiplier)
             => new(left._value * multiplier);
 
+        /// <summary>
+        ///     等価比較を行う。
+        /// </summary>
         public bool Equals(AttackPower other)
             => _value.Equals(other._value);
 
+        /// <summary>
+        ///     等価比較を行う。
+        /// </summary>
         public override bool Equals(object obj)
             => obj is AttackPower power && Equals(power);
 
+        /// <summary>
+        ///     ハッシュ値を計算する。
+        /// </summary>
         public override int GetHashCode()
             => _value.GetHashCode();
 

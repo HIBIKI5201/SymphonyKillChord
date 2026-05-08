@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         ///     攻撃処理の文脈を受け取り、各攻撃処理ステップを順番に実行する。
         /// </summary>
         /// <param name="context"></param>
-        /// <returns></returns>
+        /// <returns> 攻撃結果。 </returns>
         public AttackResult Execute(in AttackStepContext context)
         {
             AttackStepContext currentContext = context;

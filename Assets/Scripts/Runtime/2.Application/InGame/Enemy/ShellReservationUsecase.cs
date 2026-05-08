@@ -11,13 +11,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class ShellReservationUsecase : IDisposable
     {
-        public ShellReservationUsecase(IMusicActionScheduler musicActionScheduler)
+        public ShellReservationUsecase(ShellEntity entity, IMusicActionScheduler musicActionScheduler)
         {
+            if(entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity), "ShellEntityがNULLです。");
+            }
+            _entity = entity;
             _musicActionScheduler = musicActionScheduler;
-            // TODO 砲弾の爆発タイミング。今後ScriptableObjectか、敵の攻撃情報から初期化する予想。
-            _musicSpec = new EnemyMusicSpec(1, 4, 3);
         }
 
+        /// <summary> 予約タイミングが到達した時発火するイベント </summary>
         public event Action OnReservedTimingReached;
 
         public void Dispose()
@@ -55,20 +59,22 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _cancellationTokenSource = new CancellationTokenSource();
 
             _musicActionScheduler.Schedule(
-                _musicSpec,
+                _entity.MusicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
         }
 
+        /// <summary>
+        ///     予約タイミングが到達時の処理。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             Debug.Log("予約されたタイミングに到達しました。");
             OnReservedTimingReached?.Invoke();
         }
 
+        private readonly ShellEntity _entity;
         private readonly IMusicActionScheduler _musicActionScheduler;
         private CancellationTokenSource _cancellationTokenSource;
-        private EnemyMusicSpec _musicSpec;
-
     }
 }

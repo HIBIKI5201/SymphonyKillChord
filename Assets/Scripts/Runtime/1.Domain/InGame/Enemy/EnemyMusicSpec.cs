@@ -5,15 +5,18 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMusicSpec
     {
-        public EnemyMusicSpec(byte barFlag, long timeSignature, long targetBeat)
+        public EnemyMusicSpec(byte barFlag, double timeSignature, double targetBeat)
         {
             BarFlag = barFlag;
             TimeSignature = timeSignature;
             TargetBeat = targetBeat;
         }
 
+        /// <summary> 小節フラグ。0は現在小節、1は次の小節 </summary>
         public byte BarFlag { get; }
-        public long TimeSignature { get; }
-        public long TargetBeat { get; }
+        /// <summary> 小節の拍子 </summary>
+        public double TimeSignature { get; }
+        /// <summary> 拍目 </summary>
+        public double TargetBeat { get; }
     }
 }
