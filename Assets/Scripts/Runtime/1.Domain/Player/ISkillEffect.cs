@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Player
 {
     /// <summary>
     /// スキル効果を表す抽象インターフェース。

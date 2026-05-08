@@ -3,13 +3,13 @@ using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Skill
 {
     /// <summary>
     /// Composition層の初期化クラス。SkillモジュールのControllerとUsecaseを生成して接続する。

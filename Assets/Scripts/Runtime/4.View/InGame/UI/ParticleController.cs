@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.UI
 {
     /// <summary>
     ///     パーティクルエフェクトの再生を管理するシングルトンクラス。

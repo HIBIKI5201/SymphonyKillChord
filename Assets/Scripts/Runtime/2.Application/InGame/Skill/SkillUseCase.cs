@@ -5,7 +5,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Skill
 {
     /// <summary>
     /// スキル発動の判定と実行を扱うユースケースクラス。

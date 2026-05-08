@@ -1,6 +1,6 @@
 using System;
-using KillChord.Runtime.Adaptor;
-namespace KillChord.Runtime.View
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
+namespace KillChord.Runtime.View.OutGame.Scenario
 {
     public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink, IPortraitViewSink, ILayerViewSink
         , IScenarioCompletionViewSink

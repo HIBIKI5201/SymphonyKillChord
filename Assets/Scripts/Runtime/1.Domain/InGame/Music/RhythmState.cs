@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Music

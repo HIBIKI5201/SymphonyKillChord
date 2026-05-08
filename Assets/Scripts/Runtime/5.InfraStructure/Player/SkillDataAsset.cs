@@ -4,7 +4,7 @@ using KillChord.Runtime.Domain.Player;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
-namespace SymphonyKillChord.InfraStructure.Player
+namespace KillChord.Runtime.InfraStructure.Player
 {
     /// <summary>
     ///     スキルデータの設定を保持するScriptableObject。

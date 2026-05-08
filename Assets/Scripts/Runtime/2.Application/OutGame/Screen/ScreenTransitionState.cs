@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.Application.OutGame.Screen      
+namespace KillChord.Runtime.Application.OutGame.Screen
 {
     /// <summary>
     ///     画面遷移状態を保持するクラス。

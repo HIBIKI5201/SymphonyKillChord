@@ -2,7 +2,7 @@ using KillChord.Runtime.Domain.InGame.Mission.FailCondition;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     [Serializable]
     public class ElapsedTimeFailConditionAsset : MissionFailConditionAssetBase

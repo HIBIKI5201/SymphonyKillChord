@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
     /// スキル結果を表すデータ転送オブジェクト（DTO）。

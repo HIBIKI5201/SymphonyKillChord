@@ -2,7 +2,7 @@ using KillChord.Runtime.Composition;
 using KillChord.Runtime.Domain.Persistent.Input;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.Composition.Persistent.Input
 {
     /// <summary>
     ///     入力バッファの内容をデバッグ出力するクラス。

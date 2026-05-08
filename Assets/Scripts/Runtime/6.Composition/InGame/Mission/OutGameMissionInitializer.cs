@@ -1,9 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Mission
 {
     public class OutGameMissionInitializer : MonoBehaviour
     {

@@ -1,13 +1,14 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.View;
+using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.InfraStructure.OutGame.Scenario;
+using KillChord.Runtime.View.OutGame.Scenario;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.OutGame.Scenario
 {
     public class ScenarioCom : MonoBehaviour
     {
@@ -83,7 +84,7 @@ namespace KillChord.Runtime.Composition
             handlerRepo.Register<TextEvent>(textHandle.HandleAsync);
             handlerRepo.Register<FadeEvent>(fadeEventHandle.HandleAsync);
             handlerRepo.Register<BackgroundEvent>(backgroundEventHandle.HandleAsync);
-            handlerRepo.Register<Domain.AnimationEvent>(animationEventHandle.HandleAsync);
+            handlerRepo.Register<AnimationEventData>(animationEventHandle.HandleAsync);
             handlerRepo.Register<PortraitEvent>(portraitEventHandler.HandleAsync);
             handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
 

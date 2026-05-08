@@ -2,7 +2,7 @@ using CriWare;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;

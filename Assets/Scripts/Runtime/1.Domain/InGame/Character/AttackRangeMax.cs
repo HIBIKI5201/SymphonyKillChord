@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Domain.InGame.Enemy
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     最大射程距離を表す値オブジェクト。

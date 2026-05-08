@@ -1,8 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     public class AnimationRepository : CatalogRepositoryBase<AnimationDefinition, AnimationCatalogEntry>, IAnimationRepository
     {

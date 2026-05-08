@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     [CreateAssetMenu(fileName = nameof(MissionCatalogAsset)
         , menuName = "KillChord/Mission" + "/" + nameof(MissionCatalogAsset))]

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Mission
 {
     public class OutGameMissionButtonView : MonoBehaviour
     {

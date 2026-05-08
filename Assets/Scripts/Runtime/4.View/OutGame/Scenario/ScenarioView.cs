@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.OutGame.Scenario
 {
     [DefaultExecutionOrder(10)]
     public class ScenarioView : MonoBehaviour

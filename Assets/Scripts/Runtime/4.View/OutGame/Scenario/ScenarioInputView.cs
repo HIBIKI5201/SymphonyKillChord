@@ -1,7 +1,7 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.OutGame.Scenario
 {
     public class ScenarioInputView : MonoBehaviour
     {

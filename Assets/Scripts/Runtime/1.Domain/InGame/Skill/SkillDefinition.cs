@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.Player;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill

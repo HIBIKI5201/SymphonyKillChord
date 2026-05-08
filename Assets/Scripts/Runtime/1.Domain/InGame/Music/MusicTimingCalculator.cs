@@ -1,8 +1,8 @@
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Constant;
 using System;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
     ///     音楽の実行タイミングを計算する静的クラス。

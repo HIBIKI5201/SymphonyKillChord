@@ -2,7 +2,7 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 using System.Threading;
 
-namespace KillChord.Runtime.Application.InGame.Battle
+namespace KillChord.Runtime.Application.InGame.Music
 {
     /// <summary>
     ///     音楽同期のタイミングで実行するアクションを予約するためのインターフェース。

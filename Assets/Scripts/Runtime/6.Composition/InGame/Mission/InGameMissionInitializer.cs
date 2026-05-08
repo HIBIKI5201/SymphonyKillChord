@@ -1,13 +1,12 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
-using KillChord.Runtime.InfraStructure;
-using KillChord.Runtime.View;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Mission
 {
     public class InGameMissionInitializer : MonoBehaviour
     {

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Skill
 {
     public class SkillView : MonoBehaviour, ISkillVisual
     {

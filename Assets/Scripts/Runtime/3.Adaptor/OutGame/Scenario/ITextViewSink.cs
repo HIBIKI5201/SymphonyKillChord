@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
     /// テキスト表示反映の契約を定義します。
