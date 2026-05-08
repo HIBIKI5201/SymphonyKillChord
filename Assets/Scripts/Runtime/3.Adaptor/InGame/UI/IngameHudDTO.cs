@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.UI
 {
     /// <summary>
     ///     HUDの表示更新に必要なデータを保持するデータ転送用構造体。

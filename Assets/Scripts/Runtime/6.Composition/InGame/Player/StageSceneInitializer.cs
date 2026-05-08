@@ -1,7 +1,8 @@
+using KillChord.Runtime.Composition.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     /// <summary>
     ///     ステージシーン内で共有する参照を登録するクラス。

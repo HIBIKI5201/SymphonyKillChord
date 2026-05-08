@@ -4,7 +4,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.Persistent
 {
     /// <summary>
     ///     常駐シーン起動時のエントリーポイントとなるクラス。

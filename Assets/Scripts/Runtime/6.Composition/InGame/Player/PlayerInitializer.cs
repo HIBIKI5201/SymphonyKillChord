@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
@@ -6,6 +5,7 @@ using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Domain.InGame.Character;
@@ -13,24 +13,23 @@ using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.Player;
-using KillChord.Runtime.Utility;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Application.InGame.Skill;
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Composition.Persistent.Input;
 
 
 
 
 #if UNITY_EDITOR
-using KillChord.Runtime.Composition.InGame.Debugger;
 #endif
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     /// <summary>
     ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.OutGame.Scenario
 {
     public class ScenarioData
     {

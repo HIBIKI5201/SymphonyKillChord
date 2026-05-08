@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.InGame
 {
     /// <summary>
     ///     カメラのロックオン状態を表す enum。

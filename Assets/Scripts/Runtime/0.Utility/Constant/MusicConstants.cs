@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Constant
 {
     public static class MusicConstants
     {

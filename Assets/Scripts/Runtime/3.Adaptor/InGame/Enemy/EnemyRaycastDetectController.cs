@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.InGame.Enemy;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy

@@ -1,12 +1,13 @@
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using System;
 using Unity.Behavior;
 using UnityEngine;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition
 {
     [Serializable, Unity.Properties.GeneratePropertyBag]
-    [Condition(name: "IsTargetInAttackRange", story: "攻撃目標が攻撃範囲内 [Bool] [State]", category: "Conditions", id: "f089200575131990cf77ee4ef830d114")]
-    public partial class IsTargetInAttackRangeCondition : Condition
+    [Condition(name: "IsTargetInAttackRange", story: "謾ｻ謦・岼讓吶′謾ｻ謦・ｯ・峇蜀・[Bool] [State]", category: "Conditions", id: "f089200575131990cf77ee4ef830d114")]
+    public partial class IsTargetInAttackRangeCondition : Unity.Behavior.Condition
     {
         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
         [SerializeReference] public BlackboardVariable<bool> Bool;

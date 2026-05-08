@@ -1,6 +1,6 @@
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Camera;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.InGame;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 

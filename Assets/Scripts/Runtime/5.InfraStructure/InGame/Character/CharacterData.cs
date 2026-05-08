@@ -1,4 +1,5 @@
 using UnityEngine;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {

@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.OutGame.Scenario;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     public class ScenarioAdvanceGate : ITextAdvanceWaiter
     {

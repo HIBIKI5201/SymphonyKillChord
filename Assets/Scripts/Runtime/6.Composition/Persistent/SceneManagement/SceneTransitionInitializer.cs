@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.Persistent.SceneManagement;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.SceneManagement

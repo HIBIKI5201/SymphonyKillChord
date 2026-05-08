@@ -1,7 +1,7 @@
 using System;
-using KillChord.Runtime.Application;
+using KillChord.Runtime.Application.OutGame.Scenario;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     public class ScenarioSettingsRepository : IScenarioSettingsRepository
     {

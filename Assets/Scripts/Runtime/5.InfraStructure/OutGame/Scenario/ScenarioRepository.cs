@@ -5,11 +5,11 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using UnityEngine.Networking;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     public class ScenarioRepository : IScenarioRepository
     {
@@ -473,7 +473,7 @@ namespace KillChord.Runtime.InfraStructure
                         {
                             throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
                         }
-                        return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
+                        return new PlainEventDefinition(row.Step, new AnimationEvent(animationId));
                     }
                 case "fade":
                     {
@@ -620,7 +620,7 @@ namespace KillChord.Runtime.InfraStructure
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
                         }
-                        return new KillChord.Runtime.Domain.AnimationEvent(animationId);
+                        return new AnimationEvent(animationId);
                     }
                 case "portrait":
                     {

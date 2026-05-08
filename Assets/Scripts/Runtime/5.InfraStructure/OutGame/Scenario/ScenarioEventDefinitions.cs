@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     internal abstract class EventDefinition
     {

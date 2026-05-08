@@ -1,41 +1,39 @@
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using System;
 using Unity.Behavior;
 using Unity.Properties;
 using UnityEngine;
-using Action = Unity.Behavior.Action;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "MoveToAttack", story: "攻撃可能な位置まで移動 [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
-    public partial class MoveToAttackAction : Action
+    [NodeDescription(name: "MoveToAttack", story: "謾ｻ謦・庄閭ｽ縺ｪ菴咲ｽｮ縺ｾ縺ｧ遘ｻ蜍・[Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
+    public partial class MoveToAttackAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;
         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
-        protected override Status OnStart()
+
+        protected override Unity.Behavior.Node.Status OnStart()
         {
-            if (Movement?.Value == null || State?.Value == null) return Status.Failure;
+            if (Movement?.Value == null || State?.Value == null) return Unity.Behavior.Node.Status.Failure;
             Movement.Value.MoveToAttack();
-            return Status.Running;
+            return Unity.Behavior.Node.Status.Running;
         }
 
-        protected override Status OnUpdate()
+        protected override Unity.Behavior.Node.Status OnUpdate()
         {
             EnemyStateFacade stateFacade = State.Value;
             if (stateFacade.IsTargetInAttackRange && stateFacade.IsSightClearToAim)
             {
-                return Status.Success;
+                return Unity.Behavior.Node.Status.Success;
             }
-            else
-            {
-                Movement.Value.MoveToAttack();
-                return Status.Running;
-            }
+
+            Movement.Value.MoveToAttack();
+            return Unity.Behavior.Node.Status.Running;
         }
 
         protected override void OnEnd()
         {
-
         }
     }
 }

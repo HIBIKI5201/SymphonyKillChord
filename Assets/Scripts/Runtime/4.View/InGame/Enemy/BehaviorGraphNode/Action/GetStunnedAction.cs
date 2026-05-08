@@ -1,35 +1,36 @@
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using System;
 using Unity.Behavior;
 using Unity.Properties;
 using UnityEngine;
-using Action = Unity.Behavior.Action;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "GetStunned", story: "被弾硬直を開始する [State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]
-    public partial class GetStunnedAction : Action
+    [NodeDescription(name: "GetStunned", story: "陲ｫ蠑ｾ遑ｬ逶ｴ繧帝幕蟋九☆繧・[State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]
+    public partial class GetStunnedAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
         [SerializeReference] public BlackboardVariable<EnemyBattleAIFacade> Battle;
 
-        protected override Status OnStart()
+        protected override Unity.Behavior.Node.Status OnStart()
         {
-            if (State?.Value?.gameObject == null
-                || Battle?.Value == null) return Status.Failure;
+            if (State?.Value?.gameObject == null || Battle?.Value == null)
+            {
+                return Unity.Behavior.Node.Status.Failure;
+            }
 
             EnemyStateFacade state = State.Value;
             EnemyBattleAIFacade battle = Battle.Value;
-
             battle.CancelAttack();
             state.Stunned();
-            return Status.Running;
+            return Unity.Behavior.Node.Status.Running;
         }
 
-        protected override Status OnUpdate()
+        protected override Unity.Behavior.Node.Status OnUpdate()
         {
-            if (State.Value.IsStunned) return Status.Running;
-            return Status.Success;
+            if (State.Value.IsStunned) return Unity.Behavior.Node.Status.Running;
+            return Unity.Behavior.Node.Status.Success;
         }
 
         protected override void OnEnd()

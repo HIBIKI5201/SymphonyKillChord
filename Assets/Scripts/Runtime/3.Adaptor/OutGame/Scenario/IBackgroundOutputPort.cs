@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
     /// IBackgroundOutputPort の契約を定義します。

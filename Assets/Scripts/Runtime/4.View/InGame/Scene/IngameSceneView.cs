@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using SymphonyFrameWork.System.SceneLoad;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Scene
 {
     /// <summary>
     /// いったんここにすべて実装。後でレイヤー分けする

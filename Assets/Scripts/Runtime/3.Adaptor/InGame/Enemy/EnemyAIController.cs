@@ -1,7 +1,8 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
 

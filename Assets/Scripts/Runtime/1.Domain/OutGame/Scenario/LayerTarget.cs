@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.OutGame.Scenario
 {
     public enum LayerTarget
     {

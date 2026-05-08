@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Adaptor.Persistent.Input;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.InGame;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
