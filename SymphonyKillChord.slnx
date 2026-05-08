@@ -2,17 +2,17 @@
   <Project Path="UniGLTF.csproj" />
   <Project Path="CriMw.CriWare.Runtime.csproj" />
   <Project Path="MusicBattle_Mock.csproj" />
+  <Project Path="KillChord.Adaptor.csproj" />
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
   <Project Path="KillChord.Structure.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniHumanoid.csproj" />
-  <Project Path="KillChord.Adaptor.csproj" />
+  <Project Path="KillChord.View.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="DevelopProducts-Achievement.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
-  <Project Path="KillChord.View.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
   <Project Path="UniGLTF.Editor.csproj" />
@@ -28,6 +28,7 @@
   <Project Path="KillChord.Composition.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
   <Project Path="KillChord.Develop.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="DevelopProducts-RenderingExtension.csproj" />
   <Project Path="VrmLibTests.csproj" />
@@ -43,5 +44,4 @@
   <Project Path="FastSpringBone10.csproj" />
   <Project Path="UniHumanoid.Editor.Tests.csproj" />
   <Project Path="UniGLTF.UniUnlit.Editor.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>
