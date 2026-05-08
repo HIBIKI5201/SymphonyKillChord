@@ -1,4 +1,6 @@
 using KillChord.Runtime.Application.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
@@ -8,11 +10,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class ShellController : IDisposable
     {
-        public ShellController(IShellViewModel viewModel, ShellReservationUsecase reservationUsecase, EnemyAIController enemyAIController)
+        public ShellController(ShellEntity entity, IShellViewModel viewModel, ShellReservationUsecase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUsecase attackUsecase)
         {
+            _entity = entity;
             _viewModel = viewModel;
             _reservationUsecase = reservationUsecase;
-            _enemyAIController = enemyAIController;
+            _attacker = attacker;
+            _defender = defender;
+            _attackUsecase = attackUsecase;
 
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.ReserveDetonate();
@@ -33,11 +38,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             return _viewModel.FindDamageTarget();
         }
 
+        /// <summary>
+        ///     ダメージを与える処理。
+        /// </summary>
         private void DealDamage()
         {
-            _enemyAIController.DealProjectileDamage();
+            _attackUsecase.ExecuteAttack(_entity.AttackDefinition, _attacker, _defender);
         }
 
+        /// <summary>
+        ///     予約タイミングが到達した時の処理。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             if(FindDamageTarget())
@@ -47,8 +58,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _viewModel.Detonate();
         }
 
+        private readonly ShellEntity _entity;
         private readonly ShellReservationUsecase _reservationUsecase;
-        private readonly EnemyAIController _enemyAIController;
-        private IShellViewModel _viewModel;
+        private readonly IShellViewModel _viewModel;
+        private readonly IAttacker _attacker;
+        private readonly IDefender _defender;
+        private readonly ShellAttackUsecase _attackUsecase;
     }
 }

@@ -1,7 +1,7 @@
-using System;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.View.Persistent.Music;
 using R3;
 using UnityEngine;
-using KillChord.Runtime.View.Persistent.Music;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
@@ -10,43 +10,59 @@ namespace KillChord.Runtime.View.InGame.Music
     /// </summary>
     public class MusicSyncView : MonoBehaviour
     {
-        public MusicSyncViewModel MusicSyncViewModel => _musicSyncViewModel;
+        /// <summary> 音楽同期状態。 </summary>
+        public MusicSyncState MusicSyncState => _musicSyncState;
 
-#if UNITY_EDITOR
-        [SerializeField] private int _testBpm;
-#endif
-
-        private MusicPlayer _mp;
-        private MusicViewModel _musicViewModel;
-        private MusicSyncViewModel _musicSyncViewModel;
-
+        /// <summary>
+        ///     依存オブジェクトをバインドする。
+        /// </summary>
+        /// <param name="musicPlayer"> 音楽プレイヤー。 </param>
+        /// <param name="musicSyncState"> 音楽同期状態。 </param>
+        /// <param name="musicSyncController"> 音楽同期コントローラー。 </param>
+        /// <param name="testBpm"> テスト用BPM。 </param>
         public void Bind(
             MusicPlayer musicPlayer,
-            MusicSyncViewModel syncViewModel)
+            MusicSyncState musicSyncState,
+            MusicSyncController musicSyncController,
+            int testBpm)
         {
-            _mp = musicPlayer;
-            _musicViewModel = _mp.MusicVM;
-            _musicViewModel.CueName.Subscribe(PlayBgm).RegisterTo(destroyCancellationToken);
-            _musicSyncViewModel = syncViewModel;
+            _musicPlayer = musicPlayer;
+            _musicSyncState = musicSyncState;
+            _musicSyncController = musicSyncController;
+            _musicViewModel = _musicPlayer.MusicVM;
+
+            _musicViewModel.CueName
+                .Subscribe(PlayBgm)
+                .RegisterTo(destroyCancellationToken);
         }
 
+        private int _testBpm;
+        private MusicPlayer _musicPlayer;
+        private MusicViewModel _musicViewModel;
+        private MusicSyncState _musicSyncState;
+        private MusicSyncController _musicSyncController;
+
+        /// <summary>
+        ///     毎フレームの更新処理。音楽同期コントローラーを更新する。
+        /// </summary>
         private void Update()
         {
-            if (_mp == null || _musicSyncViewModel == null || _musicSyncViewModel.Bpm <= 0 || _musicSyncViewModel.BeatLength <= 0) return;
+            if (_musicPlayer == null
+                || _musicSyncState == null
+                || _musicSyncController == null
+                || _musicSyncState.Bpm <= 0
+                || _musicSyncState.BeatLength <= 0) return;
 
-            _musicSyncViewModel.Update(_mp.Time);
-
-            _musicSyncViewModel.AccurateBeat = _mp.Time / _musicSyncViewModel.BeatLength;
-            _musicSyncViewModel.NearestBeat = (int)Math.Round(_musicSyncViewModel.AccurateBeat);
-            _musicSyncViewModel.CurrentBeat = (int)Math.Floor(_musicSyncViewModel.AccurateBeat);
+            _musicSyncController.Tick(_musicPlayer.Time);
         }
 
+        /// <summary>
+        ///     BGMを再生する際の処理。
+        /// </summary>
+        /// <param name="cueName"> キュー名。 </param>
         private void PlayBgm(string cueName)
         {
-#if UNITY_EDITOR
-            _musicSyncViewModel.Bpm = _testBpm; //TODO : cueNameを引数にデータベースからBPMを取得するように変更
-#endif
-            _musicSyncViewModel.BeatLength = 60d / _musicSyncViewModel.Bpm;
+            _musicSyncState.SetBpm(_testBpm);
         }
     }
 }

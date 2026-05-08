@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
 {
-    public class AnimationRepository : CatalogRepositoryBase<AnimationDefinition, AnimationCatalogAsset.Entry>, IAnimationRepository
+    public class AnimationRepository : CatalogRepositoryBase<AnimationDefinition, AnimationCatalogEntry>, IAnimationRepository
     {
         public AnimationRepository(AnimationCatalogAsset catalog)
             : base(catalog != null ? catalog.Entries : null)
         {
         }
 
-        protected override bool TryBuild(AnimationCatalogAsset.Entry entry, out string id, out AnimationDefinition definition)
+        protected override bool TryBuild(AnimationCatalogEntry entry, out string id, out AnimationDefinition definition)
         {
             id = entry.Id;
             if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public interface IEnemyRaycastDetectRepository
     {
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget { get; }
     }
 }

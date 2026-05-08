@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Application
             _raycastDetectRepo = raycastDetectRepo;
         }
 
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => _raycastDetectRepo.CanRaycastHitTarget;
        
         private IEnemyRaycastDetectRepository _raycastDetectRepo;

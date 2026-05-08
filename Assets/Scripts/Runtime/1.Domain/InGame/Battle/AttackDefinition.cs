@@ -33,6 +33,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public AttackParameterSet AttackParameterSet { get; }
         /// <summary> 攻撃の処理パイプラインを表すプロパティ。 </summary>
         public IAttackPipeline AttackPipeline { get; }
+
+        /// <summary> 対応するビートタイプを取得する。 </summary>
         public BeatType? BeatType { get; }
     }
 }

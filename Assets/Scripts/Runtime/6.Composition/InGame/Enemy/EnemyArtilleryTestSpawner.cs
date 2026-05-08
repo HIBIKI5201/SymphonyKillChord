@@ -1,7 +1,6 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -22,11 +21,20 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ServiceLocator.RegisterInstance(this);
         }
 
+        /// <summary>
+        ///     攻撃対象のエンティティを設定する。
+        /// </summary>
+        /// <param name="targetEntity"></param>
         public void SetTargetEntity(IDefender targetEntity)
         {
             _targetEntity = targetEntity;
         }
 
+        /// <summary>
+        ///     目標選択関連のインスタンスを設定する。
+        /// </summary>
+        /// <param name="targetManager"></param>
+        /// <param name="targetEntityRegistry"></param>
         public void SetTargetManager(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
         {
             _targetManager = targetManager;
@@ -34,14 +42,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetEntityRegistryController = new(targetEntityRegistry);
         }
 
-        [SerializeField] private EnemyArtilleryMoveDebugInitializer _enemyPrefab;
-        [SerializeField] private Transform _spawnPoint;
-        [SerializeField] private float _spawnInterval;
-        [SerializeField] private int _maxSpawnCount;
+        [SerializeField, Tooltip("敵Prefab")] private EnemyMoveDebugInitializer _enemyPrefab;
+        [SerializeField, Tooltip("生成位置")] private Transform _spawnPoint;
+        [SerializeField, Tooltip("生成間隔")] private float _spawnInterval;
+        [SerializeField, Tooltip("最大生成数")] private int _maxSpawnCount;
 
-        [SerializeField] private CharacterData _enemyData;
+        [SerializeField, Tooltip("敵のキャラクター基盤データ")] private CharacterData _enemyData;
 
-        private IMusicSyncViewModel _musicSyncViewModel;
+        private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
         private IDefender _targetEntity;
         private TargetManager _targetManager;
@@ -52,17 +60,26 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private float _timer;
         private int _spawnCount;
 
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
         public void Init()
         {
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
+            if(initializer?.MusicSyncService == null)
+            {
+                Debug.LogError("MusicSyncInitializerが見つかりません。", this);
+                return;
+            }
             _musicSyncService = initializer.MusicSyncService;
+
             MusicSyncView view = FindAnyObjectByType<MusicSyncView>();
-            if (view.MusicSyncViewModel == null)
+            if (view?.MusicSyncState == null)
             {
                 Debug.LogError("MusicSyncViewが見つかりません。", this);
                 return;
             }
-            _musicSyncViewModel = view.MusicSyncViewModel;
+            _musicSyncState = view.MusicSyncState;
         }
 
         private void Update()
@@ -79,6 +96,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     敵生成処理。
+        /// </summary>
         private void SpawnEnemy()
         {
             PlayerInitializer playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
@@ -89,21 +109,23 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             _target = playerInitializer.transform;
 
-            if (_targetEntity == null || _musicSyncViewModel == null ||
+            if (_targetEntity == null || _musicSyncState == null ||
                 _musicSyncService == null || _targetEntityRegistryController == null)
             {
                 if (_targetEntity == null) Debug.LogError("ターゲットエンティティが設定されていません。", this);
-                if (_musicSyncViewModel == null) Debug.LogError("MusicSyncViewModelが見つかりません。", this);
+                if (_musicSyncState == null) Debug.LogError("MusicSyncViewModelが見つかりません。", this);
                 if (_musicSyncService == null) Debug.LogError("MusicSyncServiceが見つかりません。", this);
                 if (_targetEntityRegistryController == null) Debug.LogError("TargetEntityRegistryControllerが見つかりません。", this);
                 return;
             }
 
-            EnemyArtilleryMoveDebugInitializer enemyInstance =
+            EnemyMoveDebugInitializer enemyInstance =
                 Instantiate(_enemyPrefab, _spawnPoint.position, _spawnPoint.rotation);
 
+            EnemyArtilleryAttackControllerGenerator attackControllerGenerator = new EnemyArtilleryAttackControllerGenerator();
+
             enemyInstance.Initialize(_target, (Domain.InGame.Character.CharacterEntity)_targetEntity,
-            _musicSyncViewModel, _musicSyncService, _targetManagerController, _targetEntityRegistryController);
+            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController, attackControllerGenerator);
 
             _spawnCount++;
         }
