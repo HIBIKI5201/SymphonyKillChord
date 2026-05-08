@@ -17,14 +17,10 @@ namespace DevelopProducts.SkillTree
             _id = id;
         }
 
-        /// <summary>
-        ///     スキルノードのIDを取得します。
-        /// </summary>
+        /// <summary>スキルノードのIDを取得します。</summary>
         public int Id => _id;
 
-        /// <summary>
-        ///     スキルノードのID。
-        /// </summary>
+        /// <summary>スキルノードのID</summary>
         private readonly int _id;
 
         /// <summary>
