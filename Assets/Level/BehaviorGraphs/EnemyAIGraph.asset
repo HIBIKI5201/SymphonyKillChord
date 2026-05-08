@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
   m_Name: EnemyAIGraph Blackboard
   m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.RuntimeBlackboardAsset
-  VersionTimestamp: 639122383943683142
+  VersionTimestamp: 639133436337599837
   AssetID:
     m_Value0: 15298916761841218890
     m_Value1: 10423536786047875179
@@ -23,9 +23,7 @@ MonoBehaviour:
     - rid: 5112082949080088729
     - rid: 5112082949080088739
     - rid: 5112082949080088896
-  m_SharedBlackboardVariableGuids:
-  - m_Value0: 17569852969880927499
-    m_Value1: 10859535363759142801
+  m_SharedBlackboardVariableGuids: []
   references:
     version: 2
     RefIds:
@@ -38,7 +36,7 @@ MonoBehaviour:
         Name: Self
         m_Value: {fileID: 0}
     - rid: 5112082949080088721
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 5211698399387829366
@@ -62,7 +60,7 @@ MonoBehaviour:
         Name: EnemyStateFacade
         m_Value: {fileID: 0}
     - rid: 5112082949080088896
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 17569852969880927499
@@ -97,7 +95,7 @@ MonoBehaviour:
   - rid: 5112082980088054430
   - rid: 5112082995642630437
   - rid: 5112082995642630672
-  m_VersionTimestamp: 639123907477766386
+  m_VersionTimestamp: 639136010353315061
   m_SerializedVersion: 2
   m_DebugInfo: {fileID: 6394660027214620352}
   m_RuntimeGraph: {fileID: 4520507370308768518}
@@ -120,22 +118,23 @@ MonoBehaviour:
     NamedChildren: []
     IsPlaceholder: 0
   - Name: MoveToAttack
-    Story: "\u653B\u6483\u5BFE\u8C61\u3092\u8FFD\u8DE1\u3059\u308B [Movement] [State]"
-    RuntimeTypeString: MoveToAttackAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+    Story: "\u653B\u6483\u53EF\u80FD\u306A\u4F4D\u7F6E\u307E\u3067\u79FB\u52D5 [Movement]
+      [State]"
+    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.MoveToAttackAction, KillChord.View,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
       m_Value0: 11012707323019231883
       m_Value1: 3135116920785934511
     Variables:
     - Name: Movement
       Type:
-        m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     - Name: State
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     NamedChildren: []
     IsPlaceholder: 0
@@ -150,22 +149,22 @@ MonoBehaviour:
     NamedChildren: []
     IsPlaceholder: 0
   - Name: StopMoving
-    Story: "\u8FFD\u8DE1\u3092\u505C\u6B62\u3059\u308B [Movement] [State]"
-    RuntimeTypeString: StopMovingAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+    Story: "\u79FB\u52D5\u3092\u505C\u6B62\u3059\u308B [Movement] [State]"
+    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.StopMovingAction, KillChord.View,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
       m_Value0: 8589369632881435506
       m_Value1: 5096057573258365483
     Variables:
     - Name: Movement
       Type:
-        m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     - Name: State
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     NamedChildren: []
     IsPlaceholder: 0
@@ -181,21 +180,21 @@ MonoBehaviour:
     IsPlaceholder: 0
   - Name: AttackTarget
     Story: "\u653B\u6483\u5BFE\u8C61\u3092\u653B\u6483\u3059\u308B [Battle] [State]"
-    RuntimeTypeString: AttackTargetAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.AttackTargetAction, KillChord.View,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
       m_Value0: 2102089666372246625
       m_Value1: 10926511086557285780
     Variables:
     - Name: Battle
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     - Name: State
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     NamedChildren: []
     IsPlaceholder: 0
@@ -221,21 +220,21 @@ MonoBehaviour:
     IsPlaceholder: 0
   - Name: GetStunned
     Story: "\u88AB\u5F3E\u786C\u76F4\u3092\u958B\u59CB\u3059\u308B [State] [Battle]"
-    RuntimeTypeString: GetStunnedAction, KillChord.View, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.GetStunnedAction, KillChord.View,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
       m_Value0: 12267978893517168197
       m_Value1: 11038930453142813358
     Variables:
     - Name: State
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     - Name: Battle
       Type:
-        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade,
+          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       Tooltip: 
     NamedChildren: []
     IsPlaceholder: 0
@@ -293,8 +292,8 @@ MonoBehaviour:
         - rid: 5112082949080088927
         - rid: 5112082949080088928
         NodeType:
-          m_SerializableType: MoveToAttackAction, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.MoveToAttackAction,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 11012707323019231883
           m_Value1: 3135116920785934511
@@ -326,8 +325,8 @@ MonoBehaviour:
       data:
         FieldName: Movement
         Type:
-          m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082949080089031
         LinkedVariable:
@@ -337,14 +336,14 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082949080089032
         LinkedVariable:
           rid: 5112082949080089048
     - rid: 5112082949080089031
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 0
@@ -360,7 +359,7 @@ MonoBehaviour:
         Name: 
         m_Value: {fileID: 0}
     - rid: 5112082949080089033
-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         ID:
           m_Value0: 5211698399387829366
@@ -430,8 +429,8 @@ MonoBehaviour:
         - rid: 5112082976799719724
         - rid: 5112082976799719725
         NodeType:
-          m_SerializableType: StopMovingAction, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.StopMovingAction,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 8589369632881435506
           m_Value1: 5096057573258365483
@@ -462,8 +461,8 @@ MonoBehaviour:
       data:
         FieldName: Movement
         Type:
-          m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799719728
         LinkedVariable:
@@ -473,14 +472,14 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799719729
         LinkedVariable:
           rid: 5112082976799719767
     - rid: 5112082976799719728
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 0
@@ -496,7 +495,7 @@ MonoBehaviour:
         Name: 
         m_Value: {fileID: 0}
     - rid: 5112082976799719750
-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         ID:
           m_Value0: 5211698399387829366
@@ -565,8 +564,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsTargetInAttackRangeCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsTargetInAttackRangeCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 10383351809197509104
           m_Value1: 1500033993925359567
@@ -582,8 +581,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799719814
         LinkedVariable:
@@ -619,8 +618,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsAimSightClearCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsAimSightClearCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 1331152741325176827
           m_Value1: 7486621325230560048
@@ -636,8 +635,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799719873
         LinkedVariable:
@@ -701,8 +700,8 @@ MonoBehaviour:
         - rid: 5112082976799720109
         - rid: 5112082976799720110
         NodeType:
-          m_SerializableType: AttackTargetAction, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AttackTargetAction,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 2102089666372246625
           m_Value1: 10926511086557285780
@@ -733,8 +732,8 @@ MonoBehaviour:
       data:
         FieldName: Battle
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799720113
         LinkedVariable:
@@ -744,8 +743,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799720114
         LinkedVariable:
@@ -824,8 +823,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsAttackingCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsAttackingCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 10161038469285207466
           m_Value1: 13687708551416583149
@@ -852,8 +851,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082976799720255
         LinkedVariable:
@@ -878,8 +877,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsAttackingCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsAttackingCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 10161038469285207466
           m_Value1: 13687708551416583149
@@ -906,8 +905,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082979043410061
         LinkedVariable:
@@ -1029,8 +1028,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsStunnedCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsStunnedCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 15470212617122557828
           m_Value1: 14770888291135841713
@@ -1057,8 +1056,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082980088054043
         LinkedVariable:
@@ -1093,8 +1092,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsStunnedCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.IsStunnedCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 15470212617122557828
           m_Value1: 14770888291135841713
@@ -1121,8 +1120,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082980088054256
         LinkedVariable:
@@ -1249,8 +1248,8 @@ MonoBehaviour:
         - rid: 5112082995642630438
         - rid: 5112082995642630439
         NodeType:
-          m_SerializableType: GetStunnedAction, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.GetStunnedAction,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 12267978893517168197
           m_Value1: 11038930453142813358
@@ -1281,8 +1280,8 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082995642630441
         LinkedVariable:
@@ -1310,8 +1309,8 @@ MonoBehaviour:
       data:
         FieldName: Battle
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082995642630567
         LinkedVariable:
@@ -1346,8 +1345,8 @@ MonoBehaviour:
         - rid: 5112082995642630673
         - rid: 5112082995642630674
         NodeType:
-          m_SerializableType: StopMovingAction, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.StopMovingAction,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 8589369632881435506
           m_Value1: 5096057573258365483
@@ -1379,8 +1378,8 @@ MonoBehaviour:
       data:
         FieldName: Movement
         Type:
-          m_SerializableType: KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082995642630677
         LinkedVariable:
@@ -1390,14 +1389,14 @@ MonoBehaviour:
       data:
         FieldName: State
         Type:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
           rid: 5112082995642630678
         LinkedVariable:
           rid: 5112082995642630791
     - rid: 5112082995642630677
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 0
@@ -1413,7 +1412,7 @@ MonoBehaviour:
         Name: 
         m_Value: {fileID: 0}
     - rid: 5112082995642630764
-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         ID:
           m_Value0: 5211698399387829366
@@ -1453,7 +1452,7 @@ MonoBehaviour:
   - rid: 5112082949080088728
   - rid: 5112082949080088738
   - rid: 5112082949080088895
-  m_VersionTimestamp: 639122383943683142
+  m_VersionTimestamp: 639133436337599837
   m_CommandBuffer:
     m_Commands: []
   m_RuntimeBlackboardAsset: {fileID: -1687900579865694322}
@@ -1471,7 +1470,7 @@ MonoBehaviour:
         m_IsShared: 0
         m_Value: {fileID: 0}
     - rid: 5112082949080088720
-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         ID:
           m_Value0: 5211698399387829366
@@ -1501,14 +1500,14 @@ MonoBehaviour:
         m_IsShared: 0
         m_Value: {fileID: 0}
     - rid: 5112082949080088895
-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         ID:
           m_Value0: 17569852969880927499
           m_Value1: 10859535363759142801
         Name: EnemySharedFacade
         IsExposed: 1
-        m_IsShared: 1
+        m_IsShared: 0
         m_Value: {fileID: 0}
 --- !u!114 &4520507370308768518
 MonoBehaviour:
@@ -1542,8 +1541,8 @@ MonoBehaviour:
           rid: 5112082935029432439
         BlackboardGroupReferences: []
         Root:
-          rid: 5112083039358287988
-        m_VersionTimestamp: 639123907477766386
+          rid: 5112083216648635042
+        m_VersionTimestamp: 639136010353315061
     - rid: 5112082935029432439
       type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -1554,53 +1553,12 @@ MonoBehaviour:
       type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         m_Variables:
-        - rid: 5112082995642630794
-        - rid: 5112082995642630795
-        - rid: 5112082995642630796
-        - rid: 5112082995642630797
-        - rid: 5112082995642630798
-    - rid: 5112082995642630794
-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1
-          m_Value1: 0
-        Name: Self
-        m_Value: {fileID: 0}
-    - rid: 5112082995642630795
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 5211698399387829366
-          m_Value1: 6142912991580524478
-        Name: EnemyMovementAIFacade
-        m_Value: {fileID: 0}
-    - rid: 5112082995642630796
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1618065121561699408
-          m_Value1: 7913689795733594968
-        Name: EnemyBattleAIFacade
-        m_Value: {fileID: 0}
-    - rid: 5112082995642630797
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 204066741708314993
-          m_Value1: 254365869257419029
-        Name: EnemyStateFacade
-        m_Value: {fileID: 0}
-    - rid: 5112082995642630798
-      type: {class: 'SharedBlackboardVariable`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 17569852969880927499
-          m_Value1: 10859535363759142801
-        Name: EnemySharedFacade
-        m_Value: {fileID: 0}
-        m_SharedVariablesRuntimeAsset: {fileID: -1687900579865694322}
-    - rid: 5112083039358287988
+        - rid: 5112083216648635044
+        - rid: 5112083216648635045
+        - rid: 5112083216648635046
+        - rid: 5112083216648635047
+        - rid: 5112083216648635048
+    - rid: 5112083216648635042
       type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1611,10 +1569,10 @@ MonoBehaviour:
         m_Parent:
           rid: -2
         m_Child:
-          rid: 5112083039358287989
+          rid: 5112083216648635043
         Repeat: 1
         AllowMultipleRepeatsPerTick: 0
-    - rid: 5112083039358287989
+    - rid: 5112083216648635043
       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1623,14 +1581,54 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287988
+          rid: 5112083216648635042
         m_Children:
-        - rid: 5112083039358287990
-        - rid: 5112083039358287991
+        - rid: 5112083216648635049
+        - rid: 5112083216648635050
         m_RegisteredObservers:
         - Observer:
-            rid: 5112083039358287991
-    - rid: 5112083039358287990
+            rid: 5112083216648635050
+    - rid: 5112083216648635044
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 5112083216648635045
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5211698399387829366
+          m_Value1: 6142912991580524478
+        Name: EnemyMovementAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112083216648635046
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        m_Value: {fileID: 0}
+    - rid: 5112083216648635047
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        m_Value: {fileID: 0}
+    - rid: 5112083216648635048
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17569852969880927499
+          m_Value1: 10859535363759142801
+        Name: EnemySharedFacade
+        m_Value: {fileID: 0}
+    - rid: 5112083216648635049
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1639,14 +1637,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287989
+          rid: 5112083216648635043
         m_Child:
-          rid: 5112083039358287992
+          rid: 5112083216648635051
         m_Conditions:
-        - rid: 5112083039358287993
+        - rid: 5112083216648635052
         m_RequiresAllConditions: 0
         m_ObserverType: 0
-    - rid: 5112083039358287991
+    - rid: 5112083216648635050
       type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1655,14 +1653,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287989
+          rid: 5112083216648635043
         m_Child:
-          rid: 5112083039358287994
+          rid: 5112083216648635053
         m_Conditions:
-        - rid: 5112083039358287995
+        - rid: 5112083216648635054
         m_RequiresAllConditions: 0
         m_AbortTarget: 1
-    - rid: 5112083039358287992
+    - rid: 5112083216648635051
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1671,21 +1669,21 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287990
+          rid: 5112083216648635049
         m_Children:
-        - rid: 5112083039358287996
-        - rid: 5112083039358287997
+        - rid: 5112083216648635055
+        - rid: 5112083216648635056
         m_RegisteredObservers: []
-    - rid: 5112083039358287993
-      type: {class: IsStunnedCondition, ns: , asm: KillChord.View}
+    - rid: 5112083216648635052
+      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358287998
-    - rid: 5112083039358287994
+          rid: 5112083216648635057
+    - rid: 5112083216648635053
       type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1694,21 +1692,21 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287991
+          rid: 5112083216648635050
         m_Child:
-          rid: 5112083039358287999
+          rid: 5112083216648635058
         m_AllowMultipleRepeatsPerTick: 0
-    - rid: 5112083039358287995
-      type: {class: IsStunnedCondition, ns: , asm: KillChord.View}
+    - rid: 5112083216648635054
+      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358288000
-    - rid: 5112083039358287996
-      type: {class: StopMovingAction, ns: , asm: KillChord.View}
+          rid: 5112083216648635059
+    - rid: 5112083216648635055
+      type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         ID:
           m_Value0: 2007838495166168731
@@ -1716,13 +1714,13 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287992
+          rid: 5112083216648635051
         Movement:
-          rid: 5112082995642630795
+          rid: 5112083216648635045
         State:
-          rid: 5112082995642630797
-    - rid: 5112083039358287997
-      type: {class: GetStunnedAction, ns: , asm: KillChord.View}
+          rid: 5112083216648635047
+    - rid: 5112083216648635056
+      type: {class: GetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         ID:
           m_Value0: 980619884259720923
@@ -1730,12 +1728,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287992
+          rid: 5112083216648635051
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Battle:
-          rid: 5112082995642630796
-    - rid: 5112083039358287998
+          rid: 5112083216648635046
+    - rid: 5112083216648635057
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1743,7 +1741,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 1
-    - rid: 5112083039358287999
+    - rid: 5112083216648635058
       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1752,12 +1750,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287994
+          rid: 5112083216648635053
         m_Children:
-        - rid: 5112083039358288001
-        - rid: 5112083039358288002
+        - rid: 5112083216648635060
+        - rid: 5112083216648635061
         m_RegisteredObservers: []
-    - rid: 5112083039358288000
+    - rid: 5112083216648635059
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1765,7 +1763,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 0
-    - rid: 5112083039358288001
+    - rid: 5112083216648635060
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1774,16 +1772,16 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287999
+          rid: 5112083216648635058
         m_Child:
-          rid: 5112083039358288003
+          rid: 5112083216648635062
         m_Conditions:
-        - rid: 5112083039358288004
-        - rid: 5112083039358288005
-        - rid: 5112083039358288006
+        - rid: 5112083216648635063
+        - rid: 5112083216648635064
+        - rid: 5112083216648635065
         m_RequiresAllConditions: 1
         m_ObserverType: 0
-    - rid: 5112083039358288002
+    - rid: 5112083216648635061
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1792,15 +1790,15 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358287999
+          rid: 5112083216648635058
         m_Child:
-          rid: 5112083039358288007
+          rid: 5112083216648635066
         m_Conditions:
-        - rid: 5112083039358288008
+        - rid: 5112083216648635067
         m_RequiresAllConditions: 1
         m_ObserverType: 0
-    - rid: 5112083039358288003
-      type: {class: AttackTargetAction, ns: , asm: KillChord.View}
+    - rid: 5112083216648635062
+      type: {class: AttackTargetAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         ID:
           m_Value0: 17285828235500123636
@@ -1808,39 +1806,39 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358288001
+          rid: 5112083216648635060
         Battle:
-          rid: 5112082995642630796
+          rid: 5112083216648635046
         State:
-          rid: 5112082995642630797
-    - rid: 5112083039358288004
-      type: {class: IsTargetInAttackRangeCondition, ns: , asm: KillChord.View}
+          rid: 5112083216648635047
+    - rid: 5112083216648635063
+      type: {class: IsTargetInAttackRangeCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358288009
-    - rid: 5112083039358288005
-      type: {class: IsAimSightClearCondition, ns: , asm: KillChord.View}
+          rid: 5112083216648635068
+    - rid: 5112083216648635064
+      type: {class: IsAimSightClearCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358288010
-    - rid: 5112083039358288006
-      type: {class: IsAttackingCondition, ns: , asm: KillChord.View}
+          rid: 5112083216648635069
+    - rid: 5112083216648635065
+      type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358288011
-    - rid: 5112083039358288007
+          rid: 5112083216648635070
+    - rid: 5112083216648635066
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1849,21 +1847,21 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358288002
+          rid: 5112083216648635061
         m_Children:
-        - rid: 5112083039358288012
-        - rid: 5112083039358288013
+        - rid: 5112083216648635071
+        - rid: 5112083216648635072
         m_RegisteredObservers: []
-    - rid: 5112083039358288008
-      type: {class: IsAttackingCondition, ns: , asm: KillChord.View}
+    - rid: 5112083216648635067
+      type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
-          rid: 5112082995642630797
+          rid: 5112083216648635047
         Bool:
-          rid: 5112083039358288014
-    - rid: 5112083039358288009
+          rid: 5112083216648635073
+    - rid: 5112083216648635068
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1871,7 +1869,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 1
-    - rid: 5112083039358288010
+    - rid: 5112083216648635069
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1879,7 +1877,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 1
-    - rid: 5112083039358288011
+    - rid: 5112083216648635070
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1887,8 +1885,8 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 0
-    - rid: 5112083039358288012
-      type: {class: MoveToAttackAction, ns: , asm: KillChord.View}
+    - rid: 5112083216648635071
+      type: {class: MoveToAttackAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         ID:
           m_Value0: 2617725138129330875
@@ -1896,13 +1894,13 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358288007
+          rid: 5112083216648635066
         Movement:
-          rid: 5112082995642630795
+          rid: 5112083216648635045
         State:
-          rid: 5112082995642630797
-    - rid: 5112083039358288013
-      type: {class: StopMovingAction, ns: , asm: KillChord.View}
+          rid: 5112083216648635047
+    - rid: 5112083216648635072
+      type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
       data:
         ID:
           m_Value0: 4204141831513638362
@@ -1910,12 +1908,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 5112083039358288007
+          rid: 5112083216648635066
         Movement:
-          rid: 5112082995642630795
+          rid: 5112083216648635045
         State:
-          rid: 5112082995642630797
-    - rid: 5112083039358288014
+          rid: 5112083216648635047
+    - rid: 5112083216648635073
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:

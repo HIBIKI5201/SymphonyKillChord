@@ -13,7 +13,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyAttackUsecase = enemyAttackUsecase;
             _enemyBattleState = enemyBattleState;
         }
-
+        /// <summary>
+        ///     攻撃を実行する。
+        /// </summary>
         public void ExecuteAttack()
         {
             _enemyAttackUsecase.ExecuteAttack(
