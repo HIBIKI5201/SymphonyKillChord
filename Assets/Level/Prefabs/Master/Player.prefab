@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6619117660693068914}
   - component: {fileID: -8556356520204914904}
   - component: {fileID: -5640712038900430492}
+  - component: {fileID: 4704850274294587580}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -52,9 +53,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
   _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
   _player: {fileID: 7750579596343814766}
+  _skillRepository: {fileID: 0}
+  _bpm: 0
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
-  _enemyTestSpawner: {fileID: 0}
 --- !u!114 &7750579596343814766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,7 +71,7 @@ MonoBehaviour:
   _blendName: Speed
   _animator: {fileID: 7554209699097654958}
   _rb: {fileID: 6619117660693068914}
-  _cameraTransform: {fileID: 0}
+  _seSource: {fileID: 4704850274294587580}
 --- !u!114 &-2625927772269966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,6 +157,39 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
+--- !u!114 &4704850274294587580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339157675331060313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: 
+  _cueSheet: GunSound
 --- !u!1001 &4161154649757715263
 PrefabInstance:
   m_ObjectHideFlags: 0

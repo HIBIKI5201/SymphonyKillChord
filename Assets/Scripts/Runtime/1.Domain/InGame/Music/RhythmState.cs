@@ -5,10 +5,14 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
-    /// リズム入力の履歴を管理するクラス。
+    ///     リズム入力の履歴を管理するクラス。
     /// </summary>
     public class RhythmState
     {
+        /// <summary>
+        ///     指定された容量で履歴管理クラスを生成する。
+        /// </summary>
+        /// <param name="capacity"> バッファの容量。 </param>
         public RhythmState(int capacity)
         {
             _recordBuffer = new RingBuffer<RhythmInputRecord>(capacity);
@@ -18,31 +22,37 @@ namespace KillChord.Runtime.Domain.InGame.Music
             _actionTypeCache = new BattleActionType[capacity];
         }
 
+        /// <summary> 現在の履歴数。 </summary>
         public int Count => _recordBuffer.Count;
 
-        /// <summary>
-        /// 最後に登録されたタイミング（unscaledTime）を取得する。
-        /// </summary>
+        /// <summary> 最後に登録されたタイミング（unscaledTime）を取得する。 </summary>
         public float LastTiming => Count > 0 ? _recordBuffer.PeekLast().Timing : 0f;
 
         /// <summary>
-        ///  計算済みの値をバッファに登録する。
+        ///     計算済みの値をバッファに登録する。
         /// </summary>
-        /// <param name="beatType">計算済みの拍子</param>
-        /// <param name="timing">登録時のタイミング(Time.unscaledTimeなど)</param>
-        /// <param name="actionType">アクションの種類</param>
+        /// <param name="beatType"> 計算済みの拍子。 </param>
+        /// <param name="timing"> 登録時のタイミング。 </param>
+        /// <param name="actionType"> アクションの種類。 </param>
         public void Enqueue(BeatType beatType, float timing, BattleActionType actionType)
         {
             RhythmInputRecord record = new RhythmInputRecord(beatType, timing, actionType);
             _recordBuffer.Enqueue(record);
         }
 
+        /// <summary>
+        ///     履歴レコードをスパンとして取得する。
+        /// </summary>
+        /// <returns> レコードの読み取り専用スパン。 </returns>
         public ReadOnlySpan<RhythmInputRecord> GetHistoryRecord()
         {
             return _recordBuffer.AsReadonlySpan();
         }
 
-        /// <summary> 古い順に取得</summary>
+        /// <summary>
+        ///     拍の種類の履歴を古い順に取得する。
+        /// </summary>
+        /// <returns> 拍の種類の読み取り専用スパン。 </returns>
         public ReadOnlySpan<BeatType> GetHistoryBeatType()
         {
             ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
@@ -55,6 +65,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return _beatTypeCache.AsSpan(0, records.Length);
         }
 
+        /// <summary>
+        ///     タイミングの履歴を取得する。
+        /// </summary>
+        /// <returns> タイミングの読み取り専用スパン。 </returns>
         public ReadOnlySpan<float> GetHistoryTiming()
         {
             ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
@@ -67,6 +81,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return _timingCache.AsSpan(0, records.Length);
         }
 
+        /// <summary>
+        ///     アクション種類の履歴を取得する。
+        /// </summary>
+        /// <returns> アクション種類の読み取り専用スパン。 </returns>
         public ReadOnlySpan<BattleActionType> GetHistoryActionType()
         {
             ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();

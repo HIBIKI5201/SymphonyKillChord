@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
@@ -10,12 +11,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
     public sealed class PlayerConfig : ScriptableObject
     {
         public PlayerMoveParameter ToDomain()
-            => new(
-                Mathf.Max(0f, _moveSpeed),
-                Mathf.Max(0f, _dodgeSpeed),
-                Mathf.Max(0f, _dodgeDuration),
-                Mathf.Max(0f, _dodgeCooldown)
-                );
+            => new PlayerMoveParameter(
+                new MoveSpeed(_moveSpeed),
+                new DodgeSpeed(_dodgeSpeed),
+                new DodgeDuration(_dodgeDuration),
+                new DodgeCooldown(_dodgeCooldown)
+            );
 
         [SerializeField] private float _moveSpeed;
         [Space]

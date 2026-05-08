@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -25,7 +25,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     敵移動の依存関係を構築する。
+    ///     敵歩兵移動の依存関係を構築する。
     /// </summary>
     public class EnemyMoveDebugInitializer : MonoBehaviour
     {
@@ -46,11 +46,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemySharedFacade _enemySharedFacade;
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
+        [Header("砲兵の場合のみ必要")]
+        [SerializeField] private ShellSpawner _shellSpawner;
+
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
         private LockOnTargetGateway _lockOnTargetGateway;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
+        private IEnemyAttackControllerGenerator _attackControllerGenerator;
 
         public void Initialize(
             Transform target,
@@ -58,7 +62,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
             TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController
+            TargetEntityRegistryController targetEntityRegistryController,
+            IEnemyAttackControllerGenerator attackControllerGenerator
             )
         {
             _targetManagerController = targetManagerController;
@@ -66,6 +71,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity = CharacterFactory.Create(_enemyData);
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            _attackControllerGenerator = attackControllerGenerator;
             if (_missionEventController != null && _missionKeyAsset != null)
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
@@ -89,15 +95,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
+            // AttackController生成用コンテキスト
+            EnemyAttackControllerContext attackControllerContext = new EnemyAttackControllerContext(attackUsecase, battleState, _shellSpawner);
+
             // Controller
-            EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
+            IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -121,6 +130,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _attackPositionSearchView.enabled = true;
         }
 
+        /// <summary>
+        ///     敵死亡時に実行する処理。
+        /// </summary>
+        /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
             if (_missionKeyAsset == null)

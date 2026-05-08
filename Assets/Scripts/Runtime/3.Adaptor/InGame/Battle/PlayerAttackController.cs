@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
@@ -26,18 +27,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _musicSyncService = musicSyncService;
         }
 
-        public bool ExecuteAttack()
+        public bool ExecuteAttack(out int resultBeatType) //TODO : outでBeatTypeを返す構造を修正する
         {
+            resultBeatType = 0;
             if (_targetSelectorController == null)
             {
                 Debug.LogError("TargetSelectorControllerが設定されていません。");
                 return false;
             }
+
             if (!_targetSelectorController.TryGetCurrentTargetEntity(out var targetEntity))
             {
                 Debug.Log("攻撃対象が選択されていません。");
                 return false;
             }
+
             _battleState.ChangeTarget(targetEntity);
 
             float now = Time.unscaledTime;
@@ -56,18 +60,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
+            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
-                _battleState.Target,
-                true); // TODO 敵側で射線判定の結果が追加されたため、プレイヤー側は一旦固定値で書く
+                _battleState.Target
+            );
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
-            Debug.Log($"[PlayerAttackController]攻撃対象のHashCode：{targetEntity.GetHashCode()}");
-            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, targetEntity.GetHashCode()));
+            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
+            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical,
+                targetEntity.Id));
 
             _presenter.Push(result);
 
             _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack, beatType, now);
+
+            resultBeatType = (int)beatType;
             return true;
         }
 

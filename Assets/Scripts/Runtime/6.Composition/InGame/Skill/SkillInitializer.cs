@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
+    /// <summary>
+    /// Composition層の初期化クラス。SkillモジュールのControllerとUsecaseを生成して接続する。
+    /// </summary>
     public class SkillInitializer : MonoBehaviour, IInjectable<IMusicSyncService>
     {
         [SerializeField] private SkillRepository _skillRepository;
@@ -18,6 +21,9 @@ namespace KillChord.Runtime.Composition
         private SkillController _skillController;
         private IMusicSyncService _musicSyncService;
 
+        /// <summary>
+        /// Skillモジュールの初期化を行う。ControllerとUsecaseを生成して接続する。
+        /// </summary>
         public void Initialize()
         {
             SkillCheckService skillCheckService = new SkillCheckService();
@@ -27,6 +33,9 @@ namespace KillChord.Runtime.Composition
             _skillController.SetUsecase(skillUsecase);
         }
 
+        /// <summary>
+        /// IMusicSyncService を注入するためのメソッド。
+        /// </summary>
         public void Inject(IMusicSyncService arg0)
         {
             _musicSyncService = arg0;

@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
@@ -10,6 +12,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// </summary>
         public CriticalMultiplier(float value)
         {
+            if (value <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "CriticalMultiplierは0以上である必要があります。");
+            }
+
+
             _value = value;
         }
 

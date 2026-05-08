@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             }
             if (!float.IsFinite(value))
             {
-                throw new ArgumentException("Damage must be finite.", nameof(value));
+                throw new ArgumentException("value must be finite.", nameof(value));
             }
 
             Value = value;

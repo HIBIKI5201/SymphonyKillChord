@@ -12,8 +12,11 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             TargetBeat = targetBeat;
         }
 
+        /// <summary> 小節フラグ。0は現在小節、1は次の小節 </summary>
         public byte BarFlag { get; }
+        /// <summary> 小節の拍子 </summary>
         public double TimeSignature { get; }
+        /// <summary> 拍目 </summary>
         public double TargetBeat { get; }
     }
 }

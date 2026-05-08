@@ -7,12 +7,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
     /// </summary>
     public class MusicSyncController
     {
+        /// <summary>
+        ///     新しいコントローラーを生成する。
+        /// </summary>
+        /// <param name="musicSyncState"> 音楽同期状態。 </param>
+        /// <param name="musicSyncService"> 音楽同期サービス。 </param>
         public MusicSyncController(MusicSyncState musicSyncState, IMusicSyncService musicSyncService)
         {
             _musicSyncState = musicSyncState;
             _musicSyncService = musicSyncService;
         }
 
+        /// <summary>
+        ///     毎フレームの更新処理を行う。
+        /// </summary>
+        /// <param name="playTime"> 現在の再生時間。 </param>
         public void Tick(double playTime)
         {
             _musicSyncState.UpdatePlayTime(playTime);
