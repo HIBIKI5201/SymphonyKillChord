@@ -7,7 +7,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "MoveToAttack", story: "謾ｻ謦・庄閭ｽ縺ｪ菴咲ｽｮ縺ｾ縺ｧ遘ｻ蜍・[Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
+    [NodeDescription(name: "MoveToAttack", story: "攻撃可能な位置まで移動する [Movement] [State]", category: "Action", id: "8b82e763f6fed498af18c3983a2c822b")]
     public partial class MoveToAttackAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;

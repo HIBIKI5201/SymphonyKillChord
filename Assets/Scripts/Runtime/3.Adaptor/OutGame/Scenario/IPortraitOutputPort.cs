@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
@@ -8,7 +9,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     public interface IPortraitOutputPort
     {
         /// <summary>
-        /// 遶九■邨ｵ繧呈欠螳壹せ繝ｭ繝・ヨ縺ｸ陦ｨ遉ｺ繝ｻ譖ｴ譁ｰ縺励∪縺吶・        /// </summary>
+        /// 立ち絵を指定スロットへ表示または更新します。
+        /// </summary>
         ValueTask ShowPortraitAsync(
             string slot,
             string assetKey,

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "GetStunned", story: "陲ｫ蠑ｾ遑ｬ逶ｴ繧帝幕蟋九☆繧・[State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]
+    [NodeDescription(name: "GetStunned", story: "スタン状態を開始する [State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]
     public partial class GetStunnedAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;

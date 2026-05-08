@@ -448,7 +448,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         string text = GetValue(values, headerIndex, "Text");
                         var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
 
-                        // 莠呈鋤: Event陦後↓逶ｴ謗･譖ｸ縺九ｌ縺溷腰荳繝医Μ繧ｬ繝ｼ繧ょ女縺大・繧後ｋ
+                        // 後方互換: Event 行にもトリガー情報を直接持てるようにしている
                         TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
                         if (inlineTrigger != null)
                         {

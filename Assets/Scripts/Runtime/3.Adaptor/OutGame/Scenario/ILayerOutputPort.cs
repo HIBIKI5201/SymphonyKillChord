@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
@@ -8,7 +9,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     public interface ILayerOutputPort
     {
         /// <summary>
-        /// 蟇ｾ雎｡UI縺ｮ繝ｬ繧､繝､繝ｼ鬆・ｒ螟画峩縺励∪縺吶・        /// </summary>
+        /// 対象 UI のレイヤー順を変更します。
+        /// </summary>
         ValueTask SetLayerOrderAsync(string target, int order, CancellationToken ct);
     }
 }
