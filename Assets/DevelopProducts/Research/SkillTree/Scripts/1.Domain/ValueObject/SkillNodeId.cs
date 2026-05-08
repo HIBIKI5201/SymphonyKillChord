@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
@@ -19,9 +18,6 @@ namespace DevelopProducts.SkillTree
 
         /// <summary>スキルノードのIDを取得します。</summary>
         public int Id => _id;
-
-        /// <summary>スキルノードのID</summary>
-        private readonly int _id;
 
         /// <summary>
         ///     指定したスキルノードIDと現在の値が等しいかどうかを判定します。
@@ -73,5 +69,9 @@ namespace DevelopProducts.SkillTree
         {
             return !(left == right);
         }
+
+
+        /// <summary>スキルノードのID</summary>
+        private readonly int _id;
     }
 }
