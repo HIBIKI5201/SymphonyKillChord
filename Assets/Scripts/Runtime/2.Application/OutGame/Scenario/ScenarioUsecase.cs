@@ -27,10 +27,9 @@ namespace KillChord.Runtime.Application
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
-            ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token);
-
             try
             {
+                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token);
                 for (int i = 0; i < data.Events.Count; i++)
                 {
                     IScenarioEvent e = data.Events[i];
@@ -51,6 +50,14 @@ namespace KillChord.Runtime.Application
                 // Skip requested: end scenario gracefully.
                 skipped = true;
             }
+            finally
+            {
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                if (ReferenceEquals(_playCts, source))
+                {
+                    _playCts = null;
+                }
+            }
         }
 
         public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
@@ -70,7 +77,17 @@ namespace KillChord.Runtime.Application
 
         public void RequestSkip()
         {
-            _playCts?.Cancel();
+            CancellationTokenSource cts = _playCts;
+            if (cts == null) return;
+
+            try
+            {
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Ignore: scenario playback already ended and CTS has been disposed.
+            }
         }
 
         public bool IsFastForward { get; private set; }
