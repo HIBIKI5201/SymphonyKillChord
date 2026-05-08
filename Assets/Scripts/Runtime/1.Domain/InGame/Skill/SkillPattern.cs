@@ -8,12 +8,11 @@ namespace KillChord.Runtime.Domain.InGame.Skill
     /// </summary>
     public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
+        /// <summary> シグネチャ（読み取り専用のBeatTypeスパン）。 </summary>
         public ReadOnlySpan<BeatType> Signatures => _signatures.AsSpan();
         private readonly RhythmPattern _signatures;
 
-        /// <summary>
-        /// コンストラクタ。リズムパターンを受け取って初期化する。
-        /// </summary>
+        /// <summary>　コンストラクタ。リズムパターンを受け取って初期化する。</summary>
         public SkillPattern(RhythmPattern signatures)
         {
             _signatures = signatures;
@@ -39,17 +38,13 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             return !(left == right);
         }
 
-        /// <summary>
-        /// 別のSkillPatternと等価か判定する。
-        /// </summary>
+        /// <summary>　別のSkillPatternと等価か判定する。</summary>
         public bool Equals(SkillPattern other)
         {
             return Equals(_signatures, other._signatures);
         }
 
-        /// <summary>
-        /// BeatTypeのReadOnlySpanと一致するか判定する。
-        /// </summary>
+        /// <summary>　BeatTypeのReadOnlySpanと一致するか判定する。</summary>
         public bool Equals(ReadOnlySpan<BeatType> other)
         {
             ReadOnlySpan<BeatType> signatures = _signatures.AsSpan();
@@ -70,17 +65,13 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             return true;
         }
 
-        /// <summary>
-        /// オブジェクト等価性の判定を行う。
-        /// </summary>
+        /// <summary>　オブジェクト等価性の判定を行う。 </summary>
         public override bool Equals(object obj)
         {
             return obj is SkillPattern other && Equals(other);
         }
 
-        /// <summary>
-        /// ハッシュコードを取得する。
-        /// </summary>
+        /// <summary>　ハッシュコードを取得する。</summary>
         public override int GetHashCode()
         {
             return (_signatures.GetHashCode());

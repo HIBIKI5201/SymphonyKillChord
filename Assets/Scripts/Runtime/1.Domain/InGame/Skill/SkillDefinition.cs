@@ -8,9 +8,14 @@ namespace KillChord.Runtime.Domain.InGame.Skill
     /// </summary>
     public class SkillDefinition : IEquatable<SkillDefinition>
     {
-        public readonly SkillId Id;
-        public readonly SkillPattern SkillPattern;
-        public readonly ISkillEffect Effect;
+        /// <summary> スキルの識別子。 </summary>
+        public SkillId Id { get; }
+
+        /// <summary> スキルの入力パターン。 </summary>
+        public SkillPattern SkillPattern { get; }
+
+        /// <summary> スキルの効果実装。 </summary>
+        public ISkillEffect Effect { get; }
 
         #region 定数
 

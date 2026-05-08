@@ -84,6 +84,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
+        // ...インスペクション用のフィールド（順序はコード規定に従う）
         private readonly SkillDefinition[] _skillCache;
         private readonly Dictionary<int, ISkillVisual> _skillVisuals;
         private readonly SkillResultPresenter _presenter;

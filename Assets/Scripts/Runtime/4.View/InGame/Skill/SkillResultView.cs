@@ -4,14 +4,10 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
-    /// <summary>
-    /// スキル結果を表示するビュークラス。
-    /// </summary>
+    /// <summary> スキル結果を表示するビュークラス。 </summary>
     public class SkillResultView : MonoBehaviour
     {
-        /// <summary>
-        /// ViewModelをバインドして変更イベントを購読する。
-        /// </summary>
+        /// <summary> ViewModelをバインドして変更イベントを購読する。 </summary>
         /// <param name="viewModel">バインドするViewModel</param>
         /// <exception cref="System.ArgumentNullException">viewModelがnullの場合</exception>
         public void Bind(SkillResultViewModel viewModel)
@@ -30,9 +26,7 @@ namespace KillChord.Runtime.View
 
         private SkillResultViewModel _viewModel;
 
-        /// <summary>
-        /// ViewModel変更時に呼ばれるハンドラ。表示を更新する。
-        /// </summary>
+        /// <summary> ViewModel変更時に呼ばれるハンドラ。表示を更新する。 </summary>
         /// <param name="skillId">スキルID</param>
         /// <param name="skillPattern">パターン（配列）</param>
         private void HandleChanged(int skillId, ReadOnlyMemory<int> skillPattern)

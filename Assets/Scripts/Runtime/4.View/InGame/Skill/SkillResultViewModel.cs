@@ -8,10 +8,13 @@ namespace KillChord.Runtime.View
     /// </summary>
     public class SkillResultViewModel : ISkillResultViewModel
     {
+        /// <summary> スキル結果の変更を通知するイベント。 </summary>
         public event Action<int, ReadOnlyMemory<int>> OnChanged;
 
+        /// <summary> 現在のスキルID。 </summary>
         public int SkillId { get; private set; }
 
+        /// <summary> 現在のスキルパターン（読み取り専用メモリ）。 </summary>
         public ReadOnlyMemory<int> SkillPattern { get; private set; }
 
         /// <summary>
