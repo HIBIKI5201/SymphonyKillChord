@@ -25,8 +25,8 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         [SerializeField] private int _id;
 
-        [SerializeField] private CriAtomSource _source;
+        [SerializeField, Tooltip("SkillSE再生用CriAtomSource")] private CriAtomSource _source;
 
-        [SerializeField] private string _cueName;
+        [SerializeField, Tooltip("再生するCueの名前")] private string _cueName;
     }
 }
