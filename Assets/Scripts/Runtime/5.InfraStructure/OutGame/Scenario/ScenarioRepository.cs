@@ -5,11 +5,11 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using UnityEngine.Networking;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     public class ScenarioRepository : IScenarioRepository
     {
@@ -448,7 +448,7 @@ namespace KillChord.Runtime.InfraStructure
                         string text = GetValue(values, headerIndex, "Text");
                         var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
 
-                        // 莠呈鋤: Event陦後↓逶ｴ謗･譖ｸ縺九ｌ縺溷腰荳繝医Μ繧ｬ繝ｼ繧ょ女縺大・繧後ｋ
+                        // 後方互換: Event 行にもトリガー情報を直接持てるようにしている
                         TextTimingTrigger inlineTrigger = TryCreateTrigger(values, headerIndex, row.LineNo, text);
                         if (inlineTrigger != null)
                         {
@@ -473,7 +473,7 @@ namespace KillChord.Runtime.InfraStructure
                         {
                             throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
                         }
-                        return new PlainEventDefinition(row.Step, new KillChord.Runtime.Domain.AnimationEvent(animationId));
+                        return new PlainEventDefinition(row.Step, new AnimationEvent(animationId));
                     }
                 case "fade":
                     {
@@ -620,7 +620,7 @@ namespace KillChord.Runtime.InfraStructure
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
                         }
-                        return new KillChord.Runtime.Domain.AnimationEvent(animationId);
+                        return new AnimationEvent(animationId);
                     }
                 case "portrait":
                     {

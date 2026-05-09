@@ -1,6 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Mission
 {
     public class MissionFactory
     {

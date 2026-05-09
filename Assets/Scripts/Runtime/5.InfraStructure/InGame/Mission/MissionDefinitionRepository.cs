@@ -2,7 +2,7 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     public class MissionDefinitionRepository : IMissionDefinitionRepository
     {

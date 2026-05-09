@@ -1,7 +1,7 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Player;
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.Player.SkillVisual
 {
     /// <summary>
     ///     スキルの視覚効果をテストするためのクラス。

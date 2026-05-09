@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
     /// IFadeViewSink の契約を定義します。

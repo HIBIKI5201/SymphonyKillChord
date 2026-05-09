@@ -3,7 +3,7 @@ using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     [Serializable]
     public abstract class MissionFailConditionAssetBase : ISerializationCallbackReceiver

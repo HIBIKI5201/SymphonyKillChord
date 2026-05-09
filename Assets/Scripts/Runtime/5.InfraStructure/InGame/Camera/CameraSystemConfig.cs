@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Camera;
 using UnityEngine;
 
-namespace KillChord.Runtime.Structure.InGame.Camera
+namespace KillChord.Runtime.InfraStructure.InGame.Camera
 {
     /// <summary>
     ///     カメラシステムの各種パラメータを設定するためのScriptableObject。

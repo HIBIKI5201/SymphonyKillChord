@@ -1,7 +1,7 @@
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃の定義を保持するScriptableObjectクラス。

@@ -4,7 +4,7 @@ using SymphonyFrameWork.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     [CreateAssetMenu(fileName = nameof(MissionDefinition), menuName = "KillChord/Mission/" + nameof(MissionDefinition))]
     public class MissionDefinitionAsset : ScriptableObject

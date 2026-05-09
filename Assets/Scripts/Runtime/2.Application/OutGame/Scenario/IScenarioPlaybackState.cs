@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
     /// IScenarioPlaybackState の契約を定義します。

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     [CreateAssetMenu(
        fileName = "ScenarioSettingsAsset",

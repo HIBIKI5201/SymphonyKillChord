@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.Input
 {
     public class MobileInput : MonoBehaviour
     {

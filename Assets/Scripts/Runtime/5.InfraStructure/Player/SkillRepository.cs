@@ -2,7 +2,6 @@ using System;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
-using SymphonyKillChord.InfraStructure.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.Player

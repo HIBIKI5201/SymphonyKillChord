@@ -1,8 +1,8 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Battle;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Battle
 {
     /// <summary>
     ///     攻撃結果表示用の状態を管理するViewModelクラス。

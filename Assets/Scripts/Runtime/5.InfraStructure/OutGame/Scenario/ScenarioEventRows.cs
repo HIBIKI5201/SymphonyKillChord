@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     internal readonly struct EventRow
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃のパラメーターセットを保持するScriptableObjectクラス。

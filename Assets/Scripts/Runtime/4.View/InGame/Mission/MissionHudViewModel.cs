@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using R3;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Mission
 {
     public class MissionHudViewModel : IMissionHudViewModel
     {

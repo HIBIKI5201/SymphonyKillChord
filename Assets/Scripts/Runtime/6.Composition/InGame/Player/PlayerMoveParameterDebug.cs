@@ -2,7 +2,7 @@ using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
 #if UNITY_EDITOR
-namespace KillChord.Runtime.Composition.InGame.Debugger
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     /// <summary>
     ///     プレイヤー移動パラメータをデバッグ表示するクラス。

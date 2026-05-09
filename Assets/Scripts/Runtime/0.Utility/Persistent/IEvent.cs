@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
     ///     イベント構造体用、制約用インターフェース。<br/>

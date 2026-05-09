@@ -4,7 +4,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
 

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
     [CreateAssetMenu(
         fileName = nameof(EnemyMissionKeyAsset),

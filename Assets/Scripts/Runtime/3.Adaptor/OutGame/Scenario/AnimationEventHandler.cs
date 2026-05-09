@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
-    public class AnimationEventHandler : IScenarioEventHandler<KillChord.Runtime.Domain.AnimationEvent>
+    public class AnimationEventHandler : IScenarioEventHandler<AnimationEvent>
     {
         public AnimationEventHandler(IAnimationOutputPort animationOutputPort, IAnimationRepository animationRepository)
         {
@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Adaptor
             _animationRepository = animationRepository;
         }
 
-        public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
+        public async ValueTask HandleAsync(AnimationEvent e, CancellationToken ct)
         {
             if (!_animationRepository.TryFindById(e.AnimationId, out AnimationDefinition animation))
             {

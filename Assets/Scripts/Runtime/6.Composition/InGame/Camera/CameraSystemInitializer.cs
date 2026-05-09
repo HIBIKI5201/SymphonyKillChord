@@ -1,20 +1,20 @@
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Domain.InGame.Camera;
-using KillChord.Runtime.Structure.InGame.Camera;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.InfraStructure.InGame.Camera;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 #if UNITY_EDITOR
-using KillChord.Runtime.Composition.InGame.Debugger;
 #endif
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Camera
 {
     /// <summary>
     ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。

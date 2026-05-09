@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
     /// シナリオ再生完了通知の契約を定義します。

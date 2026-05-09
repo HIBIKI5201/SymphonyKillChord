@@ -1,14 +1,19 @@
 using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Composition.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
     [DefaultExecutionOrder(-100)]
     public class IngameComposition : MonoBehaviour

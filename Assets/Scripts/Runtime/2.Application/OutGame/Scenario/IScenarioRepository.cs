@@ -1,8 +1,8 @@
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
     /// シナリオデータ取得の契約を定義します。

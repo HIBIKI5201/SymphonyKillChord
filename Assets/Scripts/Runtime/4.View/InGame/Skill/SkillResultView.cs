@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Skill
 {
     /// <summary>
     /// スキル結果を表示するビュークラス。
