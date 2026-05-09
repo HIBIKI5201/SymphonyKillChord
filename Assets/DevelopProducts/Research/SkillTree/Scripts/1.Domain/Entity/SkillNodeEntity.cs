@@ -1,13 +1,13 @@
 namespace DevelopProducts.SkillTree
 {
-    public class SkillNodeEntityTest
+    public class SkillNodeEntity
     {
-        public SkillNodeEntityTest(int nodeId, SkillNodeEntityTest parent = null)
+        public SkillNodeEntity(int nodeId, SkillNodeEntity parent = null)
         {
             SkillNodeIdVOTest = new SkillNodeIdVOTest(nodeId);
             Parent = parent;
         }
-        public SkillNodeEntityTest Parent { get; }
+        public SkillNodeEntity Parent { get; }
         public SkillNodeIdVOTest SkillNodeIdVOTest { get; }
 
     }
