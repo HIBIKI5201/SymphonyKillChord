@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.UI
     {
         public HealthHudViewModel(float currentHealth, float maxHealth)
         {
-            _healthHudDto.Value = new HealthHudDTO(currentHealth, maxHealth);
+            _healthHudDto = new ReactiveProperty<HealthHudDTO>(new HealthHudDTO(currentHealth, maxHealth));
         }
         
         /// <summary> HP情報を保持するReactiveProperty。 </summary>

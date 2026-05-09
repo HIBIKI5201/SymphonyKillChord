@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Character;
+using System;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
@@ -7,6 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// </summary>
     public interface IDefender
     {
+        /// <summary> ダメージを受ける時に発火するイベント。 </summary>
+        public event Action<HealthEntity, float> OnDamageTaken;
+        /// <summary> 回復した時に発火するイベント。 </summary>
+        public event Action<HealthEntity, float> OnHealed;
         /// <summary>
         ///     現在の体力を取得する。
         /// </summary>
