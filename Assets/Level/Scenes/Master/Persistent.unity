@@ -386,6 +386,10 @@ MonoBehaviour:
     acbFile: MusicSyncMock.acb
     awbFile: 
     loaderStatus: 0
+  - name: SpecialAttack
+    acbFile: SpecialAttack.acb
+    awbFile: 
+    loaderStatus: 0
   dspBusSetting: 
   dontDestroyOnLoad: 0
   dontRemoveExistsCueSheet: 0
