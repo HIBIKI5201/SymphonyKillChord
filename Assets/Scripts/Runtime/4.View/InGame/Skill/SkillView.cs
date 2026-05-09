@@ -11,10 +11,6 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
             Debug.Log($"SkillView Execute: {Id}");
             //実際のViewで起こる演出など
-            if (_source == null)
-            {
-                _source = this.gameObject.GetComponent<CriAtomSource>();
-            }
 
             if (_source != null && !string.IsNullOrEmpty(_cueName))
             {
@@ -28,5 +24,13 @@ namespace KillChord.Runtime.View.InGame.Skill
         [SerializeField, Tooltip("SkillSE再生用CriAtomSource")] private CriAtomSource _source;
 
         [SerializeField, Tooltip("再生するCueの名前")] private string _cueName;
+
+        private void Awake()
+        {
+            if(_source == null)
+            {
+                _source = GetComponent<CriAtomSource>();
+            }
+        }
     }
 }
