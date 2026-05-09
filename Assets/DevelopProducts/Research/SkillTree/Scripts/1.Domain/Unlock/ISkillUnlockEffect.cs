@@ -5,6 +5,6 @@ namespace DevelopProducts.SkillTree
     /// </summary>
     public interface ISkillUnlockEffect : INodeUnlockEffect
     {
-    
+        string Description { get; } 
     }
 }

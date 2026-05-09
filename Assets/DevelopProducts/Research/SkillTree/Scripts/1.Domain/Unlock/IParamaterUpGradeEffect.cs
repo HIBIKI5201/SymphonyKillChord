@@ -5,6 +5,6 @@ namespace DevelopProducts.SkillTree
     /// </summary>
     public  interface IParameterUpgradeEffect : INodeUnlockEffect
     {
-    
+        string Description { get; } 
     }
 }

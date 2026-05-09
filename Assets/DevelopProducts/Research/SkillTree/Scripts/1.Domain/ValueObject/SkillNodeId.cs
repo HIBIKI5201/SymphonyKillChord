@@ -5,13 +5,13 @@ namespace DevelopProducts.SkillTree
     /// <summary>
     ///     スキルツリーのノードIDを表す値オブジェクトです。
     /// </summary>
-    public readonly struct SkillNodeIdVOTest : IEquatable<SkillNodeIdVOTest>
+    public readonly struct SkillNodeIdVo : IEquatable<SkillNodeIdVo>
     {
         /// <summary>
         ///     スキルノードIDを生成します。
         /// </summary>
         /// <param name="id">スキルノードのID。</param>
-        public SkillNodeIdVOTest(int id)
+        public SkillNodeIdVo(int id)
         {
             _id = id;
         }
@@ -24,7 +24,7 @@ namespace DevelopProducts.SkillTree
         /// </summary>
         /// <param name="other">比較対象のスキルノードID。</param>
         /// <returns>同じIDの場合は true、それ以外の場合は false。</returns>
-        public bool Equals(SkillNodeIdVOTest other)
+        public bool Equals(SkillNodeIdVo other)
         {
             return _id == other.Id;
         }
@@ -36,7 +36,7 @@ namespace DevelopProducts.SkillTree
         /// <returns>同じスキルノードIDの場合は true、それ以外の場合は false。</returns>
         public override bool Equals(object obj)
         {
-            return obj is SkillNodeIdVOTest other && Equals(other);
+            return obj is SkillNodeIdVo other && Equals(other);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="left">比較する左辺のスキルノードID。</param>
         /// <param name="right">比較する右辺のスキルノードID。</param>
         /// <returns>等しい場合は true、それ以外の場合は false。</returns>
-        public static bool operator ==(SkillNodeIdVOTest left, SkillNodeIdVOTest right)
+        public static bool operator ==(SkillNodeIdVo left, SkillNodeIdVo right)
         {
             return left.Equals(right);
         }
@@ -65,7 +65,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="left">比較する左辺のスキルノードID。</param>
         /// <param name="right">比較する右辺のスキルノードID。</param>
         /// <returns>異なる場合は true、それ以外の場合は false。</returns>
-        public static bool operator !=(SkillNodeIdVOTest left, SkillNodeIdVOTest right)
+        public static bool operator !=(SkillNodeIdVo left, SkillNodeIdVo right)
         {
             return !(left == right);
         }
