@@ -62,7 +62,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             AccurateBeat = PlayTime / BeatLength;
             CurrentBeat = (int)Math.Floor(AccurateBeat);
             NearestBeat = (int)Math.Floor(AccurateBeat + MusicConstants.HALF_BEAT_THRESHOLD);
-            Debug.Log($"[MusicSyncState] PlayTime:{PlayTime}, BeatLength:{BeatLength}");
         }
     }
 }
