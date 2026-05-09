@@ -80,7 +80,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
             ServiceInjector.Inject(_skillInitializer);
-            _skillInitializer.Initialize();
+            //_skillInitializer.Initialize();
 
             _enemyInfantryTestSpawner.Init();
             _enemyArtilleryTestSpawner.Init();
