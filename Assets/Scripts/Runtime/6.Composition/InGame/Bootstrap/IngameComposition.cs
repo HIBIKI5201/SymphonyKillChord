@@ -30,7 +30,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
         private PlayerInitializer _playerInitializer;
-        private SkillInitializer _skillInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
@@ -41,7 +40,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
-            _skillInitializer = stageSceneI.SkillInitializer;
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
@@ -78,9 +76,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 #endif
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
-
-            ServiceInjector.Inject(_skillInitializer);
-            _skillInitializer.Initialize();
 
             _enemyInfantryTestSpawner.Init();
             _enemyArtilleryTestSpawner.Init();
