@@ -33,7 +33,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary>
         ///     HPに変化があった時に発火するイベント。<br/>
-        ///     引数は、現在HP、最大HP、変化量
+        ///     引数は、現在HP、最大HP、変化量（ダメージは負、回復は正）
         /// </summary>
         public event Action<float, float, float> OnHealthChanged;
 
@@ -79,11 +79,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
             {
                 return;
             }
-
+            float prevHealthValue = CurrentHealth.Value;
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
             _health.ChangeHealth(nextHealth);
-            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, damage.Value);
+            float amountChanged = _health.CurrentHealth.Value - prevHealthValue;
+            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, amountChanged);
 
             if (CurrentHealth.Value <= 0f && !_isDeadNotified)
             {
@@ -98,9 +99,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="healAmount"></param>
         public void Heal(Health healAmount)
         {
+            float prevHealthValue = CurrentHealth.Value;
             Health nextHealth = new Health(CurrentHealth.Value + healAmount.Value);
             _health.ChangeHealth(nextHealth);
-            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, healAmount.Value);
+            float amountChanged = _health.CurrentHealth.Value - prevHealthValue;
+            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, amountChanged);
         }
 
         /// <summary>

@@ -8,7 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// </summary>
     public interface IDefender
     {
-        /// <summary> HPに変化があった時に発火するイベント。 </summary>
+        /// <summary>
+        ///     HPに変化があった時に発火するイベント。<br/>
+        ///     引数は、現在HP、最大HP、変化量（ダメージは負、回復は正）
+        /// </summary>
         public event Action<float, float, float> OnHealthChanged;
         /// <summary>
         ///     現在の体力を取得する。

@@ -47,8 +47,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private void OnDestroy()
         {
+            if (_playerInputView != null)
+            {
+                UnRegisterActions();
+            }
             _healthHudPresenter?.Dispose();
-            UnRegisterActions();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
