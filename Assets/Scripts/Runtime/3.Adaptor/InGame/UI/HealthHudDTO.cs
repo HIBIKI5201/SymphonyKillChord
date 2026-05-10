@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor.InGame.UI
 {
     /// <summary>
@@ -7,15 +5,15 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
     /// </summary>
     public readonly struct HealthHudDTO
     {
-        public HealthHudDTO(float maxHealth, float currentHealth)
+        public HealthHudDTO(float currentHealth, float maxHealth)
         {
-            MaxHealth = maxHealth;
             CurrentHealth = currentHealth;
+            MaxHealth = maxHealth;
         }
 
-        /// <summary> 最大HP </summary>
-        public readonly float MaxHealth;
         /// <summary> 現在HP </summary>
         public readonly float CurrentHealth;
+        /// <summary> 最大HP </summary>
+        public readonly float MaxHealth;
     }
 }

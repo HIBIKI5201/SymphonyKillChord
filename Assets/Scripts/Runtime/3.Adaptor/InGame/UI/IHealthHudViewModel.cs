@@ -1,3 +1,4 @@
+using R3;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.UI
@@ -7,6 +8,7 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
     /// </summary>
     public interface IHealthHudViewModel
     {
+        public ReadOnlyReactiveProperty<HealthHudDTO> HealthHudDTO { get; }
         /// <summary>
         ///     HP情報を更新する。
         /// </summary>

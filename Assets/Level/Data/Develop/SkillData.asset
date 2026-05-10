@@ -19,6 +19,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 8885031606625501290
       type: {class: TestSkillEffect, ns: KillChord.Runtime.Application, asm: KillChord.Application}
-      data: 

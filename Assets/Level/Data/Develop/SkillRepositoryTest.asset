@@ -14,4 +14,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
   _skillDataAssets:
   - {fileID: 11400000, guid: 92b4dad59dcbf694cbbc56a28fdbb0a4, type: 2}
-  - {fileID: 11400000, guid: 92b4dad59dcbf694cbbc56a28fdbb0a4, type: 2}

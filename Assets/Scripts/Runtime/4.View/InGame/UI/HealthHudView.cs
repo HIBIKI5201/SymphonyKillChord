@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.InGame.UI
         ///     依存関係構築、及びReactivePropertyの購読。
         /// </summary>
         /// <param name="vm"></param>
-        public void Bind(HealthHudViewModel vm)
+        public void Bind(IHealthHudViewModel vm)
         {
             _vm = vm;
 
@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField] private Image _healthBarImage;
         [SerializeField] private TextMeshProUGUI _currentHealthText;
         [SerializeField] private TextMeshProUGUI _maxHealthText;
-        private HealthHudViewModel _vm;
+        private IHealthHudViewModel _vm;
 
         /// <summary>
         ///     HUDを更新する。

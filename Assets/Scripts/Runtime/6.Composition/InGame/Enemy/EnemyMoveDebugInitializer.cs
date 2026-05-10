@@ -1,22 +1,17 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -38,6 +33,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
+        [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
@@ -109,6 +105,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
+            // HP Presenter
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, null);
+
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
             _targetManagerController.Register(_lockOnTargetGateway);
@@ -117,6 +116,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             _view.Initialize(controller, target);
+            _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();
 
