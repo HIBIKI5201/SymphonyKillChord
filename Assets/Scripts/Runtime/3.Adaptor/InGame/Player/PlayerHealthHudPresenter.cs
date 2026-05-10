@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
         public PlayerHealthHudPresenter(IDefender entity, IHealthHudViewModel healthHudViewModel)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity), "プレイヤーEntityがNULL。");
-            if (healthHudViewModel == null) throw new ArgumentNullException(nameof(entity), "プレイヤーHPのViewModelがNULL。");
+            if (healthHudViewModel == null) throw new ArgumentNullException(nameof(healthHudViewModel), "プレイヤーHPのViewModelがNULL。");
             _entity = entity;
             _healthHudViewModel = healthHudViewModel;
 

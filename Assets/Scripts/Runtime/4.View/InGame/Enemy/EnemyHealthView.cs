@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void OnDestroy()
         {
-            _presenter.Dispose();
+            _presenter?.Dispose();
         }
 
         private IHealthHudPresenter _presenter;
