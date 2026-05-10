@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a076d68b4d37684aa9b059994411634, type: 3}
+  m_Name: SkillNodeAsset
+  m_EditorClassIdentifier: SkillTreeDevelopProducts::DevelopProducts.SkillTree.SkillNodeAsset
+  _nodeUnlockEffets:
+  - rid: 6052115742612783275
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6052115742612783275
+      type: {class: SkillUnlock, ns: DevelopProducts.SkillTree, asm: SkillTreeDevelopProducts}
+      data:
+        _skillData:
+          _skillEffect:
+            rid: -2
+          _skillVisual:
+            rid: -2
+          _id: 0
+          _pattern: 
+        _description: 
