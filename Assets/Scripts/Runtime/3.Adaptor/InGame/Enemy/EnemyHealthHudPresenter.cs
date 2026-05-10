@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
      /// <summary>
      ///     プレイヤーのHPをHUDに反映するPresenter。
      /// </summary>
-    public class EnemyHealthHudPresenter : IHealthHudPresenter, IDisposable
+    public class EnemyHealthHudPresenter : IHealthHudPresenter
     {
         public EnemyHealthHudPresenter(IDefender entity, IHealthHudViewModel healthHudViewModel)
         {

@@ -1,9 +1,11 @@
+using System;
+
 namespace KillChord.Runtime.Adaptor.InGame.UI
 {
     /// <summary>
     ///     HPをHUDに反映するPresenter。
     /// </summary>
-    public interface IHealthHudPresenter
+    public interface IHealthHudPresenter : IDisposable
     {
         /// <summary>
         ///     HP HUDを更新する処理。
