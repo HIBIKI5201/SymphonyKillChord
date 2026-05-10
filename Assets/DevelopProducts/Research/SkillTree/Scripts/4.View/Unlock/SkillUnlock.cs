@@ -7,8 +7,8 @@ namespace DevelopProducts.SkillTree
     public class SkillUnlock : ISkillUnlockEffect
     {
         public string Description => _description;
-        
-        [SerializeField] private SkillData _skillData;
+
+        [SerializeField] private int _skillId;
         [SerializeField] private string _description;
     }
 }
