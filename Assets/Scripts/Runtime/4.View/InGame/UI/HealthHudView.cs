@@ -22,6 +22,14 @@ namespace KillChord.Runtime.View.InGame.UI
             _vm.HealthHudDTO.Subscribe(UpdateHpHud).RegisterTo(destroyCancellationToken);
         }
 
+        private void Awake()
+        {
+            if (_healthBarImage == null || _currentHealthText == null || _maxHealthText == null)
+            {
+                Debug.LogError("[HealthHudView] UIの参照が失っています。", this);
+            }
+        }
+
         [SerializeField] private Image _healthBarImage;
         [SerializeField] private TextMeshProUGUI _currentHealthText;
         [SerializeField] private TextMeshProUGUI _maxHealthText;
@@ -30,12 +38,12 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <summary>
         ///     HUDを更新する。
         /// </summary>
-        /// <param name="dto"></param>
+        /// <param name="dto">HP HUD用のDTO</param>
         private void UpdateHpHud(HealthHudDTO dto)
         {
             _currentHealthText.SetText("{0}", Mathf.CeilToInt(dto.CurrentHealth));
             _maxHealthText.SetText("{0}", Mathf.CeilToInt(dto.MaxHealth));
-            _healthBarImage.fillAmount = dto.CurrentHealth / dto.MaxHealth;
+            _healthBarImage.fillAmount = Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth);
         }
     }
 }
