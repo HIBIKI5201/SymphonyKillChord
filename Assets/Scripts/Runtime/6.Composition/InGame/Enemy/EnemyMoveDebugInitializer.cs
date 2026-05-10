@@ -11,7 +11,6 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
-using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -63,6 +62,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackControllerGenerator attackControllerGenerator
             )
         {
+            if (_view == null)
+                Debug.LogError($"{nameof(EnemyMoveView)}の参照がありません。");
+            if (_healthView == null)
+                Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
+            if (_raycastView == null)
+                Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
+            if (_attackPositionSearchView == null)
+                Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
             _enemyEntity = CharacterFactory.Create(_enemyData);

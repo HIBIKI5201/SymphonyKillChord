@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
 using R3;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,8 +18,8 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="vm"></param>
         public void Bind(IHealthHudViewModel vm)
         {
+            if (vm == null) throw new ArgumentNullException(nameof(vm), "HP HUDのViewModelがNULL。");
             _vm = vm;
-
             _vm.HealthHudDTO.Subscribe(UpdateHpHud).RegisterTo(destroyCancellationToken);
         }
 
@@ -41,9 +42,13 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="dto">HP HUD用のDTO</param>
         private void UpdateHpHud(HealthHudDTO dto)
         {
+            if (_healthBarImage == null || _currentHealthText == null || _maxHealthText == null) return;
+
             _currentHealthText.SetText("{0}", Mathf.CeilToInt(dto.CurrentHealth));
             _maxHealthText.SetText("{0}", Mathf.CeilToInt(dto.MaxHealth));
-            _healthBarImage.fillAmount = Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth);
+
+            _healthBarImage.fillAmount = dto.MaxHealth > 0f ?
+                Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth) : 0f;
         }
     }
 }
