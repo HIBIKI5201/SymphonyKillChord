@@ -31,10 +31,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _combatSpec = combatSpec;
         }
 
-        /// <summary> ダメージを受ける時に発火するイベント。 </summary>
-        public event Action<HealthEntity, float> OnDamageTaken;
-        /// <summary> 回復した時に発火するイベント。 </summary>
-        public event Action<HealthEntity, float> OnHealed;
+        /// <summary>
+        ///     HPに変化があった時に発火するイベント。<br/>
+        ///     引数は、現在HP、最大HP、変化量
+        /// </summary>
+        public event Action<float, float, float> OnHealthChanged;
+
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
 
@@ -81,7 +83,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
             _health.ChangeHealth(nextHealth);
-            OnDamageTaken?.Invoke(_health, damage.Value);
+            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, damage.Value);
 
             if (CurrentHealth.Value <= 0f && !_isDeadNotified)
             {
@@ -98,7 +100,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         {
             Health nextHealth = new Health(CurrentHealth.Value + healAmount.Value);
             _health.ChangeHealth(nextHealth);
-            OnHealed?.Invoke(_health, healAmount.Value);
+            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, healAmount.Value);
         }
 
         /// <summary>

@@ -1,7 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor.InGame.UI
 {
     /// <summary>
@@ -12,8 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         /// <summary>
         ///     HP HUDを更新する処理。
         /// </summary>
-        /// <param name="health">値更新後のHealthEntity</param>
+        /// <param name="currentHealth">現在HP</param>
+        /// <param name="maxHealth">最大HP</param>
         /// <param name="amountChanged">HPの変化量</param>
-        public void UpdateHealthHud(HealthEntity health, float amountChanged);
+        public void UpdateHealthHud(float currentHealth, float maxHealth, float amountChanged);
     }
 }
