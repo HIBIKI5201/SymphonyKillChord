@@ -110,12 +110,17 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             UpdateCameraBone(resolvedContext, targetPosition);
             _followSystem.Update(ref _cameraCenterOffset, resolvedContext);
-            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, _cameraBoneRotation, _previousCameraPosition, resolvedContext, targetPosition);
 
+            Quaternion boneTargetRotation = _cameraBoneRotation;
+            if (IsLockOn())
+            {
+                _boneRotationSystem.TryGetTargetRotation(resolvedContext.FollowPosition, targetPosition, _cameraBoneRotation, out boneTargetRotation);
+            }
+
+            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, boneTargetRotation, _previousCameraPosition, resolvedContext, targetPosition);
 
             CalculateCameraPlacement(resolvedContext, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
             UpdateDistance(ref _distance, result.Distance, resolvedContext.DeltaTime);
-
 
             resultPosition = result.CameraAnchorPosition + result.Direction * _distance;
             resultRotation = _cameraBoneRotation * _cameraRotation;
