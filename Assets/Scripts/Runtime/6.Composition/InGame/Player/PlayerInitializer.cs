@@ -1,13 +1,17 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
@@ -17,11 +21,10 @@ using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
-using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Composition.Persistent.Input;
 
 
 
@@ -40,7 +43,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
-        [SerializeField] private int _bpm;
+        [SerializeField] private SkillView[] _skillVisuals;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -51,6 +54,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
+        private InGameHudInitializer _inGameHudInitializer;
 
         private void Awake()
         {
@@ -77,6 +81,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
+            _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
+            if( _inGameHudInitializer == null)
+            {
+                Debug.LogError($"{nameof(InGameHudInitializer)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
 
             _playerEntity = CharacterFactory.Create(_playerData);
 
@@ -128,9 +138,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
-            //一旦ヌル。
-            ISkillVisual[] skillVisuals = null;
-            SkillController skillController = new SkillController(_skillRepository, skillVisuals, null, skillResultPresenter);
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);
 
@@ -142,9 +150,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
                 playerBattleState, skillController, targetSelectorController, musicSyncService);
+            
+            IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
+            PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
-            _player.Initialize(playerMovementController, playerAttackController, ct, inputView);
+            _player.Initialize(playerMovementController, playerAttackController, ct, inputView, healthHudPresenter);
 
+            _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
 #if UNITY_EDITOR
             _player.gameObject

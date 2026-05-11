@@ -5,6 +5,7 @@ using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.Persistent.Input;
@@ -26,11 +27,10 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
-
+        [SerializeField] private InGameHudInitializer _inGameHudInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
         private PlayerInitializer _playerInitializer;
-        private SkillInitializer _skillInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
@@ -41,7 +41,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
-            _skillInitializer = stageSceneI.SkillInitializer;
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
@@ -78,9 +77,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 #endif
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
-
-            ServiceInjector.Inject(_skillInitializer);
-            _skillInitializer.Initialize();
 
             _enemyInfantryTestSpawner.Init();
             _enemyArtilleryTestSpawner.Init();

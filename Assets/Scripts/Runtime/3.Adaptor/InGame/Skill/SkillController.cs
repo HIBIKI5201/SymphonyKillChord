@@ -1,11 +1,8 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
