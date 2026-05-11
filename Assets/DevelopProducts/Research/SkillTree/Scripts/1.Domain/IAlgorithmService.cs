@@ -4,7 +4,7 @@ namespace DevelopProducts.SkillTree
 {
     public interface IAlgorithmService
     {
-        IReadOnlyList<SkillNodeEntity> FindPath(
+        PathResult FindPath(
             SkillNodeEntity target,
             SkillTreeEntity tree);
     }
