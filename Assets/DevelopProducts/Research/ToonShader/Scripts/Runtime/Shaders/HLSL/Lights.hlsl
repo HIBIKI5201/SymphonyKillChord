@@ -3,6 +3,7 @@
 
 
 #ifndef SHADERGRAPH_PREVIEW
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
 
@@ -20,9 +21,11 @@ void MainLight_float(
     DistanceAtten = 1.0;
     ShadowAtten   = 1.0;
 #else
-    Direction = _MainLightPosition.xyz;
-    Color = _MainLightColor.rgb;
-
+    
+    Light mainLight = GetMainLight();
+    Direction = mainLight.direction;
+    Color = mainLight.color;
+    
     half cascadeIndex = ComputeCascadeIndex(positionWS);
     float4 shadowCoord = mul(_MainLightWorldToShadow[cascadeIndex], float4(positionWS, 1.0));
 
