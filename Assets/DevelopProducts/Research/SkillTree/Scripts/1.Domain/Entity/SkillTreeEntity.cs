@@ -5,7 +5,6 @@ namespace DevelopProducts.SkillTree
 {
     /// <summary>
     ///     スキルツリー全体を管理するドメインエンティティ。
-    ///     ノードの親子関係（グラフ構造）・地続き判定・動的エッジ管理を担う。
     /// </summary>
     public class SkillTreeEntity
     {
