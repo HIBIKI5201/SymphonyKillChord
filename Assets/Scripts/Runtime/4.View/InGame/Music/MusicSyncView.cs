@@ -24,19 +24,20 @@ namespace KillChord.Runtime.View.InGame.Music
             MusicPlayer musicPlayer,
             MusicSyncState musicSyncState,
             MusicSyncController musicSyncController,
-            int testBpm)
+            double testBpm)
         {
             _musicPlayer = musicPlayer;
             _musicSyncState = musicSyncState;
             _musicSyncController = musicSyncController;
             _musicViewModel = _musicPlayer.MusicVM;
+            _testBpm = testBpm;
 
             _musicViewModel.CueName
                 .Subscribe(PlayBgm)
                 .RegisterTo(destroyCancellationToken);
         }
 
-        private int _testBpm;
+        private double _testBpm;
         private MusicPlayer _musicPlayer;
         private MusicViewModel _musicViewModel;
         private MusicSyncState _musicSyncState;
