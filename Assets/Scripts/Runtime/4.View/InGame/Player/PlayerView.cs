@@ -160,6 +160,12 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
+                // 移動入力がない場合は、前方を回避方向とする
+                if (dir.sqrMagnitude <= float.Epsilon)
+                {
+                    var fwd = _cacheTransform.forward;
+                    dir = new Vector2(fwd.x, fwd.z).normalized;
+                }
                 _controller.TryDodge(dir, Time.time);
                 _isDodge = false;
             }
