@@ -16,39 +16,26 @@ void MainLight_float(
     out float ShadowAtten)
 {
 #ifdef SHADERGRAPH_PREVIEW
-    Direction     = float3(0.5, 0.5, 0);
-    Color         = float3(1, 1, 1);
-    DistanceAtten = 1.0;
-    ShadowAtten   = 1.0;
+    Direction   = float3(0.5, 0.5, 0);
+    Color       = float3(1, 1, 1);
+    ShadowAtten = 1.0;
 #else
     
     Light mainLight = GetMainLight();
     Direction = mainLight.direction;
     Color = mainLight.color;
+    
 #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-    half cascadeIndex = ComputeCascadeIndex(positionWS);
-    float4 shadowCoord = mul(
-        _MainLightWorldToShadow[cascadeIndex],
-        float4(positionWS, 1.0)
-    );
+    
+    float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
+    
+    Light mainLightWithShadow = GetMainLight(shadowCoord);
+    ShadowAtten = mainLightWithShadow.shadowAttenuation;
 
-    ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
-    half4 shadowParams = GetMainLightShadowParams();
-    shadowParams.x = 1.0;
-
-    ShadowAtten = SampleShadowmapFiltered(
-        TEXTURE2D_SHADOW_ARGS(
-            _MainLightShadowmapTexture,
-            sampler_LinearClampCompare
-        ),
-        shadowCoord,
-        shadowSamplingData
-    );
-
-    ShadowAtten = LerpWhiteTo(ShadowAtten, shadowParams.x);
 #else
     ShadowAtten = 1.0;
 #endif
+
 #endif
 }
 
