@@ -8,39 +8,56 @@ namespace DevelopProducts.SkillTree
             int cost,
             INodeUnlockEffect[] nodeUnlockEffects,
             bool isUnlocked,
-            bool isRoot = false,
-            bool isEnable = false)
+            bool isEnable = false,
+            bool isOrigin = false)
         {
             SkillNodeIdVO = new SkillNodeIdVo(nodeId);
             UnlockCost = new UnlockCost(cost);
             NodeUnlockEffects = nodeUnlockEffects;
             _isUnlocked = isUnlocked;
-            IsRoot = isRoot;
             IsEnable = isEnable;
+            IsOrigin = isOrigin;
         }
 
         public SkillNodeIdVo SkillNodeIdVO { get; }
         public UnlockCost UnlockCost { get; }
         public INodeUnlockEffect[] NodeUnlockEffects { get; }
         public bool IsUnlocked => _isUnlocked;
-        public bool IsRoot { get; }
+        public bool IsOrigin { get; }
         public bool IsEnable { get; }
+        public SkillNodeEntity[] Parents => _parents;
 
-        public void Unlock() => _isUnlocked = true;
+        public void SetParent(SkillNodeEntity[] parents)
+        {
+            _parents = parents;
+        }
+        public void Unlock()
+        {
+            _isUnlocked = true;
+        }
 
         public bool CanLock()
         {
-            return true;
+            return _isEnable;
         }
 
         public void Lock()
         {
             //  原点ノードだった場合ロックできない
-            if (IsRoot) return;
+            if (IsOrigin) return;
 
             _isUnlocked = false;
         }
-
+        public void NodeEnable()
+        {
+            _isEnable = true;
+        }
+        public void NodeDisable()
+        {
+            _isEnable = false;
+        }
         private bool _isUnlocked;
+        private bool _isEnable;
+        private SkillNodeEntity[] _parents;
     }
 }
