@@ -2,21 +2,19 @@
 2,Layer,PortraitLeft,2
 3,Layer,PortraitRight,2
 4,Portrait,Left,hello,-460,-120,1,true
-5,Text,勇者,ついに魔王の城まで来たぞ。
+5,Text,Hero,I finally made it to the Dark Lord's castle.
 6,Portrait,Right,hello,460,-120,1,true
-7,Text,魔王,よく来たな、勇者。ここがお前の終着点だ。
-8,Portrait,Left,good,-460,-120,1,true
-9,Text,勇者,みんなの願いを背負っている。ここで負けるわけにはいかない。
-10,Text,魔王,ならば見せてみろ。その剣に世界を救う力があるのかを。
-11,Fade,0,1,0.3
+7,Text,Dark Lord,You have done well to come this far, Hero. This is where your journey ends.
+8,Portrait,Left,hello,-460,-120,1,false
+9,Text,Hero,I carry everyone's hopes with me. I cannot lose here.
+10,Text,Dark Lord,Then show me. Let me see whether that sword truly has the power to save the world.
 12,Fade,1,0,0.3
-13,Text,勇者,はああああっ！
-14,Portrait,Right,good,460,-120,1,true
-15,Text,魔王,ば、ばかな……この私が……！
-16,Text,勇者,これで終わりだ、魔王！
-17,Fade,0,1,0.4
-18,Fade,1,0,0.4
-19,Background,genki_pose
-20,Portrait,Right,good,460,-120,1,false
-21,Text,勇者,魔王は倒れた。世界に、また朝が来るんだ。
-22,Text,ナレーション,こうして勇者は魔王を倒し、世界に平和が戻った。
+13,Fade,0,1,0.5
+14,Text,Hero,Haaaaah!
+15,Portrait,Right,good,460,-120,1,true
+16,Text,Dark Lord,T-This cannot be... Me, defeated...!
+17,Text,Hero,This is the end, Dark Lord!
+18,Background,genki_pose
+19,Portrait,Right,good,460,-120,1,false
+20,Text,Hero,The Dark Lord has fallen. Dawn will return to the world once more.
+21,Text,Narration,And so, the Hero defeated the Dark Lord, and peace returned to the world.

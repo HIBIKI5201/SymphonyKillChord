@@ -20,7 +20,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private const string TargetPortraitCenter = "PortraitCenter";
         private const string TargetPortraitRight = "PortraitRight";
         private const string TargetText = "Text";
-
+        [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private TMP_Text _chat;
         [SerializeField] private Image _backgroundImage;
         [SerializeField] private Animation _animationPlayer;
@@ -148,7 +148,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             if (string.Equals(target, TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
             {
-                Canvas canvas = GetComponent<Canvas>();
+                Canvas canvas =   GetComponent<Canvas>();
                 if (canvas == null)
                 {
                     return;
@@ -188,22 +188,22 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
 
             _time += Time.deltaTime;
-            if (_chat == null)
+            if ( _canvasGroup == null)
             {
-                Debug.LogWarning("ScenarioView: _chat is not assigned.");
+                Debug.LogWarning("ScenarioView: _canvasGroup is not assigned.");
                 _onFade = false;
                 return;
             }
 
             if (_duration <= 0f)
             {
-                _chat.alpha = _end;
+                 _canvasGroup.alpha = _end;
                 _onFade = false;
                 return;
             }
 
             float t = Mathf.Clamp01(_time / _duration);
-            _chat.alpha = Mathf.Lerp(_start, _end, t);
+            _canvasGroup.alpha = Mathf.Lerp(_start, _end, t);
             if (t >= 1f)
             {
                 _onFade = false;
