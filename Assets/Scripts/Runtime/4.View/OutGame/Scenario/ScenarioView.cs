@@ -26,6 +26,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField] private Animation _animationPlayer;
         [SerializeField] private GameObject _fadeObj;
         [SerializeField] private RectTransform _portraitRoot;
+        [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
 
         private bool _onFade;
         private float _time;
@@ -63,6 +64,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private void OnValidate()
         {
             TryAutoAssignReferences();
+            ApplyPortraitSizeToExistingSlots();
         }
 
         private void Update()
@@ -255,6 +257,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, new Vector2(-420f, -120f));
             EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
             EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
+            ApplyPortraitSizeToExistingSlots();
         }
 
         private void EnsurePortraitSlot(string slot, string objectName, Vector2 defaultPosition)
@@ -281,14 +284,36 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 rectTransform.anchorMin = new Vector2(0.5f, 0f);
                 rectTransform.anchorMax = new Vector2(0.5f, 0f);
                 rectTransform.pivot = new Vector2(0.5f, 0f);
-                rectTransform.sizeDelta = new Vector2(700f, 1000f);
                 rectTransform.anchoredPosition = defaultPosition;
             }
+
+            rectTransform.sizeDelta = GetValidatedPortraitSize();
 
             Image image = go.GetComponent<Image>();
             image.preserveAspect = true;
             image.enabled = image.sprite != null;
             _portraitBySlot[slot] = image;
+        }
+
+        private void ApplyPortraitSizeToExistingSlots()
+        {
+            Vector2 validatedSize = GetValidatedPortraitSize();
+            foreach (Image portraitImage in _portraitBySlot.Values)
+            {
+                if (portraitImage == null)
+                {
+                    continue;
+                }
+
+                portraitImage.rectTransform.sizeDelta = validatedSize;
+            }
+        }
+
+        private Vector2 GetValidatedPortraitSize()
+        {
+            return new Vector2(
+                Mathf.Max(1f, _portraitSize.x),
+                Mathf.Max(1f, _portraitSize.y));
         }
 
         private RectTransform GetPortraitRect(string slot)
