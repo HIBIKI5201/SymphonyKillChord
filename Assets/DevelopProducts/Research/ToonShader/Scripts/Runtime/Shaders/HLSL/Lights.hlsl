@@ -25,23 +25,30 @@ void MainLight_float(
     Light mainLight = GetMainLight();
     Direction = mainLight.direction;
     Color = mainLight.color;
-    
+#if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
     half cascadeIndex = ComputeCascadeIndex(positionWS);
-    float4 shadowCoord = mul(_MainLightWorldToShadow[cascadeIndex], float4(positionWS, 1.0));
+    float4 shadowCoord = mul(
+        _MainLightWorldToShadow[cascadeIndex],
+        float4(positionWS, 1.0)
+    );
 
     ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
     half4 shadowParams = GetMainLightShadowParams();
     shadowParams.x = 1.0;
 
-    // SampleShadowmapを使わず直接フィルタリング関数を呼ぶ
     ShadowAtten = SampleShadowmapFiltered(
-        TEXTURE2D_SHADOW_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare),
+        TEXTURE2D_SHADOW_ARGS(
+            _MainLightShadowmapTexture,
+            sampler_LinearClampCompare
+        ),
         shadowCoord,
         shadowSamplingData
     );
 
-    // ShadowStrengthを適用
     ShadowAtten = LerpWhiteTo(ShadowAtten, shadowParams.x);
+#else
+    ShadowAtten = 1.0;
+#endif
 #endif
 }
 
