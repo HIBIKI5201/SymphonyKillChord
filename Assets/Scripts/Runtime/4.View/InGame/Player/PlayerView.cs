@@ -164,7 +164,8 @@ namespace KillChord.Runtime.View.InGame.Player
                 if (dir.sqrMagnitude <= float.Epsilon)
                 {
                     var fwd = _cacheTransform.forward;
-                    dir = new Vector2(fwd.x, fwd.z).normalized;
+                    dir.x = fwd.x;
+                    dir.y = fwd.z;
                 }
                 _controller.TryDodge(dir, Time.time);
                 _isDodge = false;
