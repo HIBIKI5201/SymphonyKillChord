@@ -1,45 +1,21 @@
 # Player-Skill
 
-Player カテゴリーにおけるスキルシステムのモジュール詳細。
+スキル定義データのモジュールです。実行時の判定や発動は `InGame/Skill` 側が担当し、このモジュールは主にデータ供給を担います。
 
 ## 構造概要
 
-スキルシステムは、スキルのデータ定義（Domain）、実際の効果（Application）、およびデータの保存・取得（InfraStructure）で構成されています。
-
 ### 1. Domain
-- **SkillData**: スキルの名前、説明、威力、必要なリソースなどの基本データ。
-- **ISkillEffect**: スキルが実行された際の効果を定義するインターフェース。
-- **ISkillVisual**: スキルの発動時に再生される演出を定義するインターフェース。
+- **SkillData**: ID、入力パターン、`ISkillEffect`、`ISkillVisual` を保持する設定データ。
+- **ISkillEffect / ISkillVisual**: スキル発動時の処理と演出の抽象。
 
 ### 2. Application
-- **TestSkillEffect**: デバッグや初期実装用のスキル効果クラス。
-- **SkillVisualTest**: スキルの視覚演出を行うためのテスト用クラス。
+- このモジュール固有の Application はありません。
+- 利用側には `SkillCheckService` と `SkillController` があります。
 
 ### 5. InfraStructure
-- **SkillRepository**: ScriptableObject や保存データからスキル情報をロードするリポジトリ。
+- **SkillRepository**: `SkillData[]` を保持し、要求された ID を `SkillDefinition` に変換して返す ScriptableObject。
 
-## クラス間連携図 (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-graph TD
-    subgraph Domain
-        SD[SkillData]
-        ISE[ISkillEffect]
-        ISV[ISkillVisual]
-    end
-
-    subgraph Application
-        TSE[TestSkillEffect]
-        SVT[SkillVisualTest]
-    end
-
-    subgraph InfraStructure
-        SR[SkillRepository]
-    end
-
-    SD --> ISE
-    SD --> ISV
-    ISE <|-- TSE
-    ISV <|-- SVT
-    SR --> SD
-```
+- `SkillData.ToSkillDefinition()` で `SkillId`、`SkillPattern`、`ISkillEffect`、`ISkillVisual` を束ねた `SkillDefinition` を生成します。
+- `TestSkillEffect` と `SkillVisualTest` はドメイン抽象の具象実装で、テスト用途の色が強いクラスです。

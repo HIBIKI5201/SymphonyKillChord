@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.InGame
 {
     /// <summary>
     ///     カメラの更新モードを定義します。

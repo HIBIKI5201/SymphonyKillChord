@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f493faec32964b408a5d39fb94fc16f, type: 3}
   m_Name: CameraMovementConfig
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Structure.CameraMovementConfig
-  _cameraOffset: {x: 0, y: 1, z: -5}
+  _cameraOffset: {x: 0, y: 1, z: 0}
+  _distance: 5
   _followOffsetPower: 1
   _followLerpSpeed: 2
   _boneRotateSpeed: 10

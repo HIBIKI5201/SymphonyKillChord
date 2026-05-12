@@ -8,21 +8,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
     /// </summary>
     public sealed class CameraSystemController
     {
+        /// <summary>
+        ///     カメラシステムアプリケーションを受け取り、コントローラーを初期化するコンストラクタ。
+        /// </summary>
+        /// <param name="application"> カメラシステムアプリケーション。</param>
         public CameraSystemController(CameraSystemApplication application)
         {
             _application = application;
         }
-        public void Update(
-            in Vector3 followPosition,
-            in Vector3 targetPosition,
-            in Vector2 input,
-            bool isLockOn,
-            float deltaTime,
-            out Quaternion resultRotation,
-            out Vector3 resultPosition
-            )
+
+        /// <summary>
+        ///     攻撃時のオートロックオン発動をアプリケーション層へ委譲する。
+        /// </summary>
+        /// <param name="currentPosition"> プレイヤーの現在位置。</param>
+        public void TryActiveAutoLockOn(in Vector3 currentPosition)
         {
-            _application.Update(followPosition, targetPosition, input, isLockOn, deltaTime, out resultRotation, out resultPosition);
+            _application.TryActiveAutoLockOn(currentPosition);
+        }
+
+        /// <summary>
+        ///     マニュアルロックオン状態のトグルをアプリケーション層へ委譲する。
+        /// </summary>
+        /// <param name="currentPosition"> プレイヤーの現在位置。</param>
+        public void ToggleLockOnState(in Vector3 currentPosition)
+        {
+            _application.ToggleLockOnState(currentPosition);
         }
 
         private readonly CameraSystemApplication _application;

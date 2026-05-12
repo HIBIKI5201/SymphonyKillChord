@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
 using System;
 
 namespace KillChord.Runtime.Domain.Persistent.Input

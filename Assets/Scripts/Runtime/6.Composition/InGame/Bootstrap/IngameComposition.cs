@@ -1,33 +1,87 @@
+using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Composition.InGame.Camera;
+using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.View.InGame.Scene;
+using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
-using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
+    [DefaultExecutionOrder(-100)]
     public class IngameComposition : MonoBehaviour
     {
-        [SerializeField] private PlayerInitializer _playerInitializer;
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private SkillInitializer _skillInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
-
+        [SerializeField] private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
+        [SerializeField] private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
+        [SerializeField] private MobileInput _mobileInput;
+        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
+        [SerializeField] private InGameHudInitializer _inGameHudInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
+        private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
         {
             await _ingameSceneView.LoadScene(_backgroundSceneName);
+
+            _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
+            Debug.Log(
+                $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
+
+            // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
 
-            _camerasystemInitializer.Initialize();
-            ServiceInjector.Inject(_skillInitializer);
-            _skillInitializer.Initialize();
+            int retryCount = 0;
+            while (_musicPlayer == null && retryCount < 20)
+            {
+                await System.Threading.Tasks.Task.Delay(100);
+                _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
+                retryCount++;
+            }
+
+            if (_musicPlayer == null)
+            {
+                Debug.LogError("[IngameComposition] MusicPlayer の取得に失敗しました。常駐シーンがロードされているか確認してください。");
+                return;
+            }
+
+            TargetManager targetManager = new();
+            TargetEntityRegistry targetEntityRegistry = new();
+
+            // 初期化順序の実行
+            _musicSyncInitializer.Initialize();
+            _inGameMissionInitializer.Initialize();
+
+            var inputC = ServiceLocator.GetInstance<InputComposition>();
+            inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
+#if UNITY_ANDROID
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _mobileInput.Initialize(inputC.GetInputView);
+#else
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            Cursor.lockState = CursorLockMode.Locked;
+#endif
+
+            _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
+
+            _enemyInfantryTestSpawner.Init();
+            _enemyArtilleryTestSpawner.Init();
+
+            _rhythmGuideInitializer.Initialize();
         }
     }
 }

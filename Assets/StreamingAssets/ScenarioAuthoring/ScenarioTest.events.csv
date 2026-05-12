@@ -1,0 +1,20 @@
+1,Background,background
+2,Layer,PortraitLeft,2
+3,Layer,PortraitRight,2
+4,Portrait,Left,hello,-460,-120,1,true
+5,Text,Hero,I finally made it to the Dark Lord's castle.
+6,Portrait,Right,hello,460,-120,1,true
+7,Text,Dark Lord,You have done well to come this far, Hero. This is where your journey ends.
+8,Portrait,Left,hello,-460,-120,1,false
+9,Text,Hero,I carry everyone's hopes with me. I cannot lose here.
+10,Text,Dark Lord,Then show me. Let me see whether that sword truly has the power to save the world.
+12,Fade,1,0,0.3
+13,Fade,0,1,0.5
+14,Text,Hero,Haaaaah!
+15,Portrait,Right,good,460,-120,1,true
+16,Text,Dark Lord,T-This cannot be... Me, defeated...!
+17,Text,Hero,This is the end, Dark Lord!
+18,Background,genki_pose
+19,Portrait,Right,good,460,-120,1,false
+20,Text,Hero,The Dark Lord has fallen. Dawn will return to the world once more.
+21,Text,Narration,And so, the Hero defeated the Dark Lord, and peace returned to the world.
