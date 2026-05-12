@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
 {
+    /// <summary>
+    /// シナリオ再生に必要な依存関係を組み立てて起動する。
+    /// </summary>
     public class ScenarioCom : MonoBehaviour
     {
         [SerializeField]
@@ -26,6 +29,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioSettingsAsset _scenarioSettings;
         private ScenarioUsecase _usecase;
 
+        /// <summary>
+        /// シナリオ再生の初期化を開始する。
+        /// </summary>
         private async void Start()
         {
             try
@@ -38,6 +44,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 enabled = false;
             }
         }
+        /// <summary>
+        /// 依存関係を組み立ててシナリオ再生を開始する。
+        /// </summary>
         private async ValueTask Init()
         {
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
@@ -88,7 +97,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             handlerRepo.Register<PortraitEvent>(portraitEventHandler.HandleAsync);
             handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
 
-            //View生成
+            // View を生成する。
             ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
             var animationMap = BuildAnimationMap(_animationCatalog);
@@ -99,16 +108,25 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             await _usecase.PlayScenario();
         }
 
+        /// <summary>
+        /// 無効化時に進行中のシナリオ再生を停止する。
+        /// </summary>
         private void OnDisable()
         {
             _usecase?.RequestSkip();
         }
 
+        /// <summary>
+        /// 破棄時に進行中のシナリオ再生を停止する。
+        /// </summary>
         private void OnDestroy()
         {
             _usecase?.RequestSkip();
         }
 
+        /// <summary>
+        /// 背景アセット参照用の辞書を構築する。
+        /// </summary>
         private static IReadOnlyDictionary<string, Sprite> BuildBackgroundMap(BackgroundCatalogAsset catalog)
         {
             var map = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
@@ -125,6 +143,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             return map;
         }
 
+        /// <summary>
+        /// アニメーションアセット参照用の辞書を構築する。
+        /// </summary>
         private static IReadOnlyDictionary<string, AnimationClip> BuildAnimationMap(AnimationCatalogAsset catalog)
         {
             var map = new Dictionary<string, AnimationClip>(System.StringComparer.Ordinal);
@@ -141,6 +162,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             return map;
         }
 
+        /// <summary>
+        /// 立ち絵アセット参照用の辞書を構築する。
+        /// </summary>
         private static IReadOnlyDictionary<string, Sprite> BuildPortraitMap(PortraitCatalogAsset catalog)
         {
             var map = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
