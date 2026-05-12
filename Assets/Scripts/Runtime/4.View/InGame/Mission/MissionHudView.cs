@@ -17,14 +17,16 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <param name="viewModel">ミッションHUDのビューモデル。</param>
         public void Initialize(MissionHudViewModel viewModel)
         {
+            if (viewModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewModel));
+            }
+
             // 既存の購読を破棄
             _mainMissionDisposable?.Dispose();
             _resultDisposable?.Dispose();
 
-            if (_viewModel != null)
-            {
-                _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
-            }
+            _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
 
             _viewModel = viewModel;
 
@@ -44,10 +46,7 @@ namespace KillChord.Runtime.View.InGame.Mission
                 }
             });
 
-            if (_viewModel != null)
-            {
-                _viewModel.OnEvaluationItemsUpdated += ReBuildEvaluationItems;
-            }
+            _viewModel.OnEvaluationItemsUpdated += ReBuildEvaluationItems;
         }
 
         [Header("メインミッション表示用UI")]
@@ -90,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Mission
         {
             ClearEvaluationItems();
 
-            if (_evaluationRoot == null || _evaluationItemPrefab == null)
+            if (items == null || _evaluationRoot == null || _evaluationItemPrefab == null)
             {
                 return;
             }
