@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Player
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterData
   _characterName: Player
-  _maxHealth: 10
+  _maxHealth: 100
   _attackDifinitions:
   - {fileID: 11400000, guid: 54de395a4c3a70f4cbeb57c92fab0d24, type: 2}
   - {fileID: 11400000, guid: a0248d99b3395974a9ecc1ecda9d5933, type: 2}

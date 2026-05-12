@@ -29,6 +29,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private IPlayerController _controller;
         private PlayerAttackController _playerAttackController;
+        private PlayerHealthHudPresenter _healthHudPresenter;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController => _playerAttackController;
@@ -44,12 +45,22 @@ namespace KillChord.Runtime.View.InGame.Player
             UpdateMovement();
         }
 
+        private void OnDestroy()
+        {
+            if (_playerInputView != null)
+            {
+                UnRegisterActions();
+            }
+            _healthHudPresenter?.Dispose();
+        }
+
         /// <summary> 依存コンポーネントを初期化する。 </summary>
         public void Initialize(
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             Transform cameraTransform,
-            PlayerInputView playerInputView)
+            PlayerInputView playerInputView,
+            PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
             _playerAttackController = playerAttackController;
@@ -57,6 +68,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _colliders = new Collider[8];
             _cacheTransform = transform;
+            _healthHudPresenter = healthHudPresenter;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
