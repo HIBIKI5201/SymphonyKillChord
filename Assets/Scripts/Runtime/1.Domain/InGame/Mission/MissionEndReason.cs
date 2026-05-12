@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Domain.InGame.Mission
 {
     /// <summary>
@@ -7,8 +5,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     /// </summary>
     public enum MissionEndReason 
     {
+        /// <summary> 終了していない。 </summary>
         None = 0,
+        /// <summary> クリア。 </summary>
         Clear = 1,
+        /// <summary> 失敗。 </summary>
         Fail = 2
     }
 }

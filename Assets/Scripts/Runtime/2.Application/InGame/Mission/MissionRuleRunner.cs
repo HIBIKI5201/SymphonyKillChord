@@ -7,11 +7,19 @@ namespace KillChord.Runtime.Application.InGame.Mission
     /// </summary>
     public class MissionRuleRunner
     {
+        /// <summary>
+        ///     MissionRuleRunner クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="missionDefinition">ミッション定義。</param>
         public MissionRuleRunner(MissionDefinition missionDefinition)
         {
             _missionDefinition = missionDefinition;
         }
 
+        /// <summary>
+        ///     ミッションのルールを評価します。
+        /// </summary>
+        /// <param name="missionProgress">進行状況。</param>
         public void Evaluate(MissionProgress missionProgress)
         {
             if (missionProgress.IsFinished)
@@ -33,6 +41,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             }
         }
 
+        /// <summary> ミッション定義。 </summary>
         private readonly MissionDefinition _missionDefinition;
     }
 }
