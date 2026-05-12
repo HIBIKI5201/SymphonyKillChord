@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -12,11 +13,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
         public void Present()
         {
+            MissionEvaluationResult result = _missionRuntimeService.BuildEvaluationResult();
+
+            MissionEvaluationItemDTO[] evaluationItems = new MissionEvaluationItemDTO[result.Progresses.Length];
+
+            for(int i = 0; i < evaluationItems.Length; i++)
+            {
+                MissionEvaluationProgress progress = result.Progresses[i];
+                evaluationItems[i] = new MissionEvaluationItemDTO(
+                    progress.Description,
+                    progress.IsAchieved);
+            }
+
             string resultText = _missionRuntimeService.MissionProgress.EndReason.ToString();
 
             MissionHudDTO dto = new MissionHudDTO(
                 _missionRuntimeService.MissionDefinition.MainMissionText,
-                resultText);
+                resultText,
+                evaluationItems);
 
             _missionHudViewModel.Apply(dto);
         }
