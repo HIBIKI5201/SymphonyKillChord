@@ -7,6 +7,7 @@ namespace DevelopProducts.SkillTree
         public SkillNodeEntity(int nodeId,
             int cost,
             INodeUnlockEffect[] nodeUnlockEffects,
+            IUnlockConditon unlockConditon,
             bool isUnlocked,
             bool isEnable = false,
             bool isOrigin = false)
@@ -14,6 +15,7 @@ namespace DevelopProducts.SkillTree
             SkillNodeIdVO = new SkillNodeIdVo(nodeId);
             UnlockCost = new UnlockCost(cost);
             NodeUnlockEffects = nodeUnlockEffects;
+            UnlockConditon = unlockConditon;
             _isUnlocked = isUnlocked;
             IsEnable = isEnable;
             IsOrigin = isOrigin;
@@ -22,6 +24,7 @@ namespace DevelopProducts.SkillTree
         public SkillNodeIdVo SkillNodeIdVO { get; }
         public UnlockCost UnlockCost { get; }
         public INodeUnlockEffect[] NodeUnlockEffects { get; }
+        public IUnlockConditon UnlockConditon { get; }
         public bool IsUnlocked => _isUnlocked;
         public bool IsOrigin { get; }
         public bool IsEnable { get; }
