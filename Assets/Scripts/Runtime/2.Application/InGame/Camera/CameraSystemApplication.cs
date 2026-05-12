@@ -116,6 +116,12 @@ namespace KillChord.Runtime.Application.InGame.Camera
             UpdateDistance(ref _distance, result.Distance, resolvedContext.DeltaTime);
             Vector3 currentCameraPosition = result.CameraAnchorPosition + result.Direction * _distance;
 
+            // ロックオン中の注視方向計算はカメラ追従オフセットを含まない純粋なカメラ位置を使用する
+            // _cameraCenterOffset を除いた位置を渡すことで、移動によるオフセットが注視方向に影響しなくなる
+            Vector3 cameraPositionForRotation = IsLockOn()
+                ? result.CameraAnchorPosition - _cameraCenterOffset + result.Direction * _distance
+                : currentCameraPosition;
+
             // bone の目標回転を取得し、cameraRotation の target 計算を bone の収束状態に依存させない
             Quaternion boneTargetRotation = _cameraBoneRotation;
             if (IsLockOn())
@@ -123,7 +129,7 @@ namespace KillChord.Runtime.Application.InGame.Camera
                 _boneRotationSystem.TryGetTargetRotation(resolvedContext.FollowPosition, targetPosition, _cameraBoneRotation, out boneTargetRotation);
             }
 
-            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, boneTargetRotation, currentCameraPosition, resolvedContext, targetPosition);
+            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, boneTargetRotation, cameraPositionForRotation, resolvedContext, targetPosition);
 
             resultPosition = currentCameraPosition;
             resultRotation = _cameraBoneRotation * _cameraRotation;
