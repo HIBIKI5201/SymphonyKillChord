@@ -39,7 +39,7 @@ namespace KillChord.Runtime.View.InGame.Mission
                 ));
             }
 
-            OnEvaluationItemsUpdated?.Invoke(_evaluationItems);
+            OnEvaluationItemsUpdated?.Invoke(_evaluationItems.AsReadOnly());
         }
 
         /// <summary> 評価項目のリスト。 </summary>

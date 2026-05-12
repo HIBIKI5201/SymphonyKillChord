@@ -1,9 +1,8 @@
-using KillChord.Runtime.View.InGame.Mission;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Mission
 {
     /// <summary>
     ///     ミッションの評価項目を表示するビュークラス。
