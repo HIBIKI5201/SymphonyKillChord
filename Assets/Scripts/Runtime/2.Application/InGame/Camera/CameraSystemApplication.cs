@@ -111,18 +111,21 @@ namespace KillChord.Runtime.Application.InGame.Camera
             UpdateCameraBone(resolvedContext, targetPosition);
             _followSystem.Update(ref _cameraCenterOffset, resolvedContext);
 
+            // カメラ配置を先行計算することで、今フレームの cameraPosition を cameraRotation の計算に使用できる
+            CalculateCameraPlacement(resolvedContext, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
+            UpdateDistance(ref _distance, result.Distance, resolvedContext.DeltaTime);
+            Vector3 currentCameraPosition = result.CameraAnchorPosition + result.Direction * _distance;
+
+            // bone の目標回転を取得し、cameraRotation の target 計算を bone の収束状態に依存させない
             Quaternion boneTargetRotation = _cameraBoneRotation;
             if (IsLockOn())
             {
                 _boneRotationSystem.TryGetTargetRotation(resolvedContext.FollowPosition, targetPosition, _cameraBoneRotation, out boneTargetRotation);
             }
 
-            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, boneTargetRotation, _previousCameraPosition, resolvedContext, targetPosition);
+            _cameraRotationSystem.Update(IsLockOn(), ref _cameraRotation, boneTargetRotation, currentCameraPosition, resolvedContext, targetPosition);
 
-            CalculateCameraPlacement(resolvedContext, out (Vector3 CameraAnchorPosition, Vector3 Direction, float Distance) result);
-            UpdateDistance(ref _distance, result.Distance, resolvedContext.DeltaTime);
-
-            resultPosition = result.CameraAnchorPosition + result.Direction * _distance;
+            resultPosition = currentCameraPosition;
             resultRotation = _cameraBoneRotation * _cameraRotation;
 
             _previousCameraPosition = resultPosition;
