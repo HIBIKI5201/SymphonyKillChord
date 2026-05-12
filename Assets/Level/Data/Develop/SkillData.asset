@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
+  m_Name: SkillData
+  m_EditorClassIdentifier: KillChord.Structure::SymphonyKillChord.InfraStructure.Player.SkillDataAsset
+  _id: 0
+  _pattern: 080000000800000008000000
+  _skillEffect:
+    rid: 8885031606625501290
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8885031606625501290
+      type: {class: TestSkillEffect, ns: KillChord.Runtime.Application, asm: KillChord.Application}

@@ -1,14 +1,18 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     敵から射線を通し、指定対象に直撃できるか判定するビュー。
     /// </summary>
     public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="targetTransform"></param>
+        /// <param name="attackRange"></param>
         public void Initialize(Transform targetTransform, float attackRange)
         {
             _hitResults = new RaycastHit[_resultArraySize];
@@ -20,23 +24,30 @@ namespace KillChord.Runtime.View
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
                 return;
             }
-            if (targetTransform.TryGetComponent<Collider>(out _targetCollider))
+            if (!targetTransform.TryGetComponent<Collider>(out _targetCollider))
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象がColliderを持っていない。");
+                return;
             }
 #if UNITY_EDITOR
             _initializedFlg = true;
 #endif
         }
-        public bool CanRaycastHitTarget => CheckCanRaycastHitTarget();
+        /// <summary> 射線が通っているか </summary>
+        public bool CanRaycastHitTarget => CheckCanRaycastHitTarget(transform.position);
 
         /// <summary>
-        ///     敵からの射線が対象に直撃できるか判定する。
+        ///     始点からの射線が対象に直撃できるか判定する。
         /// </summary>
         /// <returns></returns>
-        public bool CheckCanRaycastHitTarget()
+        public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
-            int hitCount = CastAndGetHitCount();
+            if(_targetTransform == null || _targetCollider == null)
+            {
+                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象の取得が出来ていない。");
+                return false;
+            }
+            int hitCount = CastAndGetHitCount(sourcePosition);
             if (hitCount > 0)
             {
                 RaycastHit hit = FindClosestHit(hitCount);
@@ -66,9 +77,9 @@ namespace KillChord.Runtime.View
         ///     射線判定を行い、当たった対象の数を返却。
         /// </summary>
         /// <returns></returns>
-        private int CastAndGetHitCount()
+        private int CastAndGetHitCount(Vector3 sourcePosition)
         {
-            Ray ray = new Ray(transform.position, (_targetTransform.position - transform.position).normalized);
+            Ray ray = new Ray(sourcePosition, (_targetTransform.position - sourcePosition).normalized);
             return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
         }
 
@@ -102,8 +113,13 @@ namespace KillChord.Runtime.View
         private void OnDrawGizmos()
         {
             if (!_initializedFlg) return;
-            Gizmos.color = CheckCanRaycastHitTarget() ? Color.red : Color.green;
+            Gizmos.color = CheckCanRaycastHitTarget(transform.position) ? Color.red : Color.green;
             Gizmos.DrawLine(transform.position, _targetTransform.position);
+        }
+        public void DrawGizmoLineToTarget(Vector3 source)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(source, _targetTransform.position);
         }
 #endif
     }

@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f368caefeeb82b439f56866e03ca24a, type: 3}
+  m_Name: MissionDefinition
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.MissionDefinitionAsset
+  _missionId: AllKill
+  _displayName: 
+  _description: "\u3059\u3079\u3066\u306E\u6575\u3092\u6BB2\u6EC5\u3059\u308B"
+  _mainMissionText: "\u3059\u3079\u3066\u306E\u6575\u3092\u6BB2\u6EC5\u3059\u308B"
+  _clearCondition:
+    rid: 3714306836670185725
+  _failCondition:
+    rid: 3714306836670185715
+  _evaluationConditions:
+  - rid: 3714306836670185720
+  - rid: 3714306836670185721
+  references:
+    version: 2
+    RefIds:
+    - rid: 3714306836670185715
+      type: {class: OrFailConditionGroupAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u3044\u305A\u308C\u304B\u3092\u6E80\u305F\u3059\u5931\u6557\u6761\u4EF6\r\n-
+          PlayerDeadFailConditionAsset\r\n- ElapsedTimeFailConditionAsset\r\n"
+        _children:
+        - rid: 3714306836670185726
+        - rid: 3714306836670185727
+    - rid: 3714306836670185720
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C30\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 30
+    - rid: 3714306836670185721
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C60\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 60
+    - rid: 3714306836670185725
+      type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u8D64\u3044\u6575\u30925\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
+        _requiredKillCount: 5
+    - rid: 3714306836670185726
+      type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+    - rid: 3714306836670185727
+      type: {class: ElapsedTimeFailConditionAsset, ns: KillChord.Runtime.InfraStructure, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "30\u79D2\u3092\u8D85\u3048\u305F\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 30

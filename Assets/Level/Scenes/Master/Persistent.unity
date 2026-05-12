@@ -386,6 +386,10 @@ MonoBehaviour:
     acbFile: MusicSyncMock.acb
     awbFile: 
     loaderStatus: 0
+  - name: SpecialAttack
+    acbFile: SpecialAttack.acb
+    awbFile: 
+    loaderStatus: 0
   dspBusSetting: 
   dontDestroyOnLoad: 0
   dontRemoveExistsCueSheet: 0
@@ -506,7 +510,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PersistentEntryPoint
   _active: 1
-  _firstSceneName: InGame
+  _firstSceneName: OutGame
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

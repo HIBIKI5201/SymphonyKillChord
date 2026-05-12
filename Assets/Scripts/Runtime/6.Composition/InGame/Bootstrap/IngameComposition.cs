@@ -1,30 +1,36 @@
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Composition.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
-using KillChord.Runtime.View;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
     [DefaultExecutionOrder(-100)]
     public class IngameComposition : MonoBehaviour
     {
-        [SerializeField] private bool _mobileBuild;
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        [SerializeField] private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
+        [SerializeField] private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
-
+        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
+        [SerializeField] private InGameHudInitializer _inGameHudInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
         private PlayerInitializer _playerInitializer;
-        private SkillInitializer _skillInitializer;
         private MusicPlayer _musicPlayer;
 
         private async void Start()
@@ -35,7 +41,6 @@ namespace KillChord.Runtime.Composition
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
-            _skillInitializer = stageSceneI.SkillInitializer;
 
             // 常駐サービスの取得を確実にするため、取得できるまで待機する
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
@@ -59,26 +64,24 @@ namespace KillChord.Runtime.Composition
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
+            _inGameMissionInitializer.Initialize();
 
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
-            if (_mobileInput)
-            {
-                _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry, true);
-                _mobileInput.Initialize(inputC.GetInputView);
-            }
-            else
-            {
-                _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
-                Cursor.lockState = CursorLockMode.Locked;
-            }
+#if UNITY_ANDROID
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _mobileInput.Initialize(inputC.GetInputView);
+#else
+            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            Cursor.lockState = CursorLockMode.Locked;
+#endif
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
-            ServiceInjector.Inject(_skillInitializer);
-            _skillInitializer.Initialize();
+            _enemyInfantryTestSpawner.Init();
+            _enemyArtilleryTestSpawner.Init();
 
-            _enemyTestSpawner.Init();
+            _rhythmGuideInitializer.Initialize();
         }
     }
 }
