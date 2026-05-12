@@ -100,6 +100,7 @@ namespace KillChord.Runtime.View.InGame.UI
         private void Update()
         {
             if (!_debugFlg) return;
+            if (Keyboard.current == null) return;
             if (Keyboard.current.zKey.wasPressedThisFrame)
             {
                 _healthBarImage.fillAmount = _healthBarImage.fillAmount < _decreasePercent ? 0f : _healthBarImage.fillAmount - _decreasePercent;
