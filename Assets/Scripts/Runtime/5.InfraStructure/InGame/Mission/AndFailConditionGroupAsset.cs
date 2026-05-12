@@ -7,9 +7,16 @@ using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
+    /// <summary>
+    ///     複数の失敗条件を論理積（AND）でまとめるアセットクラス。
+    /// </summary>
     [Serializable]
     public class AndFailConditionGroupAsset : MissionFailConditionAssetBase
     {
+        /// <summary>
+        ///     失敗条件を生成します。
+        /// </summary>
+        /// <returns>失敗条件。</returns>
         public override IMissionFailCondition Create()
         {
             List<IMissionFailCondition> children = new();
@@ -22,9 +29,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
-            return new AndFaliConditionGroup(children);
+            return new AndFailConditionGroup(children);
         }
 
+        /// <summary> サマリーを構築します。 </summary>
+        /// <returns> サマリー文字列。 </returns>
         protected override string BuildSummary()
         {
             if (_childConditionAssets == null || _childConditionAssets.Count == 0)
@@ -46,7 +55,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             return sb.ToString();
         }
 
-        [SerializeReference, SubclassSelector]
+        [SerializeReference, SubclassSelector, Tooltip("結合する子条件のリスト。")]
         private List<MissionFailConditionAssetBase> _childConditionAssets = new();
     }
 }
