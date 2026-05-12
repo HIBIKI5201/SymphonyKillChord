@@ -11,8 +11,14 @@ using UnityEngine.Networking;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
+    /// <summary>
+    /// シナリオ定義ファイルを読み込みシナリオデータへ変換する。
+    /// </summary>
     public class ScenarioRepository : IScenarioRepository
     {
+        /// <summary>
+        /// シナリオ ID から再生用データを読み込む。
+        /// </summary>
         public async ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -49,6 +55,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return ParseAuthoringCsv(lines);
         }
 
+        /// <summary>
+        /// 正規化済み CSV をシナリオデータへ変換する。
+        /// </summary>
         private static ScenarioData ParseNormalizedCsv(string[] lines)
         {
             if (lines.Length <= 1)
@@ -130,6 +139,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return new ScenarioData(events);
         }
 
+        /// <summary>
+        /// オーサリング形式の CSV をシナリオデータへ変換する。
+        /// </summary>
         private static ScenarioData ParseAuthoringCsv(string[] lines)
         {
             var definitions = new Dictionary<int, EventDefinition>();
@@ -196,6 +208,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return new ScenarioData(events);
         }
 
+        /// <summary>
+        /// オーサリング行からイベント定義を生成する。
+        /// </summary>
         private static EventDefinition CreateAuthoringEventDefinition(int step, string type, IReadOnlyList<string> fields, int lineNo)
         {
             switch (type.Trim().ToLowerInvariant())
@@ -258,6 +273,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// オーサリング行からテキストトリガーを生成する。
+        /// </summary>
         private static TextTimingTrigger CreateAuthoringTrigger(IReadOnlyList<string> fields, int lineNo, string text)
         {
             string triggerTypeRaw = GetAuthoringField(fields, 3);
@@ -310,6 +328,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// オーサリングトリガー設定から発火イベントを生成する。
+        /// </summary>
         private static IScenarioEvent CreateAuthoringTriggerEvent(IReadOnlyList<string> fields, int lineNo, string onTriggerType)
         {
             switch (onTriggerType.ToLowerInvariant())
@@ -361,11 +382,17 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// オーサリング行から指定位置の値を安全に取得する。
+        /// </summary>
         private static string GetAuthoringField(IReadOnlyList<string> fields, int index)
         {
             return ScenarioCsvUtility.GetField(fields, index);
         }
 
+        /// <summary>
+        /// シナリオファイルの内容を行配列として読み込む。
+        /// </summary>
         private static async ValueTask<string[]> ReadScenarioLinesAsync(
             string authoringPath,
             string scenarioPath,
@@ -386,6 +413,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// コメントや空行を除いた先頭データ行を取得する。
+        /// </summary>
         private static string FindFirstDataLine(string[] lines)
         {
             if (lines == null) return string.Empty;
@@ -400,6 +430,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return string.Empty;
         }
 
+        /// <summary>
+        /// ローカルまたは URL のファイルを全行読み込む。
+        /// </summary>
         private static async ValueTask<string[]> ReadAllLinesAsync(string path, bool isUrlPath, CancellationToken ct)
         {
             if (!isUrlPath)
@@ -430,11 +463,17 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return normalized.Split('\n');
         }
 
+        /// <summary>
+        /// ヘッダー名から列番号を引ける辞書を構築する。
+        /// </summary>
         private static Dictionary<string, int> BuildHeaderIndex(IReadOnlyList<string> headers)
         {
             return ScenarioCsvUtility.BuildHeaderIndex(headers);
         }
 
+        /// <summary>
+        /// 正規化 CSV の行からイベント定義を生成する。
+        /// </summary>
         private static EventDefinition CreateEventDefinition(
             EventRow row,
             IReadOnlyDictionary<string, int> headerIndex)
@@ -516,6 +555,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// トリガー列が有効な場合のみテキストトリガーを生成する。
+        /// </summary>
         private static TextTimingTrigger TryCreateTrigger(
             IReadOnlyList<string> values,
             IReadOnlyDictionary<string, int> headerIndex,
@@ -533,6 +575,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return CreateTrigger(values, headerIndex, lineNo, text);
         }
 
+        /// <summary>
+        /// トリガー設定からテキストトリガーを生成する。
+        /// </summary>
         private static TextTimingTrigger CreateTrigger(
             IReadOnlyList<string> values,
             IReadOnlyDictionary<string, int> headerIndex,
@@ -589,6 +634,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// トリガー設定から発火イベントを生成する。
+        /// </summary>
         private static IScenarioEvent CreateTriggerEvent(
             IReadOnlyList<string> values,
             IReadOnlyDictionary<string, int> headerIndex,
@@ -644,6 +692,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 列名に対応する値を取得する。
+        /// </summary>
         private static string GetValue(
             IReadOnlyList<string> values,
             IReadOnlyDictionary<string, int> headerIndex,
@@ -652,31 +703,49 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return ScenarioCsvUtility.GetValue(values, headerIndex, key);
         }
 
+        /// <summary>
+        /// 必須の小数値を解析する。
+        /// </summary>
         private static float ParseRequiredFloat(string raw, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseRequiredFloat(raw, columnName, lineNo);
         }
 
+        /// <summary>
+        /// 必須の整数値を解析する。
+        /// </summary>
         private static int ParseRequiredInt(string raw, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseRequiredInt(raw, columnName, lineNo);
         }
 
+        /// <summary>
+        /// 任意の整数値を既定値付きで解析する。
+        /// </summary>
         private static int ParseOptionalInt(string raw, int defaultValue, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseOptionalInt(raw, defaultValue, columnName, lineNo);
         }
 
+        /// <summary>
+        /// 任意の小数値を既定値付きで解析する。
+        /// </summary>
         private static float ParseOptionalFloat(string raw, float defaultValue, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseOptionalFloat(raw, defaultValue, columnName, lineNo);
         }
 
+        /// <summary>
+        /// 任意の真偽値を既定値付きで解析する。
+        /// </summary>
         private static bool ParseOptionalBool(string raw, bool defaultValue, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseOptionalBool(raw, defaultValue, columnName, lineNo);
         }
 
+        /// <summary>
+        /// 文字列から立ち絵スロットを解析する。
+        /// </summary>
         private static PortraitSlot ParsePortraitSlot(string raw, string columnName, int lineNo)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -692,6 +761,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return slot;
         }
 
+        /// <summary>
+        /// 文字列からレイヤー対象を解析する。
+        /// </summary>
         private static LayerTarget ParseLayerTarget(string raw, string columnName, int lineNo)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -707,6 +779,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             return target;
         }
 
+        /// <summary>
+        /// CSV 1 行を列配列へ分解する。
+        /// </summary>
         private static List<string> ParseCsvLine(string line)
         {
             return ScenarioCsvUtility.ParseCsvLine(line);
