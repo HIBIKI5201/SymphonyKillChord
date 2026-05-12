@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace DevelopProducts.SkillTree
 {
     /// <summary>
-    ///     重み付き最短経路探索
+    ///     幅優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
     ///     アプリケーション層
     /// </summary>
-    public class Dijkstra : IAlgorithmService
+    public class DistributedFileSystem : IAlgorithmService
     {
         /// <summary>
         ///     選択されたノード(未解放)から解放されているノードまで辿り一番コストが掛からない経路を探す
@@ -39,9 +39,8 @@ namespace DevelopProducts.SkillTree
         ///     探索アルゴリズムを使用して、指定されたスキルノードへの最適な経路とそのコストを計算します。
         ///     開放済みノードに到達したとき、現在の経路コストとベストを比較する
         ///     
-        ///     タイブレーク
-        ///     1.　総コスト比較　最小
-        ///     2.　ポップ数(経路上のノード数)最小
+        ///     コストが同じルートのタイブレーク
+        ///     ポップ数(経路上のノード数)最小
         /// </summary>
         /// <param name="target">探索の目標となるスキルノード。</param>
         /// <param name="skillTreeEntity">探索対象となるスキルツリー全体を表すエンティティ。</param>
@@ -62,7 +61,7 @@ namespace DevelopProducts.SkillTree
                 // コストを評価して同じコストだったら次にポップ数を見る
                 bool isBetter =
                     currentCost < bestCost ||
-                    (currentCost > bestCost && currentPath.Count < bestPath.Count);
+                    (currentCost == bestCost && currentPath.Count < bestPath.Count);
 
                 // 現在の最適パスより優れていたら変更する
                 if (isBetter)
@@ -74,19 +73,19 @@ namespace DevelopProducts.SkillTree
                 return;
             }
 
-            //  もし劣っていたら枝を刈る
-            if (currentCost >= bestCost && currentPath.Count >= bestPath.Count)
-                return;
-
             //  現在のノードを経路に追加してから親へ進む
             currentPath.Insert(0, target);
             int totalCost = currentCost + target.UnlockCost.Cost;
+
+            //  もしコストが最小コストを上回ったら枝を切る
+            if (totalCost >= bestCost)
+                return;
 
             // 現在のノードから親のノードを取得する
             var parents = skillTreeEntity.GetParents(target.SkillNodeIdVO);
 
             //　親なし(ルートに到達したが未解放)　➝　経路無し
-            if (parents.Count == 0 && !target.IsOrigin)
+            if (parents.Count == 0)
             {
                 currentPath.RemoveAt(0);
                 return;
