@@ -28,8 +28,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             CancellationToken token = source.Token;
             bool skipped = false;
             try
-            {
-                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token);
+            {  
+                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token); //出力するシナリオを指定する
                 for (int i = 0; i < data.Events.Count; i++)
                 {
                     IScenarioEvent e = data.Events[i];

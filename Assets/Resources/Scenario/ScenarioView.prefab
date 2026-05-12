@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4288020384502544631}
   - component: {fileID: 7441568288651883614}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -225,6 +225,7 @@ GameObject:
   - component: {fileID: 5003634764376181167}
   - component: {fileID: 3180247618712439665}
   - component: {fileID: 5606888421214580279}
+  - component: {fileID: 5367599119196324965}
   m_Layer: 5
   m_Name: ScenarioView
   m_TagString: Untagged
@@ -241,11 +242,11 @@ RectTransform:
   m_GameObject: {fileID: 6413765400593491140}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1943580154756428260}
   - {fileID: 6140002819022688392}
+  - {fileID: 1943580154756428260}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -328,8 +329,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc4ac1da365ff44b9402a65528d1e32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.ScenarioView
+  _canvasGroup: {fileID: 0}
   _chat: {fileID: 9077911072766306316}
   _backgroundImage: {fileID: 7441568288651883614}
   _animationPlayer: {fileID: 0}
   _fadeObj: {fileID: 6413765400593491140}
   _portraitRoot: {fileID: 4622630976081625900}
+  _portraitSize: {x: 700, y: 1000}
+--- !u!225 &5367599119196324965
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6413765400593491140}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
