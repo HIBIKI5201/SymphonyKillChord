@@ -24,7 +24,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         public int AchievedCount { get; }
         public int TotalCount { get; }
-        public MissionEvaluationProgress[] Progreaaes => _progresses;
+        public MissionEvaluationProgress[] Progresses => _progresses;
 
         private readonly MissionEvaluationProgress[] _progresses;
 
