@@ -8,12 +8,21 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Mission
 {
+    /// <summary>
+    ///     インゲームにおけるミッションシステムの初期化を行うクラス。
+    /// </summary>
     public class InGameMissionInitializer : MonoBehaviour
     {
-        [SerializeField] private MissionCatalogAsset _missionCatalogAsset;
-        [SerializeField] private MissionHudView _missionHudView;
-        [SerializeField] private MissionLoopView _missionLoopView;
+        /// <summary> ミッションカタログアセット。 </summary>
+        [SerializeField, Tooltip("ミッション定義を保持するカタログアセット。")] private MissionCatalogAsset _missionCatalogAsset;
+        /// <summary> ミッションHUDのビュー。 </summary>
+        [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
+        /// <summary> ミッションループのビュー。 </summary>
+        [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
 
+        /// <summary>
+        ///     初期化処理を行います。
+        /// </summary>
         public void Initialize()
         {
             SelectedMissionState selectedMissionState =

@@ -7,12 +7,19 @@ using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
+    /// <summary>
+    ///     複数の失敗条件を論理和（OR）でまとめるアセットクラス。
+    /// </summary>
     [Serializable]
     public class OrFailConditionGroupAsset : MissionFailConditionAssetBase
     {
-        [SerializeReference, SubclassSelector]
+        [SerializeReference, SubclassSelector, Tooltip("結合する子条件のリスト。")]
         private List<MissionFailConditionAssetBase> _children = new();
 
+        /// <summary>
+        ///     失敗条件を生成します。
+        /// </summary>
+        /// <returns>失敗条件。</returns>
         public override IMissionFailCondition Create()
         {
             List<IMissionFailCondition> children = new();
@@ -28,6 +35,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             return new OrFailConditionGroup(children);
         }
 
+        /// <summary>
+        ///     サマリーを構築します。
+        /// </summary>
+        /// <returns>サマリー文字列。</returns>
         protected override string BuildSummary()
         {
             if (_children == null || _children.Count == 0)

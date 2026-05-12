@@ -4,15 +4,15 @@ using UnityEngine;
 namespace KillChord.Runtime.Domain.InGame.Mission.FailCondition
 {
     /// <summary>
-    ///     いずれかの子条件が満たされている場合にミッションが失敗となる条件グループを表すクラス。
+    ///     すべての子条件が満たされている場合にミッションが失敗となる条件グループを表すクラス。
     /// </summary>
-    public class OrFailConditionGroup : IMissionFailCondition
+    public class AndFailConditionGroup : IMissionFailCondition
     {
         /// <summary>
-        ///     OrFailConditionGroup クラスの新しいインスタンスを初期化します。
+        ///     AndFailConditionGroup クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="conditions">失敗条件のリスト。</param>
-        public OrFailConditionGroup(IReadOnlyList<IMissionFailCondition> conditions)
+        public AndFailConditionGroup(IReadOnlyList<IMissionFailCondition> conditions)
         {
             _conditions = conditions;
         }
@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.FailCondition
         /// <returns>説明文。</returns>
         public string GetDescription()
         {
-            return "いずれかの条件を満たす。";
+            return "すべての条件を満たす。";
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.FailCondition
 
             for (int i = 0; i < _conditions.Count; i++)
             {
-                if (_conditions[i].IsSatisfied(progress))
+                if (!_conditions[i].IsSatisfied(progress))
                 {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         /// <summary> 失敗条件のリスト。 </summary>
