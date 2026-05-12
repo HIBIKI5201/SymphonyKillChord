@@ -5,8 +5,14 @@ using KillChord.Runtime.Application.OutGame.Scenario;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
+    /// <summary>
+    /// テキスト送り待ちを制御する同期ゲート。
+    /// </summary>
     public class ScenarioAdvanceGate : ITextAdvanceWaiter
     {
+        /// <summary>
+        /// 次送り入力が来るまで待機する。
+        /// </summary>
         public ValueTask WaitNextAsync(CancellationToken ct)
         {
             Task waitTask;
@@ -29,6 +35,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             return new ValueTask(waitTask.WaitAsync(Timeout.InfiniteTimeSpan, TimeProvider.System, ct));
         }
 
+        /// <summary>
+        /// 待機中の次送りを解放する。
+        /// </summary>
         public void NotifyNext()
         {
             lock (_sync)

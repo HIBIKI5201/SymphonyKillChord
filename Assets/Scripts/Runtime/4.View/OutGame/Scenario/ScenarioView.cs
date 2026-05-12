@@ -6,6 +6,9 @@ using UnityEngine.UI;
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
     [DefaultExecutionOrder(10)]
+    /// <summary>
+    /// シナリオの表示状態を Unity UI に反映するビュー。
+    /// </summary>
     public class ScenarioView : MonoBehaviour
     {
         private const string SlotLeft = "Left";
@@ -40,6 +43,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
         private ViewModel _viewModel;
 
+        /// <summary>
+        /// 依存先を受け取りシナリオ表示を初期化する。
+        /// </summary>
         public void Initialize(
             ViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
@@ -55,23 +61,35 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ResetFadeState();
         }
 
+        /// <summary>
+        /// 表示に必要な参照を初期化する。
+        /// </summary>
         private void Awake()
         {
             TryAutoAssignReferences();
             EnsurePortraitSlots();
         }
 
+        /// <summary>
+        /// インスペクター変更時に参照と表示設定を補正する。
+        /// </summary>
         private void OnValidate()
         {
             TryAutoAssignReferences();
             ApplyPortraitSizeToExistingSlots();
         }
 
+        /// <summary>
+        /// 毎フレームの入力監視または演出更新を行う。
+        /// </summary>
         private void Update()
         {
             Fade();
         }
 
+        /// <summary>
+        /// 受け取ったテキストを表示へ反映する。
+        /// </summary>
         private void OnTextReceived(string chat)
         {
             if (_chat == null)
@@ -83,6 +101,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _chat.text = chat;
         }
 
+        /// <summary>
+        /// フェード要求を受け取りアニメーション状態を更新する。
+        /// </summary>
         private void OnFadeReceived(float start, float end, float duration)
         {
             _onFade = true;
@@ -92,6 +113,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _duration = duration;
         }
 
+        /// <summary>
+        /// 背景表示要求を背景画像へ反映する。
+        /// </summary>
         private void InputBackground(string assetKey)
         {
             if (_backgroundImage == null || string.IsNullOrWhiteSpace(assetKey))
@@ -107,6 +131,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _backgroundImage.sprite = background;
         }
 
+        /// <summary>
+        /// アニメーション再生要求を表示へ反映する。
+        /// </summary>
         private void InputAnimation(string assetKey)
         {
             if (_animationPlayer == null || string.IsNullOrWhiteSpace(assetKey))
@@ -123,6 +150,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _animationPlayer.Play();
         }
 
+        /// <summary>
+        /// 立ち絵表示要求を対象スロットへ反映する。
+        /// </summary>
         private void InputPortrait(string slot, string assetKey, float positionX, float positionY, float scale, bool visible)
         {
             EnsurePortraitSlots();
@@ -144,6 +174,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             portraitImage.enabled = visible && portraitImage.sprite != null;
         }
 
+        /// <summary>
+        /// レイヤー順変更要求を対象 UI へ反映する。
+        /// </summary>
         private void InputLayerOrder(string target, int order)
         {
             if (string.Equals(target, TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
@@ -180,6 +213,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             targetRect.SetSiblingIndex(clampedOrder);
         }
 
+        /// <summary>
+        /// 進行中のフェード演出を 1 フレーム分更新する。
+        /// </summary>
         private void Fade()
         {
             if (!_onFade)
@@ -210,14 +246,20 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// シナリオ完了時の後処理を表示へ反映する。
+        /// </summary>
         private void InputScenarioCompleted(bool skipped)
         {
             Debug.Log(skipped
-                ? "シナリオ完了イベント発火: スキップ終了"
-                : "シナリオ完了イベント発火: 全テキスト表示完了");
+                ? "シナリオ再生完了: スキップ終了。"
+                : "シナリオ再生完了: 全テキスト表示終了。");
             gameObject.SetActive(false);
         }
 
+        /// <summary>
+        /// 表示用カタログ辞書を構築する。
+        /// </summary>
         private void BuildCatalogMaps(
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
@@ -228,6 +270,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             CopyCatalogEntries(portraitByKey, _portraitByKey);
         }
 
+        /// <summary>
+        /// 未設定の参照を自動で補完する。
+        /// </summary>
         private void TryAutoAssignReferences()
         {
             if (_chat == null)
@@ -252,6 +297,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 立ち絵表示に必要なスロットをそろえる。
+        /// </summary>
         private void EnsurePortraitSlots()
         {
             EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, new Vector2(-420f, -120f));
@@ -260,6 +308,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ApplyPortraitSizeToExistingSlots();
         }
 
+        /// <summary>
+        /// 指定スロットの表示オブジェクトを確保する。
+        /// </summary>
         private void EnsurePortraitSlot(string slot, string objectName, Vector2 defaultPosition)
         {
             if (_portraitBySlot.ContainsKey(slot))
@@ -295,6 +346,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _portraitBySlot[slot] = image;
         }
 
+        /// <summary>
+        /// 既存の立ち絵スロットへサイズ設定を適用する。
+        /// </summary>
         private void ApplyPortraitSizeToExistingSlots()
         {
             Vector2 validatedSize = GetValidatedPortraitSize();
@@ -309,6 +363,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 最小値を保証した立ち絵サイズを取得する。
+        /// </summary>
         private Vector2 GetValidatedPortraitSize()
         {
             return new Vector2(
@@ -316,6 +373,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 Mathf.Max(1f, _portraitSize.y));
         }
 
+        /// <summary>
+        /// 指定スロットの RectTransform を取得する。
+        /// </summary>
         private RectTransform GetPortraitRect(string slot)
         {
             return _portraitBySlot.TryGetValue(slot, out Image image) && image != null
@@ -323,6 +383,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 : null;
         }
 
+        /// <summary>
+        /// レイヤー制御対象に対応する RectTransform を取得する。
+        /// </summary>
         private RectTransform ResolveLayerTargetRect(string target)
         {
             EnsurePortraitSlots();
@@ -376,6 +439,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// フェード演出の内部状態を初期化する。
+        /// </summary>
         private void ResetFadeState()
         {
             _onFade = false;
@@ -385,11 +451,17 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _duration = 0f;
         }
 
+        /// <summary>
+        /// 破棄時に進行中のシナリオ再生を停止する。
+        /// </summary>
         private void OnDestroy()
         {
             UnsubscribeFromViewModel();
         }
 
+        /// <summary>
+        /// ViewModel の通知を購読する。
+        /// </summary>
         private void SubscribeToViewModel()
         {
             if (_viewModel == null)
@@ -406,6 +478,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _viewModel.OnScenarioCompleted += InputScenarioCompleted;
         }
 
+        /// <summary>
+        /// ViewModel の通知購読を解除する。
+        /// </summary>
         private void UnsubscribeFromViewModel()
         {
             if (_viewModel == null)

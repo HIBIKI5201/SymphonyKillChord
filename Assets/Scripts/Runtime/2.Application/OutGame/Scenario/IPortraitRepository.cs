@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// 立ち絵定義の参照契約を定義します。
+    /// IPortrait の参照情報を取得するリポジトリ。
     /// </summary>
     public interface IPortraitRepository
     {

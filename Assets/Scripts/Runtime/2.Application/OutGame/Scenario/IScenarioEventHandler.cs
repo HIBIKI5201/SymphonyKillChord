@@ -6,7 +6,7 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// シナリオイベント処理の契約を定義します。
+    /// IScenario イベントを出力処理へ橋渡しする。
     /// </summary>
     public interface IScenarioEventHandler
     {

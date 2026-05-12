@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// テキスト表示反映の契約を定義します。
+    /// Text の表示反映契約を定義する。
     /// </summary>
     public interface ITextViewSink
     {
