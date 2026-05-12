@@ -5,6 +5,10 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     /// </summary>
     public class MissionEvaluationResult
     {
+        /// <summary>
+        ///     MissionEvaluationResult クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="progresses">評価状況のリスト。</param>
         public MissionEvaluationResult(MissionEvaluationProgress[] progresses)
         {
             _progresses = progresses;
@@ -22,11 +26,14 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             TotalCount = progresses.Length;
         }
 
+        /// <summary> 達成した条件の数を取得します。 </summary>
         public int AchievedCount { get; }
+        /// <summary> 合計の条件数を取得します。 </summary>
         public int TotalCount { get; }
+        /// <summary> 評価状況のリストを取得します。 </summary>
         public MissionEvaluationProgress[] Progresses => _progresses;
 
+        /// <summary> 評価状況のリスト。 </summary>
         private readonly MissionEvaluationProgress[] _progresses;
-
     }
 }
