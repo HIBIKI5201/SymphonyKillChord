@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.View.InGame.Mission
 {
     /// <summary>
@@ -14,6 +12,11 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <param name="isAchieved">達成したかどうか。</param>
         public MissionEvaluationItemViewModel(string description, bool isAchieved)
         {
+            if (string.IsNullOrEmpty(description))
+            {
+                throw new System.ArgumentException("Description cannot be null or empty.", nameof(description));
+            }
+
             Description = description;
             IsAchieved = isAchieved;
         }

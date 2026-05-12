@@ -17,6 +17,15 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <param name="viewModel">ミッションHUDのビューモデル。</param>
         public void Initialize(MissionHudViewModel viewModel)
         {
+            // 既存の購読を破棄
+            _mainMissionDisposable?.Dispose();
+            _resultDisposable?.Dispose();
+
+            if (_viewModel != null)
+            {
+                _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
+            }
+
             _viewModel = viewModel;
 
             _mainMissionDisposable = viewModel.MainMissionText.Subscribe(value =>

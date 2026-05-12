@@ -22,10 +22,21 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// </summary>
         public void OnClick()
         {
+            if (_controller == null)
+            {
+                Debug.LogError("OutGameMissionSelectController が初期化されていません。");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_missionId))
+            {
+                Debug.LogError("MissionId が未設定です。");
+                return;
+            }
+
             _controller.Select(_missionId);
         }
 
-        /// <summary> ミッションID。 </summary>
         [SerializeField, Tooltip("このボタンで選択するミッションのID。")] private string _missionId;
         /// <summary> ミッション選択コントローラー。 </summary>
         private OutGameMissionSelectController _controller;
