@@ -5,11 +5,15 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     ミッションの評価項目を表示するビュークラス。
+    /// </summary>
     public class MissionEvaluationItemView : MonoBehaviour
     {
         /// <summary>
-        ///     表示内容を反映する。
+        ///     表示内容を反映します。
         /// </summary>
+        /// <param name="viewModel">評価項目のビューモデル。</param>
         public void Apply(MissionEvaluationItemViewModel viewModel)
         {
             if (_checkBox != null)
@@ -24,7 +28,7 @@ namespace KillChord.Runtime.View
             }
         }
 
-        [SerializeField] private Toggle _checkBox;
-        [SerializeField] private TMP_Text _descriptionText;
+        [SerializeField, Tooltip("達成状況を示すチェックボックス。")] private Toggle _checkBox;
+        [SerializeField, Tooltip("評価項目の説明文を表示するテキスト。")] private TMP_Text _descriptionText;
     }
 }
