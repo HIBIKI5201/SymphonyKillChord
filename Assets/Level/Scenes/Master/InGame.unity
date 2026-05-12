@@ -340,6 +340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
   _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
+  _skillVisuals: []
 --- !u!1 &456552175
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,8 +565,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47723e9fbd3ba474cb780af31342ac26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MissionHudView
-  _mainMissionText: {fileID: 0}
-  _resultText: {fileID: 0}
+  _mainMissionText: {fileID: 887821562}
+  _resultText: {fileID: 887821561}
+  _evaluationRoot: {fileID: 1122440035}
+  _evaluationItemPrefab: {fileID: 336023683454222207, guid: a51efe594d583f6458d83a071e661097, type: 3}
+  _evaluationItemSpacing: 50
 --- !u!114 &866643817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -726,6 +730,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00dafdea7818d9c439d79a7e9a48a481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MobileInput
+--- !u!114 &887821561 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 912727433248900451, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &887821562 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5369553578249869401, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!224 &1122440035 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5105896127615380062, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1136649842
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,7 +851,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3702ab398ffa2534a8eacb53dba166e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MusicSyncView
-  _testBpm: 60
 --- !u!4 &1249666143
 Transform:
   m_ObjectHideFlags: 0
