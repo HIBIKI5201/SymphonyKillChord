@@ -47,7 +47,8 @@ namespace DevelopProducts.TicketSystem
             var url = TicketSystemSettings.instance.gasUrl;
             if (string.IsNullOrEmpty(url))
             {
-                Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystem]からURLを設定してください。");
+                // 開発用のため警告を無効化。
+                //Debug.LogError("GASのURLが指定されていません。[Edit > ProjectSettings > TicketSystem]からURLを設定してください。");
                 return;
             }
 

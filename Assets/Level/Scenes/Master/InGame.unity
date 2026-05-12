@@ -340,6 +340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
   _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
+  _skillVisuals: []
 --- !u!1 &456552175
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,7 +821,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3702ab398ffa2534a8eacb53dba166e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MusicSyncView
-  _testBpm: 60
 --- !u!4 &1249666143
 Transform:
   m_ObjectHideFlags: 0
