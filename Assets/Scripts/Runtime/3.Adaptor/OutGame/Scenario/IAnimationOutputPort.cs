@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IAnimationOutputPort の契約を定義します。
+    /// Animation の出力契約を定義する。
     /// </summary>
     public interface IAnimationOutputPort
     {

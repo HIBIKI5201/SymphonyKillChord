@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IFadeOutputPort の契約を定義します。
+    /// Fade の出力契約を定義する。
     /// </summary>
     public interface IFadeOutputPort
     {
