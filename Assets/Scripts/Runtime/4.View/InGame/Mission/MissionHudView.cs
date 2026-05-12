@@ -26,7 +26,11 @@ namespace KillChord.Runtime.View.InGame.Mission
             _mainMissionDisposable?.Dispose();
             _resultDisposable?.Dispose();
 
-            _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
+            // 既存のViewModelがある場合だけイベント解除
+            if (_viewModel != null)
+            {
+                _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
+            }
 
             _viewModel = viewModel;
 
