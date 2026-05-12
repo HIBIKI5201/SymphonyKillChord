@@ -9,7 +9,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     {
         public override IMissionEvaluationCondition Create()
         {
-            return new ClearTimeEvaluationCondition(_clearTime);
+            return new ClearTimeEvaluationCondition(_clearTime, GetDisplayText());
         }
 
         protected override string BuildSummary()

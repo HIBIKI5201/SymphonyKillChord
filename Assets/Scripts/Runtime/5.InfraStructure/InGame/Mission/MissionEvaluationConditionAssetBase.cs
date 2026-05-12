@@ -19,7 +19,19 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         {
         }
 
+        protected string GetDisplayText()
+        {
+            if(!string.IsNullOrWhiteSpace(_displayText))
+            {
+                return _displayText;
+            }
+
+            return BuildSummary();
+        }
+
         protected abstract string BuildSummary();
+
+        [SerializeField,Header("説明用のテキスト")]　private string _displayText;
 
         [SerializeField, TextArea(2, 4), ReadOnly]
         private string _inspectorSummary;
