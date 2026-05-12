@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// IScenarioPlaybackControl の契約を定義します。
+    /// シナリオ再生操作の契約を定義する。
     /// </summary>
     public interface IScenarioPlaybackControl
     {

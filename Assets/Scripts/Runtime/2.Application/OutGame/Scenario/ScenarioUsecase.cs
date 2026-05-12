@@ -5,8 +5,14 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
+    /// <summary>
+    /// シナリオ再生の進行と操作状態を管理するユースケース。
+    /// </summary>
     public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState
     {
+        /// <summary>
+        /// シナリオ再生ユースケースの依存関係を受け取る。
+        /// </summary>
         public ScenarioUsecase(
             IScenarioRepository repo,
             ScenarioHandlerRepo handlerRepo,
@@ -21,6 +27,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             _settingsRepository = settingsRepository;
         }
 
+        /// <summary>
+        /// 設定されたシナリオを先頭から順に再生する。
+        /// </summary>
         public async ValueTask PlayScenario()
         {
             using CancellationTokenSource source = new CancellationTokenSource();
@@ -29,7 +38,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             bool skipped = false;
             try
             {  
-                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token); //出力するシナリオを指定する
+                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token); // シナリオデータを読み込む。
                 for (int i = 0; i < data.Events.Count; i++)
                 {
                     IScenarioEvent e = data.Events[i];
@@ -47,7 +56,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             }
             catch (OperationCanceledException ex) when (ex.CancellationToken == token)
             {
-                // Skip requested: end scenario gracefully.
+                // スキップ要求時はシナリオを正常終了する。
                 skipped = true;
             }
             finally
@@ -60,21 +69,33 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 指定されたイベントを対応するハンドラへ引き渡す。
+        /// </summary>
         public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
         {
             return _handlerRepo.HandleAsync(scenarioEvent, ct);
         }
 
+        /// <summary>
+        /// 早送り状態を切り替える。
+        /// </summary>
         public void SetFastForward(bool enabled)
         {
             IsFastForward = enabled;
         }
 
+        /// <summary>
+        /// 一時停止状態を切り替える。
+        /// </summary>
         public void TogglePause()
         {
             IsPaused = !IsPaused;
         }
 
+        /// <summary>
+        /// シナリオ再生のスキップを要求する。
+        /// </summary>
         public void RequestSkip()
         {
             CancellationTokenSource cts = _playCts;
@@ -86,11 +107,13 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             }
             catch (ObjectDisposedException)
             {
-                // Ignore: scenario playback already ended and CTS has been disposed.
+                // シナリオ再生終了後に CTS が破棄済みでも無視する。
             }
         }
 
+        /// <summary> IsFastForward を取得する。 </summary>
         public bool IsFastForward { get; private set; }
+        /// <summary> IsPaused を取得する。 </summary>
         public bool IsPaused { get; private set; }
 
         private CancellationTokenSource _playCts;

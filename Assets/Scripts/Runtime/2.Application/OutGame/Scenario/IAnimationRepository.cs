@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// アニメーション定義の参照契約を定義します。
+    /// IAnimation の参照情報を取得するリポジトリ。
     /// </summary>
     public interface IAnimationRepository
     {
