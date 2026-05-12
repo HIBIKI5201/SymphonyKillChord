@@ -1,45 +1,32 @@
 # InGame-Player
 
-InGame カテゴリーにおけるプレイヤーキャラクターの制御機能のモジュール詳細。
+プレイヤーの移動と回避を扱うモジュールです。
 
 ## 構造概要
 
-プレイヤーの機能は、移動（PlayerMovement）と回避（Dodge）、および入力に基づくアクション実行のユースケースで構成されています。
-
 ### 1. Domain
-- **PlayerMoveParameter**: プレイヤーの移動速度、回転速度、回避距離などの特性パラメータを定義。
+- **PlayerMoveParameter**: 移動速度、回避時間などのパラメータ。
 
 ### 2. Application
-- **PlayerApplication**: プレイヤー関連の主要なユースケース。
-- **PlayerMovement**: 通常の移動（スティック入力による移動）のロジック。
-- **PlayerDodgeMovementApplication**: 回避動作（ダッシュやドッジ）の制御。特定のビートやタイミングで実行。
+- **PlayerApplication**: 通常移動と回避更新の切り替え。
+- **PlayerMovement**: 通常移動。
+- **PlayerDodgeMovementApplication**: 回避開始と回避中の更新。
 
 ### 3. Adaptor
-- **PlayerController**: プレイヤーの入力情報を Application レイヤーに仲介。
+- **PlayerController**: 入力を受けて `PlayerApplication` を呼ぶ。
 
 ### 4. View
-- **PlayerView**: プレイヤーの 3D モデル、アニメーター、パーティクルの制御。
-- **PlayerAttackInputView**: プレイヤーの攻撃入力に伴う視覚的フィードバックの管理。
+- **PlayerView**: Rigidbody / Animator / 見た目反映。
+- **PlayerAttackInputView**: 攻撃入力を戦闘側へ送る。
+
+### 5. InfraStructure
+- **PlayerConfig**: `PlayerMoveParameter` の設定元。
 
 ### 6. Composition
-- **PlayerInitializer**: プレイヤーの依存性の注入と初期化。
-- **PlayerMoveParameterDebug**: デバッグ用に移動パラメータを調整。
+- **PlayerInitializer**: View、Controller、Application を組み立てる。
+- **PlayerMoveParameterDebug**: Editor デバッグ用。
 
-## 移動処理フロー (Mermaid)
+## 現在の実装メモ
 
-```mermaid
-sequenceDiagram
-    participant PC as PlayerController
-    participant PA as PlayerApplication
-    participant PM as PlayerMovement
-    participant PD as PlayerDodgeMovementApplication
-    participant PV as PlayerView
-
-    PC->>PA: Move(input)
-    PA->>PM: Execute(input)
-    PM->>PV: SetVelocity/Rotation
-
-    PC->>PA: Dodge()
-    PA->>PD: StartDodge()
-    PD->>PV: PlayAnimation/Dash
-```
+- `PlayerApplication.Update()` は、回避中なら `PlayerDodgeMovementApplication`、それ以外は `PlayerMovement` を使います。
+- `PlayerInitializer` はプレイヤーエンティティを生成しつつ、敵スポナー側へターゲット情報も渡しています。

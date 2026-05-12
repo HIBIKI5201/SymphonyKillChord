@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4a398afe5989704a86ccd0654de0471, type: 3}
+  m_Name: AchievementElement_03
+  m_EditorClassIdentifier: DevelopProducts-Achievement::DevelopProducts.Achievement.AchievementElement
+  _id: 03
+  _conditions:
+  - rid: 1992203118183186555
+  _asset:
+  - {fileID: 11400000, guid: 2db2e38757227154fba39fb0c4f7ea06, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 1992203118183186555
+      type: {class: EnemyKillCountCondition, ns: DevelopProducts.Achievement, asm: DevelopProducts-Achievement}
+      data:
+        _value: 75

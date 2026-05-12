@@ -1,21 +1,38 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Player;
-using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
-using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Composition.Persistent.Camera;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
-using System.Collections.Generic;
+using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.UI;
+using KillChord.Runtime.View.Persistent.Input;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+
+
+
+#if UNITY_EDITOR
+#endif
+
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     /// <summary>
     ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
@@ -25,41 +42,140 @@ namespace KillChord.Runtime.Composition
     {
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
+        [SerializeField] private SkillRepository _skillRepository;
+        [SerializeField] private SkillView[] _skillVisuals;
 
         [Space]
-
         [Header("キャラクターデータ（テスト用）")]
-        [SerializeField] private CharacterData _playerData;
-        [SerializeField] private CharacterData _enemyData;
+        [SerializeField]
+        private CharacterData _playerData;
 
-        [SerializeField] private EnemyTestSpawner _enemyTestSpawner;
+        private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
+        private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        private CharacterEntity _playerEntity;
+        private MissionEventController _missionEventController;
+        private InGameHudInitializer _inGameHudInitializer;
 
         private void Awake()
         {
+            ServiceLocator.RegisterInstance(this);
+        }
+
+        public void Initialize(
+            TargetManager targetManager,
+            TargetEntityRegistry targetEntityRegistry,
+            InputComposition inputComposition)
+        {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
+            _enemyInfantryTestSpawner = ServiceLocator.GetInstance<EnemyInfantryTestSpawner>();
+            if (_enemyInfantryTestSpawner == null)
+            {
+                Debug.LogError($"{nameof(EnemyInfantryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
+            _enemyArtilleryTestSpawner = ServiceLocator.GetInstance<EnemyArtilleryTestSpawner>();
+            if (_enemyArtilleryTestSpawner == null)
+            {
+                Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
 
-            CharacterEntity player = CharacterFactory.Create(_playerData);
-            _enemyTestSpawner.SetTargetEntity(player);
+            _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
+            if( _inGameHudInitializer == null)
+            {
+                Debug.LogError($"{nameof(InGameHudInitializer)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
+
+            _playerEntity = CharacterFactory.Create(_playerData);
+
+            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (_missionEventController != null)
+            {
+                _playerEntity.OnDied += HandlePlayerDied;
+            }
+
+            _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
+            _enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
+            _enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
+            _enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
-            //BattleApplication battleApplication = new(player, attackExecutor);
-            //BattleController battleController = new(battleApplication, new(), null);
-
             PlayerDodgeMovementApplication dodge = new(parameter);
-            PlayerMovement move = new(parameter);
+            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
+            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+
+            PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
-            PlayerController playerMovementController = new(application);
-            _player.Init(playerMovementController, null);
+            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
+            var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
+
+            TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
+            if (targetSelectorController == null)
+            {
+                Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                return;
+            }
+
+            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<IMusicSyncService>();
+            if (musicSyncService == null)
+            {
+                Debug.LogError($"{nameof(IMusicSyncService)}が見つかりません。MusicSyncInitializerが先に実行されているか確認してください。");
+                return;
+            }
+
+            SkillResultViewModel skillResultViewModel = new SkillResultViewModel();
+            Debug.Log($"{skillResultViewModel}作成。");
+            SkillResultPresenter skillResultPresenter = new SkillResultPresenter(skillResultViewModel);
+            Debug.Log($"{skillResultPresenter}作成。");
+            // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
+            SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
+            skillResultView?.Bind(skillResultViewModel);
+
+            SkillCheckService skillCheckService = new SkillCheckService();
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
+            skillController?.SetUsecase(skillUsecase);
+
+
+            AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
+            AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
+
+            PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
+                playerBattleState, skillController, targetSelectorController, musicSyncService);
+            
+            IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
+            PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
+
+            _player.Initialize(playerMovementController, playerAttackController, ct, inputView, healthHudPresenter);
+
+            _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
 #if UNITY_EDITOR
             _player.gameObject
                 .AddComponent<PlayerMoveParameterDebug>()
                 .SetPlayerMoveParameter(parameter);
 #endif
+        }
+
+        private void HandlePlayerDied(CharacterEntity _)
+        {
+            _missionEventController?.NotifyPlayerDead();
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerEntity != null)
+            {
+                _playerEntity.OnDied -= HandlePlayerDied;
+            }
         }
     }
 }

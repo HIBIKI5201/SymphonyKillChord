@@ -2,7 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.Persistent.SceneManagement
 {
     /// <summary>
     ///     デバッグ用のボタンなどにつけるシーン遷移のView。

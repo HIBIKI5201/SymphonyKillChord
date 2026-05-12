@@ -1,0 +1,19 @@
+{
+    "name": "DevelopProducts-TicketSystem",
+    "rootNamespace": "DevelopProducts.TicketSystem",
+    "references": [
+        "GUID:c8a23a053cdb72f4c9c0fe6b76b389aa",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

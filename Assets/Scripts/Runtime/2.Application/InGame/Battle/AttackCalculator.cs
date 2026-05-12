@@ -14,11 +14,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        /// <returns></returns>
+        /// <returns> 攻撃結果。 </returns>
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
             IAttacker attacker,
-            IDefender defender)
+            IDefender defender
+            )
         {
             AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender);
             return attackDefinition.AttackPipeline.Execute(stepContext);

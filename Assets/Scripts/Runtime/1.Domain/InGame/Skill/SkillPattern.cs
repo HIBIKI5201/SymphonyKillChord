@@ -1,21 +1,22 @@
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
 {
     /// <summary>
-    ///     スキルの発動に必要な入力パターンを表す構造体。
+    /// スキルの発動に必要な入力パターンを表す構造体。
     /// </summary>
     public readonly struct SkillPattern : IEquatable<SkillPattern>
     {
-        public ReadOnlySpan<int> Signatures => _signatures;
-        private readonly int[] _signatures;
+        public ReadOnlySpan<BeatType> Signatures => _signatures.AsSpan();
+        private readonly RhythmPattern _signatures;
 
-        public SkillPattern(int[] signatures)
+        /// <summary>
+        /// コンストラクタ。リズムパターンを受け取って初期化する。
+        /// </summary>
+        public SkillPattern(RhythmPattern signatures)
         {
-            if (signatures == null) { throw new ArgumentNullException(nameof(signatures)); }
-            if (signatures.Length == 0)
-                { throw new ArgumentException("signatures must not be empty.", nameof(signatures)); }
-            _signatures = signatures;//受け取ったデータは変わらない為そのまま利用する
+            _signatures = signatures;
         }
 
         public static bool operator ==(SkillPattern left, SkillPattern right)
@@ -28,19 +29,61 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             return !(left == right);
         }
 
-        public bool Equals(SkillPattern other)
+        public static bool operator ==(ReadOnlySpan<BeatType> left, SkillPattern right)
         {
-            return Equals(_signatures[^1], other._signatures[^1]);
+            return right.Equals(left);
         }
 
+        public static bool operator !=(ReadOnlySpan<BeatType> left, SkillPattern right)
+        {
+            return !(left == right);
+        }
+
+        /// <summary>
+        /// 別のSkillPatternと等価か判定する。
+        /// </summary>
+        public bool Equals(SkillPattern other)
+        {
+            return Equals(_signatures, other._signatures);
+        }
+
+        /// <summary>
+        /// BeatTypeのReadOnlySpanと一致するか判定する。
+        /// </summary>
+        public bool Equals(ReadOnlySpan<BeatType> other)
+        {
+            ReadOnlySpan<BeatType> signatures = _signatures.AsSpan();
+
+            if (signatures.Length != other.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < signatures.Length; i++)
+            {
+                if (signatures[i] != other[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// オブジェクト等価性の判定を行う。
+        /// </summary>
         public override bool Equals(object obj)
         {
             return obj is SkillPattern other && Equals(other);
         }
 
+        /// <summary>
+        /// ハッシュコードを取得する。
+        /// </summary>
         public override int GetHashCode()
         {
-            return (_signatures != null ? _signatures[^1].GetHashCode() : 0);
+            return (_signatures.GetHashCode());
         }
     }
 }

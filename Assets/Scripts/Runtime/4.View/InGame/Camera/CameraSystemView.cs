@@ -1,6 +1,10 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.InGame;
+using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.View.InGame.Camera
 {
@@ -10,96 +14,160 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
-        [SerializeField] private Transform _cameraT;
-
-        [SerializeField] private Transform _playerT;
-
-        [SerializeField] private Transform _target;
-
-        [SerializeField] private LockOnState _lockOnState;
-
-        [SerializeField] private UpdateModeEnum _updateMode;
-
-        private CameraSystemController _controller;
-        private Vector2 _input;
-
-        public void Init(CameraSystemController controller)
+        /// <summary>
+        ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
+        /// </summary>
+        /// <param name="controller"> カメラシステムのコントローラー。</param>
+        /// <param name="presenter"> カメラシステムのプレゼンター。</param>
+        /// <param name="playerT"> プレイヤーの Transform。</param>
+        /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
+        public void Initialize(
+            CameraSystemController controller,
+            CameraSystemPresenter presenter,
+            Transform playerT,
+            PlayerInputView playerInputView)
         {
             _controller = controller;
+            _presenter = presenter;
+            _playerT = playerT;
+            _inputView = playerInputView;
+
+#if UNITY_ANDROID
+            _inputView.OnMobileLookInput += LookHandler;
+#else
+            _inputView.OnLookInput += LookHandler;
+#endif
+            _inputView.OnMoveInput += MoveHandler;
+            _inputView.OnLockOnInput += LockOnHandler;
+            _inputView.OnAttackInput += OnAttack;
         }
-        private void Start()
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
+
+        [SerializeField, Tooltip("カメラの Transform")]
+        private Transform _cameraT;
+        [SerializeField, Tooltip("カメラ更新タイミングの設定")]
+        private UpdateModeEnum _updateMode;
+        [SerializeField, Tooltip("カメラの感度")]
+        private int _cameraSensitivity = 5;
+
+        private CameraSystemController _controller;
+        private CameraSystemPresenter _presenter;
+        private PlayerInputView _inputView;
+        private Transform _playerT;
+        private Vector2 _input;
+        private Vector2 _moveInput;
+
+        /// <summary>
+        ///     FixedUpdate タイミングでカメラを更新する。
+        /// </summary>
         private void FixedUpdate()
         {
-            if (_updateMode != UpdateModeEnum.FixedUpdate)
-                return;
+            if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
             Tick(Time.fixedDeltaTime);
         }
+
+        /// <summary>
+        ///     Update タイミングでカメラを更新する。
+        /// </summary>
         private void Update()
         {
-            UpdateInput(out _input);
+            if (_controller == null || _playerT == null) { return; }
+
             if (_updateMode != UpdateModeEnum.Update)
-                return;
+            { return; }
             Tick(Time.deltaTime);
         }
+
+        /// <summary>
+        ///     LateUpdate タイミングでカメラを更新する。
+        /// </summary>
         private void LateUpdate()
         {
+            if (_controller == null || _playerT == null) { return; }
+
             if (_updateMode != UpdateModeEnum.LateUpdate)
-                return;
+            { return; }
             Tick(Time.deltaTime);
         }
 
+        /// <summary>
+        ///     入力イベントの購読解除を行う。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_inputView == null) { return; }
 
+#if UNITY_ANDROID
+            _inputView.OnMobileLookInput -= LookHandler;
+#else
+            _inputView.OnLookInput -= LookHandler;
+#endif
+            _inputView.OnMoveInput -= MoveHandler;
+            _inputView.OnLockOnInput -= LockOnHandler;
+            _inputView.OnAttackInput -= OnAttack;
+        }
+
+        /// <summary>
+        ///     視点操作入力を受け取り、入力値を更新する。
+        /// </summary>
+        /// <param name="context"> 視点操作の入力コンテキスト。</param>
+        private void LookHandler(InputContext<Vector2> context)
+        {
+            _input = context.Value;
+        }
+
+        /// <summary>
+        ///     移動入力を受け取り、入力値を更新する。
+        /// </summary>
+        /// <param name="context"> 移動操作の入力コンテキスト。</param>
+        private void MoveHandler(InputContext<Vector2> context)
+        {
+            _moveInput = context.Value;
+        }
+
+        /// <summary>
+        ///     ロックオン入力を受け取り、マニュアルロックオン状態をトグルする。
+        /// </summary>
+        /// <param name="context"> ロックオン操作の入力コンテキスト。</param>
+        private void LockOnHandler(InputContext<float> context)
+        {
+            if (context.Phase == InputActionPhase.Started)
+            {
+                _controller.ToggleLockOnState(_playerT.position);
+            }
+        }
+
+        /// <summary>
+        ///     攻撃入力を受け取り、オートロックオンの発動を試みる。
+        /// </summary>
+        /// <param name="context"> 攻撃操作の入力コンテキスト。</param>
+        private void OnAttack(InputContext<float> context)
+        {
+            if (context.Phase == InputActionPhase.Started)
+            {
+                _controller.TryActiveAutoLockOn(_playerT.position);
+            }
+        }
+
+        /// <summary>
+        ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
+        /// </summary>
+        /// <param name="deltaTime"> 前フレームからの経過時間。</param>
         private void Tick(float deltaTime)
         {
-            Vector2 input = _input * 200;
+            if (_controller == null || _presenter == null||
+                _playerT == null || _cameraT == null) { return; }
+            Vector2 input = _input * _cameraSensitivity;
             _input = Vector2.zero;
 
-            if (_lockOnState == LockOnState.LockOnAuto && input.sqrMagnitude > float.Epsilon)
-                _lockOnState = LockOnState.Free;
-
-            _controller.Update(
+            _presenter.Update(
                 _playerT.position,
-                _target.position,
                 input,
-                _lockOnState != LockOnState.Free,
+                _moveInput,
                 deltaTime,
                 out Quaternion rotation,
                 out Vector3 position
             );
             _cameraT.SetPositionAndRotation(position, rotation);
-        }
-        private void UpdateInput(out Vector2 input)
-        {
-            if (Input.GetKeyDown(KeyCode.Mouse2))
-                if (_lockOnState == LockOnState.Free)
-                    _lockOnState = LockOnState.LockOnManual;
-                else
-                    _lockOnState = LockOnState.Free;
-            if (Input.GetKeyDown(KeyCode.Mouse0) && _lockOnState == LockOnState.Free)
-                _lockOnState = LockOnState.LockOnAuto;
-
-            input.x = Input.GetAxisRaw("Mouse X");
-            input.y = Input.GetAxisRaw("Mouse Y");
-        }
-        private enum LockOnState : byte
-        {
-            /// <summary>
-            /// 操作によって自由にカメラを回せる
-            /// </summary>
-            Free,
-
-            /// <summary>
-            /// システムによって目標へロックオンした状態
-            /// </summary>
-            LockOnAuto,
-
-            /// <summary>
-            /// 操作によって目標へロックオンした状態
-            /// </summary>
-            LockOnManual,
         }
     }
 }
