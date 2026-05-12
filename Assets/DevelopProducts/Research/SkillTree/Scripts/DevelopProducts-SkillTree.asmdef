@@ -1,5 +1,5 @@
 {
-    "name": "SkillTreeDevelopProducts",
+    "name": "DevelopProducts-SkillTree",
     "rootNamespace": "DevelopProducts.SkillTree",
     "references": [
         "GUID:912501d3a9c2c414ba93298e84096560",
