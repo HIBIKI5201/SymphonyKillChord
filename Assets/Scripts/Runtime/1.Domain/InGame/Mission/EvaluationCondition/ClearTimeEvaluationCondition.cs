@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
     /// </summary>
     public class ClearTimeEvaluationCondition : IMissionEvaluationCondition
     {
-        public ClearTimeEvaluationCondition(float thresholdTime)
+        public ClearTimeEvaluationCondition(float thresholdTime, string description)
         {
             if (thresholdTime < 0f || float.IsNaN(thresholdTime) || float.IsInfinity(thresholdTime))
             {
@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
             }
 
             _thresholdTime = thresholdTime;
+            _description = description;
         }
 
         public bool IsSatisfied(MissionProgress progress)
@@ -26,9 +27,10 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
 
         public string GetDescription()
         {
-            return $"{_thresholdTime}秒以内にクリアで評価アップ";
+            return _description;
         }
 
         private readonly float _thresholdTime;
+        private readonly string _description;
     }
 }
