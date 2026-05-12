@@ -2,8 +2,14 @@ using System;
 
 namespace KillChord.Runtime.Domain.OutGame.Scenario
 {
+    /// <summary>
+    /// アニメーションを参照するための定義情報を保持する。
+    /// </summary>
     public readonly struct AnimationDefinition
     {
+        /// <summary>
+        /// アニメーション定義を初期化する。
+        /// </summary>
         public AnimationDefinition(string id, string assetKey)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -20,7 +26,9 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
             AssetKey = assetKey;
         }
 
+        /// <summary> Id を取得する。 </summary>
         public string Id { get; }
+        /// <summary> AssetKey を取得する。 </summary>
         public string AssetKey { get; }
     }
 }
