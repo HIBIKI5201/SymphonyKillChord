@@ -5,7 +5,7 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// IScenario イベントを出力処理へ橋渡しする。
+    /// TEvent として受け取る IScenarioEvent を出力処理へ橋渡しする。
     /// </summary>
     public interface IScenarioEventHandler<in TEvent> where TEvent : IScenarioEvent
     {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// IScenario の参照情報を取得するリポジトリ。
+    /// ScenarioData の参照情報を取得するリポジトリ。
     /// </summary>
     public interface IScenarioRepository
     {
