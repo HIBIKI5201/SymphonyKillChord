@@ -4,7 +4,6 @@ namespace DevelopProducts.SkillTree
     {
         public bool CanUnlock(
             SkillNodeEntity node,
-            SkillTreeEntity tree,
             int currentPoints)
         {
             if (node == null) return false;

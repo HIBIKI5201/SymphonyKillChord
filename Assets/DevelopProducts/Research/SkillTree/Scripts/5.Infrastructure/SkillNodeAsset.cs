@@ -6,6 +6,7 @@ namespace DevelopProducts.SkillTree
     [CreateAssetMenu(fileName = "SkillNodeAsset", menuName = "DevelopProducts/SkillTree/SkillNodeAsset")]
     public class SkillNodeAsset : ScriptableObject
     {
+        public int Id => _id;
         public SkillNodeEntity SkillNodeEntity => _skillNodeEntity;
         public INodeUnlockEffect[] NodeUnlockEffects => _nodeUnlockEffets;
         public SkillNodeAsset[] Parents => _parents;

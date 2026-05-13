@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
-    public class SkillTreeNodeController
+    public class NodeCanUnlockController
     {
-        public SkillTreeNodeController(ISkillTreeRepository skillTreeRepository,
+        public NodeCanUnlockController(ISkillTreeRepository skillTreeRepository,
                                        IAlgorithmService algorithmService,
                                        CanUnlockUsecase unlockUsecase,
                                        SkillNodePresenter presenter,
@@ -19,10 +19,10 @@ namespace DevelopProducts.SkillTree
         {
             var node = _skillTreeRepository.GetNode(nodeId);
             var path = _algorithmService.FindPath(node, _skillTree);
-            var canUnlock = _unlockUsecase.CheckUnlock(node, _skillTree, path.TotalCost.Cost);
+            var canUnlock = _unlockUsecase.CheckUnlock(node, path.TotalCost.Cost);
             if(canUnlock)
             {
-                _skillsNodePresenter.Unlock(nodeId);
+                _skillsNodePresenter.CanUnlock(nodeId);
             }
         }
         private readonly ISkillTreeRepository _skillTreeRepository;

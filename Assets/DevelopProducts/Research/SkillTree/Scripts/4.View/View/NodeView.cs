@@ -1,10 +1,22 @@
+using KillChord.Runtime.Adaptor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace DevelopProducts.SkillTree
 {
-    public class NodeView : MonoBehaviour
+    public class NodeView : MonoBehaviour, IPointerClickHandler
     {
+        public ICanUnlockVM CanUnlockVM => _canUnlockViewModel;
+        public void Initialize(NodeRegistry nodeRegistry)
+        {
+            _nodeRegistry = nodeRegistry;
+            _nodeRegistry.Register(_skillNodeAsset.Id, _canUnlockViewModel);
+        }
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            
+        }
         public void Canlock(bool canlock)
         {
             if (canlock)
@@ -17,9 +29,12 @@ namespace DevelopProducts.SkillTree
         [SerializeField] private SkillNodeAsset _skillNodeAsset;
         private Image _icon;
         private CanUnlockViewModel _canUnlockViewModel;
+        private NodeSelectPanelView _nodeSelectPanelView;
+        private NodeRegistry _nodeRegistry;
         private void Awake()
         {
             _icon = GetComponent<Image>();
+            _nodeSelectPanelView = FindAnyObjectByType<NodeSelectPanelView>();
             _canUnlockViewModel = new CanUnlockViewModel();
             _canUnlockViewModel.CanUnlock += Canlock;
         }
@@ -27,5 +42,6 @@ namespace DevelopProducts.SkillTree
         {
             _canUnlockViewModel.CanUnlock -= Canlock;
         }
+
     }
 }

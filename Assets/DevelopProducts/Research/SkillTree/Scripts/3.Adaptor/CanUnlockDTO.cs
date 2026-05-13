@@ -4,7 +4,7 @@ namespace DevelopProducts.SkillTree
 {
     public ref struct CanUnlockDTO
     {
-        public CanUnlockDTO(bool canUnlock, int cost)
+        public CanUnlockDTO(bool canUnlock)
         {
             CanUnlock = canUnlock;
         }

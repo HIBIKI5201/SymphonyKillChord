@@ -8,9 +8,9 @@ namespace DevelopProducts.SkillTree
         {
             _skillCanUnlockService = skillCanUnlockService;
         }
-        public bool CheckUnlock(SkillNodeEntity node, SkillTreeEntity tree, int currentPoints)
+        public bool CheckUnlock(SkillNodeEntity node, int currentPoints)
         {
-            return _skillCanUnlockService.CanUnlock(node, tree, currentPoints);
+            return _skillCanUnlockService.CanUnlock(node, currentPoints);
         }
         private readonly SkillCanUnlockService _skillCanUnlockService;
     }
