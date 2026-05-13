@@ -1,16 +1,20 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
-    public class RhythmJustService
+    public class RhythmJustService : IDisposable
     {
-        public RhythmJustService()
-        {
-            Instance = this;
-        }
 
-        public static RhythmJustService Instance { get; private set; }
+        public static RhythmJustService Instance
+        {
+            get
+            {
+                _instance ??= new RhythmJustService();
+                return _instance;
+            }
+        }
         public Action OnJustHit;
 
         public void Register(Action onJustHit)
@@ -28,6 +32,16 @@ namespace KillChord.Runtime.Application.InGame.Music
             OnJustHit?.Invoke();
         }
 
+        public void Dispose()
+        {
+
+            if (Instance == this)
+            {
+                _instance = null;
+            }
+        }
+
+        private static RhythmJustService _instance;
 
     }
 }
