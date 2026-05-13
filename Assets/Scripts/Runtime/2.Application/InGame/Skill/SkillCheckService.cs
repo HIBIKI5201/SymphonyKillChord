@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
@@ -34,6 +35,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
             {
                 if (equipmentSkills[i].IsMatch(reversInput))
                 {
+                    Debug.Log($"[SkillCheckService] SKILL ACTIVATED. SKILL ID: {i}");
                     skillIndex = i;
                     lastAttackType = reversInput[0];
                     return true;
