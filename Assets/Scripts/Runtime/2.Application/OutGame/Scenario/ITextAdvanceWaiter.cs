@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// テキスト送り待機の契約を定義します。
+    /// テキスト送り入力を待機する契約を定義する。
     /// </summary>
     public interface ITextAdvanceWaiter
     {
