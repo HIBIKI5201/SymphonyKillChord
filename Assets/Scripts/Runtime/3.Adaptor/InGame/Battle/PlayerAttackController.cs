@@ -89,8 +89,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _presenter.Push(result);
 
-            _musicSyncService.RegisterBattleActionHistory(BattleActionType.Attack, beatType, now);
-
             resultBeatType = (int)beatType;
             return true;
         }
