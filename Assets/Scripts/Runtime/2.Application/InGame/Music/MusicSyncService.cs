@@ -68,7 +68,9 @@ namespace KillChord.Runtime.Application.InGame.Music
             float lastTime = _rhythmState.LastTiming;
             double duration = unscaledTime - lastTime;
 
-            return _rhythmDefinition.CalculateBeatType(duration);
+            BeatType result = _rhythmDefinition.CalculateBeatType(duration,RhythmJustService.Instance.TriggerJustHit);
+
+            return result;
         }
 
         /// <summary>
