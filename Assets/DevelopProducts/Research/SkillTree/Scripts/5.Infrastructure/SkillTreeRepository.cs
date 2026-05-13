@@ -41,25 +41,50 @@ namespace DevelopProducts.SkillTree
             _nodeDictionary = new Dictionary<int, SkillNodeEntity>();
             _parentsDictionary = new Dictionary<int, SkillNodeEntity[]>();
             //  Entityに変換
-            foreach (var node in _skillNodeAsset)
+            var nodeAssets = _skillNodeAsset ?? Array.Empty<SkillNodeAsset>();
+
+            //  先に全ノードをEntity化（親子参照の順序依存をなくす）
+            foreach (var node in nodeAssets)
             {
+                if (node == null)
+                    continue;
+
                 node.ToDomain();
-                var parents = new List<SkillNodeEntity>(node.Parents.Length);
-                foreach (var parent in node.Parents)
+            }
+
+            //  親子関係を設定
+            foreach (var node in nodeAssets)
+            {
+                if (node == null || node.SkillNodeEntity == null)
+                    continue;
+
+                var parentAssets = node.Parents ?? Array.Empty<SkillNodeAsset>();
+                var parents = new List<SkillNodeEntity>(parentAssets.Length);
+                foreach (var parent in parentAssets)
                 {
-                    parents.Add(parent.ToDomain());
+                    if (parent?.SkillNodeEntity == null)
+                        continue;
+
+                    parents.Add(parent.SkillNodeEntity);
                 }
                 node.SkillNodeEntity.SetParent(parents.ToArray());
             }
 
             //  ノードごとの辞書作成
-            foreach (var node in _skillNodeAsset)
+            foreach (var node in nodeAssets)
             {
+                if (node?.SkillNodeEntity == null)
+                    continue;
+
                 _nodeDictionary[node.SkillNodeEntity.SkillNodeIdVO.Id] = node.SkillNodeEntity;
             }
+
             //  親子関係の辞書作成
-            foreach (var node in _skillNodeAsset)
+            foreach (var node in nodeAssets)
             {
+                if (node?.SkillNodeEntity == null)
+                    continue;
+
                 _parentsDictionary[node.SkillNodeEntity.SkillNodeIdVO.Id] = node.SkillNodeEntity.Parents;
             }
 

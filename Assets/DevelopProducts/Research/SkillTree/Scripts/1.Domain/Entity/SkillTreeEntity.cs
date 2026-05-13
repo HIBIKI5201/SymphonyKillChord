@@ -13,6 +13,20 @@ namespace DevelopProducts.SkillTree
             _nodes = nodes.ToDictionary(n => n.SkillNodeIdVO);
 
             _parents = _nodes.Keys.ToDictionary(id => id, _ => new List<SkillNodeId>());
+            foreach (var node in _nodes.Values)
+            {
+                if (node?.Parents == null)
+                    continue;
+
+                var parentIds = _parents[node.SkillNodeIdVO];
+                foreach (var parent in node.Parents)
+                {
+                    if (parent == null)
+                        continue;
+
+                    parentIds.Add(parent.SkillNodeIdVO);
+                }
+            }
         }
 
         public SkillNodeEntity GetNode(SkillNodeId id)

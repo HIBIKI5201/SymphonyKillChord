@@ -39,7 +39,6 @@ namespace DevelopProducts.SkillTree
             foreach (var nodeView in _nodeViews.Where(v => v != null))
             {
                 nodeView.Initialize(_nodeRegistry, _nodeCanUnlockController);
-                nodeView.
             }
         }
     }
