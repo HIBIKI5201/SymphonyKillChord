@@ -15,11 +15,13 @@ namespace KillChord.Runtime.Application.InGame.Music
         ///     新しいサービスを生成する。
         /// </summary>
         /// <param name="rhythmDefinition"> リズムの定義。 </param>
-        public MusicSyncService(RhythmDefinition rhythmDefinition)
+        /// <param name="onJustHit"> ジャストヒット時のアクション。 </param>
+        public MusicSyncService(RhythmDefinition rhythmDefinition,Action onJustHit = null)
         {
             _rhythmState = new(BUFFER_SIZE);
             _rhythmDefinition = rhythmDefinition;
             _scheduledActions = new PriorityQueue<ScheduledAction, double>();
+            _onJustHit = onJustHit;
         }
 
         /// <summary>
@@ -68,7 +70,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             float lastTime = _rhythmState.LastTiming;
             double duration = unscaledTime - lastTime;
 
-            BeatType result = _rhythmDefinition.CalculateBeatType(duration,RhythmJustService.Instance.TriggerJustHit);
+            BeatType result = _rhythmDefinition.CalculateBeatType(duration,_onJustHit);
 
             return result;
         }
@@ -144,7 +146,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         private const int BUFFER_SIZE = 64;
-
+        private readonly Action _onJustHit;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
