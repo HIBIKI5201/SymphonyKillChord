@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
-    public class RouteCalculateController
+    public interface ICanUnlockVM
     {
     
     }

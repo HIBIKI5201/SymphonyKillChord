@@ -3,8 +3,8 @@ namespace DevelopProducts.SkillTree
     /// <summary>
     ///     報酬がパラメーター強化のインターフェース
     /// </summary>
-    public  interface IParameterUpgradeEffect : INodeUnlockEffect
+    public interface IParameterUpgradeEffect : INodeUnlockEffect
     {
-        string Description { get; } 
+        new string Description { get; }
     }
 }

@@ -5,7 +5,7 @@ namespace DevelopProducts.SkillTree
 {
     public interface ISkillTreeRepository
     {
-        SkillNodeEntity GetNode(SkillNodeIdVo id);
-        IReadOnlyList<SkillNodeEntity> GetParentNodes(SkillNodeIdVo id);
+        SkillNodeEntity GetNode(int id);
+        IReadOnlyList<SkillNodeEntity> GetParentNodes(int id);
     }
 }

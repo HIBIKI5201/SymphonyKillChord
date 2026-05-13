@@ -11,22 +11,23 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a076d68b4d37684aa9b059994411634, type: 3}
   m_Name: SkillNodeAsset
-  m_EditorClassIdentifier: SkillTreeDevelopProducts::DevelopProducts.SkillTree.SkillNodeAsset
+  m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillNodeAsset
   _nodeUnlockEffets:
-  - rid: 6052115742612783275
+  - rid: 5186415340246270061
+  _unlockCondition:
+    rid: 5186415340246270060
+  _id: 0
+  _isUnlocked: 0
+  _isEnable: 0
+  _parents:
+  - {fileID: 0}
+  _cost: 2
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 6052115742612783275
-      type: {class: SkillUnlock, ns: DevelopProducts.SkillTree, asm: SkillTreeDevelopProducts}
-      data:
-        _skillData:
-          _skillEffect:
-            rid: -2
-          _skillVisual:
-            rid: -2
-          _id: 0
-          _pattern: 
-        _description: 
+    - rid: 5186415340246270060
+      type: {class: AnyParentCondition, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
+      data: 
+    - rid: 5186415340246270061
+      type: {class: HealthUp, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
+      data: 

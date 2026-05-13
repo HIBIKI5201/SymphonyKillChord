@@ -9,7 +9,7 @@ namespace DevelopProducts.SkillTree
     public readonly struct PathResult
     {
         public PathResult(
-            IReadOnlyList<SkillNodeEntity> path,
+            List<SkillNodeEntity> path,
             UnlockCost totalCost)
         {
             Path = path;
@@ -17,7 +17,7 @@ namespace DevelopProducts.SkillTree
         }
 
         /// <summary>解放が必要なノードを根元から順に並べたリスト。</summary>
-        public IReadOnlyList<SkillNodeEntity> Path { get; }
+        public List<SkillNodeEntity> Path { get; }
 
         /// <summary>経路上の全ノードのコスト合計。</summary>
         public UnlockCost TotalCost { get; }

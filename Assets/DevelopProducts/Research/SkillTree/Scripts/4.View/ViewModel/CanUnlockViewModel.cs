@@ -1,6 +1,8 @@
+using UnityEngine;
+
 namespace DevelopProducts.SkillTree
 {
-    public interface IRouteCalculateUsecase
+    public class CanUnlockViewModel
     {
     
     }

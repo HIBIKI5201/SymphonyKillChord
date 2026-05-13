@@ -1,11 +1,12 @@
 using System.Linq;
 
 namespace DevelopProducts.SkillTree
-{ 
+{
     /// <summary>
     ///     全ての親が解放されていたら解放条件を満たすクラス
     /// </summary>
-    public class AllParentCondition : IUnlockConditon
+    [System.Serializable]
+    public class AllParentCondition : IUnlockCondition
     {
         /// <summary>
         ///     全ての親ノードが解放されていたら解放条件を満たす
@@ -15,7 +16,7 @@ namespace DevelopProducts.SkillTree
         /// <returns></returns>
         public bool IsSatisfied(SkillNodeEntity skillNodeEntity, SkillTreeEntity skillTreeEntity)
         {
-            if(skillTreeEntity.GetParents(skillNodeEntity.SkillNodeIdVO).All(parent => parent.IsUnlocked))
+            if (skillTreeEntity.GetParents(skillNodeEntity.SkillNodeIdVO).All(parent => parent.IsUnlocked))
             {
                 return true;
             }

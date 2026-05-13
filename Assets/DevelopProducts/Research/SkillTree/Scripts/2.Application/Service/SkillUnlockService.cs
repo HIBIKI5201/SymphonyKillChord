@@ -13,13 +13,13 @@ namespace DevelopProducts.SkillTree
         public bool CanUnlock(
             SkillNodeEntity node,
             SkillTreeEntity tree,
-            UnlockCost currentPoints)
+            int currentPoints)
         {
             if (node == null) return false;
             if (node.IsUnlocked) return false;
             if (!node.IsEnable) return false;
             if (!tree.IsReachable(node.SkillNodeIdVO)) return false;
-            return currentPoints.Cost >= node.UnlockCost.Cost;
+            return currentPoints >= node.UnlockCost.Cost;
         }
     }
 }

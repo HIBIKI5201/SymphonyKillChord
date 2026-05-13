@@ -12,13 +12,13 @@ namespace DevelopProducts.SkillTree
         {
             _nodes = nodes.ToDictionary(n => n.SkillNodeIdVO);
 
-            _parents = _nodes.Keys.ToDictionary(id => id, _ => new List<SkillNodeIdVo>());
+            _parents = _nodes.Keys.ToDictionary(id => id, _ => new List<SkillNodeId>());
         }
 
-        public SkillNodeEntity GetNode(SkillNodeIdVo id)
+        public SkillNodeEntity GetNode(SkillNodeId id)
             => _nodes.TryGetValue(id, out var node) ? node : null;
         /// <summary>指定ノードの親ノード一覧を返す。</summary>
-        public IReadOnlyList<SkillNodeEntity> GetParents(SkillNodeIdVo id)
+        public IReadOnlyList<SkillNodeEntity> GetParents(SkillNodeId id)
         {
             if (!_parents.TryGetValue(id, out var parentIds))
                 return System.Array.Empty<SkillNodeEntity>();
@@ -31,7 +31,7 @@ namespace DevelopProducts.SkillTree
         ///     地続き判定。
         ///     原点から解放済みノードのみを経由して対象ノードに隣接しているか（BFS）。
         /// </summary>
-        public bool IsReachable(SkillNodeIdVo targetId)
+        public bool IsReachable(SkillNodeId targetId)
         {
             var target = GetNode(targetId);
             if (target == null || target.IsUnlocked) return false;
@@ -45,7 +45,7 @@ namespace DevelopProducts.SkillTree
             foreach (var node in _nodes.Values)
                 node.Lock(); // IsRoot のノードは Lock() 内でスキップされる
         }
-        private readonly Dictionary<SkillNodeIdVo, SkillNodeEntity> _nodes;
-        private readonly Dictionary<SkillNodeIdVo, List<SkillNodeIdVo>> _parents;
+        private readonly Dictionary<SkillNodeId, SkillNodeEntity> _nodes;
+        private readonly Dictionary<SkillNodeId, List<SkillNodeId>> _parents;
     }
 }

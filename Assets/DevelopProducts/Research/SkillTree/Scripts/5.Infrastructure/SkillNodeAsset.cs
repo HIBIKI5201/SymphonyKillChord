@@ -13,10 +13,11 @@ namespace DevelopProducts.SkillTree
 
         public SkillNodeEntity ToDomain()
         {
-            _skillNodeEntity = new SkillNodeEntity(_id, _cost, _nodeUnlockEffets, _isUnlocked, _isEnable);
+            _skillNodeEntity = new SkillNodeEntity(_id, _cost, _nodeUnlockEffets, _unlockCondition, _isUnlocked, _isEnable);
             return _skillNodeEntity;
         }
         [SerializeReference, SubclassSelector] private INodeUnlockEffect[] _nodeUnlockEffets;
+        [SerializeReference, SubclassSelector] private IUnlockCondition _unlockCondition;
 
         [SerializeField] private int _id;
         [SerializeField] private bool _isUnlocked;

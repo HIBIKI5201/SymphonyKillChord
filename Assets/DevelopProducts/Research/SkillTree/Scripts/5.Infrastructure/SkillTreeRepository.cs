@@ -13,10 +13,10 @@ namespace DevelopProducts.SkillTree
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        public SkillNodeEntity GetNode(SkillNodeIdVo id)
+        public SkillNodeEntity GetNode(int id)
         {
-            if (!_nodeDictionary.TryGetValue(id.Id, out var skillNode))
-                throw new NullReferenceException($"IDが{id.Id}のスキルノードはスキルツリーに存在しません");
+            if (!_nodeDictionary.TryGetValue(id, out var skillNode))
+                throw new NullReferenceException($"IDが{id}のスキルノードはスキルツリーに存在しません");
 
             return skillNode;
         }
@@ -25,9 +25,9 @@ namespace DevelopProducts.SkillTree
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IReadOnlyList<SkillNodeEntity> GetParentNodes(SkillNodeIdVo id)
+        public IReadOnlyList<SkillNodeEntity> GetParentNodes(int id)
         {
-            if (!_parentsDictionary.TryGetValue(id.Id, out var parentNodes))
+            if (!_parentsDictionary.TryGetValue(id, out var parentNodes))
                 return Array.Empty<SkillNodeEntity>();
 
             return parentNodes;

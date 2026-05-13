@@ -7,7 +7,7 @@ namespace DevelopProducts.SkillTree
     ///     幅優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
     ///     アプリケーション層
     /// </summary>
-    public class DistributedFileSystem : IAlgorithmService
+    public class SkillPathSearchService : IAlgorithmService
     {
         /// <summary>
         ///     選択されたノード(未解放)から解放されているノードまで辿り一番コストが掛からない経路を探す
@@ -18,8 +18,8 @@ namespace DevelopProducts.SkillTree
         public PathResult FindPath(SkillNodeEntity target, SkillTreeEntity tree)
         {
             //  既に開放済みなら経路不要
-            if (target.IsUnlocked)
-                return new PathResult(Array.Empty<SkillNodeEntity>(), new UnlockCost(0));
+            if (target.UnlockCondition.IsSatisfied(target, tree))
+                return new PathResult(new List<SkillNodeEntity>(), new UnlockCost(0));
 
             var bestPath = new List<SkillNodeEntity>();
             var totalCosts = int.MaxValue;
@@ -30,7 +30,7 @@ namespace DevelopProducts.SkillTree
 
             //  パスの数が0だったら何も無し
             if (bestPath.Count == 0)
-                return new PathResult(Array.Empty<SkillNodeEntity>(), new UnlockCost(0));
+                return new PathResult(new List<SkillNodeEntity>(), new UnlockCost(0));
 
             //　最適通路が見つかったらパスと総コストを生成して返す
             return new PathResult(bestPath, new UnlockCost(totalCosts));
@@ -56,7 +56,7 @@ namespace DevelopProducts.SkillTree
                             ref int bestCost)
         {
             //  解放済みノードに到達 ➝　ルートのコストを評価
-            if (target.IsUnlocked)
+            if (target.UnlockCondition.IsSatisfied(target, skillTreeEntity))
             {
                 // コストを評価して同じコストだったら次にポップ数を見る
                 bool isBetter =
@@ -79,8 +79,10 @@ namespace DevelopProducts.SkillTree
 
             //  もしコストが最小コストを上回ったら枝を切る
             if (totalCost >= bestCost)
+            {
+                currentPath.RemoveAt(0);
                 return;
-
+            }
             // 現在のノードから親のノードを取得する
             var parents = skillTreeEntity.GetParents(target.SkillNodeIdVO);
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
-    public interface IUnlockConditon
+    public interface IUnlockCondition
     {
         bool IsSatisfied(SkillNodeEntity skillNodeEntity, SkillTreeEntity skillTreeEntity);
     }

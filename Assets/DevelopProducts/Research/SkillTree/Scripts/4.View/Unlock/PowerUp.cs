@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
+    [System.Serializable]
     public class PowerUp : IParameterUpgradeEffect
     {
         public string Description { get; }

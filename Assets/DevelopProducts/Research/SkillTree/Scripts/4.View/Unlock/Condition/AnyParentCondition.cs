@@ -6,7 +6,7 @@ namespace DevelopProducts.SkillTree
     ///     親のどれかが解放されていたら解放条件を満たすクラス
     /// </summary>
     [System.Serializable]
-    public class AnyParentCondition : IUnlockConditon
+    public class AnyParentCondition : IUnlockCondition
     {
         /// <summary>
         ///     親のどれかが解放されていたら解放条件を満たす
