@@ -9,7 +9,7 @@ namespace KillChord.Editor.AutoBuilder
     ///     オートビルダーの設定を保持するクラス。
     /// </summary>
     [FilePath(
-        ProviderConst.PROJECT_PATH + nameof(AutoBuilderSettings) + ProviderConst.ASSET_EXT,
+        ProviderConst.USER_SETTINGS_PATH + nameof(AutoBuilderSettings) + ProviderConst.ASSET_EXT,
         FilePathAttribute.Location.ProjectFolder)]
     public class AutoBuilderSettings : ScriptableSingleton<AutoBuilderSettings>
     {

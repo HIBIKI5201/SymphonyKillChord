@@ -3,7 +3,7 @@ using System;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// シナリオ再生設定の参照契約を定義します。
+    /// IScenarioSettings の参照情報を取得するリポジトリ。
     /// </summary>
     public interface IScenarioSettingsRepository
     {

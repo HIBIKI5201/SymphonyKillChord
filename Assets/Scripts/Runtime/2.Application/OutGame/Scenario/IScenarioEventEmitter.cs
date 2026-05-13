@@ -5,7 +5,7 @@ using KillChord.Runtime.Domain.OutGame.Scenario;
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
     /// <summary>
-    /// シナリオイベント発火の契約を定義します。
+    /// シナリオイベントの再送出契約を定義する。
     /// </summary>
     public interface IScenarioEventEmitter
     {

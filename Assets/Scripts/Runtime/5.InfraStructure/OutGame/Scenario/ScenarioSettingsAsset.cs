@@ -5,14 +5,24 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     [CreateAssetMenu(
        fileName = "ScenarioSettingsAsset",
        menuName = "KillChord/Runtime/Scenario/Settings")]
+    /// <summary>
+    /// シナリオ再生に必要な設定値を保持するアセット。
+    /// </summary>
     public class ScenarioSettingsAsset : ScriptableObject
     {
+        /// <summary> NormalTextCharIntervalSec を取得する。 </summary>
         public float NormalTextCharIntervalSec => _normalTextCharIntervalSec;
+        /// <summary> FastForwardTextCharIntervalSec を取得する。 </summary>
         public float FastForwardTextCharIntervalSec => _fastForwardTextCharIntervalSec;
+        /// <summary> PausePollIntervalSec を取得する。 </summary>
         public float PausePollIntervalSec => _pausePollIntervalSec;
+        /// <summary> CloseDelayAfterCompleteSec を取得する。 </summary>
         public float CloseDelayAfterCompleteSec => _closeDelayAfterCompleteSec;
+        /// <summary> SkipClosesImmediately を取得する。 </summary>
         public bool SkipClosesImmediately => _skipClosesImmediately;
+        /// <summary> WaitForInputOnLastText を取得する。 </summary>
         public bool WaitForInputOnLastText => _waitForInputOnLastText;
+        /// <summary> DefaultScenarioId を取得する。 </summary>
         public string DefaultScenarioId => _defaultScenarioId;
 
         [Header("Timing")]

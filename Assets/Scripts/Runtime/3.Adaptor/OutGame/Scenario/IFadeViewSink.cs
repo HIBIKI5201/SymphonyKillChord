@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IFadeViewSink の契約を定義します。
+    /// Fade の表示反映契約を定義する。
     /// </summary>
     public interface IFadeViewSink
     {

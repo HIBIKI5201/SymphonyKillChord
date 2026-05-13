@@ -5,10 +5,17 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Mission
 {
+    /// <summary>
+    ///     アウトゲームにおけるミッションシステムの初期化を行うクラス。
+    /// </summary>
     public class OutGameMissionInitializer : MonoBehaviour
     {
-        [SerializeField] private OutGameMissionButtonView[] _buttons;
+        /// <summary> ミッション選択ボタンのリスト。 </summary>
+        [SerializeField, Tooltip("ミッションを選択するためのボタンのリスト。")] private OutGameMissionButtonView[] _buttons;
 
+        /// <summary>
+        ///     UnityのAwakeメソッド。
+        /// </summary>
         private void Awake()
         {
             SelectedMissionState selectedMissionState = new SelectedMissionState();
