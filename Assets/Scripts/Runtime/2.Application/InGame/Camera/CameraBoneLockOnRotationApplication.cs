@@ -19,7 +19,8 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
         /// <summary>
         ///     ロックオン対象方向へカメラボーンを滑らかに回転させる。
-        ///     対象との角度がマージン以内の場合は更新をスキップする。
+        ///     対象との角度がマージン内の場合はオフセットなし、マージン外の場合はマージンオフセットを適用し、プレイヤーモデルがフレーム内に収まるよう制御する。
+        ///     プレイヤーと対象が同一 XZ 座標の場合、またはカメラの前方向の XZ 成分がゼロの場合は更新をスキップする。
         /// </summary>
         /// <param name="cameraBoneRotation"> 更新対象のカメラボーン回転。参照渡しで更新される。</param>
         /// <param name="context"> 今フレームの更新コンテキスト。</param>
@@ -36,13 +37,14 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
         /// <summary>
         ///     ロックオン時のボーンの目標回転を取得する。
-        ///     マージン以内の場合は false を返し、<paramref name="targetRotation"/> は現在の回転をそのまま返す。
+        ///     対象との角度がマージン内の場合はオフセットなし、マージン外の場合はマージンオフセットを適用した回転を返すことで、プレイヤーモデルが常にフレーム内に収まることを保証する。
+        ///     プレイヤーと対象が同一 XZ 座標の場合、またはカメラの前方向の XZ 成分がゼロの場合は false を返し、<paramref name="targetRotation"/> は現在の回転をそのまま返す。
         /// </summary>
         /// <param name="followPosition"> 追従対象のワールド座標。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
         /// <param name="currentBoneRotation"> 現在のカメラボーン回転。</param>
-        /// <param name="targetRotation"> 計算した目標回転。</param>
-        /// <returns> マージンを超えている場合は true、以内の場合は false。</returns>
+        /// <param name="targetRotation"> 計算した目標回転。計算不能な場合は <paramref name="currentBoneRotation"/> をそのまま返す。</param>
+        /// <returns> 目標回転を計算できた場合は true、計算不能な場合は false。</returns>
         public bool TryGetTargetRotation(in Vector3 followPosition, in Vector3 targetPosition, in Quaternion currentBoneRotation, out Quaternion targetRotation)
         {
             return TryCalcTargetRotation(followPosition, targetPosition, currentBoneRotation, out targetRotation);
@@ -52,13 +54,14 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
         /// <summary>
         ///     対象方向へのボーン目標回転を計算する共通ロジック。
-        ///     マージン以内の場合は false を返す。
+        ///     対象との角度がマージン内の場合はオフセットなし、マージン外の場合は外積の Y 成分でカメラが対象の左右どちらにいるかを判定し、マージンオフセットを適用した目標回転を返す。
+        ///     プレイヤーと対象が同一 XZ 座標の場合、またはカメラの前方向の XZ 成分がゼロの場合は false を返す。
         /// </summary>
         /// <param name="followPosition"> 追従対象のワールド座標。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
         /// <param name="currentBoneRotation"> 現在のカメラボーン回転。</param>
-        /// <param name="targetRotation"> 計算した目標回転。</param>
-        /// <returns> マージンを超えている場合は true、以内の場合は false。</returns>
+        /// <param name="targetRotation"> 計算した目標回転。計算不能な場合は <paramref name="currentBoneRotation"/> をそのまま返す。</param>
+        /// <returns> 目標回転を計算できた場合は true、計算不能な場合は false。</returns>
         private bool TryCalcTargetRotation(in Vector3 followPosition, in Vector3 targetPosition, in Quaternion currentBoneRotation, out Quaternion targetRotation)
         {
             targetRotation = currentBoneRotation;
@@ -79,16 +82,16 @@ namespace KillChord.Runtime.Application.InGame.Camera
 
             float angle = Vector3.Angle(followDir, cameraDir);
             float lockOnAngleMargin = _parameter.LockOnAngleMargin;
-
-            // マージン以内の場合は補正不要
-            if (angle < lockOnAngleMargin)
+            if(angle <= lockOnAngleMargin)
             {
-                return false;
+                // すでにマージン内にいる場合は、マージンオフセットなしの回転を返す
+                targetRotation = Quaternion.LookRotation(followDir, Vector3.up);
+                return true;
             }
 
             float crossY = Vector3.Cross(followDir, cameraDir).y;
 
-            // 外積の符号でマージンオフセットの方向を決定する
+            // 外積の Y 成分でカメラが対象の左右どちらにいるかを判定し、マージンオフセットの方向を決定する。
             targetRotation = Quaternion.LookRotation(followDir, Vector3.up)
                 * Quaternion.Euler(0, (crossY <= 0) ? -lockOnAngleMargin : lockOnAngleMargin, 0);
 
