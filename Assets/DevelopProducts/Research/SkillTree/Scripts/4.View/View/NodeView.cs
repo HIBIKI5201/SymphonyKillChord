@@ -24,6 +24,7 @@ namespace DevelopProducts.SkillTree
         {
             if (canlock)
                 _icon.color = Color.yellow;
+            Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_skillNodeAsset.Id}, canlock: {canlock}");
         }
         public void Unlock()
         {

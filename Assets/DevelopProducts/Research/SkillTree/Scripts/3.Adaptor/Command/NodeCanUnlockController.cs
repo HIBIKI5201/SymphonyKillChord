@@ -20,11 +20,9 @@ namespace DevelopProducts.SkillTree
         {
             var node = _skillTreeRepository.GetNode(nodeId);
             var path = _algorithmService.FindPath(node, _skillTree);
-            var canUnlock = _unlockUsecase.CheckUnlock(node, path.TotalCost.Cost);
-            if(canUnlock)
-            {
-                _skillsNodePresenter.CanUnlock(nodeId);
-            }
+            var canUnlock = _unlockUsecase.CheckUnlock(path.TotalCost.Cost);
+
+            _skillsNodePresenter.CanUnlock(nodeId, canUnlock);
         }
         private readonly ISkillTreeRepository _skillTreeRepository;
         private readonly IAlgorithmService _algorithmService;

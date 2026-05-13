@@ -629,6 +629,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1186609585}
   m_CullTransparentMesh: 1
+--- !u!1 &1217851692
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1217851694}
+  - component: {fileID: 1217851693}
+  m_Layer: 0
+  m_Name: SkillTreeInitializer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1217851693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217851692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2c7a9de402e2a54d95531b333b82b3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillTreeInitializer
+  _skillTreeRepository: {fileID: 11400000, guid: 49002fc56e823f447913b69d3cd313c4, type: 2}
+  _nodeViews:
+  - {fileID: 257756467}
+  - {fileID: 402716254}
+  - {fileID: 1186609587}
+  - {fileID: 765125115}
+  _skillPointRepository: {fileID: 0}
+--- !u!4 &1217851694
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217851692}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 925.40607, y: 0.00002, z: -2323.6868}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1351984350
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,3 +983,4 @@ SceneRoots:
   - {fileID: 1475625805}
   - {fileID: 1351984354}
   - {fileID: 637334638}
+  - {fileID: 1217851694}

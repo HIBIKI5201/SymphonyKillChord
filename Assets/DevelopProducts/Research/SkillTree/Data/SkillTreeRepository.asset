@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4fc4ed8bc4e474b96c398892fba37c, type: 3}
   m_Name: SkillTreeRepository
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillTreeRepository
-  _skillNodeAsset: []
+  _skillNodeAsset:
+  - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
+  - {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
+  - {fileID: 11400000, guid: f61dac3f0191a164da5adbbd7bb77195, type: 2}

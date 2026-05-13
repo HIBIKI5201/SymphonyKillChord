@@ -44,6 +44,12 @@ namespace DevelopProducts.SkillTree
             foreach (var node in _skillNodeAsset)
             {
                 node.ToDomain();
+                var parents = new List<SkillNodeEntity>(node.Parents.Length);
+                foreach (var parent in node.Parents)
+                {
+                    parents.Add(parent.ToDomain());
+                }
+                node.SkillNodeEntity.SetParent(parents.ToArray());
             }
 
             //  ノードごとの辞書作成

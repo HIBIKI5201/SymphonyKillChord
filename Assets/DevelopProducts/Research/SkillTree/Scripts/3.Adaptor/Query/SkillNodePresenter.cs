@@ -2,20 +2,17 @@ namespace DevelopProducts.SkillTree
 {
     public class SkillNodePresenter
     {
-        public SkillNodePresenter(ISkillTreeRepository skillTreeRepository, NodeRegistry nodeRegistry)
+        public SkillNodePresenter(NodeRegistry nodeRegistry)
         {
-            _skillTreeRepository = skillTreeRepository;
             _nodeRegistry = nodeRegistry;
         }
-        public void CanUnlock(int nodeId)
+        public void CanUnlock(int nodeId, bool canUnlock)
         {
-            var node = _skillTreeRepository.GetNode(nodeId);
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
             {
-                canUnlockVM.Push(new CanUnlockDTO(node.IsEnable));
+                canUnlockVM.Push(new CanUnlockDTO(canUnlock));
             }
         }
-        private readonly ISkillTreeRepository _skillTreeRepository;
         private readonly NodeRegistry _nodeRegistry;
     }
 }

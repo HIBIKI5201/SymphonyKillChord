@@ -7,9 +7,6 @@ namespace DevelopProducts.SkillTree
     public interface IPointRepository
     {
         /// <summary>総獲得ポイント − 使用済みポイント = 現在の所持ポイント</summary>
-        UnlockCost GetCurrentPoints();
-
-        /// <summary>指定コスト分のポイントを消費する。</summary>
-        void Consume(UnlockCost cost);
+        UnlockPoint GetCurrentPoints();
     }
 }

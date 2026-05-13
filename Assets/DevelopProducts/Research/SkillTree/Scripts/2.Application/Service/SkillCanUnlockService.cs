@@ -3,12 +3,10 @@ namespace DevelopProducts.SkillTree
     public class SkillCanUnlockService
     {
         public bool CanUnlock(
-            SkillNodeEntity node,
+            int cost,
             int currentPoints)
         {
-            if (node == null) return false;
-            if (node.IsUnlocked) return false;
-            return currentPoints >= node.UnlockCost.Cost;
+            return currentPoints >= cost;
         }
     }
 }

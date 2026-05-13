@@ -7,6 +7,7 @@ namespace DevelopProducts.SkillTree
     {
         [SerializeField] private SkillTreeRepository _skillTreeRepository;
         [SerializeField] private NodeView[] _nodeViews;
+        [SerializeField] private SkillPointReposiroty _skillPointRepository;
 
         private NodeRegistry _nodeRegistry;
         private NodeCanUnlockController _nodeCanUnlockController;
@@ -24,8 +25,8 @@ namespace DevelopProducts.SkillTree
             _nodeRegistry = new NodeRegistry();
             var algorithmService = new SkillPathSearchService();
             var canUnlockService = new SkillCanUnlockService();
-            var canUnlockUsecase = new CanUnlockUsecase(canUnlockService);
-            var presenter = new SkillNodePresenter(_skillTreeRepository, _nodeRegistry);
+            var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
+            var presenter = new SkillNodePresenter(_nodeRegistry);
 
             var skillTree = new SkillTreeEntity(_skillTreeRepository.SkillNodeEntities);
             _nodeCanUnlockController = new NodeCanUnlockController(
@@ -38,6 +39,7 @@ namespace DevelopProducts.SkillTree
             foreach (var nodeView in _nodeViews.Where(v => v != null))
             {
                 nodeView.Initialize(_nodeRegistry, _nodeCanUnlockController);
+                nodeView.
             }
         }
     }
