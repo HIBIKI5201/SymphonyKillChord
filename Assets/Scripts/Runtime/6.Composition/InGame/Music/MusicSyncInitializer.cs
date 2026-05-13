@@ -25,8 +25,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         {
             MusicSyncState musicSyncViewState = new();
             var musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-
-            MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm));
+            MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm, _justTimingThreshold));
             MusicSyncController = new(musicSyncViewState, MusicSyncService);
             _musicSyncView.Bind(
                 musicPlayer,
@@ -45,5 +44,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [SerializeField] private string _testCue;
         [Tooltip("テスト用のBPM。")]
         [SerializeField] private double _testBpm;
+        [Tooltip("ジャスト判定の閾値。")]
+        [SerializeField] private float _justTimingThreshold;
+
     }
 }
