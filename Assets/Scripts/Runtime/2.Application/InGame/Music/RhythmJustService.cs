@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application.InGame.Music
                 return _instance;
             }
         }
-        public Action OnJustHit;
+        public event Action OnJustHit;
 
         public void Register(Action onJustHit)
         {
