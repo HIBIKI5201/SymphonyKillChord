@@ -24,7 +24,7 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -99,14 +99,22 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
-            int[] skillIds = null;
+            // SerializeFieldの装備スキルからskillId配列を作成する
+            List<int> skillIdList = new List<int>();
             if (_equippedSkills != null && _equippedSkills.Length > 0)
             {
-                skillIds = new int[_equippedSkills.Length];
                 for (int i = 0; i < _equippedSkills.Length; i++)
                 {
-                    skillIds[i] = _equippedSkills[i].Id;
+                    if (_equippedSkills[i] != null)
+                    {
+                        skillIdList.Add(_equippedSkills[i].Id);
+                    }
                 }
+            }
+            int[] skillIds = null;
+            if(skillIdList.Count > 0)
+            {
+                skillIds = skillIdList.ToArray();
             }
 
             _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);

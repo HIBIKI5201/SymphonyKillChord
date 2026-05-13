@@ -35,7 +35,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
             {
                 if (equipmentSkills[i].IsMatch(reversInput))
                 {
-                    Debug.Log($"[SkillCheckService] SKILL ACTIVATED. SKILL ID: {i}");
+                    Debug.Log($"[SkillCheckService] SKILL ACTIVATED. SKILL ID: {equipmentSkills[i].Id.Value}");
                     skillIndex = i;
                     lastAttackType = reversInput[0];
                     return true;
