@@ -13,6 +13,7 @@ namespace DevelopProducts.SkillTree
             _skillTreeRepository = skillTreeRepository;
             _algorithmService = algorithmService;
             _unlockUsecase = unlockUsecase;
+            _skillsNodePresenter = presenter;
             _skillTree = skillTree;
         }
         public void CanUnlock(int nodeId)

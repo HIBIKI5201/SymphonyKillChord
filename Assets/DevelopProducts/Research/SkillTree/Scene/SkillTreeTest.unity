@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f840bee76fc0204696c3f8750f7d544, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.NodeView
-  _skillNodeAsset: {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  _skillNodeAsset: {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
 --- !u!114 &402716255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,7 +501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f840bee76fc0204696c3f8750f7d544, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.NodeView
-  _skillNodeAsset: {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  _skillNodeAsset: {fileID: 11400000, guid: f61dac3f0191a164da5adbbd7bb77195, type: 2}
 --- !u!114 &765125116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -590,7 +590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f840bee76fc0204696c3f8750f7d544, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.NodeView
-  _skillNodeAsset: {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  _skillNodeAsset: {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
 --- !u!114 &1186609588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,9 +724,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 257756464}
-  - {fileID: 765125114}
   - {fileID: 402716253}
   - {fileID: 1186609586}
+  - {fileID: 765125114}
   - {fileID: 415183036}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

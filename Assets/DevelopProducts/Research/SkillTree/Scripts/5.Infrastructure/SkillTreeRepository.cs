@@ -7,6 +7,7 @@ namespace DevelopProducts.SkillTree
     [CreateAssetMenu(fileName = "SkillTreeRepository", menuName = "DevelopProducts/SkillTree/SkillTreeRepository")]
     public class SkillTreeRepository : ScriptableObject, ISkillTreeRepository
     {
+        public IReadOnlyCollection<SkillNodeEntity> SkillNodeEntities => _nodeDictionary.Values;
         /// <summary>
         ///     指定されたIDのノードを取得する
         /// </summary>
@@ -37,20 +38,14 @@ namespace DevelopProducts.SkillTree
         /// </summary>
         public void Initialize()
         {
+            _nodeDictionary = new Dictionary<int, SkillNodeEntity>();
+            _parentsDictionary = new Dictionary<int, SkillNodeEntity[]>();
             //  Entityに変換
             foreach (var node in _skillNodeAsset)
             {
                 node.ToDomain();
             }
-            //  親子関係を構築
-            foreach (var node in _skillNodeAsset)
-            {
-                var parents = new List<SkillNodeEntity>();
-                foreach (var parent in node.Parents)
-                {
-                    parents.Add(parent.SkillNodeEntity);
-                }
-            }
+
             //  ノードごとの辞書作成
             foreach (var node in _skillNodeAsset)
             {
