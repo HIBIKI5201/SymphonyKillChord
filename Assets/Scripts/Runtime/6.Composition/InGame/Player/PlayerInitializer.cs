@@ -24,6 +24,7 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -49,6 +50,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField]
         private CharacterData _playerData;
+        [Header("装備中スキル（テスト用）")]
+        [SerializeField] private SkillDataAsset[] _equippedSkills;
 
         private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
         private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
@@ -96,6 +99,24 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
+            // SerializeFieldの装備スキルからskillId配列を作成する
+            List<int> skillIdList = new List<int>();
+            if (_equippedSkills != null && _equippedSkills.Length > 0)
+            {
+                for (int i = 0; i < _equippedSkills.Length; i++)
+                {
+                    if (_equippedSkills[i] != null)
+                    {
+                        skillIdList.Add(_equippedSkills[i].Id);
+                    }
+                }
+            }
+            int[] skillIds = null;
+            if(skillIdList.Count > 0)
+            {
+                skillIds = skillIdList.ToArray();
+            }
+
             _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
             _enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
             _enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
@@ -138,7 +159,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
+            //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);
 
