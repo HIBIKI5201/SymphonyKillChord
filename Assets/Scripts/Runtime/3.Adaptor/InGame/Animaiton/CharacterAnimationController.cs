@@ -31,7 +31,6 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="velocity"> 2D速度ベクトル。 </param>
         public void SetVelocity(Vector2 velocity)
         {
-            // MusicSyncState(Adaptor層) → AnimationApplication(Application層) へBPMを橋渡しする
             _animApplication.SetBpm((float)_musicSyncState.Bpm);
             _animApplication.SetVelocity(velocity);
         }
