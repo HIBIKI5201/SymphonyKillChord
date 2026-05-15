@@ -7,9 +7,9 @@ namespace DevelopProducts.SkillTree
     {
         public UnlockPoint GetCurrentPoints()
         {
-            return new UnlockPoint(_currentPoints);
+            return new UnlockPoint(_point);
         }
 
-        [SerializeField] private int _currentPoints;
+        [SerializeField] private int _point;
     }
 }

@@ -28,7 +28,7 @@ namespace DevelopProducts.SkillTree
             var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
             var presenter = new SkillNodePresenter(_nodeRegistry);
 
-            var skillTree = new SkillTreeEntity(_skillTreeRepository.SkillNodeEntities);
+            var skillTree = new SkillTreeEntity(_skillTreeRepository.AllSkillNodes);
             _nodeCanUnlockController = new NodeCanUnlockController(
                 _skillTreeRepository,
                 algorithmService,

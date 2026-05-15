@@ -10,18 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a076d68b4d37684aa9b059994411634, type: 3}
-  m_Name: SkillNodeAsset 3
+  m_Name: SkillNodeAsset 5
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillNodeAsset
   _nodeUnlockEffets:
   - rid: 5186415340246270061
   _unlockCondition:
-    rid: 5186415364197318657
-  _id: 3
+    rid: 5186415364197318658
+  _id: 5
   _isUnlocked: 0
   _isEnable: 1
   _parents:
-  - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
-  - {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
+  - {fileID: 11400000, guid: 3ed9d045ccf72a04c9a0ad4b1a90f540, type: 2}
   _cost: 2
   references:
     version: 2
@@ -29,6 +28,6 @@ MonoBehaviour:
     - rid: 5186415340246270061
       type: {class: HealthUp, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
       data: 
-    - rid: 5186415364197318657
+    - rid: 5186415364197318658
       type: {class: AnyParentCondition, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
       data: 
