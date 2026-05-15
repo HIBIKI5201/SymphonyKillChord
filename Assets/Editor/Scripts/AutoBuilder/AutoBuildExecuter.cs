@@ -1,3 +1,4 @@
+using SymphonyFrameWork.Utility;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -34,7 +35,16 @@ namespace KillChord.Editor.AutoBuilder
                     .Select(s => s.path)
                     .ToArray();
 
-                if (scenes.Length > 0)
+                // プロファイルにシーンが設定されていない場合、ビルド設定の有効なシーンを使用する。
+                if (scenes.Length == 0)
+                {
+                    scenes = EditorBuildSettings.scenes
+                        .Where(s => s.enabled)
+                        .Select(s => s.path)
+                        .ToArray();
+                }
+
+                if (scenes.Length == 0)
                 {
                     Debug.LogWarning($"No enabled scenes found in profile: {profile.name}. Skipping build.");
                     continue;
@@ -49,7 +59,7 @@ namespace KillChord.Editor.AutoBuilder
                 BuildPlayerOptions options = new()
                 {
                     scenes = scenes,
-                    target = target,                     
+                    target = target,
                     locationPathName = locationPath
                 };
 
