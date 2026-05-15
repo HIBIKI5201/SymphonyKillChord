@@ -10,7 +10,7 @@ namespace KillChord.Editor.AutoBuilder
 {
     public static class AutoBuildExecuter
     {
-        public static void Run(string path, params BuildProfile[] profiles)
+        public static async void Run(string path, params BuildProfile[] profiles)
         {
             if (profiles == null || profiles.Length == 0)
             {
@@ -29,6 +29,8 @@ namespace KillChord.Editor.AutoBuilder
                 Debug.Log($"Start Build: {profile.name}");
 
                 BuildProfile.SetActiveBuildProfile(profile);
+
+                await SymphonyTask.WaitUntil(() => !EditorApplication.isCompiling && !EditorApplication.isUpdating);
 
                 string[] scenes = profile.GetScenesForBuild()
                     .Where(s => s.enabled)
