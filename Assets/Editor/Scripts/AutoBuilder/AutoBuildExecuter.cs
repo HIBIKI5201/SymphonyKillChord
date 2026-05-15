@@ -66,7 +66,8 @@ namespace KillChord.Editor.AutoBuilder
                 };
 
 
-                if (!Directory.Exists(buildDir)) { Directory.CreateDirectory(buildDir); }
+                if (Directory.Exists(buildDir)) { Directory.Delete(buildDir, true); }
+                else { Directory.CreateDirectory(buildDir); }
 
                 BuildReport report = BuildPipeline.BuildPlayer(options);
 
