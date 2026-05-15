@@ -43,7 +43,7 @@ namespace KillChord.Editor.AutoBuilder
                 BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
                 string buildDir = Path.Combine(path, profile.name);
-                string fileName = profile.name + GetExtension(target);
+                string fileName = Application.productName + GetExtension(target);
 
                 string locationPath = Path.Combine(buildDir, fileName);
                 BuildPlayerOptions options = new()
