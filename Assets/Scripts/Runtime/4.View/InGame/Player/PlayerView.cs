@@ -25,20 +25,18 @@ namespace KillChord.Runtime.View.InGame.Player
         [Header("攻撃インターバルテスト用の値（単位:秒）")]
         private float _attackInterval = 1.0f;
 
-        private Transform _cameraTransform;
         private bool _isInitialized;
         private bool _isAttacking;
-        private PlayerInputView _playerInputView;
-        private Vector2 _moveVector;
         private bool _isDodge;
-        private Collider[] _colliders;
+        private Vector2 _moveVector;
         private Transform _cacheTransform;
+        private Transform _cameraTransform;
         private IPlayerController _controller;
-        private PlayerAttackController _playerAttackController;
+        private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
-        public PlayerAttackController PlayerAttackController => _playerAttackController;
+        public PlayerAttackController PlayerAttackController { get; private set; }
 
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
@@ -70,10 +68,9 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
-            _playerAttackController = playerAttackController;
+            PlayerAttackController = playerAttackController;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
-            _colliders = new Collider[8];
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
 
@@ -126,13 +123,13 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_playerAttackController == null)
+            if (PlayerAttackController == null)
             {
                 Debug.LogError("[PlayerView] AttackController is null", this);
                 return;
             }
 
-            if (_playerAttackController.ExecuteAttack(out int resultBeatType))
+            if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
                 AttackCooldown(_attackInterval).Forget();
 
