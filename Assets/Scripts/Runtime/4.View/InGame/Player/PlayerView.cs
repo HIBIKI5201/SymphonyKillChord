@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using CriWare;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
@@ -20,8 +21,13 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private CriAtomSource _seSource;
 
+        [SerializeField]
+        [Header("攻撃インターバルテスト用の値（単位:秒）")]
+        private float _attackInterval = 1.0f;
+
         private Transform _cameraTransform;
         private bool _isInitialized;
+        private bool _isAttacking;
         private PlayerInputView _playerInputView;
         private Vector2 _moveVector;
         private bool _isDodge;
@@ -51,6 +57,7 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 UnRegisterActions();
             }
+
             _healthHudPresenter?.Dispose();
         }
 
@@ -127,6 +134,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_playerAttackController.ExecuteAttack(out int resultBeatType))
             {
+                AttackCooldown(_attackInterval).Forget();
+
                 // 判定ビート種別ごとに再生するSEキュー名を切り替える。
                 string cueName = resultBeatType switch
                 {
@@ -141,6 +150,18 @@ namespace KillChord.Runtime.View.InGame.Player
 
                 Play(cueName);
             }
+        }
+
+        /// <summary>
+        /// 攻撃中のクールダウンを管理する。攻撃中は開始から一定時間が経過するまで一部入力を無効化するための_isAttackingフラグを立てる。
+        /// </summary>
+        /// <param name="duration"></param>
+        private async UniTaskVoid AttackCooldown(float duration)
+        {
+            // TODO: 将来的にBPMやアニメーションを考慮した時間設定にすることから、この処理はApplication層に移動予定。
+            _isAttacking = true;
+            await UniTask.Delay((int)(duration * 1000f));
+            _isAttacking = false;
         }
 
         /// <summary>
@@ -167,6 +188,14 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             Vector2 dir = _moveVector;
+
+            if (_isAttacking)
+            {
+                // 攻撃時には移動方向をゼロベクトルにする。
+                // 入力方向のキャッシュ_moveVectorは残るため、攻撃終了後はその方向に移動を再開する。
+                dir = Vector2.zero;
+            }
+
             _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
@@ -179,6 +208,7 @@ namespace KillChord.Runtime.View.InGame.Player
                     dir.x = fwd.x;
                     dir.y = fwd.z;
                 }
+
                 _controller.TryDodge(dir, Time.time);
                 _isDodge = false;
             }

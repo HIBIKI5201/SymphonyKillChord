@@ -151,6 +151,7 @@ MonoBehaviour:
   _animator: {fileID: 7554209699097654958}
   _rb: {fileID: 6619117660693068914}
   _seSource: {fileID: 4704850274294587580}
+  _attackInterval: 1
 --- !u!114 &-2625927772269966
 MonoBehaviour:
   m_ObjectHideFlags: 0
