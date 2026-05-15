@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary>
         ///     コンストラクタ。
         /// </summary>
+        /// <param name="attackIntervalEvaluator"></param>
         /// <param name="presenter"></param>
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
@@ -28,15 +29,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             PlayerBattleState battleState,
             SkillController skillController,
             TargetSelectorController targetSelectorController,
+            AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService
         )
         {
+            _attackIntervalEvaluator = attackIntervalEvaluator;
             _presenter = presenter;
             _battleState = battleState;
             _skillController = skillController;
             _targetSelectorController = targetSelectorController;
             _musicSyncService = musicSyncService;
         }
+        
+        /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
+        public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
 
         /// <summary>
         ///     攻撃を実行する。
@@ -75,6 +81,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 Debug.LogWarning(ex.Message);
                 return false;
             }
+            
+            _attackIntervalEvaluator.EvaluateInterval();
 
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
@@ -97,6 +105,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly PlayerBattleState _battleState;
         private readonly SkillController _skillController;
         private readonly TargetSelectorController _targetSelectorController;
+        private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
     }
 }

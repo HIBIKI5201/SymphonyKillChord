@@ -25,6 +25,7 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
+using KillChord.Runtime.Application.InGame.Battle;
 using UnityEngine;
 
 
@@ -169,9 +170,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, musicSyncService);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService);
             
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
