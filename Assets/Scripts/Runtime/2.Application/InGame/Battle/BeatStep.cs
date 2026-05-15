@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-
+using KillChord.Runtime.Application.InGame.Music;
 namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
@@ -22,6 +22,10 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 return context;
 
             float resultDamage = context.Damage.Value * beatType;
+            if(context.IsJustHit)
+            {
+                resultDamage *= context.AttackDefinition.JustDamageMultiplier;
+            }
             return new AttackStepContext(new Damage(resultDamage), context.CriticalCount, context);
         }
     }

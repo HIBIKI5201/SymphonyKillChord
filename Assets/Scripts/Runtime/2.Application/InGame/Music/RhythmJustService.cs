@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
@@ -29,7 +30,18 @@ namespace KillChord.Runtime.Application.InGame.Music
 
         public void TriggerJustHit()
         {
+            ChangeJustHit(true);
             OnJustHit?.Invoke();
+        }
+        public bool IsJustHit()
+        {
+            bool wasJustHit = _isJustHit;
+            ChangeJustHit(false); // ジャストヒットの状態は一度確認されたらリセットする
+            return wasJustHit;
+        }
+        public void ChangeJustHit(bool isJustHit)
+        {
+            _isJustHit = isJustHit;
         }
 
         public void Dispose()
@@ -41,6 +53,8 @@ namespace KillChord.Runtime.Application.InGame.Music
             }
         }
 
+
+        private bool _isJustHit;
         private static RhythmJustService _instance;
 
     }
