@@ -19,8 +19,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private CriAtomSource _seSource;
-
-        private int _currentAttackIntervalId;
+        
         private bool _isInitialized;
         private bool _isDodge;
         private Vector2 _moveVector;
