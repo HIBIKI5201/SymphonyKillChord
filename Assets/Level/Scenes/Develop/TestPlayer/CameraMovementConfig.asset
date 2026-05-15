@@ -12,17 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f493faec32964b408a5d39fb94fc16f, type: 3}
   m_Name: CameraMovementConfig
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Structure.CameraMovementConfig
-  _cameraOffset: {x: 0, y: 1, z: 0}
-  _distance: 5
+  _cameraOffset: {x: 0, y: 1.5, z: 0}
+  _distance: 7
   _followOffsetPower: 1
   _followLerpSpeed: 2
   _boneRotateSpeed: 10
   _lockOnAngleMargin: 30
   _followRotationSpeed: 1.5
-  _lockOnLookAtRatio: 0.3
-  _lockOnRotationSpeed: 10
+  _lockOnLookAtRatio: 1
+  _lockOnRotationSpeed: 15
   _collisionRadius: 0.2
   _collisionMask:
     serializedVersion: 2
     m_Bits: 51
   _pitchRange: {x: -45, y: 75}
+  _invertVertical: 0
+  _invertHorizontal: 0

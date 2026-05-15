@@ -311,6 +311,7 @@ MonoBehaviour:
   _inGameMissionInitializer: {fileID: 866643817}
   _mobileInput: {fileID: 887821559}
   _rhythmGuideInitializer: {fileID: 678096161}
+  _inGameHudInitializer: {fileID: 0}
   _backgroundSceneName: Stage_01
 --- !u!4 &438459090
 Transform:
@@ -402,6 +403,10 @@ PrefabInstance:
     - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: _playerT
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
+      propertyPath: _updateMode
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: _enemyTestSpawner
@@ -838,7 +843,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 1249666142}
   _testCue: Cyber
-  _testBpm: 60
+  _testBpm: 84
+  _justTimingThreshold: 0.1
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0
