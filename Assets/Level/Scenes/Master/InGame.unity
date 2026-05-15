@@ -311,7 +311,6 @@ MonoBehaviour:
   _inGameMissionInitializer: {fileID: 866643817}
   _mobileInput: {fileID: 887821559}
   _rhythmGuideInitializer: {fileID: 678096161}
-  _inGameHudInitializer: {fileID: 0}
   _backgroundSceneName: Stage_01
 --- !u!4 &438459090
 Transform:
@@ -396,30 +395,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _target
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _playerT
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _updateMode
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _enemyTestSpawner
-      value: 
-      objectReference: {fileID: 1136649845}
-    - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: Lens.ModeOverride
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: Target.TrackingTarget
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5247649918134476368, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: m_Name
       value: CameraManager
@@ -1115,10 +1090,10 @@ SceneRoots:
   - {fileID: 1772279157}
   - {fileID: 456552177}
   - {fileID: 1898526996}
+  - {fileID: 58835741}
   - {fileID: 2031779337}
   - {fileID: 1249666143}
   - {fileID: 438459090}
-  - {fileID: 58835741}
   - {fileID: 419177560}
   - {fileID: 866643818}
   - {fileID: 219233515}
