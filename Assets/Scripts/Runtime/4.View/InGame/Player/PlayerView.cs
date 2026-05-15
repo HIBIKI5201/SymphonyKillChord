@@ -25,6 +25,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [Header("攻撃インターバルテスト用の値（単位:秒）")]
         private float _attackInterval = 1.0f;
 
+        private int _currentAttackIntervalId;
         private bool _isInitialized;
         private bool _isAttacking;
         private bool _isDodge;
@@ -131,7 +132,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
-                AttackCooldown(_attackInterval).Forget();
+                int attackIntervalId = ++_currentAttackIntervalId;
+                AttackCooldown(_attackInterval, attackIntervalId).Forget();
 
                 // 判定ビート種別ごとに再生するSEキュー名を切り替える。
                 string cueName = resultBeatType switch
@@ -153,12 +155,18 @@ namespace KillChord.Runtime.View.InGame.Player
         /// 攻撃中のクールダウンを管理する。攻撃中は開始から一定時間が経過するまで一部入力を無効化するための_isAttackingフラグを立てる。
         /// </summary>
         /// <param name="duration"></param>
-        private async UniTaskVoid AttackCooldown(float duration)
+        /// <param name="attackId"></param>
+        private async UniTaskVoid AttackCooldown(float duration, int attackId)
         {
             // TODO: 将来的にBPMやアニメーションを考慮した時間設定にすることから、この処理はApplication層に移動予定。
             _isAttacking = true;
             await UniTask.Delay((int)(duration * 1000f));
-            _isAttacking = false;
+
+            // 最新の攻撃IDでなければ無視する
+            if (attackId == _currentAttackIntervalId)
+            {
+                _isAttacking = false;
+            }
         }
 
         /// <summary>
@@ -221,3 +229,4 @@ namespace KillChord.Runtime.View.InGame.Player
             => Quaternion.Euler(0, 0, degrees) * v;
     }
 }
+
