@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="interval"></param>
         public AttackIntervalEntity(AttackInterval interval)
         {
-            _interval = interval;
+            Interval = interval;
         }
 
         /// <summary>
@@ -21,16 +21,13 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="isAttacking"></param>
         public void UpdateAttackState(bool isAttacking)
         {
-            _isAttacking = isAttacking;
+            IsAttacking = isAttacking;
         }
 
-        /// <summary> 攻撃のインターバルを表すプロパティ。 </summary>
-        public AttackInterval Interval => _interval;
+        /// <summary> 攻撃の硬直時間を表すプロパティ。 </summary>
+        public AttackInterval Interval { get; }
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
-        public bool IsAttacking => _isAttacking;
-
-        private readonly AttackInterval _interval;
-        private bool _isAttacking = false;
+        public bool IsAttacking { get; private set; }
     }
 }

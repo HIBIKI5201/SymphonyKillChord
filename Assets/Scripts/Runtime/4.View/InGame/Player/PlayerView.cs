@@ -167,6 +167,12 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Vector2 dir = _moveVector;
 
+            if (PlayerAttackController.IsAttacking)
+            {
+                // 攻撃時、入力をキャンセルする。
+                dir = Vector2.zero;
+            }
+
             _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 

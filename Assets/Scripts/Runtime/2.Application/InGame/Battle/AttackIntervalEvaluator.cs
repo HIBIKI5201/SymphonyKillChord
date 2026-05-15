@@ -1,11 +1,10 @@
 using Cysharp.Threading.Tasks;
 using KillChord.Runtime.Domain.InGame.Battle;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
-    /// 攻撃時の硬直時間を計測するクラス。攻撃の開始から指定時間が経過するまで、攻撃中フラグを立てる。
+    /// 攻撃時の硬直時間を計測及び管理するクラス。攻撃の開始から指定時間が経過するまで、攻撃中フラグを立てる。
     /// </summary>
     public class AttackIntervalEvaluator
     {
@@ -18,6 +17,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
         {
             _attackIntervalEntity = attackIntervalEntity;
         }
+        
+        /// <summary>
+        ///     現在攻撃中かどうかを表すプロパティ。
+        ///     保持しているAttackIntervalEntityのIsAttackingプロパティを参照する。
+        /// </summary>
+        public bool IsAttacking => _attackIntervalEntity.IsAttacking;
 
         /// <summary>
         ///     攻撃の硬直時間を評価するメソッド。攻撃の開始から指定時間が経過するまでIsAttackingフラグを立てる。
@@ -38,7 +43,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackId"></param>
         private async UniTaskVoid EvaluateAttackIntervalAsync(AttackInterval duration, int attackId)
         {
-            Debug.Log($"AttackIntervalEvaluator: Start evaluating attack interval. Duration={duration.Value}, AttackId={attackId}");
             _attackIntervalEntity.UpdateAttackState(true);
             await UniTask.Delay((int)(duration * 1000f));
 
@@ -46,7 +50,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
             if (attackId == _currentIntervalId)
             {
                 _attackIntervalEntity.UpdateAttackState(false);
-                Debug.Log($"AttackIntervalEvaluator: Finished evaluating attack interval. AttackId={attackId}");
             }
         }
     }
