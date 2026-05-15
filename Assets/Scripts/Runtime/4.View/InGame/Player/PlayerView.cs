@@ -25,20 +25,19 @@ namespace KillChord.Runtime.View.InGame.Player
         [Header("攻撃インターバルテスト用の値（単位:秒）")]
         private float _attackInterval = 1.0f;
 
-        private Transform _cameraTransform;
+        private int _currentAttackIntervalId;
         private bool _isInitialized;
         private bool _isAttacking;
-        private PlayerInputView _playerInputView;
-        private Vector2 _moveVector;
         private bool _isDodge;
-        private Collider[] _colliders;
+        private Vector2 _moveVector;
         private Transform _cacheTransform;
+        private Transform _cameraTransform;
         private IPlayerController _controller;
-        private PlayerAttackController _playerAttackController;
+        private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
-        public PlayerAttackController PlayerAttackController => _playerAttackController;
+        public PlayerAttackController PlayerAttackController { get; private set; }
 
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
@@ -70,10 +69,9 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
-            _playerAttackController = playerAttackController;
+            PlayerAttackController = playerAttackController;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
-            _colliders = new Collider[8];
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
 
@@ -126,15 +124,16 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_playerAttackController == null)
+            if (PlayerAttackController == null)
             {
                 Debug.LogError("[PlayerView] AttackController is null", this);
                 return;
             }
 
-            if (_playerAttackController.ExecuteAttack(out int resultBeatType))
+            if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
-                AttackCooldown(_attackInterval).Forget();
+                int attackIntervalId = ++_currentAttackIntervalId;
+                AttackCooldown(_attackInterval, attackIntervalId).Forget();
 
                 // 判定ビート種別ごとに再生するSEキュー名を切り替える。
                 string cueName = resultBeatType switch
@@ -156,12 +155,18 @@ namespace KillChord.Runtime.View.InGame.Player
         /// 攻撃中のクールダウンを管理する。攻撃中は開始から一定時間が経過するまで一部入力を無効化するための_isAttackingフラグを立てる。
         /// </summary>
         /// <param name="duration"></param>
-        private async UniTaskVoid AttackCooldown(float duration)
+        /// <param name="attackId"></param>
+        private async UniTaskVoid AttackCooldown(float duration, int attackId)
         {
             // TODO: 将来的にBPMやアニメーションを考慮した時間設定にすることから、この処理はApplication層に移動予定。
             _isAttacking = true;
             await UniTask.Delay((int)(duration * 1000f));
-            _isAttacking = false;
+
+            // 最新の攻撃IDでなければ無視する
+            if (attackId == _currentAttackIntervalId)
+            {
+                _isAttacking = false;
+            }
         }
 
         /// <summary>
@@ -224,3 +229,4 @@ namespace KillChord.Runtime.View.InGame.Player
             => Quaternion.Euler(0, 0, degrees) * v;
     }
 }
+
