@@ -17,8 +17,11 @@ namespace DevelopProducts.SkillTree
         }
         public void Canlock(bool canlock)
         {
-            if (canlock)
-                _icon.color = Color.yellow;
+            if (_isUnlocked)
+            {
+                return;
+            }
+            _icon.color = canlock ? Color.yellow : Color.white;
             Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_skillNodeAsset.Id}, canlock: {canlock}");
         }
         public void Unlock(bool isUnlock)
@@ -26,6 +29,7 @@ namespace DevelopProducts.SkillTree
             Debug.Log($"ノードがアンロックされました: SkillNodeId {_skillNodeAsset.Id}, isUnlock: {isUnlock}");
             if (isUnlock)
             {
+                _isUnlocked = true;
                 _icon.color = Color.green;
             }
 
@@ -36,6 +40,7 @@ namespace DevelopProducts.SkillTree
         private NodeSelectPanelView _nodeSelectPanelView;
         private NodeRegistry _nodeRegistry;
         private Button _button;
+        private bool _isUnlocked;
         private void Awake()
         {
             _icon = GetComponent<Image>();
