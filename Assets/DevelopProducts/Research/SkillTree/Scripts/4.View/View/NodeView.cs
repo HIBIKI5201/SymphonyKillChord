@@ -1,24 +1,19 @@
-using KillChord.Runtime.Adaptor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace DevelopProducts.SkillTree
 {
-    public class NodeView : MonoBehaviour, IPointerClickHandler
+    [RequireComponent(typeof(Button))]
+    public class NodeView : MonoBehaviour
     {
-        public ICanUnlockVM CanUnlockVM => _canUnlockViewModel;
-        public void Initialize(NodeRegistry nodeRegistry, NodeCanUnlockController nodeCanUnlockController)
+        public int Id => _skillNodeAsset.Id;
+        public void Initialize(NodeRegistry nodeRegistry)
         {
-            _canUnlockViewModel = new CanUnlockViewModel();
-            _canUnlockViewModel.CanUnlock += Canlock;
+            _nodeVM = new NodeViewModel();
+            _nodeVM.CanUnlock += Canlock;
+            _nodeVM.Unlocked += Unlock;
             _nodeRegistry = nodeRegistry;
-            _nodeRegistry.Register(_skillNodeAsset.Id, _canUnlockViewModel);
-            _nodeCanUnlockController = nodeCanUnlockController;
-        }
-        public void OnPointerClick(PointerEventData eventData)
-        {
-
+            _nodeRegistry.Register(_skillNodeAsset.Id, _nodeVM);
         }
         public void Canlock(bool canlock)
         {
@@ -26,28 +21,33 @@ namespace DevelopProducts.SkillTree
                 _icon.color = Color.yellow;
             Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_skillNodeAsset.Id}, canlock: {canlock}");
         }
-        public void Unlock()
+        public void Unlock(bool isUnlock)
         {
-            _icon.color = Color.green;
+            Debug.Log($"ノードがアンロックされました: SkillNodeId {_skillNodeAsset.Id}, isUnlock: {isUnlock}");
+            if (isUnlock)
+            {
+                _icon.color = Color.green;
+            }
+
         }
         [SerializeField] private SkillNodeAsset _skillNodeAsset;
         private Image _icon;
-        private CanUnlockViewModel _canUnlockViewModel;
+        private NodeViewModel _nodeVM;
         private NodeSelectPanelView _nodeSelectPanelView;
         private NodeRegistry _nodeRegistry;
-        private NodeCanUnlockController _nodeCanUnlockController;
+        private Button _button;
         private void Awake()
         {
             _icon = GetComponent<Image>();
+            _button = GetComponent<Button>();
+            _button.onClick.AddListener(() => _nodeSelectPanelView.SetNode(this));
             _nodeSelectPanelView = FindAnyObjectByType<NodeSelectPanelView>();
-        }
-        private void Start()
-        {
-            _nodeCanUnlockController.CanUnlock(_skillNodeAsset.Id);
         }
         private void OnDestroy()
         {
-            _canUnlockViewModel.CanUnlock -= Canlock;
+            _nodeVM.CanUnlock -= Canlock;
+            _nodeVM.Unlocked -= Unlock;
+            _button.onClick.RemoveListener(() => _nodeSelectPanelView.SetNode(this));
         }
 
     }
