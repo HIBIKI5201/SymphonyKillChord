@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using KillChord.Runtime.Domain.InGame.Battle;
 
@@ -15,6 +16,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackIntervalEntity"></param>
         public AttackIntervalEvaluator(AttackIntervalEntity attackIntervalEntity)
         {
+            if (attackIntervalEntity == null)
+            {
+                throw new ArgumentNullException(nameof(attackIntervalEntity));
+            }
+            
             _attackIntervalEntity = attackIntervalEntity;
         }
         
