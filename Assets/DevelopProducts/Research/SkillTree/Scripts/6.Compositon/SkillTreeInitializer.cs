@@ -9,9 +9,6 @@ namespace DevelopProducts.SkillTree
         [SerializeField] private NodeView[] _nodeViews;
         [SerializeField] private SkillPointReposiroty _skillPointRepository;
 
-        private NodeRegistry _nodeRegistry;
-        private NodeCanUnlockController _nodeCanUnlockController;
-
         private void Awake()
         {
             if (_skillTreeRepository == null)
@@ -22,24 +19,27 @@ namespace DevelopProducts.SkillTree
 
             _skillTreeRepository.Initialize();
 
-            _nodeRegistry = new NodeRegistry();
-            var algorithmService = new SkillPathSearchService();
+            var nodeRegistry = new NodeRegistry();
             var canUnlockService = new SkillCanUnlockService();
-            var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
-            var presenter = new SkillNodePresenter(_nodeRegistry);
-
             var skillTree = new SkillTreeEntity(_skillTreeRepository.AllSkillNodes);
-            _nodeCanUnlockController = new NodeCanUnlockController(
-                _skillTreeRepository,
-                algorithmService,
-                canUnlockUsecase,
-                presenter,
-                skillTree);
+            var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
+            var unlockUsecase = new UnlockUsecase(canUnlockService, _skillPointRepository);
+            var presenter = new SkillNodePresenter(nodeRegistry, skillTree, _skillTreeRepository);
+            var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, skillTree, presenter);
 
-            foreach (var nodeView in _nodeViews.Where(v => v != null))
+            var nodeCanUnlockController = new NodeCanUnlockController(
+                  _skillTreeRepository,
+                  canUnlockUsecase,
+                  presenter,
+                  skillTree);
+
+            foreach (var nodeView in _nodeViews)
             {
-                nodeView.Initialize(_nodeRegistry, _nodeCanUnlockController);
+                nodeView.Initialize(nodeRegistry);
             }
+
+            var skillTreePanelView = FindAnyObjectByType<NodeSelectPanelView>();
+            skillTreePanelView.Initialize(nodeUnlockController, nodeCanUnlockController, presenter);
         }
     }
 }
