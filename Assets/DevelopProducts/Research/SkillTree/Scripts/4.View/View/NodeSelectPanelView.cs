@@ -32,7 +32,11 @@ namespace DevelopProducts.SkillTree
         private SkillNodePresenter _skillNodePresenter;
         private void OnUnlockButtonClicked()
         {
-            _nodeUnlockController.UnlockNode(_currentNodeId);
+           var result = _nodeUnlockController.UnlockNode(_currentNodeId);
+            if (result)
+            {
+                _nodeNameText.text = "Complete!";
+            }
             CanUnlockNodes();
         }
         private void CanUnlockNodes()
@@ -49,15 +53,11 @@ namespace DevelopProducts.SkillTree
         }
         private void Start()
         {
+            CanUnlockNodes();
             var unlockedNodes = _skillTreeRepository.AllSkillNodes.Where(n => n.IsUnlocked);
             foreach (var node in unlockedNodes)
             {
-                _nodeUnlockController.UnlockNode(node.SkillNodeIdVO.Id);
-            }
-            var enableNodes = _skillTreeRepository.AllSkillNodes.Where(n => n.IsEnable && !n.IsUnlocked);
-            foreach (var node in enableNodes)
-            {
-                _nodeCanUnlockController.CanUnlock(node.SkillNodeIdVO.Id);
+                _skillNodePresenter.Unlock(node.SkillNodeIdVO.Id, true);
             }
         }
         private void OnDestroy()

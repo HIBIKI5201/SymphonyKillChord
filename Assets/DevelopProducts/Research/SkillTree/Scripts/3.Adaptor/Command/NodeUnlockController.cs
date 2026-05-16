@@ -22,18 +22,19 @@ namespace DevelopProducts.SkillTree
         /// <summary>
         /// ノードを解放する
         /// </summary>
-        public void UnlockNode(int nodeId)
+        public bool UnlockNode(int nodeId)
         {
             var node = _skillTreeRepository.GetNode(nodeId);
             var pathResult = node.AlgorithmService.FindPath(node, _skillTreeEntity);
             var canUnlock = _unlockUsecase.Unlock(pathResult.TotalCost.Cost);
-            if (!canUnlock) return;
+            if (!canUnlock) return false;
             foreach (var pathNode in pathResult.Path)
             {
                 var skillNode = _skillTreeRepository.GetNode(pathNode.SkillNodeIdVO.Id);
                 skillNode.Unlock();
                 _skillNodePresenter.Unlock(skillNode.SkillNodeIdVO.Id, skillNode.IsUnlocked);
             }
+            return true;
         }
         private readonly UnlockUsecase _unlockUsecase;
         private readonly ISkillTreeRepository _skillTreeRepository;

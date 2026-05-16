@@ -14,13 +14,14 @@ namespace DevelopProducts.SkillTree
             _skillsNodePresenter = presenter;
             _skillTree = skillTree;
         }
-        public void CanUnlock(int nodeId)
+        public bool CanUnlock(int nodeId)
         {
             var node = _skillTreeRepository.GetNode(nodeId);
             var path = node.AlgorithmService.FindPath(node, _skillTree);
             var canUnlock = _unlockUsecase.CheckUnlock(path.TotalCost.Cost);
 
             _skillsNodePresenter.CanUnlock(nodeId, canUnlock);
+            return canUnlock;
         }
         private readonly ISkillTreeRepository _skillTreeRepository;
         private readonly CanUnlockUsecase _unlockUsecase;
