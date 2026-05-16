@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using System.Linq;
 using UnityEngine;
 
 namespace DevelopProducts.SkillTree
@@ -8,7 +8,7 @@ namespace DevelopProducts.SkillTree
     [CreateAssetMenu(fileName = "SkillTreeRepository", menuName = "DevelopProducts/SkillTree/SkillTreeRepository")]
     public class SkillTreeRepository : ScriptableObject, ISkillTreeRepository
     {
-        public IReadOnlyCollection<SkillNodeEntity> AllSkillNodes => _nodeDictionary.Values;
+        public SkillNodeEntity[] AllSkillNodes => _nodeDictionary.Values.ToArray();
         /// <summary>
         ///     指定されたIDのノードを取得する
         /// </summary>
@@ -93,8 +93,5 @@ namespace DevelopProducts.SkillTree
         [SerializeField] private SkillNodeAsset[] _skillNodeAsset;
         private Dictionary<int, SkillNodeEntity> _nodeDictionary;
         private Dictionary<int, SkillNodeEntity[]> _parentsDictionary;
-        private List<SkillNodeEntity> _unlockedSkillNodes;
-        private List<SkillNodeEntity> _canUnlockNodes;
-        private List<SkillNodeEntity> _lockedSkillNodes;
     }
 }
