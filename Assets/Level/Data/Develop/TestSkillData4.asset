@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TestSkillData4
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
   _id: 3
-  _pattern: 030000000300000006000000
+  _pattern: 020000000400000001000000
   _skillEffect:
     rid: 8153521114334888057
   references:

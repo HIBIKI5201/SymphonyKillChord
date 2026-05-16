@@ -27,7 +27,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
-        [SerializeField] private InGameHudInitializer _inGameHudInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
 
         private PlayerInitializer _playerInitializer;
