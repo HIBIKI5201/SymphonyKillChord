@@ -25,6 +25,11 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 return 0;
             }
 
+            if (currentMatchedCount < 0)
+            {
+                currentMatchedCount = 0;
+            }
+
             // 現在待っているビートタイプと入力されたビートタイプが一致している場合、一致数を1増やす。
             if (currentMatchedCount < pattern.Length &&
                 pattern[currentMatchedCount] == inputBeatType)

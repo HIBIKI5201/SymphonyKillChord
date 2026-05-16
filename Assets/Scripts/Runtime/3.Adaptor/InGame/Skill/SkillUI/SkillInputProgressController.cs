@@ -42,25 +42,36 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
             _presenter.BeginPresent();
 
-            for (int i = 0; i < skills.Count; i++)
+            try
             {
-                SkillDefinition skill = skills[i];
-                int skillId = skill.Id.Value;
-                int currentMatchedCount = _state.GetMatchedCount(skillId);
+                for (int i = 0; i < skills.Count; i++)
+                {
+                    SkillDefinition skill = skills[i];
 
-                // スキルごとに、今回の入力でどれだけパターンがマッチしたかを計算する。
-                int nextMatchedCount = _usecase.CalculateNextMatchedCount(
-                    skill.SkillPattern.Signatures,
-                    currentMatchedCount,
-                    inputBeatType);
+                    if (skill == null)
+                    {
+                        continue;
+                    }
 
-                _state.SetMatchedCount(skillId, nextMatchedCount);
-                _presenter.Push(skill, nextMatchedCount);
+                    int skillId = skill.Id.Value;
+                    int currentMatchedCount = _state.GetMatchedCount(skillId);
+
+                    // スキルごとに、今回の入力でどれだけパターンがマッチしたかを計算する。
+                    int nextMatchedCount = _usecase.CalculateNextMatchedCount(
+                        skill.SkillPattern.Signatures,
+                        currentMatchedCount,
+                        inputBeatType);
+
+                    _state.SetMatchedCount(skillId, nextMatchedCount);
+                    _presenter.Push(skill, nextMatchedCount);
+                }
             }
-
-            _presenter.EndPresent();
+            finally
+            {
+                _presenter.EndPresent();
+            }
         }
-        
+
         /// <summary>
         ///     指定したスキルの入力進捗をリセットする。
         /// </summary>
