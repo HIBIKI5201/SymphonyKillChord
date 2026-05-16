@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
@@ -197,9 +198,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, musicSyncService);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);

@@ -13,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         /// <summary> キャラクター名を取得する。 </summary>
         public string CharacterName => _characterName;
 
+        /// <summary> キャラクターの攻撃硬直時間を取得する。 </summary>
+        public float AttackInterval => _attackInterval;
+
         /// <summary> 最大HPを取得する。 </summary>
         public float MaxHealth => _maxHealth;
 
@@ -22,6 +25,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
 
         [SerializeField, Tooltip("キャラクターの名前。")]
         private string _characterName;
+
+        [SerializeField, Tooltip("キャラクターの攻撃硬直時間")]
+        private float _attackInterval = 0.5f;
 
         [SerializeField, Tooltip("キャラクターの最大体力。")]
         private float _maxHealth;
