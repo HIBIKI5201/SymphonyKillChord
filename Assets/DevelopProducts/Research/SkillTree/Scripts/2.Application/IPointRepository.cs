@@ -8,5 +8,6 @@ namespace DevelopProducts.SkillTree
     {
         /// <summary>総獲得ポイント − 使用済みポイント = 現在の所持ポイント</summary>
         UnlockPoint GetCurrentPoints();
+        void UsePoints(int points);
     }
 }
