@@ -18,7 +18,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             ISkillRepository skillRepository,
             ISkillVisual[] skillVisuals,
             int[] skillId = null,
-            SkillResultPresenter presenter = null)
+            SkillResultPresenter presenter = null,
+            SkillInputProgressController progressController = null)
         {
             skillId ??= new[] { 0 };
             _skillCache = new SkillDefinition[skillId.Length];
@@ -38,6 +39,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
 
             _presenter = presenter;
+            _progressController = progressController;
         }
 
         /// <summary>
@@ -55,6 +57,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <returns>スキルが発動した場合はtrue、それ以外はfalse</returns>
         public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
+            _progressController?.UpdateProgress(_skillCache, beatType);
+
             if (_skillUseCase.TryExecuteSkill(
                     _skillCache,
                     actionType,
@@ -63,6 +67,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     out var executedSkill))
             {
                 _presenter?.Push(executedSkill);
+                _progressController?.ResetSkill(executedSkill.Id.Value);
                 return true;
             }
 
@@ -84,6 +89,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly SkillDefinition[] _skillCache;
         private readonly Dictionary<int, ISkillVisual> _skillVisuals;
         private readonly SkillResultPresenter _presenter;
+        private readonly SkillInputProgressController _progressController;
         private SkillUsecase _skillUseCase;
     }
 }

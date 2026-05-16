@@ -19,20 +19,18 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private CriAtomSource _seSource;
-
-        private Transform _cameraTransform;
+        
         private bool _isInitialized;
-        private PlayerInputView _playerInputView;
-        private Vector2 _moveVector;
         private bool _isDodge;
-        private Collider[] _colliders;
+        private Vector2 _moveVector;
         private Transform _cacheTransform;
+        private Transform _cameraTransform;
         private IPlayerController _controller;
-        private PlayerAttackController _playerAttackController;
+        private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
-        public PlayerAttackController PlayerAttackController => _playerAttackController;
+        public PlayerAttackController PlayerAttackController { get; private set; }
 
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
@@ -51,6 +49,7 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 UnRegisterActions();
             }
+
             _healthHudPresenter?.Dispose();
         }
 
@@ -63,10 +62,9 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
-            _playerAttackController = playerAttackController;
+            PlayerAttackController = playerAttackController;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
-            _colliders = new Collider[8];
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
 
@@ -119,13 +117,13 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_playerAttackController == null)
+            if (PlayerAttackController == null)
             {
                 Debug.LogError("[PlayerView] AttackController is null", this);
                 return;
             }
 
-            if (_playerAttackController.ExecuteAttack(out int resultBeatType))
+            if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
                 // 判定ビート種別ごとに再生するSEキュー名を切り替える。
                 string cueName = resultBeatType switch
@@ -167,11 +165,26 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             Vector2 dir = _moveVector;
+
+            if (PlayerAttackController.IsAttacking)
+            {
+                // 攻撃時、入力をキャンセルする。
+                dir = Vector2.zero;
+            }
+
             _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
             if (_isDodge)
             {
+                // 移動入力がない場合は、前方を回避方向とする
+                if (dir.sqrMagnitude <= float.Epsilon)
+                {
+                    var fwd = _cacheTransform.forward;
+                    dir.x = fwd.x;
+                    dir.y = fwd.z;
+                }
+
                 _controller.TryDodge(dir, Time.time);
                 _isDodge = false;
             }
@@ -187,3 +200,4 @@ namespace KillChord.Runtime.View.InGame.Player
             => Quaternion.Euler(0, 0, degrees) * v;
     }
 }
+
