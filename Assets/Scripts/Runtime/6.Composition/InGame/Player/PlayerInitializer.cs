@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
@@ -16,6 +17,7 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
+using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Battle;
@@ -25,7 +27,6 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
-using KillChord.Runtime.Application.InGame.Battle;
 using UnityEngine;
 
 
@@ -46,6 +47,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private SkillView[] _skillVisuals;
+        [SerializeField] private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -86,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
-            if( _inGameHudInitializer == null)
+            if (_inGameHudInitializer == null)
             {
                 Debug.LogError($"{nameof(InGameHudInitializer)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
@@ -113,7 +115,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 }
             }
             int[] skillIds = null;
-            if(skillIdList.Count > 0)
+            if (skillIdList.Count > 0)
             {
                 skillIds = skillIdList.ToArray();
             }
@@ -155,13 +157,39 @@ namespace KillChord.Runtime.Composition.InGame.Player
             Debug.Log($"{skillResultViewModel}作成。");
             SkillResultPresenter skillResultPresenter = new SkillResultPresenter(skillResultViewModel);
             Debug.Log($"{skillResultPresenter}作成。");
+
+            if (_inputProgressViewConfigAsset == null)
+            {
+                Debug.LogError($"{nameof(SkillInputProgressViewConfigAsset)}がNullです", this);
+                return;
+            }
+            SkillInputProgressViewconfig inputProgressViewConfig = _inputProgressViewConfigAsset.Create();
+
+            SkillInputProgressViewModel inputProgressViewModel =
+                new SkillInputProgressViewModel(inputProgressViewConfig);
+            SkillInputProgressPresenter inputProgressPresenter =
+                new SkillInputProgressPresenter(inputProgressViewModel);
+            SkillInputProgressState inputProgressState =
+                new SkillInputProgressState();
+            SkillInputProgressUsecase inputProgressUsecase =
+                new SkillInputProgressUsecase();
+            SkillInputProgressController inputProgressController =
+                new SkillInputProgressController(
+                    inputProgressUsecase,
+                    inputProgressState,
+                    inputProgressPresenter);
+            SkillInputProgressView skillInputProgressView =
+                FindAnyObjectByType<SkillInputProgressView>();
+
+            skillInputProgressView?.Bind(inputProgressViewModel);
+
             // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
             SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
             //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter);
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter, inputProgressController);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);
 
@@ -174,7 +202,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
                 playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService);
-            
+
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
