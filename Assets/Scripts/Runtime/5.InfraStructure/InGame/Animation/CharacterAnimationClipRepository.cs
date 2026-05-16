@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace KillChord.Runtime.InfraStructure
     ///     CharacterAnimationStateをキーにしてAnimationClipを検索するリポジトリ。
     ///     ScriptableObjectのカタログからDictionaryを構築する。
     /// </summary>
-    public class CharacterAnimationClipRepository : MonoBehaviour
+    public sealed class CharacterAnimationClipRepository : ICharacterAnimationClipRepository
     {
         /// <summary> カタログアセットからDictionaryを構築する。 </summary>
         /// <param name="catalog"> カタログアセット。 </param>

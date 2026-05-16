@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Domain
 {
     /// <summary>

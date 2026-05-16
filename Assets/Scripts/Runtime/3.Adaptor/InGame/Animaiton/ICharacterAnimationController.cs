@@ -7,13 +7,10 @@ namespace KillChord.Runtime.Adaptor
     /// </summary>
     public interface ICharacterAnimationController
     {
-        /// <summary> アニメーション再生速度（bpm / 60f）。 </summary>
-        float AnimationSpeed { get; }
+        /// <summary> 現在のアニメーション状態をDTOとして取得する。 </summary>
+        CharacterAnimationDTO GetDTO();
 
-        /// <summary> アイドルから歩きへのブレンドウェイト（0〜1）。 </summary>
-        float BlendWeight { get; }
-
-        /// <summary> プレイヤーの速度ベクトルを設定する。 </summary>
+        /// <summary> キャラクターの速度ベクトルを設定する。 </summary>
         /// <param name="velocity"> 2D速度ベクトル。 </param>
         void SetVelocity(Vector2 velocity);
     }

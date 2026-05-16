@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application
@@ -8,17 +7,14 @@ namespace KillChord.Runtime.Application
     /// </summary>
     public interface ICharacterAnimationApplication
     {
-        /// <summary> 現在のアニメーション状態。 </summary>
-        CharacterAnimationState CurrentState { get; }
-        
-        /// <summary> BPMから算出したアニメーションの再生速度。 </summary>
+        /// <summary> BPMから算出したアニメーション再生速度（bpm / 60f）。 </summary>
         float AnimationSpeed { get; }
 
-        /// <summary> ブレンドウェイト。 </summary>
-        float BlendWeight { get; }
-        
-        /// <summary> キャラクターの速度を設定します。 </summary>
-        /// <param name="velocity">速度ベクトル。</param>
+        /// <summary> アニメーションのブレンド結果。 </summary>
+        CharacterAnimationBlendData BlendData { get; }
+
+        /// <summary> プレイヤーの速度ベクトルを設定する。 </summary>
+        /// <param name="velocity"> 2D速度ベクトル。 </param>
         void SetVelocity(Vector2 velocity);
 
         /// <summary> BPMを設定する。 </summary>

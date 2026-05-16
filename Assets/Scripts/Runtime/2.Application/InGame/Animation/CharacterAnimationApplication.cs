@@ -5,15 +5,24 @@ namespace KillChord.Runtime.Application
 {
     public class CharacterAnimationApplication : ICharacterAnimationApplication
     {
+        /// <summary> アニメーションのブレンド結果。 </summary>
+        public CharacterAnimationBlendData BlendData
+        {
+            get
+            {
+                float walkWeight = _velocity.magnitude > WALK_THRESHOLD
+                    ? Mathf.Clamp01(_velocity.magnitude)
+                    : 0f;
+                return new CharacterAnimationBlendData(1f - walkWeight, walkWeight);
+            }
+        }
+
         /// <summary> 現在のアニメーション状態。 </summary>
         public CharacterAnimationState CurrentState
             => _velocity.magnitude < WALK_THRESHOLD ? CharacterAnimationState.Idle : CharacterAnimationState.Walk;
 
         /// <summary> アニメーションの再生速度。 </summary>
         public float AnimationSpeed => _bpm / BASE_BPM;
-
-        /// <summary> ブレンドウェイト。 </summary>
-        public float BlendWeight => Mathf.Clamp01(_velocity.magnitude / WALK_THRESHOLD);
 
         /// <summary> キャラクターの速度を設定します。 </summary>
         public void SetVelocity(Vector2 velocity)

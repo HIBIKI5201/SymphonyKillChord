@@ -4,9 +4,9 @@ using UnityEngine;
 namespace KillChord.Runtime.Application
 {
     /// <summary>
-    ///     プレイヤーアニメーションクリップを取得するリポジトリインターフェース。
+    ///     アニメーションクリップを取得するリポジトリインターフェース。
     /// </summary>
-    public interface IPlayerAnimationClipRepository
+    public interface ICharacterAnimationClipRepository
     {
         /// <summary> アニメーション状態からクリップを検索する。 </summary>
         /// <param name="state"> アニメーション状態。 </param>
