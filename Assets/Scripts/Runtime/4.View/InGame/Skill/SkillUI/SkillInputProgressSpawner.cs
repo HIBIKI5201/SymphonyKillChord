@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,7 +19,13 @@ namespace KillChord.Runtime.View.InGame.Skill
             Transform parent,
             int stepCount)
         {
+            if (_rowPrefab == null) throw new InvalidOperationException($"{nameof(_rowPrefab)} is not assigned.");
+            if (_stepPrefab == null) throw new InvalidOperationException($"{nameof(_stepPrefab)} is not assigned.");
+            if (parent == null) throw new ArgumentNullException(nameof(parent));
+            if (stepCount < 0) throw new ArgumentOutOfRangeException(nameof(stepCount));
+
             SkillInputProgressRowView rowView = Instantiate(_rowPrefab, parent);
+            if (rowView.StepRoot == null) throw new InvalidOperationException($"{nameof(SkillInputProgressRowView.StepRoot)} is not assigned in the prefab.");
             List<SkillInputProgressStepView> stepViews = new();
 
             for (int i = 0; i < stepCount; i++)

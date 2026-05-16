@@ -15,6 +15,15 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// </summary>
         public void Bind(SkillInputProgressViewModel viewModel)
         {
+            if (_rowRoot == null)
+            {
+                throw new InvalidOperationException($"{nameof(SkillInputProgressView)}: {_rowRoot} is not assigned.");
+            }
+            if (_spawner == null)
+            {
+                throw new InvalidOperationException($"{nameof(SkillInputProgressView)}: {_spawner} is not assigned.");
+            }
+
             _disposable?.Dispose();
 
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));

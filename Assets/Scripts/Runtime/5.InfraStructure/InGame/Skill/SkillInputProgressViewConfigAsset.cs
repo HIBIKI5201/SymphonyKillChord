@@ -17,11 +17,28 @@ namespace KillChord.Runtime.InfraStructure.InGame.Skill
         /// </summary>
         public SkillInputProgressViewconfig Create()
         {
+            if (_settings == null || _settings.Count == 0)
+            {
+                throw new System.InvalidOperationException("スキル入力進行UIの表示設定が存在しません。");
+            }
+
             List<SkillBeatVisualSetting> settings = new();
+            HashSet<int> seenBeatTypes = new();
 
             for (int i = 0; i < _settings.Count; i++)
             {
-                settings.Add(_settings[i].Create());
+                SkillBeatVisualSettingAsset asset = _settings[i]
+                    ?? throw new System.InvalidOperationException($"スキル入力進行UIの表示設定がnullです。インデックス: {i}");
+
+
+                SkillBeatVisualSetting setting = asset.Create();
+                if (!seenBeatTypes.Add(setting.BeatType))
+                {
+                    throw new System.InvalidOperationException(
+                    $"{name}: BeatType {setting.BeatType} が重複しています。");
+                }
+
+                settings.Add(setting);
             }
 
             return new SkillInputProgressViewconfig(settings);

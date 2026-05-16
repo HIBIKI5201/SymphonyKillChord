@@ -156,6 +156,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             Debug.Log($"{skillResultViewModel}作成。");
             SkillResultPresenter skillResultPresenter = new SkillResultPresenter(skillResultViewModel);
             Debug.Log($"{skillResultPresenter}作成。");
+
+            if (_inputProgressViewConfigAsset == null)
+            {
+                Debug.LogError($"{nameof(SkillInputProgressViewConfigAsset)}がNullです", this);
+                return;
+            }
             SkillInputProgressViewconfig inputProgressViewConfig = _inputProgressViewConfigAsset.Create();
 
             SkillInputProgressViewModel inputProgressViewModel =
