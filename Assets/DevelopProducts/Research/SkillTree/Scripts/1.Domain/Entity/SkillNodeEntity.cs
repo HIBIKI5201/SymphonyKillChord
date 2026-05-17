@@ -17,7 +17,7 @@ namespace DevelopProducts.SkillTree
             NodeUnlockEffects = nodeUnlockEffects;
             AlgorithmService = algorithmService;
             _isUnlocked = isUnlocked;
-            IsEnable = isEnable;
+            _isEnable = isEnable;
             IsOrigin = isOrigin;
         }
 
@@ -27,7 +27,7 @@ namespace DevelopProducts.SkillTree
         public IAlgorithmService AlgorithmService { get; }
         public bool IsUnlocked => _isUnlocked;
         public bool IsOrigin { get; }
-        public bool IsEnable { get; }
+        public bool IsEnable => _isEnable;
         public SkillNodeEntity[] Parents => _parents;
 
         public void SetParent(SkillNodeEntity[] parents)
