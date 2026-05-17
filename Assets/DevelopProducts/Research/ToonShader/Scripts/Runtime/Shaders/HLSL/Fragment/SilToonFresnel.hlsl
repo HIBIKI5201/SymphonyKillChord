@@ -10,6 +10,8 @@ half FresnelEffect(half3 normal, half3 viewDir, half power)
     half fresnel = 1.0h - saturate(abs(dot(normal, viewDir)));
     return pow(fresnel, power);
 }
+
+//逆光表現
 half BackLight(half3 normalWS, half3 cameraFwdWS, half3 viewDirWS, half3 mainLightDirWS)
 {
     //ToonFresnel
