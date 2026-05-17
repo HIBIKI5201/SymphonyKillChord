@@ -10,14 +10,20 @@ half FresnelEffect(half3 normal, half3 viewDir, half power)
     half fresnel = 1.0h - saturate(abs(dot(normal, viewDir)));
     return pow(fresnel, power);
 }
-
-half BackLight(half3 normalWS, half3 viewDirWS)
+half BackLight(half3 normalWS, half3 cameraFwdWS, half3 viewDirWS, half3 mainLightDirWS)
 {
-    half3 lightDirWS = half3(_MainLightPosition.xyz);
-    half vdl = saturate(-dot(viewDirWS, lightDirWS));
+    //ToonFresnel
+    half fresnel = 1 - abs(dot(normalWS, viewDirWS));
+    fresnel = round(fresnel * fresnel * fresnel);
     
-    half vdl5 = Pow5(vdl);
-    return vdl5 * saturate(20.0h * FresnelEffect(normalWS, viewDirWS, 9.0h));
+    //MainLight & Normal Dot
+    half mainLightDotNormal = 1 - 1.5 * saturate(dot(mainLightDirWS, normalWS));
+
+    //MainLight & CameraFwd Dot
+    half mainLightDotCamera = saturate(dot(mainLightDirWS, cameraFwdWS));
+    mainLightDotCamera *= mainLightDotCamera;
+
+    return saturate(mainLightDotCamera * mainLightDotNormal * fresnel);
 }
 
 half FrontRimFresnel(half3 normalWS, half3 viewDirWS)
@@ -47,8 +53,9 @@ void GetFresnel(
 {   
     half3 n = normalWS;
     half3 v = viewDirWS;
-
-    backLight = float((BackLight(n, v)));
+    
+    backLight = float(BackLight(n, half3(GetViewForwardDir().xyz), v, half3(_MainLightPosition.xyz)));
+    
     rimLightFront = float(FrontRimFresnel(n, v));
     rimLightBack = float(BackRimFresnel(n, v));
 }
