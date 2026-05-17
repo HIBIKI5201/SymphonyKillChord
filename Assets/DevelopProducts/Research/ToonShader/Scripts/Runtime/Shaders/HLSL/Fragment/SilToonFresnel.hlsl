@@ -39,16 +39,16 @@ half BackRimFresnel(half3 normalWS, half3 viewDirWS)
 }
 
 void GetFresnel(
-    float3 normalWS,
-    float3 viewDirWS,
+    half3 normalWS,
+    half3 viewDirWS,
     out float backLight,
     out float rimLightFront,
     out float rimLightBack)
 {   
-    half3 n = half3(normalWS);
-    half3 v = half3(viewDirWS);
+    half3 n = normalWS;
+    half3 v = viewDirWS;
 
-    backLight = float(BackLight(n, v));
+    backLight = float((BackLight(n, v)));
     rimLightFront = float(FrontRimFresnel(n, v));
     rimLightBack = float(BackRimFresnel(n, v));
 }
