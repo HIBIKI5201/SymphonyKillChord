@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3780914556809270319}
   - component: {fileID: 2601078670896065214}
   - component: {fileID: 6024709665745219317}
+  - component: {fileID: -8573756187886522192}
   - component: {fileID: 8900643656970599263}
   - component: {fileID: -1108031046539433984}
   - component: {fileID: -7434688505541404117}
@@ -142,6 +143,7 @@ MonoBehaviour:
   _battleMusicData: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
+  _healthView: {fileID: -8573756187886522192}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -117008544252888282}
   _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
@@ -150,6 +152,7 @@ MonoBehaviour:
   _enemyStateFacade: {fileID: 3390705430803442452}
   _enemySharedFacade: {fileID: -4884515779302669640}
   _behaviorGraphAgent: {fileID: 2029437041226520640}
+  _shellSpawner: {fileID: 0}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,6 +165,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de89e5405d9b6c4aa1649b59b3b8281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
+--- !u!114 &-8573756187886522192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43237e77480731b4b8a2fc81040df7a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyHealthView
 --- !u!114 &8900643656970599263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,10 +273,10 @@ MonoBehaviour:
   m_Graph: {fileID: 4520507370308768518, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
   m_BlackboardVariableOverridesList:
   - rid: 5112082949080088985
-  - rid: 5112083106830221450
-  - rid: 5112083106830221451
-  - rid: 5112083216648635085
-  - rid: 5112083216648635086
+  - rid: 8153521044661207071
+  - rid: 8153521044661207072
+  - rid: 8153521044661207073
+  - rid: 8153521044661207074
   m_OriginalGraph: {fileID: 4520507370308768518, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -276,38 +291,39 @@ MonoBehaviour:
           m_Value1: 0
         Name: Self
         m_Value: {fileID: 1465007639519197220}
-    - rid: 5112083106830221450
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 204066741708314993
-          m_Value1: 254365869257419029
-        Name: EnemyStateFacade
-        m_Value: {fileID: 3390705430803442452}
-    - rid: 5112083106830221451
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+    - rid: 8153521044661207071
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 1618065121561699408
           m_Value1: 7913689795733594968
         Name: EnemyBattleAIFacade
         m_Value: {fileID: -7434688505541404117}
-    - rid: 5112083216648635085
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+    - rid: 8153521044661207072
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 5211698399387829366
           m_Value1: 6142912991580524478
         Name: EnemyMovementAIFacade
         m_Value: {fileID: -1108031046539433984}
-    - rid: 5112083216648635086
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+    - rid: 8153521044661207073
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        m_Value: {fileID: 3390705430803442452}
+    - rid: 8153521044661207074
+      type: {class: 'SharedBlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 17569852969880927499
           m_Value1: 10859535363759142801
         Name: EnemySharedFacade
-        m_Value: {fileID: -4884515779302669640}
+        m_Value: {fileID: 0}
+        m_SharedVariablesRuntimeAsset: {fileID: -1687900579865694322, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
 --- !u!195 &3385280616353316531
 NavMeshAgent:
   m_ObjectHideFlags: 0

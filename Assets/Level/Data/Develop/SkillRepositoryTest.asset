@@ -13,4 +13,7 @@ MonoBehaviour:
   m_Name: SkillRepositoryTest
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
   _skillDataAssets:
-  - {fileID: 11400000, guid: 92b4dad59dcbf694cbbc56a28fdbb0a4, type: 2}
+  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
+  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}

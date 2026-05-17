@@ -4,12 +4,11 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// ILayerOutputPort の契約を定義します。
+    /// Layer の出力契約を定義する。
     /// </summary>
     public interface ILayerOutputPort
     {
         /// <summary>
-        /// 対象 UI のレイヤー順を変更します。
         /// </summary>
         ValueTask SetLayerOrderAsync(string target, int order, CancellationToken ct);
     }

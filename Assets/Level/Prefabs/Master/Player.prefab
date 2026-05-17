@@ -82,6 +82,9 @@ GameObject:
   - component: {fileID: -5640712038900430492}
   - component: {fileID: 4704850274294587580}
   - component: {fileID: 1160853068716909059}
+  - component: {fileID: -4916133229582652887}
+  - component: {fileID: 1192430313035069498}
+  - component: {fileID: 7852414029176531134}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -123,7 +126,15 @@ MonoBehaviour:
   _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
   _skillVisuals:
   - {fileID: 1160853068716909059}
+  - {fileID: -4916133229582652887}
+  - {fileID: 1192430313035069498}
+  - {fileID: 7852414029176531134}
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
+  _equippedSkills:
+  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
 --- !u!114 &7750579596343814766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,6 +151,7 @@ MonoBehaviour:
   _animator: {fileID: 7554209699097654958}
   _rb: {fileID: 6619117660693068914}
   _seSource: {fileID: 4704850274294587580}
+  _attackInterval: 1
 --- !u!114 &-2625927772269966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,6 +285,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillView
   _id: 0
+  _source: {fileID: 6820425283298186611}
+  _cueName: Slash
+--- !u!114 &-4916133229582652887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339157675331060313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
+  _id: 1
+  _source: {fileID: 6820425283298186611}
+  _cueName: Slash
+--- !u!114 &1192430313035069498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339157675331060313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
+  _id: 2
+  _source: {fileID: 6820425283298186611}
+  _cueName: Slash
+--- !u!114 &7852414029176531134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339157675331060313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
+  _id: 3
   _source: {fileID: 6820425283298186611}
   _cueName: Slash
 --- !u!1001 &4161154649757715263

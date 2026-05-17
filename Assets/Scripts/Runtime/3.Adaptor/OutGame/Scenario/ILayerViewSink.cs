@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// ILayerViewSink の契約を定義します。
+    /// Layer の表示反映契約を定義する。
     /// </summary>
     public interface ILayerViewSink
     {

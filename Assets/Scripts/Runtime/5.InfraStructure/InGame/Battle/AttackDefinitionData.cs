@@ -21,12 +21,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         public bool UseBeatType => _useBeatType;
         /// <summary> ビートタイプを取得する。 </summary>
         public int BeatType => _beatType;
+        /// <summary> ジャストダメージ倍率を取得する。 </summary>
+        public float JustDamageMultiplier => _justDamageMultiplier;
 
         [SerializeField, Tooltip("攻撃名")] private string _attackName;
         [SerializeField, Tooltip("基本ダメージ")] private float _baseDamage;
         [SerializeField, Tooltip("攻撃パラメーターセット")] private AttackParameterSetData _attackParameterSetData;
         [SerializeField, Tooltip("攻撃パイプラインアセット")] private AttackPipelineAsset _attackPipelineAsset;
-
+        [SerializeField, Tooltip("ジャストダメージ倍率")] private float _justDamageMultiplier;
         [SerializeField, Tooltip("ビートタイプを使用するかどうか")] private bool _useBeatType;
         [SerializeField, Tooltip("ビートタイプ")] private int _beatType;
     }

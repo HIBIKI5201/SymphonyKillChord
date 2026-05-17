@@ -11,13 +11,19 @@ namespace KillChord.Runtime.Application.InGame.Mission
     /// </summary>
     public class MissionEvaluationRunner
     {
+        /// <summary>
+        ///     評価を実行します。
+        /// </summary>
+        /// <param name="progress">進行状況。</param>
+        /// <param name="evaluationConditions">評価条件のリスト。</param>
+        /// <returns>評価結果。</returns>
         public MissionEvaluationResult Run(
             MissionProgress progress,
             IReadOnlyList<IMissionEvaluationCondition> evaluationConditions)
         {
             if (evaluationConditions == null || evaluationConditions.Count == 0)
             {
-                Debug.LogWarning("評価条件が設定されていません");
+                Debug.LogWarning("評価条件が設定されていません。");
                 return new MissionEvaluationResult(Array.Empty<MissionEvaluationProgress>());
             }
 

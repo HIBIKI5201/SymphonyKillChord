@@ -59,7 +59,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 new Damage(data.BaseDamage),
                 attackParameterSet,
                 data.AttackPipelineAsset.Create(),
-                resolvedBeatType
+                resolvedBeatType,
+                data.JustDamageMultiplier
             );
         }
     }

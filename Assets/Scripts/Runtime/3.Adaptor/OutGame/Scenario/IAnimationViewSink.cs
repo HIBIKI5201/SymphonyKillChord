@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IAnimationViewSink の契約を定義します。
+    /// Animation の表示反映契約を定義する。
     /// </summary>
     public interface IAnimationViewSink
     {
