@@ -54,6 +54,7 @@ namespace DevelopProducts.SkillTree
         }
         private void OnDestroy()
         {
+            if(_nodeVM == null) return;
             _nodeVM.CanUnlock -= Canlock;
             _nodeVM.Unlocked -= Unlock;
             _nodeVM.Locked -= Lock;
