@@ -5,9 +5,7 @@ namespace DevelopProducts.SkillTree
     /// </summary>
     public class NodeLockController
     {
-        public NodeLockController(LockUsecase lockUsecase,
-                                    ISkillTreeRepository skillTreeRepository,
-                                    SkillTreeEntity skillTreeEntity,
+        public NodeLockController(ISkillTreeRepository skillTreeRepository,
                                     SkillNodePresenter skillNodePresenter)
         {
             _skillTreeRepository = skillTreeRepository;
@@ -18,11 +16,9 @@ namespace DevelopProducts.SkillTree
         {
             var node = _skillTreeRepository.GetNode(nodeId);
             node.Lock();
-            _skillNodePresenter.Lock(nodeId, node.IsUnlocked);
+            _skillNodePresenter.Visible(nodeId, node.IsEnable);
         }
-        private readonly LockUsecase _lockUsecase;
         private readonly ISkillTreeRepository _skillTreeRepository;
-        private readonly SkillTreeEntity _skillTreeEntity;
         private readonly SkillNodePresenter _skillNodePresenter;
     }
 }

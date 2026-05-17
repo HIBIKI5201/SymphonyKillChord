@@ -26,8 +26,9 @@ namespace DevelopProducts.SkillTree
             var unlockUsecase = new UnlockUsecase(canUnlockService, _skillPointRepository);
             var lockUsecase = new LockUsecase();
             var presenter = new SkillNodePresenter(nodeRegistry, skillTree, _skillTreeRepository);
-            var nodeLockController = new NodeLockController(lockUsecase, _skillTreeRepository, skillTree, presenter);
+            var nodeLockController = new NodeLockController(_skillTreeRepository, presenter);
             var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, skillTree, presenter);
+            var nodeVisibleController = new NodeVisibleController(_skillTreeRepository, presenter);
 
             var nodeCanUnlockController = new NodeCanUnlockController(
                   _skillTreeRepository,
@@ -41,7 +42,7 @@ namespace DevelopProducts.SkillTree
             }
 
             var skillTreePanelView = FindAnyObjectByType<NodeSelectPanelView>();
-            skillTreePanelView.Initialize(nodeUnlockController, nodeCanUnlockController, nodeLockController, presenter);
+            skillTreePanelView.Initialize(nodeUnlockController, nodeCanUnlockController, nodeLockController, presenter, nodeVisibleController);
         }
     }
 }

@@ -7,12 +7,18 @@ namespace DevelopProducts.SkillTree
     public class NodeView : MonoBehaviour
     {
         public int Id => _skillNodeAsset.Id;
+        public bool IsUnlocked => _isUnlocked;
         public void Initialize(NodeRegistry nodeRegistry)
         {
+            _icon = GetComponent<Image>();
+            _button = GetComponent<Button>();
+            _button.onClick.AddListener(() => _nodeSelectPanelView.SetNode(this));
+            _nodeSelectPanelView = FindAnyObjectByType<NodeSelectPanelView>();
+
             _nodeVM = new NodeViewModel();
             _nodeVM.CanUnlock += Canlock;
             _nodeVM.Unlocked += Unlock;
-            _nodeVM.Locked += Lock;
+            _nodeVM.Visible += CanVisible;
             _nodeRegistry = nodeRegistry;
             _nodeRegistry.Register(_skillNodeAsset.Id, _nodeVM);
         }
@@ -27,16 +33,17 @@ namespace DevelopProducts.SkillTree
         }
         public void Unlock(bool isUnlock)
         {
-            Debug.Log($"ノードがアンロックされました: SkillNodeId {_skillNodeAsset.Id}, isUnlock: {isUnlock}");
+            Debug.Log($"ノードがアンロックされたかどうか: SkillNodeId {_skillNodeAsset.Id}, isUnlock: {isUnlock}");
             if (isUnlock)
             {
                 _isUnlocked = true;
                 _icon.color = Color.green;
             }
         }
-        public void Lock(bool isLock)
+        public void CanVisible(bool isLock)
         {
-            this.gameObject.SetActive(!isLock);
+            Debug.Log($"ノードを表示または非表示: SkillNodeId {_skillNodeAsset.Id}, isLock: {isLock}");
+            this.gameObject.SetActive(isLock);
         }
         [SerializeField] private SkillNodeAsset _skillNodeAsset;
         private Image _icon;
@@ -45,19 +52,12 @@ namespace DevelopProducts.SkillTree
         private NodeRegistry _nodeRegistry;
         private Button _button;
         private bool _isUnlocked;
-        private void Awake()
-        {
-            _icon = GetComponent<Image>();
-            _button = GetComponent<Button>();
-            _button.onClick.AddListener(() => _nodeSelectPanelView.SetNode(this));
-            _nodeSelectPanelView = FindAnyObjectByType<NodeSelectPanelView>();
-        }
         private void OnDestroy()
         {
             if(_nodeVM == null) return;
             _nodeVM.CanUnlock -= Canlock;
             _nodeVM.Unlocked -= Unlock;
-            _nodeVM.Locked -= Lock;
+            _nodeVM.Visible -= CanVisible;
             _button.onClick.RemoveListener(() => _nodeSelectPanelView.SetNode(this));
         }
 

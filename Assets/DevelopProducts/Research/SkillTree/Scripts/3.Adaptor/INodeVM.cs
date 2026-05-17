@@ -4,9 +4,9 @@ namespace DevelopProducts.SkillTree
     {
         event System.Action<bool> CanUnlock;
         event System.Action<bool> Unlocked;
-        event System.Action<bool> Locked;
-        void Check(in CanUnlockDTO dto);
+        event System.Action<bool> Visible;
+        void CheckUnlock(in CanUnlockDTO dto);
         void Unlock(in UnlockDTO dto);
-        void Lock(in LockDTO dto);
+        void CheckVisible(in CheckVisibleDTO dto);
     }
 }

@@ -18,7 +18,7 @@ MonoBehaviour:
     rid: 6052115885326598266
   _id: 9
   _isUnlocked: 0
-  _isEnable: 1
+  _isEnable: 0
   _parents:
   - {fileID: 11400000, guid: 1d931509731fdb4428a49817a855b4a3, type: 2}
   _cost: 2

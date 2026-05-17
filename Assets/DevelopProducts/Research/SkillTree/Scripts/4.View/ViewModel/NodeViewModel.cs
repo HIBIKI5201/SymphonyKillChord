@@ -6,16 +6,16 @@ namespace DevelopProducts.SkillTree
     {
         public event Action<bool> CanUnlock;
         public event Action<bool> Unlocked;
-        public event Action<bool> Locked;
+        public event Action<bool> Visible;
 
-        public void Check(in CanUnlockDTO dto)
+        public void CheckUnlock(in CanUnlockDTO dto)
         {
             CanUnlock?.Invoke(dto.CanUnlock);
         }
 
-        public void Lock(in LockDTO dto)
+        public void CheckVisible(in CheckVisibleDTO dto)
         {
-            Locked?.Invoke(dto.IsLock);
+            Visible?.Invoke(dto.isVisible);
         }
 
         public void Unlock(in UnlockDTO dto)

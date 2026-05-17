@@ -838,6 +838,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SkillTree
       objectReference: {fileID: 0}
+    - target: {fileID: 7599550695686964342, guid: 97c696648e8042743b1f56e6eb030ce4, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 65
+      objectReference: {fileID: 0}
     - target: {fileID: 8500717334980018136, guid: 97c696648e8042743b1f56e6eb030ce4, type: 3}
       propertyPath: m_fontSize
       value: 60

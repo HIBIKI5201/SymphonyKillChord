@@ -17,6 +17,7 @@ namespace DevelopProducts.SkillTree
         }
 
         public SkillNodeEntity[] AllSkillNodes => _nodeDictionary.Values.ToArray();
+        public int PhaseCount => _phaseGroups?.Length ?? 0;
 
         public SkillNodeEntity GetNode(int id)
         {

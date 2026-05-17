@@ -10,13 +10,23 @@ namespace DevelopProducts.SkillTree
             _skillTree = skillTree;
             _skillTreeRepository = skillTreeRepository;
         }
+        /// <summary>
+        ///     ノードがアンロック可能かどうかをチェック
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <param name="canUnlock"></param>
         public void CanUnlock(int nodeId, bool canUnlock)
         {
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
             {
-                canUnlockVM.Check(new CanUnlockDTO(canUnlock));
+                canUnlockVM.CheckUnlock(new CanUnlockDTO(canUnlock));
             }
         }
+        /// <summary>
+        ///     ノードをアンロック
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <param name="isUnlock"></param>
         public void Unlock(int nodeId, bool isUnlock)
         {
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
@@ -24,13 +34,23 @@ namespace DevelopProducts.SkillTree
                 canUnlockVM.Unlock(new UnlockDTO(isUnlock));
             }
         }
-        public void Lock(int nodeId, bool isLock)
+        /// <summary>
+        ///     ノードをロック
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <param name="isVisible"></param>
+        public void Visible(int nodeId, bool isVisible)
         {
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
             {
-                canUnlockVM.Lock(new LockDTO(isLock));
+                canUnlockVM.CheckVisible(new CheckVisibleDTO(isVisible));
             }
         }
+        /// <summary>
+        ///     計算したノードの合計コストを取得
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
         public int GetTotalCost(int nodeId)
         {
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
