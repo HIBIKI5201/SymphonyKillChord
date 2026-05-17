@@ -1,6 +1,6 @@
 using System;
 
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Collections
 {
     /// <summary>
     ///     固定長のリングバッファ。

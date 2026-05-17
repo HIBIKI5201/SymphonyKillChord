@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Character;
+using System;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
@@ -8,16 +9,22 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     public interface IDefender
     {
         /// <summary>
-        ///     現在の体力を表すプロパティ。
+        ///     HPに変化があった時に発火するイベント。<br/>
+        ///     引数は、現在HP、最大HP、変化量（ダメージは負、回復は正）
+        /// </summary>
+        public event Action<float, float, float> OnHealthChanged;
+        /// <summary>
+        ///     現在の体力を取得する。
         /// </summary>
         public Health CurrentHealth { get; }
+
         /// <summary>
-        ///     体力の最大値を表すプロパティ。
+        ///     体力の最大値を取得する。
         /// </summary>
         public Health MaxHealth { get; }
 
         /// <summary>
-        ///     ダメージを受け取るメソッド。
+        ///     ダメージを受ける。
         /// </summary>
         /// <param name="damage"></param>
         public void TakeDamage(Damage damage);

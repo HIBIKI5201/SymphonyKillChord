@@ -5,32 +5,37 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Persistent.Music;
 using System;
 using System.Threading;
-using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     /// <summary>
     ///     音楽同期に合わせたアクションのスケジュールを管理するアダプタークラス。
     /// </summary>
     public class MusicSchedulerAdaptor : IMusicActionScheduler
     {
-        public MusicSchedulerAdaptor(IMusicSyncViewModel syncViewModel, IMusicSyncService musicSyncService)
+        /// <summary>
+        ///     新しいアダプターを生成する。
+        /// </summary>
+        /// <param name="syncState"> 音楽同期状態。 </param>
+        /// <param name="musicSyncService"> 音楽同期サービス。 </param>
+        public MusicSchedulerAdaptor(MusicSyncState syncState, IMusicSyncService musicSyncService)
         {
-            _syncViewModel = syncViewModel;
+            _musicSyncState = syncState;
             _musicSyncService = musicSyncService;
         }
 
+        /// <summary>
+        ///     アクションをスケジュールする。
+        /// </summary>
+        /// <param name="musicSpec"> 敵の音楽スペック。 </param>
+        /// <param name="action"> 実行するアクション。 </param>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         public void Schedule(in EnemyMusicSpec musicSpec,
             Action action,
             CancellationToken cancellationToken)
         {
-            Debug.Log($"[MusicSchedulerAdaptor] syncViewModel null? {_syncViewModel == null}");
-            Debug.Log($"[MusicSchedulerAdaptor] musicSyncService null? {_musicSyncService == null}");
-
-            Debug.Log("攻撃予約: " + musicSpec);
             ExecuteRequestTiming timing = Convert(musicSpec);
-
-            double accurateBeat = _syncViewModel.AccurateBeat;
+            double accurateBeat = _musicSyncState.AccurateBeat;
 
             _musicSyncService.RegisterAction(
                 accurateBeat,
@@ -40,13 +45,18 @@ namespace KillChord.Runtime.Adaptor
                 );
         }
 
+        private readonly MusicSyncState _musicSyncState;
+        private readonly IMusicSyncService _musicSyncService;
+
+        /// <summary>
+        ///     EnemyMusicSpecをExecuteRequestTimingに変換する。
+        /// </summary>
+        /// <param name="musicSpec"> 変換元のスペック。 </param>
+        /// <returns> 変換後のタイミング情報。 </returns>
         private ExecuteRequestTiming Convert(in EnemyMusicSpec musicSpec)
         {
             Beat beat = new Beat(musicSpec.TimeSignature, musicSpec.TargetBeat);
             return new ExecuteRequestTiming((byte)musicSpec.BarFlag, beat);
         }
-
-        private readonly IMusicSyncViewModel _syncViewModel;
-        private readonly IMusicSyncService _musicSyncService;
     }
 }

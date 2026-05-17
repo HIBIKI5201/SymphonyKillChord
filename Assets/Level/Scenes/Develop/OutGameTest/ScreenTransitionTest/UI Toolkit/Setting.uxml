@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <ui:VisualElement picking-mode="Position" style="flex-grow: 1; width: 100%; height: 100%; justify-content: center; align-items: center; align-content: center; position: absolute; transition-duration: 0.5s; transition-timing-function: ease-in-cubic; background-color: rgba(0, 0, 0, 0.15); display: flex; opacity: 1;">
+        <ui:VisualElement style="flex-grow: 0; width: 800px; height: 500px; justify-content: flex-start; align-items: flex-start; align-content: auto; background-color: rgba(94, 87, 87, 0.78);">
+            <ui:Label text="設定" name="HeadLine" style="white-space: pre; align-items: auto; font-size: 36px; -unity-font-style: bold; align-content: auto; margin-left: 10px; justify-content: flex-start;"/>
+            <ui:Button text="戻る" name="BackButton" class="button" style="width: 100px; height: 50px; align-self: flex-end; justify-content: flex-start; align-items: auto; align-content: flex-end; color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; -unity-text-align: middle-left; position: relative; top: 360px; left: 0;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

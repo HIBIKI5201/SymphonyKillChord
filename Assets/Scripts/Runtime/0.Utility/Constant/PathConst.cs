@@ -1,4 +1,4 @@
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Constant
 {
     /// <summary>
     ///     パスに関する定数を管理するクラス。
