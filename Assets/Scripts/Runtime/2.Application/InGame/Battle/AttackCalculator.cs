@@ -18,10 +18,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
             IAttacker attacker,
-            IDefender defender
+            IDefender defender,
+            bool isJustHit = false
             )
         {
-            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender);
+            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }

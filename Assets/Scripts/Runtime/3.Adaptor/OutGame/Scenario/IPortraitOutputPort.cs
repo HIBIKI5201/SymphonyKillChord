@@ -4,12 +4,11 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IPortraitOutputPort の契約を定義します。
+    /// Portrait の出力契約を定義する。
     /// </summary>
     public interface IPortraitOutputPort
     {
         /// <summary>
-        /// 立ち絵を指定スロットへ表示または更新します。
         /// </summary>
         ValueTask ShowPortraitAsync(
             string slot,

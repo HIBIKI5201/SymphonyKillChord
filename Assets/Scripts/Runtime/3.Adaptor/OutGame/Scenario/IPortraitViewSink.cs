@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
-    /// IPortraitViewSink の契約を定義します。
+    /// Portrait の表示反映契約を定義する。
     /// </summary>
     public interface IPortraitViewSink
     {

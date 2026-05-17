@@ -12,13 +12,14 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender)
+        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false)
         {
             _attackDefinition = attackDefinition;
             _damage = attackDefinition.BaseDamage;
             _criticalCount = 0;
             _attacker = attacker;
             _defender = defender;
+            _isJustHit = isJustHit;
         }
 
         /// <summary>
@@ -35,6 +36,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _criticalCount = criticalCount;
             _attacker = attackStepContext._attacker;
             _defender = attackStepContext._defender;
+            _isJustHit = attackStepContext._isJustHit;
         }
 
         /// <summary> 攻撃定義を取得する。 </summary>
@@ -51,11 +53,14 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 防御者を取得する。 </summary>
         public IDefender Defender => _defender;
-
+        
+        /// <summary> リズムゲームのジャストタイミングで攻撃がヒットしたかを取得する。</summary>
+        public bool IsJustHit => _isJustHit;
         private readonly AttackDefinition _attackDefinition;
         private readonly Damage _damage;
         private readonly int _criticalCount;
         private readonly IAttacker _attacker;
         private readonly IDefender _defender;
+        private readonly bool _isJustHit;
     }
 }

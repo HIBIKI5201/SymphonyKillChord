@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
+    /// <summary>
+    /// プレイヤー入力をシナリオ操作へ変換する入力ビュー。
+    /// </summary>
     public class ScenarioInputView : MonoBehaviour
     {
         [SerializeField]
@@ -14,11 +17,17 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField]
         private KeyCode _skipKey = KeyCode.Escape;
 
+        /// <summary>
+        /// 依存先を受け取りシナリオ表示を初期化する。
+        /// </summary>
         public void Initialize(InputController inputController)
         {
             _inputController = inputController;
         }
 
+        /// <summary>
+        /// 毎フレームの入力監視または演出更新を行う。
+        /// </summary>
         private void Update()
         {
             if (_inputController == null) return;
