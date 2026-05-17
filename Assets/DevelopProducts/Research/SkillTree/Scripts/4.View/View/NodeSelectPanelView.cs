@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -7,15 +8,16 @@ namespace DevelopProducts.SkillTree
 {
     public class NodeSelectPanelView : MonoBehaviour
     {
-        public void Initialize(NodeUnlockController nodeUnlockController, 
+        public void Initialize(NodeUnlockController nodeUnlockController,
             NodeCanUnlockController nodeCanUnlockController,
+            NodeLockController nodeLockController,
             SkillNodePresenter skillNodePresenter)
         {
             _nodeUnlockController = nodeUnlockController;
             _nodeCanUnlockController = nodeCanUnlockController;
+            _nodeLockController = nodeLockController;
             _skillNodePresenter = skillNodePresenter;
         }
-
         public void SetNode(NodeView nodeView)
         {
             _currentNodeCost = _skillNodePresenter.GetTotalCost(nodeView.Id);
@@ -27,17 +29,47 @@ namespace DevelopProducts.SkillTree
         [SerializeField] private SkillTreeRepository _skillTreeRepository;
         private int _currentNodeId = -1;
         private int _currentNodeCost = 0;
+        private int _currentPhaseIndex = 0;
         private NodeUnlockController _nodeUnlockController;
         private NodeCanUnlockController _nodeCanUnlockController;
+        private NodeLockController _nodeLockController;
         private SkillNodePresenter _skillNodePresenter;
         private void OnUnlockButtonClicked()
         {
-           var result = _nodeUnlockController.UnlockNode(_currentNodeId);
+            var result = _nodeUnlockController.UnlockNode(_currentNodeId);
             if (result)
             {
                 _nodeNameText.text = "Complete!";
             }
             CanUnlockNodes();
+            var isAllUnlocked = TryVisibleNodes();
+            if (isAllUnlocked)
+            {
+                VisibleNodes();
+            }
+        }
+        private void VisibleNodes()
+        {
+            var phaseNodes = _skillTreeRepository.GetNodesByPhase(_currentPhaseIndex + 1);
+            foreach (var phaseNode in phaseNodes)
+            {
+                _nodeLockController.LockNode(phaseNode.SkillNodeIdVO.Id);
+            }
+            _currentPhaseIndex++;
+        }
+        private bool TryVisibleNodes()
+        {
+            var isAllUnlocked = false;
+            var phaseNodes = _skillTreeRepository.GetNodesByPhase(_currentPhaseIndex);
+            foreach (var phaseNode in phaseNodes)
+            {
+                if(!phaseNode.IsUnlocked)
+                {
+                    isAllUnlocked = false;
+                    break;
+                }
+            }
+            return isAllUnlocked;
         }
         private void CanUnlockNodes()
         {
@@ -53,6 +85,11 @@ namespace DevelopProducts.SkillTree
         }
         private void Start()
         {
+            var lockedNodes = _skillTreeRepository.AllSkillNodes.Where(n => !n.IsUnlocked);
+            foreach (var node in lockedNodes)
+            {
+                _nodeLockController.LockNode(node.SkillNodeIdVO.Id);
+            }
             CanUnlockNodes();
             var unlockedNodes = _skillTreeRepository.AllSkillNodes.Where(n => n.IsUnlocked);
             foreach (var node in unlockedNodes)

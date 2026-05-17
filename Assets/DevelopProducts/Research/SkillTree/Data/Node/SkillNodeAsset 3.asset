@@ -20,8 +20,7 @@ MonoBehaviour:
   _isUnlocked: 0
   _isEnable: 1
   _parents:
-  - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
-  - {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
+  - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
   _cost: 2
   references:
     version: 2

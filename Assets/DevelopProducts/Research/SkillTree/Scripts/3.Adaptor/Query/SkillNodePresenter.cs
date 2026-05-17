@@ -24,6 +24,13 @@ namespace DevelopProducts.SkillTree
                 canUnlockVM.Unlock(new UnlockDTO(isUnlock));
             }
         }
+        public void Lock(int nodeId, bool isLock)
+        {
+            if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
+            {
+                canUnlockVM.Lock(new LockDTO(isLock));
+            }
+        }
         public int GetTotalCost(int nodeId)
         {
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))

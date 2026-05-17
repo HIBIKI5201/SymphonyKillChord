@@ -12,6 +12,7 @@ namespace DevelopProducts.SkillTree
             _nodeVM = new NodeViewModel();
             _nodeVM.CanUnlock += Canlock;
             _nodeVM.Unlocked += Unlock;
+            _nodeVM.Locked += Lock;
             _nodeRegistry = nodeRegistry;
             _nodeRegistry.Register(_skillNodeAsset.Id, _nodeVM);
         }
@@ -32,7 +33,10 @@ namespace DevelopProducts.SkillTree
                 _isUnlocked = true;
                 _icon.color = Color.green;
             }
-
+        }
+        public void Lock(bool isLock)
+        {
+            this.gameObject.SetActive(!isLock);
         }
         [SerializeField] private SkillNodeAsset _skillNodeAsset;
         private Image _icon;
@@ -52,6 +56,7 @@ namespace DevelopProducts.SkillTree
         {
             _nodeVM.CanUnlock -= Canlock;
             _nodeVM.Unlocked -= Unlock;
+            _nodeVM.Locked -= Lock;
             _button.onClick.RemoveListener(() => _nodeSelectPanelView.SetNode(this));
         }
 
