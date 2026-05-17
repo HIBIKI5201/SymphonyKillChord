@@ -11,8 +11,8 @@ namespace KillChord.Runtime.Composition
 {
     public class AnimationComposition : MonoBehaviour
     {
-        public void Init(CharacterAnimationView view,CharacterAnimationCatalogAsset asset,
-            MusicSyncState musicSyncState)
+        public ICharacterAnimationController Init(CharacterAnimationView view, CharacterAnimationCatalogAsset asset,
+             MusicSyncState musicSyncState)
         {
             CharacterAnimationClipRepository repository = new CharacterAnimationClipRepository(asset);
 
@@ -28,11 +28,12 @@ namespace KillChord.Runtime.Composition
             ICharacterAnimationApplication application = new CharacterAnimationApplication();
 
             // Adaptor: ApplicationとMusicSyncStateを橋渡しする
-            ICharacterAnimationController controller =
-                new CharacterAnimationController(application, musicSyncState);
+            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState);
 
             // View: AdaptorとClip配列を受け取って初期化する
             view.Initialize(controller, clips);
+
+            return controller;
         }
     }
 }

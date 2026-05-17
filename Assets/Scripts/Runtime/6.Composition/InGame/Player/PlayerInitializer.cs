@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
@@ -10,16 +11,19 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
@@ -48,6 +52,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private SkillView[] _skillVisuals;
         [SerializeField] private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        [SerializeField] private CharacterAnimationView _characterAnimationView;
+        [SerializeField] private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -206,7 +212,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
-            _player.Initialize(playerMovementController, playerAttackController, ct, inputView, healthHudPresenter);
+            var musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
+            var animController = new AnimationComposition().Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+
+            _player.Initialize(playerMovementController, playerAttackController, animController, ct, inputView, healthHudPresenter);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 

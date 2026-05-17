@@ -10,6 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c03476bdb348df749aa2410de68f7601, type: 3}
-  m_Name: CharacterAnimationCatalog
+  m_Name: PlayerAnimationData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterAnimationCatalogAsset
-  _entries: []
+  _entries:
+  - State: 0
+    Clip: {fileID: 2299095657827748018, guid: b4c321926d8a47c409ea6fdd3cf8c4d1, type: 3}
+  - State: 1
+    Clip: {fileID: 7400000, guid: e9b3e9957383f4c4eb4bbfc707ee3ff8, type: 2}
