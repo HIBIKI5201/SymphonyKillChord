@@ -5,7 +5,7 @@ namespace DevelopProducts.SkillTree
 {
     public class PointChecker : MonoBehaviour
     {
-        [SerializeField] private SkillPointReposiroty _skillPointReposiroty;
+        [SerializeField] private SkillPointRepository _skillPointReposiroty;
         [SerializeField] private TMP_Text _pointText;
         private void LateUpdate()
         {

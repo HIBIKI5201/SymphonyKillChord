@@ -7,7 +7,7 @@ namespace DevelopProducts.SkillTree
     {
         [SerializeField] private SkillTreeRepository _skillTreeRepository;
         [SerializeField] private NodeView[] _nodeViews;
-        [SerializeField] private SkillPointReposiroty _skillPointRepository;
+        [SerializeField] private SkillPointRepository _skillPointRepository;
 
         private void Awake()
         {

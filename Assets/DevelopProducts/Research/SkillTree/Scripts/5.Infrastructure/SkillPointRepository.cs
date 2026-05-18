@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
-    [CreateAssetMenu(fileName = "SkillPointReposiroty", menuName = "Scriptable Objects/SkillPointReposiroty")]
-    public class SkillPointReposiroty : ScriptableObject, IPointRepository
+    [CreateAssetMenu(fileName = "SkillPointRepository", menuName = "Scriptable Objects/SkillPointRepository")]
+    public class SkillPointRepository : ScriptableObject, IPointRepository
     {
         public UnlockPoint GetCurrentPoints()
         {
