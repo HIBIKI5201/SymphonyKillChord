@@ -14,16 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Battle.AttackPipelineAsset
   _attackSteps:
   - rid: 3714306555944894570
-  - rid: 3714306555944894572
   - rid: 3714306694461522030
   references:
     version: 2
     RefIds:
     - rid: 3714306555944894570
       type: {class: CriticalStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
-      data: 
-    - rid: 3714306555944894572
-      type: {class: ConfirmedDamage, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
       data: 
     - rid: 3714306694461522030
       type: {class: BeatStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}

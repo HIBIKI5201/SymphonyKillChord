@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70b09cd4dcca8064e8545393717dd426, type: 3}
   m_Name: ExampleAttackParameter
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AttackParameterSetData
-  _criticalChance: 0.5
+  _criticalChance: 0.1
   _criticalDamageMultiplier: 2
   _confirmedDamage: 5
