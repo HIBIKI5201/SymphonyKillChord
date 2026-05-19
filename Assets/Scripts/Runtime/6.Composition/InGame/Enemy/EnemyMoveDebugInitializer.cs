@@ -13,6 +13,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
+using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using Unity.Behavior;
 using UnityEngine;
@@ -113,8 +114,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
             EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
 
+            IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, null);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -124,6 +126,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             _view.Initialize(controller, target);
+            _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();
