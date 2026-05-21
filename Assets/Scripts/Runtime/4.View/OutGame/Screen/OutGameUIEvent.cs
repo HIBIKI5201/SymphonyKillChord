@@ -30,6 +30,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
 
+        /// <summary> ステージノードが選択されたときのイベント。選択されたステージのIDを文字列で通知します。 </summary>
+        public Action<string> OnStageNodeSelected;
+
+        /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
+        public Action OnStageDetailClosed;
+
         /// <summary>
         ///     アウトゲームのUIイベントを ServiceLocator に登録します。
         /// </summary>
