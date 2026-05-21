@@ -1,8 +1,17 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="StageDetail" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/StageDetail.uxml?fileID=9197481963319205126&amp;guid=f07425cccfe20b7408da97871dab056c&amp;type=3#StageDetail"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
-    <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 100%; height: 100%; background-color: rgb(106, 59, 37);">
-        <ui:Label text="作戦" name="HeadLine" style="height: 100px; width: 200px; display: flex; visibility: visible; opacity: 1; -unity-font-style: bold; font-size: 36px; -unity-text-align: middle-center;"/>
-        <ui:Button text="戻る" name="BackButton" class="button" style="width: 200px; height: 100px; align-self: flex-end; justify-content: flex-start; align-items: flex-end; align-content: auto; color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px;"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/USS/StageNode.uss?fileID=7433441132597879392&amp;guid=f39f0e3c948e5b4418ce49ae898075b5&amp;type=3#StageNode"/>
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 100%; height: 100%; background-color: rgb(142, 144, 144);">
+        <ui:Label text="作戦" name="HeadLine" style="height: 100px; width: 200px; display: flex; visibility: visible; opacity: 1; -unity-font-style: bold; font-size: 36px; -unity-text-align: middle-center; position: absolute; align-self: center;"/>
+        <ui:VisualElement name="StageNodeRoot" picking-mode="Position" style="flex-grow: 1;">
+            <ui:Button text="ステージ１" name="stage_01" class="button stage-node" style="height: 91px; width: 341px; top: 500px; align-items: stretch; align-self: flex-start; align-content: flex-start; justify-content: center; background-color: rgb(135, 229, 226); -unity-font-style: bold; font-size: 24px;"/>
+            <ui:Button text="ステージ２" name="stage_02" class="button stage-node" style="height: 91px; width: 341px; top: 500px; align-items: stretch; align-self: flex-start; align-content: flex-start; justify-content: center; background-color: rgb(135, 229, 226); -unity-font-style: bold; font-size: 24px;"/>
+        </ui:VisualElement>
+        <ui:Button text="戻る" name="BackButton" class="button" style="width: 200px; height: 100px; align-self: flex-start; justify-content: flex-start; align-items: auto; align-content: auto; color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; position: absolute;"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="Overlay" picking-mode="Ignore" style="flex-grow: 1; position: relative; top: auto; left: auto;">
+        <ui:Instance template="StageDetail" name="StageDetailContainer" style="position: absolute; top: -1080px; left: 1420px; height: 1080px; width: 500px;"/>
     </ui:VisualElement>
 </ui:UXML>
