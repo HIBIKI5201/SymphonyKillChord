@@ -10,33 +10,49 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <summary>
         ///     ステージノードの初期化を行う。
         /// </summary>
-        /// <param name="stageId"> ステージのID。</param>
-        /// <param name="stageType"> ステージの種類。</param>
-        /// <param name="stageStatus"> ステージの状態。</param>
-        /// <param name="missionDefinition"> ステージに関連付けられたミッションの定義。</param>
-        public StageNode(StageId stageId,
-            StageType stageType,
-            StageStatus stageStatus,
-            MissionDefinition missionDefinition)
+        /// <param name="stageDefinition"> ステージの定義情報。 </param>
+        /// <param name="stageStatus"> ステージの状態。 </param>
+        public StageNode(StageDefinition stageDefinition, StageStatus stageStatus)
         {
-            _id = stageId;
-            _type = stageType;
+            _definition = stageDefinition;
             _status = stageStatus;
-            _missionDefinition = missionDefinition;
         }
 
         /// <summary> ステージID。 </summary>
-        public StageId Id => _id;
+        public StageId Id => _definition.StageId;
         /// <summary> ステージの種類。 </summary>
-        public StageType Type => _type;
+        public StageType Type => _definition.StageType;
         /// <summary> ステージの状態。 </summary>
         public StageStatus Status => _status;
-        /// <summary> ステージに関連付けられたミッションの定義。 </summary>
-        public MissionDefinition MissionDefinition => _missionDefinition;
+        /// <summary> ステージの定義情報。 </summary>
 
-        private readonly StageId _id;
-        private readonly StageType _type;
-        private readonly StageStatus _status;
-        private readonly MissionDefinition _missionDefinition;
+        public StageDefinition Definition => _definition;
+        /// <summary> ステージに関連付けられたミッションの定義。 </summary>
+        public MissionDefinition MissionDefinition => _definition.MissionDefinition;
+
+        /// <summary>
+        ///     ステージをクリア済みにする。
+        /// </summary>
+        public void MarkAsCleared()
+        {
+            if (_status == StageStatus.Unlocked)
+            {
+                _status = StageStatus.Cleared;
+            }
+        }
+
+        /// <summary>
+        ///     ステージを解放します。
+        /// </summary>
+        public void Unlock()
+        {
+            if (_status == StageStatus.Locked)
+            {
+                _status = StageStatus.Unlocked;
+            }
+        }
+
+        private readonly StageDefinition _definition;
+        private StageStatus _status;
     }
 }
