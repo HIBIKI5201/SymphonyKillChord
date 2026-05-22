@@ -1,3 +1,4 @@
+using Codice.Client.Common.GameUI;
 using KillChord.Runtime.View.InGame.Enemy;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
+            _initialized = true;
         }
         
         /// <summary>
@@ -22,7 +24,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void HandleArtilleryDeactivated()
         {
-            _spawnCount--;
+            if (_spawnCount > 0) _spawnCount--;
         }
 
         [SerializeField] private EnemyPools _enemyPools;
@@ -37,9 +39,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private float _timer;
         private int _spawnCount;
         private Vector3[] _spawnPositions;
+        private bool _initialized = false;
 
         private void Update()
         {
+            if (!_initialized) return;
             if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
 
             _timer += Time.deltaTime;

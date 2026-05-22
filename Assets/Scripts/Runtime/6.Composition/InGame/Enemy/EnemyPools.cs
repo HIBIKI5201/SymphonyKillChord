@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 createFunc: InstantiateShell,
                 collectionCheck: true,
                 defaultCapacity: _defaultShellPoolSize,
-                maxSize: _defaultShellPoolSize);
+                maxSize: _maxShellPoolSize);
         }
 
         /// <summary>

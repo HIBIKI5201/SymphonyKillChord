@@ -15,13 +15,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
+            _initialized = true;
         }
         /// <summary>
         ///     歩兵インスタンスが回収された時のcallback処理。
         /// </summary>
         public void HandleInfantryDeactivated()
         {
-            _spawnCount--;
+            if (_spawnCount > 0) _spawnCount--;
         }
 
         [SerializeField] private EnemyPools _enemyPools;
@@ -36,9 +37,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private float _timer;
         private int _spawnCount;
         private Vector3[] _spawnPositions;
+        private bool _initialized = false;
 
         private void Update()
         {
+            if (!_initialized) return;
             if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
 
             _timer += Time.deltaTime;

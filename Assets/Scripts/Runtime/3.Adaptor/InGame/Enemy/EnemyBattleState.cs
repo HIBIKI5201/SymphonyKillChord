@@ -49,6 +49,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         public void Reset()
         {
+            IsInAttackRange = false;
             FirstAttack = true;
             IsStunned = false;
         }

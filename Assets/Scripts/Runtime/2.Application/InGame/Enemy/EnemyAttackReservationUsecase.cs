@@ -80,11 +80,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary>
         ///     無効化処理。
         /// </summary>
-        public void Deactiveate()
+        public void Deactivate()
         {
             if (_cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
             }
             _hasReservation = false;
         }

@@ -79,14 +79,25 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
+            if (_enemyPools == null || _enemyInitializer == null || _enemySpawnPositionSearcher == null ||
+                _enemyInfantryTestSpawner == null || _enemyArtilleryTestSpawner == null)
+            {
+                Debug.LogError("[IngameComposition] Enemy関連の参照が未設定です。");
+                return;
+            }
+
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogError("[IngameComposition] MainCamera が見つかりません。");
+                return;
+            }
             _enemyPools.Initialize();
             _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
 
-            _enemySpawnPositionSearcher.Initialize(UnityEngine.Camera.main, _playerInitializer.transform);
+            _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
             _enemyInfantryTestSpawner.Initialize();
             _enemyArtilleryTestSpawner.Initialize();
-            _enemyInfantryTestSpawner.enabled = true;
-            _enemyArtilleryTestSpawner.enabled = true;
 
             _rhythmGuideInitializer.Initialize();
         }

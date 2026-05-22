@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy
@@ -15,6 +16,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="shellPool"></param>
         public void Initialize(IShellPool shellPool)
         {
+            if (shellPool == null)
+            {
+                throw new ArgumentNullException(nameof(shellPool), "砲弾Object PoolがNULLです。");
+            }
             _shellPool = shellPool;
         }
         /// <summary>
@@ -23,6 +28,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="enemyBattleState"></param>
         public void SpawnShell(EnemyBattleState enemyBattleState)
         {
+            if (_shellPool == null)
+            {
+                throw new InvalidOperationException("砲弾Object PoolがNULLです。");
+            }
             IShellLifeCycle shell = _shellPool.GetShell();
             shell.Activate(enemyBattleState);
         }
