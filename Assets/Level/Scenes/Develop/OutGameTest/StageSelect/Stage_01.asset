@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
   _stageId: stage_01
-  _stageType: 1
+  _stageType: 0
   _isInitiallyUnlocked: 1
   _stageName: "\u30D0\u30C8\u30EB1"
-  _flavorText: "\u30C6\u30B9\u30C8"
+  _flavorText: "\u30D0\u30C8\u30EB\u30B9\u30C6\u30FC\u30B8"
   _rewardSkillBuildPoint: 1
   _rewardSkillUnlockPoint: 1
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}

@@ -14,4 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageTreeAsset
   _nodeAssets:
   - {fileID: 11400000, guid: 312205736429ccf4891c016ca3d8c168, type: 2}
-  _connections: []
+  - {fileID: 11400000, guid: fe1142573c33fb644a28e8d2a1c5e575, type: 2}
+  - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
+  - {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
+  - {fileID: 11400000, guid: ce8f3db3b43f0a442ba433d004a9c74f, type: 2}
+  - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
+  _connections:
+  - _fromStageId: stage_01
+    _toStageId: stage_boss_01
+  - _fromStageId: stage_boss_01
+    _toStageId: stage_boss_01_branch
+  - _fromStageId: stage_boss_01
+    _toStageId: stage_02
+  - _fromStageId: stage_02
+    _toStageId: stage_boss_02
+  - _fromStageId: stage_boss_02
+    _toStageId: stage_03
