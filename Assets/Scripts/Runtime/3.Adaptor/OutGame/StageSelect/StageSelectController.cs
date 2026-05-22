@@ -37,18 +37,43 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             if (!_stageTree.TryGetNode(stageId, out var node))
             {
+#if UNITY_EDITOR
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(StageSelectController)}] StageId '{stageIdValue}' に対応するノードが見つかりませんでした。");
+#endif
                 return;
             }
 
-            // データを詳細画面に反映してから表示する
+            // 現在選択中のノード ID を保持する
+            _selectedStageId = stageId;
+
             _detailPresenter.Push(node);
             _detailScreenView.Show(token);
+        }
+
+        /// <summary>
+        ///     現在選択中のステージをクリアします。
+        ///     選択中のノードがない場合は何もしません。
+        /// </summary>
+        public bool TryClearSelectedStage(out StageId clearedId)
+        {
+            clearedId = _selectedStageId;
+
+            if (_selectedStageId.Value == null)
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogWarning(
+                    $"[{nameof(StageSelectController)}] 選択中のノードがありません。");
+#endif
+                return false;
+            }
+
+            return true;
         }
 
         private readonly StageTree _stageTree;
         private readonly StageDetailPresenter _detailPresenter;
         private readonly IStageDetailScreenShowable _detailScreenView;
+        private StageId _selectedStageId;
     }
 }
