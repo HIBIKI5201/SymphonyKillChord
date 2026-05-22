@@ -12,14 +12,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
         ///     コンストラクタ。
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="attackInterval"></param>
         /// <param name="health"></param>
-        /// <param name="moveSpeed"></param>
-        /// <param name="attackPower"></param>
         /// <param name="combatSpec"></param>
         public CharacterEntity(CharacterName name,
             HealthEntity health,
-            CharacterCombatSpec combatSpec
-            )
+            CharacterCombatSpec combatSpec,
+            AttackInterval attackInterval
+        )
         {
             if (health is null)
                 throw new ArgumentNullException(nameof(health));
@@ -29,6 +29,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _name = name;
             _health = health;
             _combatSpec = combatSpec;
+            _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
         }
 
         /// <summary>
@@ -58,10 +59,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> 死亡しているかどうかを取得する。 </summary>
         public bool IsDead => CurrentHealth.Value <= 0f;
 
-        /// <summary>
-        ///     無敵状態かどうかを示すプロパティ。
-        /// </summary>
+        /// <summary> 無敵状態かどうかを示すプロパティ。 </summary>
         public bool IsInvincible => _isInvincible;
+
+        /// <summary> 攻撃の硬直状態を管理するエンティティを取得する。 </summary>
+        public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
 
         /// <summary>
         ///     ダメージを受ける処理。
@@ -79,6 +81,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             {
                 return;
             }
+
             float prevHealthValue = CurrentHealth.Value;
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
             Health nextHealth = new Health(nextHealthValue);
@@ -118,7 +121,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
         private readonly CharacterName _name;
         private readonly HealthEntity _health;
         private readonly CharacterCombatSpec _combatSpec;
-        private bool _isDeadNotified = false;
-        private bool _isInvincible = false;
+        private readonly AttackIntervalEntity _attackIntervalEntity;
+        private bool _isDeadNotified;
+        private bool _isInvincible;
     }
 }

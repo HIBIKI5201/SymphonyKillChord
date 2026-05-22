@@ -18,5 +18,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 718556651b4db624aa295a29d17b95f0, type: 2}
   DevelopPath: Build/Dev/
   DevelopBuildProfiles:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: aabb031a04f29104d849df9a66761df9, type: 2}
   - {fileID: 11400000, guid: e1201efd627c4bd4892d9d572a8da719, type: 2}

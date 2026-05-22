@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
-  m_Name: SkillData
-  m_EditorClassIdentifier: KillChord.Structure::SymphonyKillChord.InfraStructure.Player.SkillDataAsset
+  m_Name: TestSkillData1
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
   _id: 0
-  _pattern: 080000000800000008000000
+  _pattern: 04000000040000000400000004000000
   _skillEffect:
-    rid: 8885031606625501290
+    rid: 8153521114334888054
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 8885031606625501290
-      type: {class: TestSkillEffect, ns: KillChord.Runtime.Application, asm: KillChord.Application}
+    - rid: 8153521114334888054
+      type: {class: TestSkillEffect, ns: KillChord.Runtime.Application.Player.SkillEffect, asm: KillChord.Application}
+      data: 
