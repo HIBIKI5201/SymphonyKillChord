@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Mission;
+using System;
 
 namespace KillChord.Runtime.Domain.OutGame.StageSelect
 {
@@ -17,6 +18,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _definition = stageDefinition;
             _status = stageStatus;
         }
+
+        /// <summary> ステージの状態が変更されたときに発火するイベント。 </summary>
+        public event Action<StageStatus> OnStatusChanged;
 
         /// <summary> ステージID。 </summary>
         public StageId Id => _definition.StageId;
@@ -38,6 +42,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             if (_status == StageStatus.Unlocked)
             {
                 _status = StageStatus.Cleared;
+                OnStatusChanged?.Invoke(_status);
             }
         }
 
@@ -49,6 +54,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             if (_status == StageStatus.Locked)
             {
                 _status = StageStatus.Unlocked;
+                OnStatusChanged?.Invoke(_status);
             }
         }
 
