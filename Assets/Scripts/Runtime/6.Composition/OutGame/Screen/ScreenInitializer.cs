@@ -74,6 +74,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             VisualElement stageSelectRott = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
             VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
             VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
+            VisualElement battlePreparationRoot = rootElement.Q<VisualElement>(BATTLEPREPARATIONSCREEN_NAME);
             VisualElement settingRoot = rootElement.Q<VisualElement>(SETTINGSCREEN_NAME);
 
             // 各画面のルート要素が見つからない場合は、エラーログを出力して初期化を中断します。
@@ -97,6 +98,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLBUILDSCREEN_NAME} が見つかりませんでした。", this);
                 return;
             }
+            if (battlePreparationRoot == null)
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {BATTLEPREPARATIONSCREEN_NAME} が見つかりませんでした。", this);
+                return;
+            }
             if (settingRoot == null)
             {
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SETTINGSCREEN_NAME} が見つかりませんでした。", this);
@@ -107,6 +113,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRott, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             ScreenViewRegistry screenViewRegistry = new(
@@ -114,6 +121,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 stageSelectScreenView,
                 skillTreeScreenView,
                 skillBuildScreenView,
+                battlePreparationScreen,
                 settingScreenView);
 
             _screenViewRegistry = screenViewRegistry;
@@ -163,6 +171,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownStageSelectionScreen += HandleStageSelectionScreenShown;
             _outGameUIEvent.OnShownSkillTreeScreen += HandleSkillTreeScreenShown;
             _outGameUIEvent.OnShownSkillBuildScreen += HandleSkillBuildScreenShown;
+            _outGameUIEvent.OnShownBattlePreparationScreen += HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
         }
@@ -177,6 +186,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownStageSelectionScreen -= HandleStageSelectionScreenShown;
             _outGameUIEvent.OnShownSkillTreeScreen -= HandleSkillTreeScreenShown;
             _outGameUIEvent.OnShownSkillBuildScreen -= HandleSkillBuildScreenShown;
+            _outGameUIEvent.OnShownBattlePreparationScreen -= HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
 
@@ -239,6 +249,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
+        ///     戦闘準備画面表示イベントを処理します。
+        /// </summary>
+        private void HandleBattlePreparationScreenShown()
+        {
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowBattlePreparation(RenewShowToken());
+        }
+
+        /// <summary>
         ///     画面クローズイベントを処理します。
         /// </summary>
         private void HandleScreenClosed()
@@ -286,6 +307,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private const string STAGESELECTSCREEN_NAME = "StageSelectContainer";
         private const string SKILLTREESCREEN_NAME = "SkillTreeContainer";
         private const string SKILLBUILDSCREEN_NAME = "SkillBuildContainer";
+        private const string BATTLEPREPARATIONSCREEN_NAME = "BattlePreparationContainer";
         private const string SETTINGSCREEN_NAME = "SettingContainer";
 
         [SerializeField]
