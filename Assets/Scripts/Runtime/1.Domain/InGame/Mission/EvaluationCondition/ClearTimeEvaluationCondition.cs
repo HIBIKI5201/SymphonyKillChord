@@ -25,6 +25,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
             _description = description;
         }
 
+        public MissionEvaluationResultTiming ResultTiming => MissionEvaluationResultTiming.Cleared;
+
         /// <summary>
         ///     条件が満たされているかどうかを判定します。
         /// </summary>
@@ -34,6 +36,16 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
         {
             // 経過時間がしきい値以下であれば達成。
             return progress.ElapsedTime.Value <= _thresholdTime;
+        }
+
+        /// <summary>
+        ///     制限時間を超過しているかどうかを判定します。
+        /// </summary>
+        /// <param name="progress">ミッションの進行状況。</param>
+        /// <returns>制限時間を超過している場合は true、そうでない場合は false。</returns>
+        public bool IsFailed(MissionProgress progress)
+        {
+            return progress.ElapsedTime.Value > _thresholdTime;
         }
 
         /// <summary>
