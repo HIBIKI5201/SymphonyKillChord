@@ -39,6 +39,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを文字列で通知します。 </summary>
         public Action<string> OnStageCleared;
 
+        /// <summary> 
+        ///     インゲームへ遷移するイベント。
+        ///     TODO : 遷移先のステージを指定できるようにする（OnStageNodeSelected で選択されたステージのIDを引数で受け取るなど）。
+        /// </summary>
+        public Action OnStartGame;
+
         /// <summary>
         ///     アウトゲームのUIイベントを ServiceLocator に登録します。
         /// </summary>
