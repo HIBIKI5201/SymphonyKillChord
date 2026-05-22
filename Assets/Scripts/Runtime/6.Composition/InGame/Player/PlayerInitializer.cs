@@ -56,8 +56,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
-        private EnemyInfantrySpawner _enemyInfantryTestSpawner;
-        private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -109,11 +107,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 skillIds = skillIdList.ToArray();
             }
-
-            //_enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
-            //_enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
-            //_enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
-            //_enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
@@ -178,7 +171,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
-            //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
             SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter, inputProgressController);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);

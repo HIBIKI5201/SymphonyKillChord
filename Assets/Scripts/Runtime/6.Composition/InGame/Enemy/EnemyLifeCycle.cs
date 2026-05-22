@@ -108,8 +108,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
-            _targetManagerController.Register(_lockOnTargetGateway);
-
             // View接続
             _view.Initialize(aiController, target);
             _healthView.Initialize(healthHudPresenter);
@@ -146,6 +144,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
+            _targetManagerController?.Register(_lockOnTargetGateway);
             _targetEntityRegistryController?.RegisterTargetEntity(_lockOnTargetGateway, _enemyEntity);
 
             // コンポーネント有効化
@@ -167,12 +166,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _behaviorGraphAgent.enabled = false;
             _navMeshAgent.enabled = false;
             _view.Deactivate();
-
-            if (_missionEventController != null && _missionKeyAsset != null)
-            {
-                _enemyEntity.OnDied -= HandleEnemyDied;
-            }
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
 
             _attackReservationUsecase.Deactiveate();
             _aiController.Deactivate();
@@ -224,10 +217,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
-            if (_missionKeyAsset == null)
+            if (_missionEventController != null && _missionKeyAsset != null)
             {
-                return;
+                _enemyEntity.OnDied -= HandleEnemyDied;
             }
+            _targetManagerController?.Unregister(_lockOnTargetGateway);
+            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
             _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             Deactivate();
         }
