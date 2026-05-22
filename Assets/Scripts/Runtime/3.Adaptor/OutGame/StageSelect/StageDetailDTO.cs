@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
     /// <summary>
     ///     ステージ詳細画面向けの DTO。
     /// </summary>
-    public readonly struct StageDetailDTO
+    public readonly ref struct StageDetailDTO
     {
         /// <summary>
         ///     StageDetailDTO を初期化します。
@@ -23,13 +23,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             string flavorText,
             int rewardSkillBuildPoint,
             int rewardSkillUnlockPoint,
-            string mainMissionText)
+            string mainMissionText,
+            string[] subMissionTexts)
         {
             StageName = stageName;
             FlavorText = flavorText;
             RewardSkillBuildPoint = rewardSkillBuildPoint;
             RewardSkillUnlockPoint = rewardSkillUnlockPoint;
             MainMissionText = mainMissionText;
+            SubMissionTexts = subMissionTexts;
         }
 
         /// <summary> ステージ名。 </summary>
@@ -45,6 +47,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     シナリオパートの場合は null。
         /// </summary>
         public string MainMissionText { get; }
+        /// <summary>
+        ///     サブミッションのテキスト。
+        ///     シナリオパートの場合は null。
+        /// </summary>
+        public string[] SubMissionTexts { get; }
 
         /// <summary> バトルパートかどうか。 </summary>
         public bool IsBattle => MainMissionText != null;

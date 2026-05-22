@@ -30,12 +30,26 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 ? def.MissionDefinition.MainMissionText
                 : null;
 
+            var subMissionTexts = def.StageType == StageType.Battle && def.MissionDefinition != null
+                ? new string[def.MissionDefinition.EvaluationConditions.Count]
+                : null;
+
+            if (subMissionTexts != null)
+            {
+                // 全てのサブミッションテキストを取得。
+                for(int i = 0; i < subMissionTexts.Length; i++)
+                {
+                    subMissionTexts[i] = def.MissionDefinition.EvaluationConditions[i].GetDescription();
+                }
+            }
+
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,
                 def.Reward.SkillBuildPoint,
                 def.Reward.SkillUnlockPoint,
-                mainMissionText);
+                mainMissionText,
+                subMissionTexts);
 
             _viewModel.Apply(in dto);
         }

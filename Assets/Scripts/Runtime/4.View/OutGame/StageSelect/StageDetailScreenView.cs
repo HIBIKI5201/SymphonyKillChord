@@ -37,6 +37,14 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {MAIN_MISSION_LABEL} が見つかりませんでした。");
 
+            _subMissionLabel1 = rootElement.Q<Label>(SUB_MISSION_LABEL1)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {SUB_MISSION_LABEL1} が見つかりませんでした。");
+
+            _subMissionLabel2 = rootElement.Q<Label>(SUB_MISSION_LABEL2)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {SUB_MISSION_LABEL2} が見つかりませんでした。");
+
             _missionSection = rootElement.Q<VisualElement>(MISSION_SECTION)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {MISSION_SECTION} が見つかりませんでした。");
@@ -59,7 +67,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             var rewardSkillBuildText = new StringBuilder("改造ポイント: ");
             rewardSkillBuildText.Append(dto.RewardSkillBuildPoint);
             _rewardSkillBuildLabel.text = rewardSkillBuildText.ToString();
-            var rewardSkillUnlockText = new StringBuilder("スキル解放ポイント: "); 
+            var rewardSkillUnlockText = new StringBuilder("スキル解放ポイント: ");
             rewardSkillUnlockText.Append(dto.RewardSkillUnlockPoint);
             _rewardSkillUnlockLabel.text = rewardSkillUnlockText.ToString();
 
@@ -69,6 +77,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             if (dto.IsBattle)
             {
                 _mainMissionLabel.text = dto.MainMissionText;
+
+                // ミッション定義情報からサブミッションは2つしか、現状確認していないため配列のインデックスを直接指定している。
+                _subMissionLabel1.text = dto.SubMissionTexts.Length > 0 ? dto.SubMissionTexts[0] : string.Empty;
+                _subMissionLabel2.text = dto.SubMissionTexts.Length > 1 ? dto.SubMissionTexts[1] : string.Empty;
             }
         }
 
@@ -108,6 +120,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string REWARD_SKILL_BUILD_LABEL = "RewardSkillBuildLabel";
         private const string REWARD_SKILL_UNLOCK_LABEL = "RewardSkillUnlockLabel";
         private const string MAIN_MISSION_LABEL = "MainMissionLabel";
+        private const string SUB_MISSION_LABEL1 = "SubMissionLabel1";
+        private const string SUB_MISSION_LABEL2 = "SubMissionLabel2";
         private const string MISSION_SECTION = "MissionSection";
         private const string BACK_BUTTON = "BackButton";
 
@@ -116,6 +130,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private readonly Label _rewardSkillBuildLabel;
         private readonly Label _rewardSkillUnlockLabel;
         private readonly Label _mainMissionLabel;
+        private readonly Label _subMissionLabel1;
+        private readonly Label _subMissionLabel2;
         private readonly VisualElement _missionSection;
         private readonly Button _backButton;
     }
