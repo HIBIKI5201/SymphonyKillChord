@@ -55,11 +55,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [System.Serializable]
         private class StageNodeConnectionData
         {
+            public string FromStageId => _fromStageId;
+            public string ToStageId => _toStageId;
+
             [Tooltip("接続元のステージID。")]
-            public string FromStageId;
+            [SerializeField]
+            private string _fromStageId;
 
             [Tooltip("接続先のステージID。")]
-            public string ToStageId;
+            [SerializeField]
+            private string _toStageId;
         }
     }
 }
