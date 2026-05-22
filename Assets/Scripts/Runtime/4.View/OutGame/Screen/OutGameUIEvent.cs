@@ -36,6 +36,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
         public Action OnStageDetailClosed;
 
+        /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを文字列で通知します。 </summary>
+        public Action<string> OnStageCleared;
+
         /// <summary>
         ///     アウトゲームのUIイベントを ServiceLocator に登録します。
         /// </summary>
