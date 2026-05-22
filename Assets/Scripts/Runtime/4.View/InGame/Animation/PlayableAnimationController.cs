@@ -17,6 +17,9 @@ namespace KillChord.Runtime.View
         /// <param name="clips"> アニメーションクリップの配列。 </param>
         public PlayableAnimationController(Animator animator, AnimationClip[] clips)
         {
+            if (animator == null) throw new ArgumentNullException(nameof(animator));
+            if (clips == null) throw new ArgumentNullException(nameof(clips));
+
             _playables = new List<AnimationClipPlayable>(clips.Length);
 
             // PlayableGraphを構築する
@@ -29,6 +32,10 @@ namespace KillChord.Runtime.View
             // インデックス順にclipをMixerへ登録する
             for (int i = 0; i < clips.Length; i++)
             {
+                if (clips[i] == null)
+                {
+                    throw new ArgumentException($"Clip at index {i} is null.", nameof(clips));
+                }
                 var playable = AnimationClipPlayable.Create(_graph, clips[i]);
                 playable.SetApplyFootIK(false);
                 playable.SetApplyPlayableIK(false);

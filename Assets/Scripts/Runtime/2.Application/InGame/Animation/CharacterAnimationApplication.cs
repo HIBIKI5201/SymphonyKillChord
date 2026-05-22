@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application
         {
             get
             {
-                float walkWeight = _velocity.magnitude > WALK_THRESHOLD
+                float walkWeight = _velocity.magnitude >= WALK_THRESHOLD
                     ? Mathf.Clamp01(_velocity.magnitude)
                     : 0f;
                 return new CharacterAnimationBlendData(1f - walkWeight, walkWeight);
@@ -33,7 +33,7 @@ namespace KillChord.Runtime.Application
         /// <summary> BPMを設定する。 </summary>
         public void SetBpm(float bpm)
         {
-            _bpm = bpm;
+            _bpm = Mathf.Max(1f, bpm);
         }
 
         /// <summary>   歩き状態に遷移する速度の閾値。 </summary>
