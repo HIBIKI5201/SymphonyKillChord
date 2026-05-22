@@ -39,6 +39,11 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             await _ingameSceneView.LoadScene(_backgroundSceneName);
 
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            if( _playerInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] PlayerInitializer の取得に失敗しました。");
+                return;
+            }
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
