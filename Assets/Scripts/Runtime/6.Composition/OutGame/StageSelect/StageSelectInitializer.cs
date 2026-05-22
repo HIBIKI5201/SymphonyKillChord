@@ -7,6 +7,7 @@ using KillChord.Runtime.View.OutGame.StageSelect;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,10 +15,36 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 {
     /// <summary>
     ///     ステージ選択画面の依存を解決するクラス。
-    ///     UIBuilder で配置されたノード要素を収集して StageTree と紐付けます。
+    ///     UIBuilder で配置されたノード要素・接続線要素を収集して StageTree と紐付けます。
     /// </summary>
     public sealed class StageSelectInitializer : MonoBehaviour
     {
+        /// <summary> ノード要素のUSSクラス名。 </summary>
+        private const string NODE_USS_CLASS = "stage-node";
+        /// <summary> 接続線要素のUSSクラス名。 </summary>
+        private const string CONNECTION_USS_CLASS = "stage-connection";
+        /// <summary> 接続線要素のname形式。 </summary>
+        private const string CONNECTION_NAME_FORMAT = "{fromId}-{toId}";
+        /// <summary> ステージ詳細画面のルート要素名。 </summary>
+        private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
+
+        [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
+        private UIDocument _uiDocument;
+
+        [SerializeField, Tooltip("ステージツリーの定義アセットです。")]
+        private StageTreeAsset _stageTreeAsset;
+
+        private OutGameUIEvent _outGameUIEvent;
+        private StageTree _stageTree;
+        private StageProgressService _progressService;
+        private StageSelectController _stageSelectController;
+        private StageDetailScreenView _detailScreenView;
+        private List<StageNodeView> _nodeViews;
+        private List<StageNodePresenter> _nodePresenters;
+        private Dictionary<StageId, StageNodePresenter> _nodePresenterMap;
+        private CancellationTokenSource _cts;
+        private bool _isInitialized;
+
         /// <summary>
         ///     初期化を行います。
         /// </summary>
@@ -40,9 +67,41 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void OnDisable()
         {
             Unsubscribe();
-            DisposeNodeViews();
+            DisposeNodeComponents();
             _cts?.Cancel();
             _cts?.Dispose();
+        }
+
+        /// <summary>
+        ///     ステージノードが選択されたときのイベントハンドラ。
+        /// </summary>
+        private void HandleStageNodeSelected(string stageIdValue)
+        {
+            _stageSelectController.OnStageNodeSelected(stageIdValue, _cts.Token);
+        }
+
+        /// <summary>
+        ///     ステージ詳細画面を閉じるイベントハンドラ。
+        /// </summary>
+        private void HandleStageDetailClosed()
+        {
+            _ = _detailScreenView.Hide(_cts.Token);
+        }
+
+        /// <summary>
+        ///     ステージ選択画面が閉じられたときのイベントハンドラ。
+        /// </summary>
+        private void HandleScreenClosed()
+        {
+            _detailScreenView.HideImmediately();
+        }
+
+        /// <summary>
+        ///     ステージクリアを受け取り、後続ノードの解放と接続線アニメーションの完了を待機するイベントハンドラ。
+        /// </summary>
+        private async void HandleStageCleared(string stageIdValue)
+        {
+            await CompleteAndAnimateAsync(new StageId(stageIdValue));
         }
 
         /// <summary>
@@ -53,19 +112,25 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
             if (_outGameUIEvent == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
+#endif
                 return;
             }
 
             if (_uiDocument == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] UIDocument が設定されていません。", this);
+#endif
                 return;
             }
 
             if (_stageTreeAsset == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] StageTreeAsset が設定されていません。", this);
+#endif
                 return;
             }
 
@@ -75,57 +140,28 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             VisualElement detailRoot = root.Q<VisualElement>(DETAIL_SCREEN_NAME);
             if (detailRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] {DETAIL_SCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
 
             // --- Domain 層 ---
-            StageTree stageTree = _stageTreeAsset.Create();
+            _stageTree = _stageTreeAsset.Create();
 
             // --- Application 層 ---
-            StageProgressService progressService = new StageProgressService(stageTree);
+            _progressService = new StageProgressService(_stageTree);
 
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
 
-            // --- View 層（ノード） ---
-            // UIBuilder で配置済みの要素を USS クラス名で一括収集する
-            // 各ノード要素の name に StageId の文字列値を設定しておくこと
-            var nodeElements = root.Query<VisualElement>(className: NODE_USS_CLASS).ToList();
-            _nodeViews = new List<StageNodeView>(nodeElements.Count);
-
-            for (var i = 0; i < nodeElements.Count; i++)
-            {
-                var nodeElement = nodeElements[i];
-                var stageIdValue = nodeElement.name;
-
-                if (string.IsNullOrEmpty(stageIdValue))
-                {
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] USS クラス '{NODE_USS_CLASS}' の要素 (index:{i}) に name が設定されていません。", this);
-                    continue;
-                }
-
-                if (!stageTree.TryGetNode(new StageId(stageIdValue), out var node))
-                {
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdValue}' に対応するノードが StageTree に存在しません。", this);
-                    continue;
-                }
-
-                var nodeView = new StageNodeView(nodeElement, stageIdValue, _outGameUIEvent);
-
-                // ノードの初期状態を反映する
-                var nodePresenter = new StageNodePresenter(nodeView);
-                nodePresenter.Push(node);
-
-                _nodeViews.Add(nodeView);
-            }
+            // --- View 層（接続線・ノード）---
+            var connectionViewMap = BuildConnectionViewMap(root);
+            BuildNodeComponents(root, connectionViewMap);
 
             // --- Adaptor 層 ---
-            StageDetailPresenter detailPresenter = new StageDetailPresenter(_detailScreenView);
-            _stageSelectController = new StageSelectController(stageTree, detailPresenter, _detailScreenView);
+            BuildControllers();
 
             _cts = new CancellationTokenSource();
             _isInitialized = true;
@@ -140,6 +176,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageNodeSelected += HandleStageNodeSelected;
             _outGameUIEvent.OnStageDetailClosed += HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
+            _outGameUIEvent.OnStageCleared += HandleStageCleared;
         }
 
         /// <summary>
@@ -151,65 +188,140 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageNodeSelected -= HandleStageNodeSelected;
             _outGameUIEvent.OnStageDetailClosed -= HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
+            _outGameUIEvent.OnStageCleared -= HandleStageCleared;
         }
 
         /// <summary>
-        ///     ステージノードが選択されたときのイベントハンドラ。
+        ///     接続線 VisualElement を収集し、ToStageId をキーとした Map を構築します。
         /// </summary>
-        /// <param name="stageIdValue">選択されたステージ ID の文字列値。</param>
-        private void HandleStageNodeSelected(string stageIdValue)
+        /// <param name="root"> 検索対象のルート VisualElement。</param>
+        /// <returns> ToStageId → StageNodeConnectionView の辞書。</returns>
+        private Dictionary<StageId, StageNodeConnectionView> BuildConnectionViewMap(VisualElement root)
         {
-            _stageSelectController.OnStageNodeSelected(stageIdValue, _cts.Token);
-        }
+            // 接続線要素の name は "{fromId}-{toId}" 形式で設定しておくこと
+            // 例）stage_01-stage_02
+            var connectionElements = root.Query<VisualElement>(className: CONNECTION_USS_CLASS).ToList();
+            var connectionViewMap = new Dictionary<StageId, StageNodeConnectionView>(connectionElements.Count);
 
-        /// <summary>
-        ///     ステージ詳細画面を閉じるイベントハンドラ。
-        /// </summary>
-        private void HandleStageDetailClosed()
-        {
-            _detailScreenView.Hide(_cts.Token);
-        }
-
-        /// <summary>
-        ///     ステージ選択画面が閉じられたときのイベントハンドラ。
-        ///     詳細画面が表示中の場合は即座に閉じます。
-        /// </summary>
-        private void HandleScreenClosed()
-        {
-            _detailScreenView.HideImmediately();
-        }
-
-        /// <summary>
-        ///     ノードビューのリソースを解放します。
-        /// </summary>
-        private void DisposeNodeViews()
-        {
-            if (_nodeViews == null) { return; }
-
-            for (var i = 0; i < _nodeViews.Count; i++)
+            for (var i = 0; i < connectionElements.Count; i++)
             {
-                _nodeViews[i].Dispose();
+                var element = connectionElements[i];
+                var parts = element.name?.Split('-');
+
+                if (parts == null || parts.Length != 2)
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の name が '{CONNECTION_NAME_FORMAT}' 形式ではありません。", this);
+#endif
+                    continue;
+                }
+
+                // ToStageId をキーにして接続線 View を管理する
+                var toStageId = new StageId(parts[1]);
+                connectionViewMap.Add(toStageId, new StageNodeConnectionView(element));
             }
 
-            _nodeViews.Clear();
+            return connectionViewMap;
         }
 
-        /// <summary> ノードとして収集する要素のUSSクラス名。 </summary>
-        private const string NODE_USS_CLASS = "stage-node";
-        /// <summary> ステージ詳細画面のルート要素名。 </summary>
-        private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
+        /// <summary>
+        ///     ノード VisualElement を収集し、StageNodeView / StageNodePresenter を生成して各リストに登録します。
+        /// </summary>
+        /// <param name="root"> 検索対象のルート VisualElement。</param>
+        /// <param name="connectionViewMap"> 接続線 View の辞書。</param>
+        private void BuildNodeComponents(VisualElement root, Dictionary<StageId, StageNodeConnectionView> connectionViewMap)
+        {
+            var nodeElements = root.Query<VisualElement>(className: NODE_USS_CLASS).ToList();
+            _nodeViews = new List<StageNodeView>(nodeElements.Count);
+            _nodePresenters = new List<StageNodePresenter>(nodeElements.Count);
+            _nodePresenterMap = new Dictionary<StageId, StageNodePresenter>(nodeElements.Count);
 
-        [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
-        private UIDocument _uiDocument;
+            for (var i = 0; i < nodeElements.Count; i++)
+            {
+                var nodeElement = nodeElements[i];
+                var stageIdValue = nodeElement.name;
 
-        [SerializeField, Tooltip("ステージツリーの定義アセットです。")]
-        private StageTreeAsset _stageTreeAsset;
+                if (string.IsNullOrEmpty(stageIdValue))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] USS クラス '{NODE_USS_CLASS}' の要素 (index:{i}) に name が設定されていません。", this);
+#endif
+                    continue;
+                }
 
-        private OutGameUIEvent _outGameUIEvent;
-        private StageSelectController _stageSelectController;
-        private StageDetailScreenView _detailScreenView;
-        private List<StageNodeView> _nodeViews;
-        private CancellationTokenSource _cts;
-        private bool _isInitialized;
+                var stageId = new StageId(stageIdValue);
+                if (!_stageTree.TryGetNode(stageId, out var node))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdValue}' に対応するノードが StageTree に存在しません。", this);
+#endif
+                    continue;
+                }
+
+                var nodeView = new StageNodeView(nodeElement, stageIdValue, _outGameUIEvent);
+
+                // このノードへの接続線Viewを取得する（存在しない場合は null）
+                connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);
+
+                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView);
+
+                _nodeViews.Add(nodeView);
+                _nodePresenters.Add(nodePresenter);
+                // ID で引けるようにマップへも登録する
+                _nodePresenterMap.Add(stageId, nodePresenter);
+            }
+        }
+
+        /// <summary>
+        ///     Adaptor 層のコントローラーを構築します。
+        /// </summary>
+        private void BuildControllers()
+        {
+            var detailPresenter = new StageDetailPresenter(_detailScreenView);
+            _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
+        }
+
+        /// <summary>
+        ///     ステージの進行を完了として記録し、後続ノードの接続線アニメーションが完了するまで待機します。
+        /// </summary>
+        /// <param name="clearedId"> クリアしたステージの ID。</param>
+        private async Task CompleteAndAnimateAsync(StageId clearedId)
+        {
+            _progressService.CompleteStage(clearedId);
+            var nextIds = _stageTree.GetNextIds(clearedId);
+            for (var i = 0; i < nextIds.Count; i++)
+            {
+                if (!_nodePresenterMap.TryGetValue(nextIds[i], out var presenter)) { continue; }
+                await presenter.TransitionTask;
+            }
+        }
+
+        /// <summary>
+        ///     ノードビューとノードプレゼンターのリソースを解放します。
+        /// </summary>
+        private void DisposeNodeComponents()
+        {
+            if (_nodeViews != null)
+            {
+                for (var i = 0; i < _nodeViews.Count; i++)
+                {
+                    _nodeViews[i].Dispose();
+                }
+                _nodeViews.Clear();
+            }
+
+            if (_nodePresenters != null)
+            {
+                for (var i = 0; i < _nodePresenters.Count; i++)
+                {
+                    _nodePresenters[i].Dispose();
+                }
+                _nodePresenters.Clear();
+                _nodePresenterMap.Clear();
+            }
+        }
     }
 }
