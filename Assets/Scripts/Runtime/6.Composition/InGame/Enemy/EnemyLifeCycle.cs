@@ -169,10 +169,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (_missionEventController != null && _missionKeyAsset != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
+                _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             }
             _targetManagerController?.Unregister(_lockOnTargetGateway);
             _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();

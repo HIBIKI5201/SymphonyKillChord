@@ -86,6 +86,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                         throw new InvalidOperationException("_defaultPosition が未設定です。");
                     }
                     positions[0] = _defaultPosition.position;
+                    posIndex++;
                 }
                 for (int i = posIndex; i < positions.Length; i++)
                 {
