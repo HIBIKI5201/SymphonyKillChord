@@ -26,9 +26,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyBattleState = enemyBattleState;
             _stateFacade = stateFacade;
             _attackController = attackController;
-
-            _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
-            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
+            _isActive = false;
         }
 
         /// <summary>
@@ -36,8 +34,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         public void Activate()
         {
+            if (_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
+            _isActive = true;
         }
 
         /// <summary>
@@ -45,10 +45,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         public void Deactivate()
         {
+            if (!_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
-            _enemyAttackReservationUsecase.Deactiveate();
-
+            _enemyAttackReservationUsecase.Deactivate();
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
+            _isActive = false;
         }
 
         // Debug用のイベント。
@@ -173,5 +174,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
         private IEnemyAttackController _attackController;
+        private bool _isActive;
     }
 }

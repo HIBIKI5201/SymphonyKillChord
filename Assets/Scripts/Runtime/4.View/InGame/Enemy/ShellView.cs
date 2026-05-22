@@ -58,7 +58,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         public void Detonate()
         {
             // TODO 爆発エフェクトなど
-            _dedonateCallback.Invoke();
+            _dedonateCallback?.Invoke();
         }
 
         /// <summary>

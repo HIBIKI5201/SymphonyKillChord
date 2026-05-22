@@ -81,11 +81,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 // 一つも見つからなかった場合、既定位置を設定する
                 if (posIndex == 0)
                 {
+                    if(_defaultPosition == null)
+                    {
+                        throw new InvalidOperationException("_defaultPosition が未設定です。");
+                    }
                     positions[0] = _defaultPosition.position;
                 }
-                for(int i = posIndex + 1; i < positions.Length; i++)
+                for (int i = posIndex; i < positions.Length; i++)
                 {
-                    positions[i] = positions[posIndex];
+                    positions[i] = positions[posIndex - 1];
                 }
             }
         }
@@ -118,6 +122,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 Gizmos.DrawCube(_candidatePositions[i], Vector3.one / 2);
             }
         }
-    }
 #endif
+    }
 }

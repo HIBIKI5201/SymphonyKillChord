@@ -131,10 +131,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void Activate(Vector3 position, System.Action spawnerCallback)
         {
-            if(_spawnerCallback == null)
-            {
-                _spawnerCallback = spawnerCallback;
-            }
+            _spawnerCallback = spawnerCallback;
             _enemyEntity.Reset();
             _battleState.Reset();
             _aiController.Activate();
@@ -149,6 +146,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // コンポーネント有効化
             _view.Activate();
+            _attackPositionSearchView.enabled = true;
             _navMeshAgent.enabled = true;
             _navMeshAgent.Warp(position);
             _behaviorGraphAgent.enabled = true;
@@ -165,15 +163,26 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // コンポーネント無効化
             _behaviorGraphAgent.enabled = false;
             _navMeshAgent.enabled = false;
+            _attackPositionSearchView.enabled = false;
             _view.Deactivate();
 
-            _attackReservationUsecase.Deactiveate();
+            if (_missionEventController != null && _missionKeyAsset != null)
+            {
+                _enemyEntity.OnDied -= HandleEnemyDied;
+            }
+            _targetManagerController?.Unregister(_lockOnTargetGateway);
+            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
+            
+            _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
             _healthHudPresenter.Deactivate();
 
             _spawnerCallback?.Invoke();
+            _spawnerCallback = null;
             gameObject.SetActive(false);
             _releaseCallback?.Invoke(this);
+
         }
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
@@ -217,13 +226,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
-            if (_missionEventController != null && _missionKeyAsset != null)
-            {
-                _enemyEntity.OnDied -= HandleEnemyDied;
-            }
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             Deactivate();
         }
 
