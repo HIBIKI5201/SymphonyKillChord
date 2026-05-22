@@ -56,8 +56,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
-        private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
-        private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        private EnemyInfantrySpawner _enemyInfantryTestSpawner;
+        private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -67,6 +67,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.RegisterInstance(this);
         }
 
+        public CharacterEntity PlayerEntity => _playerEntity;
+
         public void Initialize(
             TargetManager targetManager,
             TargetEntityRegistry targetEntityRegistry,
@@ -74,18 +76,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
-            _enemyInfantryTestSpawner = ServiceLocator.GetInstance<EnemyInfantryTestSpawner>();
-            if (_enemyInfantryTestSpawner == null)
-            {
-                Debug.LogError($"{nameof(EnemyInfantryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return;
-            }
-            _enemyArtilleryTestSpawner = ServiceLocator.GetInstance<EnemyArtilleryTestSpawner>();
-            if (_enemyArtilleryTestSpawner == null)
-            {
-                Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return;
-            }
 
             _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
             if (_inGameHudInitializer == null)
@@ -120,10 +110,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 skillIds = skillIdList.ToArray();
             }
 
-            _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
-            _enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
-            _enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
-            _enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
+            //_enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
+            //_enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
+            //_enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
+            //_enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 

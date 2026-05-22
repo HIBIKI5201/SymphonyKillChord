@@ -4,9 +4,8 @@ using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Skill;
-using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
@@ -22,12 +21,15 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
-        [SerializeField] private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
-        [SerializeField] private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
+        [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
+        [SerializeField] private EnemyPools _enemyPools;
+        [SerializeField] private EnemyInitializer _enemyInitializer;
+        [SerializeField] private EnemySpawnPositionSearcher _enemySpawnPositionSearcher;
 
         private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
@@ -77,8 +79,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
-            _enemyInfantryTestSpawner.Init();
-            _enemyArtilleryTestSpawner.Init();
+            _enemyPools.Initialize();
+            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
+
+            _enemySpawnPositionSearcher.Initialize(UnityEngine.Camera.main, _playerInitializer.transform);
+            _enemyInfantryTestSpawner.Initialize();
+            _enemyArtilleryTestSpawner.Initialize();
+            _enemyInfantryTestSpawner.enabled = true;
+            _enemyArtilleryTestSpawner.enabled = true;
 
             _rhythmGuideInitializer.Initialize();
         }

@@ -31,6 +31,26 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
         }
 
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
+            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _enemyAttackReservationUsecase.Deactiveate();
+
+            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
+        }
+
         // Debug用のイベント。
         /// <summary> 攻撃を予約時に発火するイベント </summary>
         public event Action OnAttackReserved;
@@ -152,6 +172,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
-        private readonly IEnemyAttackController _attackController;
+        private IEnemyAttackController _attackController;
     }
 }

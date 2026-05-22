@@ -78,6 +78,18 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactiveate()
+        {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            _hasReservation = false;
+        }
+
+        /// <summary>
         ///     予約を設定する内部メソッド。
         ///     既存の予約がある場合はキャンセルしてから新しい予約を設定する。
         /// </summary>

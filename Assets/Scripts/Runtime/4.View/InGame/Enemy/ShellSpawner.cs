@@ -10,18 +10,25 @@ namespace KillChord.Runtime.View.InGame.Enemy
     public class ShellSpawner : MonoBehaviour, IShellSpawner
     {
         /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="shellPool"></param>
+        public void Initialize(IShellPool shellPool)
+        {
+            _shellPool = shellPool;
+        }
+        /// <summary>
         ///     砲弾を生成する。
         /// </summary>
         /// <param name="enemyBattleState"></param>
         public void SpawnShell(EnemyBattleState enemyBattleState)
         {
-            ShellView shellView = Instantiate(_shellPrefab, _enemyMoveView.GetTargetTransform().position, Quaternion.identity);
-            ServiceLocator.GetInstance<IShellInitializer>().Initialize(shellView, enemyBattleState, _enemyMoveView);
+            IShellLifeCycle shell = _shellPool.GetShell();
+            shell.Activate(enemyBattleState);
         }
 
         [SerializeField]
-        private ShellView _shellPrefab;
-        [SerializeField]
         private EnemyMoveView _enemyMoveView;
+        private IShellPool _shellPool;
     }
 }

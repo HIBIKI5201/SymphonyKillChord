@@ -25,6 +25,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
         }
 
         /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            _entity.OnHealthChanged += UpdateHealthHud;
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            _entity.OnHealthChanged -= UpdateHealthHud;
+        }
+
+        /// <summary>
         ///     HP HUDを更新する処理。
         /// </summary>
         /// <param name="currentHealth">現在HP</param>

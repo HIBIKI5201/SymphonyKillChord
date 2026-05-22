@@ -43,5 +43,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public void Stunned() => IsStunned = true;
         /// <summary> 硬直から回復した </summary>
         public void StunRecover() => IsStunned = false;
+
+        /// <summary>
+        ///     再初期化処理。
+        /// </summary>
+        public void Reset()
+        {
+            FirstAttack = true;
+            IsStunned = false;
+        }
     }
 }
