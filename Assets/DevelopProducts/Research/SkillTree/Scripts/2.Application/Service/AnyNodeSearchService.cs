@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace DevelopProducts.SkillTree
 {
     /// <summary>
-    ///     幅優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
+    ///     深さ優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
     ///     アプリケーション層
     /// </summary>
     [System.Serializable]
