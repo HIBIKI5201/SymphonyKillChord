@@ -19,6 +19,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <returns> 生成されたステージノード。</returns>
         public StageNode Create()
         {
+            if (string.IsNullOrEmpty(_stageId))
+            {
+# if UNITY_EDITOR
+                Debug.LogError($"[{nameof(StageNodeAsset)}] _stageId が設定されていません。", this);
+#endif
+                return null;
+            }
+
             var missionDefinition = _stageType == StageType.Battle && _missionDefinitionAsset != null
                 ? _missionDefinitionAsset.Create()
                 : null;

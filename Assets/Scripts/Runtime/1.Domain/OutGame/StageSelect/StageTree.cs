@@ -17,9 +17,20 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             IReadOnlyList<StageNode> nodes,
             IReadOnlyList<StageNodeConnection> connections)
         {
+            if (nodes == null) { throw new System.ArgumentNullException(nameof(nodes)); }
+            if (connections == null) { throw new System.ArgumentNullException(nameof(connections)); }
+
             _nodes = new Dictionary<StageId, StageNode>(nodes.Count);
             for (var i = 0; i < nodes.Count; i++)
             {
+                if (nodes[i] == null)
+                {
+#if UNITY_EDITOR
+                    UnityEngine.Debug.LogWarning($"[{nameof(StageTree)}] インデックス {i} のノードが null です。スキップします。");
+#endif
+                    continue;
+                }
+
                 _nodes[nodes[i].Id] = nodes[i];
             }
 

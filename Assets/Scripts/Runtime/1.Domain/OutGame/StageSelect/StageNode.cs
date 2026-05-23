@@ -15,7 +15,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="stageStatus"> ステージの状態。 </param>
         public StageNode(StageDefinition stageDefinition, StageStatus stageStatus)
         {
-            _definition = stageDefinition;
+            _definition = stageDefinition 
+                ?? throw new System.ArgumentNullException(nameof(stageDefinition));
             _status = stageStatus;
         }
 

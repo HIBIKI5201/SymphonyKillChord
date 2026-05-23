@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Application.OutGame.StageSelect
         /// <param name="stageTree"> 操作対象のステージツリー。</param>
         public StageProgressService(StageTree stageTree)
         {
-            _stageTree = stageTree;
+            _stageTree = stageTree ?? throw new System.ArgumentNullException(nameof(stageTree));
         }
 
         /// <summary>

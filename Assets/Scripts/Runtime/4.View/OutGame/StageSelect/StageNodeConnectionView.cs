@@ -43,11 +43,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             var isVertical = _root.resolvedStyle.height > _root.resolvedStyle.width;
             if (isVertical)
             {
-                _fill.style.height = new Length(100, LengthUnit.Percent);
+                _fill.style.height = new Length(STYLESIZE_PERCENT, LengthUnit.Percent);
             }
             else
             {
-                _fill.style.width = new Length(100, LengthUnit.Percent);
+                _fill.style.width = new Length(STYLESIZE_PERCENT, LengthUnit.Percent);
             }
 
             _fill.RegisterCallback<TransitionEndEvent>(OnTransitionEnd);
@@ -65,6 +65,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             }
         }
 
+        /// <summary> Fill の幅または高さを 100% に設定するための定数。 </summary>
+        private const int STYLESIZE_PERCENT = 100;
         /// <summary> アニメーションのタイムアウト秒数。 </summary>
         private const float ANIMATION_TIMEOUT_SEC = 5.0f;
         /// <summary> 塗りつぶし要素の名前。 </summary>

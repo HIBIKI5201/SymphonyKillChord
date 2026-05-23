@@ -24,7 +24,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             {
                 if (_nodeAssets[i] == null)
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning($"[{nameof(StageTreeAsset)}] インデックス {i} のノードアセットが null です。", this);
+#endif
                     continue;
                 }
                 nodes.Add(_nodeAssets[i].Create());
@@ -33,6 +35,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             var connections = new List<StageNodeConnection>(_connections.Count);
             for (var i = 0; i < _connections.Count; i++)
             {
+                if (string.IsNullOrEmpty(_connections[i].FromStageId) ||
+                    string.IsNullOrEmpty(_connections[i].ToStageId))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageTreeAsset)}] インデックス {i} の接続データに空の StageId があります。スキップします。", this);
+#endif
+                    continue;
+                }
+
                 connections.Add(new StageNodeConnection(
                     new StageId(_connections[i].FromStageId),
                     new StageId(_connections[i].ToStageId)));

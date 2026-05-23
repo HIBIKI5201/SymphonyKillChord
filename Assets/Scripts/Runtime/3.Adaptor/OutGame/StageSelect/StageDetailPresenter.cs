@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="viewModel"> 反映先の ViewModel。</param>
         public StageDetailPresenter(IStageDetailViewModel viewModel)
         {
-            _viewModel = viewModel;
+            _viewModel = viewModel ?? throw new System.ArgumentNullException(nameof(viewModel));
         }
 
         /// <summary>
@@ -23,6 +23,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="node"> 詳細を表示するステージノード。</param>
         public void Push(StageNode node)
         {
+            if (node == null)
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogWarning($"[{nameof(StageDetailPresenter)}] node が null です。");
+#endif
+                return;
+            }
+
             var def = node.Definition;
 
             // シナリオパートはミッションテキストなし

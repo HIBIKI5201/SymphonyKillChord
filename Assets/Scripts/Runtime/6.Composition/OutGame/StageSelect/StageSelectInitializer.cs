@@ -101,6 +101,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(string stageIdValue)
         {
+            if (string.IsNullOrEmpty(stageIdValue))
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning($"[{nameof(StageSelectInitializer)}] HandleStageCleared に空の stageIdValue が渡されました。");
+#endif
+                return;
+            }
+
             await CompleteAndAnimateAsync(new StageId(stageIdValue));
         }
 

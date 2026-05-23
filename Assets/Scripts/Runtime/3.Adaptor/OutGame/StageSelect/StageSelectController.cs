@@ -20,9 +20,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             StageDetailPresenter detailPresenter,
             IStageDetailScreenShowable detailScreenView)
         {
-            _stageTree = stageTree;
-            _detailPresenter = detailPresenter;
-            _detailScreenView = detailScreenView;
+            _stageTree = stageTree ?? throw new System.ArgumentNullException(nameof(stageTree));
+            _detailPresenter = detailPresenter ?? throw new System.ArgumentNullException(nameof(detailPresenter));
+            _detailScreenView = detailScreenView ?? throw new System.ArgumentNullException(nameof(detailScreenView));
         }
 
         /// <summary>
@@ -33,6 +33,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="token"> キャンセルトークン。</param>
         public void OnStageNodeSelected(string stageIdValue, CancellationToken token)
         {
+            if (string.IsNullOrEmpty(stageIdValue))
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogWarning($"[{nameof(StageSelectController)}] stageIdValue が null または空です。");
+#endif
+                return;
+            }
+
             var stageId = new StageId(stageIdValue);
 
             if (!_stageTree.TryGetNode(stageId, out var node))
