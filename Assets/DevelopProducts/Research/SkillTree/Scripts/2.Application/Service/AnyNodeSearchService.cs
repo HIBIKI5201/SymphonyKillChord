@@ -95,6 +95,10 @@ namespace DevelopProducts.SkillTree
 
             foreach (var parent in parents)
             {
+                // 現在の経路に既に含まれているノードはスキップ（サイクル防止）
+                if (currentPath.Contains(parent))
+                    continue;
+
                 Search(parent, skillTreeEntity, currentPath, totalCost, ref bestPath, ref bestCost);
             }
 
