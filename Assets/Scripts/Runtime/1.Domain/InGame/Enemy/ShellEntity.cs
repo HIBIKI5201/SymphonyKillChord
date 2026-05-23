@@ -21,6 +21,15 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         /// <summary> 攻撃情報 </summary>
         public AttackDefinition AttackDefinition => _attackDefinition;
 
+        /// <summary>
+        ///     再初期化処理。
+        /// </summary>
+        /// <param name="attackDefinition"></param>
+        public void Reset(AttackDefinition attackDefinition)
+        {
+            _attackDefinition = attackDefinition;
+        }
+
         private ShellAttackSpec _attackSpec;
         private EnemyMusicSpec _musicSpec;
         private AttackDefinition _attackDefinition;

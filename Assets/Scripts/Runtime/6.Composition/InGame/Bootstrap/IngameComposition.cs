@@ -4,9 +4,8 @@ using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Skill;
-using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
@@ -22,12 +21,15 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
         [SerializeField] private IngameSceneView _ingameSceneView;
-        [SerializeField] private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
-        [SerializeField] private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
+        [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
+        [SerializeField] private EnemyPools _enemyPools;
+        [SerializeField] private EnemyInitializer _enemyInitializer;
+        [SerializeField] private EnemySpawnPositionSearcher _enemySpawnPositionSearcher;
 
         private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
@@ -37,6 +39,11 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             await _ingameSceneView.LoadScene(_backgroundSceneName);
 
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            if( _playerInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] PlayerInitializer の取得に失敗しました。");
+                return;
+            }
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
@@ -77,8 +84,25 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
-            _enemyInfantryTestSpawner.Init();
-            _enemyArtilleryTestSpawner.Init();
+            if (_enemyPools == null || _enemyInitializer == null || _enemySpawnPositionSearcher == null ||
+                _enemyInfantryTestSpawner == null || _enemyArtilleryTestSpawner == null)
+            {
+                Debug.LogError("[IngameComposition] Enemy関連の参照が未設定です。");
+                return;
+            }
+
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogError("[IngameComposition] MainCamera が見つかりません。");
+                return;
+            }
+            _enemyPools.Initialize();
+            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
+
+            _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
+            _enemyInfantryTestSpawner.Initialize();
+            _enemyArtilleryTestSpawner.Initialize();
 
             _rhythmGuideInitializer.Initialize();
         }

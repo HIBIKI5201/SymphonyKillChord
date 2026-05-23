@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.WSA;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
@@ -22,8 +23,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController = enemyAIController;
             _target = target;
-            _enemyAIController.OnAttackReserved += PlayEffectReserved;
-            _enemyAIController.OnAttack += PlayEffectHit;
         }
 
         /// <summary>
@@ -74,6 +73,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _enemyAIController.OnAttackReserved -= PlayEffectReserved;
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
+        }
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            _enemyAIController.OnAttackReserved += PlayEffectReserved;
+            _enemyAIController.OnAttack += PlayEffectHit;
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            if (_enemyAIController != null)
+            {
+                _enemyAIController.OnAttackReserved -= PlayEffectReserved;
+                _enemyAIController.OnAttack -= PlayEffectHit;
+            }
         }
         /// <summary>
         ///     攻撃を予約するエフェクトを再生する。

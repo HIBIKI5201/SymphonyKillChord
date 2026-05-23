@@ -17,11 +17,32 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
             _healthHudViewModel = healthHudViewModel;
 
             _entity.OnHealthChanged += UpdateHealthHud;
+            _isActive = true;
         }
 
         public void Dispose()
         {
             _entity.OnHealthChanged -= UpdateHealthHud;
+        }
+
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            if (_isActive) return;
+            _entity.OnHealthChanged += UpdateHealthHud;
+            _isActive = true;
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            if (!_isActive) return;
+            _entity.OnHealthChanged -= UpdateHealthHud;
+            _isActive = false;
         }
 
         /// <summary>
@@ -39,5 +60,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
 
         private IDefender _entity;
         private IHealthHudViewModel _healthHudViewModel;
+        private bool _isActive;
     }
 }

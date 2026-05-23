@@ -1,9 +1,9 @@
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
-    ///     敵攻撃の砲弾のViewModel。
+    ///     敵攻撃の砲弾のViewインタフェース。
     /// </summary>
-    public interface IShellViewModel
+    public interface IShellView
     {
         /// <summary>
         ///     砲弾爆発時処理。

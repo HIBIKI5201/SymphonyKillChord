@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class ShellController : IDisposable
     {
-        public ShellController(ShellEntity entity, IShellViewModel viewModel, ShellReservationUsecase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUsecase attackUsecase)
+        public ShellController(ShellEntity entity, IShellView viewModel, ShellReservationUsecase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUsecase attackUsecase)
         {
             _entity = entity;
             _viewModel = viewModel;
@@ -19,8 +19,30 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _defender = defender;
             _attackUsecase = attackUsecase;
 
+        }
+
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        /// <param name="enemyBattleState"></param>
+        public void Activate(EnemyBattleState enemyBattleState)
+        {
+            _attacker = enemyBattleState.Attacker;
+            _defender = enemyBattleState.Target;
+            _entity.Reset(enemyBattleState.CurrentAttack);
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.ReserveDetonate();
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            _reservationUsecase.Cancel();
+            _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _attacker = null;
+            _defender = null;
         }
 
         public void Dispose()
@@ -35,7 +57,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <returns></returns>
         private bool FindDamageTarget()
         {
-            return _viewModel.FindDamageTarget();
+            bool rst = _viewModel.FindDamageTarget();
+            return rst;
         }
 
         /// <summary>
@@ -60,9 +83,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private readonly ShellEntity _entity;
         private readonly ShellReservationUsecase _reservationUsecase;
-        private readonly IShellViewModel _viewModel;
-        private readonly IAttacker _attacker;
-        private readonly IDefender _defender;
+        private readonly IShellView _viewModel;
+        private IAttacker _attacker;
+        private IDefender _defender;
         private readonly ShellAttackUsecase _attackUsecase;
     }
 }

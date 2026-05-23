@@ -19,7 +19,6 @@ GameObject:
   - component: {fileID: -1108031046539433984}
   - component: {fileID: -7434688505541404117}
   - component: {fileID: 3390705430803442452}
-  - component: {fileID: -4884515779302669640}
   - component: {fileID: -117008544252888282}
   - component: {fileID: 2029437041226520640}
   - component: {fileID: 3385280616353316531}
@@ -150,8 +149,9 @@ MonoBehaviour:
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
-  _enemySharedFacade: {fileID: -4884515779302669640}
+  _enemySharedFacade: {fileID: 0}
   _behaviorGraphAgent: {fileID: 2029437041226520640}
+  _navMeshAgent: {fileID: 3385280616353316531}
   _shellSpawner: {fileID: 0}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
@@ -230,18 +230,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87fe872ba5861de44bc88a6a5d4520b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
---- !u!114 &-4884515779302669640
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1465007639519197220}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5a2a21d028db5249907b5089a9abb9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemySharedFacade
 --- !u!114 &-117008544252888282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,7 +319,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1465007639519197220}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
