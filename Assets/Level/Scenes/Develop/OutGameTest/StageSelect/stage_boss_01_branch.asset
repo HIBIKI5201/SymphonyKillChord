@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: stage_boss_01_branch
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: stage_boss_01_branch
+  _stageId: 6
   _stageType: 0
   _isInitiallyUnlocked: 0
   _stageName: "\u96A0\u3057\u30DC\u30B9"

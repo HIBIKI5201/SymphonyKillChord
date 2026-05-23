@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Stage_01
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: stage_01
+  _stageId: 1
   _stageType: 0
   _isInitiallyUnlocked: 1
   _stageName: "\u30D0\u30C8\u30EB1"

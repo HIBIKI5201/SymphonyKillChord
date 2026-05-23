@@ -11,19 +11,12 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         ///     ステージ ID を初期化する。
         /// </summary>
         /// <param name="value"> ステージ ID の値。 </param>
-        /// <exception cref="ArgumentException"> ステージ ID が null または空文字の場合にスローされる。 </exception>
-        public StageId(string value)
+        public StageId(int value)
         {
-            // ステージ ID は null または空文字であってはならない。
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentException("StageId cannot be null or empty", nameof(value));
-            }
-
             _value = value;
         }
 
-        public string Value => _value;
+        public int Value => _value;
 
         /// <summary>
         ///     ステージ ID の等値比較を行う。
@@ -51,7 +44,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <returns> ステージ ID のハッシュコード。 </returns>
         public override int GetHashCode()
         {
-            return _value != null ? _value.GetHashCode() : 0;
+            return _value.GetHashCode();
         }
 
         /// <summary>
@@ -60,9 +53,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <returns> ステージ ID の文字列表現。 </returns>
         public override string ToString()
         {
-            return _value;
+            return _value.ToString();
         }
 
-        private readonly string _value;
+        private readonly int _value;
     }
 }

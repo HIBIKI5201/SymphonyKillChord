@@ -20,13 +20,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ce8f3db3b43f0a442ba433d004a9c74f, type: 2}
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   _connections:
-  - _fromStageId: stage_01
-    _toStageId: stage_boss_01
-  - _fromStageId: stage_boss_01
-    _toStageId: stage_boss_01_branch
-  - _fromStageId: stage_boss_01
-    _toStageId: stage_02
-  - _fromStageId: stage_02
-    _toStageId: stage_boss_02
-  - _fromStageId: stage_boss_02
-    _toStageId: stage_03
+  - _fromStageId: 1
+    _toStageId: 2
+  - _fromStageId: 2
+    _toStageId: 3
+  - _fromStageId: 3
+    _toStageId: 4
+  - _fromStageId: 4
+    _toStageId: 5
+  - _fromStageId: 2
+    _toStageId: 6

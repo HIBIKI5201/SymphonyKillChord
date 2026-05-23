@@ -33,14 +33,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
 
-        /// <summary> ステージノードが選択されたときのイベント。選択されたステージのIDを文字列で通知します。 </summary>
-        public Action<string> OnStageNodeSelected;
+        /// <summary> ステージノードが選択されたときのイベント。選択されたステージのIDを整数で通知します。 </summary>
+        public Action<int> OnStageNodeSelected;
 
         /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
         public Action OnStageDetailClosed;
 
-        /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを文字列で通知します。 </summary>
-        public Action<string> OnStageCleared;
+        /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを整数で通知します。 </summary>
+        public Action<int> OnStageCleared;
 
         /// <summary> 
         ///     インゲームへ遷移するイベント。

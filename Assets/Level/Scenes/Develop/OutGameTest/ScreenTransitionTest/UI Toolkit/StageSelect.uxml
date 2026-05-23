@@ -1,47 +1,47 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="StageDetail" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/StageDetail.uxml?fileID=9197481963319205126&amp;guid=f07425cccfe20b7408da97871dab056c&amp;type=3#StageDetail"/>
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3"/>
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3"/>
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/USS/StageNode.uss?fileID=7433441132597879392&amp;guid=f39f0e3c948e5b4418ce49ae898075b5&amp;type=3"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/USS/StageNode.uss?fileID=7433441132597879392&amp;guid=f39f0e3c948e5b4418ce49ae898075b5&amp;type=3#StageNode"/>
     <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 100%; height: 100%; background-color: rgb(142, 144, 144);">
         <ui:Label text="作戦" name="HeadLine" style="height: 100px; width: 200px; display: flex; visibility: visible; opacity: 1; -unity-font-style: bold; font-size: 36px; -unity-text-align: middle-center; position: absolute; align-self: center;"/>
         <ui:VisualElement name="StageNodeRoot" picking-mode="Position" class="stage-map">
             <ui:VisualElement name="MainRow" class="stage-map__main-row" style="height: 604px; width: 1368px;">
-                <ui:Button name="stage_01" text="" class="button stage-node stage-node--stage">
+                <ui:Button name="1" text="" class="button stage-node stage-node--stage">
                     <ui:Label text="ス" class="stage-node__label"/>
                 </ui:Button>
-                <ui:VisualElement picking-mode="Ignore" name="stage_01-stage_boss_01" class="stage-map__connector stage-map__connector--h stage-connection">
+                <ui:VisualElement picking-mode="Ignore" name="1-2" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" enabled="true" style="flex-grow: 1; background-size: 0% 100%; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="node-boss-1-wrapper" class="stage-map__node-wrapper">
-                    <ui:Button name="stage_boss_01" class="button stage-node stage-node--boss">
+                    <ui:Button name="2" class="button stage-node stage-node--boss">
                         <ui:Label text="バ" class="stage-node__label"/>
                     </ui:Button>
                     <ui:VisualElement picking-mode="Ignore" class="stage-map__branch">
-                        <ui:VisualElement picking-mode="Ignore" name="stage_02-stage_boss_01_branch" class="stage-map__connector stage-map__connector--v stage-connection">
+                        <ui:VisualElement picking-mode="Ignore" name="2-6" class="stage-map__connector stage-map__connector--v stage-connection">
                             <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; transition-property: height; width: 100%; height: 0%;"/>
                         </ui:VisualElement>
-                        <ui:Button name="stage_boss_01_branch" class="button stage-node stage-node--boss">
+                        <ui:Button name="6" class="button stage-node stage-node--boss">
                             <ui:Label text="バ" class="stage-node__label"/>
                         </ui:Button>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement picking-mode="Ignore" name="stage_boss_01-stage_02" class="stage-map__connector stage-map__connector--h stage-connection">
+                <ui:VisualElement picking-mode="Ignore" name="2-3" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
-                <ui:Button name="stage_02" class="button stage-node stage-node--stage">
+                <ui:Button name="3" class="button stage-node stage-node--stage">
                     <ui:Label text="ス" class="stage-node__label"/>
                 </ui:Button>
-                <ui:VisualElement picking-mode="Ignore" name="stage_02-stage_boss_02" class="stage-map__connector stage-map__connector--h stage-connection">
+                <ui:VisualElement picking-mode="Ignore" name="3-4" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
-                <ui:Button name="stage_boss_02" class="button stage-node stage-node--boss">
+                <ui:Button name="4" class="button stage-node stage-node--boss">
                     <ui:Label text="バ" class="stage-node__label"/>
                 </ui:Button>
-                <ui:VisualElement picking-mode="Ignore" name="stage_boss_02-stage_03" class="stage-map__connector stage-map__connector--h stage-connection">
+                <ui:VisualElement picking-mode="Ignore" name="4-5" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
-                <ui:Button name="stage_03" class="button stage-node stage-node--stage">
+                <ui:Button name="5" class="button stage-node stage-node--stage">
                     <ui:Label text="ス" class="stage-node__label"/>
                 </ui:Button>
             </ui:VisualElement>

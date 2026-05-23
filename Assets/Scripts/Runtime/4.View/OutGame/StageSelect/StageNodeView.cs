@@ -17,7 +17,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// <param name="root"> このノードに対応する VisualElement。</param>
         /// <param name="nodeIndex"> ノードの ID。クリック時の通知に使用。</param>
         /// <param name="outGameUIEvent"> UI イベント管理クラス。</param>
-        public StageNodeView(VisualElement root, string nodeIndex, OutGameUIEvent outGameUIEvent)
+        public StageNodeView(VisualElement root, int nodeIndex, OutGameUIEvent outGameUIEvent)
         {
             _root = root;
             _nodeId = nodeIndex;
@@ -75,7 +75,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string CLASS_CLEARED = "stage-node--cleared";
 
         private readonly VisualElement _root;
-        private readonly string _nodeId;
+        private readonly int _nodeId;
         private readonly OutGameUIEvent _outGameUIEvent;
     }
 }

@@ -35,8 +35,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             var connections = new List<StageNodeConnection>(_connections.Count);
             for (var i = 0; i < _connections.Count; i++)
             {
-                if (string.IsNullOrEmpty(_connections[i].FromStageId) ||
-                    string.IsNullOrEmpty(_connections[i].ToStageId))
+                if (_connections[i].FromStageId == 0 ||
+                    _connections[i].ToStageId == 0)
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
@@ -67,16 +67,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [System.Serializable]
         private class StageNodeConnectionData
         {
-            public string FromStageId => _fromStageId;
-            public string ToStageId => _toStageId;
+            public int FromStageId => _fromStageId;
+            public int ToStageId => _toStageId;
 
             [Tooltip("接続元のステージID。")]
             [SerializeField]
-            private string _fromStageId;
+            private int _fromStageId;
 
             [Tooltip("接続先のステージID。")]
             [SerializeField]
-            private string _toStageId;
+            private int _toStageId;
         }
     }
 }

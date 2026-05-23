@@ -75,7 +75,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     ステージノードが選択されたときのイベントハンドラ。
         /// </summary>
-        private void HandleStageNodeSelected(string stageIdValue)
+        private void HandleStageNodeSelected(int stageIdValue)
         {
             _stageSelectController.OnStageNodeSelected(stageIdValue, _cts.Token);
         }
@@ -99,16 +99,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     ステージクリアを受け取り、後続ノードの解放と接続線アニメーションの完了を待機するイベントハンドラ。
         /// </summary>
-        private async void HandleStageCleared(string stageIdValue)
+        private async void HandleStageCleared(int stageIdValue)
         {
-            if (string.IsNullOrEmpty(stageIdValue))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"[{nameof(StageSelectInitializer)}] HandleStageCleared に空の stageIdValue が渡されました。");
-#endif
-                return;
-            }
-
             await CompleteAndAnimateAsync(new StageId(stageIdValue));
         }
 
@@ -207,7 +199,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private Dictionary<StageId, StageNodeConnectionView> BuildConnectionViewMap(VisualElement root)
         {
             // 接続線要素の name は "{fromId}-{toId}" 形式で設定しておくこと
-            // 例）stage_01-stage_02
+            // 例）1-2
             var connectionElements = root.Query<VisualElement>(className: CONNECTION_USS_CLASS).ToList();
             var connectionViewMap = new Dictionary<StageId, StageNodeConnectionView>(connectionElements.Count);
 
@@ -226,7 +218,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 }
 
                 // ToStageId をキーにして接続線 View を管理する
-                var toStageId = new StageId(parts[1]);
+                if (!int.TryParse(parts[1], out var toStageIdInt))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の ToStageId を int に変換できませんでした。", this);
+#endif
+                    continue;
+                }
+
+                var toStageId = new StageId(toStageIdInt);
                 connectionViewMap.Add(toStageId, new StageNodeConnectionView(element));
             }
 
@@ -250,6 +251,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 var nodeElement = nodeElements[i];
                 var stageIdValue = nodeElement.name;
 
+                // ステージノードの VisualElement の name には
+                // 対応する StageId を int 形式で設定しておくことを前提とする。
                 if (string.IsNullOrEmpty(stageIdValue))
                 {
 #if UNITY_EDITOR
@@ -259,17 +262,26 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     continue;
                 }
 
-                var stageId = new StageId(stageIdValue);
-                if (!_stageTree.TryGetNode(stageId, out var node))
+                if (!int.TryParse(stageIdValue, out var stageIdInt))
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdValue}' に対応するノードが StageTree に存在しません。", this);
+                        $"[{nameof(StageSelectInitializer)}] ノード要素 '{stageIdValue}' の name を int に変換できませんでした。", this);
 #endif
                     continue;
                 }
 
-                var nodeView = new StageNodeView(nodeElement, stageIdValue, _outGameUIEvent);
+                var stageId = new StageId(stageIdInt);
+                if (!_stageTree.TryGetNode(stageId, out var node))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdInt}' に対応するノードが StageTree に存在しません。", this);
+#endif
+                    continue;
+                }
+
+                var nodeView = new StageNodeView(nodeElement, stageIdInt, _outGameUIEvent);
 
                 // このノードへの接続線Viewを取得する（存在しない場合は null）
                 connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);

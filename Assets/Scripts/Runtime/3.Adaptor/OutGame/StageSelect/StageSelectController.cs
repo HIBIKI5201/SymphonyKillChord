@@ -29,18 +29,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     ステージノードが選択されたときの処理。
         ///     ID に対応するノードのデータを詳細 Presenter へ渡し、詳細画面を表示します。
         /// </summary>
-        /// <param name="stageIdValue"> 選択されたステージ ID の文字列値。</param>
+        /// <param name="stageIdValue"> 選択されたステージ ID の整数値。</param>
         /// <param name="token"> キャンセルトークン。</param>
-        public void OnStageNodeSelected(string stageIdValue, CancellationToken token)
+        public void OnStageNodeSelected(int stageIdValue, CancellationToken token)
         {
-            if (string.IsNullOrEmpty(stageIdValue))
-            {
-#if UNITY_EDITOR
-                UnityEngine.Debug.LogWarning($"[{nameof(StageSelectController)}] stageIdValue が null または空です。");
-#endif
-                return;
-            }
-
             var stageId = new StageId(stageIdValue);
 
             if (!_stageTree.TryGetNode(stageId, out var node))

@@ -19,7 +19,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <returns> 生成されたステージノード。</returns>
         public StageNode Create()
         {
-            if (string.IsNullOrEmpty(_stageId))
+            if (_stageId == 0)
             {
 # if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageNodeAsset)}] _stageId が設定されていません。", this);
@@ -53,7 +53,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         [Header("基礎情報")]
         [SerializeField, Tooltip("ステージを一意に識別するID。他のノードと重複しないようにすること。")]
-        private string _stageId;
+        private int _stageId;
 
         [SerializeField, Tooltip("ステージの種類。")]
         private StageType _stageType;
