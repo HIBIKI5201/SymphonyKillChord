@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace DevelopProducts.SkillTree
 {
     /// <summary>
-    ///     幅優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
+    ///     深さ優先探索を使用して、選択されたノードから解放されているノードまでの最適な経路を見つけるアルゴリズムサービス。
     ///     アプリケーション層
     /// </summary>
     [System.Serializable]
@@ -24,9 +24,10 @@ namespace DevelopProducts.SkillTree
             var bestPath = new List<SkillNodeEntity>();
             var totalCosts = int.MaxValue;
             var currentPath = new List<SkillNodeEntity>();
+            var visited = new HashSet<SkillNodeEntity>();
 
             //  選択ノードを基点に探索する
-            Search(target, tree, currentPath, 0, ref bestPath, ref totalCosts);
+            Search(target, tree, currentPath, visited, 0, ref bestPath, ref totalCosts);
 
             //  パスの数が0だったら何も無し
             if (bestPath.Count == 0)
@@ -45,12 +46,14 @@ namespace DevelopProducts.SkillTree
         /// <param name="target">探索の目標となるスキルノード。</param>
         /// <param name="skillTreeEntity">探索対象となるスキルツリー全体を表すエンティティ。</param>
         /// <param name="currentPath">現在の探索経路を表すスキルノードのリスト。探索の進行に応じて更新されます。</param>
+        /// <param name="visited">現在のい経路探索上で探索済みのノードセット。</param>
         /// <param name="currentCost">現在の経路における累積コスト。</param>
         /// <param name="bestPath">最適経路が見つかった場合に、その経路のスキルノードリストが格納される参照。</param>
         /// <param name="bestCost">最適経路のコストが見つかった場合に、そのコストが格納される参照。</param>
         private void Search(SkillNodeEntity target,
                             SkillTreeEntity skillTreeEntity,
                             List<SkillNodeEntity> currentPath,
+                            HashSet<SkillNodeEntity> visited,
                             int currentCost,
                             ref List<SkillNodeEntity> bestPath,
                             ref int bestCost)
@@ -72,15 +75,20 @@ namespace DevelopProducts.SkillTree
 
                 return;
             }
+            //  自己ループ・サイクル防止（Insert前にチェック）
+            if (visited.Contains(target))
+                return;
 
-            //  現在のノードを経路に追加してから親へ進む
+            //  現在のノードを経路と訪問済み集合に追加してから親へ進む
             currentPath.Insert(0, target);
+            visited.Add(target);
             int totalCost = currentCost + target.UnlockCost.Cost;
 
             //  もしコストが最小コストを上回ったら枝を切る
             if (totalCost >= bestCost)
             {
                 currentPath.RemoveAt(0);
+                visited.Remove(target);
                 return;
             }
             // 現在のノードから親のノードを取得する
@@ -90,15 +98,17 @@ namespace DevelopProducts.SkillTree
             if (parents.Count == 0)
             {
                 currentPath.RemoveAt(0);
+                visited.Remove(target);
                 return;
             }
 
             foreach (var parent in parents)
             {
-                Search(parent, skillTreeEntity, currentPath, totalCost, ref bestPath, ref bestCost);
+                Search(parent, skillTreeEntity, currentPath, visited, totalCost, ref bestPath, ref bestCost);
             }
 
             currentPath.RemoveAt(0);
+            visited.Remove(target);
         }
     }
 }
