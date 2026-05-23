@@ -6,7 +6,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.Persistent.Input
 {
     /// <summary>
     ///     入力の初期化クラス。

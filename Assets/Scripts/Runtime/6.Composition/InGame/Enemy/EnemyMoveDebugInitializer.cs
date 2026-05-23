@@ -1,22 +1,18 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
-using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using KillChord.Runtime.View;
-using KillChord.Runtime.View.InGame;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using SymphonyFrameWork.System.ServiceLocate;
 using Unity.Behavior;
 using UnityEngine;
@@ -24,7 +20,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     敵移動の依存関係を構築する。
+    ///     敵歩兵移動の依存関係を構築する。
     /// </summary>
     public class EnemyMoveDebugInitializer : MonoBehaviour
     {
@@ -36,6 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private int _attackIndex;
 
         [SerializeField] private EnemyMoveView _view;
+        [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
@@ -45,26 +42,41 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemySharedFacade _enemySharedFacade;
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
 
+        [Header("砲兵の場合のみ必要")]
+        [SerializeField] private ShellSpawner _shellSpawner;
+
         private TargetEntityRegistryController _targetEntityRegistryController;
         private TargetManagerController _targetManagerController;
         private LockOnTargetGateway _lockOnTargetGateway;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
+        private IEnemyAttackControllerGenerator _attackControllerGenerator;
 
         public void Initialize(
             Transform target,
             CharacterEntity targetEntity,
-            IMusicSyncViewModel musicSyncViewModel,
+            MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
             TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController
+            TargetEntityRegistryController targetEntityRegistryController,
+            IEnemyAttackControllerGenerator attackControllerGenerator
             )
         {
+            if (_view == null)
+                Debug.LogError($"{nameof(EnemyMoveView)}の参照がありません。");
+            if (_healthView == null)
+                Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
+            if (_raycastView == null)
+                Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
+            if (_attackPositionSearchView == null)
+                Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
             _enemyEntity = CharacterFactory.Create(_enemyData);
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            _attackControllerGenerator = attackControllerGenerator;
             if (_missionEventController != null && _missionKeyAsset != null)
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
@@ -83,20 +95,26 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
 
-            IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncViewModel, musicSyncService);
+            IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
 
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(musicSyncService, raycastDetectService);
+            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
             EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
 
+            // AttackController生成用コンテキスト
+            EnemyAttackControllerContext attackControllerContext = new EnemyAttackControllerContext(attackUsecase, battleState, _shellSpawner);
+
             // Controller
-            EnemyInfantryAttackController attackController = new EnemyInfantryAttackController(attackUsecase, battleState);
-            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, attackUsecase, battleState, _enemyStateFacade, attackController);
+            IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
+            EnemyAIController controller = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
+
+            // HP Presenter
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, null);
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
@@ -106,6 +124,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             _view.Initialize(controller, target);
+            _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();
 
@@ -120,6 +139,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _attackPositionSearchView.enabled = true;
         }
 
+        /// <summary>
+        ///     敵死亡時に実行する処理。
+        /// </summary>
+        /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
             if (_missionKeyAsset == null)

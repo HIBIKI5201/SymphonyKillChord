@@ -3,6 +3,7 @@
   <Project Path="CriMw.CriWare.Runtime.csproj" />
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="KillChord.Adaptor.csproj" />
+  <Project Path="KillChord.Composition.csproj" />
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
   <Project Path="KillChord.Structure.csproj" />
@@ -26,7 +27,6 @@
   <Project Path="UniGLTF.UniUnlit.csproj" />
   <Project Path="SkillTreeDevelopProducts.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
-  <Project Path="KillChord.Composition.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
   <Project Path="KillChord.Develop.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />

@@ -2,13 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
+    /// <summary>
+    /// テキストイベントを逐次表示しトリガー発火も管理する。
+    /// </summary>
     public class TextEventHandler : IScenarioEventHandler<TextEvent>
     {
+        /// <summary>
+        /// テキスト表示とトリガー処理に必要な依存関係を受け取る。
+        /// </summary>
         public TextEventHandler(
             ITextOutputPort textOutputPort,
             IScenarioEventEmitter eventEmitter,
@@ -20,6 +26,9 @@ namespace KillChord.Runtime.Adaptor
             _playbackState = playbackState;
             _settingsRepository = settingsRepository;
         }
+        /// <summary>
+        /// 受け取ったイベントを現在の出力先へ反映する。
+        /// </summary>
         public async ValueTask HandleAsync(TextEvent e, CancellationToken ct)
         {
             var fired = new HashSet<TextTimingTrigger>();
@@ -50,6 +59,9 @@ namespace KillChord.Runtime.Adaptor
             }
         }
 
+        /// <summary>
+        /// 表示済み文字数に応じて発火条件を満たしたトリガーを実行する。
+        /// </summary>
         private async ValueTask TryFireTriggersAsync(
             IReadOnlyList<TextTimingTrigger> triggers,
             HashSet<TextTimingTrigger> fired,

@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
     /// <summary>
-    ///     入力履歴に基づいて発動可能なスキルを判定するサービス。
+    /// 入力履歴に基づいて発動可能なスキルを判定するサービス。
     /// </summary>
     public class SkillCheckService
     {
-        public static bool TryCheckSkills(
+        /// <summary>
+        /// 装備中のスキル群と入力履歴から、発動したスキルのインデックスと最後の攻撃タイプを取得する。
+        /// </summary>
+        public bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
             ReadOnlySpan<BeatType> history,
             out int skillIndex, out BeatType lastAttackType)
@@ -31,6 +35,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
             {
                 if (equipmentSkills[i].IsMatch(reversInput))
                 {
+                    Debug.Log($"[SkillCheckService] SKILL ACTIVATED. SKILL ID: {equipmentSkills[i].Id.Value}");
                     skillIndex = i;
                     lastAttackType = reversInput[0];
                     return true;

@@ -1,33 +1,32 @@
-using KillChord.Runtime.View;
-using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using System;
 using Unity.Behavior;
 using Unity.Properties;
 using UnityEngine;
-using Action = Unity.Behavior.Action;
 
-[Serializable, GeneratePropertyBag]
-[NodeDescription(name: "StopMoving", story: "移動を停止する [Movement] [State]", category: "Action", id: "72e36c342c9233772b0a01e15cd5b846")]
-public partial class StopMovingAction : Action
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
-    [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;
-    [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
-
-    protected override Status OnStart()
+    [Serializable, GeneratePropertyBag]
+    [NodeDescription(name: "StopMoving", story: "移動を停止する [Movement] [State]", category: "Action", id: "72e36c342c9233772b0a01e15cd5b846")]
+    public partial class StopMovingAction : Unity.Behavior.Action
     {
-        if (Movement?.Value == null
-            || State?.Value == null) return Status.Failure;
-        Movement.Value.StopMoving();
-        return Status.Success;
-    }
+        [SerializeReference] public BlackboardVariable<EnemyMovementAIFacade> Movement;
+        [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
 
-    protected override Status OnUpdate()
-    {
-        return Status.Success;
-    }
+        protected override Unity.Behavior.Node.Status OnStart()
+        {
+            if (Movement?.Value == null || State?.Value == null) return Unity.Behavior.Node.Status.Failure;
+            Movement.Value.StopMoving();
+            return Unity.Behavior.Node.Status.Success;
+        }
 
-    protected override void OnEnd()
-    {
+        protected override Unity.Behavior.Node.Status OnUpdate()
+        {
+            return Unity.Behavior.Node.Status.Success;
+        }
+
+        protected override void OnEnd()
+        {
+        }
     }
 }
-

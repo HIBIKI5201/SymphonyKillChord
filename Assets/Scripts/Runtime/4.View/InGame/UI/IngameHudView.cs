@@ -2,7 +2,7 @@ using R3;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.UI
 {
     /// <summary>
     ///     ゲーム中のHUD表示を行うViewクラス。

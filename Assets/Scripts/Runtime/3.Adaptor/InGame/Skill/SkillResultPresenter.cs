@@ -1,21 +1,23 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
-    ///     スキルの結果をViewModel向けDTOへ変換して渡すプレゼンタークラス。
+    /// プレゼンター：ドメインのSkillDefinitionをViewModel用DTOへ変換して通知する責務を持つ。
     /// </summary>
     public class SkillResultPresenter
     {
+        /// <summary>
+        /// コンストラクタ。出力先のViewModelを受け取る。
+        /// </summary>
         public SkillResultPresenter(ISkillResultViewModel viewModel)
         {
             _viewModel = viewModel;
         }
 
         /// <summary>
-        ///     スキル結果をViewModel向けDTOへ変換して渡すメソッド。
+        /// ドメインのSkillDefinitionをSkillResultDTOに変換してViewModelに渡す。
         /// </summary>
-        /// <param name="result"></param>
         public void Push(SkillDefinition result)
         {
             var span = result.SkillPattern.Signatures;

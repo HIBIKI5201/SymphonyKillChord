@@ -1,17 +1,26 @@
 using System;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
-    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogAsset.Entry>, IBackgroundRepository
+    /// <summary>
+    /// Background の参照情報を取得するリポジトリ。
+    /// </summary>
+    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogEntry>, IBackgroundRepository
     {
+        /// <summary>
+        /// 背景カタログから参照情報を構築する。
+        /// </summary>
         public BackgroundRepository(BackgroundCatalogAsset catalog)
             : base(catalog != null ? catalog.Entries : null)
         {
         }
 
-        protected override bool TryBuild(BackgroundCatalogAsset.Entry entry, out string id, out BackgroundDefinition definition)
+        /// <summary>
+        /// カタログエントリから検索用の定義情報を生成する。
+        /// </summary>
+        protected override bool TryBuild(BackgroundCatalogEntry entry, out string id, out BackgroundDefinition definition)
         {
             id = entry.Id;
             if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)

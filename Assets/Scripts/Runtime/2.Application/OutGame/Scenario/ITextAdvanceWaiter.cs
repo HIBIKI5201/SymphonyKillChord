@@ -2,10 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.OutGame.Scenario
 {
+    /// <summary>
+    /// テキスト送り入力を待機する契約を定義する。
+    /// </summary>
     public interface ITextAdvanceWaiter
     {
-        public ValueTask WaitNextAsync(CancellationToken ct);
+        ValueTask WaitNextAsync(CancellationToken ct);
     }
 }

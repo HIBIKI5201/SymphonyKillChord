@@ -1,9 +1,9 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace KillChord.Runtime.View.InGame
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     毎フレーム敵移動を更新するビュー。
@@ -12,6 +12,11 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="enemyAIController"></param>
+        /// <param name="target"></param>
         public void Initialize(EnemyAIController enemyAIController,
             Transform target)
         {
@@ -21,6 +26,10 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack += PlayEffectHit;
         }
 
+        /// <summary>
+        ///     攻撃目標のTransformを取得する。
+        /// </summary>
+        /// <returns></returns>
         public Transform GetTargetTransform()
         {
             return _target;
@@ -66,12 +75,16 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
         }
-
+        /// <summary>
+        ///     攻撃を予約するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectReserved()
         {
             ParticleController.Instance.PlayParticleReserve(transform.position);
         }
-
+        /// <summary>
+        ///     攻撃を実行するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectHit()
         {
             ParticleController.Instance.PlayParticle(transform.position);

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edf783b390a177a42bb1aec28341bc15, type: 3}
+  m_Name: SkillUITestSkillRepositry
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
+  _skillDataAssets:
+  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}

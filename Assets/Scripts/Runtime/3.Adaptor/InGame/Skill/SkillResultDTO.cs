@@ -1,22 +1,30 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
-    ///     スキルの結果を表すデータ転送オブジェクト（DTO）。
+    /// スキル結果を表すデータ転送オブジェクト（DTO）。
     /// </summary>
     public readonly struct SkillResultDTO
     {
+        /// <summary>
+        /// コンストラクタ。スキルIDとパターン配列からDTOを構築する。
+        /// </summary>
         public SkillResultDTO(int skillId, int[] skillPattern)
         {
             SkillId = skillId;
             SkillPattern = skillPattern;
         }
 
+        /// <summary>
+        /// スキルID。
+        /// </summary>
         public int SkillId { get; }
 
-        //非同期処理でも使えるため、ReadOnlyMemoryを使用している。
+        /// <summary>
+        /// スキル入力パターン（読み取り専用メモリ）。
+        /// </summary>
         public ReadOnlyMemory<int> SkillPattern { get; }
     }
 }
