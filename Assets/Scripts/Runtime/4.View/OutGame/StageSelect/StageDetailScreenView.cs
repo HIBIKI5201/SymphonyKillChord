@@ -53,6 +53,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {BACK_BUTTON} が見つかりませんでした。");
 
+            _sortieButton = rootElement.Q<Button>(SORTIE_BUTTON)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON} が見つかりませんでした。");
+
             RegisterButtonCallback();
         }
 
@@ -96,6 +100,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private void RegisterButtonCallback()
         {
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
+            _sortieButton.RegisterCallback<ClickEvent>(OnSortieButtonClicked);
         }
 
         /// <summary>
@@ -104,6 +109,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private void UnregisterButtonCallback()
         {
             _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _sortieButton.UnregisterCallback<ClickEvent>(OnSortieButtonClicked);
         }
 
         /// <summary>
@@ -115,6 +121,15 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             OutGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
+        /// <summary>
+        ///     出撃ボタンがクリックされたときの処理。
+        ///     戦闘準備画面を表示するイベントを発火します。
+        /// </summary>
+        private void OnSortieButtonClicked(ClickEvent evt)
+        {
+            OutGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
+        }
+
         private const string STAGE_NAME_LABEL = "StageNameLabel";
         private const string FLAVOR_TEXT_LABEL = "FlavorTextLabel";
         private const string REWARD_SKILL_BUILD_LABEL = "RewardSkillBuildLabel";
@@ -124,6 +139,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string SUB_MISSION_LABEL2 = "SubMissionLabel2";
         private const string MISSION_SECTION = "MissionSection";
         private const string BACK_BUTTON = "BackButton";
+        private const string SORTIE_BUTTON = "SortieButton";
 
         private readonly Label _stageNameLabel;
         private readonly Label _flavorTextLabel;
@@ -134,5 +150,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private readonly Label _subMissionLabel2;
         private readonly VisualElement _missionSection;
         private readonly Button _backButton;
+        private readonly Button _sortieButton;
     }
 }
