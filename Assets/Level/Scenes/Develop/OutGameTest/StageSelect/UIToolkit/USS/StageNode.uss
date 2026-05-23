@@ -12,7 +12,7 @@
 .stage-map__node-wrapper {
     flex-direction: column;
     align-items: center;
-    translate: 0 80px;
+    translate: 0 30%;
 }
 
 .stage-map__branch {
