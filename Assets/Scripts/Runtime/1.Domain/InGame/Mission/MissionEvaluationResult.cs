@@ -16,7 +16,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             int achievedCount = 0;
             for (int i = 0; i < _progresses.Length; i++)
             {
-                if (_progresses[i].IsAchieved)
+                if (_progresses[i].IsSucceeded)
                 {
                     achievedCount++;
                 }
