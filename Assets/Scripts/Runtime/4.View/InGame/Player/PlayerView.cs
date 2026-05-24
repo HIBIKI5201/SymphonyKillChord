@@ -1,4 +1,5 @@
 using CriWare;
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
+        private ICharacterAnimationController _characterAnimationController;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
 
@@ -57,12 +59,14 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Initialize(
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
+            ICharacterAnimationController characterAnimationController,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _characterAnimationController = characterAnimationController;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -172,7 +176,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 dir = Vector2.zero;
             }
 
-            _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
+            //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
             if (_isDodge)
@@ -193,6 +197,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
+            _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
