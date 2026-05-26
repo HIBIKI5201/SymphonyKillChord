@@ -1,11 +1,10 @@
-using Codice.Client.Common.GameUI;
 using KillChord.Runtime.View.InGame.Enemy;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     テスト用の砲兵スポナー。
+    ///     砲兵のスポナークラス。
     /// </summary>
     public class EnemyArtillerySpawner : MonoBehaviour
     {
@@ -67,7 +66,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             for (int i = 0; i < _spawnPositions.Length; i++)
             {
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery().GetComponent<EnemyLifeCycle>();
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                 lifeCycle.Activate(_spawnPositions[i], HandleArtilleryDeactivated);
                 _spawnCount++;
             }
@@ -81,7 +80,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             for (int i = 0; i < assignedPositions.Length; i++)
             {
-                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery().GetComponent<EnemyLifeCycle>();
+                if (assignedPositions[i] == null)
+                {
+                    Debug.LogError("[EnemyArtillerySpawner] 事前配置の位置情報がNULL。");
+                    continue;
+                }
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                 lifeCycle.Activate(assignedPositions[i].position, HandleArtilleryDeactivated);
                 _spawnCount++;
             }
