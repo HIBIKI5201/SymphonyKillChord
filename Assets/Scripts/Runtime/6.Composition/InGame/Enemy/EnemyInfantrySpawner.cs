@@ -4,7 +4,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     テスト用の歩兵スポナー。
+    ///     歩兵のスポナークラス。
     /// </summary>
     public class EnemyInfantrySpawner : MonoBehaviour
     {
@@ -66,7 +66,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             for (int i = 0; i < _spawnPositions.Length; i++)
             {
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry().GetComponent<EnemyLifeCycle>();
+                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
                 lifeCycle.Activate(_spawnPositions[i], HandleInfantryDeactivated);
                 _spawnCount++;
             }
@@ -80,7 +80,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             for (int i = 0; i < assignedPositions.Length; i++)
             {
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry().GetComponent<EnemyLifeCycle>();
+                if (assignedPositions[i] == null)
+                {
+                    Debug.LogError("[EnemyInfantrySpawner] 事前配置の位置情報がNULL。");
+                    continue;
+                }
+                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
                 lifeCycle.Activate(assignedPositions[i].position, HandleInfantryDeactivated);
                 _spawnCount++;
             }
