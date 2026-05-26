@@ -25,6 +25,7 @@
   <Project Path="DevelopProducts-ToonShader.Editor.csproj" />
   <Project Path="DevelopProducts-ToonShader.csproj" />
   <Project Path="UniGLTF.UniUnlit.csproj" />
+  <Project Path="SkillTreeDevelopProducts.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
   <Project Path="KillChord.Develop.csproj" />
