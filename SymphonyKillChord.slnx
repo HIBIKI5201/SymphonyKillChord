@@ -9,6 +9,7 @@
   <Project Path="KillChord.Structure.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniHumanoid.csproj" />
+  <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="KillChord.View.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />

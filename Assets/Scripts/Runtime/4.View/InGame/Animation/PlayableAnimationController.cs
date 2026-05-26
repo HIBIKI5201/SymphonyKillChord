@@ -17,6 +17,10 @@ namespace KillChord.Runtime.View
         /// <param name="clips"> アニメーションクリップの配列。 </param>
         public PlayableAnimationController(Animator animator, AnimationClip[] clips)
         {
+            if (animator == null) throw new ArgumentNullException(nameof(animator));
+            if (clips == null) throw new ArgumentNullException(nameof(clips));
+
+            _clips = clips;
             _playables = new List<AnimationClipPlayable>(clips.Length);
 
             // PlayableGraphを構築する
@@ -29,6 +33,10 @@ namespace KillChord.Runtime.View
             // インデックス順にclipをMixerへ登録する
             for (int i = 0; i < clips.Length; i++)
             {
+                if (clips[i] == null)
+                {
+                    throw new ArgumentException($"Clip at index {i} is null.", nameof(clips));
+                }
                 var playable = AnimationClipPlayable.Create(_graph, clips[i]);
                 playable.SetApplyFootIK(false);
                 playable.SetApplyPlayableIK(false);
@@ -71,6 +79,21 @@ namespace KillChord.Runtime.View
             }
         }
 
+        // クリップを先頭に戻して再生位置をリセットする（先頭から確実に再生させたい時に呼ぶ）
+        public void ReplayClipAtIndex(int index)
+        {
+            if (index < 0 || index >= _playables.Count) return;
+            _playables[index].SetTime(0.0);
+            // MixerでのウェイトはView側でフェードする想定なのでここでは再生位置のみリセットする
+        }
+
+        // 生のクリップ長（秒）を返す
+        public float GetClipLength(int index)
+        {
+            if (index < 0 || index >= _clips.Length) return 0f;
+            return _clips[index] != null ? _clips[index].length : 0f;
+        }
+
         /// <summary> PlayableGraphを破棄する。 </summary>
         public void Dispose()
         {
@@ -88,5 +111,6 @@ namespace KillChord.Runtime.View
         private readonly AnimationMixerPlayable _mixer;
         // Playableをリストで管理することで、状態追加時もコード変更不要にする。
         private readonly List<AnimationClipPlayable> _playables;
+        private readonly AnimationClip[] _clips;
     }
 }

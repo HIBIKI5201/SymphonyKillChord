@@ -118,10 +118,20 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _isInvincible = isInvincible;
         }
 
-        private readonly CharacterName _name;
-        private readonly HealthEntity _health;
-        private readonly CharacterCombatSpec _combatSpec;
-        private readonly AttackIntervalEntity _attackIntervalEntity;
+        /// <summary>
+        ///     再初期化処理。
+        /// </summary>
+        public void Reset()
+        {
+            _health.ChangeHealth(new Health(_health.MaxHealth.Value));
+            _isDeadNotified = false;
+            _isInvincible = false;
+        }
+
+        private CharacterName _name;
+        private HealthEntity _health;
+        private CharacterCombatSpec _combatSpec;
+        private AttackIntervalEntity _attackIntervalEntity;
         private bool _isDeadNotified;
         private bool _isInvincible;
     }

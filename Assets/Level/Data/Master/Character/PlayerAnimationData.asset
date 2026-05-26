@@ -17,3 +17,5 @@ MonoBehaviour:
     Clip: {fileID: 2299095657827748018, guid: b4c321926d8a47c409ea6fdd3cf8c4d1, type: 3}
   - State: 1
     Clip: {fileID: 7400000, guid: e9b3e9957383f4c4eb4bbfc707ee3ff8, type: 2}
+  - State: 2
+    Clip: {fileID: 2914187182157092610, guid: c5dd4d6c703302246b0918e71e72d8fb, type: 3}
