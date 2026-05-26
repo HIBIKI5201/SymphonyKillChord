@@ -163,7 +163,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &219233514
+--- !u!1 &352402303
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,44 +171,60 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 219233515}
-  - component: {fileID: 219233516}
-  m_Layer: 0
-  m_Name: ShellInitializeer
+  - component: {fileID: 352402304}
+  - component: {fileID: 352402305}
+  m_Layer: 5
+  m_Name: RowRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &219233515
-Transform:
+--- !u!224 &352402304
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 219233514}
-  serializedVersion: 2
+  m_GameObject: {fileID: 352402303}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25.59384, y: 4.91708, z: -20.99003}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1493948679}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &219233516
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -516, y: 435}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &352402305
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 219233514}
+  m_GameObject: {fileID: 352402303}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f94c494d6fcab574f9f0d986d2eeb5c9, type: 3}
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.ShellInitializer
-  _attackData: {fileID: 11400000, guid: 7abb1786189c6ab409df92032a7b3bb6, type: 2}
-  _musicData: {fileID: 11400000, guid: d69421e5dc9278446a38b4415677e2aa, type: 2}
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 10
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &419177558
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,6 +328,9 @@ MonoBehaviour:
   _mobileInput: {fileID: 887821559}
   _rhythmGuideInitializer: {fileID: 678096161}
   _backgroundSceneName: Stage_01
+  _enemyPools: {fileID: 1599172285}
+  _enemyInitializer: {fileID: 1599172287}
+  _enemySpawnPositionSearcher: {fileID: 1443016744}
 --- !u!4 &438459090
 Transform:
   m_ObjectHideFlags: 0
@@ -340,6 +359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
   _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
+  _skillVisuals: []
 --- !u!1 &456552175
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,26 +414,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _target
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _playerT
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2786661489550224862, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: _enemyTestSpawner
-      value: 
-      objectReference: {fileID: 1136649845}
-    - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: Lens.ModeOverride
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5175733637733466406, guid: a259115a9df77c44da61ba832833f97b, type: 3}
-      propertyPath: Target.TrackingTarget
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5247649918134476368, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: m_Name
       value: CameraManager
@@ -564,8 +564,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47723e9fbd3ba474cb780af31342ac26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MissionHudView
-  _mainMissionText: {fileID: 0}
-  _resultText: {fileID: 0}
+  _mainMissionText: {fileID: 887821562}
+  _resultText: {fileID: 887821561}
+  _evaluationRoot: {fileID: 1122440035}
+  _evaluationItemPrefab: {fileID: 336023683454222207, guid: a51efe594d583f6458d83a071e661097, type: 3}
+  _evaluationItemSpacing: 50
 --- !u!114 &866643817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -690,7 +693,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8234020887636748037, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1493948679}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
 --- !u!114 &887821557 stripped
@@ -726,6 +732,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00dafdea7818d9c439d79a7e9a48a481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MobileInput
+--- !u!224 &887821560 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8234020887636748037, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &887821561 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 912727433248900451, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &887821562 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5369553578249869401, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!224 &1122440035 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5105896127615380062, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1136649842
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,11 +808,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb76d31aed150974e926b35db6e4acc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyInfantryTestSpawner
-  _enemyPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
+  _enemyPools: {fileID: 1599172285}
   _spawnPoint: {fileID: 1136649844}
-  _spawnInterval: 3
-  _maxSpawnCount: 1
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
+  _spawnDistance: 10
+  _spawnInterval: 5
+  _spawnBatchCount: 2
+  _maxSpawnCount: 3
+  _spawnPositionSearcher: {fileID: 1443016744}
 --- !u!1 &1249666140
 GameObject:
   m_ObjectHideFlags: 0
@@ -807,7 +847,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 1249666142}
   _testCue: Cyber
-  _testBpm: 60
+  _testBpm: 105
+  _justTimingThreshold: 0.1
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -820,7 +861,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3702ab398ffa2534a8eacb53dba166e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MusicSyncView
-  _testBpm: 60
 --- !u!4 &1249666143
 Transform:
   m_ObjectHideFlags: 0
@@ -836,6 +876,186 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1443016743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1443016745}
+  - component: {fileID: 1443016744}
+  m_Layer: 0
+  m_Name: EnemySpawnPositionSearcher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1443016744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443016743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f292d55ca8a5a4cb51b0b65b69d27a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemySpawnPositionSearcher
+  _samplingCount: 36
+  _defaultPosition: {fileID: 1443016745}
+  _drawGizmoFlg: 0
+--- !u!4 &1443016745
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443016743}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10, y: 0, z: -7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1493948678
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1493948679}
+  - component: {fileID: 1493948681}
+  - component: {fileID: 1493948680}
+  m_Layer: 5
+  m_Name: SkillInputProgressView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1493948679
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1493948678}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 352402304}
+  m_Father: {fileID: 887821560}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1493948680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1493948678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 047240a05ed03284c8026a84ee6a5d99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillInputProgressSpawner
+  _rowPrefab: {fileID: 7518163132570677971, guid: dc579867c3233e14fb5c950faf354e70, type: 3}
+  _stepPrefab: {fileID: 5679059164787724406, guid: 98c77ce8cb5fa9241bb5591444517747, type: 3}
+--- !u!114 &1493948681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1493948678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b8c9caeb3dfd37429e81adcdaa8102c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillInputProgressView
+  _rowRoot: {fileID: 352402304}
+  _spawner: {fileID: 1493948680}
+--- !u!1 &1599172284
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1599172286}
+  - component: {fileID: 1599172285}
+  - component: {fileID: 1599172287}
+  m_Layer: 0
+  m_Name: EnemyPools
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1599172285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599172284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bff06e97929e05145a813a2657adbcf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyPools
+  _initializer: {fileID: 1599172287}
+  _infantryPrefab: {fileID: 2601078670896065214, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
+  _defaultInfantryPoolSize: 10
+  _maxInfantryPoolSize: 20
+  _artilleryPrefab: {fileID: 1517351015878630201, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _defaultArtilleryPoolSize: 10
+  _maxArtilleryPoolSize: 20
+  _shellPrefab: {fileID: 425184521389573371, guid: 18302f9c3e6be1f46bfa34f66180b21c, type: 3}
+  _defaultShellPoolSize: 20
+  _maxShellPoolSize: 40
+--- !u!4 &1599172286
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599172284}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1660, y: 868, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1599172287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599172284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38a73cab12d86aa45893103822914a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.EnemyInitializer
 --- !u!1 &1643795330
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,11 +1160,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4951324db1e6bb64dbc57ee260f51bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyIArtilleryTestSpawner
-  _enemyPrefab: {fileID: 1517351015878630201, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _enemyPools: {fileID: 1599172285}
   _spawnPoint: {fileID: 1772279157}
-  _spawnInterval: 3
-  _maxSpawnCount: 1
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
+  _spawnDistance: 10
+  _spawnInterval: 6
+  _spawnBatchCount: 2
+  _maxSpawnCount: 3
+  _spawnPositionSearcher: {fileID: 1443016744}
 --- !u!1001 &1898526996
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1079,12 +1301,13 @@ SceneRoots:
   - {fileID: 1772279157}
   - {fileID: 456552177}
   - {fileID: 1898526996}
+  - {fileID: 58835741}
   - {fileID: 2031779337}
   - {fileID: 1249666143}
   - {fileID: 438459090}
-  - {fileID: 58835741}
   - {fileID: 419177560}
   - {fileID: 866643818}
-  - {fileID: 219233515}
   - {fileID: 887821556}
   - {fileID: 678096162}
+  - {fileID: 1599172286}
+  - {fileID: 1443016745}

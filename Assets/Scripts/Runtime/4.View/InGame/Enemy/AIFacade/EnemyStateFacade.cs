@@ -1,7 +1,8 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using UnityEngine;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
 {
     /// <summary>
     ///     敵AI用ファサード：状態判定系。
@@ -43,9 +44,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void Stunned()
         {
-            CancelInvoke(nameof(StunRecover));
-            // TODO 2秒後回復。一時。今後はAnimation Controllerで制御するはず
-            Invoke(nameof(StunRecover), 2f);
+            // 一時。今後はAnimation Controllerで制御するはず
+            Debug.Log("[EnemyStateFacade] クリティカルにより、敵硬直発生。");
         }
         /// <summary>
         ///     硬直回復。

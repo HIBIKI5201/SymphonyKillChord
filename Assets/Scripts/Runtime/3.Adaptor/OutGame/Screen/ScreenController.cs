@@ -56,6 +56,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
+        ///     戦闘準備画面を表示します。
+        /// </summary>
+        public async Task ShowBattlePreparation(CancellationToken token)
+        {
+            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.BattlePreparation), token);
+        }
+
+        /// <summary>
         ///     設定画面を表示します。
         /// </summary>
         public async Task ShowSetting(CancellationToken token)

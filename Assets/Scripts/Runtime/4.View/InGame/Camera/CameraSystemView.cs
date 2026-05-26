@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Adaptor.Persistent.Input;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.InGame;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,6 +14,13 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
+        /// <summary>
+        ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
+        /// </summary>
+        /// <param name="controller"> カメラシステムのコントローラー。</param>
+        /// <param name="presenter"> カメラシステムのプレゼンター。</param>
+        /// <param name="playerT"> プレイヤーの Transform。</param>
+        /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
         public void Initialize(
             CameraSystemController controller,
             CameraSystemPresenter presenter,
@@ -34,9 +42,12 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnAttackInput += OnAttack;
         }
 
-        [SerializeField] private Transform _cameraT;
-        [SerializeField] private UpdateModeEnum _updateMode;
-        [SerializeField] private int _cameraSensitivity = 5;
+        [SerializeField, Tooltip("カメラの Transform")]
+        private Transform _cameraT;
+        [SerializeField, Tooltip("カメラ更新タイミングの設定")]
+        private UpdateModeEnum _updateMode;
+        [SerializeField, Tooltip("カメラの感度")]
+        private int _cameraSensitivity = 5;
 
         private CameraSystemController _controller;
         private CameraSystemPresenter _presenter;
@@ -45,12 +56,18 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Vector2 _input;
         private Vector2 _moveInput;
 
+        /// <summary>
+        ///     FixedUpdate タイミングでカメラを更新する。
+        /// </summary>
         private void FixedUpdate()
         {
             if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
             Tick(Time.fixedDeltaTime);
         }
 
+        /// <summary>
+        ///     Update タイミングでカメラを更新する。
+        /// </summary>
         private void Update()
         {
             if (_controller == null || _playerT == null) { return; }
@@ -60,6 +77,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             Tick(Time.deltaTime);
         }
 
+        /// <summary>
+        ///     LateUpdate タイミングでカメラを更新する。
+        /// </summary>
         private void LateUpdate()
         {
             if (_controller == null || _playerT == null) { return; }
@@ -69,6 +89,27 @@ namespace KillChord.Runtime.View.InGame.Camera
             Tick(Time.deltaTime);
         }
 
+        /// <summary>
+        ///     入力イベントの購読解除を行う。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_inputView == null) { return; }
+
+#if UNITY_ANDROID
+            _inputView.OnMobileLookInput -= LookHandler;
+#else
+            _inputView.OnLookInput -= LookHandler;
+#endif
+            _inputView.OnMoveInput -= MoveHandler;
+            _inputView.OnLockOnInput -= LockOnHandler;
+            _inputView.OnAttackInput -= OnAttack;
+        }
+
+        /// <summary>
+        ///     視点操作入力を受け取り、入力値を更新する。
+        /// </summary>
+        /// <param name="context"> 視点操作の入力コンテキスト。</param>
         private void LookHandler(InputContext<Vector2> context)
         {
             _input = context.Value;
@@ -77,7 +118,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     移動入力を受け取り、入力値を更新する。
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context"> 移動操作の入力コンテキスト。</param>
         private void MoveHandler(InputContext<Vector2> context)
         {
             _moveInput = context.Value;
@@ -86,7 +127,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     ロックオン入力を受け取り、マニュアルロックオン状態をトグルする。
         /// </summary>
-        /// /// <param name="context"></param>
+        /// <param name="context"> ロックオン操作の入力コンテキスト。</param>
         private void LockOnHandler(InputContext<float> context)
         {
             if (context.Phase == InputActionPhase.Started)
@@ -98,7 +139,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     攻撃入力を受け取り、オートロックオンの発動を試みる。
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context"> 攻撃操作の入力コンテキスト。</param>
         private void OnAttack(InputContext<float> context)
         {
             if (context.Phase == InputActionPhase.Started)
@@ -107,9 +148,14 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
         }
 
+        /// <summary>
+        ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
+        /// </summary>
+        /// <param name="deltaTime"> 前フレームからの経過時間。</param>
         private void Tick(float deltaTime)
         {
-            if (_controller == null || _playerT == null) { return; }
+            if (_controller == null || _presenter == null||
+                _playerT == null || _cameraT == null) { return; }
             Vector2 input = _input * _cameraSensitivity;
             _input = Vector2.zero;
 

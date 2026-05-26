@@ -1,6 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
     /// プレゼンター：ドメインのSkillDefinitionをViewModel用DTOへ変換して通知する責務を持つ。

@@ -1,19 +1,28 @@
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
-    public class AnimationEventHandler : IScenarioEventHandler<KillChord.Runtime.Domain.AnimationEvent>
+    /// <summary>
+    /// Animation イベントを出力処理へ橋渡しする。
+    /// </summary>
+    public class AnimationEventHandler : IScenarioEventHandler<AnimationEvent>
     {
+        /// <summary>
+        /// アニメーションイベント用の依存関係を受け取る。
+        /// </summary>
         public AnimationEventHandler(IAnimationOutputPort animationOutputPort, IAnimationRepository animationRepository)
         {
             _animationOutputPort = animationOutputPort;
             _animationRepository = animationRepository;
         }
 
-        public async ValueTask HandleAsync(KillChord.Runtime.Domain.AnimationEvent e, CancellationToken ct)
+        /// <summary>
+        /// 受け取ったイベントを現在の出力先へ反映する。
+        /// </summary>
+        public async ValueTask HandleAsync(AnimationEvent e, CancellationToken ct)
         {
             if (!_animationRepository.TryFindById(e.AnimationId, out AnimationDefinition animation))
             {

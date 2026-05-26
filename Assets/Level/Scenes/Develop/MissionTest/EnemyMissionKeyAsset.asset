@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: EnemyMissionKeyAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.EnemyMissionKeyAsset
   _id: Red
-  _desplayName: "\u8D64\u3044\u6575"
+  _displayName: "\u8D64\u3044\u5175\u58EB"

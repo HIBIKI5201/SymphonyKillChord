@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.Player;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
@@ -45,7 +46,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             if (reversInput.Length < length) return false;
 
             ReadOnlySpan<BeatType> pattern = reversInput.Slice(0, length);
-            return SkillPattern.Equals(pattern);
+            return SkillPattern.EqualsInReverse(pattern);
         }
 
         /// <summary>

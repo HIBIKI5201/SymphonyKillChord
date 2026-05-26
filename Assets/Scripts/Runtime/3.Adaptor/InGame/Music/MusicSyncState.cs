@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Constant;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Music
@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public double PlayTime { get; private set; }
 
         /// <summary> BPM。 </summary>
-        public int Bpm { get; private set; }
+        public double Bpm { get; private set; }
         /// <summary> 現在の拍。 </summary>
         public int CurrentBeat { get; private set; }
         /// <summary> 最寄りの拍。 </summary>
@@ -26,12 +26,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         ///     BPMを設定する。
         /// </summary>
         /// <param name="bpm"> 設定するBPM。 </param>
-        public void SetBpm(int bpm)
+        public void SetBpm(double bpm)
         {
-            if (bpm <= 0)
+            if (bpm <= 0d)
             {
                 Bpm = 0;
                 BeatLength = 0d;
+                AccurateBeat = 0d;
+                CurrentBeat = 0;
+                NearestBeat = 0;
                 return;
             }
 
@@ -57,7 +60,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             AccurateBeat = PlayTime / BeatLength;
             CurrentBeat = (int)Math.Floor(AccurateBeat);
-            NearestBeat = (int)Math.Round(AccurateBeat + MusicConstants.HALF_BEAT_THRESHOLD, MidpointRounding.AwayFromZero);
+            NearestBeat = (int)Math.Floor(AccurateBeat + MusicConstants.HALF_BEAT_THRESHOLD);
         }
     }
 }

@@ -2,24 +2,20 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     [CreateAssetMenu(
         fileName = "BackgroundCatalogAsset",
         menuName = "KillChord/Runtime/Scenario/Background Catalog")]
+    /// <summary>
+    /// Background のカタログ情報を保持するアセット。
+    /// </summary>
     public class BackgroundCatalogAsset : ScriptableObject
     {
-        public IReadOnlyList<Entry> Entries => _entries;
+        /// <summary> Entries を取得する。 </summary>
+        public IReadOnlyList<BackgroundCatalogEntry> Entries => _entries;
 
         [SerializeField]
-        private Entry[] _entries = Array.Empty<Entry>();
-
-        [Serializable]
-        public struct Entry
-        {
-            public string Id;
-            public string AssetKey;
-            public Sprite Asset;
-        }
+        private BackgroundCatalogEntry[] _entries = Array.Empty<BackgroundCatalogEntry>();
     }
 }

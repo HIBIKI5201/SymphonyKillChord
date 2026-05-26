@@ -65,7 +65,34 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             return true;
         }
 
-        /// <summary>　オブジェクト等価性の判定を行う。 </summary>
+        /// <summary>
+        ///     BeatTypeのReadOnlySpanと逆順で一致するか判定する。
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool EqualsInReverse(ReadOnlySpan<BeatType> other)
+        {
+            ReadOnlySpan<BeatType> signatures = _signatures.AsSpan();
+
+            if (signatures.Length != other.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < signatures.Length; i++)
+            {
+                if (signatures[i] != other[^(i + 1)])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// オブジェクト等価性の判定を行う。
+        /// </summary>
         public override bool Equals(object obj)
         {
             return obj is SkillPattern other && Equals(other);

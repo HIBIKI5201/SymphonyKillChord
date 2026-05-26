@@ -1,5 +1,4 @@
 using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Application;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Camera
@@ -12,9 +11,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
     public sealed class CameraSystemPresenter
     {
         /// <summary>
-        ///     コンストラクタ。
+        ///     カメラシステムアプリケーションを受け取り、プレゼンターを初期化するコンストラクタ。
         /// </summary>
-        /// <param name="application">カメラシステムアプリケーション。</param>
+        /// <param name="application"> カメラシステムアプリケーション。</param>
         public CameraSystemPresenter(CameraSystemApplication application)
         {
             _application = application;
@@ -23,11 +22,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         /// <summary>
         ///     カメラシステムを更新し、結果の回転と位置を返す。
         /// </summary>
-        /// <param name="followPosition">追従対象のワールド座標。</param>
-        /// <param name="rawInput">生の入力値。</param>
-        /// <param name="deltaTime">前フレームからの経過時間。</param>
-        /// <param name="resultRotation">計算結果のカメラ回転。</param>
-        /// <param name="resultPosition">計算結果のカメラ位置。</param>
+        /// <param name="followPosition"> 追従対象のワールド座標。</param>
+        /// <param name="rawInput"> 生の入力値。</param>
+        /// <param name="moveInput"> 移動操作の入力値。</param>
+        /// <param name="deltaTime"> 前フレームからの経過時間。</param>
+        /// <param name="resultRotation"> 計算結果のカメラ回転。</param>
+        /// <param name="resultPosition"> 計算結果のカメラ位置。</param>
         public void Update(
             in Vector3 followPosition,
             in Vector2 rawInput,

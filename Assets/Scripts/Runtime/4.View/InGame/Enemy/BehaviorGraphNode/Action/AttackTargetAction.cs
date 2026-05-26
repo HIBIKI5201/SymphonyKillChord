@@ -1,27 +1,30 @@
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using System;
 using Unity.Behavior;
 using Unity.Properties;
 using UnityEngine;
-using Action = Unity.Behavior.Action;
 
-namespace KillChord.Runtime.View.InGame.Enemy
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "AttackTarget", story: "攻撃対象を攻撃する [Battle] [State]", category: "Action", id: "611c230a6a1f2c1d944d9d2cf1c3a297")]
-    public partial class AttackTargetAction : Action
+    [NodeDescription(name: "AttackTarget", story: "対象を攻撃する [Battle] [State]", category: "Action", id: "611c230a6a1f2c1d944d9d2cf1c3a297")]
+    public partial class AttackTargetAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<EnemyBattleAIFacade> Battle;
         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
-        protected override Status OnStart()
+
+        protected override Unity.Behavior.Node.Status OnStart()
         {
-            if (Battle?.Value == null || State?.Value == null) return Status.Failure;
+            if (Battle?.Value == null || State?.Value == null) return Unity.Behavior.Node.Status.Failure;
             Battle.Value.StartAttack();
-            return Status.Running;
+            return Unity.Behavior.Node.Status.Running;
         }
 
-        protected override Status OnUpdate()
+        protected override Unity.Behavior.Node.Status OnUpdate()
         {
-            return State.Value.IsAttacking ? Status.Running : Status.Success;
+            return State.Value.IsAttacking
+                ? Unity.Behavior.Node.Status.Running
+                : Unity.Behavior.Node.Status.Success;
         }
 
         protected override void OnEnd()
@@ -29,4 +32,3 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
     }
 }
-

@@ -1,7 +1,7 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Skill;
 using System;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Skill
 {
     /// <summary>
     ///     スキル結果表示用の状態を管理するViewModelクラス。

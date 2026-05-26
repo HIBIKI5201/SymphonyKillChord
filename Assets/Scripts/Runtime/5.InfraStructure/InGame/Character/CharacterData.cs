@@ -1,4 +1,5 @@
 using UnityEngine;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
@@ -9,13 +10,29 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     menuName = "KillChord/Character/CharacterData")]
     public class CharacterData : ScriptableObject
     {
+        /// <summary> キャラクター名を取得する。 </summary>
         public string CharacterName => _characterName;
+
+        /// <summary> キャラクターの攻撃硬直時間を取得する。 </summary>
+        public float AttackInterval => _attackInterval;
+
+        /// <summary> 最大HPを取得する。 </summary>
         public float MaxHealth => _maxHealth;
+
+        /// <summary> 攻撃定義の配列を取得する。 </summary>
         public AttackDefinitionData[] AttackDifinitions =>
             _attackDifinitions == null ? null : (AttackDefinitionData[])_attackDifinitions.Clone();
 
-        [SerializeField] private string _characterName;
-        [SerializeField] private float _maxHealth;
-        [SerializeField] private AttackDefinitionData[] _attackDifinitions;
+        [SerializeField, Tooltip("キャラクターの名前。")]
+        private string _characterName;
+
+        [SerializeField, Tooltip("キャラクターの攻撃硬直時間")]
+        private float _attackInterval = 0.5f;
+
+        [SerializeField, Tooltip("キャラクターの最大体力。")]
+        private float _maxHealth;
+
+        [SerializeField, Tooltip("キャラクターが使用する攻撃の定義リスト。")]
+        private AttackDefinitionData[] _attackDifinitions;
     }
 }

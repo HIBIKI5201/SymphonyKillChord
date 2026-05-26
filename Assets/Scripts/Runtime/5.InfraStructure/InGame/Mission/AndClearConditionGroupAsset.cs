@@ -5,11 +5,18 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
+    /// <summary>
+    ///     複数のクリア条件を論理積（AND）でまとめるアセットクラス。
+    /// </summary>
     [Serializable]
     public class AndClearConditionGroupAsset : MissionClearConditionAssetBase
     {
+        /// <summary>
+        ///     クリア条件を生成します。
+        /// </summary>
+        /// <returns>クリア条件。</returns>
         public override IMissionClearCondition Create()
         {
             List<IMissionClearCondition> children = new();
@@ -28,6 +35,10 @@ namespace KillChord.Runtime.InfraStructure
             return new AndClearConditionGroup(children);
         }
 
+        /// <summary>
+        ///     サマリーを構築します。
+        /// </summary>
+        /// <returns>サマリー文字列。</returns>
         protected override string BuildSummary()
         {
             if (_childConditionAssets == null || _childConditionAssets.Count == 0)
@@ -49,7 +60,7 @@ namespace KillChord.Runtime.InfraStructure
             return sb.ToString();
         }
 
-        [SerializeReference, SubclassSelector]
+        [SerializeReference, SubclassSelector, Tooltip("結合する子条件のリスト。")]
         private List<MissionClearConditionAssetBase> _childConditionAssets = new();
     }
 }

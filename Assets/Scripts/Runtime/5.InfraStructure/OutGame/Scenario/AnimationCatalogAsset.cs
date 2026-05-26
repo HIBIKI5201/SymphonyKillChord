@@ -2,24 +2,20 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
     [CreateAssetMenu(
         fileName = "AnimationCatalogAsset",
         menuName = "KillChord/Runtime/Scenario/Animation Catalog")]
+    /// <summary>
+    /// Animation のカタログ情報を保持するアセット。
+    /// </summary>
     public class AnimationCatalogAsset : ScriptableObject
     {
-        public IReadOnlyList<Entry> Entries => _entries;
+        /// <summary> Entries を取得する。 </summary>
+        public IReadOnlyList<AnimationCatalogEntry> Entries => _entries;
 
         [SerializeField]
-        private Entry[] _entries = Array.Empty<Entry>();
-
-        [Serializable]
-        public struct Entry
-        {
-            public string Id;
-            public string AssetKey;
-            public AnimationClip Asset;
-        }
+        private AnimationCatalogEntry[] _entries = Array.Empty<AnimationCatalogEntry>();
     }
 }

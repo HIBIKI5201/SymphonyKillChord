@@ -2,11 +2,18 @@ using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
+    /// <summary>
+    ///     敵撃破数クリア条件のアセットクラス。
+    /// </summary>
     [Serializable]
     public class EnemyKillCountClearConditionAsset : MissionClearConditionAssetBase
     {
+        /// <summary>
+        ///     クリア条件を生成します。
+        /// </summary>
+        /// <returns>クリア条件。</returns>
         public override IMissionClearCondition Create()
         {
             if (_enemyMissionKeyAsset == null)
@@ -22,16 +29,20 @@ namespace KillChord.Runtime.InfraStructure
             return new EnemyKillCountClearCondition(
                 _enemyMissionKeyAsset.Id,
                 _requiredKillCount,
-                _enemyMissionKeyAsset.DesplayName);
+                _enemyMissionKeyAsset.DisplayName);
         }
 
+        /// <summary>
+        ///     サマリーを構築します。
+        /// </summary>
+        /// <returns>サマリー文字列。</returns>
         protected override string BuildSummary()
         {
-            string enemyName = _enemyMissionKeyAsset != null ? _enemyMissionKeyAsset.DesplayName : "null";
+            string enemyName = _enemyMissionKeyAsset != null ? _enemyMissionKeyAsset.DisplayName : "null";
             return $"{enemyName}を{_requiredKillCount}体以上倒す条件";
         }
 
-        [SerializeField] private EnemyMissionKeyAsset _enemyMissionKeyAsset;
-        [SerializeField] private int _requiredKillCount;
+        [SerializeField, Tooltip("撃破対象となる敵の定義アセット。")] private EnemyMissionKeyAsset _enemyMissionKeyAsset;
+        [SerializeField, Tooltip("クリアに必要な撃破数。")] private int _requiredKillCount;
     }
 }

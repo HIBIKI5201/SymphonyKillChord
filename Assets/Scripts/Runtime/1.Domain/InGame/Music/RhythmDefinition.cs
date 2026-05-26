@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Constant;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Music
@@ -12,12 +12,14 @@ namespace KillChord.Runtime.Domain.InGame.Music
         ///     BPMを指定してリズム定義を生成する。
         /// </summary>
         /// <param name="bpm"> BPM。 </param>
-        public RhythmDefinition(double bpm)
+        /// <param name="justTimingThreshold"> ジャスト判定の閾値。 </param>
+        public RhythmDefinition(double bpm, float justTimingThreshold = 0.1f)
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             _bpm = bpm;
             _beatLength = MusicConstants.SECONDS_PER_MINUTE / _bpm;
             _barLength = _beatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
+            _justTimingThreshold = justTimingThreshold;
         }
 
         /// <summary> BPM。 </summary>
@@ -28,10 +30,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public double BarLength => _barLength;
 
         /// <summary>
-        ///     経過時間から小節内の進捗を計算する。
+        ///     経過時間から経過小節数を計算する。
         /// </summary>
         /// <param name="durationSeconds"> 経過時間（秒）。 </param>
-        /// <returns> 小節内の進捗（0.0〜1.0）。 </returns>
+        /// <returns> 経過小節数。 </returns>
         public double CalculateElapsedBarCount(double durationSeconds)
         {
             if (Bpm <= 0) return 0d;
@@ -44,7 +46,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// </summary>
         /// <param name="durationSeconds"> 前回のアクションからの経過秒数。 </param>
         /// <returns> 拍の種類。 </returns>
-        public BeatType CalculateBeatType(double durationSeconds)
+        public BeatType CalculateBeatType(double durationSeconds, Action action = null)
         {
             if (Bpm <= 0)
             {
@@ -66,7 +68,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
                     nearestBeatType = beatType;
                 }
             }
-
+            if(minDiff <= _justTimingThreshold) // ジャスト判定の閾値以内ならジャスト判定をする。
+            {
+                action?.Invoke();
+            }
             return nearestBeatType;
         }
 
@@ -83,5 +88,6 @@ namespace KillChord.Runtime.Domain.InGame.Music
         private readonly double _bpm;
         private readonly double _beatLength;
         private readonly double _barLength;
+        private readonly double _justTimingThreshold ; // ジャスト判定の閾値（秒）
     }
 }

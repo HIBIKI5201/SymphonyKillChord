@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
     ///     EventBus

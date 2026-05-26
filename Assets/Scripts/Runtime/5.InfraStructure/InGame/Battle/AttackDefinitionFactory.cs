@@ -3,10 +3,20 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
+    /// <summary>
+    ///     攻撃定義をScriptableObjectから生成するファクトリークラス。
+    /// </summary>
     public static class AttackDefinitionFactory
     {
+        /// <summary>
+        ///     攻撃定義データを受け取り、攻撃定義オブジェクトを生成するメソッド。
+        /// </summary>
+        /// <param name="data"> 攻撃定義データ。 </param>
+        /// <returns> 生成された攻撃定義オブジェクト。 </returns>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static AttackDefinition Create(AttackDefinitionData data)
         {
             if (data == null)
@@ -49,7 +59,8 @@ namespace KillChord.Runtime.InfraStructure
                 new Damage(data.BaseDamage),
                 attackParameterSet,
                 data.AttackPipelineAsset.Create(),
-                resolvedBeatType
+                resolvedBeatType,
+                data.JustDamageMultiplier
             );
         }
     }

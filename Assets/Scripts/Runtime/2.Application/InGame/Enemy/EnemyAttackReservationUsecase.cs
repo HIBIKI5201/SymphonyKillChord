@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 using System.Threading;
@@ -66,6 +67,20 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         public void Dispose()
+        {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+            _hasReservation = false;
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
         {
             if (_cancellationTokenSource != null)
             {

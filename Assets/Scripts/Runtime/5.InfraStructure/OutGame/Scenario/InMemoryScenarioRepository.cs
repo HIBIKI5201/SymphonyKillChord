@@ -2,13 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
+    /// <summary>
+    /// テスト用のシナリオデータをメモリ上で提供する。
+    /// </summary>
     public class InMemoryScenarioRepository : IScenarioRepository
     {
+        /// <summary>
+        /// シナリオ ID から再生用データを読み込む。
+        /// </summary>
         public ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -37,6 +43,9 @@ namespace KillChord.Runtime.InfraStructure
             return new ValueTask<ScenarioData>(new ScenarioData(events));
         }
 
+        /// <summary>
+        /// テキストイベント用のトリガー一覧を生成する。
+        /// </summary>
         private static IReadOnlyList<TextTimingTrigger> CreateTriggers(params TextTimingTrigger[] triggers)
         {
             if (triggers == null || triggers.Length == 0) return Array.Empty<TextTimingTrigger>();

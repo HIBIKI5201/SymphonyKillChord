@@ -17,26 +17,28 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public MusicSyncController MusicSyncController { get; private set; }
         /// <summary> 音楽同期サービス。 </summary>
         public MusicSyncService MusicSyncService { get; private set; }
+        /// <summary> 音楽同期の状態。 </summary>
+        public MusicSyncState MusicSyncState { get; private set; }
 
         /// <summary>
         ///     音楽同期機能を初期化する。
         /// </summary>
         public void Initialize()
         {
-            MusicSyncState musicSyncViewState = new();
+            MusicSyncState = new();
             var musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-
-            MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm));
-            MusicSyncController = new(musicSyncViewState, MusicSyncService);
+            MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm, _justTimingThreshold), RhythmJustService.Instance.TriggerJustHit);
+            MusicSyncController = new(MusicSyncState, MusicSyncService);
             _musicSyncView.Bind(
                 musicPlayer,
-                musicSyncViewState,
+                MusicSyncState,
                 MusicSyncController,
                 _testBpm
             );
 
             musicPlayer.MusicVM.UpdateMusicCue(_testCue);
             ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
+            ServiceLocator.RegisterInstance<MusicSyncState>(MusicSyncState);
         }
 
         [Tooltip("音楽同期View。")]
@@ -44,6 +46,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [Tooltip("テスト用のキュー名。")]
         [SerializeField] private string _testCue;
         [Tooltip("テスト用のBPM。")]
-        [SerializeField] private int _testBpm;
+        [SerializeField] private double _testBpm;
+        [Tooltip("ジャスト判定の閾値。")]
+        [SerializeField] private float _justTimingThreshold;
+
     }
 }
