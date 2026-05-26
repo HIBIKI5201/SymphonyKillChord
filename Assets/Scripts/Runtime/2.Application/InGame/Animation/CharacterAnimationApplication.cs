@@ -24,6 +24,9 @@ namespace KillChord.Runtime.Application
         /// <summary> アニメーションの再生速度。 </summary>
         public float AnimationSpeed => _bpm / BASE_BPM;
 
+        /// <summary>攻撃アニメーションのブレンド重みは Application では管理しない。 </summary>
+        public float AttackWeight => 0f;
+
         /// <summary> キャラクターの速度を設定します。 </summary>
         public void SetVelocity(Vector2 velocity)
         {
@@ -34,6 +37,11 @@ namespace KillChord.Runtime.Application
         public void SetBpm(float bpm)
         {
             _bpm = Mathf.Max(1f, bpm);
+        }
+
+        public void TriggerAttack()
+        {
+            // 攻撃アニメーションのトリガーは、BlendDataのAttackWeightで表現されるため、ここでは特に処理は必要ない。
         }
 
         /// <summary>   歩き状態に遷移する速度の閾値。 </summary>
