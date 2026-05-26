@@ -12,13 +12,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize()
+        public void Initialize(in Transform[] assignedPositions)
         {
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
             _initialized = true;
+            if (assignedPositions != null)
+            {
+                SpawnAssignedEnemy(assignedPositions);
+            }
         }
-        
+
         /// <summary>
         ///     砲兵インスタンスが回収された時のcallback処理。
         /// </summary>
@@ -65,6 +69,20 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
                 EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery().GetComponent<EnemyLifeCycle>();
                 lifeCycle.Activate(_spawnPositions[i], HandleArtilleryDeactivated);
+                _spawnCount++;
+            }
+        }
+
+        /// <summary>
+        ///     事前配置の位置で敵を生成する。
+        /// </summary>
+        /// <param name="assignedPositions"></param>
+        private void SpawnAssignedEnemy(in Transform[] assignedPositions)
+        {
+            for (int i = 0; i < assignedPositions.Length; i++)
+            {
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery().GetComponent<EnemyLifeCycle>();
+                lifeCycle.Activate(assignedPositions[i].position, HandleArtilleryDeactivated);
                 _spawnCount++;
             }
         }
