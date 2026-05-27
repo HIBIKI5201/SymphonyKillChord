@@ -1,24 +1,27 @@
-using Codice.Client.Common.GameUI;
 using KillChord.Runtime.View.InGame.Enemy;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     テスト用の砲兵スポナー。
+    ///     砲兵のスポナークラス。
     /// </summary>
     public class EnemyArtillerySpawner : MonoBehaviour
     {
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize()
+        public void Initialize(in Transform[] assignedPositions)
         {
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
             _initialized = true;
+            if (assignedPositions != null)
+            {
+                SpawnAssignedEnemy(assignedPositions);
+            }
         }
-        
+
         /// <summary>
         ///     砲兵インスタンスが回収された時のcallback処理。
         /// </summary>
@@ -63,8 +66,27 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             for (int i = 0; i < _spawnPositions.Length; i++)
             {
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery().GetComponent<EnemyLifeCycle>();
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                 lifeCycle.Activate(_spawnPositions[i], HandleArtilleryDeactivated);
+                _spawnCount++;
+            }
+        }
+
+        /// <summary>
+        ///     事前配置の位置で敵を生成する。
+        /// </summary>
+        /// <param name="assignedPositions"></param>
+        private void SpawnAssignedEnemy(in Transform[] assignedPositions)
+        {
+            for (int i = 0; i < assignedPositions.Length; i++)
+            {
+                if (assignedPositions[i] == null)
+                {
+                    Debug.LogError("[EnemyArtillerySpawner] 事前配置の位置情報がNULL。");
+                    continue;
+                }
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
+                lifeCycle.Activate(assignedPositions[i].position, HandleArtilleryDeactivated);
                 _spawnCount++;
             }
         }
