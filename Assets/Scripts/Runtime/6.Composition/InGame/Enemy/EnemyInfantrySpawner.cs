@@ -4,18 +4,22 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
-    ///     テスト用の歩兵スポナー。
+    ///     歩兵のスポナークラス。
     /// </summary>
     public class EnemyInfantrySpawner : MonoBehaviour
     {
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize()
+        public void Initialize(in Transform[] assignedPositions)
         {
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
             _initialized = true;
+            if(assignedPositions != null)
+            {
+                SpawnAssignedEnemy(assignedPositions);
+            }
         }
         /// <summary>
         ///     歩兵インスタンスが回収された時のcallback処理。
@@ -62,8 +66,27 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             for (int i = 0; i < _spawnPositions.Length; i++)
             {
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry().GetComponent<EnemyLifeCycle>();
+                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
                 lifeCycle.Activate(_spawnPositions[i], HandleInfantryDeactivated);
+                _spawnCount++;
+            }
+        }
+
+        /// <summary>
+        ///     事前配置の位置で敵を生成する。
+        /// </summary>
+        /// <param name="assignedPositions"></param>
+        private void SpawnAssignedEnemy(in Transform[] assignedPositions)
+        {
+            for (int i = 0; i < assignedPositions.Length; i++)
+            {
+                if (assignedPositions[i] == null)
+                {
+                    Debug.LogError("[EnemyInfantrySpawner] 事前配置の位置情報がNULL。");
+                    continue;
+                }
+                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
+                lifeCycle.Activate(assignedPositions[i].position, HandleInfantryDeactivated);
                 _spawnCount++;
             }
         }

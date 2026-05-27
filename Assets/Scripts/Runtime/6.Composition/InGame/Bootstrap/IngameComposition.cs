@@ -65,6 +65,38 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return;
             }
 
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogError("[IngameComposition] MainCamera が見つかりません。");
+                return;
+            }
+            if (_enemyPools == null)
+            {
+                Debug.LogError("[IngameComposition] EnemyPoolsの参照が未設定です。");
+                return;
+            }
+            if (_enemyInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] EnemyInitializerの参照が未設定です。");
+                return;
+            }
+            if (_enemySpawnPositionSearcher == null)
+            {
+                Debug.LogError("[IngameComposition] EnemySpawnPositionSearcherの参照が未設定です。");
+                return;
+            }
+            if (_enemyInfantryTestSpawner == null)
+            {
+                Debug.LogError("[IngameComposition] EnemyInfantryTestSpawnerの参照が未設定です。");
+                return;
+            }
+            if (_enemyArtilleryTestSpawner == null)
+            {
+                Debug.LogError("[IngameComposition] EnemyArtilleryTestSpawnerの参照が未設定です。");
+                return;
+            }
+
             TargetManager targetManager = new();
             TargetEntityRegistry targetEntityRegistry = new();
 
@@ -84,26 +116,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
-            if (_enemyPools == null || _enemyInitializer == null || _enemySpawnPositionSearcher == null ||
-                _enemyInfantryTestSpawner == null || _enemyArtilleryTestSpawner == null)
+            // ステージに事前配置されている敵の情報
+            AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
+            if(assignedEnemyManager == null)
             {
-                Debug.LogError("[IngameComposition] Enemy関連の参照が未設定です。");
-                return;
+                Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
+            }
+            else
+            {
+                if (assignedEnemyManager.Infantries == null || assignedEnemyManager.Infantries.Length == 0)
+                {
+                    Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
+                }
+                if (assignedEnemyManager.Artillery == null || assignedEnemyManager.Artillery.Length == 0)
+                {
+                    Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
+                }
             }
 
-            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
-            if (mainCamera == null)
-            {
-                Debug.LogError("[IngameComposition] MainCamera が見つかりません。");
-                return;
-            }
+            // 敵生成関連
             _enemyPools.Initialize();
             _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
 
             _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
-            _enemyInfantryTestSpawner.Initialize();
-            _enemyArtilleryTestSpawner.Initialize();
+            _enemyInfantryTestSpawner.Initialize(assignedEnemyManager?.Infantries);
+            _enemyArtilleryTestSpawner.Initialize(assignedEnemyManager?.Artillery);
 
+            // リズムガイドUI
             _rhythmGuideInitializer.Initialize();
         }
     }
