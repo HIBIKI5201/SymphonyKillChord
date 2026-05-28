@@ -6,14 +6,10 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
-    /// <summary>
-    /// 入力履歴に基づいて発動可能なスキルを判定するサービス。
-    /// </summary>
+    /// <summary> 入力履歴に基づいて発動可能なスキルを判定するサービス。 </summary>
     public class SkillCheckService
     {
-        /// <summary>
-        /// 装備中のスキル群と入力履歴から、発動したスキルのインデックスと最後の攻撃タイプを取得する。
-        /// </summary>
+        /// <summary> 装備中のスキル群と入力履歴から、発動したスキルのインデックスと最後の攻撃タイプを取得する。 </summary>
         public bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
             ReadOnlySpan<BeatType> history,

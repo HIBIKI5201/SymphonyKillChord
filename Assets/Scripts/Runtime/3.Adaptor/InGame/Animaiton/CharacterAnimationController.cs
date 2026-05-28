@@ -17,10 +17,13 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="musicSyncState"> BPM情報を持つ音楽同期状態。 </param>
         public CharacterAnimationController(ICharacterAnimationApplication animApplication, MusicSyncState musicSyncState)
         {
-            _animApplication = animApplication;
-            _musicSyncState = musicSyncState;
+            _animApplication = animApplication ?? throw new ArgumentNullException(nameof(animApplication));
+            _musicSyncState = musicSyncState ?? throw new ArgumentNullException(nameof(musicSyncState));
             _weights = new float[Enum.GetValues(typeof(CharacterAnimationState)).Length];
         }
+
+        /// <summary> 攻撃入力が発生したことを通知するイベント。 </summary>
+        public event Action OnAttackRequested;
 
         /// <summary>
         ///     Application層の計算結果をDTOに変換して返す。
@@ -32,7 +35,8 @@ namespace KillChord.Runtime.Adaptor
             _weights[(int)CharacterAnimationState.Idle] = blend.IdleWeight;
             _weights[(int)CharacterAnimationState.Walk] = blend.WalkWeight;
 
-            return new CharacterAnimationDTO(_animApplication.AnimationSpeed, _weights);
+            float[] snapshot = (float[])_weights.Clone();
+            return new CharacterAnimationDTO(_animApplication.AnimationSpeed, snapshot);
         }
 
         /// <summary>
@@ -44,6 +48,13 @@ namespace KillChord.Runtime.Adaptor
             // MusicSyncState(Adaptor層) → ICharacterAnimationApplication(Application層) へBPMを橋渡しする
             _animApplication.SetBpm((float)_musicSyncState.Bpm);
             _animApplication.SetVelocity(velocity);
+        }
+
+        /// <summary> 攻撃入力が発生したことを通知する。 </summary>
+        public void TriggerAttack()
+        {
+            _animApplication.TriggerAttack();
+            OnAttackRequested?.Invoke();
         }
 
         private readonly ICharacterAnimationApplication _animApplication;
