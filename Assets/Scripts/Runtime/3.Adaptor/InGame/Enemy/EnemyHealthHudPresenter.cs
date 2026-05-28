@@ -18,7 +18,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity), "敵EntityがNULL。");
             _entity = entity;
-            // TODO 敵HPのViewModel実装待ち
             if (healthHudViewModel == null) throw new ArgumentNullException(nameof(healthHudViewModel), "敵HPのViewModelがNULL。");
             _healthHudViewModel = healthHudViewModel;
             if (damageNumberView == null) throw new ArgumentNullException(nameof(damageNumberView), "敵ダメージ表示ViewがNULL。");
@@ -59,18 +58,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <param name="amountChanged">HPの変化量</param>
         public void UpdateHealthHud(float currentHealth, float maxHealth, float amountChanged)
         {
-            // TODO 敵のHP表現は実装待ち
             _healthHudViewModel.UpdateHealth(new HealthHudDTO(currentHealth, maxHealth));
             if (amountChanged < 0f)
             {
-                _damageNumberView.ShowDamage(-amountChanged);
+                _damageNumberView.ShowDamage(new DamageNumberDTO(-amountChanged));
             }
+
             Debug.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
         }
 
         private IDefender _entity;
         private IHealthHudViewModel _healthHudViewModel;
-        private bool _isActive = false;
         private IDamageNumber _damageNumberView;
+        
+        private bool _isActive = false;
     }
 }
