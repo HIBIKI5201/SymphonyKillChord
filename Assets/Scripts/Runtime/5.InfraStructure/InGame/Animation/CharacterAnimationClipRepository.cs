@@ -20,6 +20,11 @@ namespace KillChord.Runtime.InfraStructure
             {
                 return;
             }
+            if (catalog.Entries == null)
+            {
+                Debug.LogWarning("[CharacterAnimationClipRepository] Entries が null です。");
+                return;
+            }
 
             // カタログエントリをDictionaryに登録する
             foreach (var entry in catalog.Entries)

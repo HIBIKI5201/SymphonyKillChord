@@ -7,5 +7,6 @@ namespace KillChord.Runtime.Domain
     {
         Idle = 0,
         Walk = 1,
+        Attack = 2,
     }
 }
