@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Constant;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Skill
@@ -15,6 +16,9 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキルの入力パターン。 </summary>
         public SkillPattern SkillPattern { get; }
 
+        /// <summary> スキルの入力パターン。 </summary>
+        public SkillCooldownTime CooldownTime { get;  }
+
         /// <summary> スキルの効果実装。 </summary>
         public ISkillEffect Effect { get; }
 
@@ -27,11 +31,12 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, double bpm)
         {
             Id = id;
             SkillPattern = skillPattern;
             Effect = effect;
+            CooldownTime = new SkillCooldownTime(CalcCooldownTime(bpm));
         }
 
         /// <summary>
@@ -47,6 +52,26 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
             ReadOnlySpan<BeatType> pattern = reversInput.Slice(0, length);
             return SkillPattern.EqualsInReverse(pattern);
+        }
+        
+        /// <summary>
+        ///     現在のBPMを指定し、スキルのクールダウン時間を計算する。
+        /// </summary>
+        /// <param name="bpm"></param>
+        private double CalcCooldownTime(double bpm)
+        {
+            double cooldown = 0;
+            // 1小節の長さ
+            double secondsPerBar = MusicConstants.SECONDS_PER_MINUTE / bpm * MusicConstants.STANDARD_BEATS_PER_BAR;
+
+            // スキル発動するための拍の長さの合計をクールタイムとする
+            for (int i = 0; i < SkillPattern.Signatures.Length; i++)
+            {
+                cooldown += secondsPerBar / (double)SkillPattern.Signatures[i];
+            }
+            // 誤差を埋めるため16拍子を一つ足す
+            cooldown += secondsPerBar / 16;
+            return cooldown;
         }
 
         /// <summary>

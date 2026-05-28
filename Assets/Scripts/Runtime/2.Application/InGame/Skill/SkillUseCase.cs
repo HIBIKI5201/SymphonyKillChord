@@ -44,8 +44,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
             {
                 executedSkill = equipmentSkills[index];
                 executedSkill.Effect.Execute();
-                _viewAction.Execute(executedSkill.Id.Value);
-
                 return true;
             }
 
