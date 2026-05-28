@@ -13,6 +13,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
+using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using Unity.Behavior;
@@ -101,15 +102,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyAIController aiController = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
             _aiController = aiController;
 
+            IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            // TODO 引数2の敵HP HUDは実装待ち
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, null);
+             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
 
             // View接続
             _view.Initialize(aiController, target);
+            _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();
