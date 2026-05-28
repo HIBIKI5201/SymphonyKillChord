@@ -1,9 +1,10 @@
-using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.WSA;
 
-namespace KillChord.Runtime.View.InGame
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     毎フレーム敵移動を更新するビュー。
@@ -12,13 +13,48 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="enemyAIController"></param>
+        /// <param name="target"></param>
         public void Initialize(EnemyAIController enemyAIController,
             Transform target)
         {
             _enemyAIController = enemyAIController;
             _target = target;
-            _enemyAIController.OnAttackReserved += PlayEffectReserved;
-            _enemyAIController.OnAttack += PlayEffectHit;
+        }
+
+        /// <summary>
+        ///     攻撃目標のTransformを取得する。
+        /// </summary>
+        /// <returns></returns>
+        public Transform GetTargetTransform()
+        {
+            return _target;
+        }
+
+        /// <summary>
+        ///     攻撃可能な位置まで移動する。
+        /// </summary>
+        public void MoveToAttack()
+        {
+            if (!_navMeshAgent.isOnNavMesh || _target == null) return;
+            EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
+            if (intruction.ShouldMove)
+            {
+                _navMeshAgent.speed = intruction.MoveSpeed;
+                _navMeshAgent.isStopped = false;
+                _navMeshAgent.SetDestination(intruction.Destination);
+            }
+        }
+
+        /// <summary>
+        ///     移動を停止する。
+        /// </summary>
+        public void StopMoving()
+        {
+            _navMeshAgent.isStopped = true;
         }
 
         private NavMeshAgent _navMeshAgent;
@@ -30,15 +66,6 @@ namespace KillChord.Runtime.View.InGame
             _navMeshAgent = GetComponent<NavMeshAgent>();
         }
 
-        private void Update()
-        {
-            if (_enemyAIController != null && _target != null)
-            {
-                EnemyMoveInstruction intruction = _enemyAIController.Tick(transform.position, _target.position);
-                ApplyMove(intruction);
-            }
-        }
-
         private void OnDestroy()
         {
             if (_enemyAIController == null) return;
@@ -47,27 +74,36 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
         }
-
-        private void ApplyMove(EnemyMoveInstruction intruction)
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
         {
-            if (!_navMeshAgent.isOnNavMesh) return;
-
-            if (intruction.ShouldMove)
-            {
-                _navMeshAgent.speed = intruction.MoveSpeed;
-                _navMeshAgent.isStopped = false;
-                _navMeshAgent.SetDestination(intruction.Destination);
-                return;
-            }
-
-            _navMeshAgent.isStopped = true;
+            _enemyAIController.OnAttackReserved += PlayEffectReserved;
+            _enemyAIController.OnAttack += PlayEffectHit;
         }
 
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            if (_enemyAIController != null)
+            {
+                _enemyAIController.OnAttackReserved -= PlayEffectReserved;
+                _enemyAIController.OnAttack -= PlayEffectHit;
+            }
+        }
+        /// <summary>
+        ///     攻撃を予約するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectReserved()
         {
             ParticleController.Instance.PlayParticleReserve(transform.position);
         }
-
+        /// <summary>
+        ///     攻撃を実行するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectHit()
         {
             ParticleController.Instance.PlayParticle(transform.position);

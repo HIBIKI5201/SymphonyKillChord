@@ -16,11 +16,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        /// <returns></returns>
+        /// <returns> 攻撃結果。 </returns>
         public static AttackResult Execute(
             AttackDefinition attackDefinition,
             IAttacker attacker,
-            IDefender defender
+            IDefender defender,
+            bool isJustHit = false
             )
         {
             if (attackDefinition == null)
@@ -29,10 +30,9 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(attacker));
             if (defender == null)
                 throw new ArgumentNullException(nameof(defender));
-
             // 計算を行い、ダメージを適用する。
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender);
-
+            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit);
+            
             defender.TakeDamage(result.FinalDamage);
 
             Debug.Log(

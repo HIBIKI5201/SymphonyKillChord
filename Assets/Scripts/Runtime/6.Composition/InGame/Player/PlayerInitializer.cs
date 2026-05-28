@@ -1,29 +1,45 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Application.InGame;
+using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Composition.Persistent.Camera;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
+using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
-using KillChord.Runtime.Utility;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
+using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.UI;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
 using UnityEngine;
 
+
+
+
 #if UNITY_EDITOR
-using KillChord.Runtime.Composition.InGame.Debugger;
 #endif
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.Player
 {
     /// <summary>
     ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
@@ -34,51 +50,86 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
-        [SerializeField] private int _bpm;
+        [SerializeField] private SkillView[] _skillVisuals;
+        [SerializeField] private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        [SerializeField] private CharacterAnimationView _characterAnimationView;
+        [SerializeField] private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField]
         private CharacterData _playerData;
+        [Header("装備中スキル（テスト用）")]
+        [SerializeField] private SkillDataAsset[] _equippedSkills;
 
-        [SerializeField] private CharacterData _enemyData;
-
-        private EnemyTestSpawner _enemyTestSpawner;
+        private CharacterEntity _playerEntity;
+        private MissionEventController _missionEventController;
+        private InGameHudInitializer _inGameHudInitializer;
 
         private void Awake()
         {
             ServiceLocator.RegisterInstance(this);
         }
 
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        public CharacterEntity PlayerEntity => _playerEntity;
+
+        public void Initialize(
+            TargetManager targetManager,
+            TargetEntityRegistry targetEntityRegistry,
+            InputComposition inputComposition)
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
-            _enemyTestSpawner = ServiceLocator.GetInstance<EnemyTestSpawner>();
-            if (_enemyTestSpawner == null)
+
+            _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
+            if (_inGameHudInitializer == null)
             {
-                Debug.LogError($"{nameof(EnemyTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(InGameHudInitializer)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
 
+            _playerEntity = CharacterFactory.Create(_playerData);
 
-            CharacterEntity player = CharacterFactory.Create(_playerData);
-            _enemyTestSpawner.SetTargetEntity(player);
-            _enemyTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
+            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (_missionEventController != null)
+            {
+                _playerEntity.OnDied += HandlePlayerDied;
+            }
 
+            // SerializeFieldの装備スキルからskillId配列を作成する
+            List<int> skillIdList = new List<int>();
+            if (_equippedSkills != null && _equippedSkills.Length > 0)
+            {
+                for (int i = 0; i < _equippedSkills.Length; i++)
+                {
+                    if (_equippedSkills[i] != null)
+                    {
+                        skillIdList.Add(_equippedSkills[i].Id);
+                    }
+                }
+            }
+            int[] skillIds = null;
+            if (skillIdList.Count > 0)
+            {
+                skillIds = skillIdList.ToArray();
+            }
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
             PlayerDodgeMovementApplication dodge = new(parameter);
-            PlayerMovement move = new(parameter);
+            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
+            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+
+            PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
-            PlayerController playerMovementController = new(application);
-            var ct = ServiceLocator.GetInstance<ICameraTransform>().transform;
+            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
+            var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
+            var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
             TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
-            if(targetSelectorController == null)
+            if (targetSelectorController == null)
             {
                 Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
@@ -91,22 +142,83 @@ namespace KillChord.Runtime.Composition
                 return;
             }
 
-            SkillController skillController = new SkillController(_skillRepository, musicSyncService);
+            SkillResultViewModel skillResultViewModel = new SkillResultViewModel();
+            Debug.Log($"{skillResultViewModel}作成。");
+            SkillResultPresenter skillResultPresenter = new SkillResultPresenter(skillResultViewModel);
+            Debug.Log($"{skillResultPresenter}作成。");
+
+            if (_inputProgressViewConfigAsset == null)
+            {
+                Debug.LogError($"{nameof(SkillInputProgressViewConfigAsset)}がNullです", this);
+                return;
+            }
+            SkillInputProgressViewconfig inputProgressViewConfig = _inputProgressViewConfigAsset.Create();
+
+            SkillInputProgressViewModel inputProgressViewModel =
+                new SkillInputProgressViewModel(inputProgressViewConfig);
+            SkillInputProgressPresenter inputProgressPresenter =
+                new SkillInputProgressPresenter(inputProgressViewModel);
+            SkillInputProgressState inputProgressState =
+                new SkillInputProgressState();
+            SkillInputProgressUsecase inputProgressUsecase =
+                new SkillInputProgressUsecase();
+            SkillInputProgressController inputProgressController =
+                new SkillInputProgressController(
+                    inputProgressUsecase,
+                    inputProgressState,
+                    inputProgressPresenter);
+            SkillInputProgressView skillInputProgressView =
+                FindAnyObjectByType<SkillInputProgressView>();
+
+            skillInputProgressView?.Bind(inputProgressViewModel);
+
+            // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
+            SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
+            skillResultView?.Bind(skillResultViewModel);
+
+            SkillCheckService skillCheckService = new SkillCheckService();
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter, inputProgressController);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
+            skillController?.SetUsecase(skillUsecase);
+
+
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
 
-            PlayerBattleState playerBattleState = new PlayerBattleState(player);
+            PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
-            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter, playerBattleState, skillController, targetSelectorController, musicSyncService);
+            PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService);
 
-            _player.Init(playerMovementController, playerAttackController, ct);
+            IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
+            PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
+            var musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
+            var animController = new AnimationComposition().Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+
+            _player.Initialize(playerMovementController, playerAttackController, animController, ct, inputView, healthHudPresenter);
+
+            _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
 #if UNITY_EDITOR
             _player.gameObject
                 .AddComponent<PlayerMoveParameterDebug>()
                 .SetPlayerMoveParameter(parameter);
 #endif
+        }
+
+        private void HandlePlayerDied(CharacterEntity _)
+        {
+            _missionEventController?.NotifyPlayerDead();
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerEntity != null)
+            {
+                _playerEntity.OnDied -= HandlePlayerDied;
+            }
         }
     }
 }

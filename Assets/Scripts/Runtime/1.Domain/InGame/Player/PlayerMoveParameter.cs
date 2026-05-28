@@ -1,33 +1,33 @@
-using UnityEngine;
+﻿using System;
 using KillChord.Runtime.Domain.InGame.Character;
-using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Player
 {
     /// <summary>
-    ///     プレイヤーの移動に関するパラメータを保持するドメインクラス。
+    ///     プレイヤー移動に関するパラメータを保持するドメインクラス。
     /// </summary>
-    [Serializable]
     public sealed class PlayerMoveParameter
     {
-        public PlayerMoveParameter(float moveSpeed, float dodgeSpeed, float dodgeDuration, float dodgeCooldown)
+        /// <summary> プレイヤー移動パラメータを初期化する。 </summary>
+        public PlayerMoveParameter(MoveSpeed moveSpeed, DodgeSpeed dodgeSpeed, DodgeDuration dodgeDuration, DodgeCooldown dodgeCooldown)
         {
-            _moveSpeed = moveSpeed;
-            _dodgeSpeed = dodgeSpeed;
-            _dodgeDuration = dodgeDuration;
-            _dodgeCooldown = dodgeCooldown;
+            MoveSpeed = moveSpeed;
+            DodgeSpeed = dodgeSpeed;
+            DodgeDuration = dodgeDuration;
+            DodgeCooldown = dodgeCooldown;
         }
 
-        public MoveSpeed MoveSpeed => new(_moveSpeed);
+        /// <summary> 通常移動速度。 </summary>
+        public MoveSpeed MoveSpeed;
 
-        public MoveSpeed DodgeSpeed => new(_dodgeSpeed);
-        public float DodgeDuration => _dodgeDuration;
-        public float DodgeCooldown => _dodgeCooldown;
+        /// <summary> 回避移動速度。 </summary>
+        public DodgeSpeed DodgeSpeed;
 
-        [SerializeField] private float _moveSpeed;
-        [Space]
-        [SerializeField] private float _dodgeSpeed;
-        [SerializeField] private float _dodgeDuration;
-        [SerializeField] private float _dodgeCooldown;
+        /// <summary> 回避時間。 </summary>
+        public DodgeDuration DodgeDuration;
+
+        /// <summary> 回避クールダウン時間。 </summary>
+        public DodgeCooldown DodgeCooldown;
     }
 }

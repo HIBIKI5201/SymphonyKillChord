@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
-    /// <summary>
-    ///     入力履歴に基づいて発動可能なスキルを判定するサービス。
-    /// </summary>
+    /// <summary> 入力履歴に基づいて発動可能なスキルを判定するサービス。 </summary>
     public class SkillCheckService
     {
-        public static bool TryCheckSkills(
+        /// <summary> 装備中のスキル群と入力履歴から、発動したスキルのインデックスと最後の攻撃タイプを取得する。 </summary>
+        public bool TryCheckSkills(
             IReadOnlyList<SkillDefinition> equipmentSkills,
-            ReadOnlySpan<int> history,
-            out int skillIndex, out int lastAttackType)
+            ReadOnlySpan<BeatType> history,
+            out int skillIndex, out BeatType lastAttackType)
         {
             const int MAX_STACKALLOC_SIZE = 256; //入力履歴の最大長　
             if (history.Length > MAX_STACKALLOC_SIZE)
@@ -20,7 +21,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 throw new Exception("入力履歴が長すぎます");
             }
 
-            Span<int> reversInput = stackalloc int[history.Length];
+            Span<BeatType> reversInput = stackalloc BeatType[history.Length];
             for (int i = 0; i < history.Length; i++)
             {
                 reversInput[i] = history[^(i + 1)];
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
             {
                 if (equipmentSkills[i].IsMatch(reversInput))
                 {
+                    Debug.Log($"[SkillCheckService] SKILL ACTIVATED. SKILL ID: {equipmentSkills[i].Id.Value}");
                     skillIndex = i;
                     lastAttackType = reversInput[0];
                     return true;

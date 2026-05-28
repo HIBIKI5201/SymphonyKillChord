@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using System;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -16,6 +17,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         public void Initialize(InputTimestampProvider timestampProvider)
         {
             _timestampProvider = timestampProvider;
+            ServiceLocator.RegisterInstance(this);
         }
 
         // イベント群。
@@ -28,6 +30,10 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
         public event Action<InputContext<Vector2>> OnLookInput;
+        /// <summary> ロックオン入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnLockOnInput;
+
+        public event Action<InputContext<Vector2>> OnMobileLookInput;
 
         public void OnOption(InputAction.CallbackContext context)
         {
@@ -85,6 +91,14 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnLookInput?.Invoke(inputContext);
         }
 
+        public void OnLockOn(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.LockOn, context, time);
+            OnLockOnInput?.Invoke(inputContext);
+        }
+
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
             Action<InputContext<float>> action = actionId switch
@@ -122,7 +136,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, value, phase, time);
-            OnLookInput?.Invoke(inputContext);
+            OnMobileLookInput?.Invoke(inputContext);
         }
 
         private const string OPTION_ACTION_NAME = "Option";
@@ -132,6 +146,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string ATTACK_ACTION_NAME = "Attack";
         private const string MOVE_ACTION_NAME = "Move";
         private const string LOOK_ACTION_NAME = "Look";
+        private const string LOCK_ON_ACTION_NAME = "LockOn";
 
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
@@ -145,6 +160,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _attackAction;
         private InputAction _moveAction;
         private InputAction _lookAction;
+        private InputAction _lockOnAction;
 
         private void Awake()
         {
@@ -152,7 +168,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             {
                 _playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
                 if (_playerInput.uiInputModule == null)
-                    { _playerInput.uiInputModule = GetComponent<InputSystemUIInputModule>(); }
+                {
+                    _playerInput.uiInputModule = GetComponent<InputSystemUIInputModule>();
+                }
             }
             else
             {
@@ -165,24 +183,26 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         private void OnEnable()
         {
-            RegistarAction(_optionAction, OnOption);
-            RegistarAction(_submitAction, OnSubmit);
-            RegistarAction(_cancelAction, OnCancel);
-            RegistarAction(_dodgeAction, OnDodge);
-            RegistarAction(_attackAction, OnAttack);
-            RegistarAction(_moveAction, OnMove);
-            RegistarAction(_lookAction, OnLook);
+            RegisterAction(_optionAction, OnOption);
+            RegisterAction(_submitAction, OnSubmit);
+            RegisterAction(_cancelAction, OnCancel);
+            RegisterAction(_dodgeAction, OnDodge);
+            RegisterAction(_attackAction, OnAttack);
+            RegisterAction(_moveAction, OnMove);
+            RegisterAction(_lookAction, OnLook);
+            RegisterAction(_lockOnAction, OnLockOn);
         }
 
         private void OnDisable()
         {
-            UnregistarAction(_optionAction, OnOption);
-            UnregistarAction(_submitAction, OnSubmit);
-            UnregistarAction(_cancelAction, OnCancel);
-            UnregistarAction(_dodgeAction, OnDodge);
-            UnregistarAction(_attackAction, OnAttack);
-            UnregistarAction(_moveAction, OnMove);
-            UnregistarAction(_lookAction, OnLook);
+            UnregisterAction(_optionAction, OnOption);
+            UnregisterAction(_submitAction, OnSubmit);
+            UnregisterAction(_cancelAction, OnCancel);
+            UnregisterAction(_dodgeAction, OnDodge);
+            UnregisterAction(_attackAction, OnAttack);
+            UnregisterAction(_moveAction, OnMove);
+            UnregisterAction(_lookAction, OnLook);
+            UnregisterAction(_lockOnAction, OnLockOn);
         }
 
         /// <summary>
@@ -199,6 +219,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             _attackAction = actions.FindAction($"{InputMapNames.InGame}/{ATTACK_ACTION_NAME}", true);
             _moveAction = actions.FindAction($"{InputMapNames.InGame}/{MOVE_ACTION_NAME}", true);
             _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
+            _lockOnAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_ACTION_NAME}", true);
         }
 
         /// <summary>
@@ -206,7 +227,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         /// </summary>
         /// <param name="action"></param>
         /// <param name="callback"></param>
-        private static void RegistarAction(InputAction action, Action<InputAction.CallbackContext> callback)
+        private static void RegisterAction(InputAction action, Action<InputAction.CallbackContext> callback)
         {
             action.started += callback;
             action.performed += callback;
@@ -218,7 +239,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         /// </summary>
         /// <param name="action"></param>
         /// <param name="callback"></param>
-        private static void UnregistarAction(InputAction action, Action<InputAction.CallbackContext> callback)
+        private static void UnregisterAction(InputAction action, Action<InputAction.CallbackContext> callback)
         {
             action.started -= callback;
             action.performed -= callback;

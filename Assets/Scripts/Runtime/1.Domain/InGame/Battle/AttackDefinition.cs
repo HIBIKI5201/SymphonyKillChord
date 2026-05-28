@@ -1,3 +1,5 @@
+using KillChord.Runtime.Domain.InGame.Music;
+
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
@@ -13,7 +15,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             Damage baseDamage,
             AttackParameterSet attackParameterSet,
             IAttackPipeline attackPipeline,
-            int? beatType = null
+            BeatType? beatType = null,
+            float justDamageMultiplier = 1.0f
             )
         {
             AttackName = attackName;
@@ -21,6 +24,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             AttackParameterSet = attackParameterSet;
             AttackPipeline = attackPipeline;
             BeatType = beatType;
+            JustDamageMultiplier = justDamageMultiplier;
         }
 
         /// <summary> 攻撃の名前を表すプロパティ。 </summary>
@@ -31,6 +35,10 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public AttackParameterSet AttackParameterSet { get; }
         /// <summary> 攻撃の処理パイプラインを表すプロパティ。 </summary>
         public IAttackPipeline AttackPipeline { get; }
-        public int? BeatType { get; }
+
+        /// <summary> 対応するビートタイプを取得する。 </summary>
+        public BeatType? BeatType { get; }
+
+        public float JustDamageMultiplier { get; }
     }
 }

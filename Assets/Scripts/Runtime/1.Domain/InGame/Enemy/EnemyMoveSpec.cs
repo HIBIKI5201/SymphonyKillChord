@@ -7,13 +7,18 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMoveSpec
     {
-        public EnemyMoveSpec(MoveSpeed moveSpeed, AttackRange attackRange)
+        public EnemyMoveSpec(MoveSpeed moveSpeed, AttackRangeMin attackRangeMin, AttackRangeMax attackRangeMax)
         {
             MoveSpeed = moveSpeed;
-            AttackRange = attackRange;
+            AttackRangeMin = attackRangeMin;
+            AttackRangeMax = attackRangeMax;
         }
 
+        /// <summary> 移動速度 </summary>
         public MoveSpeed MoveSpeed { get; }
-        public AttackRange AttackRange { get; }
+        /// <summary> 最小攻撃距離 </summary>
+        public AttackRangeMin AttackRangeMin { get; }
+        /// <summary> 最大攻撃距離 </summary>
+        public AttackRangeMax AttackRangeMax { get; }
     }
 }

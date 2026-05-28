@@ -319,7 +319,7 @@ MonoBehaviour:
   _listenerOnStart: {fileID: 0}
   _use3dPositioning: 1
   _freezeOrientation: 0
-  _loop: 0
+  _loop: 1
   _volume: 0.15
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
@@ -384,6 +384,10 @@ MonoBehaviour:
     loaderStatus: 0
   - name: MusicSyncMock
     acbFile: MusicSyncMock.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: SpecialAttack
+    acbFile: SpecialAttack.acb
     awbFile: 
     loaderStatus: 0
   dspBusSetting: 
@@ -506,7 +510,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PersistentEntryPoint
   _active: 1
-  _firstSceneName: InGame
+  _firstSceneName: OutGame
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

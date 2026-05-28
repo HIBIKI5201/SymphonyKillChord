@@ -1,7 +1,7 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using R3;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.UI
 {
     /// <summary>
     ///     HUDの表示状態を管理するViewModelクラス。
