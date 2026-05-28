@@ -1,7 +1,9 @@
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using System;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
@@ -17,16 +19,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         public SkillController(
             ISkillRepository skillRepository,
             ISkillVisual[] skillVisuals,
+            MusicSyncState musicSyncState,
+            SkillCooldownState skillCooldownState,
             int[] skillId = null,
             SkillResultPresenter presenter = null,
             SkillInputProgressController progressController = null)
         {
+            if(musicSyncState == null)
+            {
+                throw new ArgumentNullException("[SkillController] MusicSyncStateがNULL。");
+            }
+            if(skillCooldownState == null)
+            {
+                throw new ArgumentNullException("[SkillController] SkillCooldownStateがNULL。");
+            }
+            _skillCooldownState = skillCooldownState;
             skillId ??= new[] { 0 };
             _skillCache = new SkillDefinition[skillId.Length];
 
             for (int i = 0; i < skillId.Length; i++)
             {
-                _skillCache[i] = skillRepository.GetSkill(skillId[i]);
+                _skillCache[i] = skillRepository.GetSkill(skillId[i], musicSyncState.Bpm);
             }
 
             _skillVisuals = new Dictionary<int, ISkillVisual>();
@@ -66,9 +79,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     unscaledTime,
                     out var executedSkill))
             {
-                _presenter?.Push(executedSkill);
-                _progressController?.ResetSkill(executedSkill.Id.Value);
-                return true;
+                if (_skillCooldownState.IsSkillReady(executedSkill, unscaledTime))
+                {
+                    _presenter?.Push(executedSkill);
+                    _progressController?.ResetSkill(executedSkill.Id.Value);
+                    Execute(executedSkill.Id.Value);
+                    _skillCooldownState.SetSkillCooldown(executedSkill, unscaledTime);
+                    return true;
+                }
             }
 
             return false;
@@ -91,6 +109,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly Dictionary<int, ISkillVisual> _skillVisuals;
         private readonly SkillResultPresenter _presenter;
         private readonly SkillInputProgressController _progressController;
+        private readonly SkillCooldownState _skillCooldownState;
         private SkillUsecase _skillUseCase;
     }
 }
