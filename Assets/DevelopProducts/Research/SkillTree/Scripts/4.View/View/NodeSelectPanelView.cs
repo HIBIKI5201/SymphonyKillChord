@@ -10,13 +10,11 @@ namespace DevelopProducts.SkillTree
     {
         public void Initialize(NodeUnlockController nodeUnlockController,
             NodeCanUnlockController nodeCanUnlockController,
-            NodeLockController nodeLockController,
             SkillNodePresenter skillNodePresenter,
             NodeVisibleController nodeVisibleController)
         {
             _nodeUnlockController = nodeUnlockController;
             _nodeCanUnlockController = nodeCanUnlockController;
-            _nodeLockController = nodeLockController;
             _skillNodePresenter = skillNodePresenter;
             _nodeVisibleController = nodeVisibleController;
 
@@ -53,7 +51,6 @@ namespace DevelopProducts.SkillTree
 
         private NodeUnlockController _nodeUnlockController;
         private NodeCanUnlockController _nodeCanUnlockController;
-        private NodeLockController _nodeLockController;
         private SkillNodePresenter _skillNodePresenter;
         private NodeVisibleController _nodeVisibleController;
 
@@ -112,10 +109,6 @@ namespace DevelopProducts.SkillTree
         private void Awake()
         {
             _unlockButton.onClick.AddListener(OnUnlockButtonClicked);
-        }
-        private void Start()
-        {
-
         }
         private void OnDestroy()
         {
