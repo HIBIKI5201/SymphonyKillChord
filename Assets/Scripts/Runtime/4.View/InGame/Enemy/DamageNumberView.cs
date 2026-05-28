@@ -16,6 +16,12 @@ namespace KillChord.Runtime.View
         /// <param name="damage"></param>
         public void Play(float damage)
         {
+            if (_damageText == null)
+            {
+                Debug.LogError("[DamageNumberView] TMP_Text が未設定です。", this);
+                return;
+            }
+
             _damageText.text = Mathf.CeilToInt(damage).ToString();
 
             LMotion.Create(1f, 0f, _duration)
