@@ -8,9 +8,7 @@ namespace DevelopProducts.SkillTree
     {
         public int Id => _id;
         public SkillNodeEntity SkillNodeEntity => _skillNodeEntity;
-        public IParameterUpgradeEffect[] ParameterUpgradeEffects => _nodeUnlockEffets;
         public SkillNodeAsset[] Parents => _parents;
-        public int Cost => _cost;
 
         public SkillNodeEntity ToDomain()
         {
