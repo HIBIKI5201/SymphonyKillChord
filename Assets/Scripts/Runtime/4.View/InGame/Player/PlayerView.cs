@@ -142,6 +142,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
+                _characterAnimationController?.TriggerAttack();
             }
         }
 
