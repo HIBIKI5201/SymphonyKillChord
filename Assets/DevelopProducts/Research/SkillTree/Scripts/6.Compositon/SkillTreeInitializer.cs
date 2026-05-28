@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 namespace DevelopProducts.SkillTree
@@ -24,7 +23,6 @@ namespace DevelopProducts.SkillTree
             var skillTree = new SkillTreeEntity(_skillTreeRepository.AllSkillNodes);
             var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
             var unlockUsecase = new UnlockUsecase(canUnlockService, _skillPointRepository);
-            var lockUsecase = new LockUsecase();
             var presenter = new SkillNodePresenter(nodeRegistry, skillTree, _skillTreeRepository);
             var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, skillTree, presenter);
             var nodeVisibleController = new NodeVisibleController(_skillTreeRepository, presenter);
