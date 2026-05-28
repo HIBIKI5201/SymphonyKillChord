@@ -18,7 +18,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _presenter = presenter;
         }
-        
+
         /// <summary>
         ///     ViewModelをバインドする。
         /// </summary>
@@ -40,6 +40,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="dto"> ダメージ数値のDTO。 </param>
         public void ShowDamage(in DamageNumberDTO dto)
         {
+            if (_damageNumberPrefab == null)
+            {
+                Debug.LogError("[EnemyHealthView] DamageNumberView のPrefab参照がありません。", this);
+                return;
+            }
+
             DamageNumberView view = Instantiate(_damageNumberPrefab, _damageNumberSpawnPoint);
             view.Play(dto.Damage);
         }

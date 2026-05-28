@@ -23,7 +23,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (damageNumberView == null) throw new ArgumentNullException(nameof(damageNumberView), "敵ダメージ表示ViewがNULL。");
             _damageNumberView = damageNumberView;
 
-            _entity.OnHealthChanged += UpdateHealthHud;
             _isActive = false;
         }
         public void Dispose()
