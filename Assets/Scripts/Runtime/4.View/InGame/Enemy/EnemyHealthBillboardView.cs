@@ -1,14 +1,17 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
+    /// <summary>
+    ///     敵のHP表示を常にカメラの方に向けるためのViewクラス。
+    /// </summary>
     public class EnemyHealthBillboardView : MonoBehaviour
     {
         private void LateUpdate()
         {
             if (_targetCamera == null)
             {
-                _targetCamera = Camera.main;
+                _targetCamera = UnityEngine.Camera.main;
 
                 if (_targetCamera == null)
                 {
@@ -17,9 +20,9 @@ namespace KillChord.Runtime.View
             }
 
             transform.LookAt(_targetCamera.transform);
-            transform.Rotate(0f, 0f, 0f);
         }
 
-        [SerializeField] private Camera _targetCamera;
+        [SerializeField, Tooltip("ターゲットとなるカメラ")] 
+        private UnityEngine.Camera _targetCamera;
     }
 }
