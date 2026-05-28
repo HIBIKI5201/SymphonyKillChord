@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Enemy;
 using LitMotion;
 using LitMotion.Extensions;
 using TMPro;
@@ -6,8 +5,15 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     ダメージ数値を表示するクラス。
+    /// </summary>
     public class DamageNumberView : MonoBehaviour
     {
+        /// <summary>
+        ///     ダメージ演出を再生する。
+        /// </summary>
+        /// <param name="damage"></param>
         public void Play(float damage)
         {
             _damageText.text = Mathf.CeilToInt(damage).ToString();
@@ -22,9 +28,10 @@ namespace KillChord.Runtime.View
         }
 
 
-        [SerializeField]
+        [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
 
-        [SerializeField] private float _duration;
+        [SerializeField, Tooltip("ダメージ演出の継続時間")]
+        private float _duration;
     }
 }

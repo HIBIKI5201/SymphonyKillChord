@@ -10,11 +10,19 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class EnemyHealthView : MonoBehaviour, IDamageNumber
     {
+        /// <summary>
+        ///     初期化する。
+        /// </summary>
+        /// <param name="presenter"> HP HUDのPresenter。 </param>
         public void Initialize(IHealthHudPresenter presenter)
         {
             _presenter = presenter;
         }
-
+        
+        /// <summary>
+        ///     ViewModelをバインドする。
+        /// </summary>
+        /// <param name="viewModel"> HP HUDのViewModel。 </param>
         public void Bind(IHealthHudViewModel viewModel)
         {
             if (_healthHudView == null)
@@ -26,10 +34,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _healthHudView.Bind(viewModel);
         }
 
-        public void ShowDamage(float damage)
+        /// <summary>
+        ///     ダメージ数値を表示する。
+        /// </summary>
+        /// <param name="dto"> ダメージ数値のDTO。 </param>
+        public void ShowDamage(in DamageNumberDTO dto)
         {
             DamageNumberView view = Instantiate(_damageNumberPrefab, _damageNumberSpawnPoint);
-            view.Play(damage);
+            view.Play(dto.Damage);
         }
 
         private void OnDestroy()
@@ -37,9 +49,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _presenter?.Dispose();
         }
 
-        [SerializeField] private HealthHudView _healthHudView;
-        [SerializeField] private Transform _damageNumberSpawnPoint;
-        [SerializeField] private DamageNumberView _damageNumberPrefab;
+        [SerializeField, Tooltip("HP HUDのView")] private HealthHudView _healthHudView;
+        [SerializeField, Tooltip("ダメージ数値の生成位置")] private Transform _damageNumberSpawnPoint;
+        [SerializeField, Tooltip("ダメージ数値のPrefab")] private DamageNumberView _damageNumberPrefab;
         private IHealthHudPresenter _presenter;
     }
 }
