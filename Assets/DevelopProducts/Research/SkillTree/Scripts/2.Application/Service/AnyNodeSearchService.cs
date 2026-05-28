@@ -85,7 +85,7 @@ namespace DevelopProducts.SkillTree
             int totalCost = currentCost + target.UnlockCost.Cost;
 
             //  もしコストが最小コストを上回ったら枝を切る
-            if (totalCost >= bestCost)
+            if (totalCost > bestCost)
             {
                 currentPath.RemoveAt(0);
                 visited.Remove(target);
