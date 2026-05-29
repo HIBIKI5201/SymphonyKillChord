@@ -6,7 +6,7 @@ namespace DevelopProducts.SkillTree
     public class NodeUnlockController
     {
         /// <summary>
-        /// 
+        ///     コンストラクタ
         /// </summary>
         /// <param name="unlockUsecase">スキルをアンロックするユースケース</param>
         public NodeUnlockController(UnlockUsecase unlockUsecase,
@@ -18,7 +18,7 @@ namespace DevelopProducts.SkillTree
             _skillNodePresenter = skillNodePresenter;
         }
         /// <summary>
-        /// ノードを解放する
+        ///     ノードを解放する
         /// </summary>
         public bool UnlockNode(int nodeId)
         {

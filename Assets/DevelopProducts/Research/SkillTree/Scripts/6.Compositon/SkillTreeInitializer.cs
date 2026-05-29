@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DevelopProducts.SkillTree
 {
     /// <summary>
-    ///     スキルツリーに関数クラスなどのDI
+    ///     スキルツリー関連のDIクラス
     /// </summary>
     public class SkillTreeInitializer : MonoBehaviour
     {

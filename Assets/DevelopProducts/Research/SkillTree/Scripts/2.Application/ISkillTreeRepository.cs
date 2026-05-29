@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     SkillTreeリポジトリのインターフェース
+    /// </summary>
     public interface ISkillTreeRepository
     {
         SkillNodeEntity[] AllSkillNodes { get; }

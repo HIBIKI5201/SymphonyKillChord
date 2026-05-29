@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     アルゴリズムサービスのインターフェース
+    /// </summary>
     public interface IAlgorithmService
     {
         PathResult FindPath(

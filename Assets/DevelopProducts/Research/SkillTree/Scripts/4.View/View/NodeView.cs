@@ -3,11 +3,21 @@ using UnityEngine.UI;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードのView
+    /// </summary>
     [RequireComponent(typeof(Button))]
     public class NodeView : MonoBehaviour
     {
+        /// <summary>ノードViewのID</summary>
         public int Id => _id;
+        /// <summary>解放されているかどうかのbool値</summary>
         public bool IsUnlocked => _isUnlocked;
+        /// <summary>
+        ///     初期化メソッド
+        /// </summary>
+        /// <param name="nodeRegistry"></param>
+        /// <param name="panelView"></param>
         public void Initialize(NodeRegistry nodeRegistry, NodeSelectPanelView panelView)
         {
             _nodeRegistry = nodeRegistry;
@@ -24,6 +34,10 @@ namespace DevelopProducts.SkillTree
 
             _nodeRegistry.Register(_id, _nodeVM);
         }
+        /// <summary>
+        ///     可視化されている且つ解放可能だったら色を変える
+        /// </summary>
+        /// <param name="canlock"></param>
         public void Canlock(bool canlock)
         {
             if (_isUnlocked)
@@ -33,6 +47,11 @@ namespace DevelopProducts.SkillTree
             _icon.color = canlock ? Color.yellow : Color.white;
             Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_id}, canlock: {canlock}");
         }
+
+        /// <summary>
+        ///     ノードを解放する
+        /// </summary>
+        /// <param name="isUnlock"></param>
         public void Unlock(bool isUnlock)
         {
             Debug.Log($"ノードがアンロックされたかどうか: SkillNodeId {_id}, isUnlock: {isUnlock}");
@@ -42,6 +61,10 @@ namespace DevelopProducts.SkillTree
                 _icon.color = Color.green;
             }
         }
+        /// <summary>
+        ///     可視化させる
+        /// </summary>
+        /// <param name="isLock"></param>
         public void CanVisible(bool isLock)
         {
             Debug.Log($"ノードを表示または非表示: SkillNodeId {_id}, isLock: {isLock}");

@@ -1,7 +1,15 @@
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードの状態をViewに反映させるプレゼンター
+    /// </summary>
     public class SkillNodePresenter
     {
+        /// <summary>
+        ///     コンストラクタ
+        /// </summary>
+        /// <param name="nodeRegistry"></param>
+        /// <param name="skillTreeRepository"></param>
         public SkillNodePresenter(NodeRegistry nodeRegistry,
             ISkillTreeRepository skillTreeRepository)
         {
