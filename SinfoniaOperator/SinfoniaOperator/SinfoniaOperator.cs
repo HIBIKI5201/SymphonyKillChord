@@ -83,6 +83,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
             else
             {
+                tasks[0] = Task.CompletedTask;
                 Console.WriteLine("[PushTaskList] 送信するタスクがありませんでした。");
             }
 
@@ -92,6 +93,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
             else
             {
+                tasks[1] = Task.CompletedTask;
                 Console.WriteLine("[PushTaskList] 送信するタスクアラートがありませんでした。");
             }
 
