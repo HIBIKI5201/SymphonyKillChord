@@ -1,7 +1,8 @@
-using UnityEngine;
-
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードが解放可能か調べるコントローラ
+    /// </summary>
     public class NodeCanUnlockController
     {
         public NodeCanUnlockController(ISkillTreeRepository skillTreeRepository,
@@ -12,6 +13,11 @@ namespace DevelopProducts.SkillTree
             _unlockUsecase = unlockUsecase;
             _skillsNodePresenter = presenter;
         }
+        /// <summary>
+        ///     ノードが解放できるか調べる
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
         public bool CanUnlock(int nodeId)
         {
             var node = _skillTreeRepository.GetNode(nodeId);

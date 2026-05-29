@@ -5,8 +5,19 @@ using UnityEngine.UI;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     スキルツリーの解放パネルUIに色々表示させるクラス
+    /// </summary>
     public class NodeSelectPanelView : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化メソッド
+        /// </summary>
+        /// <param name="nodeUnlockController"></param>
+        /// <param name="nodeCanUnlockController"></param>
+        /// <param name="skillNodePresenter"></param>
+        /// <param name="nodeVisibleController"></param>
+        /// <param name="skillTreeRepository"></param>
         public void Initialize(
             NodeUnlockController nodeUnlockController,
             NodeCanUnlockController nodeCanUnlockController,
@@ -36,6 +47,10 @@ namespace DevelopProducts.SkillTree
             }
             CanUnlockNodes();
         }
+        /// <summary>
+        ///     ノードの状態を代入する
+        /// </summary>
+        /// <param name="nodeView"></param>
         public void SetNode(NodeView nodeView)
         {
             if (nodeView.IsUnlocked) return;
@@ -56,6 +71,9 @@ namespace DevelopProducts.SkillTree
         private NodeVisibleController _nodeVisibleController;
         private ISkillTreeRepository _skillTreeRepository;
 
+        /// <summary>
+        ///     ボタンがクリックされた時に呼び出すメソッド
+        /// </summary>
         private void OnUnlockButtonClicked()
         {
             var result = _nodeUnlockController.UnlockNode(_currentNodeId);
@@ -100,6 +118,9 @@ namespace DevelopProducts.SkillTree
             }
             return isAllUnlocked;
         }
+        /// <summary>
+        ///     ノードが表示可能なノードを可視化させる
+        /// </summary>
         private void CanUnlockNodes()
         {
             var enableNodes = _skillTreeRepository.AllSkillNodes.Where(n => n.IsEnable && !n.IsUnlocked);
