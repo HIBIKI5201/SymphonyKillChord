@@ -2,7 +2,6 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.WSA;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
