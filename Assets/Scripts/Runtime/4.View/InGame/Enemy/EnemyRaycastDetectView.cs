@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
@@ -19,6 +20,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform;
             _attackRange = attackRange;
+            if (!transform.TryGetComponent<LineRenderer>(out _lineRenderer))
+            {
+                Debug.LogError("[EnemyRaycastDetectView] LineRendererの取得に失敗。");
+                return;
+            }
             if (targetTransform == null)
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
@@ -58,33 +64,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return false;
         }
 
-        [SerializeField, Tooltip("射線判定結果の最大保持数")]
-        private int _resultArraySize = 8;
-        [SerializeField]
-        private EnemyMoveView _enemyMoveView;
-        [SerializeField, Tooltip("敵の攻撃が当たるレイヤー")]
-        private LayerMask _hitLayers;
-
-        private RaycastHit[] _hitResults;
-        private Collider _targetCollider;
-        private Transform _targetTransform;
-        private Vector3 _endPoint;
-        private GameObject _rayObj;
-        private float _attackRange;
-#if UNITY_EDITOR
-        private bool _initializedFlg = false;
-#endif
-
-
-        /// <summary>
-        ///     射線判定を行い、当たった対象の数を返却。
-        /// </summary>
-        /// <returns></returns>
-        private int CastAndGetHitCount(Vector3 sourcePosition)
-        {
-            Ray ray = new Ray(sourcePosition, (_targetTransform.position - sourcePosition).normalized);
-            return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
-        }
         public void Handle2BeatBefore()
         {
             Vector3 direction = (_targetTransform.position - transform.position).normalized;
@@ -96,21 +75,56 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _attackRange,
                 _hitLayers);
 
-
             if (hitCount > 0)
             {
-                _endPoint = _hitResults[0].point;
+                RaycastHit closestHit = FindClosestHit(hitCount);
+                _endPoint = closestHit.point;
             }
             else
             {
                 _endPoint = ray.origin + ray.direction * _attackRange;
             }
 
-            CreateRayObject(ray.origin, _endPoint, Color.yellow);
+            _lineRenderer.material.SetColor("_EmissionColor", Color.yellow);
+            _lineRenderer.SetPosition(0, new Vector3(transform.position.x, 1f, transform.position.z));
+            _lineRenderer.SetPosition(1, new Vector3(_endPoint.x, 1f, _endPoint.z));
         }
+
         public void Handle1BeatBefore()
         {
-            ChangeObjectColor(Color.red);
+            _lineRenderer.material.SetColor("_EmissionColor", Color.red);
+        }
+
+        public void HandleOnAttack()
+        {
+
+        }
+
+        [SerializeField, Tooltip("射線判定結果の最大保持数")]
+        private int _resultArraySize = 8;
+        [SerializeField]
+        private EnemyMoveView _enemyMoveView;
+        [SerializeField, Tooltip("敵の攻撃が当たるレイヤー")]
+        private LayerMask _hitLayers;
+
+        private LineRenderer _lineRenderer;
+        private RaycastHit[] _hitResults;
+        private Collider _targetCollider;
+        private Transform _targetTransform;
+        private Vector3 _endPoint;
+
+        private float _attackRange;
+#if UNITY_EDITOR
+        private bool _initializedFlg = false;
+#endif
+        /// <summary>
+        ///     射線判定を行い、当たった対象の数を返却。
+        /// </summary>
+        /// <returns></returns>
+        private int CastAndGetHitCount(Vector3 sourcePosition)
+        {
+            Ray ray = new Ray(sourcePosition, (_targetTransform.position - sourcePosition).normalized);
+            return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
         }
         /// <summary>
         ///     Raycastが当たった最も近い対象を取得する
@@ -138,36 +152,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return _hitResults[closestIndex];
         }
 
-        private void CreateRayObject(Vector3 start, Vector3 end, Color color)
-        {
-            Vector3 direction = end - start;
-            float length = direction.magnitude;
-            Vector3 center = (start + end) * 0.5f;
 
-            _rayObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-
-            _rayObj.transform.position = center;
-            _rayObj.transform.up = direction.normalized;
-
-            // Cylinderは高さ2なので半分をスケールに指定
-            _rayObj.transform.localScale = new Vector3(
-                0.1f,
-                length * 0.5f,
-                0.1f
-            );
-            _rayObj.GetComponent<MeshRenderer>().material.color = color;
-
-            Destroy(_rayObj, 1f);
-        }
-
-        private void ChangeObjectColor(Color color)
-        {
-            MeshRenderer renderer = _rayObj.GetComponent<MeshRenderer>();
-            if (renderer != null)
-            {
-                renderer.material.color = color;
-            }
-        }
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()
