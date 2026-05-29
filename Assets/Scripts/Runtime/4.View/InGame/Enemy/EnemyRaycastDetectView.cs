@@ -4,12 +4,13 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
-    /// 敵から対象へのレイ判定と、攻撃予告ライン表示を管理する View。
+    /// Enemy attack raycast and its warning line presentation.
     /// </summary>
-    public class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
+    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
     {
+
         /// <summary>
-        /// 初期化する。
+        /// Initializes raycast target and warning line settings.
         /// </summary>
         public void Initialize(Transform targetTransform, float attackRange)
         {
@@ -19,25 +20,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             if (!TryGetComponent(out _lineRenderer))
             {
-                Debug.LogError("[EnemyRaycastDetectView] LineRendererの取得に失敗。");
+                Debug.LogError("[EnemyRaycastDetectView] Failed to find LineRenderer.");
                 return;
             }
 
             if (targetTransform == null)
             {
-                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
+                Debug.LogError("[EnemyRaycastDetectView] Target transform is null.");
                 return;
             }
 
             if (!targetTransform.TryGetComponent(out _targetCollider))
             {
-                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象がColliderを持っていない。");
+                Debug.LogError("[EnemyRaycastDetectView] Target collider is missing.");
                 return;
             }
 
             _lineRenderer.enabled = false;
             _lineRenderer.positionCount = 2;
             _lineRenderer.useWorldSpace = true;
+            HideWarningInternal();
 
 #if UNITY_EDITOR
             _initializedFlg = true;
@@ -45,51 +47,55 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 敵本体の攻撃用レイが、現在の状態で対象へ通っているか。
+        /// Returns whether the enemy's current attack ray can reach the target.
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
 
         /// <summary>
-        /// 指定位置から対象へ通常のレイが通るかを判定する。
-        /// 探索用途向けで、固定レイは使わない。
+        /// Returns whether a free ray from the given position can reach the target.
+        /// This is intended for search logic and never uses the locked warning direction.
         /// </summary>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
             return CheckRaycastHitTarget(sourcePosition);
         }
 
-        public void Handle2BeatBefore()
+        /// <summary>
+        /// Starts tracking the target with the warning line.
+        /// </summary>
+        public void StartTrackingWarning()
         {
             if (!IsReadyForLineUpdate()) return;
 
-            _isRayDirectionFrozen = false;
-            _isLineVisible = true;
+            _warningDisplayState = WarningDisplayState.Tracking;
             _currentLineColor = Color.yellow;
-            UpdateLineRenderer(Color.yellow);
+            UpdateWarningLine();
         }
 
-        public void Handle1BeatBefore()
+        /// <summary>
+        /// Locks the current warning direction while keeping the line length fixed.
+        /// </summary>
+        public void LockWarningDirection()
         {
             if (!IsReadyForLineUpdate()) return;
 
             FreezeCurrentRayDirection();
-            _isLineVisible = true;
+            _warningDisplayState = WarningDisplayState.Locked;
             _currentLineColor = Color.red;
-            UpdateLineRenderer(Color.red);
+            UpdateWarningLine();
         }
 
-        public void HandleOnAttack()
+        /// <summary>
+        /// Hides the warning line and clears the locked direction.
+        /// </summary>
+        public void HideWarning()
         {
-            _isRayDirectionFrozen = false;
-            _isLineVisible = false;
-
-            if (_lineRenderer == null) return;
-            _lineRenderer.enabled = false;
+            HideWarningInternal();
         }
 
-        [SerializeField, Tooltip("RaycastHitを格納する配列サイズ")]
+        [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
-        [SerializeField, Tooltip("レイの当たり判定を行うレイヤー")]
+        [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
         [SerializeField] private LineRenderer _lineRenderer;
 
@@ -97,9 +103,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Collider _targetCollider;
         private Transform _targetTransform;
         private float _attackRange;
-        private bool _isRayDirectionFrozen;
-        private Vector3 _frozenRayDirection;
-        private bool _isLineVisible;
+        private WarningDisplayState _warningDisplayState;
+        private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
 
 #if UNITY_EDITOR
@@ -115,7 +120,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForRaycast())
             {
-                Debug.LogError("[EnemyRaycastDetectView] 攻撃対象の取得が出来ていない。");
+                Debug.LogError("[EnemyRaycastDetectView] Raycast is not initialized.");
                 return false;
             }
 
@@ -163,7 +168,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return _hitResults[closestIndex];
         }
 
-        private void UpdateLineRenderer(Color emissionColor)
+        private void LateUpdate()
+        {
+            if (_warningDisplayState != WarningDisplayState.Tracking) return;
+            if (!IsReadyForLineUpdate()) return;
+
+            UpdateWarningLine();
+        }
+
+        private void UpdateWarningLine()
         {
             Ray ray = CreateRay(transform.position);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
@@ -173,24 +186,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             _lineRenderer.enabled = true;
-            _lineRenderer.material.SetColor("_EmissionColor", emissionColor);
+            _lineRenderer.material.SetColor("_EmissionColor", _currentLineColor);
             _lineRenderer.SetPosition(0, ray.origin);
             _lineRenderer.SetPosition(1, ray.origin + ray.direction * _attackRange);
         }
 
-        private void LateUpdate()
-        {
-            if (!_isLineVisible) return;
-            if (!IsReadyForLineUpdate()) return;
-
-            UpdateLineRenderer(_currentLineColor);
-        }
-
         private Ray CreateRay(Vector3 sourcePosition)
         {
-            if (_isRayDirectionFrozen && IsEnemyOrigin(sourcePosition))
+            if (ShouldUseLockedDirection(sourcePosition))
             {
-                return new Ray(sourcePosition, _frozenRayDirection);
+                return new Ray(sourcePosition, _lockedRayDirection);
             }
 
             Vector3 targetPoint = GetRayTargetPoint(sourcePosition);
@@ -203,19 +208,33 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return new Ray(sourcePosition, direction.normalized);
         }
 
+        private bool ShouldUseLockedDirection(Vector3 sourcePosition)
+        {
+            return _warningDisplayState == WarningDisplayState.Locked
+                && IsEnemyOrigin(sourcePosition);
+        }
+
         private void FreezeCurrentRayDirection()
         {
             Vector3 targetPoint = GetRayTargetPoint(transform.position);
             Vector3 direction = targetPoint - transform.position;
             if (direction.sqrMagnitude <= Mathf.Epsilon)
             {
-                _isRayDirectionFrozen = false;
-                _frozenRayDirection = Vector3.zero;
+                _lockedRayDirection = Vector3.zero;
+                _warningDisplayState = WarningDisplayState.Hidden;
                 return;
             }
 
-            _isRayDirectionFrozen = true;
-            _frozenRayDirection = direction.normalized;
+            _lockedRayDirection = direction.normalized;
+        }
+
+        private void HideWarningInternal()
+        {
+            _warningDisplayState = WarningDisplayState.Hidden;
+            _lockedRayDirection = Vector3.zero;
+
+            if (_lineRenderer == null) return;
+            _lineRenderer.enabled = false;
         }
 
         private bool IsEnemyOrigin(Vector3 sourcePosition)
@@ -258,12 +277,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void OnDisable()
         {
-            _isRayDirectionFrozen = false;
-            _frozenRayDirection = Vector3.zero;
-            _isLineVisible = false;
-
-            if (_lineRenderer == null) return;
-            _lineRenderer.enabled = false;
+            HideWarningInternal();
         }
     }
 }
