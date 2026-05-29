@@ -14,6 +14,7 @@
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="DevelopProducts-Achievement.csproj" />
+  <Project Path="DevelopProduct-BehaviorGraph.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
