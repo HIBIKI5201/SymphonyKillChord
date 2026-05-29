@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Persistent;
 using System;
@@ -30,7 +31,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             SkillController skillController,
             TargetSelectorController targetSelectorController,
             AttackIntervalEvaluator attackIntervalEvaluator,
-            IMusicSyncService musicSyncService
+            IMusicSyncService musicSyncService,
+            float attackRotationSpeed
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -39,10 +41,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _skillController = skillController;
             _targetSelectorController = targetSelectorController;
             _musicSyncService = musicSyncService;
+            AttackRotationSpeed = attackRotationSpeed;
         }
-        
+
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
+
+        /// <summary>
+        ///     現在のロックオン対象インターフェース（攻撃時にセットされる）。null の可能性あり。
+        /// </summary>
+        public ILockOnTarget CurrentLockOnTarget { get; private set; }
+
+        /// <summary> 攻撃時の回転速度（秒あたりの収束速度に使える値）</summary>
+        public float AttackRotationSpeed { get; }
 
         /// <summary>
         ///     攻撃を実行する。
@@ -66,6 +77,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _battleState.ChangeTarget(targetEntity);
 
+            // 現在の ILockOnTarget を取得して保持（View 側が参照する）
+            if (_targetSelectorController.TryGetCurrentTarget(out var lockOnTarget))
+            {
+                CurrentLockOnTarget = lockOnTarget;
+            }
+            else
+            {
+                CurrentLockOnTarget = null;
+            }
+
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
 
@@ -81,7 +102,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 Debug.LogWarning(ex.Message);
                 return false;
             }
-            
+
             _attackIntervalEvaluator.EvaluateInterval();
 
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
