@@ -18,7 +18,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         ///     Notionのデータベースにアクセスして、タスクの状況を文字列で返します。
         /// </summary>
         /// <returns></returns>
-        public async Task<string> GetTaskContent()
+        public async Task<TaskContentResult> GetTaskContent()
         {
             try
             {
@@ -31,6 +31,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 Console.WriteLine($"[TaskReader] 判定基準日 (JST): {today:yyyy/MM/dd}");
 
                 PriorityQueue<StringBuilder, int> outputTaskQueue = new();
+                PriorityQueue<StringBuilder, int> outputTaskAlertQueue = new();
                 int evaluatedCount = 0;
                 int notificationCount = 0;
 
@@ -123,7 +124,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                         StringBuilder endTasksSb = new();
                         AppendTaskSummry(endTasksSb, "🔴納期遅れタスク", pageName, page, startDate, endDate);
                         await AppendPageContentAsync(endTasksSb, page);
-                        outputTaskQueue.Enqueue(endTasksSb, 2);
+                        outputTaskAlertQueue.Enqueue(endTasksSb, 2);
                         Console.WriteLine($"[TaskReader] {pageName}: 納期遅れタスクとして通知リストに追加しました。");
                         continue;
                     }
@@ -134,28 +135,61 @@ namespace SinfoniaStudio.SinfoniaOperator
 
                 Console.WriteLine($"[TaskReader] 評価終了 (評価数: {evaluatedCount}, 通知対象数: {notificationCount})");
 
-                if (outputTaskQueue.Count <= 0)
+                if (outputTaskQueue.Count <= 0 && outputTaskAlertQueue.Count <= 0)
                 {
                     Console.WriteLine("[TaskReader] 今日の開始タスクと納期タスクがありません。通知を送信しません。");
-                    return string.Empty;
+                    return new TaskContentResult(string.Empty, string.Empty, evaluatedCount, notificationCount);
                 }
 
                 // 優先度順にログを並べる。
-                StringBuilder sb =
-                    new($"GitHub Actionsからの定期タスク通知です！ {nowTime:yyyy/MM/dd HH:mm:ss}");
-                while (outputTaskQueue.TryDequeue(out StringBuilder? element, out int priority))
+                string taskLog = string.Empty;
+                if (outputTaskQueue.Count > 0)
                 {
-                    sb.AppendLine(element.ToString());
+                    StringBuilder taskLogSb = new($"[タスク通知] {nowTime:yyyy/MM/dd HH:mm:ss}\n");
+                    while (outputTaskQueue.TryDequeue(out StringBuilder? element, out int priority))
+                    {
+                        taskLogSb.AppendLine(element.ToString());
+                    }
+                    taskLog = taskLogSb.ToString();
+                }
+                string taskAlertLog = string.Empty;
+                if (outputTaskAlertQueue.Count > 0)
+                {
+                    StringBuilder taskAlertSb = new($"GitHub Actionsからの定期アラート通知です！ {nowTime:yyyy/MM/dd HH:mm:ss}");
+                    while (outputTaskAlertQueue.TryDequeue(out StringBuilder? element, out int priority))
+                    {
+                        taskAlertSb.AppendLine(element.ToString());
+                    }
+                    taskAlertLog = taskAlertSb.ToString();
                 }
 
                 Console.WriteLine($"{new string('-', 10)}");
-                return sb.ToString();
+                return new TaskContentResult(taskLog, taskAlertLog, evaluatedCount, notificationCount);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[TaskReader] タスク情報の取得中に予期せぬエラーが発生しました: {ex.Message}");
-                return string.Empty;
+                return new TaskContentResult(string.Empty, string.Empty, 0, 0);
             }
+        }
+
+        public readonly struct TaskContentResult
+        {
+            public TaskContentResult(string taskContent, string taskAlertContent, int evaluatedCount, int notificationCount)
+            {
+                TaskContent = taskContent;
+                TaskAlertContent = taskAlertContent;
+                EvaluatedCount = evaluatedCount;
+                NotificationCount = notificationCount;
+            }
+
+            public bool HasTaskContent => !string.IsNullOrWhiteSpace(TaskContent);
+            public bool HasTaskAlertContent => !string.IsNullOrWhiteSpace(TaskAlertContent);
+
+            public readonly string TaskContent;
+            public readonly string TaskAlertContent;
+            public readonly int EvaluatedCount;
+            public readonly int NotificationCount;
         }
 
         private readonly NotionReader _reader;
