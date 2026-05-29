@@ -114,6 +114,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
+            _aiController.On1BeatBefore += _raycastView.Handle1BeatBefore;
+            _aiController.On2BeatBefore += _raycastView.Handle2BeatBefore;
             _attackPositionSearchView.Initialize();
             if(_shellSpawner != null && shellPool != null)
             {
