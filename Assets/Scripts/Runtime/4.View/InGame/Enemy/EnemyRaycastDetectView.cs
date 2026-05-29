@@ -46,7 +46,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         /// <summary>
         /// 敵本体の攻撃用レイが、現在の状態で対象へ通っているか。
-        /// 1拍前以降は固定したレイを使う。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
 
@@ -56,14 +55,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
-            return CheckRaycastHitTarget(sourcePosition, useFrozenRaycast: false);
+            return CheckRaycastHitTarget(sourcePosition);
         }
 
         public void Handle2BeatBefore()
         {
             if (!IsReadyForLineUpdate()) return;
 
-            _isRaycastFrozen = false;
             _isLineVisible = true;
             _currentLineColor = Color.yellow;
             UpdateLineRenderer(Color.yellow);
@@ -73,7 +71,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForLineUpdate()) return;
 
-            FreezeCurrentRaycast();
             _isLineVisible = true;
             _currentLineColor = Color.red;
             UpdateLineRenderer(Color.red);
@@ -81,7 +78,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         public void HandleOnAttack()
         {
-            ClearFrozenRaycast();
             _isLineVisible = false;
 
             if (_lineRenderer == null) return;
@@ -92,18 +88,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("レイの当たり判定を行うレイヤー")]
         private LayerMask _hitLayers;
-        [SerializeField, Tooltip("ライン終点をヒット地点の少し手前で止める距離")]
-        private float _lineStopOffset = 0.5f;
         [SerializeField] private LineRenderer _lineRenderer;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;
         private Transform _targetTransform;
-        private Vector3 _endPoint;
         private float _attackRange;
-        private bool _isRaycastFrozen;
-        private Vector3 _frozenRayOrigin;
-        private Vector3 _frozenRayDirection;
         private bool _isLineVisible;
         private Color _currentLineColor;
 
@@ -113,10 +103,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private bool CheckCurrentAttackRaycastHitTarget()
         {
-            return CheckRaycastHitTarget(transform.position, useFrozenRaycast: true);
+            return CheckRaycastHitTarget(transform.position);
         }
 
-        private bool CheckRaycastHitTarget(Vector3 sourcePosition, bool useFrozenRaycast)
+        private bool CheckRaycastHitTarget(Vector3 sourcePosition)
         {
             if (!IsReadyForRaycast())
             {
@@ -124,7 +114,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
-            int hitCount = CastAndGetHitCount(sourcePosition, useFrozenRaycast);
+            int hitCount = CastAndGetHitCount(sourcePosition);
             if (hitCount <= 0)
             {
                 return false;
@@ -134,9 +124,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return hit.colliderEntityId == _targetCollider.GetEntityId();
         }
 
-        private int CastAndGetHitCount(Vector3 sourcePosition, bool useFrozenRaycast)
+        private int CastAndGetHitCount(Vector3 sourcePosition)
         {
-            Ray ray = CreateRay(sourcePosition, useFrozenRaycast);
+            Ray ray = CreateRay(sourcePosition);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
                 return 0;
@@ -170,39 +160,29 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void UpdateLineRenderer(Color emissionColor)
         {
-            Ray ray = CreateRay(transform.position, useFrozenRaycast: true);
+            Ray ray = CreateRay(transform.position);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
                 _lineRenderer.enabled = false;
                 return;
             }
 
-            int hitCount = Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
-            _endPoint = hitCount > 0
-                ? CalculateLineEndPoint(FindClosestHit(hitCount), ray.direction)
-                : ray.origin + ray.direction * _attackRange;
-
             _lineRenderer.enabled = true;
             _lineRenderer.material.SetColor("_EmissionColor", emissionColor);
             _lineRenderer.SetPosition(0, ray.origin);
-            _lineRenderer.SetPosition(1, _endPoint);
+            _lineRenderer.SetPosition(1, ray.origin + ray.direction * _attackRange);
         }
 
         private void LateUpdate()
         {
-            if (!_isLineVisible || _isRaycastFrozen) return;
+            if (!_isLineVisible) return;
             if (!IsReadyForLineUpdate()) return;
 
             UpdateLineRenderer(_currentLineColor);
         }
 
-        private Ray CreateRay(Vector3 sourcePosition, bool useFrozenRaycast)
+        private Ray CreateRay(Vector3 sourcePosition)
         {
-            if (useFrozenRaycast && _isRaycastFrozen && IsEnemyOrigin(sourcePosition))
-            {
-                return new Ray(_frozenRayOrigin, _frozenRayDirection);
-            }
-
             Vector3 targetPoint = GetRayTargetPoint(sourcePosition);
             Vector3 direction = targetPoint - sourcePosition;
             if (direction.sqrMagnitude <= Mathf.Epsilon)
@@ -211,35 +191,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             return new Ray(sourcePosition, direction.normalized);
-        }
-
-        private void FreezeCurrentRaycast()
-        {
-            Vector3 sourcePosition = transform.position;
-            Vector3 targetPoint = GetRayTargetPoint(sourcePosition);
-            Vector3 direction = targetPoint - sourcePosition;
-
-            if (direction.sqrMagnitude <= Mathf.Epsilon)
-            {
-                ClearFrozenRaycast();
-                return;
-            }
-
-            _frozenRayOrigin = sourcePosition;
-            _frozenRayDirection = direction.normalized;
-            _isRaycastFrozen = true;
-        }
-
-        private void ClearFrozenRaycast()
-        {
-            _isRaycastFrozen = false;
-            _frozenRayOrigin = Vector3.zero;
-            _frozenRayDirection = Vector3.zero;
-        }
-
-        private bool IsEnemyOrigin(Vector3 sourcePosition)
-        {
-            return (sourcePosition - transform.position).sqrMagnitude <= 0.0001f;
         }
 
         private bool IsReadyForRaycast()
@@ -255,12 +206,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Vector3 GetRayTargetPoint(Vector3 sourcePosition)
         {
             return _targetCollider.ClosestPoint(sourcePosition);
-        }
-
-        private Vector3 CalculateLineEndPoint(RaycastHit hit, Vector3 direction)
-        {
-            float offset = Mathf.Max(0f, _lineStopOffset);
-            return hit.point - direction * Mathf.Min(offset, hit.distance);
         }
 
 #if UNITY_EDITOR
@@ -283,7 +228,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void OnDisable()
         {
-            ClearFrozenRaycast();
             _isLineVisible = false;
 
             if (_lineRenderer == null) return;
