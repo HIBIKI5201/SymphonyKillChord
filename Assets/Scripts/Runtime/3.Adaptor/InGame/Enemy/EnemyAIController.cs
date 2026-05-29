@@ -36,8 +36,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
-            _enemyAttackReservationUsecase.On2BeatBeforeShooting += Handle2BeatBeforeShooting;
-            _enemyAttackReservationUsecase.On1BeatBeforeShooting += Handle1BeatBeforeShooting;
+            _enemyAttackReservationUsecase.On2BeatBefore += Handle2BeatBefore;
+            _enemyAttackReservationUsecase.On1BeatBefore += Handle1BeatBefore;
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
             _isActive = true;
         }
@@ -49,8 +49,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (!_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
-            _enemyAttackReservationUsecase.On2BeatBeforeShooting -= Handle2BeatBeforeShooting;
-            _enemyAttackReservationUsecase.On1BeatBeforeShooting -= Handle1BeatBeforeShooting;
+            _enemyAttackReservationUsecase.On2BeatBefore -= Handle2BeatBefore;
+            _enemyAttackReservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _enemyAttackReservationUsecase.Deactivate();
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
@@ -62,9 +62,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
         /// <summary>   攻撃の2拍前に発火するイベント   </summary>
-        public event Action On2BeatBeforeShooting;
+        public event Action On2BeatBefore;
         /// <summary>   攻撃の1拍前に発火するイベント </summary>
-        public event Action On1BeatBeforeShooting;
+        public event Action On1BeatBefore;
 
         /// <summary> 敵が攻撃中か。 </summary>
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
@@ -162,16 +162,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
-        private void Handle2BeatBeforeShooting()
+        private void Handle2BeatBefore()
         {
             Debug.Log("[EnemyAIController] 攻撃の2拍前");
-            On2BeatBeforeShooting?.Invoke();
+            On2BeatBefore?.Invoke();
         }
 
-        private void Handle1BeatBeforeShooting()
+        private void Handle1BeatBefore()
         {
             Debug.Log("[EnemyAIController] 攻撃の1拍前");
-            On1BeatBeforeShooting?.Invoke();
+            On1BeatBefore?.Invoke();
         }
 
         /// <summary>

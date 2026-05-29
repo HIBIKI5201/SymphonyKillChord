@@ -81,6 +81,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.On1BeatBefore += On1BeatBefore;
+            _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
 
         /// <summary>
@@ -92,6 +94,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.On1BeatBefore -= On1BeatBefore;
+                _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
         }
         /// <summary>
@@ -107,6 +111,20 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             ParticleController.Instance.PlayParticle(transform.position);
+        }
+        /// <summary>
+        ///     攻撃の1拍前に呼び出される処理。
+        /// </summary>
+        private void On1BeatBefore()
+        {
+            
+        }
+        /// <summary>
+        ///     攻撃の2拍前に呼び出される処理。
+        /// </summary>
+        private void On2BeatBefore()
+        {
+            
         }
     }
 }

@@ -31,8 +31,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
-        public event Action On2BeatBeforeShooting;
-        public event Action On1BeatBeforeShooting;
+        public event Action On2BeatBefore;
+        public event Action On1BeatBefore;
 
         /// <summary>
         ///     Encounterタイミングで攻撃を予約する。
@@ -114,12 +114,12 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 
             _musicActionScheduler.Schedule(
                 new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
-                Handle2BeatBeforeShooting,
+                Handle2BeatBefore,
                 _cancellationTokenSource.Token);
 
             _musicActionScheduler.Schedule(
                 new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
-                Handle1BeatBeforeShooting,
+                Handle1BeatBefore,
                 _cancellationTokenSource.Token);
            
         }
@@ -137,18 +137,18 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary>
         ///    攻撃の2拍前に到達したときの処理。
         /// </summary>
-        private void Handle2BeatBeforeShooting()
+        private void Handle2BeatBefore()
         {
             Debug.Log("攻撃の2拍前に到達しました。");
-            On2BeatBeforeShooting?.Invoke();
+            On2BeatBefore?.Invoke();
         }
         /// <summary>
         ///   攻撃の1拍前に到達したときの処理。
         /// </summary>
-        private void Handle1BeatBeforeShooting()
+        private void Handle1BeatBefore()
         {
             Debug.Log("攻撃の1拍前に到達しました。");
-            On1BeatBeforeShooting?.Invoke();
+            On1BeatBefore?.Invoke();
         }
         
 
