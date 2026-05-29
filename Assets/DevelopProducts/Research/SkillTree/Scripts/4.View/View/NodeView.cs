@@ -8,15 +8,14 @@ namespace DevelopProducts.SkillTree
     {
         public int Id => _id;
         public bool IsUnlocked => _isUnlocked;
-        public void Initialize(NodeRegistry nodeRegistry, int id)
+        public void Initialize(NodeRegistry nodeRegistry, NodeSelectPanelView panelView)
         {
-            _id = id;
             _nodeRegistry = nodeRegistry;
 
             _icon = GetComponent<Image>();
             _button = GetComponent<Button>();
             _button.onClick.AddListener(() => _nodeSelectPanelView.SetNode(this));
-            _nodeSelectPanelView = FindAnyObjectByType<NodeSelectPanelView>();
+            _nodeSelectPanelView = panelView;
 
             _nodeVM = new NodeViewModel();
             _nodeVM.CanUnlock += Canlock;
@@ -48,7 +47,8 @@ namespace DevelopProducts.SkillTree
             Debug.Log($"ノードを表示または非表示: SkillNodeId {_id}, isLock: {isLock}");
             this.gameObject.SetActive(isLock);
         }
-        private int _id;
+        [Header("NodeViewの番号")]
+        [SerializeField] private int _id;
         private Image _icon;
         private NodeViewModel _nodeVM;
         private NodeSelectPanelView _nodeSelectPanelView;
