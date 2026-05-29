@@ -33,13 +33,19 @@ namespace DevelopProducts.SkillTree
                   presenter,
                   skillTree);
 
-            foreach (var nodeView in _nodeViews)
+            var nodes = _skillTreeRepository.AllSkillNodes;
+            for (int i = 0; i < _nodeViews.Length; i++)
             {
-                nodeView.Initialize(nodeRegistry);
+                _nodeViews[i].Initialize(nodeRegistry, nodes[i].SkillNodeIdVO.Id);
             }
 
             var skillTreePanelView = FindAnyObjectByType<NodeSelectPanelView>();
-            skillTreePanelView.Initialize(nodeUnlockController, nodeCanUnlockController, presenter, nodeVisibleController);
+            skillTreePanelView.Initialize(
+                nodeUnlockController, 
+                nodeCanUnlockController, 
+                presenter, 
+                nodeVisibleController, 
+                _skillTreeRepository);
         }
     }
 }

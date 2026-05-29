@@ -9,7 +9,10 @@ namespace DevelopProducts.SkillTree
         public int Id => _id;
         public SkillNodeEntity SkillNodeEntity => _skillNodeEntity;
         public SkillNodeAsset[] Parents => _parents;
-
+        /// <summary>
+        ///     Entityに変換
+        /// </summary>
+        /// <returns></returns>
         public SkillNodeEntity ToDomain()
         {
             _skillNodeEntity = new SkillNodeEntity(_id, _cost, _algorithmService, _isUnlocked, _isEnable);
