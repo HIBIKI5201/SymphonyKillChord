@@ -1,3 +1,4 @@
+using System;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
 
@@ -16,10 +17,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         public void Initialize(Transform targetTransform, float attackRange)
         {
             _hitResults = new RaycastHit[_resultArraySize];
-            _targetTransform = targetTransform; 
+            _targetTransform = targetTransform;
             _attackRange = attackRange;
-
-            if(targetTransform == null)
+            if (targetTransform == null)
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象transformがNULL。");
                 return;
@@ -33,6 +33,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _initializedFlg = true;
 #endif
         }
+
         /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => CheckCanRaycastHitTarget(transform.position);
 
@@ -42,7 +43,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <returns></returns>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
-            if(_targetTransform == null || _targetCollider == null)
+            if (_targetTransform == null || _targetCollider == null)
             {
                 Debug.LogError("[EnemyRaycastDetectView] 攻撃対象の取得が出来ていない。");
                 return false;
@@ -64,9 +65,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("敵の攻撃が当たるレイヤー")]
         private LayerMask _hitLayers;
 
-        private RaycastHit[] _hitResults; 
+        private RaycastHit[] _hitResults;
         private Collider _targetCollider;
         private Transform _targetTransform;
+        private Vector3 _endPoint;
+        private GameObject _rayObj;
         private float _attackRange;
 #if UNITY_EDITOR
         private bool _initializedFlg = false;
@@ -82,7 +85,33 @@ namespace KillChord.Runtime.View.InGame.Enemy
             Ray ray = new Ray(sourcePosition, (_targetTransform.position - sourcePosition).normalized);
             return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
         }
+        public void Handle2BeatBefore()
+        {
+            Vector3 direction = (_targetTransform.position - transform.position).normalized;
+            Ray ray = new Ray(transform.position, direction);
 
+            int hitCount = Physics.RaycastNonAlloc(
+                ray,
+                _hitResults,
+                _attackRange,
+                _hitLayers);
+
+
+            if (hitCount > 0)
+            {
+                _endPoint = _hitResults[0].point;
+            }
+            else
+            {
+                _endPoint = ray.origin + ray.direction * _attackRange;
+            }
+
+            CreateRayObject(ray.origin, _endPoint, Color.yellow);
+        }
+        public void Handle1BeatBefore()
+        {
+            ChangeObjectColor(Color.red);
+        }
         /// <summary>
         ///     Raycastが当たった最も近い対象を取得する
         /// </summary>
@@ -107,6 +136,37 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             return _hitResults[closestIndex];
+        }
+
+        private void CreateRayObject(Vector3 start, Vector3 end, Color color)
+        {
+            Vector3 direction = end - start;
+            float length = direction.magnitude;
+            Vector3 center = (start + end) * 0.5f;
+
+            _rayObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+
+            _rayObj.transform.position = center;
+            _rayObj.transform.up = direction.normalized;
+
+            // Cylinderは高さ2なので半分をスケールに指定
+            _rayObj.transform.localScale = new Vector3(
+                0.1f,
+                length * 0.5f,
+                0.1f
+            );
+            _rayObj.GetComponent<MeshRenderer>().material.color = color;
+
+            Destroy(_rayObj, 1f);
+        }
+
+        private void ChangeObjectColor(Color color)
+        {
+            MeshRenderer renderer = _rayObj.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = color;
+            }
         }
 
 #if UNITY_EDITOR
