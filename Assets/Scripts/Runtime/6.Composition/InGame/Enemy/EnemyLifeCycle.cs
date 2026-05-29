@@ -116,6 +116,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _aiController.On1BeatBefore += _raycastView.Handle1BeatBefore;
             _aiController.On2BeatBefore += _raycastView.Handle2BeatBefore;
+            _aiController.OnAttack += _raycastView.HandleOnAttack;
             _attackPositionSearchView.Initialize();
             if(_shellSpawner != null && shellPool != null)
             {
