@@ -41,18 +41,6 @@ namespace DevelopProducts.SkillTree
                 .Select(pid => _nodes[pid])
                 .ToList();
         }
-        /// <summary>
-        ///     地続き判定。
-        ///     原点から解放済みノードのみを経由して対象ノードに隣接しているか（BFS）。
-        /// </summary>
-        public bool IsReachable(SkillNodeId targetId)
-        {
-            var target = GetNode(targetId);
-            if (target == null || target.IsUnlocked) return false;
-
-            // 対象ノードの親のうち1つでも解放済みであれば地続き
-            return GetParents(targetId).Any(p => p.IsUnlocked);
-        }
         /// <summary>原点以外のノードを全てロックする。</summary>
         public void ResetAll()
         {
