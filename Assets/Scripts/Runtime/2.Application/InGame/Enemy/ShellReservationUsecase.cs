@@ -73,11 +73,11 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 _cancellationTokenSource.Token);
                 _musicActionScheduler.Schedule(
                 new EnemyMusicSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 2),// 2拍前
-                HandleReservedTimingReached,
+                Handle2BeatBefore,
                 _cancellationTokenSource.Token);
                 _musicActionScheduler.Schedule(
                 new EnemyMusicSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 1),// 1拍前
-                HandleReservedTimingReached,
+                Handle1BeatBefore,
                 _cancellationTokenSource.Token);
         }
 
@@ -96,6 +96,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         private void Handle2BeatBefore()
         {
             Debug.Log("[ShellReservationUsecase] 爆発の2拍前");
+            On2BeatBefore?.Invoke();
         }
 
         /// <summary>
@@ -104,6 +105,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         private void Handle1BeatBefore()
         {
             Debug.Log("[ShellReservationUsecase] 爆発の1拍前");
+            On1BeatBefore?.Invoke();
         }
 
 
