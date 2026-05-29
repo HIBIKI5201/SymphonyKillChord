@@ -3,8 +3,8 @@ namespace DevelopProducts.SkillTree
     /// <summary>
     ///     報酬がスキルのノードエフェクトインターフェース
     /// </summary>
-    public interface ISkillUnlockEffect : INodeUnlockEffect
+    public interface ISkillUnlockEffect
     {
-        new string Description { get; }
+        int GetSkill();
     }
 }
