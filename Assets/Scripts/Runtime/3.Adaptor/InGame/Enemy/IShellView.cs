@@ -5,6 +5,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public interface IShellView
     {
+        public void ChangeShellColor(ShellColor color);
         /// <summary>
         ///     砲弾爆発時処理。
         /// </summary>

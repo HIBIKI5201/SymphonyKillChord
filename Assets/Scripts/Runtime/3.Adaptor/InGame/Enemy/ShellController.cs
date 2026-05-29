@@ -88,13 +88,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private void Handle2BeatBefore()
         {
-            Debug.Log("[ShellController] 爆発の2拍前");
+            Debug.Log("<color=yellow>[ShellController] 爆発の2拍前</color>");
+           _viewModel.ChangeShellColor(ShellColor.Yellow);
         }
 
         private void Handle1BeatBefore()
         {
-            Debug.Log("[ShellController] 爆発の1拍前");
+            Debug.Log("<color=yellow>[ShellController] 爆発の1拍前</color>");
+            _viewModel.ChangeShellColor(ShellColor.Red);
         }
+        
 
         private readonly ShellEntity _entity;
         private readonly ShellReservationUsecase _reservationUsecase;
