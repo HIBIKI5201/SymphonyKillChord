@@ -1,7 +1,6 @@
 using System;
-using UnityEngine;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     攻撃時の回転速度を表す値オブジェクト。

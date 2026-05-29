@@ -47,12 +47,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
 
-        /// <summary>
-        ///     現在のロックオン対象インターフェース（攻撃時にセットされる）。null の可能性あり。
-        /// </summary>
-        public ILockOnTarget CurrentLockOnTarget { get; private set; }
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        public bool HasCurrentLockOnTarget { get; private set; }
 
-        /// <summary> 攻撃時の回転速度（秒あたりの収束速度に使える値）</summary>
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        public Vector3 CurrentLockOnTargetPosition { get; private set; }
+
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
         public float AttackRotationSpeed { get; }
 
         /// <summary>
@@ -80,11 +81,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             // 現在の ILockOnTarget を取得して保持（View 側が参照する）
             if (_targetSelectorController.TryGetCurrentTarget(out var lockOnTarget))
             {
-                CurrentLockOnTarget = lockOnTarget;
+                HasCurrentLockOnTarget = true;
+                CurrentLockOnTargetPosition = lockOnTarget.Position;
             }
             else
             {
-                CurrentLockOnTarget = null;
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
             }
 
             float now = Time.unscaledTime;

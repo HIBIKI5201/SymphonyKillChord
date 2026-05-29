@@ -29,6 +29,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
         public PlayerMoveParameter ToDomain()
             => new PlayerMoveParameter(
                 new MoveSpeed(_moveSpeed),
+                new AttackRotationSpeed(_attackRotationSpeed),
                 new DodgeSpeed(_dodgeSpeed),
                 new DodgeDuration(_dodgeDuration),
                 new DodgeCooldown(_dodgeCooldown)
