@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     スキルツリーに関数クラスなどのDI
+    /// </summary>
     public class SkillTreeInitializer : MonoBehaviour
     {
         [SerializeField] private SkillTreeRepository _skillTreeRepository;
@@ -20,18 +23,16 @@ namespace DevelopProducts.SkillTree
 
             var nodeRegistry = new NodeRegistry();
             var canUnlockService = new SkillCanUnlockService();
-            var skillTree = new SkillTreeEntity(_skillTreeRepository.AllSkillNodes);
             var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
             var unlockUsecase = new UnlockUsecase(canUnlockService, _skillPointRepository);
-            var presenter = new SkillNodePresenter(nodeRegistry, skillTree, _skillTreeRepository);
-            var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, skillTree, presenter);
+            var presenter = new SkillNodePresenter(nodeRegistry, _skillTreeRepository);
+            var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, presenter);
             var nodeVisibleController = new NodeVisibleController(_skillTreeRepository, presenter);
 
             var nodeCanUnlockController = new NodeCanUnlockController(
                   _skillTreeRepository,
                   canUnlockUsecase,
-                  presenter,
-                  skillTree);
+                  presenter);
 
             var nodes = _skillTreeRepository.AllSkillNodes;
             for (int i = 0; i < _nodeViews.Length; i++)

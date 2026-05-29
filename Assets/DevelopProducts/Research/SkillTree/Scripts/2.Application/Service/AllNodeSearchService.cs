@@ -4,16 +4,16 @@ namespace DevelopProducts.SkillTree
     [System.Serializable]
     public class AllNodeSearchService : IAlgorithmService
     {
-        public PathResult FindPath(SkillNodeEntity target, SkillTreeEntity tree)
+        public PathResult FindPath(SkillNodeEntity target, ISkillTreeRepository skillTreeRepository)
         {
             AnyNodeSearchService anyNodeSearchService = new AnyNodeSearchService();
 
-            var allParentNodes = tree.GetParents(target.SkillNodeIdVO);
+            var allParentNodes = skillTreeRepository.GetParentNodes(target.SkillNodeIdVO.Id);
             int totalCost = 0;
             var totalPath = new List<SkillNodeEntity>();
             foreach (var node in allParentNodes)
             {
-                var pathResult = anyNodeSearchService.FindPath(node, tree);
+                var pathResult = anyNodeSearchService.FindPath(node, skillTreeRepository);
                 foreach (var root in pathResult.Path)
                 {
                     if(!totalPath.Contains(root))

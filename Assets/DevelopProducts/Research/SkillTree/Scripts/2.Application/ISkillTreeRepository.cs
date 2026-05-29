@@ -9,6 +9,6 @@ namespace DevelopProducts.SkillTree
         SkillNodeEntity GetNode(int id);
         IReadOnlyList<SkillNodeEntity> GetParentNodes(int id);
 
-        public IReadOnlyList<SkillNodeEntity> GetNodesByPhase(int phase);
+        IReadOnlyList<SkillNodeEntity> GetNodesByPhase(int phase);
     }
 }

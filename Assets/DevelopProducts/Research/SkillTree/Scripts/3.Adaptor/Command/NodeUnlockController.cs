@@ -11,12 +11,10 @@ namespace DevelopProducts.SkillTree
         /// <param name="unlockUsecase">スキルをアンロックするユースケース</param>
         public NodeUnlockController(UnlockUsecase unlockUsecase,
                                     ISkillTreeRepository skillTreeRepository,
-                                    SkillTreeEntity skillTreeEntity,
                                     SkillNodePresenter skillNodePresenter)
         {
             _unlockUsecase = unlockUsecase;
             _skillTreeRepository = skillTreeRepository;
-            _skillTreeEntity = skillTreeEntity;
             _skillNodePresenter = skillNodePresenter;
         }
         /// <summary>
@@ -25,7 +23,7 @@ namespace DevelopProducts.SkillTree
         public bool UnlockNode(int nodeId)
         {
             var node = _skillTreeRepository.GetNode(nodeId);
-            var pathResult = node.AlgorithmService.FindPath(node, _skillTreeEntity);
+            var pathResult = node.AlgorithmService.FindPath(node, _skillTreeRepository);
             var canUnlock = _unlockUsecase.Unlock(pathResult.TotalCost.Cost);
             if (!canUnlock) return false;
             foreach (var pathNode in pathResult.Path)
@@ -38,7 +36,6 @@ namespace DevelopProducts.SkillTree
         }
         private readonly UnlockUsecase _unlockUsecase;
         private readonly ISkillTreeRepository _skillTreeRepository;
-        private readonly SkillTreeEntity _skillTreeEntity;
         private readonly SkillNodePresenter _skillNodePresenter;
     }
 }

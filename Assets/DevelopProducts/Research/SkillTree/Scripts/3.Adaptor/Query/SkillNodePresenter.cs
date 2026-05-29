@@ -3,11 +3,9 @@ namespace DevelopProducts.SkillTree
     public class SkillNodePresenter
     {
         public SkillNodePresenter(NodeRegistry nodeRegistry,
-            SkillTreeEntity skillTree,
             ISkillTreeRepository skillTreeRepository)
         {
             _nodeRegistry = nodeRegistry;
-            _skillTree = skillTree;
             _skillTreeRepository = skillTreeRepository;
         }
         /// <summary>
@@ -56,13 +54,12 @@ namespace DevelopProducts.SkillTree
             if (_nodeRegistry.TryGet(nodeId, out var canUnlockVM))
             {
                 var node = _skillTreeRepository.GetNode(nodeId);
-                var pathResult = node.AlgorithmService.FindPath(node, _skillTree);
+                var pathResult = node.AlgorithmService.FindPath(node, _skillTreeRepository);
                 return pathResult.TotalCost.Cost;
             }
             return 0;
         }
         private readonly NodeRegistry _nodeRegistry;
-        private readonly SkillTreeEntity _skillTree;
         private readonly ISkillTreeRepository _skillTreeRepository;
     }
 }

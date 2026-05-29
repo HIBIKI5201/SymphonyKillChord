@@ -6,18 +6,16 @@ namespace DevelopProducts.SkillTree
     {
         public NodeCanUnlockController(ISkillTreeRepository skillTreeRepository,
                                        CanUnlockUsecase unlockUsecase,
-                                       SkillNodePresenter presenter,
-                                       SkillTreeEntity skillTree)
+                                       SkillNodePresenter presenter)
         {
             _skillTreeRepository = skillTreeRepository;
             _unlockUsecase = unlockUsecase;
             _skillsNodePresenter = presenter;
-            _skillTree = skillTree;
         }
         public bool CanUnlock(int nodeId)
         {
             var node = _skillTreeRepository.GetNode(nodeId);
-            var path = node.AlgorithmService.FindPath(node, _skillTree);
+            var path = node.AlgorithmService.FindPath(node, _skillTreeRepository);
             var canUnlock = _unlockUsecase.CheckUnlock(path.TotalCost.Cost);
 
             _skillsNodePresenter.CanUnlock(nodeId, canUnlock);
@@ -26,6 +24,5 @@ namespace DevelopProducts.SkillTree
         private readonly ISkillTreeRepository _skillTreeRepository;
         private readonly CanUnlockUsecase _unlockUsecase;
         private readonly SkillNodePresenter _skillsNodePresenter;
-        private readonly SkillTreeEntity _skillTree;
     }
 }

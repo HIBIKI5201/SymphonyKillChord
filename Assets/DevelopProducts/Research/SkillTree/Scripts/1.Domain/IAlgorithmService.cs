@@ -6,6 +6,6 @@ namespace DevelopProducts.SkillTree
     {
         PathResult FindPath(
             SkillNodeEntity target,
-            SkillTreeEntity tree);
+            ISkillTreeRepository skillTreeRepository);
     }
 }
