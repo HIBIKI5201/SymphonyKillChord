@@ -62,6 +62,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForLineUpdate()) return;
 
+            _isRayDirectionFrozen = false;
             _isLineVisible = true;
             _currentLineColor = Color.yellow;
             UpdateLineRenderer(Color.yellow);
@@ -71,6 +72,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForLineUpdate()) return;
 
+            FreezeCurrentRayDirection();
             _isLineVisible = true;
             _currentLineColor = Color.red;
             UpdateLineRenderer(Color.red);
@@ -78,6 +80,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         public void HandleOnAttack()
         {
+            _isRayDirectionFrozen = false;
             _isLineVisible = false;
 
             if (_lineRenderer == null) return;
@@ -94,6 +97,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Collider _targetCollider;
         private Transform _targetTransform;
         private float _attackRange;
+        private bool _isRayDirectionFrozen;
+        private Vector3 _frozenRayDirection;
         private bool _isLineVisible;
         private Color _currentLineColor;
 
@@ -183,6 +188,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private Ray CreateRay(Vector3 sourcePosition)
         {
+            if (_isRayDirectionFrozen && IsEnemyOrigin(sourcePosition))
+            {
+                return new Ray(sourcePosition, _frozenRayDirection);
+            }
+
             Vector3 targetPoint = GetRayTargetPoint(sourcePosition);
             Vector3 direction = targetPoint - sourcePosition;
             if (direction.sqrMagnitude <= Mathf.Epsilon)
@@ -191,6 +201,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             return new Ray(sourcePosition, direction.normalized);
+        }
+
+        private void FreezeCurrentRayDirection()
+        {
+            Vector3 targetPoint = GetRayTargetPoint(transform.position);
+            Vector3 direction = targetPoint - transform.position;
+            if (direction.sqrMagnitude <= Mathf.Epsilon)
+            {
+                _isRayDirectionFrozen = false;
+                _frozenRayDirection = Vector3.zero;
+                return;
+            }
+
+            _isRayDirectionFrozen = true;
+            _frozenRayDirection = direction.normalized;
+        }
+
+        private bool IsEnemyOrigin(Vector3 sourcePosition)
+        {
+            return (sourcePosition - transform.position).sqrMagnitude <= 0.0001f;
         }
 
         private bool IsReadyForRaycast()
@@ -228,6 +258,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void OnDisable()
         {
+            _isRayDirectionFrozen = false;
+            _frozenRayDirection = Vector3.zero;
             _isLineVisible = false;
 
             if (_lineRenderer == null) return;
