@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -8,15 +7,18 @@ namespace DevelopProducts.SkillTree
 {
     public class NodeSelectPanelView : MonoBehaviour
     {
-        public void Initialize(NodeUnlockController nodeUnlockController,
+        public void Initialize(
+            NodeUnlockController nodeUnlockController,
             NodeCanUnlockController nodeCanUnlockController,
             SkillNodePresenter skillNodePresenter,
-            NodeVisibleController nodeVisibleController)
+            NodeVisibleController nodeVisibleController,
+            ISkillTreeRepository skillTreeRepository)
         {
             _nodeUnlockController = nodeUnlockController;
             _nodeCanUnlockController = nodeCanUnlockController;
             _skillNodePresenter = skillNodePresenter;
             _nodeVisibleController = nodeVisibleController;
+            _skillTreeRepository = skillTreeRepository;
 
             // 流れとしては、最初に全てのノードをロック状態にしてから、アンロックされているノードをアンロック状態にする
             for (int i = 1; i <= _skillTreeRepository.PhaseCount; i++)
@@ -43,7 +45,6 @@ namespace DevelopProducts.SkillTree
         }
         [SerializeField] private TMP_Text _nodeNameText;
         [SerializeField] private Button _unlockButton;
-        [SerializeField] private SkillTreeRepository _skillTreeRepository;
 
         private int _currentNodeId = -1;
         private int _currentNodeCost = 0;
@@ -53,6 +54,7 @@ namespace DevelopProducts.SkillTree
         private NodeCanUnlockController _nodeCanUnlockController;
         private SkillNodePresenter _skillNodePresenter;
         private NodeVisibleController _nodeVisibleController;
+        private ISkillTreeRepository _skillTreeRepository;
 
         private void OnUnlockButtonClicked()
         {

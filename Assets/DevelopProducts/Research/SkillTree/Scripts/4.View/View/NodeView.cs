@@ -6,10 +6,13 @@ namespace DevelopProducts.SkillTree
     [RequireComponent(typeof(Button))]
     public class NodeView : MonoBehaviour
     {
-        public int Id => _skillNodeAsset.Id;
+        public int Id => _id;
         public bool IsUnlocked => _isUnlocked;
-        public void Initialize(NodeRegistry nodeRegistry)
+        public void Initialize(NodeRegistry nodeRegistry, int id)
         {
+            _id = id;
+            _nodeRegistry = nodeRegistry;
+
             _icon = GetComponent<Image>();
             _button = GetComponent<Button>();
             _button.onClick.AddListener(() => _nodeSelectPanelView.SetNode(this));
@@ -19,8 +22,8 @@ namespace DevelopProducts.SkillTree
             _nodeVM.CanUnlock += Canlock;
             _nodeVM.Unlocked += Unlock;
             _nodeVM.Visible += CanVisible;
-            _nodeRegistry = nodeRegistry;
-            _nodeRegistry.Register(_skillNodeAsset.Id, _nodeVM);
+
+            _nodeRegistry.Register(_id, _nodeVM);
         }
         public void Canlock(bool canlock)
         {
@@ -29,11 +32,11 @@ namespace DevelopProducts.SkillTree
                 return;
             }
             _icon.color = canlock ? Color.yellow : Color.white;
-            Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_skillNodeAsset.Id}, canlock: {canlock}");
+            Debug.Log($"NodeView: CanUnlock changed for SkillNodeId {_id}, canlock: {canlock}");
         }
         public void Unlock(bool isUnlock)
         {
-            Debug.Log($"ノードがアンロックされたかどうか: SkillNodeId {_skillNodeAsset.Id}, isUnlock: {isUnlock}");
+            Debug.Log($"ノードがアンロックされたかどうか: SkillNodeId {_id}, isUnlock: {isUnlock}");
             if (isUnlock)
             {
                 _isUnlocked = true;
@@ -42,10 +45,10 @@ namespace DevelopProducts.SkillTree
         }
         public void CanVisible(bool isLock)
         {
-            Debug.Log($"ノードを表示または非表示: SkillNodeId {_skillNodeAsset.Id}, isLock: {isLock}");
+            Debug.Log($"ノードを表示または非表示: SkillNodeId {_id}, isLock: {isLock}");
             this.gameObject.SetActive(isLock);
         }
-        [SerializeField] private SkillNodeAsset _skillNodeAsset;
+        private int _id;
         private Image _icon;
         private NodeViewModel _nodeVM;
         private NodeSelectPanelView _nodeSelectPanelView;
@@ -54,7 +57,7 @@ namespace DevelopProducts.SkillTree
         private bool _isUnlocked;
         private void OnDestroy()
         {
-            if(_nodeVM == null) return;
+            if (_nodeVM == null) return;
             _nodeVM.CanUnlock -= Canlock;
             _nodeVM.Unlocked -= Unlock;
             _nodeVM.Visible -= CanVisible;
