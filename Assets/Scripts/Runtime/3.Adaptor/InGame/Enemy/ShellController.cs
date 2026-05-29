@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -31,6 +32,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _defender = enemyBattleState.Target;
             _entity.Reset(enemyBattleState.CurrentAttack);
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
+            _reservationUsecase.On2BeatBefore += Handle2BeatBefore;
+            _reservationUsecase.On1BeatBefore += Handle1BeatBefore;
             _reservationUsecase.ReserveDetonate();
         }
 
@@ -41,6 +44,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _reservationUsecase.Cancel();
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
+            _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _attacker = null;
             _defender = null;
         }
@@ -79,6 +84,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 DealDamage();
             }
             _viewModel.Detonate();
+        }
+
+        private void Handle2BeatBefore()
+        {
+            Debug.Log("[ShellController] 爆発の2拍前");
+        }
+
+        private void Handle1BeatBefore()
+        {
+            Debug.Log("[ShellController] 爆発の1拍前");
         }
 
         private readonly ShellEntity _entity;
