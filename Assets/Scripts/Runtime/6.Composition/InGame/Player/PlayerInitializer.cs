@@ -96,6 +96,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
+            MusicSyncState musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
+            if(musicSyncState == null)
+            {
+                Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
+            }
             // SerializeFieldの装備スキルからskillId配列を作成する
             List<int> skillIdList = new List<int>();
             if (_equippedSkills != null && _equippedSkills.Length > 0)
@@ -177,7 +182,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter, inputProgressController);
+            SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);
 
@@ -194,7 +200,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
-            var musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
             var animController = new AnimationComposition().Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
 
             _player.Initialize(playerMovementController, playerAttackController, animController, ct, inputView, healthHudPresenter);
