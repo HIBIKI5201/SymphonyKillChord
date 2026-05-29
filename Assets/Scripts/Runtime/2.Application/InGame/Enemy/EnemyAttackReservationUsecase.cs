@@ -31,6 +31,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
+        public event Action On2BeatBeforeShooting;
+        public event Action On1BeatBeforeShooting;
 
         /// <summary>
         ///     Encounterタイミングで攻撃を予約する。
@@ -101,7 +103,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             Debug.Log("[EnemyAttackReservationUsecase] Reserve 開始");
             // 既存の予約をキャンセルしてから新しい予約を設定する。
             Cancel();
-
+            Debug.Log($"{musicSpec.TargetBeat}拍目に予約を設定します。");
             _cancellationTokenSource = new CancellationTokenSource();
             _hasReservation = true;
 
@@ -109,6 +111,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 musicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
+                
+            _musicActionScheduler.Schedule(
+                new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
+                Handle2BeatBeforeShooting,
+                _cancellationTokenSource.Token);
+
+            _musicActionScheduler.Schedule(
+                new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
+                Handle1BeatBeforeShooting,
+                _cancellationTokenSource.Token);
+           
         }
 
         /// <summary>
@@ -120,6 +133,24 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _hasReservation = false;
             OnReservedTimingReached?.Invoke();
         }
+
+        /// <summary>
+        ///    攻撃の2拍前に到達したときの処理。
+        /// </summary>
+        private void Handle2BeatBeforeShooting()
+        {
+            Debug.Log("攻撃の2拍前に到達しました。");
+            On2BeatBeforeShooting?.Invoke();
+        }
+        /// <summary>
+        ///   攻撃の1拍前に到達したときの処理。
+        /// </summary>
+        private void Handle1BeatBeforeShooting()
+        {
+            Debug.Log("攻撃の1拍前に到達しました。");
+            On1BeatBeforeShooting?.Invoke();
+        }
+        
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;
