@@ -14,20 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillNodeAsset
   _nodeUnlockEffets:
   - rid: 5186415340246270061
-  _unlockCondition:
-    rid: 5186415340246270060
+  _algorithmService:
+    rid: 6052115885326598262
   _id: 2
   _isUnlocked: 0
   _isEnable: 1
   _parents:
-  - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
   _cost: 2
   references:
     version: 2
     RefIds:
-    - rid: 5186415340246270060
-      type: {class: AnyParentCondition, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
-      data: 
     - rid: 5186415340246270061
       type: {class: HealthUp, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
+      data: 
+    - rid: 6052115885326598262
+      type: {class: AnyNodeSearchService, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
       data: 

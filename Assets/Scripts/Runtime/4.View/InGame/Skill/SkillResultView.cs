@@ -2,18 +2,14 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Skill
 {
-    /// <summary>
-    ///     スキル結果を表示するビュークラス。
-    /// </summary>
+    /// <summary> スキル結果を表示するビュークラス。 </summary>
     public class SkillResultView : MonoBehaviour
     {
-        /// <summary>
-        ///     ViewModelを購読してスキル結果の変化を反映するためのメソッド。
-        /// </summary>
-        /// <param name="viewModel"></param>
-        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <summary> ViewModelをバインドして変更イベントを購読する。 </summary>
+        /// <param name="viewModel">バインドするViewModel</param>
+        /// <exception cref="System.ArgumentNullException">viewModelがnullの場合</exception>
         public void Bind(SkillResultViewModel viewModel)
         {
             if (viewModel == null) throw new System.ArgumentNullException(nameof(viewModel));
@@ -30,11 +26,9 @@ namespace KillChord.Runtime.View
 
         private SkillResultViewModel _viewModel;
 
-        /// <summary>
-        ///     ViewModelのスキル結果が変更されたときに呼び出されるハンドラメソッド。
-        /// </summary>
-        /// <param name="skillId"></param>
-        /// <param name="skillPattern"></param>
+        /// <summary> ViewModel変更時に呼ばれるハンドラ。表示を更新する。 </summary>
+        /// <param name="skillId">スキルID</param>
+        /// <param name="skillPattern">パターン（配列）</param>
         private void HandleChanged(int skillId, ReadOnlyMemory<int> skillPattern)
         {
             _skillIdText.text = $"Skill ID: {skillId}";

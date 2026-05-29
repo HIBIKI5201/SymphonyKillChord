@@ -2,10 +2,17 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.InfraStructure.InGame.Mission
 {
+    /// <summary>
+    ///     ミッション定義を管理するリポジトリクラス。
+    /// </summary>
     public class MissionDefinitionRepository : IMissionDefinitionRepository
     {
+        /// <summary>
+        ///     MissionDefinitionRepository クラスの新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="missionCatalogAsset">ミッションカタログアセット。</param>
         public MissionDefinitionRepository(MissionCatalogAsset missionCatalogAsset)
         {
             _missionDefinitions = new Dictionary<MissionId, MissionDefinition>();
@@ -41,6 +48,11 @@ namespace KillChord.Runtime.InfraStructure
             }
         }
 
+        /// <summary>
+        ///     指定したIDのミッション定義を取得します。
+        /// </summary>
+        /// <param name="missionId">ミッションID。</param>
+        /// <returns>ミッション定義。</returns>
         public MissionDefinition Get(MissionId missionId)
         {
             if (_missionDefinitions.TryGetValue(missionId, out MissionDefinition definition))

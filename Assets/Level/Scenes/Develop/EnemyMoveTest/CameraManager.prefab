@@ -90,10 +90,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.TestCameraSystem
   _cameraT: {fileID: 6603128112584395780}
-  _playerT: {fileID: 0}
-  _target: {fileID: 0}
-  _lockOnState: 0
-  _updateMode: 1
+  _updateMode: 2
+  _cameraSensitivity: 5
 --- !u!114 &2786661489550224862
 MonoBehaviour:
   m_ObjectHideFlags: 0

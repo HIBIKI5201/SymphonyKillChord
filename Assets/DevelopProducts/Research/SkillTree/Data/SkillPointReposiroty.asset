@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c359ae6851d169141b47ca7cd059f215, type: 3}
   m_Name: SkillPointReposiroty
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillPointReposiroty
-  _point: 5
+  _point: 2000000

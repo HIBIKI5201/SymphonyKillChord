@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using System.Linq;
 using UnityEngine;
 
 namespace DevelopProducts.SkillTree
@@ -8,13 +8,17 @@ namespace DevelopProducts.SkillTree
     [CreateAssetMenu(fileName = "SkillTreeRepository", menuName = "DevelopProducts/SkillTree/SkillTreeRepository")]
     public class SkillTreeRepository : ScriptableObject, ISkillTreeRepository
     {
-        public IReadOnlyCollection<SkillNodeEntity> AllSkillNodes => _nodeDictionary.Values;
-        /// <summary>
-        ///     指定されたIDのノードを取得する
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
+        [Serializable]
+        public class SkillPhaseGroup
+        {
+            public SkillNodeAsset[] SkillNodeAssets => _skillNodeAssets ?? Array.Empty<SkillNodeAsset>();
+
+            [SerializeField] private SkillNodeAsset[] _skillNodeAssets;
+        }
+
+        public SkillNodeEntity[] AllSkillNodes => _nodeDictionary.Values.ToArray();
+        public int PhaseCount => _phaseGroups?.Length ?? 0;
+
         public SkillNodeEntity GetNode(int id)
         {
             if (!_nodeDictionary.TryGetValue(id, out var skillNode))
@@ -22,11 +26,7 @@ namespace DevelopProducts.SkillTree
 
             return skillNode;
         }
-        /// <summary>
-        ///     指定されたIDのノードの親を取得する
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+
         public IReadOnlyList<SkillNodeEntity> GetParentNodes(int id)
         {
             if (!_parentsDictionary.TryGetValue(id, out var parentNodes))
@@ -34,67 +34,69 @@ namespace DevelopProducts.SkillTree
 
             return parentNodes;
         }
+
         /// <summary>
-        ///     リポジトリの初期化
+        ///     指定フェーズのノード一覧を返す
         /// </summary>
+        public IReadOnlyList<SkillNodeEntity> GetNodesByPhase(int phase)
+        {
+            if (phase < 0 || phase >= _phaseGroups.Length)
+                return Array.Empty<SkillNodeEntity>();
+
+            return _phaseGroups[phase].SkillNodeAssets
+                .Where(a => a?.SkillNodeEntity != null)
+                .Select(a => a.SkillNodeEntity)
+                .ToArray();
+        }
         public void Initialize()
         {
             _nodeDictionary = new Dictionary<int, SkillNodeEntity>();
             _parentsDictionary = new Dictionary<int, SkillNodeEntity[]>();
-            //  Entityに変換
-            var nodeAssets = _skillNodeAsset ?? Array.Empty<SkillNodeAsset>();
 
-            //  先に全ノードをEntity化（親子参照の順序依存をなくす）
-            foreach (var node in nodeAssets)
+            IEnumerable<SkillNodeAsset> AllAssets()
             {
-                if (node == null)
-                    continue;
-
-                node.ToDomain();
+                foreach (var group in _phaseGroups)
+                {
+                    if (group == null) continue;
+                    foreach (var asset in group.SkillNodeAssets) yield return asset;
+                }
             }
 
-            //  親子関係を設定
-            foreach (var node in nodeAssets)
+            // Pass1: 全ノードをEntity化
+            foreach (var asset in AllAssets())
             {
-                if (node == null || node.SkillNodeEntity == null)
-                    continue;
+                if (asset == null) continue;
+                asset.ToDomain();
+            }
 
-                var parentAssets = node.Parents ?? Array.Empty<SkillNodeAsset>();
+            // Pass2: 親子関係を設定
+            foreach (var asset in AllAssets())
+            {
+                if (asset?.SkillNodeEntity == null) continue;
+
+                var parentAssets = asset.Parents ?? Array.Empty<SkillNodeAsset>();
                 var parents = new List<SkillNodeEntity>(parentAssets.Length);
                 foreach (var parent in parentAssets)
                 {
-                    if (parent?.SkillNodeEntity == null)
-                        continue;
-
-                    parents.Add(parent.SkillNodeEntity);
+                    if (parent?.SkillNodeEntity != null)
+                        parents.Add(parent.SkillNodeEntity);
                 }
-                node.SkillNodeEntity.SetParent(parents.ToArray());
+                asset.SkillNodeEntity.SetParent(parents.ToArray());
             }
 
-            //  ノードごとの辞書作成
-            foreach (var node in nodeAssets)
+            // Pass3: 辞書構築
+            foreach (var asset in AllAssets())
             {
-                if (node?.SkillNodeEntity == null)
-                    continue;
+                if (asset?.SkillNodeEntity == null) continue;
 
-                _nodeDictionary[node.SkillNodeEntity.SkillNodeIdVO.Id] = node.SkillNodeEntity;
+                var id = asset.SkillNodeEntity.SkillNodeIdVO.Id;
+                _nodeDictionary[id] = asset.SkillNodeEntity;
+                _parentsDictionary[id] = asset.SkillNodeEntity.Parents;
             }
-
-            //  親子関係の辞書作成
-            foreach (var node in nodeAssets)
-            {
-                if (node?.SkillNodeEntity == null)
-                    continue;
-
-                _parentsDictionary[node.SkillNodeEntity.SkillNodeIdVO.Id] = node.SkillNodeEntity.Parents;
-            }
-
         }
-        [SerializeField] private SkillNodeAsset[] _skillNodeAsset;
+
+        [SerializeField] private SkillPhaseGroup[] _phaseGroups;
         private Dictionary<int, SkillNodeEntity> _nodeDictionary;
         private Dictionary<int, SkillNodeEntity[]> _parentsDictionary;
-        private List<SkillNodeEntity> _unlockedSkillNodes;
-        private List<SkillNodeEntity> _canUnlockNodes;
-        private List<SkillNodeEntity> _lockedSkillNodes;
     }
 }

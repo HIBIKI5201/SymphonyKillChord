@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface
 {
     /// <summary>
     ///     敵AI用ファサード：戦闘系。

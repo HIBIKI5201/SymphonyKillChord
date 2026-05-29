@@ -1,9 +1,10 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.WSA;
 
-namespace KillChord.Runtime.View.InGame
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     毎フレーム敵移動を更新するビュー。
@@ -12,15 +13,22 @@ namespace KillChord.Runtime.View.InGame
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyMoveView : MonoBehaviour
     {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="enemyAIController"></param>
+        /// <param name="target"></param>
         public void Initialize(EnemyAIController enemyAIController,
             Transform target)
         {
             _enemyAIController = enemyAIController;
             _target = target;
-            _enemyAIController.OnAttackReserved += PlayEffectReserved;
-            _enemyAIController.OnAttack += PlayEffectHit;
         }
 
+        /// <summary>
+        ///     攻撃目標のTransformを取得する。
+        /// </summary>
+        /// <returns></returns>
         public Transform GetTargetTransform()
         {
             return _target;
@@ -66,12 +74,36 @@ namespace KillChord.Runtime.View.InGame
             _enemyAIController.OnAttack -= PlayEffectHit;
             _enemyAIController.Dispose();
         }
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            _enemyAIController.OnAttackReserved += PlayEffectReserved;
+            _enemyAIController.OnAttack += PlayEffectHit;
+        }
 
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            if (_enemyAIController != null)
+            {
+                _enemyAIController.OnAttackReserved -= PlayEffectReserved;
+                _enemyAIController.OnAttack -= PlayEffectHit;
+            }
+        }
+        /// <summary>
+        ///     攻撃を予約するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectReserved()
         {
             ParticleController.Instance.PlayParticleReserve(transform.position);
         }
-
+        /// <summary>
+        ///     攻撃を実行するエフェクトを再生する。
+        /// </summary>
         private void PlayEffectHit()
         {
             ParticleController.Instance.PlayParticle(transform.position);

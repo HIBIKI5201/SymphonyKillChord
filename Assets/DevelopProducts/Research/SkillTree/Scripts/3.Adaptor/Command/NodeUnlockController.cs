@@ -8,18 +8,34 @@ namespace DevelopProducts.SkillTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="skillUnlockService">スキルをアンロックするサービス</param>
-        public NodeUnlockController(SkillUnlockService skillUnlockService)
+        /// <param name="unlockUsecase">スキルをアンロックするユースケース</param>
+        public NodeUnlockController(UnlockUsecase unlockUsecase,
+                                    ISkillTreeRepository skillTreeRepository,
+                                    SkillNodePresenter skillNodePresenter)
         {
-            _skillUnlockService = skillUnlockService;
+            _unlockUsecase = unlockUsecase;
+            _skillTreeRepository = skillTreeRepository;
+            _skillNodePresenter = skillNodePresenter;
         }
         /// <summary>
-        /// ノードを
+        /// ノードを解放する
         /// </summary>
-        public void UnlockNode()
+        public bool UnlockNode(int nodeId)
         {
-
+            var node = _skillTreeRepository.GetNode(nodeId);
+            var pathResult = node.AlgorithmService.FindPath(node, _skillTreeRepository);
+            var canUnlock = _unlockUsecase.Unlock(pathResult.TotalCost.Cost);
+            if (!canUnlock) return false;
+            foreach (var pathNode in pathResult.Path)
+            {
+                var skillNode = _skillTreeRepository.GetNode(pathNode.SkillNodeIdVO.Id);
+                skillNode.Unlock();
+                _skillNodePresenter.Unlock(skillNode.SkillNodeIdVO.Id, skillNode.IsUnlocked);
+            }
+            return true;
         }
-        private readonly SkillUnlockService _skillUnlockService;
+        private readonly UnlockUsecase _unlockUsecase;
+        private readonly ISkillTreeRepository _skillTreeRepository;
+        private readonly SkillNodePresenter _skillNodePresenter;
     }
 }

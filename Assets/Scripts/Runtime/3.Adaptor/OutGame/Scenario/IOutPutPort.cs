@@ -1,11 +1,10 @@
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
-    public interface IOutputPort : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort
-    {
-    }
-
-    [System.Obsolete("Use IOutputPort")]
-    public interface IOutPutPort : IOutputPort
+    /// <summary>
+    /// シナリオ演出の出力操作をまとめた契約を定義する。
+    /// </summary>
+    public interface IOutputPort
+        : ITextOutputPort, IFadeOutputPort, IBackgroundOutputPort, IAnimationOutputPort, IPortraitOutputPort, ILayerOutputPort
     {
     }
 }

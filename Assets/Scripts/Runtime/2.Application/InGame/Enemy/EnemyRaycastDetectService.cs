@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
     ///     敵から射線を通し、目標に直撃できるか判定する。
@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Application
             _raycastDetectRepo = raycastDetectRepo;
         }
 
+        /// <summary> 射線が通っているか </summary>
         public bool CanRaycastHitTarget => _raycastDetectRepo.CanRaycastHitTarget;
        
         private IEnemyRaycastDetectRepository _raycastDetectRepo;

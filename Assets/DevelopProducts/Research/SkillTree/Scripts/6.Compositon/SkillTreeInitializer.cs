@@ -1,16 +1,15 @@
-using System.Linq;
 using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     スキルツリーに関数クラスなどのDI
+    /// </summary>
     public class SkillTreeInitializer : MonoBehaviour
     {
         [SerializeField] private SkillTreeRepository _skillTreeRepository;
         [SerializeField] private NodeView[] _nodeViews;
-        [SerializeField] private SkillPointReposiroty _skillPointRepository;
-
-        private NodeRegistry _nodeRegistry;
-        private NodeCanUnlockController _nodeCanUnlockController;
+        [SerializeField] private SkillPointRepository _skillPointRepository;
 
         private void Awake()
         {
@@ -22,24 +21,32 @@ namespace DevelopProducts.SkillTree
 
             _skillTreeRepository.Initialize();
 
-            _nodeRegistry = new NodeRegistry();
-            var algorithmService = new SkillPathSearchService();
+            var nodeRegistry = new NodeRegistry();
             var canUnlockService = new SkillCanUnlockService();
             var canUnlockUsecase = new CanUnlockUsecase(canUnlockService, _skillPointRepository);
-            var presenter = new SkillNodePresenter(_nodeRegistry);
+            var unlockUsecase = new UnlockUsecase(canUnlockService, _skillPointRepository);
+            var presenter = new SkillNodePresenter(nodeRegistry, _skillTreeRepository);
+            var nodeUnlockController = new NodeUnlockController(unlockUsecase, _skillTreeRepository, presenter);
+            var nodeVisibleController = new NodeVisibleController(_skillTreeRepository, presenter);
 
-            var skillTree = new SkillTreeEntity(_skillTreeRepository.AllSkillNodes);
-            _nodeCanUnlockController = new NodeCanUnlockController(
-                _skillTreeRepository,
-                algorithmService,
-                canUnlockUsecase,
-                presenter,
-                skillTree);
+            var nodeCanUnlockController = new NodeCanUnlockController(
+                  _skillTreeRepository,
+                  canUnlockUsecase,
+                  presenter);
 
-            foreach (var nodeView in _nodeViews.Where(v => v != null))
+            var nodes = _skillTreeRepository.AllSkillNodes;
+            for (int i = 0; i < _nodeViews.Length; i++)
             {
-                nodeView.Initialize(_nodeRegistry, _nodeCanUnlockController);
+                _nodeViews[i].Initialize(nodeRegistry, nodes[i].SkillNodeIdVO.Id);
             }
+
+            var skillTreePanelView = FindAnyObjectByType<NodeSelectPanelView>();
+            skillTreePanelView.Initialize(
+                nodeUnlockController, 
+                nodeCanUnlockController, 
+                presenter, 
+                nodeVisibleController, 
+                _skillTreeRepository);
         }
     }
 }

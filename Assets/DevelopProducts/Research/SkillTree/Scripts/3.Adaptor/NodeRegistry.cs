@@ -14,7 +14,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="skillId">スキルID。</param>
         /// <param name="viewModel">登録するViewModel。</param>
         /// <exception cref="ArgumentNullException">viewModelがnullの場合。</exception>
-        public void Register(int skillId, ICanUnlockVM viewModel)
+        public void Register(int skillId, INodeVM viewModel)
         {
             if (viewModel == null)
             {
@@ -40,7 +40,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="skillId">スキルID。</param>
         /// <param name="viewModel">取得したViewModel。</param>
         /// <returns>取得できた場合はtrue。</returns>
-        public bool TryGet(int skillId, out ICanUnlockVM viewModel)
+        public bool TryGet(int skillId, out INodeVM viewModel)
         {
             return _viewModels.TryGetValue(skillId, out viewModel);
         }
@@ -53,6 +53,6 @@ namespace DevelopProducts.SkillTree
             _viewModels.Clear();
         }
 
-        private readonly Dictionary<int, ICanUnlockVM> _viewModels = new Dictionary<int, ICanUnlockVM>();
+        private readonly Dictionary<int, INodeVM> _viewModels = new Dictionary<int, INodeVM>();
     }
 }

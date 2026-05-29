@@ -1,7 +1,10 @@
 using System;
 
-namespace KillChord.Runtime.Application
+namespace KillChord.Runtime.Application.OutGame.Scenario
 {
+    /// <summary>
+    /// IScenarioSettings の参照情報を取得するリポジトリ。
+    /// </summary>
     public interface IScenarioSettingsRepository
     {
         TimeSpan NormalTextCharInterval { get; }

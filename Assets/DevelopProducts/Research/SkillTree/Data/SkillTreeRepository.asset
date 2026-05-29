@@ -12,10 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4fc4ed8bc4e474b96c398892fba37c, type: 3}
   m_Name: SkillTreeRepository
   m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillTreeRepository
-  _skillNodeAsset:
-  - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
-  - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
-  - {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
-  - {fileID: 11400000, guid: f61dac3f0191a164da5adbbd7bb77195, type: 2}
-  - {fileID: 11400000, guid: 3ed9d045ccf72a04c9a0ad4b1a90f540, type: 2}
-  - {fileID: 11400000, guid: 1d931509731fdb4428a49817a855b4a3, type: 2}
+  _phaseGroups:
+  - _skillNodeAssets:
+    - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+    - {fileID: 11400000, guid: ae2ebc5adf71c904fb2e9644769e4816, type: 2}
+    - {fileID: 11400000, guid: ba516b49671498448ac4ef7ad4acc9a1, type: 2}
+    - {fileID: 11400000, guid: f61dac3f0191a164da5adbbd7bb77195, type: 2}
+    - {fileID: 11400000, guid: 3ed9d045ccf72a04c9a0ad4b1a90f540, type: 2}
+    - {fileID: 11400000, guid: 1d931509731fdb4428a49817a855b4a3, type: 2}
+  - _skillNodeAssets:
+    - {fileID: 11400000, guid: 4d4bb6317521d614b987e34634346e6c, type: 2}
+    - {fileID: 11400000, guid: 6f4aeb5ae4d035746940d69becf9227c, type: 2}
+  - _skillNodeAssets:
+    - {fileID: 11400000, guid: 701edb33f20ffac47ab47e782771f168, type: 2}
+    - {fileID: 11400000, guid: 9472ee285f8192f4087c96c75f3a5c4f, type: 2}
+    - {fileID: 11400000, guid: 03ade0a33cbdebe4489cff2fd8b931dc, type: 2}

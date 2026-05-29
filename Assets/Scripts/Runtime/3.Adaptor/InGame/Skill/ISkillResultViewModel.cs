@@ -1,16 +1,12 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
-    /// <summary>
-    ///     スキルの結果を表示するためのインターフェース。
-    /// </summary>
+    /// <summary> ViewModelへスキル結果DTOを渡すためのインターフェース。 </summary>
     public interface ISkillResultViewModel
     {
-        /// <summary>
-        ///     スキルの結果を表示するためのメソッド。
-        /// </summary>
-        /// <param name="dto"></param>
+        /// <summary> スキル結果DTOを受け取り、ViewModel側の状態を更新する。 </summary>
+        /// <param name="dto">スキル結果DTO（読み取り専用）</param>
         void Push(in SkillResultDTO dto);
     }
 }

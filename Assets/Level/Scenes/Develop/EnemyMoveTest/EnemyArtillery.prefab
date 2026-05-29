@@ -12,13 +12,13 @@ GameObject:
   - component: {fileID: 8137558588415556362}
   - component: {fileID: 1818394911742236768}
   - component: {fileID: 3780914556809270319}
-  - component: {fileID: 4106329999906055556}
+  - component: {fileID: 1517351015878630201}
   - component: {fileID: 6024709665745219317}
+  - component: {fileID: -5582845147010298855}
   - component: {fileID: 8900643656970599263}
   - component: {fileID: -1108031046539433984}
   - component: {fileID: -7434688505541404117}
   - component: {fileID: 3390705430803442452}
-  - component: {fileID: -4884515779302669640}
   - component: {fileID: -1587367200165867470}
   - component: {fileID: -2597676450090958460}
   - component: {fileID: 2029437041226520640}
@@ -42,7 +42,8 @@ Transform:
   m_LocalPosition: {x: -2.06599, y: 0.5, z: 7.20404}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4239302231747718614}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8137558588415556362
@@ -125,7 +126,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4106329999906055556
+--- !u!114 &1517351015878630201
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,24 +135,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 1465007639519197220}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd5465d26fd4dfa42ae5611d7532e1d8, type: 3}
+  m_Script: {fileID: 11500000, guid: 535ba71651c02f2469918f19291b4862, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyArtilleryMoveDebugInitializer
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyMoveDebugInitializer
   _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
   _moveData: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
   _encounterMusicData: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
-  _battleMusicData: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
+  _battleMusicData: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
+  _healthView: {fileID: -5582845147010298855}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -1587367200165867470}
-  _shellSpawner: {fileID: -2597676450090958460}
   _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
-  _enemySharedFacade: {fileID: -4884515779302669640}
+  _enemySharedFacade: {fileID: 0}
   _behaviorGraphAgent: {fileID: 2029437041226520640}
+  _navMeshAgent: {fileID: 3385280616353316531}
+  _shellSpawner: {fileID: -2597676450090958460}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +167,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de89e5405d9b6c4aa1649b59b3b8281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
+--- !u!114 &-5582845147010298855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43237e77480731b4b8a2fc81040df7a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyHealthView
+  _healthHudView: {fileID: 3195145979150290354}
+  _damageNumberSpawnPoint: {fileID: 580429503840945673}
+  _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
 --- !u!114 &8900643656970599263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,18 +235,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87fe872ba5861de44bc88a6a5d4520b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
---- !u!114 &-4884515779302669640
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1465007639519197220}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5a2a21d028db5249907b5089a9abb9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemySharedFacade
 --- !u!114 &-1587367200165867470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,10 +280,10 @@ MonoBehaviour:
   m_Graph: {fileID: 4520507370308768518, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
   m_BlackboardVariableOverridesList:
   - rid: 5112082949080088985
-  - rid: 5112082949080088986
-  - rid: 5112082949080088989
-  - rid: 5112083106830221448
-  - rid: 5112083106830221449
+  - rid: 8153521044661207067
+  - rid: 8153521044661207068
+  - rid: 8153521044661207069
+  - rid: 8153521044661207070
   m_OriginalGraph: {fileID: 4520507370308768518, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -292,16 +298,32 @@ MonoBehaviour:
           m_Value1: 0
         Name: Self
         m_Value: {fileID: 1465007639519197220}
-    - rid: 5112082949080088986
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+    - rid: 8153521044661207067
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 5211698399387829366
           m_Value1: 6142912991580524478
         Name: EnemyMovementAIFacade
         m_Value: {fileID: -1108031046539433984}
-    - rid: 5112082949080088989
-      type: {class: 'SharedBlackboardVariable`1[[KillChord.Runtime.View.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+    - rid: 8153521044661207068
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1618065121561699408
+          m_Value1: 7913689795733594968
+        Name: EnemyBattleAIFacade
+        m_Value: {fileID: -7434688505541404117}
+    - rid: 8153521044661207069
+      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 204066741708314993
+          m_Value1: 254365869257419029
+        Name: EnemyStateFacade
+        m_Value: {fileID: 3390705430803442452}
+    - rid: 8153521044661207070
+      type: {class: 'SharedBlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 17569852969880927499
@@ -309,22 +331,6 @@ MonoBehaviour:
         Name: EnemySharedFacade
         m_Value: {fileID: 0}
         m_SharedVariablesRuntimeAsset: {fileID: -1687900579865694322, guid: 4ab5d0ddbcab50d46bb8990b7bd7a790, type: 2}
-    - rid: 5112083106830221448
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1618065121561699408
-          m_Value1: 7913689795733594968
-        Name: EnemyBattleAIFacade
-        m_Value: {fileID: -7434688505541404117}
-    - rid: 5112083106830221449
-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 204066741708314993
-          m_Value1: 254365869257419029
-        Name: EnemyStateFacade
-        m_Value: {fileID: 3390705430803442452}
 --- !u!195 &3385280616353316531
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -332,7 +338,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1465007639519197220}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
@@ -347,3 +353,121 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!1001 &5246757749188476188
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3731371427858582317}
+    m_Modifications:
+    - target: {fileID: 3633621283076261781, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_Name
+      value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+--- !u!224 &580429503840945673 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4674212844608207637, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+  m_PrefabInstance: {fileID: 5246757749188476188}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3195145979150290354 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7243839929005732014, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+  m_PrefabInstance: {fileID: 5246757749188476188}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf62745f13ad0804589d701191c24c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.UI.HealthHudView
+--- !u!224 &4239302231747718614 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+  m_PrefabInstance: {fileID: 5246757749188476188}
+  m_PrefabAsset: {fileID: 0}

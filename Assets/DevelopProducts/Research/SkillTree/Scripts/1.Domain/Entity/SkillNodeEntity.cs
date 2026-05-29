@@ -6,28 +6,25 @@ namespace DevelopProducts.SkillTree
     {
         public SkillNodeEntity(int nodeId,
             int cost,
-            INodeUnlockEffect[] nodeUnlockEffects,
-            IUnlockCondition unlockCondition,
+            IAlgorithmService algorithmService,
             bool isUnlocked,
             bool isEnable = false,
             bool isOrigin = false)
         {
             SkillNodeIdVO = new SkillNodeId(nodeId);
             UnlockCost = new UnlockCost(cost);
-            NodeUnlockEffects = nodeUnlockEffects;
-            UnlockCondition = unlockCondition;
+            AlgorithmService = algorithmService;
             _isUnlocked = isUnlocked;
-            IsEnable = isEnable;
+            _isEnable = isEnable;
             IsOrigin = isOrigin;
         }
 
         public SkillNodeId SkillNodeIdVO { get; }
         public UnlockCost UnlockCost { get; }
-        public INodeUnlockEffect[] NodeUnlockEffects { get; }
-        public IUnlockCondition UnlockCondition { get; }
+        public IAlgorithmService AlgorithmService { get; }
         public bool IsUnlocked => _isUnlocked;
         public bool IsOrigin { get; }
-        public bool IsEnable { get; }
+        public bool IsEnable => _isEnable;
         public SkillNodeEntity[] Parents => _parents;
 
         public void SetParent(SkillNodeEntity[] parents)
