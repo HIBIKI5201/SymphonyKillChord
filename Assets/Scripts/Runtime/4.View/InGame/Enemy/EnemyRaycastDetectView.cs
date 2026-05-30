@@ -79,7 +79,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForLineUpdate()) return;
 
-            FreezeCurrentRayDirection();
+            if (!FreezeCurrentRayDirection())
+            {
+                _warningDisplayState = WarningDisplayState.Hidden;
+                return;
+            }
+
             _warningDisplayState = WarningDisplayState.Locked;
             _currentLineColor = Color.red;
             UpdateWarningLine();
@@ -214,7 +219,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 && IsEnemyOrigin(sourcePosition);
         }
 
-        private void FreezeCurrentRayDirection()
+        private bool FreezeCurrentRayDirection()
         {
             Vector3 targetPoint = GetRayTargetPoint(transform.position);
             Vector3 direction = targetPoint - transform.position;
@@ -222,10 +227,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _lockedRayDirection = Vector3.zero;
                 _warningDisplayState = WarningDisplayState.Hidden;
-                return;
+                return false;
             }
 
             _lockedRayDirection = direction.normalized;
+            return true;
         }
 
         private void HideWarningInternal()
