@@ -5,10 +5,11 @@ namespace DevelopProducts.SkillTree
     [System.Serializable]
     public class PowerUp : IParameterUpgradeEffect
     {
-        public string Description { get; }
-        public float Value { get; }
-
+        public float GetEffect()
+        {
+            return _healthMultiplier;
+        }
         [SerializeField] private string _description;
-        [SerializeField] private float _healthMultiplier;
+        [SerializeField, Range(0,100)] private float _healthMultiplier;
     }
 }

@@ -62,6 +62,14 @@ namespace SinfoniaStudio.SinfoniaOperator
             Console.WriteLine($"[DiscordBot] タスクチャンネルへの送信を試みます (ChannelID: {channelID})");
             await PushContextAsync(channelID, content);
         }
+        public async Task PushTaskAlertChannelAsync(string content)
+        {
+            await _readyTcs.Task;
+
+            ulong channelID = _env.DiscordTaskAlertChannelID;
+            Console.WriteLine($"[DiscordBot] タスクアラートチャンネルへの送信を試みます (ChannelID: {channelID})");
+            await PushContextAsync(channelID, content);
+        }
 
         /// <summary>
         ///     スプリントチャンネルに文字列をDiscordに出力します。

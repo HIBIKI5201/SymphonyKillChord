@@ -8,17 +8,26 @@ namespace DevelopProducts.SkillTree
     [CreateAssetMenu(fileName = "SkillTreeRepository", menuName = "DevelopProducts/SkillTree/SkillTreeRepository")]
     public class SkillTreeRepository : ScriptableObject, ISkillTreeRepository
     {
+        /// <summary>
+        ///     フェーズ毎ノードグループクラス
+        /// </summary>
         [Serializable]
         public class SkillPhaseGroup
         {
+            /// <summary>フェーズの全てのノード</summary>
             public SkillNodeAsset[] SkillNodeAssets => _skillNodeAssets ?? Array.Empty<SkillNodeAsset>();
 
-            [SerializeField] private SkillNodeAsset[] _skillNodeAssets;
+            [SerializeField, Tooltip("このフェーズのノード配列")] private SkillNodeAsset[] _skillNodeAssets;
         }
 
         public SkillNodeEntity[] AllSkillNodes => _nodeDictionary.Values.ToArray();
         public int PhaseCount => _phaseGroups?.Length ?? 0;
-
+        /// <summary>
+        ///     ID指定されたNodeEntityを返す
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
         public SkillNodeEntity GetNode(int id)
         {
             if (!_nodeDictionary.TryGetValue(id, out var skillNode))
@@ -26,7 +35,11 @@ namespace DevelopProducts.SkillTree
 
             return skillNode;
         }
-
+        /// <summary>
+        ///     ID指定されたノードの親を全て返す
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public IReadOnlyList<SkillNodeEntity> GetParentNodes(int id)
         {
             if (!_parentsDictionary.TryGetValue(id, out var parentNodes))
@@ -48,6 +61,9 @@ namespace DevelopProducts.SkillTree
                 .Select(a => a.SkillNodeEntity)
                 .ToArray();
         }
+        /// <summary>
+        ///     初期化メソッド
+        /// </summary>
         public void Initialize()
         {
             _nodeDictionary = new Dictionary<int, SkillNodeEntity>();
@@ -93,9 +109,37 @@ namespace DevelopProducts.SkillTree
                 _nodeDictionary[id] = asset.SkillNodeEntity;
                 _parentsDictionary[id] = asset.SkillNodeEntity.Parents;
             }
-        }
 
-        [SerializeField] private SkillPhaseGroup[] _phaseGroups;
+            NodeStateInitialize();
+        }
+        /// <summary>
+        ///     ノードの状態を初期化する
+        /// </summary>
+        private void NodeStateInitialize()
+        {
+            // 最初のフェーズのノードは表示できるようにする
+            var originPhase = _phaseGroups[0].SkillNodeAssets;
+            foreach (var node in originPhase)
+            {
+                if (node.SkillNodeEntity.IsOrigin)
+                {
+                    node.SkillNodeEntity.Unlock();
+                }
+                node.SkillNodeEntity.NodeEnable();
+            }
+            //  フェーズのIndexが１以降は非表示にする
+            for (int i = 1; i < PhaseCount; i++)
+            {
+                var phaseNodes = _phaseGroups[i].SkillNodeAssets;
+                foreach (var node in phaseNodes)
+                {
+                    node.SkillNodeEntity.NodeDisable();
+                }
+            }
+        }
+        [SerializeField]
+        [Tooltip("ノードフェーズ\nIndexが0以外は初期化で見えない")]
+        private SkillPhaseGroup[] _phaseGroups;
         private Dictionary<int, SkillNodeEntity> _nodeDictionary;
         private Dictionary<int, SkillNodeEntity[]> _parentsDictionary;
     }

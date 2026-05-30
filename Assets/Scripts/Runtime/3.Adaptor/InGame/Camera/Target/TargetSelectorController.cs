@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Character;
 using UnityEngine;
 
@@ -43,6 +44,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
             { return false; }
 
             return _registryController.GetTargetEntity(target, out entity);
+        }
+
+        /// <summary>
+        ///     現在のロックオン対象インターフェースの取得を試みる。
+        /// </summary>
+        /// <param name="result"> 現在のロックオン対象。取得失敗時は null。</param>
+        /// <returns> 有効な対象が存在する場合は true。</returns>
+        public bool TryGetCurrentTarget(out ILockOnTarget result)
+        {
+            return _selector.TryGetCurrentTarget(out result);
         }
 
         private readonly TargetSelector _selector;

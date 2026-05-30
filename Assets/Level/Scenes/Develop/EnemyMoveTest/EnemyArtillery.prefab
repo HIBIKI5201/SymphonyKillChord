@@ -263,7 +263,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5136002f68afb564e8590b6060a3f7d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.ShellSpawner
-  _shellPrefab: {fileID: 1460797723794679686, guid: 18302f9c3e6be1f46bfa34f66180b21c, type: 3}
   _enemyMoveView: {fileID: 6024709665745219317}
 --- !u!114 &2029437041226520640
 MonoBehaviour:
@@ -445,10 +444,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5835233792107802770, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3633621283076261781, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4564273472820378686}
   m_SourcePrefab: {fileID: 100100000, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
 --- !u!224 &580429503840945673 stripped
 RectTransform:
@@ -471,3 +474,21 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
   m_PrefabInstance: {fileID: 5246757749188476188}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8844239613999938185 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3633621283076261781, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+  m_PrefabInstance: {fileID: 5246757749188476188}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4564273472820378686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8844239613999938185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c44eee6ac7b239a4cac4591e375d2d19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyHealthBillboardView
+  _targetCamera: {fileID: 0}

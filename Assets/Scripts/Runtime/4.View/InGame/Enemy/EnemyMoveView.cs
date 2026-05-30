@@ -44,6 +44,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _navMeshAgent.speed = intruction.MoveSpeed;
                 _navMeshAgent.isStopped = false;
+                _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
             }
         }
@@ -56,6 +57,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.isStopped = true;
         }
 
+        public void StopRotating()
+        {
+            _navMeshAgent.updateRotation = false;
+        }
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
@@ -80,6 +85,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.On1BeatBefore += On1BeatBefore;
+            _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
 
         /// <summary>
@@ -91,6 +98,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.On1BeatBefore -= On1BeatBefore;
+                _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
         }
         /// <summary>
@@ -106,6 +115,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             ParticleController.Instance.PlayParticle(transform.position);
+            MoveToAttack();
+        }
+        /// <summary>
+        ///     攻撃の1拍前に呼び出される処理。
+        /// </summary>
+        private void On1BeatBefore()
+        {
+            StopMoving();
+            StopRotating();
+        }
+        /// <summary>
+        ///     攻撃の2拍前に呼び出される処理。
+        /// </summary>
+        private void On2BeatBefore()
+        {
+            
         }
     }
 }

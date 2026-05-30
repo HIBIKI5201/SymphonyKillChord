@@ -26,7 +26,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _overlapResults = new Collider[1];
 
             // TODO 一時的な攻撃予兆表示。今後素材を差し替える
-            _indicator.material.color = new Color(1, 0, 0, 0.1f);
+            ChangeShellColor(ShellColor.Green);
             _indicator.transform.localScale = new Vector3(_shellSpecPresenter.ExplosionRadius * 2, _indicator.transform.localScale.y, _shellSpecPresenter.ExplosionRadius * 2);
         }
 
@@ -40,6 +40,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 Debug.LogError("[ShellView] 攻撃対象を失っています。");
                 return;
             }
+             ChangeShellColor(ShellColor.Green);
             transform.position = _targetTransform.position;
             _indicator.gameObject.SetActive(true);
         }
@@ -59,6 +60,20 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             // TODO 爆発エフェクトなど
             _dedonateCallback?.Invoke();
+        }
+
+        public void ChangeShellColor(ShellColor color)
+        {
+            Color unityColor = color switch
+            {
+                ShellColor.Red => Color.red,
+                ShellColor.Blue => Color.blue,
+                ShellColor.Green => Color.green,
+                ShellColor.Yellow => Color.yellow,
+                _ => Color.white
+            };
+            _indicator.material.color = new Color(unityColor.r, unityColor.g, unityColor.b, 1f);
+            Debug.Log($"<color={color.ToString()}>[ShellView] 砲弾の色を{color}に変更</color>");
         }
 
         /// <summary>
