@@ -97,7 +97,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-        private LineRenderer _lineRenderer;
+         private LineRenderer _lineRenderer;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;

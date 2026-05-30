@@ -44,6 +44,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _navMeshAgent.speed = intruction.MoveSpeed;
                 _navMeshAgent.isStopped = false;
+                _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
             }
         }
