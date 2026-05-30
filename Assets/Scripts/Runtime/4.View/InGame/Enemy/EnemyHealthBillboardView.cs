@@ -19,7 +19,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 }
             }
 
-            transform.LookAt(_targetCamera.transform);
+            transform.forward = _targetCamera.transform.forward;
         }
 
         [SerializeField, Tooltip("ターゲットとなるカメラ")] 
