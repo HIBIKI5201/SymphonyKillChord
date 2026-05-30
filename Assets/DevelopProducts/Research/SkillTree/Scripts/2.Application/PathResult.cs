@@ -6,7 +6,7 @@ namespace DevelopProducts.SkillTree
     /// <summary>
     ///     経路探索の結果。
     /// </summary>
-    public readonly struct PathResult
+    public class PathResult
     {
         public PathResult(
             List<SkillNodeEntity> path,

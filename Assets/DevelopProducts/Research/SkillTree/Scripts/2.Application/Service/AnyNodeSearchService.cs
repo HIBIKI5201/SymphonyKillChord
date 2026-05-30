@@ -15,7 +15,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="target">選択したノード</param>
         /// <param name="tree">スキルツリー</param>
         /// <returns></returns>
-        public PathResult FindPath(SkillNodeEntity target, SkillTreeEntity tree)
+        public PathResult FindPath(SkillNodeEntity target, ISkillTreeRepository skillTreeRepository)
         {
             //  既に開放済みなら経路不要
             if (target.IsUnlocked)
@@ -27,7 +27,7 @@ namespace DevelopProducts.SkillTree
             var visited = new HashSet<SkillNodeEntity>();
 
             //  選択ノードを基点に探索する
-            Search(target, tree, currentPath, visited, 0, ref bestPath, ref totalCosts);
+            Search(target, skillTreeRepository, currentPath, visited, 0, ref bestPath, ref totalCosts);
 
             //  パスの数が0だったら何も無し
             if (bestPath.Count == 0)
@@ -51,7 +51,7 @@ namespace DevelopProducts.SkillTree
         /// <param name="bestPath">最適経路が見つかった場合に、その経路のスキルノードリストが格納される参照。</param>
         /// <param name="bestCost">最適経路のコストが見つかった場合に、そのコストが格納される参照。</param>
         private void Search(SkillNodeEntity target,
-                            SkillTreeEntity skillTreeEntity,
+                            ISkillTreeRepository skillTreeRepository,
                             List<SkillNodeEntity> currentPath,
                             HashSet<SkillNodeEntity> visited,
                             int currentCost,
@@ -85,14 +85,14 @@ namespace DevelopProducts.SkillTree
             int totalCost = currentCost + target.UnlockCost.Cost;
 
             //  もしコストが最小コストを上回ったら枝を切る
-            if (totalCost >= bestCost)
+            if (totalCost > bestCost)
             {
                 currentPath.RemoveAt(0);
                 visited.Remove(target);
                 return;
             }
             // 現在のノードから親のノードを取得する
-            var parents = skillTreeEntity.GetParents(target.SkillNodeIdVO);
+            var parents = skillTreeRepository.GetParentNodes(target.SkillNodeIdVO.Id);
 
             //　親なし(ルートに到達したが未解放)　➝　経路無し
             if (parents.Count == 0)
@@ -104,7 +104,7 @@ namespace DevelopProducts.SkillTree
 
             foreach (var parent in parents)
             {
-                Search(parent, skillTreeEntity, currentPath, visited, totalCost, ref bestPath, ref bestCost);
+                Search(parent, skillTreeRepository, currentPath, visited, totalCost, ref bestPath, ref bestCost);
             }
 
             currentPath.RemoveAt(0);

@@ -1,5 +1,8 @@
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードが可視化されているかどうか渡すDTO
+    /// </summary>
     public ref struct CheckVisibleDTO
     {
         public CheckVisibleDTO(bool isVisible)

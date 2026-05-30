@@ -7,6 +7,7 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
         private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
+        private const string DISCORD_TASK_ALERT_CHANNEL_ID = "DISCORD_TASK_ALERT_CHANNEL_ID";
         private const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
         private const string NOTION_TOKEN = "NOTION_TOKEN";
         private const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
@@ -26,6 +27,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 discordEnv = new DiscordEnvironment(
                     DISCORD_BOT_TOKEN,
                     DISCORD_TASK_CHANNEL_ID,
+                    DISCORD_TASK_ALERT_CHANNEL_ID,
                     DISCORD_SPRINT_CHANNEL_ID);
                 notionEnv = new NotionEnvironment(
                     NOTION_TOKEN,
@@ -44,6 +46,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             Console.WriteLine("[Main] 環境変数のチェックが完了しました。");
             Console.WriteLine($"[Main] Notion設定 - 日付プロパティ名: '{notionEnv.DatePropertyName}', 名前プロパティ名: '{notionEnv.NamePropertyName}'");
+            Console.WriteLine($"[Main] Discord設定 - タスクチャンネルID: '{discordEnv.DiscordTaskChannelID}', スプリントチャンネルID: '{discordEnv.DiscordSprintChannelID}', タスクアラートチャンネルID: '{discordEnv.DiscordTaskAlertChannelID}'");
 
             // ワーカークラスのインスタンスを生成。
             NotionTaskListReader taskReader = new(notionEnv);
@@ -71,14 +74,30 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             Console.WriteLine("[PushTaskList] タスクリストの取得を開始します...");
-            string taskContent = await reader.GetTaskContent();
-            if (string.IsNullOrEmpty(taskContent))
+            NotionTaskListReader.TaskContentResult taskContent = await reader.GetTaskContent();
+
+            Task[] tasks = new Task[2];
+            if (taskContent.HasTaskContent)
             {
+                tasks[0] = discordBot.PushTaskChannelAsync(taskContent.TaskContent);
+            }
+            else
+            {
+                tasks[0] = Task.CompletedTask;
                 Console.WriteLine("[PushTaskList] 送信するタスクがありませんでした。");
-                return;
             }
 
-            await discordBot.PushTaskChannelAsync(taskContent);
+            if (taskContent.HasTaskAlertContent)
+            {
+                tasks[1] = discordBot.PushTaskAlertChannelAsync(taskContent.TaskAlertContent);
+            }
+            else
+            {
+                tasks[1] = Task.CompletedTask;
+                Console.WriteLine("[PushTaskList] 送信するタスクアラートがありませんでした。");
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         private static async Task PushSprint(NotionSprintListReader reader, DiscordBotManager discordBot)
