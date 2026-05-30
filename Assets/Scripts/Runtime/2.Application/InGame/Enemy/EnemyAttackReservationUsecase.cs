@@ -111,7 +111,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 musicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
-                
+
+            if(musicSpec.TargetBeat >= 3) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
+            {
+            
             _musicActionScheduler.Schedule(
                 new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
                 Handle2BeatBefore,
@@ -121,6 +124,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
                 Handle1BeatBefore,
                 _cancellationTokenSource.Token);
+            }
            
         }
 
