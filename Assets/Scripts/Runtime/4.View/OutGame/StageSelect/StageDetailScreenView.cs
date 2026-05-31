@@ -76,7 +76,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _rewardSkillUnlockLabel.text = rewardSkillUnlockText.ToString();
 
             // バトルパートのみミッションセクションを表示する
-            _missionSection.style.display = dto.IsBattle ? DisplayStyle.Flex : DisplayStyle.None;
+            _missionSection.style.visibility = dto.IsBattle ? Visibility.Visible : Visibility.Hidden;
 
             if (dto.IsBattle)
             {
