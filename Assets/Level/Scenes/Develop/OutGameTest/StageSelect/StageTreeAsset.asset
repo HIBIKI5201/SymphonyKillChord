@@ -17,7 +17,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fe1142573c33fb644a28e8d2a1c5e575, type: 2}
   - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
   - {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
-  - {fileID: 11400000, guid: ce8f3db3b43f0a442ba433d004a9c74f, type: 2}
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   _connections:
   - _fromStageId: 1
@@ -28,5 +27,3 @@ MonoBehaviour:
     _toStageId: 4
   - _fromStageId: 4
     _toStageId: 5
-  - _fromStageId: 2
-    _toStageId: 6

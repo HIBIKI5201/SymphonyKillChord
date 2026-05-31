@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Stage_03
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: 5
-  _stageType: 0
+  _stageId: 3
+  _stageType: 1
   _isInitiallyUnlocked: 0
-  _stageName: "\u30D0\u30C8\u30EB\uFF12"
-  _flavorText: "\u30D0\u30C8\u30EB\u30B9\u30C6\u30FC\u30B8\uFF12"
-  _rewardSkillBuildPoint: 2
-  _rewardSkillUnlockPoint: 2
-  _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
+  _stageName: "\u30B7\u30CA\u30EA\u30AA2"
+  _flavorText: "\u30B7\u30CA\u30EA\u30AA2"
+  _rewardSkillBuildPoint: 1
+  _rewardSkillUnlockPoint: 1
+  _missionDefinitionAsset: {fileID: 0}

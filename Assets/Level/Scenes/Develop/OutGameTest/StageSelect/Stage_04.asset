@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: befc44a5af6a869489c5d3b14768302e, type: 3}
-  m_Name: stage_boss_01_branch
+  m_Name: Stage_04
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: 6
+  _stageId: 4
   _stageType: 0
   _isInitiallyUnlocked: 0
-  _stageName: "\u96A0\u3057\u30DC\u30B9"
-  _flavorText: "\u96A0\u3057\u30DC\u30B9\u6226"
+  _stageName: "\u30D0\u30C8\u30EB"
+  _flavorText: "\u30D0\u30C8\u30EB"
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
