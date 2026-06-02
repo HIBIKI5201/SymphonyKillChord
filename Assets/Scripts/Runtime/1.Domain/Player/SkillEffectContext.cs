@@ -8,15 +8,13 @@ namespace KillChord.Runtime.Domain.Player
     /// </summary>
     public readonly struct SkillEffectContext
     {
-        public SkillEffectContext(CharacterEntity playerEntity, CharacterEntity targetEntity)
+        public SkillEffectContext( CharacterEntity targetEntity)
         {
-            PlayerEntity = playerEntity;
             TargetEntity = targetEntity;
         }
-        
+
         public CharacterEntity TargetEntity { get; }
 
-        public CharacterEntity PlayerEntity { get; }
 
     }
 }
