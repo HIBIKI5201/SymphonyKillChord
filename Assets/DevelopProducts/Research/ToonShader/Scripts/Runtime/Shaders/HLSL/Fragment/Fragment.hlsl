@@ -98,6 +98,7 @@ half4 frag(Varyings IN) : SV_Target
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, IN.positionWS, (float3) normalWS, color);
     
     half backLight, rimLightFront, rimLightBack;
+    //GetViewForwardDir()
     GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
                backLight, rimLightFront, rimLightBack);
 
