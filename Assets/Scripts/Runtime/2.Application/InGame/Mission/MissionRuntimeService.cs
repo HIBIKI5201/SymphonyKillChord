@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Mission;
+using System;
 
 namespace KillChord.Runtime.Application.InGame.Mission
 {
@@ -35,6 +36,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionEvaluationRunner = missionEvaluationRunner;
         }
 
+        /// <summary> ミッション終了イベント。 </summary>
+        public event Action<MissionEndReason> OnMissionFinished;
+
         /// <summary> ミッション定義を取得します。 </summary>
         public MissionDefinition MissionDefinition => _missionDefinition;
         /// <summary> 進行状況を取得します。 </summary>
@@ -52,6 +56,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             }
             _missionTimeAdvanceUseCase.Execute(_missionProgress, deltaTime);
             _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
         }
 
         /// <summary>
@@ -66,6 +71,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             }
             _missionEnemyKilledUseCase.Execute(_missionProgress, enemyMissionKey);
             _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
         }
 
         /// <summary>
@@ -79,6 +85,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             }
             _missionPlayerDeadUseCase.Execute(_missionProgress);
             _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
         }
 
         /// <summary>
@@ -106,5 +113,21 @@ namespace KillChord.Runtime.Application.InGame.Mission
         private readonly MissionRuleRunner _missionRuleRunner;
         /// <summary> 評価実行器。 </summary>
         private readonly MissionEvaluationRunner _missionEvaluationRunner;
+
+        // Tick()などでミッションの終了を検知した際に、
+        // 複数回OnMissionFinishedイベントが発火するのを防止するためのフラグ。
+        private bool _hasFinished = false;
+
+        /// <summary>
+        ///    ミッションが終了しているかどうかをチェックし、終了している場合はイベントを発火させます。
+        /// </summary>
+        private void CheckMissionFinished()
+        {
+            if (_missionProgress.IsFinished && !_hasFinished)
+            {
+                _hasFinished = true;
+                OnMissionFinished?.Invoke(_missionProgress.EndReason);
+            }
+        }
     }
 }
