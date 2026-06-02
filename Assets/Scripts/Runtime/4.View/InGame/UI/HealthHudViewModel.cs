@@ -17,8 +17,6 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <summary> HP情報を保持するReactiveProperty。 </summary>
         public ReadOnlyReactiveProperty<HealthHudDTO> HealthHudDTO => _healthHudDto;
 
-        private ReactiveProperty<HealthHudDTO> _healthHudDto;
-
         /// <summary>
         ///     HP情報を更新する。
         /// </summary>
@@ -27,5 +25,7 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             _healthHudDto.Value = dto;
         }
+
+        private ReactiveProperty<HealthHudDTO> _healthHudDto;
     }
 }

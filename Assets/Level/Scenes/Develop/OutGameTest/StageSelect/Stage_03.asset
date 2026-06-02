@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: befc44a5af6a869489c5d3b14768302e, type: 3}
+  m_Name: Stage_03
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
+  _plannerMemo: 
+  _stageId: 5
+  _stageType: 0
+  _isInitiallyUnlocked: 0
+  _stageName: "\u30D0\u30C8\u30EB\uFF12"
+  _flavorText: "\u30D0\u30C8\u30EB\u30B9\u30C6\u30FC\u30B8\uFF12"
+  _rewardSkillBuildPoint: 2
+  _rewardSkillUnlockPoint: 2
+  _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}

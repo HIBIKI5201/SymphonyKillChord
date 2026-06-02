@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
@@ -12,6 +12,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
     {
         [SerializeField, Tooltip("通常移動速度。")]
         private float _moveSpeed;
+        [SerializeField,Tooltip("攻撃した際の回転速度")] 
+        private float _attackRotationSpeed;
 
         [Space]
         [SerializeField, Tooltip("回避移動速度。")]
@@ -27,6 +29,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
         public PlayerMoveParameter ToDomain()
             => new PlayerMoveParameter(
                 new MoveSpeed(_moveSpeed),
+                new AttackRotationSpeed(_attackRotationSpeed),
                 new DodgeSpeed(_dodgeSpeed),
                 new DodgeDuration(_dodgeDuration),
                 new DodgeCooldown(_dodgeCooldown)

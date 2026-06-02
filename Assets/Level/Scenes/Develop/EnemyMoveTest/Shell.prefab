@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1733792189036827415}
   - component: {fileID: 1460797723794679686}
+  - component: {fileID: 425184521389573371}
   m_Layer: 0
   m_Name: Shell
   m_TagString: Untagged
@@ -45,11 +46,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 731bfc943b94505419c9e02bc4698a5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.ShellView
-  _damageRadius: 1.5
   _damageLayer:
     serializedVersion: 2
     m_Bits: 128
   _indicator: {fileID: 4306531910727972082}
+--- !u!114 &425184521389573371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 705118818257841111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 765b73f065b219c4181e4bc591090ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ShellLifeCycle
+  _attackData: {fileID: 11400000, guid: 7abb1786189c6ab409df92032a7b3bb6, type: 2}
+  _musicData: {fileID: 11400000, guid: d69421e5dc9278446a38b4415677e2aa, type: 2}
+  _view: {fileID: 1460797723794679686}
 --- !u!1 &1383630595572981443
 GameObject:
   m_ObjectHideFlags: 0
@@ -67,7 +82,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6031270403927125913
 Transform:
   m_ObjectHideFlags: 0

@@ -15,5 +15,7 @@ namespace KillChord.Runtime.Domain.OutGame.Screen
         SkillBuild,
         /// <summary> 設定画面。 </summary>
         Setting,
+        /// <summary> 戦闘準備画面。 </summary>
+        BattlePreparation,
     }
 }

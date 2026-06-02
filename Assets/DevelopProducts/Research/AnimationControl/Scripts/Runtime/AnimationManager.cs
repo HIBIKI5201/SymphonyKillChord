@@ -29,6 +29,9 @@ namespace DevelopProducts.AnimationControl.Blender
         [SerializeField]
         private AnimatorUpdateMode _mode;
 
+        [SerializeField]
+        private float _testBPM = 120f;
+
         private Animator _animator;
         private AnimatorPlayableBlend _blender;
         private SymphonyAnimeAdaptor _adaptor;
@@ -40,6 +43,8 @@ namespace DevelopProducts.AnimationControl.Blender
             _animator = GetComponent<Animator>();
             _adaptor = new SymphonyAnimeAdaptor(_animator);
             _blender = new AnimatorPlayableBlend(_adaptor);
+
+            _blender.SetBPM(_testBPM);
 
             for (int i = 0; i < _playClip.Length; i++)
             {

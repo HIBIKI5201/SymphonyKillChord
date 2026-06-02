@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PlayerConfig
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Structure.PlayerConfig
   _moveSpeed: 10
+  _attackRotationSpeed: 10
   _dodgeSpeed: 20
   _dodgeDuration: 0.2
   _dodgeCooldown: 0.3

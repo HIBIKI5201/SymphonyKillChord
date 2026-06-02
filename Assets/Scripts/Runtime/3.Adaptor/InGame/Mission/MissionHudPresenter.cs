@@ -28,12 +28,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             MissionEvaluationItemDTO[] evaluationItems = new MissionEvaluationItemDTO[result.Progresses.Length];
 
-            for(int i = 0; i < evaluationItems.Length; i++)
+            for (int i = 0; i < evaluationItems.Length; i++)
             {
                 MissionEvaluationProgress progress = result.Progresses[i];
                 evaluationItems[i] = new MissionEvaluationItemDTO(
                     progress.Description,
-                    progress.IsAchieved);
+                    ConvertDisplayState(progress.DisplaySituation));
             }
 
             string resultText = _missionRuntimeService.MissionProgress.EndReason.ToString();
@@ -50,5 +50,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private readonly MissionRuntimeService _missionRuntimeService;
         /// <summary> ミッションHUDビューモデル。 </summary>
         private readonly IMissionHudViewModel _missionHudViewModel;
+
+        private MissionEvaluationDisplayState ConvertDisplayState(
+            MissionEvaluationDisplaySituation situation)
+        {
+            switch (situation)
+            {
+                case MissionEvaluationDisplaySituation.Failed:
+                    return MissionEvaluationDisplayState.Failed;
+
+                case MissionEvaluationDisplaySituation.Challenging:
+                    return MissionEvaluationDisplayState.Challenging;
+
+                case MissionEvaluationDisplaySituation.Succeeded:
+                    return MissionEvaluationDisplayState.Succeeded;
+
+                default:
+                    return MissionEvaluationDisplayState.Challenging;
+            }
+        }
     }
 }

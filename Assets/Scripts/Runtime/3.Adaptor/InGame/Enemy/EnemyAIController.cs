@@ -26,9 +26,34 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyBattleState = enemyBattleState;
             _stateFacade = stateFacade;
             _attackController = attackController;
+            _isActive = false;
+        }
 
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            if (_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
+            _enemyAttackReservationUsecase.On2BeatBefore += Handle2BeatBefore;
+            _enemyAttackReservationUsecase.On1BeatBefore += Handle1BeatBefore;
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
+            _isActive = true;
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            if (!_isActive) return;
+            _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _enemyAttackReservationUsecase.On2BeatBefore -= Handle2BeatBefore;
+            _enemyAttackReservationUsecase.On1BeatBefore -= Handle1BeatBefore;
+            _enemyAttackReservationUsecase.Deactivate();
+            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
+            _isActive = false;
         }
 
         // Debug用のイベント。
@@ -36,6 +61,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public event Action OnAttackReserved;
         /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
+        /// <summary>   攻撃の2拍前に発火するイベント   </summary>
+        public event Action On2BeatBefore;
+        /// <summary>   攻撃の1拍前に発火するイベント </summary>
+        public event Action On1BeatBefore;
 
         /// <summary> 敵が攻撃中か。 </summary>
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
@@ -133,6 +162,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
+        private void Handle2BeatBefore()
+        {
+            Debug.Log("[EnemyAIController] 攻撃の2拍前");
+            On2BeatBefore?.Invoke();
+        }
+
+        private void Handle1BeatBefore()
+        {
+            Debug.Log("[EnemyAIController] 攻撃の1拍前");
+            On1BeatBefore?.Invoke();
+        }
+
         /// <summary>
         ///     ダメージを受ける時の処理。
         /// </summary>
@@ -152,6 +193,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
-        private readonly IEnemyAttackController _attackController;
+        private IEnemyAttackController _attackController;
+        private bool _isActive;
     }
 }

@@ -30,7 +30,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             SkillController skillController,
             TargetSelectorController targetSelectorController,
             AttackIntervalEvaluator attackIntervalEvaluator,
-            IMusicSyncService musicSyncService
+            IMusicSyncService musicSyncService,
+            float attackRotationSpeed
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -39,10 +40,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _skillController = skillController;
             _targetSelectorController = targetSelectorController;
             _musicSyncService = musicSyncService;
+            AttackRotationSpeed = attackRotationSpeed;
         }
-        
+
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
+
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        public bool HasCurrentLockOnTarget { get; private set; }
+
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        public Vector3 CurrentLockOnTargetPosition { get; private set; }
+
+        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        public float AttackRotationSpeed { get; }
 
         /// <summary>
         ///     攻撃を実行する。
@@ -66,6 +77,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _battleState.ChangeTarget(targetEntity);
 
+            // 現在の ILockOnTarget を取得して保持（View 側が参照する）
+            if (_targetSelectorController.TryGetCurrentTarget(out var lockOnTarget))
+            {
+                HasCurrentLockOnTarget = true;
+                CurrentLockOnTargetPosition = lockOnTarget.Position;
+            }
+            else
+            {
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
+            }
+
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
 
@@ -81,7 +104,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 Debug.LogWarning(ex.Message);
                 return false;
             }
-            
+
             _attackIntervalEvaluator.EvaluateInterval();
 
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。

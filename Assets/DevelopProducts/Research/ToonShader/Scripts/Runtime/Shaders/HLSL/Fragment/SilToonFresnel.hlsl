@@ -26,7 +26,7 @@ half BackLight(half3 normalWS, half3 cameraFwdWS, half3 viewDirWS, half3 mainLig
     mainLightDotCamera *= mainLightDotCamera;
 
     return saturate(mainLightDotCamera * mainLightDotNormal * fresnel);
-}
+}   
 
 half FrontRimFresnel(half3 mainLightDirWS, half3 normalWS, half3 viewDirWS)
 {

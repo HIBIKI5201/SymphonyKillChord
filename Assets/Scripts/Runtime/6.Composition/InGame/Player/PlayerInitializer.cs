@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
@@ -10,16 +11,19 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
@@ -48,6 +52,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private SkillView[] _skillVisuals;
         [SerializeField] private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        [SerializeField] private CharacterAnimationView _characterAnimationView;
+        [SerializeField] private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -56,8 +62,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
-        private EnemyInfantryTestSpawner _enemyInfantryTestSpawner;
-        private EnemyArtilleryTestSpawner _enemyArtilleryTestSpawner;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -67,6 +71,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.RegisterInstance(this);
         }
 
+        public CharacterEntity PlayerEntity => _playerEntity;
+
         public void Initialize(
             TargetManager targetManager,
             TargetEntityRegistry targetEntityRegistry,
@@ -74,18 +80,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
-            _enemyInfantryTestSpawner = ServiceLocator.GetInstance<EnemyInfantryTestSpawner>();
-            if (_enemyInfantryTestSpawner == null)
-            {
-                Debug.LogError($"{nameof(EnemyInfantryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return;
-            }
-            _enemyArtilleryTestSpawner = ServiceLocator.GetInstance<EnemyArtilleryTestSpawner>();
-            if (_enemyArtilleryTestSpawner == null)
-            {
-                Debug.LogError($"{nameof(EnemyArtilleryTestSpawner)}が見つかりません。シーン内に配置されていることを確認してください。", this);
-                return;
-            }
 
             _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
             if (_inGameHudInitializer == null)
@@ -102,6 +96,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
+            MusicSyncState musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
+            if(musicSyncState == null)
+            {
+                Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
+            }
             // SerializeFieldの装備スキルからskillId配列を作成する
             List<int> skillIdList = new List<int>();
             if (_equippedSkills != null && _equippedSkills.Length > 0)
@@ -119,11 +118,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 skillIds = skillIdList.ToArray();
             }
-
-            _enemyInfantryTestSpawner.SetTargetEntity(_playerEntity);
-            _enemyInfantryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
-            _enemyArtilleryTestSpawner.SetTargetEntity(_playerEntity);
-            _enemyArtilleryTestSpawner.SetTargetManager(targetManager, targetEntityRegistry);
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
@@ -188,8 +182,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
-            //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, null, skillResultPresenter);
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, skillIds, skillResultPresenter, inputProgressController);
+            SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
             SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
             skillController?.SetUsecase(skillUsecase);
 
@@ -201,12 +195,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
-            _player.Initialize(playerMovementController, playerAttackController, ct, inputView, healthHudPresenter);
+            var animController = new AnimationComposition().Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+
+            _player.Initialize(playerMovementController, playerAttackController, animController, ct, inputView, healthHudPresenter);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 

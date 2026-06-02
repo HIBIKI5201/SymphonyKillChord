@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c03476bdb348df749aa2410de68f7601, type: 3}
+  m_Name: PlayerAnimationData
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterAnimationCatalogAsset
+  _entries:
+  - State: 0
+    Clip: {fileID: 2299095657827748018, guid: b4c321926d8a47c409ea6fdd3cf8c4d1, type: 3}
+  - State: 1
+    Clip: {fileID: 8993902097722301239, guid: 90d0c7ae3b6e9dc488b2a77ed6980770, type: 3}
+  - State: 2
+    Clip: {fileID: 2914187182157092610, guid: c5dd4d6c703302246b0918e71e72d8fb, type: 3}
