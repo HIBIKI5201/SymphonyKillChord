@@ -18,11 +18,13 @@ namespace KillChord.Runtime.Application.InGame.Skill
         public SkillUsecase(
             IMusicSyncService musicSyncService,
             SkillCheckService skillCheckService,
-            IViewAction viewAction)
+            IViewAction viewAction,
+            ISkillTargetResolver targetResolver)
         {
             _musicSyncService = musicSyncService;
             _skillCheckService = skillCheckService;
             _viewAction = viewAction;
+            _targetResolver = targetResolver;
         }
 
         /// <summary>
@@ -54,5 +56,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
         private readonly IMusicSyncService _musicSyncService;
         private readonly SkillCheckService _skillCheckService;
         private readonly IViewAction _viewAction;
+        private readonly ISkillTargetResolver _targetResolver;
     }
 }
