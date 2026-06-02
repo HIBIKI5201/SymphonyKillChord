@@ -50,11 +50,13 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 {
                     SkillEffectContext context = new SkillEffectContext(target);
                     executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
+                    //TODO: プレイヤーの基礎攻撃力の取得。
                 }
                 else
                 {
                     return false; //ターゲットがいない場合はスキルを発動しない 
                 }
+
                 return true;
             }
 
