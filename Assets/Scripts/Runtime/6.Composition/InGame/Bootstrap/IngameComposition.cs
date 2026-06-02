@@ -9,6 +9,7 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
@@ -137,6 +138,16 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
 
+            PlayerView playerView = FindFirstObjectByType<PlayerView>();
+
+            if (playerView == null)
+            {
+                Debug.LogError("[IngameComposition] PlayerView が見つかりません。");
+                return false;
+            }
+
+            _inGamePlayDirector.AddGamePlayControllable(playerView);
+
             // ステージに事前配置されている敵の情報
             AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
             if (assignedEnemyManager == null)
@@ -262,6 +273,11 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             if (_inGamePlayDirector == null)
             {
                 Debug.LogError("[IngameComposition] InGamePlayDirectorの参照が未設定です。", this);
+                return false;
+            }
+            if(_stageResultUIView == null)
+            {
+                Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
                 return false;
             }
 
