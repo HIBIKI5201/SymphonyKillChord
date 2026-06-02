@@ -76,7 +76,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _rewardSkillUnlockLabel.text = rewardSkillUnlockText.ToString();
 
             // バトルパートのみミッションセクションを表示する
-            _missionSection.style.display = dto.IsBattle ? DisplayStyle.Flex : DisplayStyle.None;
+            _missionSection.style.visibility = dto.IsBattle ? Visibility.Visible : Visibility.Hidden;
 
             if (dto.IsBattle)
             {
@@ -123,11 +123,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         /// <summary>
         ///     出撃ボタンがクリックされたときの処理。
-        ///     戦闘準備画面を表示するイベントを発火します。
+        ///     ステージタイプに応じた出撃イベントを発火します。
         /// </summary>
         private void OnSortieButtonClicked(ClickEvent evt)
         {
-            OutGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
+            OutGameUIEvent.OnSortieRequested?.Invoke();
         }
 
         private const string STAGE_NAME_LABEL = "StageNameLabel";

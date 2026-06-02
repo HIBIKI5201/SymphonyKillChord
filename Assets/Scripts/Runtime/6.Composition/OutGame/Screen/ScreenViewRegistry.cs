@@ -36,8 +36,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     指定画面を表示し、トランジションの完了を待機します。
         /// </summary>
-        public async Task Show(ScreenId screenId, CancellationToken token)
+        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
+            ScreenViewBase view = _views[screenId];
+            if (view is BattlePreparationScreen battlePreparationScreen)
+            {
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+            }
+
             await _views[screenId].Show(token);
         }
 
