@@ -1,3 +1,5 @@
+using Codice.Utils;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,10 +29,22 @@ namespace DevelopProducts.SaveSystem
         /// <returns></returns>
         internal async ValueTask WriteAsync()
         {
-            var json = JsonUtility.ToJson(this, true);
-            var tempPath = FilePath + ".tmp";
-            await File.WriteAllTextAsync(tempPath, json);
-            File.Move(tempPath, FilePath);
+            try
+            {
+                var json = JsonUtility.ToJson(this, true);
+                var tempPath = FilePath + ".tmp";
+                await File.WriteAllTextAsync(tempPath, json);
+
+                if (File.Exists(FilePath))
+                    File.Delete(FilePath);
+
+                File.Move(tempPath, FilePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to write save file: {ex}");
+                throw;
+            }
         }
         /// <summary> セーブデータのキーを取得します。</summary>
         private string SaveKey => GetType().Name;
