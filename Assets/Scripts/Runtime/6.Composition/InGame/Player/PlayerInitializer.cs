@@ -204,8 +204,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
             var animationComposition = new AnimationComposition();
             var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
             int attackAnimationIndex = animationComposition.GetAnimationIndex(CharacterAnimationState.Attack);
+            int dodgeAnimationIndex = animationComposition.GetAnimationIndex(CharacterAnimationState.Dodge);
 
-            _player.Initialize(playerMovementController, playerAttackController, animController, attackAnimationIndex, ct, inputView, healthHudPresenter);
+            _player.Initialize(playerMovementController, playerAttackController, animController, attackAnimationIndex, dodgeAnimationIndex, ct, inputView, healthHudPresenter);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 

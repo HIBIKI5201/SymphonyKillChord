@@ -65,6 +65,7 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
             int attackAnimationIndex,
+            int dodgeAnimationIndex,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -73,6 +74,7 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
             _attackAnimationIndex = attackAnimationIndex;
+            _dodgeAnimationIndex = dodgeAnimationIndex;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -114,6 +116,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (input.Phase == InputActionPhase.Started)
             {
                 _isDodge = true;
+                _characterAnimationController?.TriggerOneShot(_dodgeAnimationIndex);
             }
         }
 
@@ -284,6 +287,7 @@ namespace KillChord.Runtime.View.InGame.Player
             => Quaternion.Euler(0, 0, degrees) * v;
 
         private int _attackAnimationIndex;
+        private int _dodgeAnimationIndex;
     }
 }
 
