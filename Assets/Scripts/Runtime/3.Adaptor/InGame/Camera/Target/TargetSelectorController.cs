@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
     /// <summary>
     ///     ロックオン対象の選択と、対象に紐づくキャラクターエンティティの取得をセレクターへ委譲するコントローラークラス。
     /// </summary>
-    public class TargetSelectorController
+    public class TargetSelectorController : ISkillTargetResolver
     {
         /// <summary>
         ///     セレクターとレジストリコントローラーを受け取り、コントローラーを初期化するコンストラクタ。
