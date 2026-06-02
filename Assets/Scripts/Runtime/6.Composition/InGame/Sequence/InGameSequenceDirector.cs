@@ -20,8 +20,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         {
             _gameplayControllable.StopGameplay();
             _stageResultUIView?.Hide();
+            _stageResultUIView?.SetStageStartMessage();
 
-            if(_stageSequenceView != null)
+            if (_stageSequenceView != null)
             {
                 await _stageSequenceView.PlayStageStartAsync(cancellationToken);
             }
@@ -32,6 +33,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable ClearAsync(CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
+            _stageResultUIView?.SetClearMessage();
 
             if (_stageSequenceView != null)
             {
@@ -44,6 +46,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable GameOverAsync(CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
+            _stageResultUIView.SetGameOverMessage();
 
             if (_stageSequenceView != null)
             {
