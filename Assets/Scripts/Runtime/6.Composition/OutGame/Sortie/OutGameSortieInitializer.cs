@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Sortie
 {
+    /// <summary>
+    ///     アウトゲームの出撃機能の初期化を行うクラス。
+    /// </summary>
     public sealed class OutGameSortieInitializer : MonoBehaviour
     {
         private void Awake()
