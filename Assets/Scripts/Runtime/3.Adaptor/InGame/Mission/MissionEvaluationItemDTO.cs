@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
     /// <summary>
@@ -11,17 +9,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     MissionEvaluationItemDTO 構造体の新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="description"> 表示文。 </param>
-        /// <param name="isAchieved"> 条件達成しているか。 </param>
-        public MissionEvaluationItemDTO(string description, bool isAchieved)
+        /// <param name="displayState"> HUD表示状態。 </param>
+        public MissionEvaluationItemDTO(string description, MissionEvaluationDisplayState displayState)
         {
             Description = description;
-            IsAchieved = isAchieved;
+            DisplayState = displayState;
         }
 
         /// <summary> 表示文を取得します。 </summary>
         public string Description { get; }
 
-        /// <summary> 条件達成しているかを取得します。 </summary>
-        public bool IsAchieved { get; }
+        /// <summary> HUD表示状態を取得します。 </summary>
+        public MissionEvaluationDisplayState DisplayState { get; }
     }
 }

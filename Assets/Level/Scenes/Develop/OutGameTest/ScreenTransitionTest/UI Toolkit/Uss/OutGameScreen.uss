@@ -18,3 +18,8 @@
     opacity: 1;
     display: flex;
 }
+
+.screen {
+    width: 100%;
+    height: 100%;
+}

@@ -1,9 +1,12 @@
 using CriWare;
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.Persistent.Input;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,8 +29,11 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
+        private ICharacterAnimationController _characterAnimationController;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
+        private CancellationTokenSource _cancellationTokenSource;
+        private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -57,12 +63,14 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Initialize(
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
+            ICharacterAnimationController characterAnimationController,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _characterAnimationController = characterAnimationController;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -138,6 +146,15 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
+                _characterAnimationController?.TriggerAttack();
+
+                if (PlayerAttackController.HasCurrentLockOnTarget)
+                {
+                    CancelAttackRotate();
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    RotateToTargetAsync(PlayerAttackController.CurrentLockOnTargetPosition, PlayerAttackController.AttackRotationSpeed
+                        , _cancellationTokenSource.Token);
+                }
             }
         }
 
@@ -172,7 +189,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 dir = Vector2.zero;
             }
 
-            _animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
+            //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
             if (_isDodge)
@@ -190,9 +207,74 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             Quaternion rotation = _cacheTransform.rotation;
+            if (_cancellationTokenSource != null)
+            {
+                rotation = _rotation;
+            }
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
+            _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+        }
+
+        /// <summary>
+        ///     攻撃時にターゲット方向へ滑らかに回転する Task 実装。
+        ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
+        /// </summary>
+        private async Task RotateToTargetAsync(Vector3 targetPosition, float speed, CancellationToken ct)
+        {
+            _rotation = _cacheTransform.rotation;
+
+            try
+            {
+                while (!ct.IsCancellationRequested
+                    && PlayerAttackController != null
+                    && PlayerAttackController.IsAttacking
+                    && PlayerAttackController.HasCurrentLockOnTarget)
+                {
+                    Vector3 dirToTarget = targetPosition - _cacheTransform.position;
+                    dirToTarget.y = 0f;
+                    if (dirToTarget.sqrMagnitude <= float.Epsilon) break;
+
+                    Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
+                    float t = 1f - Mathf.Exp(-Mathf.Max(0f, speed) * Time.deltaTime);
+                    _rotation = Quaternion.Slerp(_rotation, targetRot, t);
+
+                    if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
+                    {
+                        _rotation = targetRot;
+                        break;
+                    }
+
+                    await Task.Yield();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            finally
+            {
+                if (_cancellationTokenSource != null && _cancellationTokenSource.Token == ct)
+                {
+                    try { _cancellationTokenSource.Dispose(); } catch { }
+                    _cancellationTokenSource = null;
+                }
+            }
+        }
+
+        private void CancelAttackRotate()
+        {
+            if (_cancellationTokenSource != null)
+            {
+                try
+                {
+                    _cancellationTokenSource.Cancel();
+                }
+                catch { }
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>

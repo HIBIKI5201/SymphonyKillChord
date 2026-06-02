@@ -12,10 +12,10 @@ namespace KillChord.Runtime.InfraStructure.Player
     [CreateAssetMenu(fileName = "SkillRepository", menuName = "Scriptable Objects/SkillRepository")]
     public class SkillRepository : ScriptableObject, ISkillRepository
     {
-        public SkillDefinition GetSkill(int id)
+        public SkillDefinition GetSkill(int id, double bpm)
         {
             SkillDataAsset asset = Array.Find(_skillDataAssets, x => x.Id == id);
-            return asset.ToDomain().ToSkillDefinition();
+            return asset.ToDomain().ToSkillDefinition(bpm);
         }
 
         [SerializeField] private SkillDataAsset[] _skillDataAssets;

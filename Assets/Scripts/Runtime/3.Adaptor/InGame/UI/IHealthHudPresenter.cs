@@ -14,5 +14,13 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         /// <param name="maxHealth">最大HP</param>
         /// <param name="amountChanged">HPの変化量</param>
         public void UpdateHealthHud(float currentHealth, float maxHealth, float amountChanged);
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate();
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate();
     }
 }

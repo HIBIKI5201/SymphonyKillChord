@@ -7,6 +7,9 @@ using UnityEngine.Playables;
 
 namespace DevelopProducts.AnimationControl.Blender
 {
+    /// <summary>
+    ///     AnimatorControllerとAnimationClipをPlayableでブレンドするクラス。
+    /// </summary>
     public class AnimatorPlayableBlend : IDisposable
     {
         public AnimatorPlayableBlend(AnimationAdaptor adaptor)
@@ -29,9 +32,9 @@ namespace DevelopProducts.AnimationControl.Blender
             {
                 return;
             }
-
+            // AnimationClip → Playable化。
             AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_graph, clip);
-
+            // ルートモーションやIKの影響を受けないように設定。
             clipPlayable.SetApplyFootIK(false);
             clipPlayable.SetApplyPlayableIK(false);
 
@@ -62,19 +65,23 @@ namespace DevelopProducts.AnimationControl.Blender
             }
 
             var playable = blendClip.ClipPlayable;
-
+            // BPMに応じた速度適用
+            playable.SetSpeed(_speed);
+            // PlayableGraphに接続。
             _graph.Connect(playable, 0, _mixer, 1);
-
+            // 再生開始位置をリセット。
             playable.SetTime(0);
+            // 「再生終了扱い」を解除（再利用対策）。
             playable.SetDone(false);
 
             _currentClip = clip;
             _currentBlendClip = blendClip;
-
-            _enterDuration = Mathf.Max(blendClip.EnterDuration, 0.0001f);
-            _exitDuration = Mathf.Max(blendClip.ExitDuration, 0.0001f);
-
+            // Enter/Exit時間をBPMに応じた速度で調整。
+            _enterDuration = Mathf.Max(blendClip.EnterDuration / _speed, 0.0001f);
+            _exitDuration = Mathf.Max(blendClip.ExitDuration / _speed, 0.0001f);
+            // ブレンド時間リセット。
             _blendTime = 0f;
+            // ブレンド開始。
             _state = BlendState.Enter;
         }
 
@@ -86,55 +93,61 @@ namespace DevelopProducts.AnimationControl.Blender
             if (!_currentBlendClip.IsValid) { return; }
 
             float deltaTime = Time.deltaTime;
-            
+
             switch (_state)
             {
                 case BlendState.Enter:
-                {
-                    _blendTime += deltaTime;
-
-                    float t = Mathf.Clamp01(_blendTime / _enterDuration);
-
-                    // Controller → Clip
-                    _mixer.SetInputWeight(0, 1f - t);
-                    _mixer.SetInputWeight(1, t);
-
-                    if (t >= 1f)
                     {
-                        _state = BlendState.Play;
+                        _blendTime += deltaTime;
+
+                        float t = Mathf.Clamp01(_blendTime / _enterDuration);
+
+                        // Controller → Clip
+                        _mixer.SetInputWeight(0, 1f - t);
+                        _mixer.SetInputWeight(1, t);
+
+                        if (t >= 1f)
+                        {
+                            // ブレンド完了 → Clip再生状態へ。
+                            _state = BlendState.Play;
+                        }
+                        break;
                     }
-                    break;
-                }
 
                 case BlendState.Play:
-                {
-                    double time = _currentBlendClip.ClipPlayable.GetTime();
-                    float exitStartTime = Mathf.Max(0f, _currentClip.length - _exitDuration);
-
-                    if (time >= exitStartTime)
                     {
-                        _blendTime = 0f;
-                        _state = BlendState.Exit;
+                        // Clipの再生時間を取得。
+                        double time = _currentBlendClip.ClipPlayable.GetTime();
+                        // Clipの長さを再生速度で調整。
+                        float adjustedLength = _currentClip.length / _speed;
+                        // Exit開始時間 = 調整後の長さ - Exit時間。  
+                        float exitStartTime = Mathf.Max(0f, adjustedLength - _exitDuration);
+
+                        if (time >= exitStartTime)
+                        {
+                            _blendTime = 0f;
+                            _state = BlendState.Exit;
+                        }
+                        break;
                     }
-                    break;
-                }
 
                 case BlendState.Exit:
-                {
-                    _blendTime += deltaTime;
-
-                    float t = Mathf.Clamp01(_blendTime / _exitDuration);
-
-                    // Clip → Controller
-                    _mixer.SetInputWeight(0, t);
-                    _mixer.SetInputWeight(1, 1f - t);
-
-                    if (t >= 1f)
                     {
-                        _state = BlendState.None;
+                        _blendTime += deltaTime;
+
+                        float t = Mathf.Clamp01(_blendTime / _exitDuration);
+
+                        // Clip → Controller
+                        _mixer.SetInputWeight(0, t);
+                        _mixer.SetInputWeight(1, 1f - t);
+
+                        if (t >= 1f)
+                        {
+                            // ブレンド完了 → Clip停止＆状態リセット。
+                            _state = BlendState.None;
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
 
@@ -151,8 +164,23 @@ namespace DevelopProducts.AnimationControl.Blender
             _clipMap.Clear();
         }
 
+        /// <summary>
+        ///     BPM（テンポ）に応じた再生速度の設定。
+        /// </summary>
+        /// <param name="bpm"></param>
+        public void SetBPM(float bpm)
+        {
+            _speed = bpm / BASE_BPM;
+        }
+
+        public void SetDiffTime(double diffTime)
+        {
+            _diffTime = diffTime;
+        }
+
         private const string ANIMATION_OUTPUT_NAME = "AnimationOutput";
         private const string GRAPH_NAME = "AnimatorPlayableBlend";
+        private const float BASE_BPM = 60f;
 
         private readonly Animator _animator;
         private readonly RuntimeAnimatorController _controller;
@@ -169,6 +197,8 @@ namespace DevelopProducts.AnimationControl.Blender
         private float _enterDuration;
         private float _exitDuration;
         private float _blendTime;
+        private float _speed;
+        private double _diffTime;
 
         private BlendState _state;
 

@@ -1,0 +1,20 @@
+:root {
+}
+
+.mission-check {
+    width: 5%;
+    min-width: 5%;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 20%;
+    margin-right: 3%;
+    flex-shrink: 0;
+    border-top-width: 15px;
+    border-right-width: 15px;
+    border-bottom-width: 15px;
+    border-left-width: 15px;
+}
+
+.mission-check-mission-achieved {
+    background-color: rgb(255, 227, 93);
+}

@@ -10,6 +10,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
         /// <summary>
         /// 指定したIDに対応するSkillDefinitionを取得する。
         /// </summary>
-        SkillDefinition GetSkill(int id);
+        SkillDefinition GetSkill(int id, double bpm);
     }
 }

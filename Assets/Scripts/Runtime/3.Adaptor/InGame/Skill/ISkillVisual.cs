@@ -7,14 +7,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public interface ISkillVisual
     {
-        /// <summary>
-        /// スキルに対応する識別子。
-        /// </summary>
+        /// <summary> スキルに対応する識別子。 </summary>
         int Id { get; }
 
-        /// <summary>
-        /// ビジュアル演出を実行する。
-        /// </summary>
+        /// <summary> ビジュアル演出を実行する。 </summary>
         void Execute();
     }
 }

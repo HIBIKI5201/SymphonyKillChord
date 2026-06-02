@@ -44,9 +44,8 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
         /// </summary>
         public void Stunned()
         {
-            CancelInvoke(nameof(StunRecover));
-            // TODO 2秒後回復。一時。今後はAnimation Controllerで制御するはず
-            Invoke(nameof(StunRecover), 2f);
+            // 一時。今後はAnimation Controllerで制御するはず
+            Debug.Log("[EnemyStateFacade] クリティカルにより、敵硬直発生。");
         }
         /// <summary>
         ///     硬直回復。

@@ -35,7 +35,7 @@ namespace KillChord.Runtime.View.InGame.Mission
 
                 _evaluationItems.Add(new MissionEvaluationItemViewModel(
                     itemDTO.Description,
-                    itemDTO.IsAchieved
+                    itemDTO.DisplayState
                 ));
             }
 

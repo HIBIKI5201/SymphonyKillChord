@@ -25,12 +25,13 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary>
         ///     SkillDefinitionに変換する。
         /// </summary>
-        public SkillDefinition ToSkillDefinition()
+        public SkillDefinition ToSkillDefinition(double bpm)
         {
             return new SkillDefinition(
                 new SkillId(Id),
                 new SkillPattern(new(Pattern)),
-                SkillEffect);
+                SkillEffect,
+                bpm);
         }
     }
 }

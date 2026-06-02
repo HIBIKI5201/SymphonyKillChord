@@ -24,11 +24,29 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 改造画面を表示するイベント。 </summary>
         public Action OnShownSkillBuildScreen;
 
+        /// <summary> 戦闘準備画面を表示するイベント。 </summary>
+        public Action OnShownBattlePreparationScreen;
+
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
 
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
+
+        /// <summary> ステージノードが選択されたときのイベント。選択されたステージのIDを整数で通知します。 </summary>
+        public Action<int> OnStageNodeSelected;
+
+        /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
+        public Action OnStageDetailClosed;
+
+        /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを整数で通知します。 </summary>
+        public Action<int> OnStageCleared;
+
+        /// <summary> 
+        ///     インゲームへ遷移するイベント。
+        ///     TODO : 遷移先のステージを指定できるようにする（OnStageNodeSelected で選択されたステージのIDを引数で受け取るなど）。
+        /// </summary>
+        public Action OnStartGame;
 
         /// <summary>
         ///     アウトゲームのUIイベントを ServiceLocator に登録します。
