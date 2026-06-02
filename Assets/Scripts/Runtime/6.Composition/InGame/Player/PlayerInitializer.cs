@@ -184,7 +184,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             SkillCheckService skillCheckService = new SkillCheckService();
             SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
             SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
-            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController,targetSelectorController);
             skillController?.SetUsecase(skillUsecase);
 
 
