@@ -28,9 +28,9 @@ namespace DevelopProducts.SaveSystem
         internal async ValueTask WriteAsync()
         {
             var json = JsonUtility.ToJson(this, true);
-            var tempPath = _filePath + ".tmp";
+            var tempPath = FilePath + ".tmp";
             await File.WriteAllTextAsync(tempPath, json);
-            File.Move(tempPath, _filePath);
+            File.Move(tempPath, FilePath);
         }
         /// <summary> セーブデータのキーを取得します。</summary>
         private string SaveKey => GetType().Name;
