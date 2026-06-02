@@ -29,11 +29,11 @@ namespace KillChord.Runtime.Application.InGame.Skill
         /// 入力と行動を記録し、発動可能なスキルがあれば効果の実行と演出の要求を行う。
         /// </summary>
         public bool TryExecuteSkill(
-            IReadOnlyList<SkillDefinition> equipmentSkills,
-            BattleActionType actionType,
-            BeatType beatType,
-            float unscaledTime,
-            out SkillDefinition executedSkill)
+            IReadOnlyList<SkillDefinition> equipmentSkills, //装備中のスキル群
+            BattleActionType actionType,    //行動の種類
+            BeatType beatType,  //入力された攻撃の種類
+            float unscaledTime, //入力された攻撃のタイミング（ゲーム時間）
+            out SkillDefinition executedSkill) //発動したスキルの定義（発動しなかった場合は null）
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
