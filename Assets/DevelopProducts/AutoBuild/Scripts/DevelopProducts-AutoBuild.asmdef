@@ -1,7 +1,9 @@
 {
     "name": "DevelopProducts-AutoBuild",
     "rootNamespace": "DevelopProducts.DevelopProducts-AutoBuild",
-    "references": [],
+    "references": [
+        "GUID:c8a23a053cdb72f4c9c0fe6b76b389aa"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -10,6 +12,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false,
-    "platforms": []
+    "noEngineReferences": false
 }
