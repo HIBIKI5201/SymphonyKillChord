@@ -40,7 +40,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
             if (_skillCheckService.TryCheckSkills(
                     equipmentSkills,
                     _musicSyncService.GetBeatTypeHistory(),
-                    out var index, out _))
+                    out var index, out _)) //indexは発動したスキルのインデックス、_は入力された攻撃の種類
             {
                 executedSkill = equipmentSkills[index];
                 executedSkill.Effect.Execute();
