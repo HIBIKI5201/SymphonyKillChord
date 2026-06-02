@@ -123,11 +123,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         /// <summary>
         ///     出撃ボタンがクリックされたときの処理。
-        ///     戦闘準備画面を表示するイベントを発火します。
+        ///     ステージタイプに応じた出撃イベントを発火します。
         /// </summary>
         private void OnSortieButtonClicked(ClickEvent evt)
         {
-            OutGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
+            OutGameUIEvent.OnSortieRequested?.Invoke();
         }
 
         private const string STAGE_NAME_LABEL = "StageNameLabel";

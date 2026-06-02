@@ -1,4 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.Sortie;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -67,11 +69,19 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
+            if(!ServiceLocator.TryGetInstance(out _sceneTransitionController))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] SceneTransitionController が取得できませんでした.", this);
+                return;
+#endif
+            }
+
             // View 層
             VisualElement rootElement = _uiDocument.rootVisualElement;
 
             VisualElement homeRoot = rootElement.Q<VisualElement>(HOMESCREEN_NAME);
-            VisualElement stageSelectRott = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
+            VisualElement stageSelectRoot = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
             VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
             VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
             VisualElement battlePreparationRoot = rootElement.Q<VisualElement>(BATTLEPREPARATIONSCREEN_NAME);
@@ -83,7 +93,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {HOMESCREEN_NAME} が見つかりませんでした。", this);
                 return;
             }
-            if (stageSelectRott == null)
+            if (stageSelectRoot == null)
             {
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this); 
                 return;
@@ -110,7 +120,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
-            StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRott, _outGameUIEvent);
+            StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
@@ -156,6 +166,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _ctsShow = new();
             _ctsHide = new();
+            _ctsTransition = new();
 
             _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             _isInitialized = true;
@@ -174,6 +185,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownBattlePreparationScreen += HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
+            _outGameUIEvent.OnStartGame += HandleStartGame;
         }
 
         /// <summary>
@@ -189,6 +201,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownBattlePreparationScreen -= HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
+            _outGameUIEvent.OnStartGame -= HandleStartGame;
 
             _outGameUIEvent.UnregisterOutGameUIEvent();
         }
@@ -251,12 +264,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     戦闘準備画面表示イベントを処理します。
         /// </summary>
-        private void HandleBattlePreparationScreenShown()
+        private void HandleBattlePreparationScreenShown(string targetSceneName)
         {
             // 前回の画面の表示が完了していない場合は、完了するまで待機します。
             if (IsTransitioning) { return; }
-
-            _transitionTask = _screenController.ShowBattlePreparation(RenewShowToken());
+            
+            _transitionTask = _screenController.ShowBattlePreparation(targetSceneName, RenewShowToken());
         }
 
         /// <summary>
@@ -268,6 +281,19 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (IsTransitioning) { return; }
 
             _transitionTask = _screenController.CloseCurrent(RenewHideToken());
+        }
+
+        /// <summary>
+        ///     インゲームへの遷移イベントを処理します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
+        private async void HandleStartGame(string targetSceneName)
+        {
+            var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            await _sceneTransitionController.ChangeSceneAsync(
+                currentSceneName,
+                targetSceneName,
+                _ctsTransition.Token);
         }
 
         /// <summary>
@@ -320,11 +346,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenController _screenController;
         private OutGameUIEvent _outGameUIEvent;
         private ScreenViewRegistry _screenViewRegistry;
+        private SceneTransitionController _sceneTransitionController;
         private bool _isInitialized = false;
 
         private Task _transitionTask;
 
         private CancellationTokenSource _ctsShow;
         private CancellationTokenSource _ctsHide;
+        private CancellationTokenSource _ctsTransition;
     }
 }

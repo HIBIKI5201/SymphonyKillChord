@@ -1,4 +1,7 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
@@ -44,12 +47,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private Dictionary<StageId, StageNodePresenter> _nodePresenterMap;
         private CancellationTokenSource _cts;
         private bool _isInitialized;
+        private OutGameSortieController _outGameSortieController;
+        private OutGameMissionSelectController _missionSelectController;
+        private string _currentSceneName;
 
         /// <summary>
         ///     初期化を行います。
         /// </summary>
         private void Awake()
         {
+            _currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             Initialize();
         }
 
@@ -105,18 +112,48 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     出撃ボタンが押されたときの処理。
+        ///     ステージタイプに応じて戦闘準備画面表示またはシナリオ直接遷移イベントを発火します。
+        /// </summary>
+        private async void HandleSortieRequested()
+        {
+            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName, out var missionDefinition))
+            {
+                return;
+            }
+
+            await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
+        }
+
+        /// <summary>
         ///     システムを構築します。
         /// </summary>
         private void Initialize()
         {
-            _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
-            if (_outGameUIEvent == null)
+            if (! ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
 #endif
                 return;
             }
+
+            if(!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this); 
+                return;
+#endif
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedMissionState が取得できませんでした。", this);
+                return;
+#endif
+            }
+            _missionSelectController = new OutGameMissionSelectController(selectedMissionState);
 
             if (_uiDocument == null)
             {
@@ -177,6 +214,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageDetailClosed += HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
+            _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
         }
 
         /// <summary>
@@ -189,6 +227,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageDetailClosed -= HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
+            _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
         }
 
         /// <summary>
