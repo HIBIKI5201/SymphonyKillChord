@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         Task ShowSkillBuild(CancellationToken token);
 
         /// <summary> 戦闘準備画面を表示します。 </summary>
-        Task ShowBattlePreparation(CancellationToken token);
+        Task ShowBattlePreparation(string targetSceneName, CancellationToken token);
 
         /// <summary> 設定画面を表示します。 </summary>
         Task ShowSetting(CancellationToken token);

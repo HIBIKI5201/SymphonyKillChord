@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System.Threading;
 
@@ -68,6 +69,34 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 return false;
             }
 
+            return true;
+        }
+
+        /// <summary>
+        ///    現在選択中のステージの出撃情報を取得します。
+        ///    選択中のノードがない場合には false を返します。
+        /// </summary>
+        /// <param name="stageType"> 出撃情報のステージタイプ。</param>
+        /// <param name="targetSceneName"> 出撃情報のターゲットシーン名。</param>
+        /// <param name="missionDefinition"> 出撃情報のミッション定義。</param>
+        /// <returns> 出撃情報が取得できた場合は true、取得できなかった場合は false を返します。</returns>
+        public bool TryGetSortieInfo(
+            out StageType stageType, 
+            out string targetSceneName, 
+            out MissionDefinition missionDefinition)
+        {
+            stageType = default;
+            targetSceneName = default;
+            missionDefinition = default;
+
+            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
+            {
+                return false;
+            }
+
+            stageType = node.Definition.StageType;
+            targetSceneName = node.Definition.TargetSceneName;
+            missionDefinition = node.Definition.MissionDefinition;
             return true;
         }
 
