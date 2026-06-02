@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -6,21 +7,37 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     砲兵のスポナークラス。
     /// </summary>
-    public class EnemyArtillerySpawner : MonoBehaviour
+    public class EnemyArtillerySpawner : MonoBehaviour, IGameplayControllable
     {
         /// <summary>
         ///     初期化処理。
         /// </summary>
         public void Initialize(in Transform[] assignedPositions)
         {
+            _assignedPositions = assignedPositions;
             _spawnPositions = new Vector3[_spawnBatchCount];
             _spawnCount = 0;
             _initialized = true;
-            if (assignedPositions != null)
-            {
-                SpawnAssignedEnemy(assignedPositions);
-            }
+            _timer = 0f;
+            _isPlaying = false;
         }
+
+        public void StartGameplay()
+        {
+            if (!_initialized)
+            {
+                return;
+            }
+
+            if (_assignedPositions != null)
+            {
+                SpawnAssignedEnemy(_assignedPositions);
+            }
+
+            _isPlaying = true;
+        }
+
+        public void StopGameplay() => _isPlaying = false;
 
         /// <summary>
         ///     砲兵インスタンスが回収された時のcallback処理。
@@ -43,10 +60,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private int _spawnCount;
         private Vector3[] _spawnPositions;
         private bool _initialized = false;
+        private Transform[] _assignedPositions;
+        private bool _isPlaying;
 
         private void Update()
         {
-            if (!_initialized) return;
+            if (!_initialized || !_isPlaying) return;
             if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
 
             _timer += Time.deltaTime;
