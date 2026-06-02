@@ -64,6 +64,7 @@ namespace KillChord.Runtime.View.InGame.Player
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
+            int attackAnimationIndex,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -71,6 +72,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
+            _attackAnimationIndex = attackAnimationIndex;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -146,7 +148,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
-                _characterAnimationController?.TriggerAttack();
+                _characterAnimationController?.TriggerOneShot(_attackAnimationIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -280,6 +282,8 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
         private static Vector2 Rotate(Vector2 v, float degrees)
             => Quaternion.Euler(0, 0, degrees) * v;
+
+        private int _attackAnimationIndex;
     }
 }
 

@@ -22,8 +22,8 @@ namespace KillChord.Runtime.Adaptor
             _weights = new float[Enum.GetValues(typeof(CharacterAnimationState)).Length];
         }
 
-        /// <summary> 攻撃入力が発生したことを通知するイベント。 </summary>
-        public event Action OnAttackRequested;
+        /// <summary> 入力が発生したことを通知するイベント。 </summary>
+        public event Action<int> OnOneShotRequested;
 
         /// <summary>
         ///     Application層の計算結果をDTOに変換して返す。
@@ -50,11 +50,10 @@ namespace KillChord.Runtime.Adaptor
             _animApplication.SetVelocity(velocity);
         }
 
-        /// <summary> 攻撃入力が発生したことを通知する。 </summary>
-        public void TriggerAttack()
+        /// <summary> 入力が発生したことを通知する。 </summary>
+        public void TriggerOneShot(int index)
         {
-            _animApplication.TriggerAttack();
-            OnAttackRequested?.Invoke();
+            OnOneShotRequested?.Invoke(index);
         }
 
         private readonly ICharacterAnimationApplication _animApplication;
