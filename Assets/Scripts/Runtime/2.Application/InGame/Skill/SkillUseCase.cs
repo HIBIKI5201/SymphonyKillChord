@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Player;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Application.InGame.Skill
@@ -45,7 +46,15 @@ namespace KillChord.Runtime.Application.InGame.Skill
                     out var index, out _)) //indexは発動したスキルのインデックス、_は入力された攻撃の種類
             {
                 executedSkill = equipmentSkills[index];
-                executedSkill.Effect.Execute();
+                if(_targetResolver.TryGetCurrentTargetEntity(out var target))
+                {
+                    SkillEffectContext context = new SkillEffectContext(target);
+                    executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
+                }
+                else
+                {
+                    return false; //ターゲットがいない場合はスキルを発動しない 
+                }
                 return true;
             }
 
