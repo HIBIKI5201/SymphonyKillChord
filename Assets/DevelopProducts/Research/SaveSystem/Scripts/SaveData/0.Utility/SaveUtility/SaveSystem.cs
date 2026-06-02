@@ -5,101 +5,120 @@ using System.Threading.Tasks;
 namespace DevelopProducts.SaveSystem
 {
     /// <summary>
-    ///     セーブデータのロード・保存を管理する静的クラス。
-    ///
-    ///     同一型のセーブデータはメモリ上にキャッシュされ、
-    ///     2回目以降のロードはディスクアクセスを行わない。
+    ///     セーブデータの管理システム。
     /// </summary>
     public static class SaveSystem
     {
         /// <summary>
-        ///     指定型のセーブデータを非同期でロードします。
+        ///    指定された型のセーブデータを非同期で読み込みます。
+        ///    キャッシュが存在する場合はキャッシュから返し、存在しない場合は新たに読み込みます。
         /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
+        /// <returns>指定された型のセーブデータ。</returns>
         public static ValueTask<T> LoadAsync<T>() where T : SaveBase, new()
         {
             var type = typeof(T);
 
-            // キャッシュ済み
-            if (_cache.TryGetValue(type, out var cached))
-                return new((T)cached);
+            lock (_lock)
+            {
+                if (_cache.TryGetValue(type, out var cached))
+                    return new((T)cached);
 
-            // 読み込み中
-            if (_loadingTasks.TryGetValue(type, out var loadingTask))
-                return AwaitLoadingTask<T>(loadingTask.Value);
+                if (_loadingTasks.TryGetValue(type, out var loadingTask))
+                    return AwaitLoadingTask<T>(loadingTask.Value);
 
-            // 新規ロード開始
-            return LoadCoreAsync<T>(type);
+                var lazyTask = new Lazy<Task<SaveBase>>(() => LoadInternalAsync<T>(type));
+                _loadingTasks[type] = lazyTask;
+                return AwaitAndCleanup<T>(type, lazyTask.Value);
+            }
         }
-
         /// <summary>
-        ///     指定型のセーブデータを保存します。
+        ///   指定されたセーブデータを非同期で保存します。
         /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
+        /// <param name="data">保存するセーブデータ。</param>
+        /// <returns>非同期操作のタスク。</returns>
         public static async ValueTask SaveAsync<T>(T data) where T : SaveBase
         {
             await data.WriteAsync();
-            _cache[typeof(T)] = data;
+            lock (_lock)
+            {
+                _cache[typeof(T)] = data;
+            }
         }
-
         /// <summary>
-        ///     指定型のキャッシュを破棄します。
+        ///   指定された型のセーブデータをキャッシュから削除します。
         /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
         public static void Unload<T>() where T : SaveBase
         {
             var type = typeof(T);
-
-            _cache.Remove(type);
-            _loadingTasks.Remove(type);
-        }
-
-        /// <summary>
-        ///     キャッシュミス時のロード処理。
-        /// </summary>
-        private static async ValueTask<T> LoadCoreAsync<T>(Type type)
-            where T : SaveBase, new()
-        {
-            var lazyTask = new Lazy<Task<SaveBase>>(
-                () => LoadInternalAsync<T>(type));
-
-            _loadingTasks[type] = lazyTask;
-
-            try
+            // ロックを取得して、キャッシュと読み込みタスクから指定された型のデータを削除します。
+            lock (_lock)
             {
-                return (T)await lazyTask.Value;
-            }
-            finally
-            {
+                _cache.Remove(type);
                 _loadingTasks.Remove(type);
             }
         }
-
         /// <summary>
-        ///     読み込み中タスクの完了を待機する。
+        ///   指定された型のセーブデータの読み込みタスクを待機し、
+        ///   完了後にキャッシュからクリーンアップします。
         /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
+        /// <param name="type">セーブデータの型情報。</param>
+        /// <param name="task">読み込みタスク。</param>
+        /// <returns>指定された型のセーブデータ。</returns>
+        private static async ValueTask<T> AwaitAndCleanup<T>(Type type, Task<SaveBase> task)
+            where T : SaveBase
+        {
+            // タスクの完了を待機し、結果を取得します。
+            try
+            {
+                return (T)await task;
+            }
+            // タスクの完了後に、ロックを取得して読み込みタスクをクリーンアップします。
+            finally
+            {
+                lock (_lock)
+                {
+                    _loadingTasks.Remove(type);
+                }
+            }
+        }
+        /// <summary>
+        ///    taskを待機して、完了後に指定された型のセーブデータを返します。
+        /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
+        /// <param name="task">読み込みタスク。</param>
+        /// <returns>指定された型のセーブデータ。</returns>
         private static async ValueTask<T> AwaitLoadingTask<T>(Task<SaveBase> task)
             where T : SaveBase
         {
+            // タスクの完了を待機し、結果を取得します。
             return (T)await task;
         }
-
         /// <summary>
-        ///     実際のファイルロード処理。
+        ///  loadAsyncの内部実装。指定された型のセーブデータを非同期で読み込み、キャッシュに保存します。
         /// </summary>
+        /// <typeparam name="T">セーブデータの型。</typeparam>
+        /// <param name="type">セーブデータの型情報。</param>
+        /// <returns>指定された型のセーブデータ。</returns>
         private static async Task<SaveBase> LoadInternalAsync<T>(Type type)
             where T : SaveBase, new()
         {
             var instance = new T();
-
             await instance.ReadAsync();
-
-            _cache[type] = instance;
-
+            lock (_lock)
+            {
+                _cache[type] = instance;
+            }
             return instance;
         }
-
-        /// <summary> ロード済みセーブデータ。</summary>
+        /// <summary>キャッシュされたセーブデータを保持する辞書。</summary>
         private static readonly Dictionary<Type, SaveBase> _cache = new();
-
-        /// <summary>ロード中タスク。同一型への同時ロード要求を共有する。</summary>
+        /// <summary>読み込み中のセーブデータのタスクを保持する辞書。</summary>
         private static readonly Dictionary<Type, Lazy<Task<SaveBase>>> _loadingTasks = new();
+        /// <summary>キャッシュと読み込みタスクへのアクセスを同期するためのロックオブジェクト。</summary>
+        private static readonly object _lock = new();
     }
 }
