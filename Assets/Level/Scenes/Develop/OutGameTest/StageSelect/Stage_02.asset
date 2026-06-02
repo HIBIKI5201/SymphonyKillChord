@@ -18,6 +18,7 @@ MonoBehaviour:
   _isInitiallyUnlocked: 0
   _stageName: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB"
   _flavorText: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB"
+  _targetSceneName: Persistent
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
