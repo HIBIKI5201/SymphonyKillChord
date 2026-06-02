@@ -26,6 +26,22 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
+        public void AddGamePlayControllable(IGameplayControllable controllable)
+        {
+            if(controllable == null)
+            {
+                Debug.LogWarning("[InGamePlayDirector] 追加しようとした IGameplayControllable が null です。");
+                return;
+            }
+
+            CacheControllables();
+
+            if (!_gameplayControllables.Contains(controllable))
+            {
+                _gameplayControllables.Add(controllable);
+            }
+        }
+
         [SerializeField, Header("ゲーム開始と終了の演出に関わるIGameplayControllableを実装したMonoBehaviourリスト")]
         private MonoBehaviour[] _gamePlayControllableObjects;
 
@@ -49,6 +65,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // IGameplayControllableを実装しているものを抽出して_gameplayControllablesに追加する。
             foreach (var mono in _gamePlayControllableObjects)
             {
+                if (mono == null)
+                {
+                    Debug.LogWarning("[InGamePlayDirector] 制御対象が未設定です。", this);
+                    continue;
+                }
+
                 if (mono is IGameplayControllable controllable)
                 {
                     _gameplayControllables.Add(controllable);
