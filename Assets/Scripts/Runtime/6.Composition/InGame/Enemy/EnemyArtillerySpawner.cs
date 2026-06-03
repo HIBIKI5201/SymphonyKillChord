@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -20,8 +21,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _initialized = true;
             _timer = 0f;
             _isPlaying = false;
+            _spawnedAssignedEnemies = false;
+            _activeEnemies.Clear();
         }
 
+        /// <summary>
+        ///   ゲームプレイの開始処理を行います。
+        /// </summary>
         public void StartGameplay()
         {
             if (!_initialized)
@@ -29,15 +35,37 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
-            if (_assignedPositions != null)
+            if (!_spawnedAssignedEnemies && _assignedPositions != null)
             {
                 SpawnAssignedEnemy(_assignedPositions);
+                _spawnedAssignedEnemies = true;
+            }
+
+            // 非アクティブな敵をリストから削除し、残りの敵のゲームプレイを開始する。
+            ReMoveInactiveEnemies();
+
+            for (int i = 0; i < _activeEnemies.Count; i++)
+            {
+                _activeEnemies[i]?.StartGameplay();
             }
 
             _isPlaying = true;
         }
 
-        public void StopGameplay() => _isPlaying = false;
+        /// <summary>
+        ///    ゲームプレイの停止処理を行います。
+        /// </summary>
+        public void StopGameplay()
+        {
+            // 非アクティブな敵をリストから削除し、残りの敵のゲームプレイを停止する。
+            _isPlaying = false;
+            ReMoveInactiveEnemies();
+
+            for (int i = 0; i < _activeEnemies.Count; i++)
+            {
+                _activeEnemies[i]?.StopGameplay();
+            }
+        }
 
         /// <summary>
         ///     砲兵インスタンスが回収された時のcallback処理。
@@ -45,6 +73,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void HandleArtilleryDeactivated()
         {
             if (_spawnCount > 0) _spawnCount--;
+
+            ReMoveInactiveEnemies();
         }
 
         [SerializeField] private EnemyPools _enemyPools;
@@ -56,6 +86,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("敵の生成位置を探索するコンポーネント")]
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 
+        private readonly List<EnemyLifeCycle> _activeEnemies = new();
+        private bool _spawnedAssignedEnemies;
         private float _timer;
         private int _spawnCount;
         private Vector3[] _spawnPositions;
@@ -87,6 +119,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
                 EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                 lifeCycle.Activate(_spawnPositions[i], HandleArtilleryDeactivated);
+                lifeCycle.StartGameplay();
+                _activeEnemies.Add(lifeCycle);
                 _spawnCount++;
             }
         }
@@ -106,7 +140,23 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 }
                 EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                 lifeCycle.Activate(assignedPositions[i].position, HandleArtilleryDeactivated);
+                lifeCycle.StartGameplay();
+                _activeEnemies.Add(lifeCycle);
                 _spawnCount++;
+            }
+        }
+
+        /// <summary>
+        ///     非アクティブな敵をリストから削除する。
+        /// </summary>
+        private void ReMoveInactiveEnemies()
+        {
+            for (int i = _activeEnemies.Count - 1; i >= 0; i--)
+            {
+                if (_activeEnemies[i] == null || !_activeEnemies[i].gameObject.activeSelf)
+                {
+                    _activeEnemies.RemoveAt(i);
+                }
             }
         }
     }
