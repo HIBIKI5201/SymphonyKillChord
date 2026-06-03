@@ -48,6 +48,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 出撃ボタンが押されたことを通知するイベント。 </summary>
         public Action OnSortieRequested;
 
+        /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
+        public Action OnStageSelectScreenCompleted;
+
         /// <summary> 
         ///     インゲームへ遷移するイベント。
         ///     引数は遷移先のシーン名。
