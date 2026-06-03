@@ -72,6 +72,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
             {
                 // キャンセルされた場合は演出も停止。
                 director.Stop();
+                throw;
             }
         }
 

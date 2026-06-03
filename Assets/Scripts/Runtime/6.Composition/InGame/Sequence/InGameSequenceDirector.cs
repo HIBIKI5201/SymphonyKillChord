@@ -69,7 +69,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable GameOverAsync(CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
-            _stageResultUIView.SetGameOverMessage();
+            _stageResultUIView?.SetGameOverMessage();
 
             if (_stageSequenceView != null)
             {
