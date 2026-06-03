@@ -86,7 +86,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         public void StopRotating()
         {
-            if (_navMeshAgent == null || _navMeshAgent.enabled) return;
+            if (_navMeshAgent == null || !_navMeshAgent.enabled) return;
 
             _navMeshAgent.updateRotation = false;
         }

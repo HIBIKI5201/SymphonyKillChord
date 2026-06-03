@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
-            if (_assignedPositions != null)
+            if (!_spawnedAssignedEnemies && _assignedPositions != null)
             {
                 SpawnAssignedEnemy(_assignedPositions);
                 _spawnedAssignedEnemies = true;
