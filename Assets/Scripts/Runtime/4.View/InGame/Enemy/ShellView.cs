@@ -73,7 +73,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _ => Color.white
             };
             _indicator.material.color = new Color(unityColor.r, unityColor.g, unityColor.b, 1f);
-            Debug.Log($"<color={color.ToString()}>[ShellView] 砲弾の色を{color}に変更</color>");
+            Debug.Log($"[ShellView] 砲弾の色を{color}に変更しました。");
         }
 
         /// <summary>
