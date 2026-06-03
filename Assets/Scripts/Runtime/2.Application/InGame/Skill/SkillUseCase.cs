@@ -47,12 +47,10 @@ namespace KillChord.Runtime.Application.InGame.Skill
                     out var index, out _)) //indexは発動したスキルのインデックス、_は入力された攻撃の種類
             {
                  executedSkill = equipmentSkills[index];
-                ISkillEffect effect = new Skill_00(); //仮のスキル効果。後で装備中のスキルに応じた効果を生成するように変更する。
                 if(_targetResolver.TryGetCurrentTargetEntity(out var target))
                 {
                     SkillEffectContext context = new SkillEffectContext(target,100f);//仮の基礎攻撃力を渡す
-                   // executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
-                    effect.Execute(context); //仮のスキル効果を実行
+                    executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
                     //TODO: プレイヤーの基礎攻撃力の取得。現在のビート数から判定できるかも。
                 }
                 else
