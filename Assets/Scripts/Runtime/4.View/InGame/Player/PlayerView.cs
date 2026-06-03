@@ -33,6 +33,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
+        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
@@ -64,8 +65,7 @@ namespace KillChord.Runtime.View.InGame.Player
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
-            int attackAnimationIndex,
-            int dodgeAnimationIndex,
+             CharacterAnimationIndices animationIndices,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -73,8 +73,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
-            _attackAnimationIndex = attackAnimationIndex;
-            _dodgeAnimationIndex = dodgeAnimationIndex;
+            _characterAnimationIndices = animationIndices;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -116,7 +115,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (input.Phase == InputActionPhase.Started)
             {
                 _isDodge = true;
-                _characterAnimationController?.TriggerOneShot(_dodgeAnimationIndex);
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
 
@@ -151,7 +150,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
-                _characterAnimationController?.TriggerOneShot(_attackAnimationIndex);
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -285,9 +284,6 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
         private static Vector2 Rotate(Vector2 v, float degrees)
             => Quaternion.Euler(0, 0, degrees) * v;
-
-        private int _attackAnimationIndex;
-        private int _dodgeAnimationIndex;
     }
 }
 

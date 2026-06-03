@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -202,11 +203,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             var animationComposition = new AnimationComposition();
-            var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
-            int attackAnimationIndex = animationComposition.GetAnimationIndex(CharacterAnimationState.Attack);
-            int dodgeAnimationIndex = animationComposition.GetAnimationIndex(CharacterAnimationState.Dodge);
+            var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
 
-            _player.Initialize(playerMovementController, playerAttackController, animController, attackAnimationIndex, dodgeAnimationIndex, ct, inputView, healthHudPresenter);
+            _player.Initialize(playerMovementController, playerAttackController, animController, animationIndices, ct, inputView, healthHudPresenter);
+
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
