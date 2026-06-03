@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
     /// <summary>
     ///     アウトゲームの出撃機能の初期化を行うクラス。
     /// </summary>
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class OutGameSortieInitializer : MonoBehaviour
     {
         private void Awake()
