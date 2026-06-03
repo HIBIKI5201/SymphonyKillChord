@@ -94,17 +94,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
 
-            AttackDefinition attackDefinition;
-            try
-            {
-                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Debug.LogWarning(ex.Message);
-                return false;
-            }
-
+            AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);
+            
             _attackIntervalEvaluator.EvaluateInterval();
 
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
@@ -122,6 +113,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             resultBeatType = (int)beatType;
             return true;
+        }
+
+        private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
+        {
+            try
+            {
+                return _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Debug.LogWarning(ex.Message);
+                return null;
+            }
         }
 
         private readonly AttackResultPresenter _presenter;
