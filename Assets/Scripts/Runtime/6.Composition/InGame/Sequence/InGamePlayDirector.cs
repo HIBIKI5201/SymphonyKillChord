@@ -4,8 +4,14 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Sequence
 {
+    /// <summary>
+    ///    ゲームプレイの開始と終了の演出を制御するクラス。
+    /// </summary>
     public class InGamePlayDirector : MonoBehaviour, IGameplayControllable
     {
+        /// <summary>
+        ///     ゲームプレイの開始演出を開始する。
+        /// </summary>
         public void StartGameplay()
         {
             CacheControllables();
@@ -16,6 +22,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
+        /// <summary>
+        ///     ゲームプレイの終了演出を開始する。
+        /// </summary>
         public void StopGameplay()
         {
             CacheControllables();
@@ -26,9 +35,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
+        /// <summary>
+        ///     ゲームプレイの開始と終了の演出に関わるIGameplayControllableを実装したMonoBehaviourを追加する。
+        ///     これはステージシーンなどに配置されたIGameplayControllableを実装したMonoBehaviourをInGamePlayDirectorに紐づけるためのメソッドです。
+        /// </summary>
+        /// <param name="controllable">追加するIGameplayControllableを実装したMonoBehaviour</param>
         public void AddGamePlayControllable(IGameplayControllable controllable)
         {
-            if(controllable == null)
+            if (controllable == null)
             {
                 Debug.LogWarning("[InGamePlayDirector] 追加しようとした IGameplayControllable が null です。");
                 return;

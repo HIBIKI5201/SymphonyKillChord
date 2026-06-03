@@ -11,21 +11,42 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// </summary>
     public class StageSequenceView : MonoBehaviour
     {
+        /// <summary>
+        ///    ステージ開始演出を再生します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセル用のトークン。 </param>
+        /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         public async Awaitable PlayStageStartAsync(CancellationToken cancellationToken)
         {
             await PlayAsync(_stageStartDirector, cancellationToken);
         }
 
+        /// <summary>
+        ///     ステージクリア演出を再生します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセル用のトークン。 </param>
+        /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         public async Awaitable PlayStageClearAsync(CancellationToken cancellationToken)
         {
             await PlayAsync(_stageClearDirector, cancellationToken);
         }
 
+        /// <summary>
+        ///     ゲームオーバー演出を再生します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセル用のトークン。 </param>
+        /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         public async Awaitable PlayGameOverAsync(CancellationToken cancellationToken)
         {
             await PlayAsync(_gameOverDirector, cancellationToken);
         }
 
+        /// <summary>
+        ///     指定されたPlayableDirectorの演出を再生し、完了するまで待機します。
+        /// </summary>
+        /// <param name="director"> 再生するPlayableDirector。 </param>
+        /// <param name="cancellationToken"> キャンセル用のトークン。 </param>
+        /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         private static async Awaitable PlayAsync(
             PlayableDirector director,
             CancellationToken cancellationToken)

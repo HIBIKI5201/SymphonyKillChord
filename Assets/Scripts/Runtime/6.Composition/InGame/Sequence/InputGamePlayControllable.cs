@@ -6,13 +6,14 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Sequence
 {
+    /// <summary>
+    ///     入力のゲームプレイ制御クラス。
+    /// </summary>
     public class InputGamePlayControllable : MonoBehaviour, IGameplayControllable
     {
-        public InputGamePlayControllable(InputComposition inputComposition)
-        {
-            _inputComposition = inputComposition;
-        }
-
+        /// <summary>
+        ///     ゲームプレイ開始時の処理。
+        /// </summary>
         public void StartGameplay()
         {
             InputComposition inputComposition = GetInputComposition();
@@ -25,6 +26,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             inputComposition.GetInputMapController.EnableOnly(InputMapNames.InGame);
         }
 
+        /// <summary>
+        ///     ゲームプレイ停止時の処理。
+        /// </summary>
         public void StopGameplay()
         {
             InputComposition inputComposition = GetInputComposition();
@@ -38,6 +42,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             inputComposition.GetInputMapController.EnableOnly(InputMapNames.Common);
         }
 
+        /// <summary>
+        ///    InputComposition を取得するためのヘルパーメソッド。
+        /// </summary>
+        /// <returns></returns>
         private InputComposition GetInputComposition()
         {
             if (_inputComposition != null)
