@@ -17,7 +17,6 @@ namespace DevelopProducts.AutoBuild
     [InitializeOnLoad]
     public static class AssetPackageImporter
     {
-
         /// <summary>
         /// インポート待ちのパッケージのキューを管理するためのクラス。SessionStateにJSON化して保存される。
         /// </summary>
@@ -100,7 +99,7 @@ namespace DevelopProducts.AutoBuild
             Debug.Log($"[{nameof(AssetPackageImporter)}] インポート対象の .unitypackage を {files.Length} 件見つけました。インポートを開始します...");
 
             // AssetDatabase.ImportPackage が要求する「Assets/」から始まる相対パスに変換。
-            List<string> projectRelativePaths = new List<string>();
+            List<string> projectRelativePaths = new();
             string projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, "../"));
 
             foreach (var file in files)
