@@ -219,13 +219,18 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
         /// <summary>
         ///     ステージ選択表示イベントを処理します。
+        ///     画面表示アニメーション完了後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
-        private void HandleStageSelectionScreenShown()
+        private async void HandleStageSelectionScreenShown()
         {
             // 前回の画面の表示が完了していない場合は、完了するまで待機します。
             if (IsTransitioning) { return; }
 
             _transitionTask = _screenController.ShowStageSelect(RenewShowToken());
+            await _transitionTask;
+
+            // 作戦画面の表示完了を通知する
+            _outGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
         /// <summary>

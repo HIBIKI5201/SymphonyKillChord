@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
-using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
@@ -50,6 +49,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private OutGameSortieController _outGameSortieController;
         private OutGameMissionSelectController _missionSelectController;
         private string _currentSceneName;
+        private StageSelectOpenUseCase _openUseCase;
 
         /// <summary>
         ///     初期化を行います。
@@ -126,11 +126,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     作戦画面が表示された時の処理。
+        ///     セーブデータ等から新たにクリアされたステージを検出し、後続ノードの解放アニメーションを再生します。
+        /// </summary>
+        private async void HandleStageSelectScreenCompleted()
+        {
+            await ApplyNewlyClearedStagesAsync(_cts.Token);
+        }
+
+        /// <summary>
         ///     システムを構築します。
         /// </summary>
         private void Initialize()
         {
-            if (! ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -138,10 +147,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
-            if(!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
             {
 #if UNITY_EDITOR
-                Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this); 
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this);
                 return;
 #endif
             }
@@ -189,6 +198,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);
 
+            // セーブデータ連携
+            IStageClearRepository clearRepository = new SaveDataClearStageRepository();
+            _openUseCase = new StageSelectOpenUseCase(_stageTree, _progressService, clearRepository);
+
+            // Presenter 生成前に既知のクリアステージをツリーへ反映する。
+            _openUseCase.ApplySavedClearedStages();
+
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
@@ -215,6 +231,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
             _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
+            _outGameUIEvent.OnStageSelectScreenCompleted += HandleStageSelectScreenCompleted;
         }
 
         /// <summary>
@@ -228,6 +245,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
             _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
+            _outGameUIEvent.OnStageSelectScreenCompleted -= HandleStageSelectScreenCompleted;
         }
 
         /// <summary>
@@ -285,6 +303,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _nodePresenters = new List<StageNodePresenter>(nodeElements.Count);
             _nodePresenterMap = new Dictionary<StageId, StageNodePresenter>(nodeElements.Count);
 
+            // ノードのアニメーションを順番に再生するためのシーケンサーを生成する
+            var sequencer = new StageNodeAnimationSequencer();
+
             for (var i = 0; i < nodeElements.Count; i++)
             {
                 var nodeElement = nodeElements[i];
@@ -325,7 +346,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 // このノードへの接続線Viewを取得する（存在しない場合は null）
                 connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);
 
-                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView);
+                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView, sequencer);
 
                 _nodeViews.Add(nodeView);
                 _nodePresenters.Add(nodePresenter);
@@ -382,5 +403,21 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _nodePresenterMap.Clear();
             }
         }
+
+        /// <summary>
+        ///     新規クリア済みステージを検出し、後続ノードの解放アニメーションを再生します。
+        ///     新規クリアがなければ何も行いません。
+        /// </summary>
+        private async Task ApplyNewlyClearedStagesAsync(CancellationToken token)
+        {
+            var newlyClearedIds = _openUseCase.GetNewlyClearedIds();
+
+            for (var i = 0; i < newlyClearedIds.Count; i++)
+            {
+                await CompleteAndAnimateAsync(newlyClearedIds[i]);
+                if (token.IsCancellationRequested) { return; }
+            }
+        }
+
     }
 }
