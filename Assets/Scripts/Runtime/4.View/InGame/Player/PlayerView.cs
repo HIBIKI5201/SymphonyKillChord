@@ -33,6 +33,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
+        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
@@ -64,6 +65,7 @@ namespace KillChord.Runtime.View.InGame.Player
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
+             CharacterAnimationIndices animationIndices,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -71,6 +73,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
+            _characterAnimationIndices = animationIndices;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -112,6 +115,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (input.Phase == InputActionPhase.Started)
             {
                 _isDodge = true;
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
 
@@ -146,7 +150,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
-                _characterAnimationController?.TriggerAttack();
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
