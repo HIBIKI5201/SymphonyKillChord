@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
@@ -10,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     ///     敵の移動ロジックはEnemyMoveControllerに委譲される。
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    public class EnemyMoveView : MonoBehaviour
+    public class EnemyMoveView : MonoBehaviour, IGameplayControllable
     {
         /// <summary>
         ///     初期化処理。
@@ -22,6 +23,25 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController = enemyAIController;
             _target = target;
+            _isPlaying = false;
+        }
+
+        /// <summary>
+        ///     ゲームプレイの開始処理を行います。
+        /// </summary>
+        public void StartGameplay()
+        {
+            _isPlaying = true;
+        }
+
+        /// <summary>
+        ///    ゲームプレイの停止処理を行います。
+        /// </summary>
+        public void StopGameplay()
+        {
+            _isPlaying = false;
+            StopMoving();
+            StopRotating();
         }
 
         /// <summary>
@@ -38,7 +58,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void MoveToAttack()
         {
+            if (!_isPlaying) return;
             if (!_navMeshAgent.isOnNavMesh || _target == null) return;
+
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
             if (intruction.ShouldMove)
             {
@@ -54,16 +76,24 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void StopMoving()
         {
+            if (!CanUseNavMeshAgent())
+            {
+                return;
+            }
+
             _navMeshAgent.isStopped = true;
         }
 
         public void StopRotating()
         {
+            if (_navMeshAgent == null || !_navMeshAgent.enabled) return;
+
             _navMeshAgent.updateRotation = false;
         }
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
+        private bool _isPlaying;
 
         private void Awake()
         {
@@ -103,10 +133,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
         }
         /// <summary>
+        ///     NavMeshAgentが使用可能かどうかを確認する。
+        /// </summary>
+        /// <returns> 使用可能であればtrue、そうでなければfalse。 </returns>
+        private bool CanUseNavMeshAgent()
+        {
+            return _navMeshAgent != null
+                && _navMeshAgent.enabled
+                && _navMeshAgent.isOnNavMesh;
+        }
+        /// <summary>
         ///     攻撃を予約するエフェクトを再生する。
         /// </summary>
         private void PlayEffectReserved()
         {
+            if (!_isPlaying) return;
+
             ParticleController.Instance.PlayParticleReserve(transform.position);
         }
         /// <summary>
@@ -114,6 +156,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void PlayEffectHit()
         {
+            if (!_isPlaying) return;
+
             ParticleController.Instance.PlayParticle(transform.position);
             MoveToAttack();
         }
@@ -130,7 +174,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On2BeatBefore()
         {
-            
+
         }
     }
 }
