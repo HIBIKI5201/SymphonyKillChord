@@ -107,9 +107,17 @@ namespace KillChord.Runtime.View.InGame.Player
 
             UnRegisterActions();
 
-            _moveVector = Vector3.zero;
+            _moveVector = Vector2.zero;
             _isDodge = false;
             _isPlaying = false;
+
+            if (_rb != null)
+            {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+
+            _characterAnimationController?.SetVelocity(Vector2.zero);
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
