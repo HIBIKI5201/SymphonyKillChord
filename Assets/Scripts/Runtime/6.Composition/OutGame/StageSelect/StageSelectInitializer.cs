@@ -74,8 +74,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void OnDisable()
         {
             Unsubscribe();
-            DisposeNodeComponents();
             _cts?.Cancel();
+            DisposeNodeComponents();
             _cts?.Dispose();
         }
 
@@ -415,8 +415,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             for (var i = 0; i < newlyClearedIds.Count; i++)
             {
-                await CompleteAndAnimateAsync(newlyClearedIds[i]);
                 if (token.IsCancellationRequested) { return; }
+                await CompleteAndAnimateAsync(newlyClearedIds[i]);
             }
         }
 
