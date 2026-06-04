@@ -13,6 +13,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
+using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -25,7 +26,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     敵の依存関係を構築する。
     /// </summary>
-    public class EnemyLifeCycle : MonoBehaviour
+    public class EnemyLifeCycle : MonoBehaviour, IGameplayControllable
     {
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // Adaptor
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
-            
+
             // UseCase
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
@@ -104,7 +105,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
             _lockOnTargetGateway = new LockOnTargetGateway(transform);
@@ -118,7 +119,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
             _attackPositionSearchView.Initialize();
-            if(_shellSpawner != null && shellPool != null)
+            if (_shellSpawner != null && shellPool != null)
             {
                 _shellSpawner.Initialize(shellPool);
             }
@@ -178,7 +179,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             _targetManagerController?.Unregister(_lockOnTargetGateway);
             _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            
+
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
             _healthHudPresenter.Deactivate();
@@ -189,6 +190,52 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _releaseCallback?.Invoke(this);
 
         }
+
+        /// <summary>
+        ///    ゲームプレイ開始処理。
+        /// </summary>
+        public void StartGameplay()
+        {
+            if (_behaviorGraphAgent != null)
+            {
+                _behaviorGraphAgent.enabled = true;
+                _behaviorGraphAgent.Restart();
+            }
+
+            if (_navMeshAgent != null && _navMeshAgent.enabled)
+            {
+                _navMeshAgent.isStopped = false;
+            }
+
+            _enemyBattleAIFacade?.StartGameplay();
+            _view?.StartGameplay();
+        }
+
+        /// <summary>
+        ///    ゲームプレイ停止処理。
+        /// </summary>
+        public void StopGameplay()
+        {
+            _attackReservationUsecase?.Deactivate();
+            _aiController?.CancelAttack();
+
+            if (_behaviorGraphAgent != null)
+            {
+                _behaviorGraphAgent.enabled = false;
+            }
+
+            if (_navMeshAgent != null && _navMeshAgent.enabled && _navMeshAgent.isOnNavMesh)
+            {
+                _navMeshAgent.isStopped = true;
+                _navMeshAgent.ResetPath();
+                _navMeshAgent.velocity = Vector3.zero;
+                _navMeshAgent.updateRotation = false;
+            }
+
+            _enemyBattleAIFacade?.StopGameplay();
+            _view?.StopGameplay();
+        }
+
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
 
