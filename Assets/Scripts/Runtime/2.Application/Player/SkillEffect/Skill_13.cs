@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             for(int i = 0; i < _attackCount; i++)
             {
                 context.TargetEntity.TakeDamage(attackResult.FinalDamage);
-                 Debug.Log($"<color=green>{i + 1} 回目の、Skill_13 を実行しました:{attackResult.FinalDamage}ダメージです。 </color>");
+                 Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{attackResult.FinalDamage}ダメージです。 ");
             }
             
         }
