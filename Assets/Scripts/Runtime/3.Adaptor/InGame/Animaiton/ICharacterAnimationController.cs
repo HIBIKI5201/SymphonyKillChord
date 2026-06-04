@@ -9,9 +9,9 @@ namespace KillChord.Runtime.Adaptor
     public interface ICharacterAnimationController
     {
         /// <summary>
-        ///     Viewが購読する攻撃要求イベント。
+        ///     Viewが購読するイベント。
         /// </summary>
-        event Action OnAttackRequested;
+        event Action<int> OnOneShotRequested;
 
         /// <summary> 現在のアニメーション状態をDTOとして取得する。 </summary>
         CharacterAnimationDTO GetDTO();
@@ -19,8 +19,8 @@ namespace KillChord.Runtime.Adaptor
         /// <summary> キャラクターの速度ベクトルを設定する。 </summary>
         /// <param name="velocity"> 2D速度ベクトル。 </param>
         void SetVelocity(Vector2 velocity);
-        
-        /// <summary> 攻撃入力が発生したことを通知する。 </summary>
-        void TriggerAttack();
+
+        /// <summary> イベント入力が発生したことを通知する。 </summary>
+        void TriggerOneShot(int index);
     }
 }
