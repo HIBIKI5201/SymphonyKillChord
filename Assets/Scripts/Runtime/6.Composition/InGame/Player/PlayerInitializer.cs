@@ -11,8 +11,6 @@ using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
-using KillChord.Runtime.Composition.InGame.Enemy;
-using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
@@ -34,9 +32,6 @@ using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using UnityEngine;
-
-
-
 
 #if UNITY_EDITOR
 #endif
