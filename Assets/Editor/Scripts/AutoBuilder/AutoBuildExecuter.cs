@@ -193,7 +193,7 @@ namespace KillChord.Editor.AutoBuilder
             string fileName = Application.productName + GetExtension(target);
             string locationPath = Path.Combine(buildDir, fileName);
 
-            BuildPlayerOptions options = CreateBuildPlayerOptions(profile);
+            BuildPlayerOptions options = CreateBuildPlayerOptions(profile, locationPath);
 
             // フォルダ生成。
             if (Directory.Exists(buildDir))
@@ -281,11 +281,10 @@ namespace KillChord.Editor.AutoBuilder
         /// <summary>
         /// BuildProfileの情報からBuildPlayerOptionsを生成する静的メソッド
         /// </summary>
-        public static BuildPlayerOptions CreateBuildPlayerOptions(BuildProfile profile)
+        public static BuildPlayerOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
         {
             BuildProfile.SetActiveBuildProfile(profile);
             BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
-            BuildPlayerOptions options = new BuildPlayerOptions();
 
             // 有効なシーンの抽出
             string[] scenes = profile.GetScenesForBuild()
@@ -301,9 +300,12 @@ namespace KillChord.Editor.AutoBuilder
                     .ToArray();
             }
 
-            options.scenes = scenes;
-
-            return options;
+            return new BuildPlayerOptions()
+            {
+                scenes = scenes,
+                target = target,
+                locationPathName = path,
+            };
         }
     }
 }
