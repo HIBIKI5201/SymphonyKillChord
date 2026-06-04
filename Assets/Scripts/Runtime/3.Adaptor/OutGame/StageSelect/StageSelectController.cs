@@ -38,6 +38,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             if (!_stageTree.TryGetNode(stageId, out var node))
             {
+                _selectedStageId = default;
 #if UNITY_EDITOR
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(StageSelectController)}] StageId '{stageIdValue}' に対応するノードが見つかりませんでした。");
@@ -50,26 +51,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             _detailPresenter.Push(node);
             _detailScreenView.Show(token);
-        }
-
-        /// <summary>
-        ///     現在選択中のステージをクリアします。
-        ///     選択中のノードがない場合は何もしません。
-        /// </summary>
-        public bool TryClearSelectedStage(out StageId clearedId)
-        {
-            clearedId = _selectedStageId;
-
-            if (_selectedStageId.Value == null)
-            {
-#if UNITY_EDITOR
-                UnityEngine.Debug.LogWarning(
-                    $"[{nameof(StageSelectController)}] 選択中のノードがありません。");
-#endif
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
