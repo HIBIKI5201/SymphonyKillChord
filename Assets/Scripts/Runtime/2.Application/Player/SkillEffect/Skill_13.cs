@@ -17,18 +17,24 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         public void Execute(SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity);
-            AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
 
-            for(int i = 0; i < _attackCount; i++)
+
+            for (int i = 0; i < _attackCount; i++)
             {
-                context.TargetEntity.TakeDamage(attackResult.FinalDamage);
-                 Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{attackResult.FinalDamage}ダメージです。 ");
+                AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity);
+                Damage damage = result.FinalDamage * _multiplier;
+                if(result.IsCritical)
+                {
+                    damage *= _criticalMultiplier; //クリティカルヒットの場合、ダメージをさらに増加させる
+                }
+                context.TargetEntity.TakeDamage(damage);
+                Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{damage}ダメージです。 ");
             }
-            
+
         }
- 
+
         private float _multiplier = 0.6f; //ダメージ倍率。
-        private int _attackCount = 5;
+        private int _attackCount = 5; //攻撃回数。
+        private float _criticalMultiplier = 2f; //クリティカルヒットのダメージ倍率。
     }
 }
