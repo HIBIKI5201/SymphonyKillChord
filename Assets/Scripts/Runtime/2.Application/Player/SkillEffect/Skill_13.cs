@@ -25,7 +25,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 Damage damage = result.FinalDamage * _multiplier;
                 if(result.IsCritical)
                 {
-                    damage *= _criticalMultiplier; //クリティカルヒットの場合、ダメージをさらに増加させる
+                    damage /= attackDefinition.AttackParameterSet.CriticalMultiplier.Value; //元の攻撃定義のクリティカル倍率でダメージを補正してから、スキル固有のクリティカル倍率を適用
+                    damage *= _criticalMultiplier; //クリティカルヒットのダメージを補正
                 }
                 context.TargetEntity.TakeDamage(damage);
                 Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{damage}ダメージです。 ");
