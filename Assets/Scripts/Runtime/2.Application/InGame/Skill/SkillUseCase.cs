@@ -22,12 +22,14 @@ namespace KillChord.Runtime.Application.InGame.Skill
             IMusicSyncService musicSyncService,
             SkillCheckService skillCheckService,
             IViewAction viewAction,
-            ISkillTargetResolver targetResolver)
+            ISkillTargetResolver targetResolver,
+            CharacterEntity playerEntity)
         {
             _musicSyncService = musicSyncService;
             _skillCheckService = skillCheckService;
             _viewAction = viewAction;
             _targetResolver = targetResolver;
+            _playerEntity = playerEntity;
         }
 
         /// <summary>
@@ -50,13 +52,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
                  executedSkill = equipmentSkills[index];
                 if(_targetResolver.TryGetCurrentTargetEntity(out var target))
                 {
-                     CharacterEntity playerEntity = new CharacterEntity(
-                        new CharacterName("Player"),
-                        new HealthEntity(100f),
-                        new CharacterCombatSpec(new List<AttackDefinition>()), //仮のコンバットスペックを渡す
-                        new AttackInterval(1.0f) //仮の攻撃間隔を渡す
-                    );
-                    SkillEffectContext context = new SkillEffectContext(target, playerEntity, beatType); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
+                    SkillEffectContext context = new SkillEffectContext(target, _playerEntity, beatType); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
                     executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
                     //TODO: プレイヤーの基礎攻撃力の取得。現在のビート数から判定できるかも。
                 }
@@ -76,5 +72,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
         private readonly SkillCheckService _skillCheckService;
         private readonly IViewAction _viewAction;
         private readonly ISkillTargetResolver _targetResolver;
+        private readonly CharacterEntity _playerEntity;
     }
 }
