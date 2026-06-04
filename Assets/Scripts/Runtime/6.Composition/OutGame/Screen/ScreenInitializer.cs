@@ -188,6 +188,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             _isInitialized = true;
+            _isStartGame = false;
         }
 
         /// <summary>
@@ -319,6 +320,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
         private async void HandleStartGame(string targetSceneName)
         {
+            // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
+            if (_isStartGame) { return; }
+
+            _isStartGame = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             await _sceneTransitionController.ChangeSceneAsync(
                 currentSceneName,
@@ -378,6 +383,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenViewRegistry _screenViewRegistry;
         private SceneTransitionController _sceneTransitionController;
         private bool _isInitialized = false;
+        private bool _isStartGame = false;
 
         private Task _transitionTask;
 
