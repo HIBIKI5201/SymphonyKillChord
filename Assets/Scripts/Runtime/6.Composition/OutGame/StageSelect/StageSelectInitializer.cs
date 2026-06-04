@@ -151,16 +151,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this);
-                return;
 #endif
+                return;
             }
 
             if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedMissionState が取得できませんでした。", this);
-                return;
 #endif
+                return;
             }
             _missionSelectController = new OutGameMissionSelectController(selectedMissionState);
 

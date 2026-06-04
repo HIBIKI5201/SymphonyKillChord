@@ -21,8 +21,8 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] OutGameUIEvent が取得できませんでした。", this);
-                return;
 #endif
+                return;
             }
 
             ISceneTransitionService sceneTransitionService = new SceneTransitionService();

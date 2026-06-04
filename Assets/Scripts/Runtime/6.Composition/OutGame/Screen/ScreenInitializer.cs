@@ -5,6 +5,7 @@ using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -53,19 +54,24 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
             if (_outGameUIEvent == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] OutGameUIEvent が取得できませんでした.", this);
+#endif
                 return;
             }
 
             if (_uiDocument == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] UIDocument が設定されていません。", this);
+#endif
                 return;
             }
-
             if (_screenRuleData == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] ScreenRuleData が設定されていません。", this);
+#endif
                 return;
             }
 
@@ -73,8 +79,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] SceneTransitionController が取得できませんでした.", this);
-                return;
 #endif
+                return;
             }
 
             // View 層
@@ -90,32 +96,44 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             // 各画面のルート要素が見つからない場合は、エラーログを出力して初期化を中断します。
             if (homeRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {HOMESCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (stageSelectRoot == null)
             {
-                Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this); 
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (skillTreeRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLTREESCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (skillBuildRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLBUILDSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (battlePreparationRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {BATTLEPREPARATIONSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (settingRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SETTINGSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
 
@@ -227,7 +245,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (IsTransitioning) { return; }
 
             _transitionTask = _screenController.ShowStageSelect(RenewShowToken());
-            await _transitionTask;
+            try
+            {
+                await _transitionTask;
+            }
+            catch (OperationCanceledException) 
+            {
+                throw;
+            }
 
             // 作戦画面の表示完了を通知する
             _outGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
