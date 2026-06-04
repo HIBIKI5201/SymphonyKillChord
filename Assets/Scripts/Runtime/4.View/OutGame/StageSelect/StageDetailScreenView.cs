@@ -86,6 +86,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 _subMissionLabel1.text = dto.SubMissionTexts.Length > 0 ? dto.SubMissionTexts[0] : string.Empty;
                 _subMissionLabel2.text = dto.SubMissionTexts.Length > 1 ? dto.SubMissionTexts[1] : string.Empty;
             }
+
+            // TODO: ミッション達成状況を取得して、UI に反映する
         }
 
         public override void Dispose()

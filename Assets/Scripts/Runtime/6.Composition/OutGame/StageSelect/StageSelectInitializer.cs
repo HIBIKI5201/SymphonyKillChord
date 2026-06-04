@@ -108,6 +108,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(int stageIdValue)
         {
+            // TODO: セーブデータにクリアしたステージのIDを保存する処理を実装する
             await CompleteAndAnimateAsync(new StageId(stageIdValue));
         }
 
