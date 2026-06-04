@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -11,9 +12,15 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     {
         public void Execute(SkillEffectContext context)
         {
-            Damage damage =  new Damage(context.PlayerBaseAttackPower * 5f); //基礎攻撃力の500%に相当するダメージを計算する例
-            context.TargetEntity.TakeDamage(damage); //ターゲットに基礎攻撃力の10%に相当するダメージを与える例
-            Debug.Log($"<color=green>Skill_00 を実行しました:{damage.Value}ダメージです。 </color>");
+            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
+            AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity);
+            AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
+
+            context.TargetEntity.TakeDamage(attackResult.FinalDamage);
+
+             Debug.Log($"<color=green>Skill_00 を実行しました:{attackResult.FinalDamage}ダメージです。 </color>");
         }
+
+        private float _multiplier = 5f; //ダメージ倍率。
     }
 }
