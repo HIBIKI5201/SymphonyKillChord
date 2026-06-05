@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         public void Execute(SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
+            //  武器なし攻撃を実装するための箱替え。
             AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackParameterSet,attackDefinition.AttackPipeline);
             AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity);
             AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
