@@ -57,6 +57,9 @@ namespace KillChord.Editor.AssetImporter
                 SessionState.SetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, 0f);
                 SessionState.SetString(AssetImportSettings.PROGRESS_MESSAGE_KEY, "Initializing...");
 
+                // 一時的な保存先パスを設定
+                string tempSavePath = Path.GetFullPath(AssetImportSettings.TEMP_EXTRACT_PATH);
+
                 // 環境変数から API キーとフォルダIDを取得してダウンロード実行
                 await GoogleDriveDownloader.DownloadWithEnvironmentVariablesAsync(onProgressUpdate: (progress, message) =>
                 {
@@ -65,10 +68,11 @@ namespace KillChord.Editor.AssetImporter
                     SessionState.SetString(AssetImportSettings.PROGRESS_MESSAGE_KEY, message);
                 });
 
-                // ダウンロード完了後、インポート処理をキューに追加
-                SessionState.SetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, 1.0f);
-                SessionState.SetString(AssetImportSettings.PROGRESS_MESSAGE_KEY, "Download complete. Waiting for import...");
-                Debug.Log("[GoogleDriveBatchCI] Download complete. AutoBuilder will be triggered on import completion.");
+                // ダウンロード完了後、インポートキューを開始する
+                // 重要：AssetPackageImporter.ResetAndStartImportQueue() を呼ぶまで、PROGRESS_VALUE_KEY は 1.0f にしない
+                // インポートキューが完成するまで、MonitorImportProgress() は待機し続ける
+                Debug.Log("[GoogleDriveBatchCI] Download complete. Starting asset import queue...");
+                AssetPackageImporter.ResetAndStartImportQueue(tempSavePath);
             }
             catch (Exception ex)
             {
@@ -78,8 +82,9 @@ namespace KillChord.Editor.AssetImporter
         }
 
         /// <summary>
-        ///     インポート進捗を監視し、完了後に AutoBuilder を起動する。
-        ///     SessionState の PROGRESS_VALUE_KEY が 1.0f 以上になったら、処理が完了したと判定する。
+        ///     インポート進捗を監視し、すべてのアセットインポートが完了したら AutoBuilder を起動する。
+        ///     SessionState の PROGRESS_VALUE_KEY が 1.0f 以上かつインポートキューが空の場合、
+        ///     すべてのインポートが完了したと判定し、ビルド処理を開始する。
         /// </summary>
         private static void MonitorImportProgress()
         {
@@ -91,18 +96,15 @@ namespace KillChord.Editor.AssetImporter
 
             _lastProgressCheck = EditorApplication.timeSinceStartup;
 
-            // インポートキューが存在しないか、進捗が記録されていない場合はスキップ
+            // インポート進捗と キュー状態を取得
             float progress = SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, 0.0f);
+            string queueJson = SessionState.GetString(AssetImportSettings.SESSION_KEY, "");
 
-            // 進捗が 1.0f 以上（完了状態）かつインポートキューがまだある場合、処理完了と判定
-            if (progress >= 1.0f)
+            // 進捗が 1.0f 以上（完了状態）かつインポートキューが空の場合、すべてのインポートが完了
+            // queueJson が IsNullOrEmpty = true のとき、インポートキューは完全に空の状態
+            if (progress >= 1.0f && string.IsNullOrEmpty(queueJson))
             {
-                string queueJson = SessionState.GetString(AssetImportSettings.SESSION_KEY, "");
-                if (string.IsNullOrEmpty(queueJson))
-                {
-                    // インポートキューが完全に空になったので、クリーンアップして AutoBuilder を起動
-                    TriggerAutoBuilderOnComplete();
-                }
+                TriggerAutoBuilderOnComplete();
             }
         }
 
