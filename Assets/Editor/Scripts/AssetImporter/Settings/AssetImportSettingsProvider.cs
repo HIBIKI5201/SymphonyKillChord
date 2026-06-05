@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace DevelopProducts.AutoBuild.Settings
+#if UNITY_EDITOR
+namespace KillChord.Editor.AssetImporter.Settings
 {
     /// <summary>
     ///     Google DriveからのUnityPackageのダウンロードに必要な設定を管理するSettingsProvider。
@@ -49,3 +50,5 @@ namespace DevelopProducts.AutoBuild.Settings
         }
     }
 }
+
+#endif

@@ -2,11 +2,11 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using DevelopProducts.AutoBuild.Settings;
+using KillChord.Editor.AssetImporter.Settings;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace DevelopProducts.AutoBuild
+namespace KillChord.Editor.AssetImporter
 {
     /// <summary>
     ///     Google Drive APIのOAuth認証を管理するクラス。

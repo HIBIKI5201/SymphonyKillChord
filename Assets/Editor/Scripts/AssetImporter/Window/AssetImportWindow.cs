@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using DevelopProducts.AutoBuild.Settings;
+using KillChord.Editor.AssetImporter.Settings;
 using DevelopProducts.Utility;
 using UnityEditor;
 using UnityEngine;
-
-namespace DevelopProducts.AutoBuild
+#if UNITY_EDITOR
+namespace KillChord.Editor.AssetImporter
 {
     /// <summary>
     ///     Google Driveから最新のアセットパッケージをダウンロードして展開するためのエディタウィンドウ。
@@ -242,3 +242,4 @@ namespace DevelopProducts.AutoBuild
         }
     }
 }
+#endif
