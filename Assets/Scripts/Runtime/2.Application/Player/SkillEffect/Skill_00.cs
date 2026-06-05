@@ -13,7 +13,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         public void Execute(SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity);
+            AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackParameterSet,attackDefinition.AttackPipeline);
+            AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity);
             AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
 
             context.TargetEntity.TakeDamage(attackResult.FinalDamage);
