@@ -1,3 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -44,12 +46,17 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private Dictionary<StageId, StageNodePresenter> _nodePresenterMap;
         private CancellationTokenSource _cts;
         private bool _isInitialized;
+        private OutGameSortieController _outGameSortieController;
+        private OutGameMissionSelectController _missionSelectController;
+        private string _currentSceneName;
+        private StageSelectOpenUseCase _openUseCase;
 
         /// <summary>
         ///     初期化を行います。
         /// </summary>
         private void Awake()
         {
+            _currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             Initialize();
         }
 
@@ -67,8 +74,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void OnDisable()
         {
             Unsubscribe();
-            DisposeNodeComponents();
             _cts?.Cancel();
+            DisposeNodeComponents();
             _cts?.Dispose();
         }
 
@@ -101,7 +108,31 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(int stageIdValue)
         {
+            // TODO: セーブデータにクリアしたステージのIDを保存する処理を実装する
             await CompleteAndAnimateAsync(new StageId(stageIdValue));
+        }
+
+        /// <summary>
+        ///     出撃ボタンが押されたときの処理。
+        ///     ステージタイプに応じて戦闘準備画面表示またはシナリオ直接遷移イベントを発火します。
+        /// </summary>
+        private async void HandleSortieRequested()
+        {
+            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName, out var missionDefinition))
+            {
+                return;
+            }
+
+            await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
+        }
+
+        /// <summary>
+        ///     作戦画面が表示された時の処理。
+        ///     セーブデータ等から新たにクリアされたステージを検出し、後続ノードの解放アニメーションを再生します。
+        /// </summary>
+        private async void HandleStageSelectScreenCompleted()
+        {
+            await ApplyNewlyClearedStagesAsync(_cts.Token);
         }
 
         /// <summary>
@@ -109,14 +140,30 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void Initialize()
         {
-            _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
-            if (_outGameUIEvent == null)
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
 #endif
                 return;
             }
+
+            if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this);
+#endif
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedMissionState が取得できませんでした。", this);
+#endif
+                return;
+            }
+            _missionSelectController = new OutGameMissionSelectController(selectedMissionState);
 
             if (_uiDocument == null)
             {
@@ -152,6 +199,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);
 
+            // セーブデータ連携
+            IStageClearRepository clearRepository = new SaveDataClearStageRepository();
+            _openUseCase = new StageSelectOpenUseCase(_stageTree, _progressService, clearRepository);
+
+            // Presenter 生成前に既知のクリアステージをツリーへ反映する。
+            _openUseCase.ApplySavedClearedStages();
+
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
@@ -177,6 +231,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageDetailClosed += HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
+            _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
+            _outGameUIEvent.OnStageSelectScreenCompleted += HandleStageSelectScreenCompleted;
         }
 
         /// <summary>
@@ -189,6 +245,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageDetailClosed -= HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
+            _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
+            _outGameUIEvent.OnStageSelectScreenCompleted -= HandleStageSelectScreenCompleted;
         }
 
         /// <summary>
@@ -246,6 +304,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _nodePresenters = new List<StageNodePresenter>(nodeElements.Count);
             _nodePresenterMap = new Dictionary<StageId, StageNodePresenter>(nodeElements.Count);
 
+            // ノードのアニメーションを順番に再生するためのシーケンサーを生成する
+            var sequencer = new StageNodeAnimationSequencer();
+
             for (var i = 0; i < nodeElements.Count; i++)
             {
                 var nodeElement = nodeElements[i];
@@ -286,7 +347,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 // このノードへの接続線Viewを取得する（存在しない場合は null）
                 connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);
 
-                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView);
+                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView, sequencer);
 
                 _nodeViews.Add(nodeView);
                 _nodePresenters.Add(nodePresenter);
@@ -343,5 +404,21 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _nodePresenterMap.Clear();
             }
         }
+
+        /// <summary>
+        ///     新規クリア済みステージを検出し、後続ノードの解放アニメーションを再生します。
+        ///     新規クリアがなければ何も行いません。
+        /// </summary>
+        private async Task ApplyNewlyClearedStagesAsync(CancellationToken token)
+        {
+            var newlyClearedIds = _openUseCase.GetNewlyClearedIds();
+
+            for (var i = 0; i < newlyClearedIds.Count; i++)
+            {
+                if (token.IsCancellationRequested) { return; }
+                await CompleteAndAnimateAsync(newlyClearedIds[i]);
+            }
+        }
+
     }
 }

@@ -55,5 +55,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
         /// <summary> バトルパートかどうか。 </summary>
         public bool IsBattle => MainMissionText != null;
+
+        // TODO: ミッション達成状況を反映するためのプロパティを追加する。
     }
 }

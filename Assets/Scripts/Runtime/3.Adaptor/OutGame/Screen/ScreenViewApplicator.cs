@@ -24,17 +24,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         {
             var hideId = screenViewDTO.ScreenToHideId;
             var showId = screenViewDTO.ScreenToShowId;
-            return ApplyInternalAsync(hideId, showId, token);
+            var targetSceneName = screenViewDTO.TargetSceneName;
+            return ApplyInternalAsync(hideId, showId, token, targetSceneName);
         }
 
-        private async Task ApplyInternalAsync(ScreenId? hideId, ScreenId showId, CancellationToken token)
+        private async Task ApplyInternalAsync(ScreenId? hideId, ScreenId showId, CancellationToken token, string targetSceneName = null)
         {
             if (hideId.HasValue)
             {
                 await _screenViewRegistry.Hide(hideId.Value, token);
             }
 
-            await _screenViewRegistry.Show(showId, token);
+            await _screenViewRegistry.Show(showId, token, targetSceneName);
         }
 
         private readonly IScreenViewRegistry _screenViewRegistry;
