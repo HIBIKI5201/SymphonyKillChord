@@ -4,13 +4,19 @@ using UnityEditor;
 using UnityEditor.Build.Profile; // Unity 6のBuildProfile APIを使用
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using KillChord.Editor.AutoBuilder;
 
-namespace DevelopProducts.AutoBuild
+namespace KillChord.Editor.AutoBuilder
 {
     public static class AutoBuilder
     {
-        public static void PerformMultipleBuilds()
+        /// <summary>
+        ///     複数のビルドプロファイルに基づいてビルドを実行する。
+        /// </summary>
+        /// <param name="isBatchMode">
+        ///     true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。
+        ///     false の場合は手動実行扱い。
+        /// </param>
+        public static void PerformMultipleBuilds(bool isBatchMode = false)
         {
             Debug.Log("Starting multiple builds process via BuildProfile...");
 
@@ -19,7 +25,7 @@ namespace DevelopProducts.AutoBuild
                 settings.MasterBuildProfiles.Length == 0)
             {
                 Debug.LogError($"Build settings not found or empty");
-                EditorApplication.Exit(1);
+                ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
@@ -41,15 +47,36 @@ namespace DevelopProducts.AutoBuild
             if (allSuccess)
             {
                 Debug.Log("All builds completed successfully.");
-                EditorApplication.Exit(0);
+                ExitIfBatchMode(isBatchMode, exitCode: 0);
             }
             else
             {
                 Debug.LogError("One or more builds failed.");
-                EditorApplication.Exit(1);
+                ExitIfBatchMode(isBatchMode, exitCode: 1);
             }
         }
 
+        /// <summary>
+        ///     バッチモード、または isBatchMode が true の場合のみ、エディタプロセスを指定されたコードで終了する。
+        ///     これにより、手動での CI/CD トリガー時のエディタ強制終了を回避できる。
+        /// </summary>
+        /// <param name="isBatchMode">強制的にバッチモード判定を行うかどうか（通常は Application.isBatchMode と組み合わせる）</param>
+        /// <param name="exitCode">終了コード（0: 成功、1: 失敗）</param>
+        private static void ExitIfBatchMode(bool isBatchMode, int exitCode)
+        {
+            bool shouldExit = Application.isBatchMode || isBatchMode;
+            if (shouldExit)
+            {
+                Debug.Log($"Exiting Unity editor with code {exitCode} (Batch Mode)");
+                EditorApplication.Exit(exitCode);
+            }
+        }
+
+        /// <summary>
+        /// 指定されたビルドプロファイルに基づいてビルドを実行し、結果を返す。
+        /// </summary>
+        /// <param name="profile">ビルドプロファイル</param>
+        /// <returns>ビルド成功時は true、失敗時は false</returns>
         private static bool ExecuteBuildForProfile(BuildProfile profile)
         {
             string outputDir = $"Builds/{profile.name}";
@@ -62,8 +89,8 @@ namespace DevelopProducts.AutoBuild
 
             // 拡張子等はターゲットプラットフォームに応じてプロファイル側で設定されている前提
             string extension = AutoBuildExecuter.GetExtension(options.target);
-
             options.locationPathName = $"{outputDir}/{profile.name}{extension}";
+
 
             // ビルドの実行
             BuildReport report = BuildPipeline.BuildPlayer(options);
