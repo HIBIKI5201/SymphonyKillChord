@@ -30,9 +30,9 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             bool allSuccess = true;
-            var profileGUIDs = settings.DevelopBuildProfiles.Concat(settings.MasterBuildProfiles);
+            var allProfiles = settings.DevelopBuildProfiles.Concat(settings.MasterBuildProfiles);
 
-            foreach (BuildProfile profile in profileGUIDs)
+            foreach (BuildProfile profile in allProfiles)
             {
                 // BuildProfileごとにビルド実行。
                 Debug.Log($"Building profile: {profile.name}");
@@ -79,7 +79,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns>ビルド成功時は true、失敗時は false</returns>
         private static bool ExecuteBuildForProfile(BuildProfile profile)
         {
-            string outputDir = $"Builds/{profile.name}";
+            string outputDir = Path.Combine(Application.dataPath, "../Builds", profile.name);
             if (!Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
@@ -89,7 +89,7 @@ namespace KillChord.Editor.AutoBuilder
 
             // 拡張子等はターゲットプラットフォームに応じてプロファイル側で設定されている前提
             string extension = AutoBuildExecuter.GetExtension(options.target);
-            options.locationPathName = $"{outputDir}/{profile.name}{extension}";
+            options.locationPathName = Path.Combine(outputDir, $"{profile.name}{extension}");
 
 
             // ビルドの実行

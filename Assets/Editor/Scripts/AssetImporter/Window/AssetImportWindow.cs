@@ -155,6 +155,8 @@ namespace KillChord.Editor.AssetImporter
 
         /// <summary>
         /// Google Driveから最新のzipファイルの情報を非同期で取得し、UIに反映する処理。
+        /// 注意：このメソッドは最新ファイル情報を取得するのみで、lastDownloadedVersion は更新しません。
+        /// バージョンの更新は ExecuteDownloadAsync のダウンロード完了時に行われます。
         /// </summary>
         private async Task FetchLatestFileInfoAsync()
         {
@@ -168,12 +170,6 @@ namespace KillChord.Editor.AssetImporter
                 (string fileId, string fileName) =
                     await GoogleDriveDownloader.GetLatestZipFileIdAsync(settings.folderId);
 
-                // バージョン記録処理を追加
-                if (fileId != null)
-                {
-                    settings.lastDownloadedVersion = fileName;
-                    settings.Save();
-                }
 
                 latestFileName = fileName ?? "対象ファイルが見つかりません";
             }
@@ -190,6 +186,7 @@ namespace KillChord.Editor.AssetImporter
 
         /// <summary>
         /// Google Driveから最新のzipファイルをダウンロードし、展開してパッケージを抽出する非同期処理。
+        /// ダウンロード成功後に lastDownloadedVersion を更新し、UI の警告表示を正確に保つ。
         /// </summary>
         private async Task ExecuteDownloadAsync()
         {
@@ -203,6 +200,25 @@ namespace KillChord.Editor.AssetImporter
                 );
 
                 AssetDatabase.Refresh();
+
+                // ダウンロード完了後、最新ファイル情報を取得してバージョンを記録
+                try
+                {
+                    (string fileId, string fileName) =
+                        await GoogleDriveDownloader.GetLatestZipFileIdAsync(settings.folderId);
+
+                    // ファイルが実際に存在することを確認してからバージョンを更新
+                    if (!string.IsNullOrEmpty(fileId) && !string.IsNullOrEmpty(fileName))
+                    {
+                        settings.lastDownloadedVersion = fileName;
+                        settings.Save();
+                        Debug.Log($"[AssetImportWindow] バージョン情報を更新しました: {fileName}");
+                    }
+                }
+                catch (Exception versionCheckEx)
+                {
+                    Debug.LogWarning($"[AssetImportWindow] バージョン更新に失敗しましたが、ダウンロード処理は成功しました: {versionCheckEx.Message}");
+                }
 
                 AssetPackageImporter.ResetAndStartImportQueue(AssetImportSettings.TEMP_EXTRACT_PATH);
             }

@@ -6,6 +6,11 @@ on:
       - develop
     types: [closed]
 
+permissions:
+  contents: write      # リリース作成のために必要
+  actions: write       # アーティファクトのアップロード等に必要
+  packages: write      # 必要に応じてパッケージ操作を許可
+
 jobs:
   build-and-release:
     if: github.event.pull_request.merged == true
@@ -14,7 +19,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
 
       - name: Execute Unity - Download Assets and Build
         # Unity 6のインストールパスは環境に応じて変更してください
@@ -35,7 +42,7 @@ jobs:
           GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
 
       - name: Upload Unity Log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: unity-build-log
@@ -68,7 +75,7 @@ jobs:
         shell: powershell
 
       - name: Create Release and Upload Asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
