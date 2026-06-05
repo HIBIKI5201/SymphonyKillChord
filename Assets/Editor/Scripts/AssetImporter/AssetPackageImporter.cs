@@ -40,7 +40,7 @@ namespace KillChord.Editor.AssetImporter
 
             if (SessionState.GetBool(AssetImportSettings.WAITING_KEY, false))
             {
-                SessionState.SetBool(AssetImportSettings.PROGRESS_VALUE_KEY, false); // フラグを回収
+                SessionState.SetBool(AssetImportSettings.WAITING_KEY, false); // フラグを回収
                 ContinueImportQueue();
             }
         }
@@ -53,7 +53,7 @@ namespace KillChord.Editor.AssetImporter
         {
             if (SessionState.GetBool(AssetImportSettings.WAITING_KEY, false))
             {
-                SessionState.SetBool(AssetImportSettings.PROGRESS_VALUE_KEY, false); // フラグを回収
+                SessionState.SetBool(AssetImportSettings.WAITING_KEY, false); // フラグを回収
                 ContinueImportQueue();
             }
         }
