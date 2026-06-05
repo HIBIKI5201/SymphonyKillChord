@@ -39,7 +39,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 new CharacterName(data.CharacterName),
                 new HealthEntity(data.MaxHealth),
                 combatSpec,
-                new AttackInterval(data.AttackInterval));
+                new AttackInterval(data.AttackInterval),
+                new Damage(data.BaseDamage)
+            );
         }
     }
 }

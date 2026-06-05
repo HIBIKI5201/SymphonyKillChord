@@ -31,7 +31,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             TargetSelectorController targetSelectorController,
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
-            float attackRotationSpeed
+            float attackRotationSpeed,
+            int baseDamage
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -41,6 +42,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _targetSelectorController = targetSelectorController;
             _musicSyncService = musicSyncService;
             AttackRotationSpeed = attackRotationSpeed;
+            _baseDamage = baseDamage;
         }
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
@@ -95,13 +97,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);
-            
+
             _attackIntervalEvaluator.EvaluateInterval();
 
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
-                _battleState.Target
+                _battleState.Target,
+                false,
+                _battleState.Attacker.BaseDamage
             );
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
@@ -134,5 +138,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly TargetSelectorController _targetSelectorController;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
+        private readonly int _baseDamage;
     }
 }

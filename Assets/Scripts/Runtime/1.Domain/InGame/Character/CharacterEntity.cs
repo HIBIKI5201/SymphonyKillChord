@@ -18,7 +18,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterEntity(CharacterName name,
             HealthEntity health,
             CharacterCombatSpec combatSpec,
-            AttackInterval attackInterval
+            AttackInterval attackInterval,
+            Damage baseDamage
         )
         {
             if (health is null)
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _health = health;
             _combatSpec = combatSpec;
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
+            _baseDamage = baseDamage;
         }
 
         /// <summary>
@@ -64,6 +66,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> 攻撃の硬直状態を管理するエンティティを取得する。 </summary>
         public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
+        /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
+        public Damage BaseDamage => _baseDamage;
 
         /// <summary>
         ///     ダメージを受ける処理。
@@ -134,5 +138,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
         private AttackIntervalEntity _attackIntervalEntity;
         private bool _isDeadNotified;
         private bool _isInvincible;
+        private Damage _baseDamage;
     }
 }
