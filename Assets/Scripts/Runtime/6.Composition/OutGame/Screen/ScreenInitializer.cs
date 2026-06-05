@@ -1,8 +1,11 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.Sortie;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -51,19 +54,32 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
             if (_outGameUIEvent == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] OutGameUIEvent が取得できませんでした.", this);
+#endif
                 return;
             }
 
             if (_uiDocument == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] UIDocument が設定されていません。", this);
+#endif
+                return;
+            }
+            if (_screenRuleData == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] ScreenRuleData が設定されていません。", this);
+#endif
                 return;
             }
 
-            if (_screenRuleData == null)
+            if(!ServiceLocator.TryGetInstance(out _sceneTransitionController))
             {
-                Debug.LogError($"[{nameof(ScreenInitializer)}] ScreenRuleData が設定されていません。", this);
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] SceneTransitionController が取得できませんでした.", this);
+#endif
                 return;
             }
 
@@ -71,7 +87,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             VisualElement rootElement = _uiDocument.rootVisualElement;
 
             VisualElement homeRoot = rootElement.Q<VisualElement>(HOMESCREEN_NAME);
-            VisualElement stageSelectRott = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
+            VisualElement stageSelectRoot = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
             VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
             VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
             VisualElement battlePreparationRoot = rootElement.Q<VisualElement>(BATTLEPREPARATIONSCREEN_NAME);
@@ -80,37 +96,49 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             // 各画面のルート要素が見つからない場合は、エラーログを出力して初期化を中断します。
             if (homeRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {HOMESCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
-            if (stageSelectRott == null)
+            if (stageSelectRoot == null)
             {
-                Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this); 
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {STAGESELECTSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (skillTreeRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLTREESCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (skillBuildRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLBUILDSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (battlePreparationRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {BATTLEPREPARATIONSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
             if (settingRoot == null)
             {
+#if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] {SETTINGSCREEN_NAME} が見つかりませんでした。", this);
+#endif
                 return;
             }
 
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
-            StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRott, _outGameUIEvent);
+            StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
@@ -156,9 +184,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _ctsShow = new();
             _ctsHide = new();
+            _ctsTransition = new();
 
             _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             _isInitialized = true;
+            _isStartGame = false;
         }
 
         /// <summary>
@@ -174,6 +204,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownBattlePreparationScreen += HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
+            _outGameUIEvent.OnStartGame += HandleStartGame;
         }
 
         /// <summary>
@@ -189,6 +220,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownBattlePreparationScreen -= HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
+            _outGameUIEvent.OnStartGame -= HandleStartGame;
 
             _outGameUIEvent.UnregisterOutGameUIEvent();
         }
@@ -206,13 +238,25 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
         /// <summary>
         ///     ステージ選択表示イベントを処理します。
+        ///     画面表示アニメーション完了後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
-        private void HandleStageSelectionScreenShown()
+        private async void HandleStageSelectionScreenShown()
         {
             // 前回の画面の表示が完了していない場合は、完了するまで待機します。
             if (IsTransitioning) { return; }
 
             _transitionTask = _screenController.ShowStageSelect(RenewShowToken());
+            try
+            {
+                await _transitionTask;
+            }
+            catch (OperationCanceledException) 
+            {
+                throw;
+            }
+
+            // 作戦画面の表示完了を通知する
+            _outGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
         /// <summary>
@@ -251,12 +295,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     戦闘準備画面表示イベントを処理します。
         /// </summary>
-        private void HandleBattlePreparationScreenShown()
+        private void HandleBattlePreparationScreenShown(string targetSceneName)
         {
             // 前回の画面の表示が完了していない場合は、完了するまで待機します。
             if (IsTransitioning) { return; }
-
-            _transitionTask = _screenController.ShowBattlePreparation(RenewShowToken());
+            
+            _transitionTask = _screenController.ShowBattlePreparation(targetSceneName, RenewShowToken());
         }
 
         /// <summary>
@@ -268,6 +312,23 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (IsTransitioning) { return; }
 
             _transitionTask = _screenController.CloseCurrent(RenewHideToken());
+        }
+
+        /// <summary>
+        ///     インゲームへの遷移イベントを処理します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
+        private async void HandleStartGame(string targetSceneName)
+        {
+            // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
+            if (_isStartGame) { return; }
+
+            _isStartGame = true;
+            var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            await _sceneTransitionController.ChangeSceneAsync(
+                currentSceneName,
+                targetSceneName,
+                _ctsTransition.Token);
         }
 
         /// <summary>
@@ -320,11 +381,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenController _screenController;
         private OutGameUIEvent _outGameUIEvent;
         private ScreenViewRegistry _screenViewRegistry;
+        private SceneTransitionController _sceneTransitionController;
         private bool _isInitialized = false;
+        private bool _isStartGame = false;
 
         private Task _transitionTask;
 
         private CancellationTokenSource _ctsShow;
         private CancellationTokenSource _ctsHide;
+        private CancellationTokenSource _ctsTransition;
     }
 }
