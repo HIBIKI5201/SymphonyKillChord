@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///     指定された画面を表示します。
         /// </summary>
-        Task Show(ScreenId screenId, CancellationToken token);
+        Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null);
 
         /// <summary>
         ///     指定された画面を非表示にします。

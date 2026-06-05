@@ -9,24 +9,14 @@
         <ui:VisualElement name="StageNodeRoot" picking-mode="Position" class="stage-map">
             <ui:VisualElement name="MainRow" class="stage-map__main-row" style="height: 604px; width: 1368px;">
                 <ui:Button name="1" text="" class="button stage-node stage-node--stage">
-                    <ui:Label text="ス" class="stage-node__label"/>
+                    <ui:Label text="プ" class="stage-node__label"/>
                 </ui:Button>
                 <ui:VisualElement picking-mode="Ignore" name="1-2" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" enabled="true" style="flex-grow: 1; background-size: 0% 100%; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
-                <ui:VisualElement name="node-boss-1-wrapper" class="stage-map__node-wrapper">
-                    <ui:Button name="2" class="button stage-node stage-node--boss">
-                        <ui:Label text="バ" class="stage-node__label"/>
-                    </ui:Button>
-                    <ui:VisualElement picking-mode="Ignore" class="stage-map__branch">
-                        <ui:VisualElement picking-mode="Ignore" name="2-6" class="stage-map__connector stage-map__connector--v stage-connection">
-                            <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; transition-property: height; width: 100%; height: 0%;"/>
-                        </ui:VisualElement>
-                        <ui:Button name="6" class="button stage-node stage-node--boss">
-                            <ui:Label text="バ" class="stage-node__label"/>
-                        </ui:Button>
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <ui:Button name="2" class="button stage-node stage-node--boss">
+                    <ui:Label text="チ" class="stage-node__label"/>
+                </ui:Button>
                 <ui:VisualElement picking-mode="Ignore" name="2-3" class="stage-map__connector stage-map__connector--h stage-connection">
                     <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
@@ -43,7 +33,7 @@
                     <ui:VisualElement name="ConnectionFill" style="flex-grow: 1; width: 0%; height: 100%; transition-property: width;"/>
                 </ui:VisualElement>
                 <ui:Button name="5" class="button stage-node stage-node--stage">
-                    <ui:Label text="ス" class="stage-node__label"/>
+                    <ui:Label text="ボ" class="stage-node__label"/>
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>

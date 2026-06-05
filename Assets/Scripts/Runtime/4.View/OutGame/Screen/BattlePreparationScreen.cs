@@ -47,6 +47,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///     遷移先のシーン名を設定します。
+        /// </summary>
+        public void SetTargetSceneName(string targetSceneName)
+        {
+            _pendingTargetSceneName = targetSceneName;
+        }
+
+        /// <summary>
         ///     画面を閉じるボタンがクリックされたときの処理です。
         /// </summary>
         private void OnBackButtonClicked(ClickEvent evt)
@@ -59,7 +67,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void OnStartButtonClicked(ClickEvent evt)
         {
-            OutGameUIEvent.OnStartGame?.Invoke();
+            OutGameUIEvent.OnStartGame?.Invoke(_pendingTargetSceneName);
         }
 
         private const string BACKBUTTON_NAME = "BackButton";
@@ -67,5 +75,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private readonly Button _backButton;
         private readonly Button _startButton;
+
+        private string _pendingTargetSceneName;
     }
 }
