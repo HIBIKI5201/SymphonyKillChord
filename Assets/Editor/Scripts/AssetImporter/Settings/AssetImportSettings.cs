@@ -1,12 +1,13 @@
-using DevelopProducts.Utility;
+using KillChord.Editor.Utility;
 using UnityEditor;
 
-namespace DevelopProducts.AutoBuild.Settings
+#if UNITY_EDITOR
+namespace KillChord.Editor.AssetImporter.Settings
 {
     /// <summary>
     /// Google Driveからのインポートに関する設定や、他で使用する定数を保持・管理するScriptableSingletonクラス。
     /// </summary>
-    [FilePath("UserSettings/KillChord/" + nameof(AssetImportSettings) + ".asset",
+    [FilePath(ProviderConst.USER_SETTINGS_PATH + nameof(AssetImportSettings) + ProviderConst.ASSET_EXT,
         FilePathAttribute.Location.ProjectFolder)]
     public class AssetImportSettings : ScriptableSingleton<AssetImportSettings>
     {
@@ -14,13 +15,12 @@ namespace DevelopProducts.AutoBuild.Settings
         public string clientSecret = "";
         public string accessToken = "";
         public string refreshToken = "";
-
         public string folderId = "";
         public string lastDownloadedVersion = "";
         public bool deleteAfterImport = true;
         
         // Projectのパスを保存するための定数。
-        public const string SETTINGS_PATH = DevelopProductsConst.DEVELOP_PRODUCTS_PROJECT_PATH + nameof(AssetImportWindow);
+        public const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + nameof(AssetImportWindow);
         
         // GoogleDriveからインポートしたファイルを処理する一時フォルダのパス。
         public const string TEMP_EXTRACT_PATH = "Library/GoogleDriveDownloaderTemp";
@@ -63,3 +63,4 @@ namespace DevelopProducts.AutoBuild.Settings
         }
     }
 }
+#endif

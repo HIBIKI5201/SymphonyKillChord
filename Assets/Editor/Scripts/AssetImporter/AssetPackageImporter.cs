@@ -3,23 +3,22 @@ using UnityEditor;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using DevelopProducts.AutoBuild.Settings;
+using KillChord.Editor.AssetImporter.Settings;
 
-namespace DevelopProducts.AutoBuild
+namespace KillChord.Editor.AssetImporter
 {
     /// <summary>
-    /// 指定されたディレクトリ内のUnityPackageを順番にサイレントインポートするためのクラス。
+    ///     指定されたディレクトリ内のUnityPackageを順番にサイレントインポートするためのクラス。
     /// 
-    /// AssetDatabase.ImportPackageはインポートするアセットにスクリプトが含まれる場合、
-    /// ドメインリロードが発生するため、複数のパッケージを連続してインポートするには、
-    /// インポート完了イベントをトリガーにして次のインポートを開始する必要がある。
+    ///     AssetDatabase.ImportPackageはインポートするアセットにスクリプトが含まれる場合、
+    ///     ドメインリロードが発生するため、複数のパッケージを連続してインポートするには、
+    ///     インポート完了イベントをトリガーにして次のインポートを開始する必要がある。
     /// </summary>
     [InitializeOnLoad]
     public static class AssetPackageImporter
     {
-
         /// <summary>
-        /// インポート待ちのパッケージのキューを管理するためのクラス。SessionStateにJSON化して保存される。
+        ///     インポート待ちのパッケージのキューを管理するためのクラス。SessionStateにJSON化して保存される。
         /// </summary>
         [Serializable]
         private class QueueData
@@ -29,7 +28,7 @@ namespace DevelopProducts.AutoBuild
         }
 
         /// <summary>
-        /// 静的コンストラクタ。エディタがロードされたときに一度だけ呼び出される。
+        ///     静的コンストラクタ。エディタがロードされたときに一度だけ呼び出される。
         /// </summary>
         static AssetPackageImporter()
         {
@@ -47,7 +46,7 @@ namespace DevelopProducts.AutoBuild
         }
 
         /// <summary>
-        /// パッケージのインポートが完了したときに呼び出されるイベントハンドラー。次のパッケージのインポートを続行する。
+        ///     パッケージのインポートが完了したときに呼び出されるイベントハンドラー。次のパッケージのインポートを続行する。
         /// </summary>
         /// <param name="packageName"></param>
         private static void OnImportPackageCompleted(string packageName)
@@ -60,7 +59,7 @@ namespace DevelopProducts.AutoBuild
         }
 
         /// <summary>
-        /// パッケージのインポートが失敗したときに呼び出されるイベントハンドラー。エラーメッセージをログに出力し、次のパッケージのインポートを続行する。
+        ///     パッケージのインポートが失敗したときに呼び出されるイベントハンドラー。エラーメッセージをログに出力し、次のパッケージのインポートを続行する。
         /// </summary>
         /// <param name="packageName"></param>
         /// <param name="errorMessage"></param>
@@ -76,7 +75,7 @@ namespace DevelopProducts.AutoBuild
         }
 
         /// <summary>
-        /// 指定されたディレクトリ内のすべての .unitypackage を対象に、サイレントインポートを開始する
+        ///     指定されたディレクトリ内のすべての .unitypackage を対象に、サイレントインポートを開始する
         /// </summary>
         /// <param name="directoryPath">.unitypackageファイルが格納されているフォルダパス</param>
         public static void ResetAndStartImportQueue(string directoryPath)
@@ -100,7 +99,7 @@ namespace DevelopProducts.AutoBuild
             Debug.Log($"[{nameof(AssetPackageImporter)}] インポート対象の .unitypackage を {files.Length} 件見つけました。インポートを開始します...");
 
             // AssetDatabase.ImportPackage が要求する「Assets/」から始まる相対パスに変換。
-            List<string> projectRelativePaths = new List<string>();
+            List<string> projectRelativePaths = new();
             string projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, "../"));
 
             foreach (var file in files)
@@ -123,7 +122,7 @@ namespace DevelopProducts.AutoBuild
         }
 
         /// <summary>
-        /// セッションからキューを読み込み、次のパッケージのインポートを実行する。
+        ///     セッションからキューを読み込み、次のパッケージのインポートを実行する。
         /// </summary>
         private static void ContinueImportQueue()
         {
@@ -156,7 +155,7 @@ namespace DevelopProducts.AutoBuild
         }
         
         /// <summary>
-        /// セッションに保存されたすべてのキーを削除する。インポートキューが空になったときに呼び出される。
+        ///     セッションに保存されたすべてのキーを削除する。インポートキューが空になったときに呼び出される。
         /// </summary>
         private static void ClearAllSessionKeys()
         {

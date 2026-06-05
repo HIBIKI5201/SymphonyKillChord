@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using DevelopProducts.AutoBuild.Settings;
+using KillChord.Editor.AssetImporter.Settings;
 using DevelopProducts.Utility;
 using UnityEditor;
 using UnityEngine;
-
-namespace DevelopProducts.AutoBuild
+#if UNITY_EDITOR
+namespace KillChord.Editor.AssetImporter
 {
     /// <summary>
     ///     Google Driveから最新のアセットパッケージをダウンロードして展開するためのエディタウィンドウ。
@@ -51,9 +51,6 @@ namespace DevelopProducts.AutoBuild
             }
 
             var isSettingsIncomplete = string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(folderId);
-            var isProcessing = isDownloading ||
-                               SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, -1f) >= 0f ||
-                               isFetchingFileInfo;
 
             if (isSettingsIncomplete)
             {
@@ -62,6 +59,10 @@ namespace DevelopProducts.AutoBuild
 
                 return;
             }
+            
+            var isProcessing = isDownloading ||
+                               SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, -1f) >= 0f ||
+                               isFetchingFileInfo;
 
             using (new EditorGUI.DisabledScope(isProcessing))
             {
@@ -105,12 +106,13 @@ namespace DevelopProducts.AutoBuild
             }
 
 
-            if (SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, -1f) >= 0f)
+            var value = SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, -1f);
+            var msg = SessionState.GetString(AssetImportSettings.PROGRESS_MESSAGE_KEY, "");
+            if (value >= 0f)
             {
-                progressValue = SessionState.GetFloat(AssetImportSettings.PROGRESS_VALUE_KEY, 0f);
-                statusMessage = SessionState.GetString(AssetImportSettings.PROGRESS_MESSAGE_KEY, "");
+                UpdateProgress(value, msg);
 
-                if (progressValue >= 1.0f)
+                if (value >= 1.0f)
                 {
                     if (settings.deleteAfterImport)
                     {
@@ -240,3 +242,4 @@ namespace DevelopProducts.AutoBuild
         }
     }
 }
+#endif
