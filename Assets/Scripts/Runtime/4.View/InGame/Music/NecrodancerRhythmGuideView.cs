@@ -1,6 +1,7 @@
 using KillChord.Runtime.View.InGame.Sequence;
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
@@ -15,6 +16,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [Tooltip("落ちてくるビート達のRectTransform")]
         [SerializeField] private RectTransform[] _beatRectTransforms;
+
+        [Tooltip("落ちてくるビート達のImage(Alpha用)")]
+        [SerializeField] private Image[] _beatImages;
 
         [Tooltip("ビートの位置を決めるための配列。(_beatRectTransforms.Length + 1の長さにしてください)")]
         [SerializeField] private float[] _beats;
@@ -50,6 +54,54 @@ namespace KillChord.Runtime.View.InGame.Music
         public void SetBeatsOffset(float normalizeOffset)
         {
             _beatsRootRectTransform.anchoredPosition = Vector2.up * (-Mathf.Lerp(_beats[0], _beats[^1], normalizeOffset) * _scale);
+
+            float targetValue = Mathf.Lerp(_beats[0], _beats[^1], normalizeOffset);
+
+
+            int activeIndex = -1;
+            if (_beats != null && _beats.Length >= 2)
+            {
+                for (int i = 0; i < _beats.Length - 1; i++)
+                {
+                    float a = _beats[i];
+                    float b = _beats[i + 1];
+
+                    if (a <= b)
+                    {
+                        if (targetValue >= a && targetValue <= b)
+                        {
+                            activeIndex = i;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (targetValue <= a && targetValue >= b)
+                        {
+                            activeIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (activeIndex == -1)
+                {
+                    if (targetValue <= Mathf.Min(_beats[0], _beats[^1]))
+                        activeIndex = 0;
+                    else
+                        activeIndex = _beats.Length - 2;
+                }
+            }
+
+            for (int i = 0; i < _beatImages.Length; i++)
+            {
+                var img = _beatImages[i];
+                if (img == null) continue;
+
+                Color c = img.color;
+                bool isActive = (i == activeIndex);
+                c.a = isActive ? 1f : 0.5f;
+                img.color = c;
+            }
         }
         public void StartGameplay()
         {
