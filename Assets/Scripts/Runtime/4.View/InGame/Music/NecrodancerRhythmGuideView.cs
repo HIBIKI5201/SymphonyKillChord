@@ -1,11 +1,14 @@
+using KillChord.Runtime.View.InGame.Sequence;
 using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
-    public sealed class NecrodancerRhythmGuideView : MonoBehaviour
+    public sealed class NecrodancerRhythmGuideView : MonoBehaviour, IGameplayControllable
     {
         public event Action OnUpdate;
+        public event Action OnStartGameplay;
+        public event Action OnStopGameplay;
 
         [Tooltip("ビート達の親RectTransform")]
         [SerializeField] private RectTransform _beatsRootRectTransform;
@@ -48,7 +51,15 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             _beatsRootRectTransform.anchoredPosition = Vector2.up * (-Mathf.Lerp(_beats[0], _beats[^1], normalizeOffset) * _scale);
         }
+        public void StartGameplay()
+        {
+            OnStartGameplay?.Invoke();
+        }
 
+        public void StopGameplay()
+        {
+            OnStopGameplay?.Invoke();
+        }
 
 
         private void Awake()

@@ -1,17 +1,19 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
-    public sealed class NecrodancerRhythmGuideViewModel
+    public sealed class NecrodancerRhythmGuideViewModel : IGameplayControllable
     {
-        public NecrodancerRhythmGuideViewModel(NecrodancerRhythmGuideView view)
+        public NecrodancerRhythmGuideViewModel(NecrodancerRhythmGuideView view, RhythmGuidePresenter presenter)
         {
             _view = view;
-
-
+            _presenter = presenter;
 
             view.OnUpdate += OnUpdate;
+            view.OnStartGameplay += StartGameplay;
+            view.OnStopGameplay += StopGameplay;
         }
 
         /// <summary>
@@ -34,6 +36,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
 
             RhythmGuideDto dto = _presenter.CreateDto(Time.unscaledTime);
+
+            _view.SetAlpha(dto.HasTarget);
+            _view.SetBeatsOffset(dto.IndicatorNormalized);
         }
 
         private bool _isPlaying;
