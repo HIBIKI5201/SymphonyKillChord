@@ -165,6 +165,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
+            if (_controller.IsDodging)
+            {
+                return;
+            }
+
             if (PlayerAttackController == null)
             {
                 Debug.LogError("[PlayerView] AttackController is null", this);
