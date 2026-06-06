@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="missionDefinition"> ステージのミッション定義。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
         public StageDefinition(StageId stageId, StageType stageType, string stageName, string flavorText,
-            StageReward reward, string targetSceneName, MissionDefinition missionDefinition = null)
+            StageReward reward, string targetSceneName,string scenarioId = "" ,MissionDefinition missionDefinition = null)
         {
             if (string.IsNullOrEmpty(targetSceneName))
             {
@@ -32,6 +32,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _flavorText = flavorText;
             _reward = reward;
             _targetSceneName = targetSceneName;
+            _scenarioId = scenarioId ?? string.Empty;
             _missionDefinition = missionDefinition;
         }
 
@@ -46,7 +47,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <summary> ステージの報酬情報。 </summary>
         public StageReward Reward => _reward;
         /// <summary> ステージのターゲットシーン名。 </summary>
-        public string TargetSceneName => _targetSceneName;
+        public string TargetSceneName => _targetSceneName;  
+        /// <summary> ステージのシナリオID。 </summary>
+        public string ScenarioId => _scenarioId;
         /// <summary> ステージのミッション定義。 </summary>
         public MissionDefinition MissionDefinition => _missionDefinition;
 
@@ -56,6 +59,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         private readonly string _flavorText;
         private readonly StageReward _reward;
         private readonly string _targetSceneName;
+        private readonly string _scenarioId;
         private readonly MissionDefinition _missionDefinition;
     }
 }
