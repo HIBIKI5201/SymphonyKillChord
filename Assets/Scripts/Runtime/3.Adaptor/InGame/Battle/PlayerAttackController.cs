@@ -96,7 +96,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
 
-            AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);
+            AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
+
+            if(attackDefinition == null) return false; 
 
             _attackIntervalEvaluator.EvaluateInterval();
 
