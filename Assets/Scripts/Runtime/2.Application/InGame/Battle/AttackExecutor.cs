@@ -21,8 +21,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackDefinition attackDefinition,
             IAttacker attacker,
             IDefender defender,
-            bool isJustHit = false,
-            Damage baseDamage = default
+            bool isJustHit,
+            Damage baseDamage
                )
         {
             if (attackDefinition == null)
