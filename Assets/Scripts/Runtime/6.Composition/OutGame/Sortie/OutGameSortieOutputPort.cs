@@ -17,7 +17,6 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         /// </summary>
         /// <param name="outGameUIEvent"> OutGameUIEvent のインスタンス。 </param>
         /// <param name="inputComposition"> InputComposition のインスタンス。 </param>
-        /// <param name="outGameScenarioUiState"> OutGameScenarioUiState のインスタンス。 </param>
         public OutGameSortieOutputPort(
             OutGameUIEvent outGameUIEvent,
             InputComposition inputComposition)

@@ -9,6 +9,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
     /// </summary>
     public class OutGameScenarioInitializer : MonoBehaviour
     {
+        private bool _registeredByThisInitializer;
+
         private void Awake()
         {
             if (ServiceLocator.TryGetInstance<SelectedScenarioState>(out _))
@@ -17,11 +19,15 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             }
 
             ServiceLocator.RegisterInstance(new SelectedScenarioState());
+            _registeredByThisInitializer = true;
         }
 
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance<SelectedScenarioState>();
+            if (_registeredByThisInitializer)
+            {
+                ServiceLocator.UnregisterInstance<SelectedScenarioState>();
+            }
         }
     }
 }
