@@ -13,6 +13,5 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         TimeSpan CloseDelayAfterComplete { get; }
         bool SkipClosesImmediately { get; }
         bool WaitForInputOnLastText { get; }
-        string DefaultScenarioId { get; }
     }
 }
