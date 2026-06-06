@@ -58,6 +58,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 }
                 else
                 {
+                    executedSkill = null;
                     return false; //ターゲットがいない場合はスキルを発動しない 
                 }
 
