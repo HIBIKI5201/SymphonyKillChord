@@ -15,5 +15,5 @@ MonoBehaviour:
   _moveSpeed: 10
   _attackRotationSpeed: 10
   _dodgeSpeed: 20
-  _dodgeDuration: 0.2
+  _dodgeDuration: 10
   _dodgeCooldown: 0.3
