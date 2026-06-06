@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
@@ -133,12 +132,18 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
             await _usecase.PlayScenario(selectedScenarioState.CurrentScenarioId);
 
-            selectedScenarioState.Clear();
-
-            await sceneTransitionController.UnloadAndSetActiveAsync(
+            bool transitioned = await sceneTransitionController.UnloadAndSetActiveAsync(
                 SceneManager.GetActiveScene().name,
                 _returnSceneName,
                 CancellationToken.None);
+
+            if (!transitioned)
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] シーン復帰に失敗しました。", this);
+                return;
+            }
+
+            selectedScenarioState.Clear();
 
             if (ServiceLocator.TryGetInstance(out InputComposition inputComposition))
             {

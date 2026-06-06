@@ -47,16 +47,24 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
 
             _outputPort.SetOutGameActiveForScenario(false);
 
-            bool success = await _sceneTransitionService.LoadAdditiveAndSetActiveAsync(
-                targetSceneName,
-                cancellationToken);
+            try
+            {
+                bool success = await _sceneTransitionService.LoadAdditiveAndSetActiveAsync(
+                    targetSceneName,
+                    cancellationToken);
 
-            if (!success)
+                if (!success)
+                {
+                    _outputPort.SetOutGameActiveForScenario(true);
+                }
+
+                return success;
+            }
+            catch
             {
                 _outputPort.SetOutGameActiveForScenario(true);
+                throw;
             }
-
-            return success;
         }
 
         private readonly ISceneTransitionService _sceneTransitionService;

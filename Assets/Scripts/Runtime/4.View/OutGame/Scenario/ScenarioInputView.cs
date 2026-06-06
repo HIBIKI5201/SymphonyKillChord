@@ -28,6 +28,11 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             Subscribe();
         }
 
+        private void OnDisable()
+        {
+            Unsubscribe();
+        }
+
         private void OnDestroy()
         {
             Unsubscribe();
