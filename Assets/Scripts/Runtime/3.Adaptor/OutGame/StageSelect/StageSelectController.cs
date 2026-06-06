@@ -65,10 +65,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         public bool TryGetSortieInfo(
             out StageType stageType, 
             out string targetSceneName, 
+            out string scenarioId,
             out MissionDefinition missionDefinition)
         {
             stageType = default;
             targetSceneName = default;
+            scenarioId = default;
             missionDefinition = default;
 
             if (!_stageTree.TryGetNode(_selectedStageId, out var node))
@@ -78,6 +80,31 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             stageType = node.Definition.StageType;
             targetSceneName = node.Definition.TargetSceneName;
+            scenarioId = node.Definition.ScenarioId;
+            missionDefinition = node.Definition.MissionDefinition;
+            return true;
+        }
+
+        /// <summary>
+        ///     現在選択中のノードがバトルタイプの場合、ミッション定義を取得します。
+        ///     バトル以外のタイプまたはミッション定義が存在しない場合は false を返します。
+        /// </summary>
+        /// <param name="missionDefinition"> ミッション定義を格納する変数。</param>
+        /// <returns> ミッション定義が取得できた場合は true、取得できなかった場合は false を返します。</returns>
+        public bool TryGetBattleMissionDefinition(out MissionDefinition missionDefinition)
+        {
+            missionDefinition = default;
+
+            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
+            {
+                return false;
+            }
+
+            if (node.Definition.StageType != StageType.Battle)
+            {
+                return false;
+            }
+
             missionDefinition = node.Definition.MissionDefinition;
             return true;
         }

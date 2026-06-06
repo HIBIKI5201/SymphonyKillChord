@@ -9,18 +9,18 @@ namespace KillChord.Runtime.Application.InGame.Player
     /// </summary>
     public sealed class PlayerDodgeMovementApplication
     {
-        private readonly PlayerMoveParameter _parameter;
-        private Vector3 _direction;
-        private float _previousDodgedTime;
-        private bool _isDodging;
-        private bool _hasNotifiedDodgeEnd;
-
         /// <summary> 回避移動アプリケーションを初期化する。 </summary>
         public PlayerDodgeMovementApplication(PlayerMoveParameter parameter)
         {
             _parameter = parameter;
             _previousDodgedTime = float.NegativeInfinity;
         }
+
+        private readonly PlayerMoveParameter _parameter;
+        private Vector3 _direction;
+        private float _previousDodgedTime;
+        private bool _isDodging;
+        private bool _hasNotifiedDodgeEnd;
 
         /// <summary> 回避開始時に通知するイベント。 </summary>
         public Action<float> OnDodgeStarted;

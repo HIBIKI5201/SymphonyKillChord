@@ -7,9 +7,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// <summary>
     ///     アウトゲーム UI のイベントを管理するクラス。
     ///     イベント管理クラスのため、他のクラスよりも早く初期化されるように
-    ///     DefaultExecutionOrder を -100 に設定しています。
+    ///     DefaultExecutionOrder を -200 に設定しています。
     /// </summary>
-    [DefaultExecutionOrder(-100)]
+    [DefaultExecutionOrder(-200)]
     public class OutGameUIEvent : MonoBehaviour
     {
         /// <summary> ホーム画面を表示するイベント。 </summary>
@@ -23,6 +23,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> 改造画面を表示するイベント。 </summary>
         public Action OnShownSkillBuildScreen;
+
+        /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
+        public Action<bool> OnOutGameUiVisibilityChanged;
 
         /// <summary> 
         ///     戦闘準備画面を表示するイベント。
