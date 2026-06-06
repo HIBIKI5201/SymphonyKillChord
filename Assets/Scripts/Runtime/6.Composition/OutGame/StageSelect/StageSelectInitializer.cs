@@ -125,7 +125,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             if (_stageSelectController.TryGetBattleMissionDefinition(out var battleMissionDefinition))
             {
-                _missionSelectController.Select(missionDefinition.MissionId.Value);
+                _missionSelectController.Select(battleMissionDefinition.MissionId.Value);
             }
 
             await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
