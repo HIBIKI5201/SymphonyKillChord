@@ -16,11 +16,11 @@ namespace KillChord.Runtime.Domain.Player
             CurrentBeatType = currentBeatType;
         }
         /// <summary>
-        /// スキルの効果が対象とするキャラクターエンティティ。スキル効果の実行に必要な情報を提供する。
+        /// 被スキル者
         /// </summary>
         public CharacterEntity TargetEntity { get; }
         /// <summary>
-        /// プレイヤーの基礎攻撃力。スキル効果の計算に使用される。
+        /// スキル発動者
         /// </summary>
         public CharacterEntity PlayerEntity { get; }
         
