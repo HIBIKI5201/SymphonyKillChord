@@ -123,6 +123,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
+            if (_stageSelectController.TryGetBattleMissionDefinition(out var battleMissionDefinition))
+            {
+                _missionSelectController.Select(missionDefinition.MissionId.Value);
+            }
+
             await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
         }
 
