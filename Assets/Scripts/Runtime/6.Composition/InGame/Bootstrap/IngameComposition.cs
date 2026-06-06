@@ -34,6 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
+        [SerializeField] private NecrodancerRhythmGuideInitializer _necrodancerRhythmGuideInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
         [SerializeField] private EnemyPools _enemyPools;
         [SerializeField] private EnemyInitializer _enemyInitializer;
@@ -118,7 +119,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _musicSyncInitializer.Initialize();
             _inGameMissionInitializer.Initialize();
             _stageResultUIView.Initialize();
-
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             if (inputC == null)
             {
@@ -177,6 +177,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyArtilleryTestSpawner.Initialize(assignedEnemyManager?.Artillery);
 
             _rhythmGuideInitializer.Initialize();
+            _necrodancerRhythmGuideInitializer.Initialize();
 
             _inGameSequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
@@ -265,6 +266,11 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] RhythmGuideInitializerの参照が未設定です。", this);
                 return false;
             }
+            if (_necrodancerRhythmGuideInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] NecrodancerRhythmGuideInitializerの参照が未設定です。", this);
+                return false;
+            }
             if (_stageSequenceView == null)
             {
                 Debug.LogError("[IngameComposition] StageSequenceViewの参照が未設定です。", this);
@@ -275,7 +281,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] InGamePlayDirectorの参照が未設定です。", this);
                 return false;
             }
-            if(_stageResultUIView == null)
+            if (_stageResultUIView == null)
             {
                 Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
                 return false;
