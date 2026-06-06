@@ -150,6 +150,10 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             if (input.Phase == InputActionPhase.Started)
             {
+                if (_controller.IsDodging)
+                {
+                    return;
+                }
                 _isDodge = true;
                 _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
@@ -161,6 +165,11 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnAttack(InputContext<float> input)
         {
             if (input.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+
+            if (_controller.IsDodging)
             {
                 return;
             }
