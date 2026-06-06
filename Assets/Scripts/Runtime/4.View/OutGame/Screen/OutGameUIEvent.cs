@@ -24,6 +24,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 改造画面を表示するイベント。 </summary>
         public Action OnShownSkillBuildScreen;
 
+        /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
+        public Action<bool> OnOutGameUiVisibilityChanged;
+
         /// <summary> 
         ///     戦闘準備画面を表示するイベント。
         ///     引数は遷移先のシーン名。

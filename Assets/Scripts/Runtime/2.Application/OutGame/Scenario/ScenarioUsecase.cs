@@ -30,15 +30,22 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         /// <summary>
         /// 設定されたシナリオを先頭から順に再生する。
         /// </summary>
-        public async ValueTask PlayScenario()
+        public async ValueTask PlayScenario(string scenarioId)
         {
+            if(string.IsNullOrWhiteSpace(scenarioId))
+            {
+                throw new ArgumentException("シナリオIDが設定されていません。", nameof(scenarioId));
+            }
+
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
             try
-            {  
-                ScenarioData data = await _scenarioRepo.FindByIdAsync(_settingsRepository.DefaultScenarioId, token); // シナリオデータを読み込む。
+            {
+                // シナリオデータを読み込む。
+                ScenarioData data = await _scenarioRepo.FindByIdAsync(scenarioId, token); 
+
                 for (int i = 0; i < data.Events.Count; i++)
                 {
                     IScenarioEvent e = data.Events[i];
