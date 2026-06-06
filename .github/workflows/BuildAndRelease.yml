@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: write      # リリース作成のために必要
-  actions: write       # アーティファクトのアップロード等に必要
-  packages: write      # 必要に応じてパッケージ操作を許可
 
 jobs:
   build-and-release:
