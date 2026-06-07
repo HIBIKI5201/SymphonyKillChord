@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             //  武器なし攻撃を実装するための箱替え。
             AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackParameterSet,attackDefinition.AttackPipeline);
-            AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity);
+            AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity,false,context.PlayerEntity.BaseDamage);
             AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
 
             context.TargetEntity.TakeDamage(attackResult.FinalDamage);

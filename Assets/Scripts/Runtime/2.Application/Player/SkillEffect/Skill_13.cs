@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             for (int i = 0; i < _attackCount; i++)
             {
-                AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity);
+                AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity,false,context.PlayerEntity.BaseDamage);
                 Damage damage = result.FinalDamage * _multiplier;
                 if(result.IsCritical)
                 {

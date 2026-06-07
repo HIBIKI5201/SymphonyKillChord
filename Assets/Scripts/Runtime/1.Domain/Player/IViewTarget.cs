@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Player
 {
-        public interface IViewTarget
+    public interface IViewTarget
     {
-         /// <summary>
+        /// <summary>
         ///     Viewのアクション。
         /// </summary>
         /// <param name="baseDamage">スキル側の基礎攻撃力</param>
