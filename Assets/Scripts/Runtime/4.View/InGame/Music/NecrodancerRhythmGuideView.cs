@@ -127,6 +127,8 @@ namespace KillChord.Runtime.View.InGame.Music
         private void OnDestroy()
         {
             OnUpdate = null;
+            OnStartGameplay = null;
+            OnStopGameplay = null;
         }
 
 
