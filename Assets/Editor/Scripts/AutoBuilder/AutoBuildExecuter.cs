@@ -193,14 +193,7 @@ namespace KillChord.Editor.AutoBuilder
             string fileName = Application.productName + GetExtension(target);
             string locationPath = Path.Combine(buildDir, fileName);
 
-            BuildPlayerOptions options = new()
-            {
-                scenes = scenes,
-
-                target = target,
-
-                locationPathName = locationPath
-            };
+            BuildPlayerOptions options = CreateBuildPlayerOptions(profile, locationPath);
 
             // フォルダ生成。
             if (Directory.Exists(buildDir))
@@ -273,7 +266,7 @@ namespace KillChord.Editor.AutoBuilder
             await Awaitable.NextFrameAsync();
         }
 
-        private static string GetExtension(BuildTarget target)
+        public static string GetExtension(BuildTarget target)
         {
             return target switch
             {
@@ -282,6 +275,36 @@ namespace KillChord.Editor.AutoBuilder
                 BuildTarget.Android => ".apk",
                 BuildTarget.StandaloneOSX => ".app",
                 _ => string.Empty
+            };
+        }
+
+        /// <summary>
+        /// BuildProfileの情報からBuildPlayerOptionsを生成する静的メソッド
+        /// </summary>
+        public static BuildPlayerOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
+        {
+            BuildProfile.SetActiveBuildProfile(profile);
+            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+
+            // 有効なシーンの抽出
+            string[] scenes = profile.GetScenesForBuild()
+                .Where(s => s.enabled)
+                .Select(s => s.path)
+                .ToArray();
+
+            if (scenes.Length == 0)
+            {
+                scenes = EditorBuildSettings.scenes
+                    .Where(s => s.enabled)
+                    .Select(s => s.path)
+                    .ToArray();
+            }
+
+            return new BuildPlayerOptions()
+            {
+                scenes = scenes,
+                target = target,
+                locationPathName = path,
             };
         }
     }
