@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Application.InGame.Skill;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
