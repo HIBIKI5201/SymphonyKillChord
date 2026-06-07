@@ -9,11 +9,12 @@ namespace KillChord.Runtime.Domain.Player
     /// </summary>
     public readonly struct SkillEffectContext
     {
-        public SkillEffectContext( CharacterEntity targetEntity, CharacterEntity playerEntity, BeatType currentBeatType)
+        public SkillEffectContext( CharacterEntity targetEntity, CharacterEntity playerEntity, BeatType currentBeatType,IViewTarget viewAction)
         {
             TargetEntity = targetEntity;
             PlayerEntity = playerEntity;
             CurrentBeatType = currentBeatType;
+            View = viewAction;
         }
         /// <summary>
         /// 被スキル者
@@ -29,6 +30,7 @@ namespace KillChord.Runtime.Domain.Player
         /// </summary>
         public BeatType CurrentBeatType { get; }
 
+        public IViewTarget View {get;}
 
     }
 }
