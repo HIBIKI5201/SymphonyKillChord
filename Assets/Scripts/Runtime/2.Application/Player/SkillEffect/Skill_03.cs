@@ -16,10 +16,11 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage * _damageMultiPlier);
             //ターゲットに対して単発高火力（通常攻撃の2倍くらいの威力）
 
-            if(context.Characters != null) return;
+            var targets = context.Repository.FindByRule();
+            if (targets != null) return;
 
-             for(int i = 0 ; i < context.Characters.Length; i++)
-             context.Characters[i].TakeDamage(result.FinalDamage / _damageMultiPlier);
+            for (int i = 0; i < targets.Length; i++)
+                targets[i].TakeDamage(result.FinalDamage / _damageMultiPlier);
             //ターゲットに的中した後、プレイヤーと敵との半直線状にいる敵に対してスキル火力の50％のダメージを与える
         }
 

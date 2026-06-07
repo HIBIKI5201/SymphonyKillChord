@@ -52,7 +52,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
                  executedSkill = equipmentSkills[index];
                 if(_targetResolver.TryGetCurrentTargetEntity(out var target))
                 {
-                    SkillEffectContext context = new SkillEffectContext(target, _playerEntity, beatType); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
+                    SkillEffectContext context = new SkillEffectContext(target, _playerEntity, beatType,null); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
                     executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
                     //TODO: プレイヤーの基礎攻撃力の取得。現在のビート数から判定できるかも。
                 }
