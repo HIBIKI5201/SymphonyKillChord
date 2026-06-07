@@ -1,0 +1,340 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6996070228347563734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
+  m_Name: BossGraph Blackboard
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.RuntimeBlackboardAsset
+  VersionTimestamp: 639164775916201315
+  AssetID:
+    m_Value0: 0
+    m_Value1: 0
+  m_Blackboard:
+    m_Variables:
+    - rid: 8353671707150778368
+    - rid: 8353671707150778379
+    - rid: 8353671707150778387
+    - rid: 8353671707150778397
+    - rid: 8353671707150778409
+  m_SharedBlackboardVariableGuids: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8353671707150778368
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778379
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 6690711734084317719
+          m_Value1: 7561035839154152391
+        Name: Boss State Facade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778387
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1317533565754856946
+          m_Value1: 6263063795858537545
+        Name: Boss Movement AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778397
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1707038001490708525
+          m_Value1: 11413210636822117936
+        Name: New Boss Movement AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778409
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossSharedFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10098522973658398978
+          m_Value1: 13645487742402175616
+        Name: Boss Shared Facade
+        m_Value: {fileID: 0}
+--- !u!114 &-5503066355765760950
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd922ae02c94c87a66e46a10a7319b9, type: 3}
+  m_Name: BossGraph Blackboard
+  m_EditorClassIdentifier: Unity.Behavior.Authoring::Unity.Behavior.BehaviorBlackboardAuthoringAsset
+  AssetID:
+    m_Value0: 0
+    m_Value1: 0
+  m_Variables:
+  - rid: 8353671707150778369
+  - rid: 8353671707150778378
+  - rid: 8353671707150778386
+  - rid: 8353671707150778396
+  - rid: 8353671707150778408
+  m_VersionTimestamp: 639164775916201315
+  m_CommandBuffer:
+    m_Commands: []
+  m_RuntimeBlackboardAsset: {fileID: -6996070228347563734}
+  references:
+    version: 2
+    RefIds:
+    - rid: 8353671707150778369
+      type: {class: 'TypedVariableModel`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778378
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossStateFacade, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 6690711734084317719
+          m_Value1: 7561035839154152391
+        Name: Boss State Facade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778386
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1317533565754856946
+          m_Value1: 6263063795858537545
+        Name: Boss Movement AIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778396
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1707038001490708525
+          m_Value1: 11413210636822117936
+        Name: New Boss Movement AIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778408
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossSharedFacade, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 10098522973658398978
+          m_Value1: 13645487742402175616
+        Name: Boss Shared Facade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bad8f2220607dac4db5082ff333fafb8, type: 3}
+  m_Name: BossGraph
+  m_EditorClassIdentifier: Unity.Behavior.Authoring::Unity.Behavior.BehaviorAuthoringGraph
+  Blackboard: {fileID: -5503066355765760950}
+  m_Description: 
+  m_Nodes:
+  - rid: 8353671707150778370
+  m_VersionTimestamp: 639164775917408687
+  m_SerializedVersion: 2
+  m_DebugInfo: {fileID: 9003436453915977336}
+  m_RuntimeGraph: {fileID: 1607383703168246584}
+  AssetID:
+    m_Value0: 6091709029350342583
+    m_Value1: 10122312685016659530
+  Story:
+    Story: 
+    StoryVariableNames: []
+    Variables: []
+  m_NodeModelsInfo:
+  - Name: On Start
+    Story: 
+    RuntimeTypeString: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    RuntimeTypeID:
+      m_Value0: 3335272451348827663
+      m_Value1: 11549843281177505721
+    Variables: []
+    NamedChildren: []
+    IsPlaceholder: 0
+  m_Blackboards: []
+  m_MainBlackboardAuthoringAsset: {fileID: -5503066355765760950}
+  m_CommandBuffer:
+    m_Commands: []
+  m_SubgraphsInfo: []
+  m_BlackboardMissingManagedRef: 0
+  m_GraphMissingManagedRef: 0
+  m_HasMissingTypeInManagedRef: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8353671707150778370
+      type: {class: StartNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 0, y: 0}
+        ID:
+          m_Value0: 10133156094191166767
+          m_Value1: 4599553584762985424
+        Parents: []
+        PortModels:
+        - rid: 8353671707150778371
+        NodeType:
+          m_SerializableType: Unity.Behavior.Start, Unity.Behavior, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 3335272451348827663
+          m_Value1: 11549843281177505721
+        m_FieldValues: []
+        Repeat: 1
+        AllowMultipleRepeatsPerTick: 0
+    - rid: 8353671707150778371
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 8353671707150778370
+        m_Connections: []
+--- !u!114 &1607383703168246584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db920e62f70f420bb33c771449926fa4, type: 3}
+  m_Name: BossGraph
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraph
+  Graphs:
+  - rid: 8353671707150778372
+  m_DebugInfo: {fileID: 9003436453915977336}
+  m_WasCompileWithPlaceholderNode: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8353671707150778372
+      type: {class: BehaviorGraphModule, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        AuthoringAssetID:
+          m_Value0: 6091709029350342583
+          m_Value1: 10122312685016659530
+        m_DebugInfo: {fileID: 9003436453915977336}
+        BlackboardReference:
+          rid: 8353671707150778373
+        BlackboardGroupReferences: []
+        Root:
+          rid: 8353671707150778416
+        m_VersionTimestamp: 639164775917408687
+    - rid: 8353671707150778373
+      type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        m_Blackboard:
+          rid: 8353671707150778375
+        m_Source: {fileID: -6996070228347563734}
+    - rid: 8353671707150778375
+      type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        m_Variables:
+        - rid: 8353671707150778417
+        - rid: 8353671707150778418
+        - rid: 8353671707150778419
+        - rid: 8353671707150778420
+        - rid: 8353671707150778421
+    - rid: 8353671707150778416
+      type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 10133156094191166767
+          m_Value1: 4599553584762985424
+        Graph:
+          rid: 8353671707150778372
+        m_Parent:
+          rid: -2
+        m_Child:
+          rid: -2
+        Repeat: 1
+        AllowMultipleRepeatsPerTick: 0
+    - rid: 8353671707150778417
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778418
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 6690711734084317719
+          m_Value1: 7561035839154152391
+        Name: Boss State Facade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778419
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1317533565754856946
+          m_Value1: 6263063795858537545
+        Name: Boss Movement AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778420
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1707038001490708525
+          m_Value1: 11413210636822117936
+        Name: New Boss Movement AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671707150778421
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossSharedFacade, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10098522973658398978
+          m_Value1: 13645487742402175616
+        Name: Boss Shared Facade
+        m_Value: {fileID: 0}
+--- !u!114 &9003436453915977336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b27bb6d9a2c8d540a10dff10acc543e, type: 3}
+  m_Name: BossGraph Debug Info
+  m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraphDebugInfo
+  m_CodeBreakPointsList: []
