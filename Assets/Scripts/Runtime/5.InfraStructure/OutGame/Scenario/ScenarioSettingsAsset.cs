@@ -22,8 +22,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         public bool SkipClosesImmediately => _skipClosesImmediately;
         /// <summary> WaitForInputOnLastText を取得する。 </summary>
         public bool WaitForInputOnLastText => _waitForInputOnLastText;
-        /// <summary> DefaultScenarioId を取得する。 </summary>
-        public string DefaultScenarioId => _defaultScenarioId;
 
         [Header("Timing")]
         [Tooltip("通常再生時の1文字あたりの表示間隔（秒）です。")]
@@ -46,8 +44,5 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         [Tooltip("有効な場合、最後のテキストでも入力待ちを行います。無効な場合は最後の表示後に終了へ進みます。")]
         [SerializeField]
         private bool _waitForInputOnLastText = false;
-        [Tooltip("PlayScenario実行時に最初に読み込むシナリオIDです。")]
-        [SerializeField]
-        private string _defaultScenarioId = "test";
     }
 }

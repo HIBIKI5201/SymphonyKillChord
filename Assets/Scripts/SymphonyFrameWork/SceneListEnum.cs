@@ -6,5 +6,5 @@
     InGame = 3,
     Stage_01 = 4,
     InGameDodgeTest = 5,
-    InGameAnimation = 6,
+    Scenario = 6,
 }

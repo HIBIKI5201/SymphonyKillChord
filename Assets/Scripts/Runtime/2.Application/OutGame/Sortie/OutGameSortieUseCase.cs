@@ -45,10 +45,26 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
                 return true;
             }
 
-            return await _sceneTransitionService.ChangeSceneAsync(
-                fromSceneName,
-                targetSceneName,
-                cancellationToken);
+            _outputPort.SetOutGameActiveForScenario(false);
+
+            try
+            {
+                bool success = await _sceneTransitionService.LoadAdditiveAndSetActiveAsync(
+                    targetSceneName,
+                    cancellationToken);
+
+                if (!success)
+                {
+                    _outputPort.SetOutGameActiveForScenario(true);
+                }
+
+                return success;
+            }
+            catch
+            {
+                _outputPort.SetOutGameActiveForScenario(true);
+                throw;
+            }
         }
 
         private readonly ISceneTransitionService _sceneTransitionService;

@@ -28,6 +28,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _isPlaying;
         private bool _isDodge;
         private Vector2 _moveVector;
+        private Vector2 _dogeVector;
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
@@ -154,6 +155,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 {
                     return;
                 }
+                _dogeVector = _moveVector;
                 _isDodge = true;
                 _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
@@ -243,15 +245,16 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
+                Vector2 dodgeDir = _dogeVector;
                 // 移動入力がない場合は、前方を回避方向とする
-                if (dir.sqrMagnitude <= float.Epsilon)
+                if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
                     var fwd = _cacheTransform.forward;
-                    dir.x = fwd.x;
-                    dir.y = fwd.z;
+                    dodgeDir.x = fwd.x;
+                    dodgeDir.y = fwd.z;
                 }
-
-                _controller.TryDodge(dir, Time.time);
+                dodgeDir = Rotate(dodgeDir, -_cameraTransform.eulerAngles.y);
+                _controller.TryDodge(dodgeDir, Time.time);
                 _isDodge = false;
             }
 

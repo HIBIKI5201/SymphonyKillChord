@@ -205,6 +205,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStartGame += HandleStartGame;
+            _outGameUIEvent.OnOutGameUiVisibilityChanged += HandleOutGameUiVisibilityChanged;
         }
 
         /// <summary>
@@ -221,6 +222,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStartGame -= HandleStartGame;
+            _outGameUIEvent.OnOutGameUiVisibilityChanged -= HandleOutGameUiVisibilityChanged;
 
             _outGameUIEvent.UnregisterOutGameUIEvent();
         }
@@ -329,6 +331,28 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 currentSceneName,
                 targetSceneName,
                 _ctsTransition.Token);
+        }
+
+        /// <summary>
+        ///     OutGame UIの表示状態変更イベントを処理します。
+        /// </summary>
+        /// <param name="isVisible">表示する場合はtrue。</param>
+        private void HandleOutGameUiVisibilityChanged(bool isVisible)
+        {
+            if (_uiDocument == null)
+            {
+                return;
+            }
+
+            VisualElement rootElement = _uiDocument.rootVisualElement;
+            if (rootElement == null)
+            {
+                return;
+            }
+
+            rootElement.style.display = isVisible
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
         }
 
         /// <summary>
