@@ -35,6 +35,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
         [SerializeField] private NecrodancerRhythmGuideInitializer _necrodancerRhythmGuideInitializer;
+        [SerializeField] private BPMRhythmGuideInitializer _bpmRhythmGuideInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
         [SerializeField] private EnemyPools _enemyPools;
         [SerializeField] private EnemyInitializer _enemyInitializer;
@@ -178,6 +179,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _rhythmGuideInitializer.Initialize();
             _necrodancerRhythmGuideInitializer.Initialize();
+            _bpmRhythmGuideInitializer.Initialize();
 
             _inGameSequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
@@ -269,6 +271,11 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             if (_necrodancerRhythmGuideInitializer == null)
             {
                 Debug.LogError("[IngameComposition] NecrodancerRhythmGuideInitializerの参照が未設定です。", this);
+                return false;
+            }
+            if (_bpmRhythmGuideInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] BPMRhythmGuideInitializerの参照が未設定です。", this);
                 return false;
             }
             if (_stageSequenceView == null)
