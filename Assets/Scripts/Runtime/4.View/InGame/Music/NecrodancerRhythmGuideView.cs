@@ -92,13 +92,16 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
             }
 
+            Image img;
+            Color c;
+            bool isActive;
             for (int i = 0; i < _beatImages.Length; i++)
             {
-                var img = _beatImages[i];
+                img = _beatImages[i];
                 if (img == null) continue;
 
-                Color c = img.color;
-                bool isActive = (i == activeIndex);
+                c = img.color;
+                isActive = (i == activeIndex);
                 c.a = isActive ? 1f : 0.5f;
                 img.color = c;
             }
