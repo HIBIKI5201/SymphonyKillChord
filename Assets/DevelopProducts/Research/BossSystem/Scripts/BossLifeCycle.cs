@@ -59,7 +59,10 @@ namespace DevelopProducts.Boss
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
             if (_attackEntries == null || _attackEntries.Length == 0)
+            {
                 Debug.LogError("攻撃エントリ(_attackEntries)が設定されていません。");
+                return;
+            }
 
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
@@ -192,7 +195,6 @@ namespace DevelopProducts.Boss
             if (_missionEventController != null && _missionKeyAsset != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
-                _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             }
             _targetManagerController?.Unregister(_lockOnTargetGateway);
             _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
@@ -291,7 +293,12 @@ namespace DevelopProducts.Boss
         /// </summary>
         private void HandleEnemyDied(CharacterEntity _)
         {
+            if (_missionEventController != null && _missionKeyAsset != null)
+            {
+                _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
+            }
             Deactivate();
+
         }
 
         private void OnDestroy()

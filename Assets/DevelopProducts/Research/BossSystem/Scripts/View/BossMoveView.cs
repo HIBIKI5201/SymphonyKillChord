@@ -92,6 +92,8 @@ namespace DevelopProducts.Boss
 
             _bossAIController.OnAttackReserved -= PlayEffectReserved;
             _bossAIController.OnAttack -= PlayEffectHit;
+            _bossAIController.On1BeatBefore -= On1BeatBefore;
+            _bossAIController.On2BeatBefore -= On2BeatBefore;
             _bossAIController.Dispose();
         }
 
