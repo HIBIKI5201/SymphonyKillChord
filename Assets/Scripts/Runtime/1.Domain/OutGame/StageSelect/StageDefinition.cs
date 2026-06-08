@@ -18,8 +18,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="reward"> ステージの報酬情報。 </param>
         /// <param name="missionDefinition"> ステージのミッション定義。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
+        /// <param name="battleSceneName"> バトルパートのシーン名。 </param>
         public StageDefinition(StageId stageId, StageType stageType, string stageName, string flavorText,
-            StageReward reward, string targetSceneName,string scenarioId = "" ,MissionDefinition missionDefinition = null)
+            StageReward reward, string targetSceneName, string battleSceneName, string scenarioId = "" ,MissionDefinition missionDefinition = null)
         {
             if (string.IsNullOrEmpty(targetSceneName))
             {
@@ -32,6 +33,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _flavorText = flavorText;
             _reward = reward;
             _targetSceneName = targetSceneName;
+            _battleSceneName = battleSceneName;
             _scenarioId = scenarioId ?? string.Empty;
             _missionDefinition = missionDefinition;
         }
@@ -47,7 +49,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <summary> ステージの報酬情報。 </summary>
         public StageReward Reward => _reward;
         /// <summary> ステージのターゲットシーン名。 </summary>
-        public string TargetSceneName => _targetSceneName;  
+        public string TargetSceneName => _targetSceneName;
+        /// <summary> バトルパートのシーン名。 </summary>
+        public string BattleSceneName => _battleSceneName;
         /// <summary> ステージのシナリオID。 </summary>
         public string ScenarioId => _scenarioId;
         /// <summary> ステージのミッション定義。 </summary>
@@ -59,6 +63,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         private readonly string _flavorText;
         private readonly StageReward _reward;
         private readonly string _targetSceneName;
+        private readonly string _battleSceneName;
         private readonly string _scenarioId;
         private readonly MissionDefinition _missionDefinition;
     }
