@@ -6,6 +6,8 @@ on:
       - develop
     types: [closed]
 
+  workflow_dispatch:       # 手動実行も可能。
+
 permissions:
   contents: write      # リリース作成のために必要
 
