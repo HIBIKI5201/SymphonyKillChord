@@ -15,7 +15,7 @@ MonoBehaviour:
   _attackName: "\u901A\u5E38\u653B\u64831"
   _baseDamage: 10
   _attackParameterSetData: {fileID: 11400000, guid: 8faf63df57de1094ab5a168e38099746, type: 2}
-  _attackPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: 350334df01949bb4fadee0b378b43907, type: 2}
   _justDamageMultiplier: 1
   _useBeatType: 0
   _beatType: 0

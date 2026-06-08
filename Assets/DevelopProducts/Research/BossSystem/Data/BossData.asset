@@ -17,3 +17,5 @@ MonoBehaviour:
   _maxHealth: 500
   _attackDifinitions:
   - {fileID: 11400000, guid: 4f522906838d7a245afbd2bd069ec923, type: 2}
+  - {fileID: 11400000, guid: 87ce44739b8bbef4da3aba044d24f102, type: 2}
+  - {fileID: 11400000, guid: 0759d3ee94fcd134c8530574b04ec5a9, type: 2}

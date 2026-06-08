@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: BossParamererSetData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Battle.AttackParameterSetData
   _criticalChance: 0
-  _criticalDamageMultiplier: 0
+  _criticalDamageMultiplier: 1
   _confirmedDamage: 0
