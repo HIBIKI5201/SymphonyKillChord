@@ -76,7 +76,6 @@ GameObject:
   - component: {fileID: 4877291778978284914}
   - component: {fileID: -6880971324520778393}
   - component: {fileID: 7750579596343814766}
-  - component: {fileID: -2625927772269966}
   - component: {fileID: 6619117660693068914}
   - component: {fileID: -8556356520204914904}
   - component: {fileID: -5640712038900430492}
@@ -123,12 +122,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
   _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
   _player: {fileID: 7750579596343814766}
-  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
+  _skillRepository: {fileID: 11400000, guid: 8f8d7fb175cdb054bb9439f0d1bb8dda, type: 2}
   _skillVisuals:
   - {fileID: 1160853068716909059}
   - {fileID: -4916133229582652887}
   - {fileID: 1192430313035069498}
   - {fileID: 7852414029176531134}
+  _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _characterAnimationView: {fileID: 3246823200832017395}
+  _characterAnimationCatalogAsset: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
   _equippedSkills:
   - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
@@ -151,22 +153,6 @@ MonoBehaviour:
   _animator: {fileID: 7554209699097654958}
   _rb: {fileID: 6619117660693068914}
   _seSource: {fileID: 4704850274294587580}
-  _attackInterval: 1
---- !u!114 &-2625927772269966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3339157675331060313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d24540182c664045867ee6da2f0dd10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
-  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
-  _skillVisuals:
-  - {fileID: 1160853068716909059}
 --- !u!54 &6619117660693068914
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1991,6 +1977,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6896593460022464294}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3246823200832017395}
   m_SourcePrefab: {fileID: 100100000, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
 --- !u!4 &133838188508236879 stripped
 Transform:
@@ -2322,6 +2311,19 @@ MonoBehaviour:
   - {fileID: 5209942940970827830}
   - {fileID: 8838003232234665038}
   - {fileID: 1896497447538463727}
+--- !u!114 &3246823200832017395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3854533494831789678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e4266b03dd11a847a990b9971a7cad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
+  _attackRampUpRatio: 0.25
 --- !u!4 &3902374432798108195 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1123473033512182044, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
