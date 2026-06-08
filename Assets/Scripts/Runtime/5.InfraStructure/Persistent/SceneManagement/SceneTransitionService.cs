@@ -3,6 +3,7 @@ using SymphonyFrameWork.System.SceneLoad;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 {
@@ -49,11 +50,45 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+
+        public async Task<bool> LoadAdditiveAsync(string sceneName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return false;
+            }
+
+            return await SceneLoader.LoadScene(
+                sceneName,
+                null,
+                LoadSceneMode.Additive,
+                cancellationToken);
+        }
+
+
+        public async Task<bool> UnloadAsync(string sceneName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return false;
+            }
+
+            if (!SceneLoader.IsExist(sceneName))
+            {
+                return false;
+            }
+
+            return await SceneLoader.UnloadScene(
+                sceneName,
+                null,
+                cancellationToken);
+        }
+
         public async ValueTask<bool> LoadAdditiveAndSetActiveAsync(
-            string toSceneName, 
+            string toSceneName,
             CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(toSceneName))
+            if (string.IsNullOrEmpty(toSceneName))
             {
                 Debug.LogError("シーン名が無効です。");
                 return false;
@@ -82,7 +117,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
         public async ValueTask<bool> UnloadAndSetActiveAsync(
-            string unloadSceneName, string activeSceneName, 
+            string unloadSceneName, string activeSceneName,
             CancellationToken cancellationToken)
         {
             if (!SceneLoader.SetActiveScene(activeSceneName))
