@@ -1,3 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Camera;
@@ -16,6 +18,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
@@ -28,7 +31,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     {
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
         [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
@@ -50,7 +52,19 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
         private async void Start()
         {
-            await _ingameSceneView.LoadScene(_backgroundSceneName);
+            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            {
+                Debug.LogError("[IngameComposition] SelectedBattleStageStateが取得できませんでした", this);
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
+            {
+                Debug.LogError("[IngameComposition] SceneTransitionControllerが取得できませんでした", this);
+            }
+
+            await sceneTransitionController.LoadAdditiveAsync(
+                selectedBattleStageState.CurrentBattleStageName, CancellationToken.None
+                ); 
 
             if (!await TryInitializeAsync())
             {
@@ -230,11 +244,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] CameraSystemInitializerの参照が未設定です。", this);
                 return false;
             }
-            if (_ingameSceneView == null)
-            {
-                Debug.LogError("[IngameComposition] IngameSceneViewの参照が未設定です。", this);
-                return false;
-            }
             if (_enemyPools == null)
             {
                 Debug.LogError("[IngameComposition] EnemyPoolsの参照が未設定です。", this);
@@ -275,7 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] InGamePlayDirectorの参照が未設定です。", this);
                 return false;
             }
-            if(_stageResultUIView == null)
+            if (_stageResultUIView == null)
             {
                 Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
                 return false;
