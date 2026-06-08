@@ -12,7 +12,7 @@ namespace DevelopProducts.Boss
     /// <summary>
     ///     ボスの行動を制御するコントローラー。
     ///     複数の攻撃パターンを保持し、予約のたびにどれを撃つかを選択する。
-    ///     方針2のため、攻撃定義の差し替え（SetCurrentAttack）は使わず、
+    ///     攻撃定義の差し替え（SetCurrentAttack）は使わず、
     ///     各パターンが定義固定の専用Controllerを持つ。
     /// </summary>
     public sealed class BossAIController : IDisposable

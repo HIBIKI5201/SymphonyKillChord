@@ -506,6 +506,118 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: m_Graph
+      value: 
+      objectReference: {fileID: -2324828011024662561, guid: f133828652a818e44899a680eb278118, type: 2}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: m_OriginalGraph
+      value: 
+      objectReference: {fileID: -2324828011024662561, guid: f133828652a818e44899a680eb278118, type: 2}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'managedReferences[8353671722807853431]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[DevelopProducts.Boss.BossBattleAIFacade,
+        DevelopProducts-Boss]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'managedReferences[8353671722807853432]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade,
+        DevelopProducts-Boss]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'managedReferences[8353671722807853433]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[DevelopProducts.Boss.BossSharedFacade,
+        DevelopProducts-Boss]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'managedReferences[8353671722807853434]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade,
+        DevelopProducts-Boss]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853431].Name
+      value: Boss Battle AIFacade
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853432].Name
+      value: Boss Movement AIFacade
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853433].Name
+      value: Boss Shared Facade
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853434].Name
+      value: Boss State Facade
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: m_BlackboardVariableOverridesList.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853431].m_Value
+      value: 
+      objectReference: {fileID: 1812356053}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853432].m_Value
+      value: 
+      objectReference: {fileID: 1812356052}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853433].m_Value
+      value: 
+      objectReference: {fileID: 1812356051}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853434].m_Value
+      value: 
+      objectReference: {fileID: 1812356050}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[1]'
+      value: 8353671722807853431
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[2]'
+      value: 8353671722807853432
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[3]'
+      value: 8353671722807853433
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[4]'
+      value: 8353671722807853434
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853431].GUID.m_Value0
+      value: 1947231644087476086
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853431].GUID.m_Value1
+      value: 13465903865307256253
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853432].GUID.m_Value0
+      value: 12697459224287993256
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853432].GUID.m_Value1
+      value: 14639025913209292480
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853433].GUID.m_Value0
+      value: 9529682487250638392
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853433].GUID.m_Value1
+      value: 4892901199811365514
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853434].GUID.m_Value0
+      value: 11038894497716435248
+      objectReference: {fileID: 0}
+    - target: {fileID: 7745163353530437078, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+      propertyPath: managedReferences[8353671722807853434].GUID.m_Value1
+      value: 9918647191724063549
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -574,6 +686,50 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4381861589023682040, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
   m_PrefabInstance: {fileID: 1401963045}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1812356050 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3214863623344856649, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+  m_PrefabInstance: {fileID: 1401963045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f3ae79edbc4924394a7666edb839c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Boss.BossStateFacade
+--- !u!114 &1812356051 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1829073922509269005, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+  m_PrefabInstance: {fileID: 1401963045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 767a9487aba91d44c9db91322e76b186, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Boss.BossSharedFacade
+--- !u!114 &1812356052 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3681290833048637974, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+  m_PrefabInstance: {fileID: 1401963045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a24aad4122dd197419a6504221aff976, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Boss.BossMovementAIFacade
+--- !u!114 &1812356053 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5381298403583571509, guid: 99465033fe0464d4687fa1931c992fb8, type: 3}
+  m_PrefabInstance: {fileID: 1401963045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7448b704c7a18f54a927ef9d936b85fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Boss.BossBattleAIFacade
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
