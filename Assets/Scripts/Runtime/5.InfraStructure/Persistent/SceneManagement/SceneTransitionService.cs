@@ -51,18 +51,34 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
 
-        public async Task<bool> LoadAdditiveAsync(string sceneName, CancellationToken cancellationToken)
+        public async Task<bool> LoadAdditiveAsync(
+            string sceneName, 
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(sceneName))
             {
+                Debug.LogError("[SceneTransitionService] ロード対象のシーン名が空です。");
                 return false;
             }
 
-            return await SceneLoader.LoadScene(
+            if (SceneLoader.GetExistScene(sceneName, out Scene loadedScene) && loadedScene.isLoaded)
+            {
+                return true;
+            }
+
+            bool loadSuccess = await SceneLoader.LoadScene(
                 sceneName,
                 null,
                 LoadSceneMode.Additive,
                 cancellationToken);
+
+            if (!loadSuccess)
+            {
+                Debug.LogError($"[SceneTransitionService] シーンのAdditiveロードに失敗しました。SceneName: {sceneName}");
+                return false;
+            }
+
+            return true;
         }
 
 
