@@ -6,6 +6,8 @@ on:
       - develop
     types: [closed]
 
+  workflow_dispatch:       # 手動実行も可能。
+
 permissions:
   contents: write      # リリース作成のために必要
 
@@ -14,6 +16,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: self-hosted
     timeout-minutes: 120  # ビルド処理が長くなる可能性があるため、タイムアウトを設定
+    environment: 'AutoBuildAndRelease'
 
     steps:
       - name: Checkout Repository
