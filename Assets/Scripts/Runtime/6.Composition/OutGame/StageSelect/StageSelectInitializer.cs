@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
@@ -52,6 +53,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private string _currentSceneName;
         private StageSelectOpenUseCase _openUseCase;
         private SelectedScenarioState _selectedScenarioState;
+        private SelectedBattleStageState _selectedBattleStageState;
+        private bool _registeredSelectedBattleStageState;
 
         /// <summary>
         ///     初期化を行います。
@@ -120,9 +123,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleSortieRequested()
         {
-            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName,out var scenarioId, out var missionDefinition))
-            {
+            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName,out var battleStageScene, out var scenarioId, out var missionDefinition))
+            {   
                 return;
+            }
+
+            if(stageType == StageType.Battle)
+            {
+                _selectedBattleStageState.SelectBattleStage(battleStageScene);
             }
 
             if(stageType == StageType.Scenario)
@@ -160,6 +168,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void Initialize()
         {
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
+            {
+                _selectedBattleStageState = new SelectedBattleStageState();
+
+                ServiceLocator.RegisterInstance(_selectedBattleStageState);
+
+                _registeredSelectedBattleStageState = true;
+            }
+
+
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
 #if UNITY_EDITOR

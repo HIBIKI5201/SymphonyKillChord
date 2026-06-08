@@ -39,6 +39,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 _flavorText,
                 new StageReward(_rewardSkillBuildPoint, _rewardSkillUnlockPoint),
                 _targetSceneName,
+                _stageType == StageType.Battle ? _battleSceneName : string.Empty,
                 _stageType == StageType.Scenario ? _scenarioId : string.Empty,
                 missionDefinition);
 
@@ -75,7 +76,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名。")]
         private string _targetSceneName;
 
-        [SerializeField,Tooltip("シナリオパートで再生するシナリオId")]
+        [Header("バトルパート情報（バトルパートの場合のみ）")]
+        [SerializeField, SceneNameSelector, Tooltip("バトルパートで遷移するステージシーン名。シナリオパートは空欄にすること。")]
+        private string _battleSceneName;
+
+        [Header("シナリオパート情報（シナリオパートの場合のみ）")]
+        [SerializeField, Tooltip("シナリオパートで再生するシナリオId")]
         private string _scenarioId;
 
         [Header("クリア報酬")]
