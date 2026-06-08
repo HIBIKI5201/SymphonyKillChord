@@ -145,6 +145,8 @@ namespace DevelopProducts.Boss
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _reservationUsecase.Dispose();
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
+            _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
+            _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
         }
 
         /// <summary>
