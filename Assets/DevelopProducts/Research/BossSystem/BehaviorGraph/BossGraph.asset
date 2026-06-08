@@ -112,8 +112,8 @@ MonoBehaviour:
           rid: 8353671707150779267
         BlackboardGroupReferences: []
         Root:
-          rid: 8353671722807853413
-        m_VersionTimestamp: 639165376218293568
+          rid: 8353671723436998853
+        m_VersionTimestamp: 639165396711163498
     - rid: 8353671707150779267
       type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -124,52 +124,12 @@ MonoBehaviour:
       type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         m_Variables:
-        - rid: 8353671707150779332
-        - rid: 8353671707150779333
-        - rid: 8353671707150779334
-        - rid: 8353671707150779335
-        - rid: 8353671707150779336
-    - rid: 8353671707150779332
-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1
-          m_Value1: 0
-        Name: Self
-        m_Value: {fileID: 0}
-    - rid: 8353671707150779333
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1947231644087476086
-          m_Value1: 13465903865307256253
-        Name: Boss Battle AIFacade
-        m_Value: {fileID: 0}
-    - rid: 8353671707150779334
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 12697459224287993256
-          m_Value1: 14639025913209292480
-        Name: Boss Movement AIFacade
-        m_Value: {fileID: 0}
-    - rid: 8353671707150779335
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossSharedFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 9529682487250638392
-          m_Value1: 4892901199811365514
-        Name: Boss Shared Facade
-        m_Value: {fileID: 0}
-    - rid: 8353671707150779336
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 11038894497716435248
-          m_Value1: 9918647191724063549
-        Name: Boss State Facade
-        m_Value: {fileID: 0}
-    - rid: 8353671707150779359
+        - rid: 8353671723436998855
+        - rid: 8353671723436998856
+        - rid: 8353671723436998857
+        - rid: 8353671723436998858
+        - rid: 8353671723436998859
+    - rid: 8353671722807853460
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -177,7 +137,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 1
-    - rid: 8353671722807853166
+    - rid: 8353671722807853463
       type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -185,7 +145,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: 0
-    - rid: 8353671722807853413
+    - rid: 8353671723436998853
       type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -196,10 +156,10 @@ MonoBehaviour:
         m_Parent:
           rid: -2
         m_Child:
-          rid: 8353671722807853414
+          rid: 8353671723436998854
         Repeat: 1
         AllowMultipleRepeatsPerTick: 0
-    - rid: 8353671722807853414
+    - rid: 8353671723436998854
       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -208,14 +168,54 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853413
+          rid: 8353671723436998853
         m_Children:
-        - rid: 8353671722807853415
-        - rid: 8353671722807853416
+        - rid: 8353671723436998860
+        - rid: 8353671723436998861
         m_RegisteredObservers:
         - Observer:
-            rid: 8353671722807853416
-    - rid: 8353671722807853415
+            rid: 8353671723436998861
+    - rid: 8353671723436998855
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998856
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1947231644087476086
+          m_Value1: 13465903865307256253
+        Name: Boss Battle AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998857
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12697459224287993256
+          m_Value1: 14639025913209292480
+        Name: Boss Movement AIFacade
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998858
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossSharedFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9529682487250638392
+          m_Value1: 4892901199811365514
+        Name: Boss Shared Facade
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998859
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 11038894497716435248
+          m_Value1: 9918647191724063549
+        Name: Boss State Facade
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998860
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -224,14 +224,14 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853414
+          rid: 8353671723436998854
         m_Child:
-          rid: 8353671722807853417
+          rid: 8353671723436998862
         m_Conditions:
-        - rid: 8353671722807853418
+        - rid: 8353671723436998863
         m_RequiresAllConditions: 0
         m_ObserverType: 0
-    - rid: 8353671722807853416
+    - rid: 8353671723436998861
       type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -240,14 +240,14 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853414
+          rid: 8353671723436998854
         m_Child:
-          rid: 8353671722807853419
+          rid: 8353671723436998864
         m_Conditions:
-        - rid: 8353671722807853420
+        - rid: 8353671723436998865
         m_RequiresAllConditions: 0
         m_AbortTarget: 2
-    - rid: 8353671722807853417
+    - rid: 8353671723436998862
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -256,21 +256,21 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853415
+          rid: 8353671723436998860
         m_Children:
-        - rid: 8353671722807853421
-        - rid: 8353671722807853422
+        - rid: 8353671723436998866
+        - rid: 8353671723436998867
         m_RegisteredObservers: []
-    - rid: 8353671722807853418
+    - rid: 8353671723436998863
       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
           rid: 8353671707150779266
         State:
-          rid: 8353671722807853423
+          rid: 8353671723436998868
         Bool:
-          rid: 8353671707150779359
-    - rid: 8353671722807853419
+          rid: 8353671722807853460
+    - rid: 8353671723436998864
       type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -279,20 +279,20 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853416
+          rid: 8353671723436998861
         m_Child:
-          rid: 8353671722807853424
+          rid: 8353671723436998869
         m_AllowMultipleRepeatsPerTick: 0
-    - rid: 8353671722807853420
+    - rid: 8353671723436998865
       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
           rid: 8353671707150779266
         State:
-          rid: 8353671722807853425
+          rid: 8353671723436998870
         Bool:
-          rid: 8353671722807853166
-    - rid: 8353671722807853421
+          rid: 8353671722807853463
+    - rid: 8353671723436998866
       type: {class: BossStopMovingAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
@@ -301,12 +301,12 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853417
+          rid: 8353671723436998862
         Movement:
-          rid: 8353671707150779334
+          rid: 8353671723436998857
         State:
-          rid: 8353671707150779336
-    - rid: 8353671722807853422
+          rid: 8353671723436998859
+    - rid: 8353671723436998867
       type: {class: BossGetStunnedAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
@@ -315,12 +315,12 @@ MonoBehaviour:
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853417
+          rid: 8353671723436998862
         State:
-          rid: 8353671707150779336
+          rid: 8353671723436998859
         Battle:
-          rid: 8353671707150779333
-    - rid: 8353671722807853423
+          rid: 8353671723436998856
+    - rid: 8353671723436998868
       type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -329,100 +329,87 @@ MonoBehaviour:
         Name: 
         m_Value: {fileID: 0}
         m_LinkedVariable:
-          rid: 8353671707150779336
-    - rid: 8353671722807853424
-      type: {class: RepeaterModifier, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 2804854020584853242
-          m_Value1: 12021572459897700598
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8353671722807853419
-        m_Child:
-          rid: 8353671722807853426
-        m_AllowMultipleRepeatsPerTick: 0
-    - rid: 8353671722807853425
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8353671707150779336
-    - rid: 8353671722807853426
+          rid: 8353671723436998859
+    - rid: 8353671723436998869
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
-          m_Value0: 14406629402457892145
-          m_Value1: 13027057388512493238
+          m_Value0: 8791596817553281394
+          m_Value1: 3776550087554662360
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853424
+          rid: 8353671723436998864
         m_Children:
-        - rid: 8353671722807853427
-        - rid: 8353671722807853428
+        - rid: 8353671723436998871
+        - rid: 8353671723436998872
         m_RegisteredObservers: []
-    - rid: 8353671722807853427
+    - rid: 8353671723436998870
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8353671723436998859
+    - rid: 8353671723436998871
       type: {class: BossMoveToAttackAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
-          m_Value0: 14406629402457892145
-          m_Value1: 13027057388512493238
+          m_Value0: 8791596817553281394
+          m_Value1: 3776550087554662360
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853426
+          rid: 8353671723436998869
         Movement:
-          rid: 8353671707150779334
+          rid: 8353671723436998857
         State:
-          rid: 8353671707150779336
-    - rid: 8353671722807853428
+          rid: 8353671723436998859
+    - rid: 8353671723436998872
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
-          m_Value0: 4157690906850532644
-          m_Value1: 3770020216045153666
+          m_Value0: 11930641162824848114
+          m_Value1: 9721971629474659164
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853426
+          rid: 8353671723436998869
         m_Children:
-        - rid: 8353671722807853429
-        - rid: 8353671722807853430
+        - rid: 8353671723436998873
+        - rid: 8353671723436998874
         m_RegisteredObservers: []
-    - rid: 8353671722807853429
+    - rid: 8353671723436998873
       type: {class: BossStopMovingAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
-          m_Value0: 4157690906850532644
-          m_Value1: 3770020216045153666
+          m_Value0: 11930641162824848114
+          m_Value1: 9721971629474659164
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853428
+          rid: 8353671723436998872
         Movement:
-          rid: 8353671707150779334
+          rid: 8353671723436998857
         State:
-          rid: 8353671707150779336
-    - rid: 8353671722807853430
+          rid: 8353671723436998859
+    - rid: 8353671723436998874
       type: {class: BossAttackTargetAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
-          m_Value0: 12231517673796068896
-          m_Value1: 13515254744228053511
+          m_Value0: 4122637960115304867
+          m_Value1: 12157780775917834791
         Graph:
           rid: 8353671707150779266
         m_Parent:
-          rid: 8353671722807853428
+          rid: 8353671723436998872
         Battle:
-          rid: 8353671707150779333
+          rid: 8353671723436998856
         State:
-          rid: 8353671707150779336
+          rid: 8353671723436998859
 --- !u!114 &-1925673734827059310
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -523,11 +510,10 @@ MonoBehaviour:
   - rid: 8353671707150779385
   - rid: 8353671722807853129
   - rid: 8353671722807853178
-  - rid: 8353671722807853220
-  - rid: 8353671722807853248
-  - rid: 8353671722807853271
-  - rid: 8353671722807853296
-  m_VersionTimestamp: 639165376218293568
+  - rid: 8353671723336074144
+  - rid: 8353671723336074171
+  - rid: 8353671723336074234
+  m_VersionTimestamp: 639165396711163498
   m_SerializedVersion: 2
   m_DebugInfo: {fileID: -6316138842400658221}
   m_RuntimeGraph: {fileID: -2324828011024662561}
@@ -627,16 +613,6 @@ MonoBehaviour:
     RuntimeTypeID:
       m_Value0: 11621593790572692340
       m_Value1: 10219770791897163173
-    Variables: []
-    NamedChildren: []
-    IsPlaceholder: 0
-  - Name: Repeat
-    Story: 
-    RuntimeTypeString: Unity.Behavior.RepeaterModifier, Unity.Behavior, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-    RuntimeTypeID:
-      m_Value0: 3696095273264312494
-      m_Value1: 14191201703811421854
     Variables: []
     NamedChildren: []
     IsPlaceholder: 0
@@ -765,7 +741,7 @@ MonoBehaviour:
     - rid: 8353671707150779343
       type: {class: ConditionalGuardNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        Position: {x: -197.69995, y: 207.7}
+        Position: {x: -249.69995, y: 207.7}
         ID:
           m_Value0: 4377907921342068016
           m_Value1: 12918410418094005627
@@ -873,7 +849,7 @@ MonoBehaviour:
     - rid: 8353671707150779370
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        Position: {x: -197.69995, y: 315.7}
+        Position: {x: -249.69995, y: 315.7}
         ID:
           m_Value0: 1634618623071459286
           m_Value1: 7906543182792848808
@@ -951,7 +927,7 @@ MonoBehaviour:
     - rid: 8353671707150779385
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        Position: {x: -197.69995, y: 403.7}
+        Position: {x: -249.69995, y: 403.7}
         ID:
           m_Value0: 18308684116021897195
           m_Value1: 10991797778514411948
@@ -1186,141 +1162,18 @@ MonoBehaviour:
         m_NodeModel:
           rid: 8353671722807853178
         m_Connections:
-        - rid: 8353671722807853221
-    - rid: 8353671722807853220
-      type: {class: RepeatNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        Position: {x: 216.30005, y: 403.7}
-        ID:
-          m_Value0: 2804854020584853242
-          m_Value1: 12021572459897700598
-        Parents: []
-        PortModels:
-        - rid: 8353671722807853221
-        - rid: 8353671722807853222
-        NodeType:
-          m_SerializableType: Unity.Behavior.RepeaterModifier, Unity.Behavior, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-        NodeTypeID:
-          m_Value0: 3696095273264312494
-          m_Value1: 14191201703811421854
-        m_FieldValues: []
-        AllowMultipleRepeatsPerTick: 0
-        <ConditionModels>k__BackingField: []
-        <RequiresAllConditionsTrue>k__BackingField: 0
-        <ShouldTruncateNodeUI>k__BackingField: 0
-        m_RepeatMode: 0
-        <ObserverType>k__BackingField: 0
-        <ReturnFailureOnConditionFail>k__BackingField: 1
-    - rid: 8353671722807853221
-      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        m_Name: InputPort
-        m_PortDataFlowType: 0
-        m_IsFloating: 0
-        m_NodeModel:
-          rid: 8353671722807853220
-        m_Connections:
-        - rid: 8353671722807853181
-    - rid: 8353671722807853222
-      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        m_Name: OutputPort
-        m_PortDataFlowType: 1
-        m_IsFloating: 0
-        m_NodeModel:
-          rid: 8353671722807853220
-        m_Connections:
-        - rid: 8353671722807853249
-    - rid: 8353671722807853248
+        - rid: 8353671723336074172
+    - rid: 8353671723336074144
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         Position: {x: 216.30005, y: 491.7}
         ID:
-          m_Value0: 14406629402457892145
-          m_Value1: 13027057388512493238
+          m_Value0: 11930641162824848114
+          m_Value1: 9721971629474659164
         Parents: []
         PortModels:
-        - rid: 8353671722807853249
-        - rid: 8353671722807853250
-        NodeType:
-          m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossMoveToAttackAction,
-            DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        NodeTypeID:
-          m_Value0: 1749550554756145586
-          m_Value1: 1326303793270471824
-        m_FieldValues:
-        - rid: 8353671722807853251
-        - rid: 8353671722807853252
-    - rid: 8353671722807853249
-      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        m_Name: InputPort
-        m_PortDataFlowType: 0
-        m_IsFloating: 0
-        m_NodeModel:
-          rid: 8353671722807853248
-        m_Connections:
-        - rid: 8353671722807853222
-    - rid: 8353671722807853250
-      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        m_Name: OutputPort
-        m_PortDataFlowType: 1
-        m_IsFloating: 0
-        m_NodeModel:
-          rid: 8353671722807853248
-        m_Connections:
-        - rid: 8353671722807853272
-    - rid: 8353671722807853251
-      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        FieldName: Movement
-        Type:
-          m_SerializableType: DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        LocalValue:
-          rid: 8353671722807853253
-        LinkedVariable:
-          rid: 8353671722807853066
-    - rid: 8353671722807853252
-      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        FieldName: State
-        Type:
-          m_SerializableType: DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        LocalValue:
-          rid: 8353671722807853254
-        LinkedVariable:
-          rid: 8353671707150779364
-    - rid: 8353671722807853253
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-    - rid: 8353671722807853254
-      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-    - rid: 8353671722807853271
-      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        Position: {x: 216.30005, y: 579.7}
-        ID:
-          m_Value0: 4157690906850532644
-          m_Value1: 3770020216045153666
-        Parents: []
-        PortModels:
-        - rid: 8353671722807853272
-        - rid: 8353671722807853273
+        - rid: 8353671723336074145
+        - rid: 8353671723336074146
         NodeType:
           m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossStopMovingAction,
             DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -1328,29 +1181,29 @@ MonoBehaviour:
           m_Value0: 2974899849266516675
           m_Value1: 2555981178401508609
         m_FieldValues:
-        - rid: 8353671722807853274
-        - rid: 8353671722807853275
-    - rid: 8353671722807853272
+        - rid: 8353671723336074147
+        - rid: 8353671723336074148
+    - rid: 8353671723336074145
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         m_Name: InputPort
         m_PortDataFlowType: 0
         m_IsFloating: 0
         m_NodeModel:
-          rid: 8353671722807853271
+          rid: 8353671723336074144
         m_Connections:
-        - rid: 8353671722807853250
-    - rid: 8353671722807853273
+        - rid: 8353671723336074173
+    - rid: 8353671723336074146
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         m_Name: OutputPort
         m_PortDataFlowType: 1
         m_IsFloating: 0
         m_NodeModel:
-          rid: 8353671722807853271
+          rid: 8353671723336074144
         m_Connections:
-        - rid: 8353671722807853297
-    - rid: 8353671722807853274
+        - rid: 8353671723336074235
+    - rid: 8353671723336074147
       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         FieldName: Movement
@@ -1358,10 +1211,10 @@ MonoBehaviour:
           m_SerializableType: DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
-          rid: 8353671722807853276
+          rid: 8353671723336074149
         LinkedVariable:
-          rid: 8353671722807853066
-    - rid: 8353671722807853275
+          rid: 8353671723436998740
+    - rid: 8353671723336074148
       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         FieldName: State
@@ -1369,10 +1222,10 @@ MonoBehaviour:
           m_SerializableType: DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
-          rid: 8353671722807853277
+          rid: 8353671723336074150
         LinkedVariable:
-          rid: 8353671707150779364
-    - rid: 8353671722807853276
+          rid: 8353671723436998763
+    - rid: 8353671723336074149
       type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1380,7 +1233,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: {fileID: 0}
-    - rid: 8353671722807853277
+    - rid: 8353671723336074150
       type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1388,57 +1241,58 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: {fileID: 0}
-    - rid: 8353671722807853296
+    - rid: 8353671723336074171
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        Position: {x: 216.30005, y: 667.7}
+        Position: {x: 216.30005, y: 403.7}
         ID:
-          m_Value0: 12231517673796068896
-          m_Value1: 13515254744228053511
+          m_Value0: 8791596817553281394
+          m_Value1: 3776550087554662360
         Parents: []
         PortModels:
-        - rid: 8353671722807853297
-        - rid: 8353671722807853298
+        - rid: 8353671723336074172
+        - rid: 8353671723336074173
         NodeType:
-          m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossAttackTargetAction,
+          m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossMoveToAttackAction,
             DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
-          m_Value0: 524306401045180577
-          m_Value1: 96527452092935049
+          m_Value0: 1749550554756145586
+          m_Value1: 1326303793270471824
         m_FieldValues:
-        - rid: 8353671722807853299
-        - rid: 8353671722807853300
-    - rid: 8353671722807853297
+        - rid: 8353671723336074174
+        - rid: 8353671723336074175
+    - rid: 8353671723336074172
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         m_Name: InputPort
         m_PortDataFlowType: 0
         m_IsFloating: 0
         m_NodeModel:
-          rid: 8353671722807853296
+          rid: 8353671723336074171
         m_Connections:
-        - rid: 8353671722807853273
-    - rid: 8353671722807853298
+        - rid: 8353671722807853181
+    - rid: 8353671723336074173
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
         m_Name: OutputPort
         m_PortDataFlowType: 1
         m_IsFloating: 0
         m_NodeModel:
-          rid: 8353671722807853296
-        m_Connections: []
-    - rid: 8353671722807853299
+          rid: 8353671723336074171
+        m_Connections:
+        - rid: 8353671723336074145
+    - rid: 8353671723336074174
       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        FieldName: Battle
+        FieldName: Movement
         Type:
-          m_SerializableType: DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss,
+          m_SerializableType: DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
-          rid: 8353671722807853301
+          rid: 8353671723336074176
         LinkedVariable:
-          rid: 8353671722807853091
-    - rid: 8353671722807853300
+          rid: 8353671723436998740
+    - rid: 8353671723336074175
       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         FieldName: State
@@ -1446,10 +1300,87 @@ MonoBehaviour:
           m_SerializableType: DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         LocalValue:
-          rid: 8353671722807853302
+          rid: 8353671723336074177
         LinkedVariable:
-          rid: 8353671707150779364
-    - rid: 8353671722807853301
+          rid: 8353671723436998763
+    - rid: 8353671723336074176
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 8353671723336074177
+      type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 8353671723336074234
+      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        Position: {x: 216.30005, y: 579.7}
+        ID:
+          m_Value0: 4122637960115304867
+          m_Value1: 12157780775917834791
+        Parents: []
+        PortModels:
+        - rid: 8353671723336074235
+        - rid: 8353671723336074236
+        NodeType:
+          m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossAttackTargetAction,
+            DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        NodeTypeID:
+          m_Value0: 524306401045180577
+          m_Value1: 96527452092935049
+        m_FieldValues:
+        - rid: 8353671723336074237
+        - rid: 8353671723336074238
+    - rid: 8353671723336074235
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: InputPort
+        m_PortDataFlowType: 0
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 8353671723336074234
+        m_Connections:
+        - rid: 8353671723336074146
+    - rid: 8353671723336074236
+      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        m_Name: OutputPort
+        m_PortDataFlowType: 1
+        m_IsFloating: 0
+        m_NodeModel:
+          rid: 8353671723336074234
+        m_Connections: []
+    - rid: 8353671723336074237
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: Battle
+        Type:
+          m_SerializableType: DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 8353671723336074239
+        LinkedVariable:
+          rid: 8353671723436998830
+    - rid: 8353671723336074238
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: State
+        Type:
+          m_SerializableType: DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss,
+            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 8353671723436998656
+        LinkedVariable:
+          rid: 8353671723436998763
+    - rid: 8353671723336074239
       type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -1457,11 +1388,41 @@ MonoBehaviour:
           m_Value1: 0
         Name: 
         m_Value: {fileID: 0}
-    - rid: 8353671722807853302
+    - rid: 8353671723436998656
       type: {class: 'BlackboardVariable`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
           m_Value0: 0
           m_Value1: 0
         Name: 
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998740
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 12697459224287993256
+          m_Value1: 14639025913209292480
+        Name: Boss Movement AIFacade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998763
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 11038894497716435248
+          m_Value1: 9918647191724063549
+        Name: Boss State Facade
+        IsExposed: 1
+        m_IsShared: 0
+        m_Value: {fileID: 0}
+    - rid: 8353671723436998830
+      type: {class: 'TypedVariableModel`1[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+      data:
+        ID:
+          m_Value0: 1947231644087476086
+          m_Value1: 13465903865307256253
+        Name: Boss Battle AIFacade
+        IsExposed: 1
+        m_IsShared: 0
         m_Value: {fileID: 0}
