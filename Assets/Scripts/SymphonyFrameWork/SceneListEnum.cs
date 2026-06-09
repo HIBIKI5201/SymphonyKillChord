@@ -4,7 +4,8 @@
     Persistent = 1,
     OutGame = 2,
     InGame = 3,
-    Stage_01 = 4,
-    InGameDodgeTest = 5,
-    Scenario = 6,
+    Scenario = 4,
+    Stage_01 = 5,
+    Stage_02 = 6,
+    InGameDodgeTest = 7,
 }
