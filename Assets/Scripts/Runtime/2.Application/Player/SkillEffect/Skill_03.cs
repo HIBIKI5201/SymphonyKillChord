@@ -16,7 +16,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage * _damageMultiPlier);
             //ターゲットに対して単発高火力（通常攻撃の2倍くらいの威力）
 
-            var targets = context.Repository.FindByRule();
+            var targets = context.Repository.FindByRule(); //直線上にいるキャラクタを取得する。
             if (targets != null) return;
 
             for (int i = 0; i < targets.Length; i++)
