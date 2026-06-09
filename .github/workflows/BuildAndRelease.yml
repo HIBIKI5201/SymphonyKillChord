@@ -58,6 +58,12 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 120  # ビルド処理が長くなる可能性があるため、タイムアウトを設定
     environment: 'AutoBuildAndRelease'
+    # ジョブ全体で利用する環境変数（必要に応じてリポジトリ Secrets に設定）
+    env:
+      GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
+      GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+      # UNITY_BUILD_OUTPUT_DIR を設定すると出力先を上書きできます（省略時はプロジェクト内 Builds フォルダを使用）
+      UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR }}
 
     steps:
       - name: Checkout Repository
@@ -79,9 +85,6 @@ jobs:
         env:
           # Unity 実行ファイルパスを GitHub Secrets から取得
           UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
-          # Google Drive API認証情報（GitHub Secrets から取得）
-          GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
 
       - name: Upload Unity Log
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
