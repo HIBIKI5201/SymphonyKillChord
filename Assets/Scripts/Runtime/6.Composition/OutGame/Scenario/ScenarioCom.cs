@@ -1,12 +1,20 @@
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
 using KillChord.Runtime.View.OutGame.Scenario;
+using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Input;
+using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
 {
@@ -27,6 +35,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private PortraitCatalogAsset _portraitCatalog;
         [SerializeField]
         private ScenarioSettingsAsset _scenarioSettings;
+        [SerializeField, SceneNameSelector, Tooltip("シナリオ終了後に戻るシーン名。")]
+        private string _returnSceneName;
+        [SerializeField, Tooltip("シナリオ表示View。Scenarioシーンに事前配置したものを指定します。")]
+        private ScenarioView _scenarioView;
+        [SerializeField, Tooltip("シナリオ入力View。Scenarioシーンに事前配置したものを指定します。")]
+        private ScenarioInputView _scenarioInputView;
         private ScenarioUsecase _usecase;
 
         /// <summary>
@@ -98,14 +112,49 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
 
             // View を生成する。
-            ScenarioView view = Instantiate(_chatText, Vector3.zero, Quaternion.identity);
             var backgroundMap = BuildBackgroundMap(_backgroundCatalog);
             var animationMap = BuildAnimationMap(_animationCatalog);
             var portraitMap = BuildPortraitMap(_portraitCatalog);
-            view.Initialize(viewModel, backgroundMap, animationMap, portraitMap);
-            ScenarioInputView inputView = Instantiate(_inputView, Vector3.zero, Quaternion.identity);
-            inputView.Initialize(controller);
-            await _usecase.PlayScenario();
+            _scenarioView.Initialize(viewModel, backgroundMap, animationMap, portraitMap);
+            _scenarioInputView.Initialize(controller);
+
+            if (!ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState))
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] SelectedScenarioState が取得できませんでした。", this);
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
+                return;
+            }
+
+            await _usecase.PlayScenario(selectedScenarioState.CurrentScenarioId);
+
+            bool transitioned = await sceneTransitionController.UnloadAndSetActiveAsync(
+                SceneManager.GetActiveScene().name,
+                _returnSceneName,
+                CancellationToken.None);
+
+            if (!transitioned)
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] シーン復帰に失敗しました。", this);
+                return;
+            }
+
+            selectedScenarioState.Clear();
+
+            if (ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            {
+                inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+            }
+
+            if (ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
+            {
+                outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(true);
+                outGameUIEvent.OnShownHomeScreen?.Invoke();
+            }
         }
 
         /// <summary>

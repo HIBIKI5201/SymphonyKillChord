@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4426c8dd6feefd448a8392d8bf33a4ae, type: 3}
+  m_Name: SkillNodeBindRepo
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeBindRepo
+  SkillNodeBinds:
+  - {fileID: 11400000, guid: 5985124ae216c144387574fd9a159a09, type: 2}
+  - {fileID: 11400000, guid: b2408832e375b6846a1087f77ceee36a, type: 2}
+  - {fileID: 11400000, guid: f6bc4795a16034e419bc25b2b77e709f, type: 2}
+  - {fileID: 11400000, guid: 5b6035eaccc45f94b89c19b94df86190, type: 2}
+  - {fileID: 11400000, guid: f26489f0ae6d82648a1cff4b49f82a0a, type: 2}
+  - {fileID: 11400000, guid: b2ddf406f1b774546a651a4153945256, type: 2}
+  - {fileID: 11400000, guid: d4cf71b954046594382f68fd90e46a85, type: 2}
+  - {fileID: 11400000, guid: 50129adf3e8750c4b87e0fbda96752be, type: 2}
+  - {fileID: 11400000, guid: 3eb9c278aa2109a43baa1cf400ad57ff, type: 2}
+  - {fileID: 11400000, guid: 283bc2c5e8101de45901963956b2b68c, type: 2}
+  - {fileID: 11400000, guid: 2d63d3f9afd8f8047adc52e586a4df1c, type: 2}
+  - {fileID: 11400000, guid: 8f7cf4f00930b674f81ef133917df08e, type: 2}
+  - {fileID: 11400000, guid: 396e2d903095ff7418150fb0ce62342f, type: 2}
+  - {fileID: 11400000, guid: 1c528eb6cf1c50148bc2c1e70916751a, type: 2}
+  - {fileID: 11400000, guid: 8e16e18c111776f47b3b73a804680140, type: 2}
+  - {fileID: 11400000, guid: f0eac83d6a2dbbd4693e6da7887af411, type: 2}
+  - {fileID: 11400000, guid: ce50429acf9d81d4891d6bf5ed802e33, type: 2}
+  - {fileID: 11400000, guid: 55bce54d40b02a0438546aa8ea81f57c, type: 2}
+  - {fileID: 11400000, guid: d44dc4acec3522845985753bb2faadff, type: 2}
+  - {fileID: 11400000, guid: 92aea5f6d0fbda6408d4c6ea3b09d20d, type: 2}

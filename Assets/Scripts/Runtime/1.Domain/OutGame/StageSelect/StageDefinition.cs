@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Mission;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.OutGame.StageSelect
 {
@@ -18,14 +17,24 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="flavorText"> ステージのフレーバーテキスト。 </param>
         /// <param name="reward"> ステージの報酬情報。 </param>
         /// <param name="missionDefinition"> ステージのミッション定義。 </param>
+        /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
+        /// <param name="battleSceneName"> バトルパートのシーン名。 </param>
         public StageDefinition(StageId stageId, StageType stageType, string stageName, string flavorText,
-            StageReward reward, MissionDefinition missionDefinition = null)
+            StageReward reward, string targetSceneName, string battleSceneName, string scenarioId = "" ,MissionDefinition missionDefinition = null)
         {
+            if (string.IsNullOrEmpty(targetSceneName))
+            {
+                throw new System.ArgumentException("Target scene name must not be null or empty.", nameof(targetSceneName));
+            }
+
             _stageId = stageId;
             _stageType = stageType;
             _stageName = stageName;
             _flavorText = flavorText;
             _reward = reward;
+            _targetSceneName = targetSceneName;
+            _battleSceneName = battleSceneName;
+            _scenarioId = scenarioId ?? string.Empty;
             _missionDefinition = missionDefinition;
         }
 
@@ -39,6 +48,12 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public string FlavorText => _flavorText;
         /// <summary> ステージの報酬情報。 </summary>
         public StageReward Reward => _reward;
+        /// <summary> ステージのターゲットシーン名。 </summary>
+        public string TargetSceneName => _targetSceneName;
+        /// <summary> バトルパートのシーン名。 </summary>
+        public string BattleSceneName => _battleSceneName;
+        /// <summary> ステージのシナリオID。 </summary>
+        public string ScenarioId => _scenarioId;
         /// <summary> ステージのミッション定義。 </summary>
         public MissionDefinition MissionDefinition => _missionDefinition;
 
@@ -47,6 +62,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         private readonly string _stageName;
         private readonly string _flavorText;
         private readonly StageReward _reward;
+        private readonly string _targetSceneName;
+        private readonly string _battleSceneName;
+        private readonly string _scenarioId;
         private readonly MissionDefinition _missionDefinition;
     }
 }

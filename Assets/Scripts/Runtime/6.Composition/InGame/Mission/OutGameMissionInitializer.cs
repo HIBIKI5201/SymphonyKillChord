@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// <summary>
     ///     アウトゲームにおけるミッションシステムの初期化を行うクラス。
     /// </summary>
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public class OutGameMissionInitializer : MonoBehaviour
     {
         /// <summary> ミッション選択ボタンのリスト。 </summary>
