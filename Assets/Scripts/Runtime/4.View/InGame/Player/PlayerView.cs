@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,14 +17,15 @@ namespace KillChord.Runtime.View.InGame.Player
     ///     プレイヤー入力を受け取り、移動と攻撃を更新するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
-    public sealed class PlayerView : MonoBehaviour, IDamageable
+    public sealed class PlayerView : MonoBehaviour, IDamageable, IGameplayControllable
     {
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private CriAtomSource _seSource;
-        
+
         private bool _isInitialized;
+        private bool _isPlaying;
         private bool _isDodge;
         private Vector2 _moveVector;
         private Transform _cacheTransform;
@@ -33,6 +35,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
+        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
@@ -41,7 +44,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
         {
-            if (!_isInitialized || _controller == null)
+            if (!_isInitialized || !_isPlaying || _controller == null)
             {
                 return;
             }
@@ -64,6 +67,7 @@ namespace KillChord.Runtime.View.InGame.Player
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
+             CharacterAnimationIndices animationIndices,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -71,6 +75,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
+            _characterAnimationIndices = animationIndices;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -81,7 +86,41 @@ namespace KillChord.Runtime.View.InGame.Player
             Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)} is null", this);
 
             _isInitialized = true;
+        }
+
+        /// <summary> ゲームプレイを開始し、入力イベントを購読する。 </summary>
+        public void StartGameplay()
+        {
+            if (!_isInitialized || _playerInputView == null || _isPlaying)
+            {
+                return;
+            }
+
             RegisterActions();
+            _isPlaying = true;
+        }
+
+        /// <summary> ゲームプレイを停止し、入力イベントの購読を解除する。 </summary>
+        public void StopGameplay()
+        {
+            if (!_isPlaying)
+            {
+                return;
+            }
+
+            UnRegisterActions();
+
+            _moveVector = Vector2.zero;
+            _isDodge = false;
+            _isPlaying = false;
+
+            if (_rb != null)
+            {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+
+            _characterAnimationController?.SetVelocity(Vector2.zero);
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
@@ -112,6 +151,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (input.Phase == InputActionPhase.Started)
             {
                 _isDodge = true;
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
 
@@ -146,7 +186,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 };
 
                 Play(cueName);
-                _characterAnimationController?.TriggerAttack();
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
