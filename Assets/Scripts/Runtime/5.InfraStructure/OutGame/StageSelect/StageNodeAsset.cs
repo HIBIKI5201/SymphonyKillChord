@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Constant;
+using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
@@ -37,6 +38,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 _stageName,
                 _flavorText,
                 new StageReward(_rewardSkillBuildPoint, _rewardSkillUnlockPoint),
+                _targetSceneName,
+                _stageType == StageType.Scenario ? _scenarioId : string.Empty,
                 missionDefinition);
 
             // 初期解放フラグが立っている場合は Unlocked で生成する
@@ -67,6 +70,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         [SerializeField, TextArea, Tooltip("ステージのフレーバーテキスト。")]
         private string _flavorText;
+
+        [Header("シーン遷移")]
+        [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名。")]
+        private string _targetSceneName;
+
+        [SerializeField,Tooltip("シナリオパートで再生するシナリオId")]
+        private string _scenarioId;
 
         [Header("クリア報酬")]
         [SerializeField, Tooltip("スキル編成・強化に使用するポイント。")]

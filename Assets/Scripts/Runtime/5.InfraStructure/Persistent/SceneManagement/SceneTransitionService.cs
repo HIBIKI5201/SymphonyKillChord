@@ -48,5 +48,64 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
             return true;
         }
+
+        public async ValueTask<bool> LoadAdditiveAndSetActiveAsync(
+            string toSceneName, 
+            CancellationToken cancellationToken)
+        {
+            if(string.IsNullOrEmpty(toSceneName))
+            {
+                Debug.LogError("シーン名が無効です。");
+                return false;
+            }
+
+            if (!SceneLoader.GetExistScene(toSceneName, out _))
+            {
+                bool loadSuccess = await SceneLoader.LoadScene(
+                    toSceneName,
+                    token: cancellationToken)
+                    ;
+                if (!loadSuccess)
+                {
+                    Debug.LogError($"シーンのロードに失敗 : {toSceneName}");
+                    return false;
+                }
+            }
+
+            if (!SceneLoader.SetActiveScene(toSceneName))
+            {
+                Debug.LogError($"ActiveSceneの切り替えに失敗しました。SceneName:{toSceneName}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public async ValueTask<bool> UnloadAndSetActiveAsync(
+            string unloadSceneName, string activeSceneName, 
+            CancellationToken cancellationToken)
+        {
+            if (!SceneLoader.SetActiveScene(activeSceneName))
+            {
+                Debug.LogError($"ActiveSceneの復帰に失敗しました。SceneName:{activeSceneName}");
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(unloadSceneName) &&
+                SceneLoader.GetExistScene(unloadSceneName, out _))
+            {
+                bool unloadSuccess = await SceneLoader.UnloadScene(
+                    unloadSceneName,
+                    token: cancellationToken);
+
+                if (!unloadSuccess)
+                {
+                    Debug.LogError($"シーンのUnloadに失敗しました。SceneName:{unloadSceneName}");
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

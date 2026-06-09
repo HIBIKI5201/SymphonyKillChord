@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System.Threading;
 
@@ -37,6 +38,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             if (!_stageTree.TryGetNode(stageId, out var node))
             {
+                _selectedStageId = default;
 #if UNITY_EDITOR
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(StageSelectController)}] StageId '{stageIdValue}' に対応するノードが見つかりませんでした。");
@@ -47,27 +49,63 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             // 現在選択中のノード ID を保持する
             _selectedStageId = stageId;
 
+            // TODO: ノードのデータを渡す時に、セーブデータからミッションの達成状況を受け取るようにする
             _detailPresenter.Push(node);
             _detailScreenView.Show(token);
         }
 
         /// <summary>
-        ///     現在選択中のステージをクリアします。
-        ///     選択中のノードがない場合は何もしません。
+        ///    現在選択中のステージの出撃情報を取得します。
+        ///    選択中のノードがない場合には false を返します。
         /// </summary>
-        public bool TryClearSelectedStage(out StageId clearedId)
+        /// <param name="stageType"> 出撃情報のステージタイプ。</param>
+        /// <param name="targetSceneName"> 出撃情報のターゲットシーン名。</param>
+        /// <param name="missionDefinition"> 出撃情報のミッション定義。</param>
+        /// <returns> 出撃情報が取得できた場合は true、取得できなかった場合は false を返します。</returns>
+        public bool TryGetSortieInfo(
+            out StageType stageType, 
+            out string targetSceneName, 
+            out string scenarioId,
+            out MissionDefinition missionDefinition)
         {
-            clearedId = _selectedStageId;
+            stageType = default;
+            targetSceneName = default;
+            scenarioId = default;
+            missionDefinition = default;
 
-            if (_selectedStageId.Value == null)
+            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
             {
-#if UNITY_EDITOR
-                UnityEngine.Debug.LogWarning(
-                    $"[{nameof(StageSelectController)}] 選択中のノードがありません。");
-#endif
                 return false;
             }
 
+            stageType = node.Definition.StageType;
+            targetSceneName = node.Definition.TargetSceneName;
+            scenarioId = node.Definition.ScenarioId;
+            missionDefinition = node.Definition.MissionDefinition;
+            return true;
+        }
+
+        /// <summary>
+        ///     現在選択中のノードがバトルタイプの場合、ミッション定義を取得します。
+        ///     バトル以外のタイプまたはミッション定義が存在しない場合は false を返します。
+        /// </summary>
+        /// <param name="missionDefinition"> ミッション定義を格納する変数。</param>
+        /// <returns> ミッション定義が取得できた場合は true、取得できなかった場合は false を返します。</returns>
+        public bool TryGetBattleMissionDefinition(out MissionDefinition missionDefinition)
+        {
+            missionDefinition = default;
+
+            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
+            {
+                return false;
+            }
+
+            if (node.Definition.StageType != StageType.Battle)
+            {
+                return false;
+            }
+
+            missionDefinition = node.Definition.MissionDefinition;
             return true;
         }
 
