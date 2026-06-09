@@ -97,21 +97,23 @@ jobs:
 
       - name: Check Build Output
         run: |
-          if (Test-Path "Builds") {
-            Write-Host "Build artifacts found in Builds directory"
-            Get-ChildItem -Path "Builds" -Recurse | ForEach-Object { Write-Host $_.FullName }
+          $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
+          if (Test-Path $BuildDir) {
+            Write-Host "Build artifacts found in $BuildDir directory"
+            Get-ChildItem -Path $BuildDir -Recurse | ForEach-Object { Write-Host $_.FullName }
           } else {
-            Write-Host "WARNING: No Builds directory found"
+            Write-Host "WARNING: No $BuildDir directory found"
           }
         shell: powershell
 
       - name: Zip Build Artifacts
         run: |
-          if (Test-Path "Builds") {
-            Compress-Archive -Path Builds\* -DestinationPath Builds.zip
+          $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
+          if (Test-Path $BuildDir) {
+            Compress-Archive -Path "$BuildDir\*" -DestinationPath Builds.zip
             Write-Host "Build artifacts compressed successfully"
           } else {
-            Write-Host "ERROR: Builds directory not found, cannot create archive"
+            Write-Host "ERROR: $BuildDir directory not found, cannot create archive"
             exit 1
           }
         shell: powershell
