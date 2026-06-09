@@ -4,5 +4,6 @@ namespace DevelopProducts.BindingSystem
     {
         void SetPanelActive(bool active);
         void BackToTheDefault();
+        void BackToTheInitial();
     }
 }
