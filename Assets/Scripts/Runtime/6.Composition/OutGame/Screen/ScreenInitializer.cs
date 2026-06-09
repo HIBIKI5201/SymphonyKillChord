@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -89,6 +90,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             VisualElement homeRoot = rootElement.Q<VisualElement>(HOMESCREEN_NAME);
             VisualElement stageSelectRoot = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
             VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
+            VisualElement playerStatusRoot = skillTreeRoot.Q<VisualElement>(SKILLTREESCREEN_PLAYERSTATUS_NAME);
             VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
             VisualElement battlePreparationRoot = rootElement.Q<VisualElement>(BATTLEPREPARATIONSCREEN_NAME);
             VisualElement settingRoot = rootElement.Q<VisualElement>(SETTINGSCREEN_NAME);
@@ -140,6 +142,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
+            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
@@ -391,6 +394,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private const string HOMESCREEN_NAME = "HomeContainer";
         private const string STAGESELECTSCREEN_NAME = "StageSelectContainer";
         private const string SKILLTREESCREEN_NAME = "SkillTreeContainer";
+        private const string SKILLTREESCREEN_PLAYERSTATUS_NAME = "PlayerStatus";
         private const string SKILLBUILDSCREEN_NAME = "SkillBuildContainer";
         private const string BATTLEPREPARATIONSCREEN_NAME = "BattlePreparationContainer";
         private const string SETTINGSCREEN_NAME = "SettingContainer";
