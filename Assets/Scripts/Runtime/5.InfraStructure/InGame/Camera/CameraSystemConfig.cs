@@ -16,6 +16,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Camera
         public CameraSystemParameter ToDomain()
             => new(
                 _cameraOffset,
+                _characterCenterOffset,
                 _distance,
                 _followOffsetPower,
                 _followLerpSpeed,
@@ -34,6 +35,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Camera
         [Header("Main")]
         [Tooltip("追従先を中心としたカメラの基本的オフセット位置")]
         [SerializeField] private Vector3 _cameraOffset;
+        [Tooltip("キャラクターモデルの中心オフセット")]
+        [SerializeField] private Vector3 _characterCenterOffset;
         [Tooltip("追従先からカメラまでの距離")]
         [SerializeField] private float _distance = 5f;
 
