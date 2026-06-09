@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-and-release:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: self-hosted
     timeout-minutes: 120  # ビルド処理が長くなる可能性があるため、タイムアウトを設定
     environment: 'AutoBuildAndRelease'
