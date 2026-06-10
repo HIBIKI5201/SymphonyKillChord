@@ -35,6 +35,19 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "==========================================="
 
+          # 同一ワークフローの他の実行中インスタンスを確認（二重起動の防止と早期リターン）
+          echo "[INFO] Checking for active runs of this workflow..."
+          ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
+          OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
+          
+          if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
+            echo "[SKIP] Another run of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Early returning..."
+            echo "days=0" >> $GITHUB_OUTPUT
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] Decision: should_run=false (concurrency skip)"
+            exit 0
+          fi
+
           # Skip the release-age check when the workflow is manually dispatched to avoid unnecessary API calls.
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             echo "[SKIP] Manual dispatch detected (workflow_dispatch); bypassing release age check"
