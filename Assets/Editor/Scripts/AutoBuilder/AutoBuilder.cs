@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -79,7 +80,26 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns>ビルド成功時は true、失敗時は false</returns>
         private static bool ExecuteBuildForProfile(BuildProfile profile)
         {
-            string outputDir = Path.Combine(Application.dataPath, "../Builds", profile.name);
+            // 環境変数 UNITY_BUILD_OUTPUT_DIR が指定されていれば優先して使用する
+            string envDir = Environment.GetEnvironmentVariable("UNITY_BUILD_OUTPUT_DIR");
+            string baseOutputDir;
+            if (!string.IsNullOrEmpty(envDir))
+            {
+                baseOutputDir = envDir;
+                Debug.Log($"[AutoBuilder] Using UNITY_BUILD_OUTPUT_DIR from environment: {baseOutputDir}");
+            }
+            else
+            {
+                baseOutputDir = Path.Combine(Application.dataPath, "../Builds");
+            }
+
+            // 相対パスが指定されている場合はプロジェクトルート基準で絶対化する
+            if (!Path.IsPathRooted(baseOutputDir))
+            {
+                baseOutputDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), baseOutputDir));
+            }
+
+            string outputDir = Path.Combine(baseOutputDir, profile.name);
             if (!Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);

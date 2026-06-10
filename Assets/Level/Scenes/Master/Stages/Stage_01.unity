@@ -207303,46 +207303,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -6880971324520778393, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: _skillRepository
-      value: 
-      objectReference: {fileID: 11400000, guid: 8f8d7fb175cdb054bb9439f0d1bb8dda, type: 2}
-    - target: {fileID: -6880971324520778393, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: _characterAnimationView
-      value: 
-      objectReference: {fileID: 1494484569}
-    - target: {fileID: -6880971324520778393, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: _inputProgressViewConfigAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
-    - target: {fileID: -6880971324520778393, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: _characterAnimationCatalogAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
-    - target: {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: _skillVisuals.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: '_skillVisuals.Array.data[0]'
-      value: 
-      objectReference: {fileID: 1212405973}
-    - target: {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: '_skillVisuals.Array.data[1]'
-      value: 
-      objectReference: {fileID: 1212405976}
-    - target: {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: '_skillVisuals.Array.data[2]'
-      value: 
-      objectReference: {fileID: 1212405975}
-    - target: {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: '_skillVisuals.Array.data[3]'
-      value: 
-      objectReference: {fileID: 1212405974}
-    - target: {fileID: 1160853068716909059, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3339157675331060313, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
       propertyPath: m_Name
       value: Player
@@ -207387,64 +207347,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: -2625927772269966, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3854533494831789678, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1494484569}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
 --- !u!4 &1212405972 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4877291778978284914, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   m_PrefabInstance: {fileID: 1212405971}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1212405973 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1160853068716909059, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  m_PrefabInstance: {fileID: 1212405971}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillView
---- !u!114 &1212405974 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7852414029176531134, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  m_PrefabInstance: {fileID: 1212405971}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
---- !u!114 &1212405975 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1192430313035069498, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  m_PrefabInstance: {fileID: 1212405971}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
---- !u!114 &1212405976 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: -4916133229582652887, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  m_PrefabInstance: {fileID: 1212405971}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
 --- !u!1001 &1213355299
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -229056,23 +228968,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6cdb78efcfb17f34fa722834c0b90a7d, type: 3}
   m_PrefabInstance: {fileID: 1491845005}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1494484568 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3854533494831789678, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  m_PrefabInstance: {fileID: 1212405971}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1494484569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494484568}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e4266b03dd11a847a990b9971a7cad1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
 --- !u!1001 &1496002485
 PrefabInstance:
   m_ObjectHideFlags: 0

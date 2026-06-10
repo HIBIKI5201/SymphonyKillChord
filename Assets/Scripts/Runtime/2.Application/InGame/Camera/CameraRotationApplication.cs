@@ -45,8 +45,8 @@ namespace KillChord.Runtime.Application.InGame.Camera
             Quaternion target = Quaternion.identity;
             if (isLockOn)
             {
-                // Offset を加えてモデルの中心座標を求める
-                Vector3 playerCenter = context.FollowPosition + _parameter.Offset;
+                // プレイヤーのモデル中心位置を求める
+                Vector3 playerCenter = context.FollowPosition + _parameter.CharacterCenterOffset;
 
                 // プレイヤーのモデル中心と対象の中間点を求める
                 Vector3 lerpPosition = Vector3.Lerp(playerCenter, targetPosition, _parameter.LockOnLookAtRatio);

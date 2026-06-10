@@ -1,3 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Camera;
@@ -10,12 +12,12 @@ using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
-using KillChord.Runtime.View.InGame.Scene;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
@@ -28,7 +30,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     {
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private IngameSceneView _ingameSceneView;
         [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
         [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
@@ -53,7 +54,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
         private async void Start()
         {
-            await _ingameSceneView.LoadScene(_backgroundSceneName);
+            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            {
+                Debug.LogError("[IngameComposition] SelectedBattleStageStateが取得できませんでした", this);
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
+            {
+                Debug.LogError("[IngameComposition] SceneTransitionControllerが取得できませんでした", this);
+                return;
+            }
+
+            if (!selectedBattleStageState.HasSelectedBattleStage)
+            {
+                Debug.LogError("[IngameComposition] バトルステージが選択されていません", this);
+                return;
+            }
+
+            bool loadSuccess = await sceneTransitionController.LoadAdditiveAsync(
+                selectedBattleStageState.CurrentBattleStageName, destroyCancellationToken
+                );
+
+            if (!loadSuccess)
+            {
+                Debug.LogError("[IngameComposition] バトルシーンの読み込みに失敗しました", this);
+                return;
+            }
 
             if (!await TryInitializeAsync())
             {
@@ -233,11 +260,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             if (_camerasystemInitializer == null)
             {
                 Debug.LogError("[IngameComposition] CameraSystemInitializerの参照が未設定です。", this);
-                return false;
-            }
-            if (_ingameSceneView == null)
-            {
-                Debug.LogError("[IngameComposition] IngameSceneViewの参照が未設定です。", this);
                 return false;
             }
             if (_enemyPools == null)
