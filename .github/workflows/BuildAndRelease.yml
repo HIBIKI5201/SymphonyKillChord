@@ -28,9 +28,17 @@ jobs:
       - name: Check latest release age
         id: release_age
         run: |
+          # Skip the release-age check when the workflow is manually dispatched to avoid unnecessary API calls.
+          set -e
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch detected; skipping release age check" >&2
+            echo "days=0" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           # 最新リリースの公開日を取得し、経過日数を算出します。
           # github.token を使うことでシークレット準備は不要です。
-          set -e
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
 
