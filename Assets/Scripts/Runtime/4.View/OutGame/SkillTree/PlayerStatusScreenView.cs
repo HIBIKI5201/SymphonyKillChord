@@ -12,8 +12,29 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public PlayerStatusScreenView(VisualElement root, OutGameUIEvent outGameUIEvent) : base(root, outGameUIEvent)
         {
             _healthPreviewLabel = root.Q<Label>(name: E_NAME_HEALTH_PREVIEW_LABEL);
+            if (_healthPreviewLabel == null)
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_HEALTH_PREVIEW_LABEL} が見つかりませんでした。");
+#endif
+                throw new System.InvalidOperationException($"Required UI element '{E_NAME_HEALTH_PREVIEW_LABEL}' not found.");
+            }
             _attackPreviewLabel = root.Q<Label>(name: E_NAME_ATTACK_PREVIEW_LABEL);
+            if (_attackPreviewLabel == null)
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_ATTACK_PREVIEW_LABEL} が見つかりませんでした。");
+#endif
+                throw new System.InvalidOperationException($"Required UI element '{E_NAME_ATTACK_PREVIEW_LABEL}' not found.");
+            }
             _criticalChancePreviewLabel = root.Q<Label>(name: E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL);
+            if (_criticalChancePreviewLabel == null)
+            {
+#if UNITY_EDITOR
+                UnityEngine.Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL} が見つかりませんでした。");
+#endif
+                throw new System.InvalidOperationException($"Required UI element '{E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL}' not found.");
+            }
         }
 
         /// <summary>

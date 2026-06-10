@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
@@ -42,6 +43,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
+        private Label _currentPointsLabel;
 
         private SkillDetailScreenView _skillDetailScreenView;
         private PlayerStatusScreenView _playerStatusScreenView;
@@ -66,6 +68,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PLAYER_STATUS = "PlayerStatus";
         private const string E_NAME_PREVIEW_VIDEO_CONTAINER = "PreviewVideoContainer";
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
+        private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
 
         /// <summary>
         ///     初期化処理。
@@ -80,6 +83,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void OnEnable()
         {
+            _cts = new CancellationTokenSource();
             Subscribe();
         }
 
@@ -92,6 +96,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             DisposeComponents();
             _cts?.Cancel();
             _cts?.Dispose();
+            _cts = null;
         }
 
         private void Initialize()
@@ -102,6 +107,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _playerStatusRoot = _rootElement.Q<VisualElement>(E_NAME_PLAYER_STATUS);
             _previewVideoContainerRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
             _previewVideoRoot = _previewVideoContainerRoot.Q<VisualElement>(name: E_NAME_PREVIEW_VIDEO);
+            _currentPointsLabel = _rootElement.Q<Label>(name: E_NAME_CURRENT_POINTS_LABEL);
 
             _videoPlayer.source = VideoSource.VideoClip;
             _videoPlayer.renderMode = VideoRenderMode.RenderTexture;
@@ -129,8 +135,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
             _playerStatusPresenter = new PlayerStatusPresenter();
+
             _skillTreeController = new SkillTreeController(_skillDetailScreenView,
-                _skillDetailPresenter, 
+                _skillDetailPresenter,
+                _currentPointsLabel,
                 skillTreeService, 
                 _playerStatusPresenter,
                 _previewVideoScreenView,
@@ -140,9 +148,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillNodeConnBinds,
                 _skillNodeConnViews,
                 _unlockPhases,
+                _skillPreviewVideos,
                 skillTreeEntity);
-
-            _cts = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -172,9 +179,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 SkillNodeData nodeData = _skillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
                 if (nodeData == null)
                 {
-                    continue;
-                    // TODO スキルツリーの設計が固まったら正式的なエラー処理を行う。
-                    //throw new KeyNotFoundException($"VisualElementの要素名に対応するスキルノードデータが見つかりません：{nodeName}");
+                    throw new KeyNotFoundException($"SkillNodeBindDataが見つかりません：{nodeName}");
                 }
 
                 SkillNodeEntity nodeEntity = nodeData.ToDomain();
@@ -191,7 +196,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeIds.Length];
                 for (int i = 0; i < data.ParentNodeIds.Length; i++)
                 {
-                    parents[i] = _skillNodeEntities[data.ParentNodeIds[i]];
+                    if (!_skillNodeEntities.TryGetValue(data.ParentNodeIds[i], out SkillNodeEntity parent))
+                    {
+                        throw new KeyNotFoundException(
+                            $"親ノードID {data.ParentNodeIds[i]} が UI/Bind 構築結果に存在しません。子ノードID: {entity.SkillNodeIdVO.Id}");
+                    }
+                    parents[i] = parent;
                 }
                 entity.SetParent(parents);
             }

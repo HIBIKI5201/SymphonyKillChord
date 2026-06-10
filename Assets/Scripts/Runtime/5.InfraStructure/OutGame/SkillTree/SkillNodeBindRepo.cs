@@ -24,9 +24,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
 
             for (int i = 0; i < SkillNodeBinds.Length; i++)
             {
-                if (SkillNodeBinds[i].SkillNodeData.NodeId == id)
+                var bind = SkillNodeBinds[i];
+                if (bind == null || bind.SkillNodeData == null)
                 {
-                    return SkillNodeBinds[i];
+                    continue;
+                }
+                if (bind.SkillNodeData.NodeId == id)
+                {
+                    return bind;
                 }
             }
             return null;
@@ -41,9 +46,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
 
             for (int i = 0; i < SkillNodeBinds.Length; i++)
             {
-                if (SkillNodeBinds[i].NodeName == name)
+                var bind = SkillNodeBinds[i];
+                if (bind == null)
                 {
-                    return SkillNodeBinds[i];
+                    continue;
+                }
+                if (bind.NodeName == name)
+                {
+                    return bind;
                 }
             }
             return null;

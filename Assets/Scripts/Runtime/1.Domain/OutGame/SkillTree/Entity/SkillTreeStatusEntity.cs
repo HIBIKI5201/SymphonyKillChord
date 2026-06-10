@@ -1,6 +1,5 @@
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.OutGame.SkillTree
 {
@@ -26,6 +25,11 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public void ModifyPoint(int amount)
         {
             _currentPoints += amount;
+        }
+
+        public void AddUnlockedNodes(int[] nodeIds)
+        {
+            _unlockedNodes.AddRange(nodeIds);
         }
 
         private int _currentPoints;

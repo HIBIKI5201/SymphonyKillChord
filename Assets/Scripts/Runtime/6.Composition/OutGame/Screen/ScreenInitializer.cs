@@ -117,6 +117,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 #endif
                 return;
             }
+            if (playerStatusRoot == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(ScreenInitializer)}] {SKILLTREESCREEN_PLAYERSTATUS_NAME} が見つかりませんでした。", this);
+#endif
+                return;
+            }
             if (skillBuildRoot == null)
             {
 #if UNITY_EDITOR

@@ -33,6 +33,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _unlockButton.text = dto.Unlocked ? STRING_UNLOCK_BUTTON_TEXT_ALREADY_UNLOCKED
                 : STRING_UNLOCK_BUTTON_TEXT_UNLOCK_COST + dto.UnlockCost.ToString();
             _unlockButton.SetEnabled(unlockButtonEnable);
+            _previewVideoButton.SetEnabled(dto.HasPreviewVideo);
         }
 
         public override void Dispose()

@@ -19,11 +19,22 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <returns></returns>
         public bool TryGetUnlockPhaseName(int unlockedNodeId, out string phaseName)
         {
+            if (PhaseBindData == null || PhaseBindData.Length == 0)
+            {
+                phaseName = null;
+                return false;
+            }
+
             for (int i = 0; i < PhaseBindData.Length; i++)
             {
-                if (PhaseBindData[i].RequiredSkillNodeId == unlockedNodeId)
+                var bind = PhaseBindData[i];
+                if (bind == null)
                 {
-                    phaseName = PhaseBindData[i].PhaseName;
+                    continue;
+                }
+                if (bind.RequiredSkillNodeId == unlockedNodeId)
+                {
+                    phaseName = bind.PhaseName;
                     return true;
                 }
             }

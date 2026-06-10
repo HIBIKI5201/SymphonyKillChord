@@ -15,10 +15,10 @@ MonoBehaviour:
   NodeName: N6
   SkillNodeData: {fileID: 11400000, guid: 6cd6005cd1a84d44ba0c86645cf92aea, type: 2}
   FromConnNames:
-  - C15
-  - C18
+  - C110-6
+  - C112-6
   ToConnNames:
-  - C19
-  - C27
-  - C30
-  - C33
+  - C6-113
+  - C6-118
+  - C6-120
+  - C6-122
