@@ -20,12 +20,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             if (SkillNodes == null || SkillNodes.Length <= 0)
             {
                 Debug.LogError($"[SkillNodeDataRepo] スキルノード情報リポジトリーが空です。");
+                return null;
             }
             for(int i = 0; i < SkillNodes.Length; i++)
             {
-                if (SkillNodes[i].NodeId == id)
+                var node = SkillNodes[i];
+                if (node == null)
                 {
-                    return SkillNodes[i];
+                    continue;
+                }
+                if (node.NodeId == id)
+                {
+                    return node;
                 }
             }
             Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");

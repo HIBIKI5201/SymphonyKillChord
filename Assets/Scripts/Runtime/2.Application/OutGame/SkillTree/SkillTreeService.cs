@@ -33,9 +33,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             nodesOnPath.Clear();
             _visitedNodes.Clear();
 
-            SkillNodeEntity node = _skillNodeEntityDict[nodeId];
+            if (!_skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node))
+            {
+                Debug.LogWarning($"[SkillTreeService] ノードID {nodeId} が見つかりません。");
+                return -1;
+            }
             // 解放済み、或いは親ノードがない場合、探索終了する
-            if(node.IsUnlocked || node.Parents == null || node.Parents.Length <= 0)
+            if (node.IsUnlocked || node.Parents == null || node.Parents.Length <= 0)
             {
                 return -1;
             }

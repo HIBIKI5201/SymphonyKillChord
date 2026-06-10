@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebfbf15e78f77074da4f5dff785b18ba, type: 3}
   m_Name: SkillTreeTestInputData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillTreeTestInputData
+  currentPoints: 100000
   UnlockedSkillIds: 01000000
   PlayerHp: 100
   PlayerAttack: 10

@@ -15,6 +15,6 @@ MonoBehaviour:
   NodeName: N109
   SkillNodeData: {fileID: 11400000, guid: fac889a6c8c862c419d71ba331b6e0cd, type: 2}
   FromConnNames:
-  - C13
+  - C4-109
   ToConnNames:
-  - C14
+  - C109-110
