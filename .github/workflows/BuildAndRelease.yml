@@ -29,75 +29,75 @@ jobs:
         id: release_age
         run: |
           set -e
-          echo "========== Release Age Check =========="
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting release age validation..."
-          echo "Trigger Event: ${GITHUB_EVENT_NAME}"
-          echo "Repository: ${{ github.repository }}"
+          echo "========== リリース経過日数の確認 =========="
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] リリース経過日数の検証を開始します..."
+          echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
+          echo "リポジトリ: ${{ github.repository }}"
           echo "==========================================="
 
           # 同一ワークフローの他の実行中インスタンスを確認（二重起動の防止と早期リターン）
-          echo "[INFO] Checking for active runs of this workflow..."
+          echo "[INFO] 同一ワークフローの実行中インスタンスを確認しています..."
           ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
           OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
           
           if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "[SKIP] Another run of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Early returning..."
+            echo "[SKIP] このワークフローの別の実行が既に進行中です (実行数: $OTHER_RUNS_COUNT)。早期終了します..."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=false (concurrency skip)"
+            echo "[SUCCESS] 判定: should_run=false (重複実行によるスキップ)"
             exit 0
           fi
 
-          # Skip the release-age check when the workflow is manually dispatched to avoid unnecessary API calls.
+          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "[SKIP] Manual dispatch detected (workflow_dispatch); bypassing release age check"
+            echo "[SKIP] 手動実行を検出したため、リリース経過日数のチェックをスキップします"
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (manual trigger)"
+            echo "[SUCCESS] 判定: should_run=true (手動起動)"
             exit 0
           fi
 
-          # Fetch latest release from GitHub API
-          echo "[INFO] Fetching latest release from GitHub API..."
+          # GitHub APIから最新のリリースを取得します
+          echo "[INFO] GitHub APIから最新のリリースを取得しています..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
           if [ "$HTTP_CODE" = "404" ]; then
-            echo "[INFO] No previous release found"
+            echo "[INFO] 過去のリリースが見つかりませんでした"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (no release found)"
+            echo "[SUCCESS] 判定: should_run=true (新規リリース)"
             exit 0
           elif [ "$HTTP_CODE" != "200" ]; then
-            echo "[ERROR] GitHub API returned HTTP $HTTP_CODE"
+            echo "[ERROR] GitHub APIが HTTP $HTTP_CODE を返しました"
             exit 1
           fi
 
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "[INFO] No release date found in response"
+            echo "[INFO] レスポンス内にリリース日がみつかりませんでした"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (no release found)"
+            echo "[SUCCESS] 判定: should_run=true (リリース日未特定のため実行)"
             exit 0
           fi
           
-          echo "[INFO] Latest release published at: $RELEASE_DATE"
+          echo "[INFO] 最新のリリース公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
           
-          echo "[INFO] Days since last release: $DAYS days"
-          echo "[INFO] Threshold: 3 days (releases within 3 days are skipped)"
+          echo "[INFO] 前回のリリースからの経過日数: $DAYS 日"
+          echo "[INFO] しきい値: 3 日 (3日以内のリリースはスキップされます)"
           
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=false (last release was $DAYS days ago <= 3 day threshold)"
+            echo "[DECISION] should_run=false (最終リリースが $DAYS 日前のため、しきい値3日以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=true (last release was $DAYS days ago > 3 day threshold)"
+            echo "[DECISION] should_run=true (最終リリースが $DAYS 日前の分、しきい値3日を超過)"
           fi
 
   build-and-release:
@@ -294,20 +294,20 @@ jobs:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
           body: |
-            Automated build generated from workflow run #${{ github.run_id }}
+            ワークフロー実行 #${{ github.run_id }} から自動生成されたビルド成果物です。
             
-            **Trigger Event:** ${{ github.event_name }}
-            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**Trigger:** Manual dispatch' }}
-            **Timestamp:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            **トリガーイベント:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行（workflow_dispatch）' }}
+            **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
-            **Build Process:**
-            1. Assets downloaded from Google Drive
-            2. Unity packages imported automatically
-            3. Multi-profile builds executed (Development & Master profiles)
+            **ビルドプロセス:**
+            1. Google Drive からアセットをダウンロードしました。
+            2. Unity パッケージを自動インポートしました。
+            3. 複数プロファイル（Development ＆ Master）でビルドを実行しました。
             
-            **Included Builds:**
-            - Development profiles
-            - Master profiles
+            **含まれるビルド対象:**
+            - 開発用プロファイル (Development profiles)
+            - マスター用プロファイル (Master profiles)
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
