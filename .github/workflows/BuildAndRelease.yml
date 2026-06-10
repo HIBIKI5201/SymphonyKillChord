@@ -7,12 +7,13 @@ on:
   pull_request:
     branches:
       - develop
-    types: [closed]
+    types: [ closed ]
 
   workflow_dispatch:       # 手動実行も可能。
 
 permissions:
   contents: write      # リリース作成とリポジトリ参照に必要な最小権限
+  variables: write     # リポジトリ変数の更新に必要
 
 # 注意: アーティファクトアップロードや他の操作が必要な場合、
 # permissions を追加で緩和する必要があるか確認してください。
@@ -177,15 +178,15 @@ jobs:
           if (Test-Path "unity_build.log") {
             Write-Host "[INFO] Extracting key information from unity_build.log..."
             Write-Host ""
-            
+          
             # エラーと警告をカウント
             $Errors = Select-String -Path "unity_build.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
             $Warnings = Select-String -Path "unity_build.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-            
+          
             Write-Host "Errors found: $Errors"
             Write-Host "Warnings found: $Warnings"
             Write-Host ""
-            
+          
             # 最後の50行を出力（最終ステータス）
             Write-Host "[Last 50 lines of unity_build.log:]"
             Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
@@ -212,21 +213,21 @@ jobs:
           if (Test-Path $BuildDir) {
             Write-Host "[OK] Build directory found: $BuildDir"
             Write-Host ""
-            
+          
             $Items = Get-ChildItem -Path $BuildDir -Recurse -File
             $TotalSize = ($Items | Measure-Object -Property Length -Sum).Sum
-            
+          
             Write-Host "File Statistics:"
             Write-Host "  Total files: $($Items.Count)"
             Write-Host "  Total size: $([Math]::Round($TotalSize / 1MB, 2)) MB"
             Write-Host ""
-            
+          
             Write-Host "Build Artifacts:"
             $Items | ForEach-Object {
               $Size = [Math]::Round($_.Length / 1MB, 2)
               Write-Host "  - $($_.FullName) ($Size MB)"
             }
-            
+          
             if ($Items.Count -eq 0) {
               Write-Host "[WARNING] No files found in build directory"
             }
@@ -251,7 +252,7 @@ jobs:
           try {
             Write-Host "[INFO] Compressing build artifacts..."
             Compress-Archive -Path "$BuildDir\*" -DestinationPath Builds.zip -ErrorAction Stop
-            
+          
             $ZipSize = (Get-Item "Builds.zip").Length
             Write-Host "[OK] Build archive created successfully"
             Write-Host "     Archive size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
@@ -266,9 +267,15 @@ jobs:
         id: tag_gen
         run: |
           Write-Host "========== Generating Release Tag =========="
-          $TagName = "v1.0.${{ github.run_number }}"
+          
+          # リポジトリ変数から現在のカウントを取得（未設定の場合は1をデフォルトにする）
+          $Counter = "${{ vars.BUILD_COUNTER }}"
+          if (-not $Counter) { $Counter = "1" }
+          
+          $TagName = "v1.0.$Counter"
           echo "TAG_NAME=$TagName" >> $env:GITHUB_OUTPUT
           Write-Host "[OK] Release tag generated: $TagName"
+          
           Write-Host "=========================================="
         shell: powershell
 
@@ -296,6 +303,39 @@ jobs:
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Increment Release Counter
+        if: success()
+        run: |
+          Write-Host "========== Incrementing Release Counter =========="
+          $CurrentCounter = [int]"${{ vars.BUILD_COUNTER }}"
+          if (-not $CurrentCounter) { $CurrentCounter = 1 }
+          $NextCounter = $CurrentCounter + 1
+          
+          Write-Host "Current Counter: $CurrentCounter"
+          Write-Host "Next Counter: $NextCounter"
+          
+          # GitHub API を呼び出してリポジトリ変数を更新
+          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_COUNTER"
+          $Headers = @{
+              "Authorization" = "Bearer ${{ secrets.GITHUB_TOKEN }}"
+              "Accept"        = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $Body = @{
+              "name" = "BUILD_COUNTER"
+              "value" = [string]$NextCounter
+          } | ConvertTo-Json
+          
+          try {
+              $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
+              Write-Host "[OK] Successfully incremented BUILD_COUNTER to $NextCounter"
+          } catch {
+              Write-Host "[ERROR] Failed to update BUILD_COUNTER: $_"
+              exit 1
+          }
+          Write-Host "=================================================="
+        shell: powershell
 
       - name: Release Completion Summary
         if: always()
