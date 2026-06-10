@@ -390,6 +390,10 @@ MonoBehaviour:
     acbFile: SpecialAttack.acb
     awbFile: 
     loaderStatus: 0
+  - name: CueSheet_0
+    acbFile: CueSheet_0.acb
+    awbFile: 
+    loaderStatus: 0
   dspBusSetting: 
   dontDestroyOnLoad: 0
   dontRemoveExistsCueSheet: 0
