@@ -28,36 +28,60 @@ jobs:
       - name: Check latest release age
         id: release_age
         run: |
-          # Skip the release-age check when the workflow is manually dispatched to avoid unnecessary API calls.
           set -e
+          echo "========== Release Age Check =========="
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting release age validation..."
+          echo "Trigger Event: ${GITHUB_EVENT_NAME}"
+          echo "Repository: ${{ github.repository }}"
+          echo "==========================================="
+
+          # Skip the release-age check when the workflow is manually dispatched to avoid unnecessary API calls.
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "Manual dispatch detected; skipping release age check" >&2
+            echo "[SKIP] Manual dispatch detected (workflow_dispatch); bypassing release age check"
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] Decision: should_run=true (manual trigger)"
             exit 0
           fi
 
-          # 最新リリースの公開日を取得し、経過日数を算出します。
-          # github.token を使うことでシークレット準備は不要です。
-          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
-
-          if [ -z "$RELEASE_DATE" ]; then
-            echo "No release found or could not fetch release date; will run build"
+          # Fetch latest release from GitHub API
+          echo "[INFO] Fetching latest release from GitHub API..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          RESPONSE=$(echo "$RESPONSE" | head -n -1)
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "[WARNING] GitHub API returned HTTP $HTTP_CODE; treating as no release found"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] Decision: should_run=true (no release, API error)"
+            exit 0
+          fi
+
+          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
+          if [ -z "$RELEASE_DATE" ]; then
+            echo "[INFO] No release date found in response"
+            echo "days=999" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] Decision: should_run=true (no release found)"
             exit 0
           fi
           
+          echo "[INFO] Latest release published at: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
-
+          
+          echo "[INFO] Days since last release: $DAYS days"
+          echo "[INFO] Threshold: 3 days (releases within 3 days are skipped)"
+          
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "[DECISION] should_run=false (last release was $DAYS days ago <= 3 day threshold)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[DECISION] should_run=true (last release was $DAYS days ago > 3 day threshold)"
           fi
 
   build-and-release:
@@ -79,20 +103,97 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Display Environment Information
+        run: |
+          Write-Host "========== Build Workflow Environment =========="
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow started"
+          Write-Host "Runner: ${{ runner.os }} (architecture: ${{ runner.arch }})"
+          Write-Host "Project Path: ${{ github.workspace }}"
+          Write-Host "."
+          Write-Host "========== Configuration =========="
+          Write-Host "Google Drive API Key configured: $(if ($env:GOOGLE_DRIVE_API_KEY) { 'YES (*****)' } else { 'NO' })"
+          Write-Host "Google Drive Folder ID configured: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { 'YES (*****)' } else { 'NO' })"
+          $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
+          Write-Host "Build Output Directory: $BuildDir"
+          Write-Host "Unity EXE configured: $(if ($env:UNITY_EXE_PATH) { 'YES' } else { 'NO' })"
+          Write-Host "=========================================="
+        shell: powershell
+
+      - name: Validate Unity Installation
+        run: |
+          Write-Host "========== Checking Unity Installation =========="
+          if (-not $env:UNITY_EXE_PATH) {
+            Write-Host "[ERROR] UNITY_EXE_PATH is not set"
+            exit 1
+          }
+          Write-Host "UNITY_EXE_PATH: $env:UNITY_EXE_PATH"
+          
+          if (Test-Path $env:UNITY_EXE_PATH) {
+            $FileInfo = Get-Item $env:UNITY_EXE_PATH
+            Write-Host "[OK] Unity executable found"
+            Write-Host "      File size: $($FileInfo.Length / 1MB) MB"
+            Write-Host "      Last modified: $($FileInfo.LastWriteTime)"
+          } else {
+            Write-Host "[ERROR] Unity executable not found at: $env:UNITY_EXE_PATH"
+            exit 1
+          }
+          Write-Host "=============================================="
+        shell: powershell
+
       - name: Execute Unity - Download Assets and Build
         # Unity 6のインストールパスは環境に応じて変更してください
         # このステップで以下の処理が自動で実行されます：
         # 1. GoogleDriveBatchCI.StartBatchImport でGoogle Driveからアセットをダウンロード
         # 2. アセットインポート完了後、自動的にAutoBuilderでビルド開始
         run: |
-          # UNITY_EXE_PATH は runner またはリポジトリシークレットで指定してください。
-          # 例: Secrets に UNITY_EXE_PATH を登録するか、self-hosted runner の環境変数に設定します。
-          Write-Host "Using UNITY_EXE_PATH: $env:UNITY_EXE_PATH"
-          & "$env:UNITY_EXE_PATH" -batchmode -quit -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
+          Write-Host "========== Starting Unity Build Process =========="
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity..."
+          Write-Host "Entry Method: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
+          Write-Host ""
+          
+          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
+          
+          $UnityExitCode = $LASTEXITCODE
+          Write-Host ""
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity process exited with code: $UnityExitCode"
+          
+          if ($UnityExitCode -eq 0) {
+            Write-Host "[OK] Unity build process completed successfully"
+          } else {
+            Write-Host "[WARNING] Unity process returned non-zero exit code ($UnityExitCode)"
+            Write-Host "         This may indicate a build error; check unity_build.log for details"
+          }
+          Write-Host "==============================================="
+          exit $UnityExitCode
         shell: powershell
         env:
           # Unity 実行ファイルパスを GitHub Secrets から取得
           UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+
+      - name: Extract Unity Build Log Summary
+        if: always()
+        run: |
+          Write-Host "========== Unity Build Log Summary =========="
+          if (Test-Path "unity_build.log") {
+            Write-Host "[INFO] Extracting key information from unity_build.log..."
+            Write-Host ""
+            
+            # エラーと警告をカウント
+            $Errors = Select-String -Path "unity_build.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+            $Warnings = Select-String -Path "unity_build.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+            
+            Write-Host "Errors found: $Errors"
+            Write-Host "Warnings found: $Warnings"
+            Write-Host ""
+            
+            # 最後の50行を出力（最終ステータス）
+            Write-Host "[Last 50 lines of unity_build.log:]"
+            Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "[WARNING] unity_build.log not found"
+          }
+          Write-Host "=========================================="
+        shell: powershell
 
       - name: Upload Unity Log
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -105,44 +206,89 @@ jobs:
 
       - name: Check Build Output
         run: |
+          Write-Host "========== Build Output Validation =========="
           $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
+          
           if (Test-Path $BuildDir) {
-            Write-Host "Build artifacts found in $BuildDir directory"
-            Get-ChildItem -Path $BuildDir -Recurse | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "[OK] Build directory found: $BuildDir"
+            Write-Host ""
+            
+            $Items = Get-ChildItem -Path $BuildDir -Recurse -File
+            $TotalSize = ($Items | Measure-Object -Property Length -Sum).Sum
+            
+            Write-Host "File Statistics:"
+            Write-Host "  Total files: $($Items.Count)"
+            Write-Host "  Total size: $([Math]::Round($TotalSize / 1MB, 2)) MB"
+            Write-Host ""
+            
+            Write-Host "Build Artifacts:"
+            $Items | ForEach-Object {
+              $Size = [Math]::Round($_.Length / 1MB, 2)
+              Write-Host "  - $($_.FullName) ($Size MB)"
+            }
+            
+            if ($Items.Count -eq 0) {
+              Write-Host "[WARNING] No files found in build directory"
+            }
           } else {
-            Write-Host "WARNING: No $BuildDir directory found"
+            Write-Host "[ERROR] Build directory not found: $BuildDir"
+            Write-Host "[ERROR] Build output is missing; cannot proceed with artifact creation"
+            exit 1
           }
+          Write-Host "=========================================="
         shell: powershell
 
       - name: Zip Build Artifacts
         run: |
+          Write-Host "========== Creating Build Archive =========="
           $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
-          if (Test-Path $BuildDir) {
-            Compress-Archive -Path "$BuildDir\*" -DestinationPath Builds.zip
-            Write-Host "Build artifacts compressed successfully"
-          } else {
-            Write-Host "ERROR: $BuildDir directory not found, cannot create archive"
+          
+          if (-not (Test-Path $BuildDir)) {
+            Write-Host "[ERROR] Build directory not found: $BuildDir"
             exit 1
           }
+          
+          try {
+            Write-Host "[INFO] Compressing build artifacts..."
+            Compress-Archive -Path "$BuildDir\*" -DestinationPath Builds.zip -ErrorAction Stop
+            
+            $ZipSize = (Get-Item "Builds.zip").Length
+            Write-Host "[OK] Build archive created successfully"
+            Write-Host "     Archive size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+          } catch {
+            Write-Host "[ERROR] Failed to create archive: $_"
+            exit 1
+          }
+          Write-Host "=========================================="
         shell: powershell
 
       - name: Generate Release Tag
         id: tag_gen
-        run: echo "TAG_NAME=v1.0.${{ github.run_number }}" >> $env:GITHUB_OUTPUT
+        run: |
+          Write-Host "========== Generating Release Tag =========="
+          $TagName = "v1.0.${{ github.run_number }}"
+          echo "TAG_NAME=$TagName" >> $env:GITHUB_OUTPUT
+          Write-Host "[OK] Release tag generated: $TagName"
+          Write-Host "=========================================="
         shell: powershell
 
       - name: Create Release and Upload Asset
+        id: create_release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
           body: |
-            Automated build generated by merging PR #${{ github.event.pull_request.number }} into develop.
+            Automated build generated from workflow run #${{ github.run_id }}
+            
+            **Trigger Event:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**Trigger:** Manual dispatch' }}
+            **Timestamp:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
             **Build Process:**
             1. Assets downloaded from Google Drive
             2. Unity packages imported automatically
-            3. Multi-profile builds executed
+            3. Multi-profile builds executed (Development & Master profiles)
             
             **Included Builds:**
             - Development profiles
@@ -150,3 +296,19 @@ jobs:
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Completion Summary
+        if: always()
+        run: |
+          Write-Host "========== Workflow Completion Summary =========="
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow finished"
+          
+          if ("${{ steps.create_release.outcome }}" -eq "success") {
+            Write-Host "[OK] Release created successfully"
+            Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
+            Write-Host "     Artifact: Builds.zip uploaded"
+          } else {
+            Write-Host "[WARNING] Release creation did not complete (may have failed or been skipped)"
+          }
+          Write-Host "==============================================="
+        shell: powershell
