@@ -50,12 +50,15 @@ jobs:
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "[WARNING] GitHub API returned HTTP $HTTP_CODE; treating as no release found"
+          if [ "$HTTP_CODE" = "404" ]; then
+            echo "[INFO] No previous release found"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (no release, API error)"
+            echo "[SUCCESS] Decision: should_run=true (no release found)"
             exit 0
+          elif [ "$HTTP_CODE" != "200" ]; then
+            echo "[ERROR] GitHub API returned HTTP $HTTP_CODE"
+            exit 1
           fi
 
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
