@@ -268,7 +268,7 @@ jobs:
           $Counter = "${{ vars.BUILD_VERSION }}"
           if (-not $Counter) { $Counter = "1" }
           
-          $TagName = "v1.0.$Counter"
+          $TagName = "dev-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[OK] 生成されたタグ名: $TagName"
           Write-Host "::endgroup::"
