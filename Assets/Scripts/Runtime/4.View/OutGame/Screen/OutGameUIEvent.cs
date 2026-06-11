@@ -45,6 +45,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
         public Action OnStageDetailClosed;
 
+        /// <summary> スキルノードが選択された時のイベント。 </summary>
+        public Action<string> OnSkillNodeSelected;
+
+        /// <summary> スキルノードが選択された時のイベント。 </summary>
+        public Action OnSkillUnlocked;
+
+        /// <summary> スキル詳細画面を閉じるイベント。 </summary>
+        public Action<int> OnSkillDetailClosed;
+
+        /// <summary> スキルプレビュー動画ボタンをクリックした時のイベント。 </summary>
+        public Action OnSkillPreviewButtonClicked;
+
+        /// <summary> スキルプレビュー動画の閉じるボタンをクリックした時のイベント。 </summary>
+        public Action OnSkillPreviewCloseButtonClicked;
+
         /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを整数で通知します。 </summary>
         public Action<int> OnStageCleared;
 
