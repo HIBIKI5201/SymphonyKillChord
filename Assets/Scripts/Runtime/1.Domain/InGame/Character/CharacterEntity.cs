@@ -1,4 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Skill;
+
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Character
@@ -19,7 +21,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
             HealthEntity health,
             CharacterCombatSpec combatSpec,
             AttackInterval attackInterval,
-            Damage baseDamage
+            Damage baseDamage,
+            IBuffSystem buffSystem
         )
         {
             if (health is null)
@@ -32,6 +35,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _combatSpec = combatSpec;
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
             _baseDamage = baseDamage;
+            _buffSystem = buffSystem;
         }
 
         /// <summary>
@@ -68,7 +72,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
         /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
         public Damage BaseDamage => _baseDamage;
+        public IBuffSystem BuffSystem => _buffSystem;
 
+        public void ChangeBaseDamage(Damage newDamage)
+        {
+            _baseDamage = newDamage;
+        }
         /// <summary>
         ///     ダメージを受ける処理。
         ///     HealthEntityのChangeHealthを呼び出す。
@@ -131,7 +140,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _isDeadNotified = false;
             _isInvincible = false;
         }
-
+        private IBuffSystem _buffSystem;
         private CharacterName _name;
         private HealthEntity _health;
         private CharacterCombatSpec _combatSpec;
