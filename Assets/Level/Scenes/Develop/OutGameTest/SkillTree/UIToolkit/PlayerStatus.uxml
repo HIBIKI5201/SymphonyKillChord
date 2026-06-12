@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="VisualElement" picking-mode="Ignore" style="flex-grow: 1; width: 500px; height: 100%; align-self: flex-end; background-color: rgb(148, 173, 176); flex-direction: column; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; opacity: 1; justify-content: flex-start; align-items: center;">
+        <ui:Label text="ステータス" name="TitleLable" style="position: relative; -unity-text-align: upper-center; width: auto; height: auto; font-size: 30px; -unity-font-style: normal; top: 0; align-self: stretch; align-items: stretch;"/>
+        <ui:VisualElement name="StatusContainer" style="flex-grow: initial; align-items: flex-start; align-content: auto; flex-direction: row; flex-wrap: wrap; justify-content: center;">
+            <ui:Label text="HP：" name="HealthLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
+            <ui:Label text="99" name="HealthPreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
+            <ui:Label text="攻撃力：" name="AttackLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
+            <ui:Label text="10&#10;" name="AttackPreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
+            <ui:Label text="クリティカル率：" name="CriticalChanceLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
+            <ui:Label text="5%" name="CriticalChancePreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

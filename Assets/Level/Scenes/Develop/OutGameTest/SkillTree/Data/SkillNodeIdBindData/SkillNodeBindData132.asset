@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f047c76dba26c88439afe659572ce9f6, type: 3}
+  m_Name: SkillNodeBindData132
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeIdBindData
+  NodeName: N132
+  SkillNodeData: {fileID: 11400000, guid: 103b3ef1e77a7864f9a507e8d6d91cf1, type: 2}
+  FromConnNames:
+  - C10-132
+  ToConnNames:
+  - C132-11
