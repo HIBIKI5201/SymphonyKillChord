@@ -798,7 +798,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.IngameComposition
   _musicSyncInitializer: {fileID: 1249666141}
   _camerasystemInitializer: {fileID: 533730526}
-  _ingameSceneView: {fileID: 58835740}
   _enemyInfantryTestSpawner: {fileID: 1136649845}
   _enemyArtilleryTestSpawner: {fileID: 1772279158}
   _inGameMissionInitializer: {fileID: 866643817}
@@ -1508,7 +1507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.MusicSyncInitializer
   _musicSyncView: {fileID: 1249666142}
-  _testCue: Cyber
+  _testCue: BGM_Ingame
   _testBpm: 105
   _justTimingThreshold: 0.1
 --- !u!114 &1249666142

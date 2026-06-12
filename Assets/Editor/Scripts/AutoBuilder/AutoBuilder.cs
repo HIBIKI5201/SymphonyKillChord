@@ -100,10 +100,12 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             string outputDir = Path.Combine(baseOutputDir, profile.name);
-            if (!Directory.Exists(outputDir))
+            if (Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.Delete(outputDir, true);
             }
+            
+            Directory.CreateDirectory(outputDir);
 
             BuildPlayerOptions options = AutoBuildExecuter.CreateBuildPlayerOptions(profile);
 

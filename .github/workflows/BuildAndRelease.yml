@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - develop
-    types: [closed]
+    types: [ closed ]
 
   workflow_dispatch:       # 手動実行も可能。
 
@@ -28,28 +28,76 @@ jobs:
       - name: Check latest release age
         id: release_age
         run: |
-          # 最新リリースの公開日を取得し、経過日数を算出します。
-          # github.token を使うことでシークレット準備は不要です。
           set -e
-          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
+          echo "========== リリース経過日数の確認 =========="
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] リリース経過日数の検証を開始します..."
+          echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
+          echo "リポジトリ: ${{ github.repository }}"
+          echo "==========================================="
 
-          if [ -z "$RELEASE_DATE" ]; then
-            echo "No release found or could not fetch release date; will run build"
+          # 同一ワークフローの他の実行中インスタンスを確認（二重起動の防止と早期リターン）
+          echo "[INFO] 同一ワークフローの実行中インスタンスを確認しています..."
+          ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
+          OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
+          
+          if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
+            echo "[SKIP] このワークフローの別の実行が既に進行中です (実行数: $OTHER_RUNS_COUNT)。早期終了します..."
+            echo "days=0" >> $GITHUB_OUTPUT
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] 判定: should_run=false (重複実行によるスキップ)"
+            exit 0
+          fi
+
+          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "[SKIP] 手動実行を検出したため、リリース経過日数のチェックをスキップします"
+            echo "days=0" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] 判定: should_run=true (手動起動)"
+            exit 0
+          fi
+
+          # GitHub APIから最新のリリースを取得します
+          echo "[INFO] GitHub APIから最新のリリースを取得しています..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          RESPONSE=$(echo "$RESPONSE" | head -n -1)
+          
+          if [ "$HTTP_CODE" = "404" ]; then
+            echo "[INFO] 過去のリリースが見つかりませんでした"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] 判定: should_run=true (新規リリース)"
+            exit 0
+          elif [ "$HTTP_CODE" != "200" ]; then
+            echo "[ERROR] GitHub APIが HTTP $HTTP_CODE を返しました"
+            exit 1
+          fi
+
+          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
+          if [ -z "$RELEASE_DATE" ]; then
+            echo "[INFO] レスポンス内にリリース日がみつかりませんでした"
+            echo "days=999" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[SUCCESS] 判定: should_run=true (リリース日未特定のため実行)"
             exit 0
           fi
           
+          echo "[INFO] 最新のリリース公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
-
+          
+          echo "[INFO] 前回のリリースからの経過日数: $DAYS 日"
+          echo "[INFO] しきい値: 3 日 (3日以内のリリースはスキップされます)"
+          
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "[DECISION] should_run=false (最終リリースが $DAYS 日前のため、しきい値3日以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "[DECISION] should_run=true (最終リリースが $DAYS 日前の分、しきい値3日を超過)"
           fi
 
   build-and-release:
@@ -58,12 +106,12 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 120  # ビルド処理が長くなる可能性があるため、タイムアウトを設定
     environment: 'AutoBuildAndRelease'
-    # ジョブ全体で利用する環境変数（必要に応じてリポジトリ Secrets に設定）
+    # ジョブ全体で利用する環境変数
     env:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-      # UNITY_BUILD_OUTPUT_DIR を設定すると出力先を上書きできます（省略時はプロジェクト内 Builds フォルダを使用）
-      UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR }}
+      UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
+      UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
 
     steps:
       - name: Checkout Repository
@@ -71,20 +119,94 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Display Environment Information
+        run: |
+          Write-Host "::group::ビルドワークフロー実行環境情報"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
+          Write-Host "Runner: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
+          Write-Host "Project Path: ${{ github.workspace }}"
+          Write-Host ""
+          Write-Host "Google Drive API Key 設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
+          Write-Host "Google Drive Folder ID 設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
+          Write-Host "Build Output Directory: $env:UNITY_BUILD_OUTPUT_DIR"
+          Write-Host "Unity EXE Path: $env:UNITY_EXE_PATH"
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Validate Unity Installation
+        run: |
+          Write-Host "::group::Unityインストールの確認"
+          if (-not $env:UNITY_EXE_PATH) {
+            Write-Host "[ERROR] UNITY_EXE_PATH が設定されていません。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "UNITY_EXE_PATH: $env:UNITY_EXE_PATH"
+          
+          if (Test-Path $env:UNITY_EXE_PATH) {
+            $FileInfo = Get-Item $env:UNITY_EXE_PATH
+            Write-Host "[OK] Unityの実行ファイルを確認しました。"
+            Write-Host "      ファイルサイズ: $($FileInfo.Length / 1MB) MB"
+            Write-Host "      最終更新日時: $($FileInfo.LastWriteTime)"
+          } else {
+            Write-Host "[ERROR] 指定されたパスにUnityの実行ファイルが見つかりません: $env:UNITY_EXE_PATH"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Execute Unity - Download Assets and Build
-        # Unity 6のインストールパスは環境に応じて変更してください
         # このステップで以下の処理が自動で実行されます：
         # 1. GoogleDriveBatchCI.StartBatchImport でGoogle Driveからアセットをダウンロード
         # 2. アセットインポート完了後、自動的にAutoBuilderでビルド開始
         run: |
-          # UNITY_EXE_PATH は runner またはリポジトリシークレットで指定してください。
-          # 例: Secrets に UNITY_EXE_PATH を登録するか、self-hosted runner の環境変数に設定します。
-          Write-Host "Using UNITY_EXE_PATH: $env:UNITY_EXE_PATH"
-          & "$env:UNITY_EXE_PATH" -batchmode -quit -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
+          Write-Host "::group::Unityビルド処理の開始"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unityを起動中..."
+          Write-Host "実行メソッド: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
+          Write-Host "ログ出力先: unity_build.log"
+          Write-Host ""
+          
+          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
+          
+          $UnityExitCode = $LASTEXITCODE
+          Write-Host ""
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unityプロセスが終了コード $UnityExitCode で終了しました。"
+          
+          if ($UnityExitCode -eq 0) {
+            Write-Host "[OK] Unityビルド処理が正常に完了しました。"
+          } else {
+            Write-Host "[WARNING] Unityプロセスが非ゼロの終了コード ($UnityExitCode) を返しました。"
+            Write-Host "          ビルドエラーが発生した可能性があります。詳細は unity_build.log を確認してください。"
+          }
+          Write-Host "::endgroup::"
+          exit $UnityExitCode
         shell: powershell
-        env:
-          # Unity 実行ファイルパスを GitHub Secrets から取得
-          UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+
+      - name: Extract Unity Build Log Summary
+        if: always()
+        run: |
+          Write-Host "::group::Unityビルドログのサマリー出力"
+          if (Test-Path "unity_build.log") {
+            Write-Host "[INFO] unity_build.log から主要な情報を抽出しています..."
+            Write-Host ""
+          
+            # エラーと警告をカウント
+            $Errors = Select-String -Path "unity_build.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+            $Warnings = Select-String -Path "unity_build.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+          
+            Write-Host "検出されたエラー数: $Errors"
+            Write-Host "検出された警告数: $Warnings"
+            Write-Host ""
+          
+            # 最後の50行を出力（最終ステータス）
+            Write-Host "[unity_build.log の末尾50行:]"
+            Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "[WARNING] unity_build.log が見つかりませんでした。"
+          }
+          Write-Host "::endgroup::"
+        shell: powershell
 
       - name: Upload Unity Log
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -93,52 +215,149 @@ jobs:
           name: unity-build-log
           path: unity_build.log
 
-      # ビルド成果物（Builds.zip）は後で Release に添付されます。
-
       - name: Check Build Output
         run: |
-          $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
-          if (Test-Path $BuildDir) {
-            Write-Host "Build artifacts found in $BuildDir directory"
-            Get-ChildItem -Path $BuildDir -Recurse | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "::group::ビルド成果物の検証"
+          if (Test-Path $env:UNITY_BUILD_OUTPUT_DIR) {
+            Write-Host "[OK] ビルド出力ディレクトリを確認: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host ""
+          
+            $Items = Get-ChildItem -Path $env:UNITY_BUILD_OUTPUT_DIR -Recurse -File
+            $TotalSize = ($Items | Measure-Object -Property Length -Sum).Sum
+          
+            Write-Host "ファイル統計:"
+            Write-Host "  総ファイル数: $($Items.Count)"
+            Write-Host "  総サイズ: $([Math]::Round($TotalSize / 1MB, 2)) MB"
+            Write-Host ""
+          
+            Write-Host "ビルド成果物一覧:"
+            $Items | ForEach-Object {
+              $Size = [Math]::Round($_.Length / 1MB, 2)
+              Write-Host "  - $($_.FullName) ($Size MB)"
+            }
+          
+            if ($Items.Count -eq 0) {
+              Write-Host "[WARNING] ビルド出力ディレクトリにファイルが見つかりません。"
+            }
           } else {
-            Write-Host "WARNING: No $BuildDir directory found"
+            Write-Host "[ERROR] ビルド出力ディレクトリが見つかりません: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "[ERROR] ビルド成果物が存在しないため、圧縮処理を中断します。"
+            Write-Host "::endgroup::"
+            exit 1
           }
+          Write-Host "::endgroup::"
         shell: powershell
 
       - name: Zip Build Artifacts
         run: |
-          $BuildDir = if ($env:UNITY_BUILD_OUTPUT_DIR) { $env:UNITY_BUILD_OUTPUT_DIR } else { "Builds" }
-          if (Test-Path $BuildDir) {
-            Compress-Archive -Path "$BuildDir\*" -DestinationPath Builds.zip
-            Write-Host "Build artifacts compressed successfully"
-          } else {
-            Write-Host "ERROR: $BuildDir directory not found, cannot create archive"
+          Write-Host "::group::ビルド成果物のアーカイブ（ZIP化）"
+          if (-not (Test-Path $env:UNITY_BUILD_OUTPUT_DIR)) {
+            Write-Host "[ERROR] ビルド出力ディレクトリが見つかりません: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "::endgroup::"
             exit 1
           }
+          
+          try {
+            Write-Host "[INFO] ビルド成果物を圧縮中..."
+            Compress-Archive -Path "$env:UNITY_BUILD_OUTPUT_DIR\*" -DestinationPath Builds.zip -ErrorAction Stop
+          
+            $ZipSize = (Get-Item "Builds.zip").Length
+            Write-Host "[OK] アーカイブ（Builds.zip）の作成が完了しました。"
+            Write-Host "     ファイルサイズ: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+          } catch {
+            Write-Host "[ERROR] アーカイブ作成に失敗しました: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "::endgroup::"
         shell: powershell
 
       - name: Generate Release Tag
         id: tag_gen
-        run: echo "TAG_NAME=v1.0.${{ github.run_number }}" >> $env:GITHUB_OUTPUT
+        run: |
+          Write-Host "::group::リリース用タグ名の生成"
+          
+          # リポジトリ変数から現在のカウントを取得（未設定の場合は1をデフォルトにする）
+          $Counter = "${{ vars.BUILD_VERSION }}"
+          if (-not $Counter) { $Counter = "1" }
+          
+          $TagName = "dev-v1.0.$Counter"
+          "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
+          Write-Host "[OK] 生成されたタグ名: $TagName"
+          Write-Host "::endgroup::"
         shell: powershell
 
       - name: Create Release and Upload Asset
+        id: create_release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
           body: |
-            Automated build generated by merging PR #${{ github.event.pull_request.number }} into develop.
+            ワークフロー実行 #${{ github.run_id }} から自動生成されたビルド成果物です。
             
-            **Build Process:**
-            1. Assets downloaded from Google Drive
-            2. Unity packages imported automatically
-            3. Multi-profile builds executed
+            **トリガーイベント:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行（workflow_dispatch）' }}
+            **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
-            **Included Builds:**
-            - Development profiles
-            - Master profiles
+            **ビルドプロセス:**
+            1. Google Drive からアセットをダウンロードしました。
+            2. Unity パッケージを自動インポートしました。
+            3. 複数プロファイル（Development ＆ Master）でビルドを実行しました。
+            
+            **含まれるビルド対象:**
+            - 開発用プロファイル (Development profiles)
+            - マスター用プロファイル (Master profiles)
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Increment Release Counter
+        if: success()
+        run: |
+          Write-Host "::group::リリース用カウンターのインクリメント"
+          $CurrentCounter = [int]"${{ vars.BUILD_VERSION }}"
+          if (-not $CurrentCounter) { $CurrentCounter = 1 }
+          $NextCounter = $CurrentCounter + 1
+          
+          Write-Host "現在のカウンター: $CurrentCounter"
+          Write-Host "次のカウンター: $NextCounter"
+          
+          # GitHub API を呼び出してリポジトリ変数を更新
+          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_VERSION"
+          $Headers = @{
+              "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
+              "Accept"        = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $Body = @{
+              "name" = "BUILD_VERSION"
+              "value" = [string]$NextCounter
+          } | ConvertTo-Json
+          
+          try {
+              $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
+              Write-Host "[OK] BUILD_VERSION を $NextCounter に正常に更新しました。"
+          } catch {
+              Write-Host "[ERROR] BUILD_VERSION の更新に失敗しました: $_"
+              Write-Host "::endgroup::"
+              exit 1
+          }
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Release Completion Summary
+        if: always()
+        run: |
+          Write-Host "::group::ワークフロー実行サマリー"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが終了しました。"
+          
+          if ("${{ steps.create_release.outcome }}" -eq "success") {
+            Write-Host "[OK] リリースが正常に作成されました。"
+            Write-Host "     タグ名: ${{ steps.tag_gen.outputs.TAG_NAME }}"
+            Write-Host "     成果物: Builds.zip をアップロードしました。"
+          } else {
+            Write-Host "[WARNING] リリースの作成が完了しませんでした（失敗またはスキップされた可能性があります）。"
+          }
+          Write-Host "::endgroup::"
+        shell: powershell
