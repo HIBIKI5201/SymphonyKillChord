@@ -1,4 +1,6 @@
 using KillChord.Runtime.View.InGame.Sequence;
+using LitMotion;
+using LitMotion.Extensions;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,6 +42,42 @@ namespace KillChord.Runtime.View.InGame.Music
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
                 _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
+            }
+
+            int activeIndex = GetIndex(Mathf.Lerp(_beats[0], _beats[^1], normalizeOffset));
+            if (activeIndex == _currentOpenIndex)
+            {
+                return;
+            }
+            SetBeatAnimation(_currentOpenIndex, activeIndex);
+            _currentOpenIndex = activeIndex;
+        }
+        /// <summary>
+        ///    ビートのアニメーションを更新する。
+        /// </summary>
+        /// <param name="closeIndex"></param>
+        /// <param name="openIndex"></param>
+        public void SetBeatAnimation(int closeIndex, int openIndex)
+        {
+            if (closeIndex == -1 && openIndex == -1)
+            {
+                return;
+            }
+
+            _handle.TryComplete();
+            if (closeIndex != -1)
+            {
+                _handle = LSequence.Create()
+                    .Join(LMotion.Create(_inTimingSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .BindToSizeDeltaX(_leftBeatRectTransforms[closeIndex]))
+                    .Join(LMotion.Create(_inTimingSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .BindToSizeDeltaX(_rightBeatRectTransforms[closeIndex]))
+                    .Run();
+            }
+            if (openIndex != -1)
+            {
+                _leftBeatRectTransforms[openIndex].sizeDelta = new Vector2(_inTimingSizeDelta, _leftBeatRectTransforms[openIndex].sizeDelta.y);
+                _rightBeatRectTransforms[openIndex].sizeDelta = new Vector2(_inTimingSizeDelta, _rightBeatRectTransforms[openIndex].sizeDelta.y);
             }
         }
 
@@ -86,6 +124,16 @@ namespace KillChord.Runtime.View.InGame.Music
         [Range(0f, 1f)]
         [SerializeField] private float _noTargetAlpha;
 
+        [Space]
+        [Tooltip("タイミング内にあるビートのSizeDelta")]
+        [SerializeField] private float _inTimingSizeDelta;
+        [Tooltip("タイミング外にあるビートのSizeDelta")]
+        [SerializeField] private float _outTimingSizeDelta;
+        [Tooltip("ビートのアニメーションのDuration")]
+        [SerializeField] private float _outTimingDuration;
+        private int _currentOpenIndex = -1;
+        private MotionHandle _handle;
+
         private void Awake()
         {
             InitBeatRectTransforms();
@@ -100,10 +148,14 @@ namespace KillChord.Runtime.View.InGame.Music
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
+            _handle.TryCancel();
         }
+
         [ContextMenu("ビートの位置を初期化")]
         private void InitBeatRectTransforms()
         {
+            _currentOpenIndex = -1;
+
             if (_beatPositionImages.Length != _beatPositionRectTransfroms.Length)
             {
                 Debug.LogError("ビート位置を表示するImageとRectTransformの配列の長さが一致していません。\n_beatPositionImages.Length = _beatPositionRectTransfroms.Lengthになるように設定してください。");
@@ -138,10 +190,10 @@ namespace KillChord.Runtime.View.InGame.Music
 
                 startY = _beats[i] * _scale;
                 endY = _beats[i + 1] * _scale;
-                _leftBeatRectTransforms[i].sizeDelta = new Vector2(_leftBeatRectTransforms[i].sizeDelta.x, Mathf.Abs(endY - startY));
+                _leftBeatRectTransforms[i].sizeDelta = new Vector2(_outTimingSizeDelta, Mathf.Abs(endY - startY));
                 _leftBeatRectTransforms[i].anchoredPosition = Vector2.up * ((endY + startY) / 2);
 
-                _rightBeatRectTransforms[i].sizeDelta = new Vector2(_rightBeatRectTransforms[i].sizeDelta.x, Mathf.Abs(endY - startY));
+                _rightBeatRectTransforms[i].sizeDelta = new Vector2(_outTimingSizeDelta, Mathf.Abs(endY - startY));
                 _rightBeatRectTransforms[i].anchoredPosition = Vector2.up * ((endY + startY) / 2);
             }
 
@@ -151,6 +203,43 @@ namespace KillChord.Runtime.View.InGame.Music
                 size.x = _beats[^1] * _scale;
                 _beatPositionRectTransfroms[i].sizeDelta = size;
             }
+        }
+        private int GetIndex(float targetValue)
+        {
+            int activeIndex = -1;
+            if (_beats != null && _beats.Length >= 2)
+            {
+                for (int i = 0; i < _beats.Length - 1; i++)
+                {
+                    float a = _beats[i];
+                    float b = _beats[i + 1];
+
+                    if (a <= b)
+                    {
+                        if (targetValue >= a && targetValue <= b)
+                        {
+                            activeIndex = i;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (targetValue <= a && targetValue >= b)
+                        {
+                            activeIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (activeIndex == -1)
+                {
+                    if (targetValue <= Mathf.Min(_beats[0], _beats[^1]))
+                        activeIndex = 0;
+                    else
+                        activeIndex = _beats.Length - 2;
+                }
+            }
+            return activeIndex;
         }
     }
 }
