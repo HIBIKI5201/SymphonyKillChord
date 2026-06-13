@@ -5,7 +5,7 @@ using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Skill;
 using UnityEngine.Assertions.Must;
 
-namespace KillChord.Runtime.Application.InGame.Skill
+namespace KillChord.Runtime.Application.InGame.Buff
 {
     public class BuffSystem : IBuffSystem
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
-using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;

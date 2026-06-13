@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
