@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     /// <summary>
     ///     効果音の再生を管理するクラス。
     /// </summary>
-    public class SoundEffectVolumeManager : MonoBehaviour
+    public class SoundEffectVolumeManager : IVolumeManager
     {
         /// <summary>
         ///     SE Sourceを登録する。
@@ -58,6 +59,6 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         private readonly List<SoundEffectSource> _sources = new();
-        private float _volume;
+        private float _volume = 1f;
     }
 }
