@@ -22,6 +22,9 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキルの効果実装。 </summary>
         public ISkillEffect Effect { get; }
 
+        /// <summary> スキル発動時に再生するアニメーションのキー。空なら通常攻撃アニメーションを使う。 </summary>
+        public string AnimationKey { get; }
+
         #region 定数
 
         private const int MIN_PATTERN_LENGTH = 1;
@@ -31,11 +34,12 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, double bpm)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, double bpm, string animationKey)
         {
             Id = id;
             SkillPattern = skillPattern;
             Effect = effect;
+            AnimationKey = animationKey;
             CooldownTime = new SkillCooldownTime(CalcCooldownTime(bpm));
         }
 
