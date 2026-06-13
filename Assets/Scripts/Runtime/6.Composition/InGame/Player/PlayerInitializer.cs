@@ -225,7 +225,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
             }
-            if(_skillController != null)
+            if (_skillController != null)
             {
                 _skillController.OnSkillAnimationRequested -= _player.PlaySkillAnimation;
             }
