@@ -46,6 +46,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
+        private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
         private Vector2 _dogeVector;
         private Transform _cacheTransform;
@@ -165,15 +166,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_characterAnimationIndices == null)
-            {
-                return;
-            }
-
-            if (_characterAnimationIndices.TryGetOneShotIndex(animationKey, out int index))
-            {
-                _characterAnimationController?.TriggerOneShot(index);
-            }
+            _pendingSkillAnimationKey = animationKey;
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
@@ -240,22 +233,32 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 PlayAttackSound(resultBeatType);
 
-                string attackKey = GetAttackAnimationKey(resultBeatType);
+                string animationKey = _pendingSkillAnimationKey;
+                _pendingSkillAnimationKey = null;
+
+                if (string.IsNullOrWhiteSpace(animationKey))
+                {
+                    animationKey = GetAttackAnimationKey(resultBeatType);
+                }
+
                 int attackIndex = _characterAnimationIndices.Attack;
 
-                if (!string.IsNullOrEmpty(attackKey)
-                    && _characterAnimationIndices.TryGetOneShotIndex(attackKey, out int oneShotIndex))
+                if (!string.IsNullOrEmpty(animationKey)
+                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
                 {
                     attackIndex = oneShotIndex;
                 }
 
                 _characterAnimationController?.TriggerOneShot(attackIndex);
+
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
                     CancelAttackRotate();
                     _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(PlayerAttackController.CurrentLockOnTargetPosition, PlayerAttackController.AttackRotationSpeed
-                        , _cancellationTokenSource.Token);
+                    RotateToTargetAsync(
+                        PlayerAttackController.CurrentLockOnTargetPosition,
+                        PlayerAttackController.AttackRotationSpeed,
+                        _cancellationTokenSource.Token);
                 }
             }
         }
