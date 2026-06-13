@@ -78,7 +78,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 UnRegisterActions();
             }
 
-            _healthHudPresenter?.Dispose();
+            if (_healthHudPresenter != null)
+            {
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter?.Dispose();
+            }
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -99,6 +103,8 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
+
+            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -185,7 +191,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 _dogeVector = _moveVector;
                 _isDodge = true;
 
-                _dodgeSoundSource.Play();
+                PlaySound(_dodgeSoundSource, null);
                 _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
@@ -335,6 +341,12 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void PlayAttackSound(int beatType)
         {
+            if (_attackSoundConfigs == null || _attackSoundConfigs.Length == 0)
+            {
+                Debug.LogError("攻撃SE設定が未設定です。");
+                return;
+            }
+
             for (int i = 0; i < _attackSoundConfigs.Length; i++)
             {
                 if (_attackSoundConfigs[i].BeatType != beatType)
