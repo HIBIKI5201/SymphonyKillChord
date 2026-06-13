@@ -27,7 +27,6 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _list.Clear();
             return context;
         }
-
         public void Add(IBuff buff)
         {
             _list.Add(buff);

@@ -5,11 +5,11 @@ using UnityEngine;
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
     /// <summary>
-    ///     スキルの効果をテストするためのクラス。
+    ///     スキルID 09 のスキル効果を実装するクラス。 
     /// </summary>
-    public class TestSkillEffect : SkillBase
+    public class Skill_09 : SkillBase
     {
-        public TestSkillEffect(IBuff buff) : base(buff)
+        public Skill_09(IBuff buff) : base(buff)
         {
             
         }

@@ -64,7 +64,7 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///     スキル発動時に発動。
         /// </summary>
-        Skill
+        Skill,
     }
 
     /// <summary>

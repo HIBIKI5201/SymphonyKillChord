@@ -6,16 +6,16 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
-    /// <summary>
-    ///     スキルの効果をテストするためのクラス。
+     /// <summary>
+    ///     スキルID 06 のスキル効果を実装するクラス。
     /// </summary>
-    public class Skill_06 : ISkillEffect
+    public class Skill_06 : SkillBase
     {
-        public Skill_06(IBuff buff)
+        public Skill_06(IBuff buff):base(buff)
         {
             _buff = buff;
         }
-        public void Execute(SkillEffectContext context)
+        public override void Execute(SkillEffectContext context)
         {
             context.PlayerEntity.BuffSystem.Add(_buff);
         }

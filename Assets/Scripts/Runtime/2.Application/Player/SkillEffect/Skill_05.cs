@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -6,13 +7,16 @@ using UnityEngine;
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
     /// <summary>
-    ///     スキルの効果をテストするためのクラス。
+    ///     スキルID 05 のスキル効果を実装するクラス。
     /// </summary>
-    public class Skill_05 : ISkillEffect
+    public class Skill_05 : SkillBase
     {
-        public void Execute(SkillEffectContext context)
+        public Skill_05(IBuff buff) : base(buff)
         {
-            Damage selfDamage = new Damage(context.PlayerEntity.CurrentHealth.Value * _n );
+        }
+        public override void Execute(SkillEffectContext context)
+        {
+            Damage selfDamage = new Damage(context.PlayerEntity.CurrentHealth.Value * _n);
             context.PlayerEntity.TakeDamage(selfDamage); // _N%消費する。
 
             Damage attackDamage = new Damage(selfDamage.Value * _m); //自身の体力をn%消費して、その消費量×mのダメージを与える。

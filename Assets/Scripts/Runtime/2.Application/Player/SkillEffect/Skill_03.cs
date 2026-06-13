@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -8,9 +9,12 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// <summary>
     ///     スキルID 03 のスキル効果を実装するクラス。
     /// </summary>
-    public class Skill_03 : ISkillEffect
+    public class Skill_03 : SkillBase
     {
-        public void Execute(SkillEffectContext context)
+        public Skill_03(IBuff buff) : base(buff)
+        {
+        }
+        public override void Execute(SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage * _damageMultiPlier);
@@ -25,5 +29,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         }
 
         private readonly float _damageMultiPlier = 2f;
+
     }
 }
