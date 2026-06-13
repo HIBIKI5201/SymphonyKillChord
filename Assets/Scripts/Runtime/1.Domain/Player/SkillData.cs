@@ -11,15 +11,18 @@ namespace KillChord.Runtime.Domain.Player
         public int Id { get; }
         public BeatType[] Pattern { get; }
         public ISkillEffect SkillEffect { get; }
+        public string AnimationKey { get; }
 
         public SkillData(
             int id,
             BeatType[] pattern,
-            ISkillEffect skillEffect)
+            ISkillEffect skillEffect,
+            string animationKey)
         {
             Id = id;
             Pattern = pattern;
             SkillEffect = skillEffect;
+            AnimationKey = animationKey;
         }
 
         /// <summary>
@@ -31,7 +34,8 @@ namespace KillChord.Runtime.Domain.Player
                 new SkillId(Id),
                 new SkillPattern(new(Pattern)),
                 SkillEffect,
-                bpm);
+                bpm,
+                AnimationKey);
         }
     }
 }
