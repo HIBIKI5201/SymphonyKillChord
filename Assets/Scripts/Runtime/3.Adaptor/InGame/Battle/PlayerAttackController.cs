@@ -105,7 +105,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _attackIntervalEvaluator.EvaluateInterval();
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
-            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteType.Pre);
+            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Before);
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
@@ -114,7 +114,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Attacker.BaseDamage
             );
 
-           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteType.Post));
+           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteTiming.After));
 
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う

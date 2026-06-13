@@ -28,12 +28,12 @@ namespace KillChord.Runtime.Application.InGame.Buff
             return context;
         }
 
-        public BuffStateData GetState()
+        public BuffMetaData GetState()
         {
             return _status;
         }
 
-        private readonly BuffStateData _status = new BuffStateData(BuffExecuteType.Pre,BuffType.Wait);
+        private readonly BuffMetaData _status = new BuffMetaData(BuffExecuteTiming.Before,BuffActivationType.Duration);
         private readonly float _multiPiler = 2f;
         private readonly float _waitTime = 5f;
     }

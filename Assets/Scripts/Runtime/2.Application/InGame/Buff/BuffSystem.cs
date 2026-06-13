@@ -9,15 +9,15 @@ namespace KillChord.Runtime.Application.InGame.Buff
 {
     public class BuffSystem : IBuffSystem
     {
-        public BuffContext Execute(BuffContext context, BuffExecuteType state)
+        public BuffContext Execute(BuffContext context, BuffExecuteTiming state)
         {
             for (int i = 0; i < _list.Count; i++)
             {
                 IBuff buff = _list[i];
 
-                if (buff.GetState().GetBuffExecuteType() != state)
+                if (buff.GetState().GetActivationType() != state)
                     continue;
-                if (buff.GetState().GetBuffType() == BuffType.Wait)
+                if (buff.GetState().GetTimingType() == BuffActivationType.Duration)
                 {
                     _ = buff.ExecuteAsync(context); 
                     continue;

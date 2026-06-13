@@ -7,10 +7,24 @@ using UnityEngine.TextCore.Text;
 namespace KillChord.Runtime.Domain
 {
     public interface IBuff
-    {
+    {  
+        /// <summary>
+        ///     即時発動バフ
+        /// </summary>
+        /// <param name="context"> バフ対象 </param>
+        /// <returns></returns>
         BuffContext Execute(BuffContext context);
+        /// <summary>
+        ///     継続発動バフ
+        /// </summary>
+        /// <param name="context"> バフ対象 </param>
+        /// <returns></returns>
         ValueTask<BuffContext> ExecuteAsync(BuffContext context);
-        BuffStateData GetState();
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <returns></returns>
+        BuffMetaData GetState();
     }
 
     public readonly struct BuffContext
@@ -21,14 +35,6 @@ namespace KillChord.Runtime.Domain
             _target = target;
             _result = result;
         }
-
-        public BuffContext(in BuffContext context)
-        {
-            _attacker = context._attacker;
-            _target = context._target;
-            _result = context._result;
-        }
-
         public CharacterEntity Attacker => _attacker;
         public CharacterEntity Target => _target;
         public AttackResult AttackResult => _result;
@@ -37,27 +43,48 @@ namespace KillChord.Runtime.Domain
         private readonly CharacterEntity _target;
         private readonly AttackResult _result;
     }
-    public enum BuffExecuteType
+    /// <summary>
+    ///     バフの発動タイミングのタイプ。
+    /// </summary>
+    public enum BuffExecuteTiming
     {
-        Pre,
-        Post,
+        /// <summary>
+        ///     攻撃計算前に発動。
+        /// </summary>
+        Before,
+        /// <summary>
+        ///     攻撃計算後に発動。
+        /// </summary>
+        After,
     }
-    public enum BuffType
+    /// <summary>
+    /// バフのタイプ
+    /// </summary>
+    public enum BuffActivationType
     {
-        Wait,
-        Now,
+        /// <summary>
+        ///     継続発動。
+        /// </summary>
+        Duration,
+        /// <summary>
+        ///     即時発動。
+        /// </summary>
+        Instance,
     }
-    public readonly struct BuffStateData
+    /// <summary>
+    ///     バフのタイプクラスをまとめたデータ。
+    /// </summary>
+    public readonly struct BuffMetaData
     {
-        public BuffStateData(BuffExecuteType executeType, BuffType type)
+        public BuffMetaData(BuffExecuteTiming timing, BuffActivationType activation)
         {
-            _buffExecuteType = executeType;
-            _buffType = type;
+            _executeTimingType = timing;
+            _activationType = activation;
         }
 
-        public BuffType GetBuffType() => _buffType;
-        public BuffExecuteType GetBuffExecuteType() => _buffExecuteType;
-        private readonly BuffExecuteType _buffExecuteType;
-        private readonly BuffType _buffType;
+        public BuffActivationType GetTimingType() => _activationType;
+        public BuffExecuteTiming GetActivationType() => _executeTimingType;
+        private readonly BuffExecuteTiming _executeTimingType;
+        private readonly BuffActivationType _activationType;
     }
 }

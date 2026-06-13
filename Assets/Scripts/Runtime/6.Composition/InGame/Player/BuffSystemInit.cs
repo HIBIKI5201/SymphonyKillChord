@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Composition
             BuffContext context = new BuffContext(attacker, target, attackResult);
             buffSystem.Add(buff);
             Debug.Log(attacker.BaseDamage.Value);
-            BuffContext result = buffSystem.Execute(context, BuffExecuteType.Pre);
+            BuffContext result = buffSystem.Execute(context, BuffExecuteTiming.Before);
             Debug.Log(attacker.BaseDamage.Value);
             Debug.Log(result.AttackResult.FinalDamage.Value);
 
