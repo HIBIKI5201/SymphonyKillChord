@@ -13,7 +13,7 @@ namespace KillChord.Runtime.InfraStructure
         /// <summary> カタログエントリ一覧。 </summary>
         public IReadOnlyList<CharacterAnimationCatalogEntry> Entries => _entries;
 
-        [SerializeField, Tooltip("アニメーションクリップのカタログ。")]
+        [SerializeField, Tooltip("アニメーションクリップのカタログ。IDは無視して")]
         private CharacterAnimationCatalogEntry[] _entries = Array.Empty<CharacterAnimationCatalogEntry>();
     }
 }
