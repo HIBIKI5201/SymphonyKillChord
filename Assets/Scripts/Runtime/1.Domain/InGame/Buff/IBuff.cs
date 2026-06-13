@@ -35,6 +35,12 @@ namespace KillChord.Runtime.Domain
             _target = target;
             _result = result;
         }
+        public BuffContext(BuffContext context)
+        {
+            _attacker = context.Attacker;
+            _target = context.Target;
+            _result = context._result;
+        }
         public CharacterEntity Attacker => _attacker;
         public CharacterEntity Target => _target;
         public AttackResult AttackResult => _result;
