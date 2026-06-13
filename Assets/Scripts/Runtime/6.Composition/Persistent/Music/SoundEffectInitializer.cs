@@ -1,8 +1,9 @@
 using KillChord.Runtime.View.Persistent.Music;
+using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition.InGame.Music
+namespace KillChord.Runtime.Composition.Persistent.Music
 {
     /// <summary>
     ///     SoundEffectVolumeManager関連の初期化をする。
@@ -11,8 +12,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
     {
         private void Awake()
         {
-            SoundEffectVolumeManager manager = new();
-            ServiceLocator.RegisterInstance(manager);
+            ServiceLocator.RegisterInstance(new SoundEffectVolumeManager());
+            ServiceLocator.RegisterInstance(new VoiceVolumeManager());
         }
     }
 }
