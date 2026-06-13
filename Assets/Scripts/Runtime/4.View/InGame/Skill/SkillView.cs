@@ -1,4 +1,3 @@
-using CriWare;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
@@ -13,11 +12,19 @@ namespace KillChord.Runtime.View.InGame.Skill
             Debug.Log($"SkillView Execute: {Id}");
             //実際のViewで起こる演出など
 
-            if (_source != null && !string.IsNullOrEmpty(_cueName))
+            if (_source == null)
             {
-                Debug.Log($"Playing sound: {_cueName}");
-                _source?.Play(_cueName);
+                return;
             }
+
+            if (string.IsNullOrWhiteSpace(_cueName))
+            {
+                _source.Play();
+                return;
+            }
+
+            Debug.Log($"Playing sound: {_cueName}");
+            _source.Play(_cueName);
         }
 
         [SerializeField] private int _id;
