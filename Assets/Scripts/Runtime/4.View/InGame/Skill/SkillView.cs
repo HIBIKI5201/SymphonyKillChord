@@ -1,5 +1,6 @@
 using CriWare;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill
@@ -15,22 +16,14 @@ namespace KillChord.Runtime.View.InGame.Skill
             if (_source != null && !string.IsNullOrEmpty(_cueName))
             {
                 Debug.Log($"Playing sound: {_cueName}");
-                _source.Play(_cueName);
+                _source?.Play(_cueName);
             }
         }
 
         [SerializeField] private int _id;
 
-        [SerializeField, Tooltip("SkillSE再生用CriAtomSource")] private CriAtomSource _source;
+        [SerializeField, Tooltip("SkillSE再生用SoundEffectSource")] private SoundEffectSource _source;
 
         [SerializeField, Tooltip("再生するCueの名前")] private string _cueName;
-
-        private void Awake()
-        {
-            if(_source == null)
-            {
-                _source = GetComponent<CriAtomSource>();
-            }
-        }
     }
 }
