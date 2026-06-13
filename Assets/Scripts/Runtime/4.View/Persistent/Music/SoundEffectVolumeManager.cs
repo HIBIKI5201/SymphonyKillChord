@@ -46,11 +46,12 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _volume = Mathf.Clamp01(volume);
 
-            foreach (var source in _sources)
+            for (int i = _sources.Count - 1; i >= 0; i--)
             {
+                SoundEffectSource source = _sources[i];
                 if (source == null)
                 {
-                    _sources.Remove(source);
+                    _sources.RemoveAt(i);
                     continue;
                 }
 

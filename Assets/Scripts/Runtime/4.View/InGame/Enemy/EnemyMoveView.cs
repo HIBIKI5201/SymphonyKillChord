@@ -155,8 +155,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (_enemyAIController == null) return;
 
-            _enemyAIController.OnAttackReserved -= PlayEffectReserved;
-            _enemyAIController.OnAttack -= PlayEffectHit;
+            Deactivate();
             _enemyAIController.Dispose();
         }
 
@@ -200,6 +199,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             Vector3 origin = transform.position + _footstepRayOffset;
 
             if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _footstepRayDistance))
+            {
+                return default;
+            }
+
+            if (_footstepSoundConfigs == null || _footstepSoundConfigs.Length == 0)
             {
                 return default;
             }
