@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
+using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -54,6 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 {
                     SkillEffectContext context = new SkillEffectContext(target, _playerEntity, beatType,null); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
                     executedSkill.Effect.Execute(context); //ターゲット情報を渡してスキル効果を実行
+                    _playerEntity.BuffSystem.Execute(new BuffContext(_playerEntity,target),BuffExecuteTiming.Skill);
                     //TODO: プレイヤーの基礎攻撃力の取得。現在のビート数から判定できるかも。
                 }
                 else

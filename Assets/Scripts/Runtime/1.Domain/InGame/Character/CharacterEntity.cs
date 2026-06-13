@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 
 using System;
@@ -46,6 +47,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
+        /// <summary> キャラクターが対象にダメージを与えた時に発火するイベント。 </summary>
+        public event Action<Damage> OnSetDamage;
 
         /// <summary> キャラクター名を取得する。 </summary>
         public CharacterName Name => _name;
@@ -77,6 +80,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
+        }
+        public void SetDamage(Damage damage)
+        {
+            OnSetDamage?.Invoke(damage);
         }
         /// <summary>
         ///     ダメージを受ける処理。

@@ -105,7 +105,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _attackIntervalEvaluator.EvaluateInterval();
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
-            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Before);
+            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
             // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
             AttackResult result = AttackExecutor.Execute(attackDefinition,
                 _battleState.Attacker,
@@ -114,7 +114,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Attacker.BaseDamage
             );
 
-           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteTiming.After));
+           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteTiming.Attack_Logic_After));
 
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
@@ -122,6 +122,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(buffContextPost.AttackResult.FinalDamage.Value, buffContextPost.AttackResult.IsCritical,
                 targetEntity.Id));
 
+            buffContext.Attacker.SetDamage(buffContext.AttackResult.FinalDamage);
             _presenter.Push(buffContextPost.AttackResult);
 
             resultBeatType = (int)beatType;
