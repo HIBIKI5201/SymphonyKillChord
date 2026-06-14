@@ -15,17 +15,21 @@ namespace KillChord.Runtime.InfraStructure.Player
         public int Id => _id;
         public BeatType[] Pattern => _pattern;
         public ISkillEffect SkillEffect => _skillEffect;
+        public string AnimationKey => _animationKey;
 
         /// <summary>
         ///     Domain層のSkillDataに変換する。
         /// </summary>
         public SkillData ToDomain()
         {
-            return new SkillData(_id, _pattern, _skillEffect);
+            return new SkillData(_id, _pattern, _skillEffect, _animationKey);
         }
 
         [SerializeField] private int _id;
         [SerializeField] private BeatType[] _pattern;
         [SerializeReference, SubclassSelector] private ISkillEffect _skillEffect;
+        [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
+        private string _animationKey;
+
     }
 }
