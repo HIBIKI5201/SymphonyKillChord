@@ -2,7 +2,9 @@ using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Persistent;
 using System;
@@ -31,7 +33,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             TargetSelectorController targetSelectorController,
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
-            float attackRotationSpeed
+            float attackRotationSpeed,
+            int baseDamage
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -41,6 +44,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _targetSelectorController = targetSelectorController;
             _musicSyncService = musicSyncService;
             AttackRotationSpeed = attackRotationSpeed;
+            _baseDamage = baseDamage;
         }
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
@@ -94,34 +98,48 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
            
             _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
 
-            AttackDefinition attackDefinition;
+            AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
+
+            if (attackDefinition == null) return false;
+
+            _attackIntervalEvaluator.EvaluateInterval();
+
+            BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
+            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
+            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
+            AttackResult result = AttackExecutor.Execute(attackDefinition,
+                _battleState.Attacker,
+                _battleState.Target,
+                false,
+                _battleState.Attacker.BaseDamage
+            );
+
+           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteTiming.Attack_Logic_After));
+
+
+            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
+            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
+            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(buffContextPost.AttackResult.FinalDamage.Value, buffContextPost.AttackResult.IsCritical,
+                targetEntity.Id));
+
+            buffContext.Attacker.SetDamage(buffContext.AttackResult.FinalDamage);
+            _presenter.Push(buffContextPost.AttackResult);
+
+            resultBeatType = (int)beatType;
+            return true;
+        }
+
+        private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
+        {
             try
             {
-                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
+                return _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
             }
             catch (InvalidOperationException ex)
             {
                 Debug.LogWarning(ex.Message);
-                return false;
+                return null;
             }
-
-            _attackIntervalEvaluator.EvaluateInterval();
-
-            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
-            AttackResult result = AttackExecutor.Execute(attackDefinition,
-                _battleState.Attacker,
-                _battleState.Target
-            );
-
-            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
-            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
-            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical,
-                targetEntity.Id));
-
-            _presenter.Push(result);
-
-            resultBeatType = (int)beatType;
-            return true;
         }
 
         private readonly AttackResultPresenter _presenter;
@@ -130,5 +148,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly TargetSelectorController _targetSelectorController;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
+        private readonly int _baseDamage;
     }
 }
