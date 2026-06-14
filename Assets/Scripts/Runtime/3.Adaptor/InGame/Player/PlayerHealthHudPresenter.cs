@@ -20,6 +20,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
             _isActive = true;
         }
 
+        /// <summary>
+        ///     被弾時に発火。
+        ///     ViewでのSE再生用。
+        /// </summary>
+        public event Action OnDamaged;
+
         public void Dispose()
         {
             _entity.OnHealthChanged -= UpdateHealthHud;
@@ -56,6 +62,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
             // TODO amountChangedを使ってダメージ表示など
             _healthHudViewModel.UpdateHealth(new HealthHudDTO(currentHealth, maxHealth));
 
+
+            if (amountChanged < 0f)
+            {
+                OnDamaged?.Invoke();
+            }
         }
 
         private IDefender _entity;

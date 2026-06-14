@@ -28,5 +28,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
         {
             _playerApplication.Update(ref rotation, input, time, out velocity);
         }
+
+        /// <summary> 回避中かどうかを取得する。 </summary>
+        public bool IsDodging => _playerApplication.IsDodging;
     }
 }

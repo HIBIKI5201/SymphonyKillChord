@@ -24,9 +24,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         public bool SkipClosesImmediately => _asset == null || _asset.SkipClosesImmediately;
         /// <summary> WaitForInputOnLastText を取得する。 </summary>
         public bool WaitForInputOnLastText => _asset != null && _asset.WaitForInputOnLastText;
-        public string DefaultScenarioId => _asset != null && !string.IsNullOrWhiteSpace(_asset.DefaultScenarioId)
-            ? _asset.DefaultScenarioId
-            : "test";
 
         /// <summary>
         /// 秒指定を TimeSpan へ変換する。

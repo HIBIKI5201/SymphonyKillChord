@@ -1,5 +1,8 @@
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.OutGame.Sortie;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Input;
 
 namespace KillChord.Runtime.Composition.OutGame.Sortie
 {
@@ -13,9 +16,13 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         ///    OutGameSortieOutputPort を初期化します。
         /// </summary>
         /// <param name="outGameUIEvent"> OutGameUIEvent のインスタンス。 </param>
-        public OutGameSortieOutputPort(OutGameUIEvent outGameUIEvent)
+        /// <param name="inputComposition"> InputComposition のインスタンス。 </param>
+        public OutGameSortieOutputPort(
+            OutGameUIEvent outGameUIEvent,
+            InputComposition inputComposition)
         {
             _outGameUIEvent = outGameUIEvent;
+            _inputComposition = inputComposition;
         }
 
         public void ShowBattlePreparationScreen(string targetSceneName)
@@ -23,6 +30,25 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
             _outGameUIEvent.OnShownBattlePreparationScreen?.Invoke(targetSceneName);
         }
 
+        public void SetOutGameActiveForScenario(bool isActive)
+        {
+            _outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(isActive);
+
+            if (_inputComposition == null)
+            {
+                return;
+            }
+
+            if (isActive)
+            {
+                _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+                return;
+            }
+
+            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.Scenario);
+        }
+
         private readonly OutGameUIEvent _outGameUIEvent;
+        private readonly InputComposition _inputComposition;
     }
 }

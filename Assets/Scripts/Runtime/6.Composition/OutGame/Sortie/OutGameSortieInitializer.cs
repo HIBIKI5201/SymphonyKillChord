@@ -1,6 +1,8 @@
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -17,7 +19,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
     {
         private void Awake()
         {
-            if (!ServiceLocator.TryGetInstance<OutGameUIEvent> (out var outGameUIEvent))
+            if (!ServiceLocator.TryGetInstance<OutGameUIEvent>(out var outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -25,12 +27,22 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return;
             }
 
+            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(OutGameSortieInitializer)}] InputComposition が取得できませんでした。", this);
+#endif
+                return;
+            }
+
             ISceneTransitionService sceneTransitionService = new SceneTransitionService();
 
-            IOutGameSortieOutputPort outGameOutputPort = 
-                new OutGameSortieOutputPort(outGameUIEvent);
-             OutGameSortieUseCase useCase = 
-                new OutGameSortieUseCase(sceneTransitionService, outGameOutputPort);
+            IOutGameSortieOutputPort outputPort =
+                new OutGameSortieOutputPort(
+                    outGameUIEvent,
+                    inputComposition);
+            OutGameSortieUseCase useCase =
+                new OutGameSortieUseCase(sceneTransitionService, outputPort);
 
             OutGameSortieController controller = new OutGameSortieController(useCase);
 

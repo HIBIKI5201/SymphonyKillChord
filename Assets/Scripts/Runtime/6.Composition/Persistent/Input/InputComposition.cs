@@ -70,8 +70,9 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InputActionMap commonMap = actions.FindActionMap(InputMapNames.Common, true);
             InputActionMap inGameMap = actions.FindActionMap(InputMapNames.InGame, true);
             InputActionMap outGameMap = actions.FindActionMap(InputMapNames.OutGame, true);
+            InputActionMap scenarioMap = actions.FindActionMap(InputMapNames.Scenario, true);
 
-            _inputMapController = new UnityInputMapController(commonMap, inGameMap, outGameMap);
+            _inputMapController = new UnityInputMapController(commonMap, inGameMap, outGameMap, scenarioMap);
         }
 
         /// <summary>

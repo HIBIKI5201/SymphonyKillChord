@@ -55,6 +55,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             _progressController = progressController;
         }
 
+        /// <summary>スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。</summary>
+        public event Action<string> OnSkillAnimationRequested;
+
         /// <summary>
         /// ユースケースを設定する。
         /// </summary>
@@ -83,7 +86,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 {
                     _presenter?.Push(executedSkill);
                     _progressController?.ResetSkill(executedSkill.Id.Value);
-                    Execute(executedSkill.Id.Value);
+
+                    Execute(executedSkill.Id.Value, executedSkill.AnimationKey);
+
                     _skillCooldownState.SetSkillCooldown(executedSkill, unscaledTime);
                     return true;
                 }
@@ -96,11 +101,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// 指定したスキルIDに対応する視覚演出を実行する。
         /// </summary>
         /// <param name="skillId">実行するスキルのID</param>
-        public void Execute(int skillId)
+        public void Execute(int skillId, string animationKey = null)
         {
             if (_skillVisuals.TryGetValue(skillId, out var visual))
             {
                 visual.Execute();
+            }
+            if (!string.IsNullOrWhiteSpace(animationKey))
+            {
+                OnSkillAnimationRequested?.Invoke(animationKey);
             }
         }
 
