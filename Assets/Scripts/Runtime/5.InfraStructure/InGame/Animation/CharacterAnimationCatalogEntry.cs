@@ -13,6 +13,8 @@ namespace KillChord.Runtime.InfraStructure
     {
         [Tooltip("アニメーション状態に対応するクリップ")]
         public CharacterAnimationState State;
+        [Tooltip("ワンショット用の識別キー")]
+        public string Key;
         [Tooltip("対応するアニメーションクリップ")]
         public AnimationClip Clip;
     }

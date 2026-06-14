@@ -41,10 +41,12 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
 
-
+        private const string ATTACK_BEAT_1_KEY = "Attack_Beat1";
+        private const string ATTACK_BEAT_2_KEY = "Attack_Beat2";
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
+        private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
         private Vector2 _dogeVector;
         private Transform _cacheTransform;
@@ -157,6 +159,16 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayVoice(_voiceSource, _damageVoiceCueName);
         }
 
+        public void PlaySkillAnimation(string animationKey)
+        {
+            if (string.IsNullOrWhiteSpace(animationKey))
+            {
+                return;
+            }
+
+            _pendingSkillAnimationKey = animationKey;
+        }
+
         /// <summary> 入力イベントを購読する。 </summary>
         private void RegisterActions()
         {
@@ -220,14 +232,33 @@ namespace KillChord.Runtime.View.InGame.Player
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
                 PlayAttackSound(resultBeatType);
-                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
+
+                string animationKey = _pendingSkillAnimationKey;
+                _pendingSkillAnimationKey = null;
+
+                if (string.IsNullOrWhiteSpace(animationKey))
+                {
+                    animationKey = GetAttackAnimationKey(resultBeatType);
+                }
+
+                int attackIndex = _characterAnimationIndices.Attack;
+
+                if (!string.IsNullOrEmpty(animationKey)
+                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+                {
+                    attackIndex = oneShotIndex;
+                }
+
+                _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
                     CancelAttackRotate();
                     _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(PlayerAttackController.CurrentLockOnTargetPosition, PlayerAttackController.AttackRotationSpeed
-                        , _cancellationTokenSource.Token);
+                    RotateToTargetAsync(
+                        PlayerAttackController.CurrentLockOnTargetPosition,
+                        PlayerAttackController.AttackRotationSpeed,
+                        _cancellationTokenSource.Token);
                 }
             }
         }
@@ -397,6 +428,17 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             source.Play(cueName);
+        }
+
+        //TODO:今はint直置きだから後で調整しやすいようにしとく。
+        private string GetAttackAnimationKey(int beatType)
+        {
+            return beatType switch
+            {
+                1 or 2 or 3 => ATTACK_BEAT_1_KEY,
+                4 or 6 or 8 => ATTACK_BEAT_2_KEY,
+                _ => string.Empty
+            };
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
