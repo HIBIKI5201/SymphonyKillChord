@@ -31,6 +31,7 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -62,6 +63,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
+        private SkillController _skillController;
 
         private void Awake()
         {
@@ -180,9 +182,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             SkillCheckService skillCheckService = new SkillCheckService();
             SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
-            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController);
-            skillController?.SetUsecase(skillUsecase);
+            _skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, _skillController);
+            _skillController?.SetUsecase(skillUsecase);
+            _skillController.OnSkillAnimationRequested += _player.PlaySkillAnimation;
 
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
@@ -192,12 +195,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed);
+                playerBattleState, _skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
-
-            var animationComposition = new AnimationComposition();
+            var animationComposition = _player.gameObject.AddComponent<AnimationComposition>();
             var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
 
             _player.Initialize(playerMovementController, playerAttackController, animController, animationIndices, ct, inputView, healthHudPresenter);
@@ -222,6 +224,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
+            }
+            if (_skillController != null)
+            {
+                _skillController.OnSkillAnimationRequested -= _player.PlaySkillAnimation;
             }
         }
     }

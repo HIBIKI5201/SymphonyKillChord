@@ -12,6 +12,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
         ///     カメラシステム全体の動作パラメータを初期化するコンストラクタ。
         /// </summary>
         /// <param name="cameraOffset"> 追従先を中心としたカメラの基本オフセット位置。</param>
+        /// <param name="characterCenterOffset"> キャラクターモデルの中心オフセット。</param>
         /// <param name="distance"> 追従先からカメラまでの距離。</param>
         /// <param name="followOffsetPower"> 移動中の追従オフセットの強さ。</param>
         /// <param name="followLerpSpeed"> 移動中の追従オフセットの補間速度。</param>
@@ -27,6 +28,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
         /// <param name="invertHorizontal"> 水平方向の入力を反転するフラグ。</param>
         public CameraSystemParameter(
             in Vector3 cameraOffset,
+            in Vector3 characterCenterOffset,
             float distance,
             float followOffsetPower,
             float followLerpSpeed,
@@ -43,6 +45,7 @@ namespace KillChord.Runtime.Domain.InGame.Camera
             )
         {
             _cameraOffset = cameraOffset;
+            _characterCenterOffset = characterCenterOffset;
             _distance = distance;
             _followOffsetPower = followOffsetPower;
             _followLerpSpeed = followLerpSpeed;
@@ -60,6 +63,9 @@ namespace KillChord.Runtime.Domain.InGame.Camera
 
         /// <summary> 追従先を中心としたカメラの基本オフセット位置。 </summary>
         public Vector3 Offset => _cameraOffset;
+
+        /// <summary> キャラクターモデルの中心オフセット。 </summary>
+        public Vector3 CharacterCenterOffset => _characterCenterOffset;
 
         /// <summary> 追従先からカメラまでの距離。 </summary>
         public float Distance => _distance;
@@ -103,6 +109,8 @@ namespace KillChord.Runtime.Domain.InGame.Camera
         [Header("Main")]
         [Header("追従先を中心としたカメラの基本的オフセット位置")]
         [SerializeField] private Vector3 _cameraOffset;
+        [Header("キャラクターモデルの中心オフセット")]
+        [SerializeField] private Vector3 _characterCenterOffset;
         [Header("追従先からカメラまでの距離")]
         [SerializeField] private float _distance;
 

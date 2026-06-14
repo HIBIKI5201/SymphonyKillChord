@@ -1,0 +1,11 @@
+.skill-node-conn {
+	background-color:  rgb(96, 96, 96);
+}
+
+.skill-node-conn-passed {
+	background-color:  rgb(255, 255, 255);
+}
+
+.skill-node-conn-not-passed {
+	background-color:  rgb(96, 96, 96);
+}
