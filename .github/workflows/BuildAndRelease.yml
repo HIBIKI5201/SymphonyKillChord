@@ -119,8 +119,13 @@ jobs:
         with:
           persist-credentials: false
 
+
       - name: Display Environment Information
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::Build Environment Information"
           Write-Host "::group::ビルドワークフロー実行環境情報"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
           Write-Host "Runner: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
