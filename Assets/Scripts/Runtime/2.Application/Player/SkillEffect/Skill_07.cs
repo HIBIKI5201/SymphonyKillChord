@@ -12,9 +12,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_07 : SkillBase
     {
-        public Skill_07(IBuff buff) : base(buff)
+        public Skill_07(IBuff buff,IAttackController attackController) : base(buff)
         {
-
+            _attackController = attackController;
         }
         public override void Execute(SkillEffectContext context)
         {
