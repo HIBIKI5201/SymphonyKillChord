@@ -430,6 +430,7 @@ namespace KillChord.Runtime.View.InGame.Player
             source.Play(cueName);
         }
 
+        //TODO:今はint直置きだから後で調整しやすいようにしとく。
         private string GetAttackAnimationKey(int beatType)
         {
             return beatType switch
