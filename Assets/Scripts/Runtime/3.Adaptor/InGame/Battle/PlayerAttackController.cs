@@ -115,7 +115,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Attacker.BaseDamage
             );
 
-           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, buffContext.AttackResult), BuffExecuteTiming.Attack_Logic_After));
+           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, result), BuffExecuteTiming.Attack_Logic_After));
 
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
@@ -123,7 +123,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(buffContextPost.AttackResult.FinalDamage.Value, buffContextPost.AttackResult.IsCritical,
                 targetEntity.Id));
 
-            buffContext.Attacker.SetDamage(buffContext.AttackResult.FinalDamage);
+            buffContext.Attacker.SetDamage(buffContextPost.AttackResult.FinalDamage);
             _presenter.Push(buffContextPost.AttackResult);
 
             resultBeatType = (int)beatType;
