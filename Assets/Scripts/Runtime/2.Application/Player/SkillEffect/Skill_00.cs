@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.InGame.Buff;
+
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.InGame.Buff
 {
     public interface IBuff
     {  

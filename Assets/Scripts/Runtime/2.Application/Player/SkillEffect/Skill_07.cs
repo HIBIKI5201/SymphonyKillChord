@@ -1,12 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
-using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
-using SymphonyFrameWork.Debugger;
 using UnityEngine;
+using KillChord.Runtime.Domain.InGame.Buff;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
