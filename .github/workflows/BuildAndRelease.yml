@@ -1,7 +1,7 @@
 name: Unity Build and Release
 
-# このワークフローは PR のマージ（develop ブランチ）または手動実行で
-# Unity ビルドを実行し、成果物をリリースとしてアップロードします。
+# This workflow runs a Unity build and uploads artifacts as a release when a PR is merged into develop or when triggered manually
+# Build artifacts are uploaded as a GitHub Release.
 
 on:
   pull_request:
@@ -9,13 +9,13 @@ on:
       - develop
     types: [ closed ]
 
-  workflow_dispatch:       # 手動実行も可能。
+  workflow_dispatch:       # Manual execution is also supported.
 
 permissions:
-  contents: write      # リリース作成とリポジトリ参照に必要な最小権限
+  contents: write      # Minimum permissions required for release creation and repository access
 
-# 注意: アーティファクトアップロードや他の操作が必要な場合、
-# permissions を追加で緩和する必要があるか確認してください。
+# Note: If artifact uploads or additional operations are required,
+# verify whether additional permissions are needed.
 
 jobs:
   check:
@@ -25,23 +25,23 @@ jobs:
       days: ${{ steps.release_age.outputs.days }}
 
     steps:
-      - name: Check latest release age
+      - name: Check Latest Release Age
         id: release_age
         run: |
           set -e
-          echo "========== リリース経過日数の確認 =========="
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] リリース経過日数の検証を開始します..."
-          echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
-          echo "リポジトリ: ${{ github.repository }}"
+          echo "========== Release Age Check =========="
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting release age validation..."
+          echo "Trigger Event: ${GITHUB_EVENT_NAME}"
+          echo "Repository: ${{ github.repository }}"
           echo "==========================================="
 
           # 同一ワークフローの他の実行中インスタンスを確認（二重起動の防止と早期リターン）
-          echo "[INFO] 同一ワークフローの実行中インスタンスを確認しています..."
+          echo "[INFO] Checking for other running instances of this workflow..."
           ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
           OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
           
           if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "[SKIP] このワークフローの別の実行が既に進行中です (実行数: $OTHER_RUNS_COUNT)。早期終了します..."
+            echo "[SKIP] Another execution of this workflow is already in progress (実行数: $OTHER_RUNS_COUNT)。Exiting early..."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=false" >> $GITHUB_OUTPUT
             echo "[SUCCESS] 判定: should_run=false (重複実行によるスキップ)"
@@ -50,7 +50,7 @@ jobs:
 
           # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "[SKIP] 手動実行を検出したため、リリース経過日数のチェックをスキップします"
+            echo "[SKIP] Manual execution detected. Skipping release age check."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[SUCCESS] 判定: should_run=true (手動起動)"
@@ -58,13 +58,13 @@ jobs:
           fi
 
           # GitHub APIから最新のリリースを取得します
-          echo "[INFO] GitHub APIから最新のリリースを取得しています..."
+          echo "[INFO] Retrieving latest release from GitHub API..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
           if [ "$HTTP_CODE" = "404" ]; then
-            echo "[INFO] 過去のリリースが見つかりませんでした"
+            echo "[INFO] No previous release found"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[SUCCESS] 判定: should_run=true (新規リリース)"
@@ -83,21 +83,21 @@ jobs:
             exit 0
           fi
           
-          echo "[INFO] 最新のリリース公開日時: $RELEASE_DATE"
+          echo "[INFO] Latest release published at: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
           
-          echo "[INFO] 前回のリリースからの経過日数: $DAYS 日"
-          echo "[INFO] しきい値: 3 日 (3日以内のリリースはスキップされます)"
+          echo "[INFO] Days since last release: $DAYS 日"
+          echo "[INFO] Threshold: 3 日 (3日以内のリリースはスキップされます)"
           
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=false (最終リリースが $DAYS 日前のため、しきい値3日以下に該当)"
+            echo "[DECISION] should_run=false (最終リリースが $DAYS 日前のため、Threshold3日以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=true (最終リリースが $DAYS 日前の分、しきい値3日を超過)"
+            echo "[DECISION] should_run=true (最終リリースが $DAYS 日前の分、Threshold3日を超過)"
           fi
 
   build-and-release:
@@ -126,13 +126,13 @@ jobs:
           $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::Build Environment Information"
-          Write-Host "::group::ビルドワークフロー実行環境情報"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
+          Write-Host "::group::Build Workflow Environment Information"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow started."
           Write-Host "Runner: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
           Write-Host "Project Path: ${{ github.workspace }}"
           Write-Host ""
-          Write-Host "Google Drive API Key 設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
-          Write-Host "Google Drive Folder ID 設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
+          Write-Host "Google Drive API Key 設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { 'Configured' } else { 'Not Configured' })"
+          Write-Host "Google Drive Folder ID 設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { 'Configured' } else { 'Not Configured' })"
           Write-Host "Build Output Directory: $env:UNITY_BUILD_OUTPUT_DIR"
           Write-Host "Unity EXE Path: $env:UNITY_EXE_PATH"
           Write-Host "::endgroup::"
@@ -140,7 +140,7 @@ jobs:
 
       - name: Validate Unity Installation
         run: |
-          Write-Host "::group::Unityインストールの確認"
+          Write-Host "::group::Validate Unity Installation"
           if (-not $env:UNITY_EXE_PATH) {
             Write-Host "[ERROR] UNITY_EXE_PATH が設定されていません。"
             Write-Host "::endgroup::"
@@ -150,11 +150,11 @@ jobs:
           
           if (Test-Path $env:UNITY_EXE_PATH) {
             $FileInfo = Get-Item $env:UNITY_EXE_PATH
-            Write-Host "[OK] Unityの実行ファイルを確認しました。"
+            Write-Host "[OK] Unity executable verified."
             Write-Host "      ファイルサイズ: $($FileInfo.Length / 1MB) MB"
             Write-Host "      最終更新日時: $($FileInfo.LastWriteTime)"
           } else {
-            Write-Host "[ERROR] 指定されたパスにUnityの実行ファイルが見つかりません: $env:UNITY_EXE_PATH"
+            Write-Host "[ERROR] Unity executable not found at the specified path: $env:UNITY_EXE_PATH"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -166,23 +166,23 @@ jobs:
         # 1. GoogleDriveBatchCI.StartBatchImport でGoogle Driveからアセットをダウンロード
         # 2. アセットインポート完了後、自動的にAutoBuilderでビルド開始
         run: |
-          Write-Host "::group::Unityビルド処理の開始"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unityを起動中..."
+          Write-Host "::group::Start Unity Build Process"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity..."
           Write-Host "実行メソッド: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
-          Write-Host "ログ出力先: unity_build.log"
+          Write-Host "Log output: unity_build.log"
           Write-Host ""
           
           & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
           
           $UnityExitCode = $LASTEXITCODE
           Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unityプロセスが終了コード $UnityExitCode で終了しました。"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity process exited with code $UnityExitCode で終了しました。"
           
           if ($UnityExitCode -eq 0) {
-            Write-Host "[OK] Unityビルド処理が正常に完了しました。"
+            Write-Host "[OK] Unity build completed successfully."
           } else {
             Write-Host "[WARNING] Unityプロセスが非ゼロの終了コード ($UnityExitCode) を返しました。"
-            Write-Host "          ビルドエラーが発生した可能性があります。詳細は unity_build.log を確認してください。"
+            Write-Host "          A build error may have occurred. See unity_build.log for details."
           }
           Write-Host "::endgroup::"
           exit $UnityExitCode
@@ -191,7 +191,7 @@ jobs:
       - name: Extract Unity Build Log Summary
         if: always()
         run: |
-          Write-Host "::group::Unityビルドログのサマリー出力"
+          Write-Host "::group::Unity Build Log Summary"
           if (Test-Path "unity_build.log") {
             Write-Host "[INFO] unity_build.log から主要な情報を抽出しています..."
             Write-Host ""
@@ -222,7 +222,7 @@ jobs:
 
       - name: Check Build Output
         run: |
-          Write-Host "::group::ビルド成果物の検証"
+          Write-Host "::group::Validate Build Output"
           if (Test-Path $env:UNITY_BUILD_OUTPUT_DIR) {
             Write-Host "[OK] ビルド出力ディレクトリを確認: $env:UNITY_BUILD_OUTPUT_DIR"
             Write-Host ""
@@ -255,7 +255,7 @@ jobs:
 
       - name: Zip Build Artifacts
         run: |
-          Write-Host "::group::ビルド成果物のアーカイブ（ZIP化）"
+          Write-Host "::group::Archive Build Artifacts (ZIP)"
           if (-not (Test-Path $env:UNITY_BUILD_OUTPUT_DIR)) {
             Write-Host "[ERROR] ビルド出力ディレクトリが見つかりません: $env:UNITY_BUILD_OUTPUT_DIR"
             Write-Host "::endgroup::"
@@ -280,15 +280,15 @@ jobs:
       - name: Generate Release Tag
         id: tag_gen
         run: |
-          Write-Host "::group::リリース用タグ名の生成"
+          Write-Host "::group::Generate Release Tag"
           
-          # リポジトリ変数から現在のカウントを取得（未設定の場合は1をデフォルトにする）
+          # Repository変数から現在のカウントを取得（Not Configuredの場合は1をデフォルトにする）
           $Counter = "${{ vars.BUILD_VERSION }}"
           if (-not $Counter) { $Counter = "1" }
           
           $TagName = "dev-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
-          Write-Host "[OK] 生成されたタグ名: $TagName"
+          Write-Host "[OK] Generated tag name: $TagName"
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -301,7 +301,7 @@ jobs:
           body: |
             ワークフロー実行 #${{ github.run_id }} から自動生成されたビルド成果物です。
             
-            **トリガーイベント:** ${{ github.event_name }}
+            **Trigger Event:** ${{ github.event_name }}
             ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行（workflow_dispatch）' }}
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
@@ -320,7 +320,7 @@ jobs:
       - name: Increment Release Counter
         if: success()
         run: |
-          Write-Host "::group::リリース用カウンターのインクリメント"
+          Write-Host "::group::Increment Release Counter"
           $CurrentCounter = [int]"${{ vars.BUILD_VERSION }}"
           if (-not $CurrentCounter) { $CurrentCounter = 1 }
           $NextCounter = $CurrentCounter + 1
@@ -328,7 +328,7 @@ jobs:
           Write-Host "現在のカウンター: $CurrentCounter"
           Write-Host "次のカウンター: $NextCounter"
           
-          # GitHub API を呼び出してリポジトリ変数を更新
+          # GitHub API を呼び出してRepository変数を更新
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_VERSION"
           $Headers = @{
               "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
@@ -354,8 +354,8 @@ jobs:
       - name: Release Completion Summary
         if: always()
         run: |
-          Write-Host "::group::ワークフロー実行サマリー"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが終了しました。"
+          Write-Host "::group::Workflow Execution Summary"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow completed."
           
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "[OK] リリースが正常に作成されました。"
