@@ -58,7 +58,7 @@ namespace KillChord.Runtime.View.InGame.Music
                     break;
                 }
             }
-            SetBeatAnimation(_currentOpenIndex, activeIndex, isJustTiming);
+            SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
         }
         /// <summary>
@@ -67,30 +67,21 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="closeIndex"></param>
         /// <param name="openIndex"></param>
         /// <param name="isJustTiming"></param>
-        public void SetBeatAnimation(int closeIndex, int openIndex, bool isJustTiming)
+        public void SetBeatAnimation(int openIndex, bool isJustTiming)
         {
-            if (closeIndex == -1 && openIndex == -1)
-            {
-                return;
-            }
 
             float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
-            if (closeIndex != -1)
-            {
-                _handles[closeIndex].TryComplete();
-                _handles[closeIndex] = LSequence.Create()
-                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .WithEase(Ease.OutCirc)
-                        .BindToSizeDeltaY(_leftBeatRectTransforms[closeIndex]))
-                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .WithEase(Ease.OutCirc)
-                        .BindToSizeDeltaY(_rightBeatRectTransforms[closeIndex]))
-                    .Run();
-            }
             if (openIndex != -1)
             {
-                _leftBeatRectTransforms[openIndex].sizeDelta = new Vector2(_leftBeatRectTransforms[openIndex].sizeDelta.x, targetSizeDelta);
-                _rightBeatRectTransforms[openIndex].sizeDelta = new Vector2(_rightBeatRectTransforms[openIndex].sizeDelta.x, targetSizeDelta);
+                _handles[openIndex].TryComplete();
+                _handles[openIndex] = LSequence.Create()
+                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .WithEase(Ease.OutCirc)
+                        .BindToSizeDeltaY(_leftBeatRectTransforms[openIndex]))
+                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .WithEase(Ease.OutCirc)
+                        .BindToSizeDeltaY(_rightBeatRectTransforms[openIndex]))
+                    .Run();
             }
         }
 
@@ -100,6 +91,12 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [Tooltip("ビートの位置を決めるための配列。(_beatRectTransforms.Length + 1の長さにしてください)")]
         [SerializeField] private float[] _beats;
+
+        [Tooltip("ビートの色")]
+        [SerializeField] private Color[] _beatColor;
+
+        [Tooltip("ビートの幅")]
+        [SerializeField] private float _beatWidth;
 
         [Tooltip("ビートの位置を決めるためのスケール")]
         [SerializeField] private float _scale;
@@ -167,8 +164,8 @@ namespace KillChord.Runtime.View.InGame.Music
             InitBeatGUI(
                 _canvasGroup.gameObject,
                 _beats,
+                _beatWidth,
                 _outTimingSizeDelta,
-                10f,
                 _scale,
                 out _totalBeatBoxCount,
                 out _leftBeatImages,
@@ -179,25 +176,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _justTimingBeatBoxIndex);
 
             _currentOpenIndex = -1;
-        }
-        /// <summary>
-        /// 指定した進み具合がいずれかのBeatのジャストタイミングか判定する
-        /// </summary>
-        /// <param name="beats">ビートの位置配列</param>
-        /// <param name="justTolerance">ジャストと判定する猶予（±この値の範囲内でジャストと判定）</param>
-        /// <param name="progress">現在の進み具合</param>
-        /// <returns>いずれかのBeatのジャストタイミングならtrue</returns>
-        private bool IsJustTiming(float[] beats, float justTolerance, float progress)
-        {
-            for (int i = 0; i < beats.Length - 1; i++)
-            {
-                float target = (beats[i] + beats[i + 1]) / 2;
-                if (Mathf.Abs(progress - target) <= justTolerance)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
         private void InitBeatGUI(
             in GameObject parent,
@@ -238,11 +216,13 @@ namespace KillChord.Runtime.View.InGame.Music
             //スペクトラム風ビートのブロックを生成
             for (int i = 0; i < beatBlockCount; i++)
             {
+                Color color = _beatColor[GetBeatSectionIndex(i, beats, scale, beatWidth)];
+
                 GameObject leftBeat = new GameObject($"LeftBeat_{i}", typeof(RectTransform), typeof(Image));
                 leftBeat.transform.SetParent(parent.transform, false);
                 RectTransform leftRT = leftBeat.GetComponent<RectTransform>();
                 Image leftImage = leftBeat.GetComponent<Image>();
-                leftImage.color = Color.red; //ビートの色を赤に設定
+                leftImage.color = color; //ビートの色を設定
                 leftRT.anchoredPosition = Vector2.left * (i * beatWidth);
                 leftRT.sizeDelta = new Vector2(beatWidth, beatHeight);
                 leftRT.pivot = new Vector2(1f, 0.5f);
@@ -253,7 +233,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 rightBeat.transform.SetParent(parent.transform, false);
                 RectTransform rightRT = rightBeat.GetComponent<RectTransform>();
                 Image rightImage = rightBeat.GetComponent<Image>();
-                rightImage.color = Color.red; //ビートの色を赤に設定
+                rightImage.color = color; //ビートの色を設定
                 rightRT.anchoredPosition = Vector2.right * (i * beatWidth);
                 rightRT.sizeDelta = new Vector2(beatWidth, beatHeight);
                 rightRT.pivot = new Vector2(0f, 0.5f);
@@ -266,6 +246,30 @@ namespace KillChord.Runtime.View.InGame.Music
                 float position = (beats[i] + beats[i + 1]) / 2;
                 justTimingBeatBoxIndex[i] = (int)(position * scale / beatWidth);
             }
+        }
+        /// <summary>
+        /// ブロックインデックスがどのbeats区間に属するかを返す
+        /// </summary>
+        /// <param name="blockIndex">ブロックのインデックス</param>
+        /// <param name="beats">ビートの位置配列</param>
+        /// <param name="scale">ビートのスケール</param>
+        /// <param name="beatWidth">1ブロックの幅</param>
+        /// <returns>属するbeats区間のインデックス（beats[i]～beats[i+1]のi）</returns>
+        private int GetBeatSectionIndex(int blockIndex, float[] beats, float scale, float beatWidth)
+        {
+            // ブロックインデックスをbeats空間に逆変換
+            float position = (blockIndex * beatWidth) / scale;
+
+            for (int i = 0; i < beats.Length - 1; i++)
+            {
+                if (position >= beats[i] && position < beats[i + 1])
+                {
+                    return i;
+                }
+            }
+
+            // 末尾のブロックは最後の区間に属する
+            return beats.Length - 2;
         }
     }
 }
