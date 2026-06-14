@@ -853,6 +853,94 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Scenario"",
+            ""id"": ""86d29b9f-ab29-42a6-af77-953429bbd21b"",
+            ""actions"": [
+                {
+                    ""name"": ""Advance"",
+                    ""type"": ""Button"",
+                    ""id"": ""a58cc8c9-bed1-4935-925e-adb2374c7734"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""FastForward"",
+                    ""type"": ""Button"",
+                    ""id"": ""bfa429ce-734d-4838-8ded-a6146aae65c3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""4191ef89-4cb0-46e2-824b-9c4a0061c450"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Skip"",
+                    ""type"": ""Button"",
+                    ""id"": ""e42980b2-3302-4ca4-8046-82d1cb9f2920"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9a589d30-edc6-4676-9e2b-ace151994539"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Advance"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""310065c3-1858-407b-9075-5644d99ffb2b"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FastForward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c083ea14-6847-48c2-82e7-b5182091f00d"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7df0081f-926a-4a55-bf43-91bf7a706cdd"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Skip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -883,6 +971,12 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         m_UI_RightClick = m_UI.FindAction("RightClick", throwIfNotFound: true);
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
+        // Scenario
+        m_Scenario = asset.FindActionMap("Scenario", throwIfNotFound: true);
+        m_Scenario_Advance = m_Scenario.FindAction("Advance", throwIfNotFound: true);
+        m_Scenario_FastForward = m_Scenario.FindAction("FastForward", throwIfNotFound: true);
+        m_Scenario_Pause = m_Scenario.FindAction("Pause", throwIfNotFound: true);
+        m_Scenario_Skip = m_Scenario.FindAction("Skip", throwIfNotFound: true);
     }
 
     ~@KillChordInputActioMap()
@@ -891,6 +985,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         UnityEngine.Debug.Assert(!m_OutGame.enabled, "This will cause a leak and performance issues, KillChordInputActioMap.OutGame.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_InGame.enabled, "This will cause a leak and performance issues, KillChordInputActioMap.InGame.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, KillChordInputActioMap.UI.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Scenario.enabled, "This will cause a leak and performance issues, KillChordInputActioMap.Scenario.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1500,6 +1595,135 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     /// Provides a new <see cref="UIActions" /> instance referencing this action map.
     /// </summary>
     public UIActions @UI => new UIActions(this);
+
+    // Scenario
+    private readonly InputActionMap m_Scenario;
+    private List<IScenarioActions> m_ScenarioActionsCallbackInterfaces = new List<IScenarioActions>();
+    private readonly InputAction m_Scenario_Advance;
+    private readonly InputAction m_Scenario_FastForward;
+    private readonly InputAction m_Scenario_Pause;
+    private readonly InputAction m_Scenario_Skip;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Scenario".
+    /// </summary>
+    public struct ScenarioActions
+    {
+        private @KillChordInputActioMap m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public ScenarioActions(@KillChordInputActioMap wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/Advance".
+        /// </summary>
+        public InputAction @Advance => m_Wrapper.m_Scenario_Advance;
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/FastForward".
+        /// </summary>
+        public InputAction @FastForward => m_Wrapper.m_Scenario_FastForward;
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/Pause".
+        /// </summary>
+        public InputAction @Pause => m_Wrapper.m_Scenario_Pause;
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/Skip".
+        /// </summary>
+        public InputAction @Skip => m_Wrapper.m_Scenario_Skip;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_Scenario; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="ScenarioActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(ScenarioActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="ScenarioActions" />
+        public void AddCallbacks(IScenarioActions instance)
+        {
+            if (instance == null || m_Wrapper.m_ScenarioActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_ScenarioActionsCallbackInterfaces.Add(instance);
+            @Advance.started += instance.OnAdvance;
+            @Advance.performed += instance.OnAdvance;
+            @Advance.canceled += instance.OnAdvance;
+            @FastForward.started += instance.OnFastForward;
+            @FastForward.performed += instance.OnFastForward;
+            @FastForward.canceled += instance.OnFastForward;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
+            @Skip.started += instance.OnSkip;
+            @Skip.performed += instance.OnSkip;
+            @Skip.canceled += instance.OnSkip;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="ScenarioActions" />
+        private void UnregisterCallbacks(IScenarioActions instance)
+        {
+            @Advance.started -= instance.OnAdvance;
+            @Advance.performed -= instance.OnAdvance;
+            @Advance.canceled -= instance.OnAdvance;
+            @FastForward.started -= instance.OnFastForward;
+            @FastForward.performed -= instance.OnFastForward;
+            @FastForward.canceled -= instance.OnFastForward;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
+            @Skip.started -= instance.OnSkip;
+            @Skip.performed -= instance.OnSkip;
+            @Skip.canceled -= instance.OnSkip;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="ScenarioActions.UnregisterCallbacks(IScenarioActions)" />.
+        /// </summary>
+        /// <seealso cref="ScenarioActions.UnregisterCallbacks(IScenarioActions)" />
+        public void RemoveCallbacks(IScenarioActions instance)
+        {
+            if (m_Wrapper.m_ScenarioActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="ScenarioActions.AddCallbacks(IScenarioActions)" />
+        /// <seealso cref="ScenarioActions.RemoveCallbacks(IScenarioActions)" />
+        /// <seealso cref="ScenarioActions.UnregisterCallbacks(IScenarioActions)" />
+        public void SetCallbacks(IScenarioActions instance)
+        {
+            foreach (var item in m_Wrapper.m_ScenarioActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_ScenarioActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="ScenarioActions" /> instance referencing this action map.
+    /// </summary>
+    public ScenarioActions @Scenario => new ScenarioActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Common" which allows adding and removing callbacks.
     /// </summary>
@@ -1657,5 +1881,41 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Scenario" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="ScenarioActions.AddCallbacks(IScenarioActions)" />
+    /// <seealso cref="ScenarioActions.RemoveCallbacks(IScenarioActions)" />
+    public interface IScenarioActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Advance" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAdvance(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "FastForward" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnFastForward(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPause(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Skip" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSkip(InputAction.CallbackContext context);
     }
 }

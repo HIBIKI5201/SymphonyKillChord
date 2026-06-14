@@ -65,10 +65,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         public bool TryGetSortieInfo(
             out StageType stageType, 
             out string targetSceneName, 
+            out string battleSceneName,
+            out string scenarioId,
             out MissionDefinition missionDefinition)
         {
             stageType = default;
             targetSceneName = default;
+            battleSceneName = default;
+            scenarioId = default;
             missionDefinition = default;
 
             if (!_stageTree.TryGetNode(_selectedStageId, out var node))
@@ -78,6 +82,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             stageType = node.Definition.StageType;
             targetSceneName = node.Definition.TargetSceneName;
+            battleSceneName = node.Definition.BattleSceneName;
+            scenarioId = node.Definition.ScenarioId;
             missionDefinition = node.Definition.MissionDefinition;
             return true;
         }

@@ -19,10 +19,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackDefinition attackDefinition,
             IAttacker attacker,
             IDefender defender,
-            bool isJustHit = false
+            bool isJustHit,
+            Damage baseDamage
             )
         {
-            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit);
+            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit, baseDamage);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }

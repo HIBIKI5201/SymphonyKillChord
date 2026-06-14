@@ -35,12 +35,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void Activate()
         {
-            if(_targetTransform == null)
+            if (_targetTransform == null)
             {
                 Debug.LogError("[ShellView] 攻撃対象を失っています。");
                 return;
             }
-             ChangeShellColor(ShellColor.Green);
+            ChangeShellColor(ShellColor.Green);
             transform.position = _targetTransform.position;
             _indicator.gameObject.SetActive(true);
         }
@@ -73,7 +73,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _ => Color.white
             };
             _indicator.material.color = new Color(unityColor.r, unityColor.g, unityColor.b, 1f);
-            Debug.Log($"<color={color.ToString()}>[ShellView] 砲弾の色を{color}に変更</color>");
+            Debug.Log($"[ShellView] 砲弾の色を{color}に変更しました。");
         }
 
         /// <summary>

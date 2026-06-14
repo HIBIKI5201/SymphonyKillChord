@@ -1,5 +1,9 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Input;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -8,56 +12,109 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// </summary>
     public class ScenarioInputView : MonoBehaviour
     {
-        [SerializeField]
-        private KeyCode _advanceKey = KeyCode.Mouse0;
-        [SerializeField]
-        private KeyCode _fastForwardKey = KeyCode.LeftShift;
-        [SerializeField]
-        private KeyCode _pauseToggleKey = KeyCode.Space;
-        [SerializeField]
-        private KeyCode _skipKey = KeyCode.Escape;
-
         /// <summary>
-        /// 依存先を受け取りシナリオ表示を初期化する。
+        ///     依存先を初期化する。
         /// </summary>
         public void Initialize(InputController inputController)
         {
             _inputController = inputController;
+
+            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が取得できませんでした。", this);
+                return;
+            }
+
+            Subscribe();
         }
 
-        /// <summary>
-        /// 毎フレームの入力監視または演出更新を行う。
-        /// </summary>
-        private void Update()
+        private void OnDisable()
         {
-            if (_inputController == null) return;
+            Unsubscribe();
+        }
 
-            if (Input.GetKeyDown(_advanceKey))
+        private void OnDestroy()
+        {
+            Unsubscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (_playerInputView == null || _isSubscribed)
             {
-                _inputController.MouseClick();
+                return;
             }
 
-            if (Input.GetKeyDown(_fastForwardKey))
+            _playerInputView.OnScenarioAdvanceInput += HandleAdvanceInput;
+            _playerInputView.OnScenarioFastForwardInput += HandleFastForwardInput;
+            _playerInputView.OnScenarioPauseInput += HandlePauseInput;
+            _playerInputView.OnScenarioSkipInput += HandleSkipInput;
+
+            _isSubscribed = true;
+        }
+
+        private void Unsubscribe()
+        {
+            if (_playerInputView == null || !_isSubscribed)
             {
-                _inputController.SetFastForward(true);
+                return;
             }
 
-            if (Input.GetKeyUp(_fastForwardKey))
+            _playerInputView.OnScenarioAdvanceInput -= HandleAdvanceInput;
+            _playerInputView.OnScenarioFastForwardInput -= HandleFastForwardInput;
+            _playerInputView.OnScenarioPauseInput -= HandlePauseInput;
+            _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
+
+            _isSubscribed = false;
+        }
+
+        private void HandleAdvanceInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
             {
-                _inputController.SetFastForward(false);
+                return;
             }
 
-            if (Input.GetKeyDown(_pauseToggleKey))
+            _inputController?.MouseClick();
+        }
+
+        private void HandleFastForwardInput(InputContext<float> context)
+        {
+            if (context.Phase == InputActionPhase.Started ||
+                context.Phase == InputActionPhase.Performed)
             {
-                _inputController.TogglePause();
+                _inputController?.SetFastForward(true);
+                return;
             }
 
-            if (Input.GetKeyDown(_skipKey))
+            if (context.Phase == InputActionPhase.Canceled)
             {
-                _inputController.Skip();
+                _inputController?.SetFastForward(false);
             }
+        }
+
+        private void HandlePauseInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _inputController?.TogglePause();
+        }
+
+        private void HandleSkipInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _inputController?.Skip();
         }
 
         private InputController _inputController;
+        private PlayerInputView _playerInputView;
+        private bool _isSubscribed;
     }
 }
