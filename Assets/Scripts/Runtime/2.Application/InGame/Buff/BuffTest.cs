@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 using UnityEngine.Assertions.Must;
 
