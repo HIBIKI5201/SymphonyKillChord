@@ -36,68 +36,68 @@ jobs:
           echo "==========================================="
 
           # Check for other running instances of the same workflow (prevent duplicate execution)
-          echo "[INFO] Checking for other running instances of this workflow..."
+          echo "INFO: Checking for other running instances of this workflow..."
           ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
           OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
           
           if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "[SKIP] Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT)。Exiting early..."
+            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT)。Exiting early..."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=false (Skipped due to duplicate execution)"
+            echo "SUCCESS: Decision: should_run=false (Skipped due to duplicate execution)"
             exit 0
           fi
 
           # 不要なAPIコール 避けるため、手動実行時（workflow_dispatch）はリリース経過days数のチェック スキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "[SKIP] Manual execution detected. Skipping release age check."
+            echo "SKIP: Manual execution detected. Skipping release age check."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (Manual trigger)"
+            echo "SUCCESS: Decision: should_run=true (Manual trigger)"
             exit 0
           fi
 
           # GitHub APIから最新のリリース 取得します
-          echo "[INFO] Retrieving latest release from GitHub API..."
+          echo "INFO: Retrieving latest release from GitHub API..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
           if [ "$HTTP_CODE" = "404" ]; then
-            echo "[INFO] No previous release found"
+            echo "INFO: No previous release found"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (New release)"
+            echo "SUCCESS: Decision: should_run=true (New release)"
             exit 0
           elif [ "$HTTP_CODE" != "200" ]; then
-            echo "[ERROR] GitHub API returned HTTP $HTTP_CODE"
+            echo "ERROR: GitHub API returned HTTP $HTTP_CODE"
             exit 1
           fi
 
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "[INFO] Release date not found in API response"
+            echo "INFO: Release date not found in API response"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[SUCCESS] Decision: should_run=true (Running because release date could not be determined)"
+            echo "SUCCESS: Decision: should_run=true (Running because release date could not be determined)"
             exit 0
           fi
           
-          echo "[INFO] Latest release published at: $RELEASE_DATE"
+          echo "INFO: Latest release published at: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
           
-          echo "[INFO] Days since last release: $DAYS days"
-          echo "[INFO] Threshold: 3 days (3days以内のリリースはスキップされます)"
+          echo "INFO: Days since last release: $DAYS days"
+          echo "INFO: Threshold: 3 days (3days以内のリリースはスキップされます)"
           
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
+            echo "DECISION: should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[DECISION] should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
+            echo "DECISION: should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
           fi
 
   build-and-release:
@@ -142,7 +142,7 @@ jobs:
         run: |
           Write-Host "::group::Validate Unity Installation"
           if (-not $env:UNITY_EXE_PATH) {
-            Write-Host "[ERROR] UNITY_EXE_PATH is not configured."
+            Write-Host "ERROR: UNITY_EXE_PATH is not configured."
             Write-Host "::endgroup::"
             exit 1
           }
@@ -150,11 +150,11 @@ jobs:
           
           if (Test-Path $env:UNITY_EXE_PATH) {
             $FileInfo = Get-Item $env:UNITY_EXE_PATH
-            Write-Host "[OK] Unity executable verified."
+            Write-Host "OK: Unity executable verified."
             Write-Host "      File Size: $($FileInfo.Length / 1MB) MB"
             Write-Host "      last days: $($FileInfo.LastWriteTime)"
           } else {
-            Write-Host "[ERROR] Unity executable not found at the specified path: $env:UNITY_EXE_PATH"
+            Write-Host "ERROR: Unity executable not found at the specified path: $env:UNITY_EXE_PATH"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -179,9 +179,9 @@ jobs:
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity process exited with code $UnityExitCode."
           
           if ($UnityExitCode -eq 0) {
-            Write-Host "[OK] Unity build completed successfully."
+            Write-Host "OK: Unity build completed successfully."
           } else {
-            Write-Host "[WARNING] Unity process returned a non-zero exit code ($UnityExitCode)."
+            Write-Host "WARNING: Unity process returned a non-zero exit code ($UnityExitCode)."
             Write-Host "          A build error may have occurred. See unity_build.log for details."
           }
           Write-Host "::endgroup::"
@@ -193,7 +193,7 @@ jobs:
         run: |
           Write-Host "::group::Unity Build Log Summary"
           if (Test-Path "unity_build.log") {
-            Write-Host "[INFO] unity_build.log Extracting key information from..."
+            Write-Host "INFO: unity_build.log Extracting key information from..."
             Write-Host ""
           
             # Count errors and warnings
@@ -208,7 +208,7 @@ jobs:
             Write-Host "[unity_build.log Last 50 lines of:]"
             Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
           } else {
-            Write-Host "[WARNING] unity_build.log was not found."
+            Write-Host "WARNING: unity_build.log was not found."
           }
           Write-Host "::endgroup::"
         shell: powershell
@@ -224,7 +224,7 @@ jobs:
         run: |
           Write-Host "::group::Validate Build Output"
           if (Test-Path $env:UNITY_BUILD_OUTPUT_DIR) {
-            Write-Host "[OK] Build output directory found: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "OK: Build output directory found: $env:UNITY_BUILD_OUTPUT_DIR"
             Write-Host ""
           
             $Items = Get-ChildItem -Path $env:UNITY_BUILD_OUTPUT_DIR -Recurse -File
@@ -242,11 +242,11 @@ jobs:
             }
           
             if ($Items.Count -eq 0) {
-              Write-Host "[WARNING] No files found in the build output directory."
+              Write-Host "WARNING: No files found in the build output directory."
             }
           } else {
-            Write-Host "[ERROR] Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
-            Write-Host "[ERROR] Build artifacts do not exist. Aborting archive process."
+            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "ERROR: Build artifacts do not exist. Aborting archive process."
             Write-Host "::endgroup::"
             exit 1
           }
@@ -257,20 +257,20 @@ jobs:
         run: |
           Write-Host "::group::Archive Build Artifacts (ZIP)"
           if (-not (Test-Path $env:UNITY_BUILD_OUTPUT_DIR)) {
-            Write-Host "[ERROR] Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
             Write-Host "::endgroup::"
             exit 1
           }
           
           try {
-            Write-Host "[INFO] Compressing build artifacts..."
+            Write-Host "INFO: Compressing build artifacts..."
             Compress-Archive -Path "$env:UNITY_BUILD_OUTPUT_DIR\*" -DestinationPath Builds.zip -ErrorAction Stop
           
             $ZipSize = (Get-Item "Builds.zip").Length
-            Write-Host "[OK] Archive (Builds.zip) created successfully."
+            Write-Host "OK: Archive (Builds.zip) created successfully."
             Write-Host "     File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
           } catch {
-            Write-Host "[ERROR] Failed to create archive: $_"
+            Write-Host "ERROR: Failed to create archive: $_"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -288,7 +288,7 @@ jobs:
           
           $TagName = "dev-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
-          Write-Host "[OK] Generated tag name: $TagName"
+          Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -342,9 +342,9 @@ jobs:
           
           try {
               $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
-              Write-Host "[OK] BUILD_VERSION   $NextCounter updated successfully."
+              Write-Host "OK: BUILD_VERSION   $NextCounter updated successfully."
           } catch {
-              Write-Host "[ERROR] BUILD_VERSION Failed to update: $_"
+              Write-Host "ERROR: BUILD_VERSION Failed to update: $_"
               Write-Host "::endgroup::"
               exit 1
           }
@@ -358,11 +358,11 @@ jobs:
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow completed."
           
           if ("${{ steps.create_release.outcome }}" -eq "success") {
-            Write-Host "[OK] Release created successfully."
+            Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
             Write-Host "     Artifact: Builds.zip  アップロードしました。"
           } else {
-            Write-Host "[WARNING] Release creation did not complete (failed or skipped)."
+            Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }
           Write-Host "::endgroup::"
         shell: powershell
