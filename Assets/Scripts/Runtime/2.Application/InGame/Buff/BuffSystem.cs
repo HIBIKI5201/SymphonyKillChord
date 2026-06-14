@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
     {
         public BuffContext Execute(BuffContext context, BuffExecuteTiming state)
         {
-            for (int i = 0; i < _list.Count; i++)
+            for (int i = _list.Count - 1; i >= 0; i--)
             {
                 IBuff buff = _list[i];
                 if (buff.GetState().GetActivationType() != state)
@@ -22,9 +22,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
                 buff.ExecuteAsync(context, _source.Token);
                 context = buff.ExecuteInstance(context);
+                _list.RemoveAt(i);
             }
 
-            _list.Clear();
             return context;
         }
         public void Add(IBuff buff)
