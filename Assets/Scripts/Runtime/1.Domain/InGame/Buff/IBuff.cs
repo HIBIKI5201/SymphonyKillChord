@@ -28,9 +28,9 @@ namespace KillChord.Runtime.Domain
 
     public readonly struct BuffContext
     {
-        public BuffContext(CharacterEntity attaker, CharacterEntity target, AttackResult result = default)
+        public BuffContext(CharacterEntity attacker, CharacterEntity target, AttackResult result = default)
         {
-            _attacker = attaker;
+            _attacker = attacker;
             _target = target;
             _result = result;
         }
