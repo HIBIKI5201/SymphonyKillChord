@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
+using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -68,6 +69,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _navMeshAgent.isStopped = false;
                 _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
+
+                PlayFootstepSound();
             }
         }
 
@@ -90,24 +93,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _navMeshAgent.updateRotation = false;
         }
-        private NavMeshAgent _navMeshAgent;
-        private Transform _target;
-        private EnemyAIController _enemyAIController;
-        private bool _isPlaying;
 
-        private void Awake()
-        {
-            _navMeshAgent = GetComponent<NavMeshAgent>();
-        }
-
-        private void OnDestroy()
-        {
-            if (_enemyAIController == null) return;
-
-            _enemyAIController.OnAttackReserved -= PlayEffectReserved;
-            _enemyAIController.OnAttack -= PlayEffectHit;
-            _enemyAIController.Dispose();
-        }
         /// <summary>
         ///     有効化処理。
         /// </summary>
@@ -132,6 +118,47 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
         }
+
+        [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackSoundSource;
+
+        [SerializeField, Tooltip("足音SEの共通Source。床設定側にSourceがない場合に使用します。")]
+        private SoundEffectSource _defaultFootstepSoundSource;
+
+        [SerializeField, Tooltip("足音SEの共通CueName。床設定側にCueNameがない場合に使用します。")]
+        private string _defaultFootstepCueName;
+
+        [SerializeField, Tooltip("床素材ごとの足音SE設定。")]
+        private FootstepSoundConfig[] _footstepSoundConfigs;
+
+        [SerializeField, Tooltip("足元判定の開始位置オフセット。")]
+        private Vector3 _footstepRayOffset;
+
+        [SerializeField, Min(0.01f), Tooltip("足元判定の距離。")]
+        private float _footstepRayDistance;
+
+        [SerializeField, Min(0.01f), Tooltip("足音SEの再生間隔。")]
+        private float _footstepInterval;
+
+        private float _lastFootstepTime;
+        private NavMeshAgent _navMeshAgent;
+        private Transform _target;
+        private EnemyAIController _enemyAIController;
+        private bool _isPlaying;
+
+        private void Awake()
+        {
+            _navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+
+        private void OnDestroy()
+        {
+            if (_enemyAIController == null) return;
+
+            Deactivate();
+            _enemyAIController.Dispose();
+        }
+
         /// <summary>
         ///     NavMeshAgentが使用可能かどうかを確認する。
         /// </summary>
@@ -159,8 +186,88 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (!_isPlaying) return;
 
             ParticleController.Instance.PlayParticle(transform.position);
+            PlaySound(_attackSoundSource, null);
             MoveToAttack();
         }
+
+        /// <summary>
+        ///     現在の足元に対応する足音SE設定を取得します。
+        /// </summary>
+        private FootstepSoundConfig GetCurrentFootstepSoundConfig()
+        {
+            // 足元へ下向きの例を飛ばす。
+            Vector3 origin = transform.position + _footstepRayOffset;
+
+            if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _footstepRayDistance))
+            {
+                return default;
+            }
+
+            if (_footstepSoundConfigs == null || _footstepSoundConfigs.Length == 0)
+            {
+                return default;
+            }
+
+            // Layer番号をLayerMask形式に変換する。
+            // LayerMaskで複数対応している。
+            int hitLayerMask = 1 << hit.collider.gameObject.layer;
+
+            for (int i = 0; i < _footstepSoundConfigs.Length; i++)
+            {
+                // SurfaceLayerの中に、今当たった床Layerが含まれているかチェック。
+                if ((_footstepSoundConfigs[i].SurfaceLayer.value & hitLayerMask) != 0)
+                {
+                    return _footstepSoundConfigs[i];
+                }
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        ///     足音SEを一定間隔で再生します。
+        /// </summary>
+        private void PlayFootstepSound()
+        {
+            if (Time.time - _lastFootstepTime < _footstepInterval)
+            {
+                return;
+            }
+
+            FootstepSoundConfig config = GetCurrentFootstepSoundConfig();
+
+            // 床専用Sourceがある場合、それを再生。
+            // ない場合はdefaultで。
+            SoundEffectSource source = config.Source != null
+                ? config.Source
+                : _defaultFootstepSoundSource;
+
+            string cueName = string.IsNullOrWhiteSpace(config.CueName)
+                ? _defaultFootstepCueName
+                : config.CueName;
+
+            PlaySound(source, cueName);
+            _lastFootstepTime = Time.time;
+        }
+        /// <summary>
+        ///     SE Sourceを再生します。
+        /// </summary>
+        private void PlaySound(SoundEffectSource source, string cueName)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                source.Play();
+                return;
+            }
+
+            source.Play(cueName);
+        }
+
         /// <summary>
         ///     攻撃の1拍前に呼び出される処理。
         /// </summary>
@@ -176,5 +283,32 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
 
         }
+#if UNITY_EDITOR
+        /// <summary>
+        ///     足音判定用RayをSceneビューへ描画します。
+        /// </summary>
+        private void OnDrawGizmosSelected()
+        {
+            Vector3 origin = transform.position + _footstepRayOffset;
+
+            if (Physics.Raycast(
+                    origin,
+                    Vector3.down,
+                    out RaycastHit hit,
+                    _footstepRayDistance))
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(origin, hit.point);
+                Gizmos.DrawWireSphere(hit.point, 0.1f);
+            }
+            else
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(
+                    origin,
+                    origin + (Vector3.down * _footstepRayDistance));
+            }
+        }
+#endif
     }
 }
