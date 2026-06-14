@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -7434688505541404117}
   - component: {fileID: 3390705430803442452}
   - component: {fileID: -117008544252888282}
+  - component: {fileID: 4514743631212080455}
   - component: {fileID: 2029437041226520640}
   - component: {fileID: 3385280616353316531}
   - component: {fileID: 4632999564934893021}
@@ -158,6 +159,8 @@ MonoBehaviour:
   _enemySharedFacade: {fileID: 0}
   _behaviorGraphAgent: {fileID: 2029437041226520640}
   _navMeshAgent: {fileID: 3385280616353316531}
+  _characterAnimationView: {fileID: 4514743631212080455}
+  _characterAnimationCatalogAsset: {fileID: 11400000, guid: d4bf747a9f8ccab419e014df8b73ef72, type: 2}
   _shellSpawner: {fileID: 0}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
@@ -183,6 +186,7 @@ MonoBehaviour:
   _footstepRayOffset: {x: 0, y: 0.2, z: 0}
   _footstepRayDistance: 1.5
   _footstepInterval: 0.5
+  _attackAttackReservedAnimation: Enemy_AttackReserved
 --- !u!114 &-8573756187886522192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,6 +270,20 @@ MonoBehaviour:
   _searchInterval: 0.16
   _agent: {fileID: 3385280616353316531}
   _raycastView: {fileID: 8900643656970599263}
+--- !u!114 &4514743631212080455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e4266b03dd11a847a990b9971a7cad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
+  _attackRampUpRatio: 0
+  _animator: {fileID: 4888016226605571557}
 --- !u!114 &2029437041226520640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -843,11 +861,20 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 61366630e3c077b4b991d36e541d2c9d, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61366630e3c077b4b991d36e541d2c9d, type: 3}
+--- !u!95 &4888016226605571557 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9500000, guid: 61366630e3c077b4b991d36e541d2c9d, type: 3}
+  m_PrefabInstance: {fileID: 4888016226614995077}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4888016226615128681 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400108, guid: 61366630e3c077b4b991d36e541d2c9d, type: 3}
