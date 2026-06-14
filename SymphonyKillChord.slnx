@@ -31,13 +31,13 @@
   <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
+  <Project Path="KillChord.Utility.csproj" />
   <Project Path="KillChord.Develop.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="DevelopProducts-RenderingExtension.csproj" />
   <Project Path="VrmLibTests.csproj" />
   <Project Path="VrmLib.csproj" />
   <Project Path="SymphonyFrameWork.Enum.csproj" />
-  <Project Path="KillChord.Utility.csproj" />
   <Project Path="VRM10.MToon10.Tests.csproj" />
   <Project Path="DevelopProducts-SpringBone.csproj" />
   <Project Path="DevelopProductsUtility.csproj" />
