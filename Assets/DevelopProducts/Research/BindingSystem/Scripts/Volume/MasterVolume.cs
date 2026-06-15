@@ -5,32 +5,13 @@ using UnityEngine.UI;
 
 namespace DevelopProducts.BindingSystem
 {
-    public class MasterVolume : ISliderSetting
+    public class MasterVolume : SliderSettingItemBase
     {
-        public Slider Slider => _slider;
-
-        public void Apply()
+        protected override void ApplyValue(float value)
         {
-            _atom.volume = Slider.value;
+            //TODO: ここで、実際のマスターボリュームに値を適用する処理を実装する。
         }
-
-        public void Load()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void ResetToDefault()
-        {
-            throw new System.NotImplementedException();
-        }
-        [Header("スライダーの設定")]
-        [SerializeField] private Slider _slider;
         [Header("CRI")]
         [SerializeField] private CriAtomSource _atom;
-        [Header("テキストの設定")]
-        [SerializeField] private string _displayName;
-        [SerializeField] private string _description;
-        [SerializeField] private TextMeshProUGUI _nameText;
-        [SerializeField] private TextMeshProUGUI _descriptionText;
     }
 }
