@@ -15,11 +15,13 @@ namespace KillChord.Runtime.Adaptor
         /// <summary> CharacterAnimationControllerを初期化する。 </summary>
         /// <param name="animApplication"> アニメーション処理を委譲するApplication。 </param>
         /// <param name="musicSyncState"> BPM情報を持つ音楽同期状態。 </param>
-        public CharacterAnimationController(ICharacterAnimationApplication animApplication, MusicSyncState musicSyncState)
+        /// <param name="clipCount"> アニメーションクリップの数。 </param>
+        public CharacterAnimationController(ICharacterAnimationApplication animApplication, MusicSyncState musicSyncState, int clipCount)
         {
             _animApplication = animApplication ?? throw new ArgumentNullException(nameof(animApplication));
             _musicSyncState = musicSyncState ?? throw new ArgumentNullException(nameof(musicSyncState));
-            _weights = new float[Enum.GetValues(typeof(CharacterAnimationState)).Length];
+            int baseCount = Enum.GetValues(typeof(CharacterAnimationState)).Length;
+            _weights = new float[Mathf.Max(clipCount, baseCount)];
         }
 
         /// <summary> 入力が発生したことを通知するイベント。 </summary>

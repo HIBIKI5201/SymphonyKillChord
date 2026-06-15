@@ -1,4 +1,3 @@
-using CriWare;
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
@@ -6,6 +5,8 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Music;
+using KillChord.Runtime.View.Persistent.Voice;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,11 +23,30 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
-        [SerializeField] private CriAtomSource _seSource;
 
+        [SerializeField, Tooltip("攻撃結果ごとの銃声SE設定。")]
+        private AttackSoundConfig[] _attackSoundConfigs;
+        [Space]
+
+        [SerializeField, Tooltip("被弾SE用Source。")]
+        private SoundEffectSource _damageSoundSource;
+        [Space]
+
+        [SerializeField, Tooltip("仮Voice用Source。")]
+        private VoiceSource _voiceSource;
+        [SerializeField, Tooltip("被弾時VoiceのCueName。空の場合はSource側のCueを再生します。")]
+        private string _damageVoiceCueName;
+        [Space]
+
+        [SerializeField, Tooltip("回避SE用Source。")]
+        private SoundEffectSource _dodgeSoundSource;
+
+        private const string ATTACK_BEAT_1_KEY = "Attack_Beat1";
+        private const string ATTACK_BEAT_2_KEY = "Attack_Beat2";
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
+        private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
         private Vector2 _dogeVector;
         private Transform _cacheTransform;
@@ -60,7 +80,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 UnRegisterActions();
             }
 
-            _healthHudPresenter?.Dispose();
+            if (_healthHudPresenter != null)
+            {
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter?.Dispose();
+            }
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -81,6 +105,8 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
+
+            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -124,6 +150,25 @@ namespace KillChord.Runtime.View.InGame.Player
             _characterAnimationController?.SetVelocity(Vector2.zero);
         }
 
+        /// <summary>
+        ///     被弾時のSEと仮Voiceを再生します。
+        /// </summary>
+        public void PlayDamageFeedbackSound()
+        {
+            PlaySound(_damageSoundSource, null);
+            PlayVoice(_voiceSource, _damageVoiceCueName);
+        }
+
+        public void PlaySkillAnimation(string animationKey)
+        {
+            if (string.IsNullOrWhiteSpace(animationKey))
+            {
+                return;
+            }
+
+            _pendingSkillAnimationKey = animationKey;
+        }
+
         /// <summary> 入力イベントを購読する。 </summary>
         private void RegisterActions()
         {
@@ -157,6 +202,8 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
                 _dogeVector = _moveVector;
                 _isDodge = true;
+
+                PlaySound(_dodgeSoundSource, null);
                 _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
@@ -184,44 +231,36 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
-                // 判定ビート種別ごとに再生するSEキュー名を切り替える。
-                string cueName = resultBeatType switch
-                {
-                    1 => "HandgunShoot_3",
-                    2 => "RifleShoot_3",
-                    3 => "HandgunShoot_2",
-                    4 => "RifleShoot_1",
-                    6 => "HandgunShoot_1",
-                    8 => "RifleShoot_2",
-                    _ => string.Empty
-                };
+                PlayAttackSound(resultBeatType);
 
-                Play(cueName);
-                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
+                string animationKey = _pendingSkillAnimationKey;
+                _pendingSkillAnimationKey = null;
+
+                if (string.IsNullOrWhiteSpace(animationKey))
+                {
+                    animationKey = GetAttackAnimationKey(resultBeatType);
+                }
+
+                int attackIndex = _characterAnimationIndices.Attack;
+
+                if (!string.IsNullOrEmpty(animationKey)
+                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+                {
+                    attackIndex = oneShotIndex;
+                }
+
+                _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
                     CancelAttackRotate();
                     _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(PlayerAttackController.CurrentLockOnTargetPosition, PlayerAttackController.AttackRotationSpeed
-                        , _cancellationTokenSource.Token);
+                    RotateToTargetAsync(
+                        PlayerAttackController.CurrentLockOnTargetPosition,
+                        PlayerAttackController.AttackRotationSpeed,
+                        _cancellationTokenSource.Token);
                 }
             }
-        }
-
-        /// <summary>
-        ///     指定したSEキュー名を再生する。
-        /// </summary>
-        private void Play(string cueName)
-        {
-            if (_seSource == null || string.IsNullOrEmpty(cueName))
-            {
-                Debug.LogWarning("[PlayerView] SE再生をスキップしました（source/cueName不正）", this);
-                return;
-            }
-
-            _seSource.cueName = cueName;
-            _seSource.Play();
         }
 
         /// <summary> 入力に基づいて移動と向きを更新する。 </summary>
@@ -327,6 +366,79 @@ namespace KillChord.Runtime.View.InGame.Player
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
+        }
+        /// <summary>
+        ///     BeatTypeに対応する攻撃SEを再生します。
+        /// </summary>
+        private void PlayAttackSound(int beatType)
+        {
+            if (_attackSoundConfigs == null || _attackSoundConfigs.Length == 0)
+            {
+                Debug.LogError("攻撃SE設定が未設定です。");
+                return;
+            }
+
+            for (int i = 0; i < _attackSoundConfigs.Length; i++)
+            {
+                if (_attackSoundConfigs[i].BeatType != beatType)
+                {
+                    continue;
+                }
+
+                PlaySound(_attackSoundConfigs[i].Source, _attackSoundConfigs[i].CueName);
+                return;
+            }
+
+            Debug.LogWarning($"攻撃SE設定が見つかりません。BeatType:{beatType}", this);
+        }
+
+        /// <summary>
+        ///     SE Sourceを再生します。
+        /// </summary>
+        private void PlaySound(SoundEffectSource source, string cueName)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                source.Play();
+                return;
+            }
+
+            source.Play(cueName);
+        }
+
+        /// <summary>
+        ///     Voice Sourceを再生します。
+        /// </summary>
+        private void PlayVoice(VoiceSource source, string cueName)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                source.Play();
+                return;
+            }
+
+            source.Play(cueName);
+        }
+
+        //TODO:今はint直置きだから後で調整しやすいようにしとく。
+        private string GetAttackAnimationKey(int beatType)
+        {
+            return beatType switch
+            {
+                1 or 2 or 3 => ATTACK_BEAT_1_KEY,
+                4 or 6 or 8 => ATTACK_BEAT_2_KEY,
+                _ => string.Empty
+            };
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
