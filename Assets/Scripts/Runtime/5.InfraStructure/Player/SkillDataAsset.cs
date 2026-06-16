@@ -14,6 +14,8 @@ namespace KillChord.Runtime.InfraStructure.Player
     {
         public int Id => _id;
         public BeatType[] Pattern => _pattern;
+        public int CooldownNumerator => _cooldownNumerator;
+        public int CooldownDenomimator => _cooldownDenomimator;
         public ISkillEffect SkillEffect => _skillEffect;
         public string AnimationKey => _animationKey;
 
@@ -22,11 +24,13 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// </summary>
         public SkillData ToDomain()
         {
-            return new SkillData(_id, _pattern, _skillEffect, _animationKey);
+            return new SkillData(_id, _pattern, _cooldownNumerator, _cooldownDenomimator, _skillEffect, _animationKey);
         }
 
         [SerializeField] private int _id;
         [SerializeField] private BeatType[] _pattern;
+        [SerializeField] private int _cooldownNumerator;
+        [SerializeField] private int _cooldownDenomimator;
         [SerializeReference, SubclassSelector] private ISkillEffect _skillEffect;
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;

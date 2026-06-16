@@ -11,114 +11,136 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// <summary>
     /// スキルの表示・入力チェックを仲介するコントローラクラス。
     /// </summary>
-    public class SkillController : IViewAction
+    public class SkillController
     {
         /// <summary>
         /// コンストラクタ。リポジトリから指定されたスキルを読み込み、視覚演出を登録する。
         /// </summary>
-        public SkillController(
-            ISkillRepository skillRepository,
-            ISkillVisual[] skillVisuals,
-            MusicSyncState musicSyncState,
-            SkillCooldownState skillCooldownState,
-            int[] skillId = null,
-            SkillResultPresenter presenter = null,
-            SkillInputProgressController progressController = null)
+        //public SkillController(
+        //    ISkillRepository skillRepository,
+        //    ISkillVisual[] skillVisuals,
+        //    MusicSyncState musicSyncState,
+        //    SkillCooldownState skillCooldownState,
+        //    int[] skillId = null,
+        //    SkillResultPresenter presenter = null,
+        //    SkillInputProgressController progressController = null)
+        public SkillController()
         {
-            if(musicSyncState == null)
-            {
-                throw new ArgumentNullException("[SkillController] MusicSyncStateがNULL。");
-            }
-            if(skillCooldownState == null)
-            {
-                throw new ArgumentNullException("[SkillController] SkillCooldownStateがNULL。");
-            }
-            _skillCooldownState = skillCooldownState;
-            skillId ??= new[] { 0 };
-            _skillCache = new SkillDefinition[skillId.Length];
+            //if(musicSyncState == null)
+            //{
+            //    throw new ArgumentNullException("[SkillController] MusicSyncStateがNULL。");
+            //}
+            //if(skillCooldownState == null)
+            //{
+            //    throw new ArgumentNullException("[SkillController] SkillCooldownStateがNULL。");
+            //}
+            //_skillCooldownState = skillCooldownState;
+            //skillId ??= new[] { 0 };
+            //_skillCache = new SkillDefinition[skillId.Length];
 
-            for (int i = 0; i < skillId.Length; i++)
-            {
-                _skillCache[i] = skillRepository.GetSkill(skillId[i], musicSyncState.Bpm);
-            }
+            //for (int i = 0; i < skillId.Length; i++)
+            //{
+            //    _skillCache[i] = skillRepository.GetSkill(skillId[i], musicSyncState.Bpm);
+            //}
 
-            _skillVisuals = new Dictionary<int, ISkillVisual>();
-            if (skillVisuals != null)
-            {
-                foreach (var visual in skillVisuals)
-                {
-                    _skillVisuals[visual.Id] = visual;
-                }
-            }
+            //_skillVisuals = new Dictionary<int, ISkillVisual>();
+            //if (skillVisuals != null)
+            //{
+            //    foreach (var visual in skillVisuals)
+            //    {
+            //        _skillVisuals[visual.Id] = visual;
+            //    }
+            //}
 
-            _presenter = presenter;
-            _progressController = progressController;
+            //_presenter = presenter;
+            //_progressController = progressController;
         }
 
         /// <summary>スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。</summary>
         public event Action<string> OnSkillAnimationRequested;
 
-        /// <summary>
-        /// ユースケースを設定する。
-        /// </summary>
-        /// <param name="usecase">スキル処理のユースケース</param>
-        public void SetUsecase(SkillUsecase usecase)
+        public void Initialize(SkillExecutionController[] skillExecutionControllers)
         {
-            _skillUseCase = usecase;
+            _skillExecutionControllers = skillExecutionControllers;
         }
 
-        /// <summary>
-        /// 指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
-        /// </summary>
-        /// <returns>スキルが発動した場合はtrue、それ以外はfalse</returns>
-        public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        ///// <summary>
+        ///// 指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
+        ///// </summary>
+        public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
-            _progressController?.UpdateProgress(_skillCache, beatType);
-
-            if (_skillUseCase.TryExecuteSkill(
-                    _skillCache,
-                    actionType,
-                    beatType,
-                    unscaledTime,
-                    out var executedSkill))
+            for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                if (_skillCooldownState.IsSkillReady(executedSkill, unscaledTime))
+                SkillExecutionController exeController = _skillExecutionControllers[i];
+                bool result = exeController.TryExecuteSkill(beatType, unscaledTime, actionType, out string animationKey);
+                if (result)
                 {
-                    _presenter?.Push(executedSkill);
-                    _progressController?.ResetSkill(executedSkill.Id.Value);
-
-                    Execute(executedSkill.Id.Value, executedSkill.AnimationKey);
-
-                    _skillCooldownState.SetSkillCooldown(executedSkill, unscaledTime);
-                    return true;
+                    OnSkillAnimationRequested?.Invoke(animationKey);
                 }
             }
-
-            return false;
         }
+        ///// <summary>
+        ///// ユースケースを設定する。
+        ///// </summary>
+        ///// <param name="usecase">スキル処理のユースケース</param>
+        //public void SetUsecase(SkillUsecase usecase)
+        //{
+        //    _skillUseCase = usecase;
+        //}
 
-        /// <summary>
-        /// 指定したスキルIDに対応する視覚演出を実行する。
-        /// </summary>
-        /// <param name="skillId">実行するスキルのID</param>
-        public void Execute(int skillId, string animationKey = null)
-        {
-            if (_skillVisuals.TryGetValue(skillId, out var visual))
-            {
-                visual.Execute();
-            }
-            if (!string.IsNullOrWhiteSpace(animationKey))
-            {
-                OnSkillAnimationRequested?.Invoke(animationKey);
-            }
-        }
+        ///// <summary>
+        ///// 指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
+        ///// </summary>
+        ///// <returns>スキルが発動した場合はtrue、それ以外はfalse</returns>
+        //public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        //{
+        //    _progressController?.UpdateProgress(_skillCache, beatType);
+
+        //    if (_skillUseCase.TryExecuteSkill(
+        //            _skillCache,
+        //            actionType,
+        //            beatType,
+        //            unscaledTime,
+        //            out var executedSkill))
+        //    {
+        //        if (_skillCooldownState.IsSkillReady(executedSkill, unscaledTime))
+        //        {
+        //            _presenter?.Push(executedSkill);
+        //            _progressController?.ResetSkill(executedSkill.Id.Value);
+
+        //            Execute(executedSkill.Id.Value, executedSkill.AnimationKey);
+
+        //            _skillCooldownState.SetSkillCooldown(executedSkill, unscaledTime);
+        //            return true;
+        //        }
+        //    }
+
+        //    return false;
+        //}
+
+        ///// <summary>
+        ///// 指定したスキルIDに対応する視覚演出を実行する。
+        ///// </summary>
+        ///// <param name="skillId">実行するスキルのID</param>
+        //public void Execute(int skillId, string animationKey = null)
+        //{
+        //    if (_skillVisuals.TryGetValue(skillId, out var visual))
+        //    {
+        //        visual.Execute();
+        //    }
+        //    if (!string.IsNullOrWhiteSpace(animationKey))
+        //    {
+        //        OnSkillAnimationRequested?.Invoke(animationKey);
+        //    }
+        //}
 
         // ...インスペクション用のフィールド（順序はコード規定に従う）
-        private readonly SkillDefinition[] _skillCache;
-        private readonly Dictionary<int, ISkillVisual> _skillVisuals;
-        private readonly SkillResultPresenter _presenter;
-        private readonly SkillInputProgressController _progressController;
-        private readonly SkillCooldownState _skillCooldownState;
-        private SkillUsecase _skillUseCase;
+        private SkillExecutionController[] _skillExecutionControllers;
+        //private readonly SkillDefinition[] _skillCache;
+        //private readonly Dictionary<int, ISkillVisual> _skillVisuals;
+        //private readonly SkillResultPresenter _presenter;
+        //private readonly SkillInputProgressController _progressController;
+        //private readonly SkillCooldownState _skillCooldownState;
+        //private SkillUsecase _skillUseCase;
     }
 }

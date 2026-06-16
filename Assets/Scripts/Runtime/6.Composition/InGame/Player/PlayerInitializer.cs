@@ -17,6 +17,8 @@ using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
@@ -31,6 +33,7 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -178,12 +181,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
             SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
             skillResultView?.Bind(skillResultViewModel);
 
-            SkillCheckService skillCheckService = new SkillCheckService();
-            SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
-            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
-            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController,targetSelectorController, _playerEntity);
-            skillController?.SetUsecase(skillUsecase);
+            //SkillCheckService skillCheckService = new SkillCheckService();
+            //SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
+            //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
+            //SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController, targetSelectorController, _playerEntity);
+            //skillController?.SetUsecase(skillUsecase);
 
+            SkillCheckService skillCheckService = new SkillCheckService();
+            SkillUsecase skillUsecase = new SkillUsecase(targetSelectorController, _playerEntity);
+            SkillController skillController = new SkillController();
+            skillController.Initialize(BuildSkillExecutionControllers(musicSyncState, skillResultPresenter, skillCheckService, skillUsecase, musicSyncService));
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
@@ -210,6 +217,27 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .AddComponent<PlayerMoveParameterDebug>()
                 .SetPlayerMoveParameter(parameter);
 #endif
+        }
+
+        private SkillExecutionController[] BuildSkillExecutionControllers(MusicSyncState musicSyncState, SkillResultPresenter skillResultPresenter, SkillCheckService checkService, SkillUsecase usecase, IMusicSyncService musicSyncService)
+        {
+            SkillExecutionController[] executionControllers = new SkillExecutionController[_equippedSkills.Length];
+            for(int i = 0; i < _equippedSkills.Length; i++)
+            {
+                SkillData data = _equippedSkills[i].ToDomain();
+                SkillDefinition definition = data.ToSkillDefinition(musicSyncState.Bpm);
+                SkillCooldownState cooldownState = new SkillCooldownState(definition);
+                SkillView view = _skillVisuals.First(n => n.Id == definition.Id.Value);
+                SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length);
+                SkillExecutionController executionController = new SkillExecutionController(skillResultPresenter, null, cooldownState, usecase, checkService, view, definition, rhythmState, musicSyncService);
+                executionControllers[i] = executionController;
+            }
+            return executionControllers;
+        }
+
+        private void BuildSkillProgressModules()
+        {
+
         }
 
         private void HandlePlayerDied(CharacterEntity _)

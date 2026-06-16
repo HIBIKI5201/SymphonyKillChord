@@ -42,5 +42,31 @@ namespace KillChord.Runtime.Application.InGame.Skill
             lastAttackType = reversInput[0];
             return false;
         }
+
+        /// <summary>
+        ///     スキル発動を試す。
+        /// </summary>
+        /// <param name="skillDefinition"></param>
+        /// <param name="inputHistory"></param>
+        /// <param name="lastAttackType"></param>
+        /// <returns></returns>
+        public bool CheckInput(
+            in SkillDefinition skillDefinition,
+            in ReadOnlySpan<BeatType> inputHistory)
+        {
+            Span<BeatType> reversedInput = stackalloc BeatType[inputHistory.Length];
+            for (int i = 0; i < inputHistory.Length; i++)
+            {
+                reversedInput[i] = inputHistory[^(i + 1)];
+            }
+
+            if (skillDefinition.IsMatch(reversedInput))
+            {
+                Debug.Log($"[SkillCheckService] SKILL TRIGGERED. SKILL ID: {skillDefinition.Id.Value}");
+                return true;
+            }
+
+            return false;
+        }
     }
 }
