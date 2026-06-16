@@ -29,8 +29,10 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField] private int _id;
         [SerializeField] private BeatType[] _pattern;
-        [SerializeField] private int _cooldownNumerator = 1;
-        [SerializeField] private int _cooldownDenomimator = 1;
+        [SerializeField, Min(0), Tooltip("小節単位で表すクールダウン時間の分子")]
+        private int _cooldownNumerator = 1;
+        [SerializeField, Min(1), Tooltip("小節単位で表すクールダウン時間の分母")]
+        private int _cooldownDenomimator = 1;
         [SerializeReference, SubclassSelector] private ISkillEffect _skillEffect;
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;

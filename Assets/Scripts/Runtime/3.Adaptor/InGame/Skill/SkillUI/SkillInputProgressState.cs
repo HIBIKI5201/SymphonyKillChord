@@ -20,7 +20,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         public void CheckInputBeatType(BeatType beatType)
         {
-            if(beatType == _skillDefinition.SkillPattern.Signatures[_nextBeatTypeIndex])
+            // パターンが完了している場合はリセット
+            if (_nextBeatTypeIndex >= _skillDefinition.SkillPattern.Signatures.Length)
+            {
+                ResetProgress();
+            }
+            if (beatType == _skillDefinition.SkillPattern.Signatures[_nextBeatTypeIndex])
             {
                 _currentMachedCount++;
                 _nextBeatTypeIndex++;

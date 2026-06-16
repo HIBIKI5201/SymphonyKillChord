@@ -69,6 +69,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 _skillRhythmState.Clear();
                 _skillCooldownState.SetSkillCooldown(now);
                 _progressController.SkillTriggered(now, _skillCooldownState.SkillReadyTimestamp);
+                animationKey = _skillDefinition.AnimationKey;
                 return true;
             }
 

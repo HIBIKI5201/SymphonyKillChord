@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             if(_skillInputProgressViewConfigAsset == null)
             {
                 Debug.LogError("スキル入力進行UIの表示設定が未設定です。");
+                return;
             }
             _inputProgressViewConfig = _skillInputProgressViewConfigAsset.Create();
             ServiceLocator.RegisterInstance(this);

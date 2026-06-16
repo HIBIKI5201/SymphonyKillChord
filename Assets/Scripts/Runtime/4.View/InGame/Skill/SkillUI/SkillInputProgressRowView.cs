@@ -31,6 +31,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             if (dto.PatternMatchCount < 0 || dto.PatternMatchCount > _stepViews.Length)
             {
                 Debug.LogError($"入力進捗とスキルの拍子パターン定義が整合していません。入力進捗：{dto.PatternMatchCount}, 拍子パターン長：{_stepViews.Length}");
+                return;
             }
 
             // マッチした部分を光るようにする
@@ -56,8 +57,16 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
             if (_isSkillCoolingDown)
             {
+                float cooldownDuration = _skillReadyTimestamp - _skillTriggeredTimestamp;
+                if (cooldownDuration <= 0)
+                {
+                    _backgroundImage.fillAmount = 1;
+                    ProcessSkillReady();
+                    return;
+                }
+
                 float backgroundFillAmount = (Time.unscaledTime - _skillTriggeredTimestamp)
-                    / (_skillReadyTimestamp - _skillTriggeredTimestamp);
+                    / cooldownDuration;
 
                 if (backgroundFillAmount >= 1)
                 {

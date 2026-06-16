@@ -16,7 +16,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキルの入力パターン。 </summary>
         public SkillPattern SkillPattern { get; }
 
-        /// <summary> スキルの入力パターン。 </summary>
+        /// <summary> クールダウン時間の長さ。 </summary>
         public SkillCooldownTime CooldownTime { get;  }
 
         /// <summary> スキルの効果実装。 </summary>
@@ -36,6 +36,14 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// </summary>
         public SkillDefinition(SkillId id, SkillPattern skillPattern, double cooldownBarRatio, ISkillEffect effect, double bpm, string animationKey)
         {
+            if (!double.IsFinite(bpm) || bpm <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bpm), "BPMは0超えの有限値で設定してください。");
+            }
+            if (!double.IsFinite(cooldownBarRatio) || cooldownBarRatio < 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cooldownBarRatio), "クールダウン時間の小節比率は0以上の有限値で設定してください。");
+            }
             Id = id;
             SkillPattern = skillPattern;
             Effect = effect;

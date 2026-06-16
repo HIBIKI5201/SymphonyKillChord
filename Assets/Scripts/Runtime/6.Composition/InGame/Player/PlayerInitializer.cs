@@ -102,12 +102,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (musicSyncState == null)
             {
                 Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
+                return;
             }
 
             _skillInputProgressUIInitializer = ServiceLocator.GetInstance<SkillInputProgressUIInitializer>();
             if(_skillInputProgressUIInitializer == null)
             {
                 Debug.LogError($"{nameof(SkillInputProgressUIInitializer)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
+                return;
             }
             // SerializeFieldの装備スキルからskillId配列を作成する
             List<int> skillIdList = new List<int>();
@@ -213,21 +215,29 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns></returns>
         private SkillExecutionController[] BuildSkillExecutionControllers(MusicSyncState musicSyncState, SkillResultPresenter skillResultPresenter, SkillCheckService checkService, SkillUsecase usecase, IMusicSyncService musicSyncService)
         {
-            SkillExecutionController[] executionControllers = new SkillExecutionController[_equippedSkills.Length];
-            for(int i = 0; i < _equippedSkills.Length; i++)
+            if (_equippedSkills == null || _equippedSkills.Length == 0)
             {
+                return System.Array.Empty<SkillExecutionController>();
+            }
+
+            List<SkillExecutionController> executionControllers = new List<SkillExecutionController>(_equippedSkills.Length);
+            for (int i = 0; i < _equippedSkills.Length; i++)
+            {
+                if (_equippedSkills[i] == null) { continue; }
+
                 SkillData data = _equippedSkills[i].ToDomain();
                 SkillDefinition definition = data.ToSkillDefinition(musicSyncState.Bpm);
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
-                SkillView view = _skillVisuals.First(n => n.Id == definition.Id.Value);
+                SkillView view = _skillVisuals.FirstOrDefault(n => n.Id == definition.Id.Value);
+                if (view == null) { continue; }
                 SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length * 2);
 
                 SkillInputProgressController progressController = BuildSkillProgressModules(definition);
 
                 SkillExecutionController executionController = new SkillExecutionController(skillResultPresenter, progressController, cooldownState, usecase, checkService, view, definition, rhythmState);
-                executionControllers[i] = executionController;
+                executionControllers.Add(executionController);
             }
-            return executionControllers;
+            return executionControllers.ToArray();
         }
 
         /// <summary>
