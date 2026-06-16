@@ -12,8 +12,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         public SkillCooldownState(in SkillDefinition skill)
         {
             _skillDefinition = skill;
-            _skillReadyTimestamp = 0d;
+            _skillReadyTimestamp = 0f;
         }
+
+        public float SkillReadyTimestamp => _skillReadyTimestamp;
 
         /// <summary>
         ///     スキルのクールダウン完了時間を設定する。
@@ -21,7 +23,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="now"></param>
         public void SetSkillCooldown(float now)
         {
-            _skillReadyTimestamp = now + _skillDefinition.CooldownTime.Value;
+            _skillReadyTimestamp = now + (float)_skillDefinition.CooldownTime.Value;
         }
 
         /// <summary>
@@ -34,8 +36,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             return now >= _skillReadyTimestamp;
         }
 
-        private SkillDefinition _skillDefinition;
-        // スキルのクールダウン完了時間を保持する
-        private double _skillReadyTimestamp;
+        private readonly SkillDefinition _skillDefinition;
+        private float _skillReadyTimestamp;
     }
 }

@@ -11,6 +11,7 @@ using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
@@ -65,6 +66,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
+        private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
 
         private void Awake()
         {
@@ -100,6 +102,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (musicSyncState == null)
             {
                 Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
+            }
+
+            _skillInputProgressUIInitializer = ServiceLocator.GetInstance<SkillInputProgressUIInitializer>();
+            if(_skillInputProgressUIInitializer == null)
+            {
+                Debug.LogError($"{nameof(SkillInputProgressUIInitializer)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
             }
             // SerializeFieldの装備スキルからskillId配列を作成する
             List<int> skillIdList = new List<int>();
@@ -157,39 +165,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 Debug.LogError($"{nameof(SkillInputProgressViewConfigAsset)}がNullです", this);
                 return;
             }
-            SkillInputProgressViewconfig inputProgressViewConfig = _inputProgressViewConfigAsset.Create();
-
-            SkillInputProgressViewModel inputProgressViewModel =
-                new SkillInputProgressViewModel(inputProgressViewConfig);
-            SkillInputProgressPresenter inputProgressPresenter =
-                new SkillInputProgressPresenter(inputProgressViewModel);
-            SkillInputProgressState inputProgressState =
-                new SkillInputProgressState();
-            SkillInputProgressUsecase inputProgressUsecase =
-                new SkillInputProgressUsecase();
-            SkillInputProgressController inputProgressController =
-                new SkillInputProgressController(
-                    inputProgressUsecase,
-                    inputProgressState,
-                    inputProgressPresenter);
-            SkillInputProgressView skillInputProgressView =
-                FindAnyObjectByType<SkillInputProgressView>();
-
-            skillInputProgressView?.Bind(inputProgressViewModel);
 
             // 仮でシーン内のSkillResultViewを見つけて、ViewModelをバインド
             SkillResultView skillResultView = FindAnyObjectByType<SkillResultView>();
             skillResultView?.Bind(skillResultViewModel);
 
-            //SkillCheckService skillCheckService = new SkillCheckService();
-            //SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
-            //SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
-            //SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController, targetSelectorController, _playerEntity);
-            //skillController?.SetUsecase(skillUsecase);
-
             SkillCheckService skillCheckService = new SkillCheckService();
             SkillUsecase skillUsecase = new SkillUsecase(targetSelectorController, _playerEntity);
-            SkillController skillController = new SkillController();
+            SkillController skillController = new SkillController(musicSyncService);
             skillController.Initialize(BuildSkillExecutionControllers(musicSyncState, skillResultPresenter, skillCheckService, skillUsecase, musicSyncService));
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
@@ -219,6 +202,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
 #endif
         }
 
+        /// <summary>
+        ///     装備中1スキル分のモジュール一式を構築する。
+        /// </summary>
+        /// <param name="musicSyncState"></param>
+        /// <param name="skillResultPresenter"></param>
+        /// <param name="checkService"></param>
+        /// <param name="usecase"></param>
+        /// <param name="musicSyncService"></param>
+        /// <returns></returns>
         private SkillExecutionController[] BuildSkillExecutionControllers(MusicSyncState musicSyncState, SkillResultPresenter skillResultPresenter, SkillCheckService checkService, SkillUsecase usecase, IMusicSyncService musicSyncService)
         {
             SkillExecutionController[] executionControllers = new SkillExecutionController[_equippedSkills.Length];
@@ -228,16 +220,28 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 SkillDefinition definition = data.ToSkillDefinition(musicSyncState.Bpm);
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillView view = _skillVisuals.First(n => n.Id == definition.Id.Value);
-                SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length);
-                SkillExecutionController executionController = new SkillExecutionController(skillResultPresenter, null, cooldownState, usecase, checkService, view, definition, rhythmState, musicSyncService);
+                SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length * 2);
+
+                SkillInputProgressController progressController = BuildSkillProgressModules(definition);
+
+                SkillExecutionController executionController = new SkillExecutionController(skillResultPresenter, progressController, cooldownState, usecase, checkService, view, definition, rhythmState);
                 executionControllers[i] = executionController;
             }
             return executionControllers;
         }
 
-        private void BuildSkillProgressModules()
+        /// <summary>
+        ///     装備中1スキル分の入力進捗UIモジュール一式を構築する。
+        /// </summary>
+        /// <param name="definition"></param>
+        /// <returns></returns>
+        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition)
         {
-
+            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition);
+            SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(rowView);
+            SkillInputProgressState state = new SkillInputProgressState(definition);
+            SkillInputProgressController controller = new SkillInputProgressController(state, presenter);
+            return controller;
         }
 
         private void HandlePlayerDied(CharacterEntity _)

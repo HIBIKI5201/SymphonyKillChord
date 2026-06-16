@@ -1,11 +1,8 @@
-using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
@@ -24,15 +21,12 @@ namespace KillChord.Runtime.Application.InGame.Skill
         }
 
         /// <summary>
-        /// 入力と行動を記録し、発動可能なスキルがあれば効果の実行と演出の要求を行う。
+        ///     スキルが発動可能な場合、発動する。
         /// </summary>
         public bool TryExecuteSkill(
-            SkillDefinition skillDefinition, //装備中のスキル群
-            BattleActionType actionType,    //行動の種類
-            BeatType beatType,  //入力された攻撃の種類
-            float unscaledTime) //入力された攻撃のタイミング（ゲーム時間）
+            SkillDefinition skillDefinition, //対象スキル
+            BeatType beatType) //入力の拍子種類
         {
-
             if (_targetResolver.TryGetCurrentTargetEntity(out var target))
             {
                 SkillEffectContext context = new SkillEffectContext(target, _playerEntity, beatType,null); //スキル効果の実行に必要な情報をまとめたコンテキストを作成
