@@ -207,6 +207,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5003634764376181167, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6413765400593491140, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
       propertyPath: m_Name
       value: ScenarioView
@@ -227,6 +231,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc4ac1da365ff44b9402a65528d1e32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.ScenarioView
+--- !u!224 &66726729 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
+  m_PrefabInstance: {fileID: 66726727}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &124245064
 GameObject:
   m_ObjectHideFlags: 0
@@ -1490,6 +1499,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
+      propertyPath: _scenarioUIHideView
+      value: 
+      objectReference: {fileID: 1267567897}
+    - target: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
       propertyPath: _scenarioUIRaycastView
       value: 
       objectReference: {fileID: 1267567896}
@@ -1500,6 +1513,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2951739066022850640, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1267567896}
+    - targetCorrespondingSourceObject: {fileID: 2951739066022850640, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1267567897}
   m_SourcePrefab: {fileID: 100100000, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
 --- !u!114 &1267567894 stripped
 MonoBehaviour:
@@ -1529,6 +1545,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75dc38e04df361941a469bc094a4bddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Scenario.ScenarioUIRaycastView
+--- !u!114 &1267567897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1267567895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc49293edfd10aa44bd921941b106498, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Scenario.ScenarioUIHideView
+  _hideTargets:
+  - {fileID: 2037954930}
+  - {fileID: 66726729}
 --- !u!1 &1700515002
 GameObject:
   m_ObjectHideFlags: 0
@@ -1952,6 +1983,7 @@ GameObject:
   - component: {fileID: 1939302605}
   - component: {fileID: 1939302604}
   - component: {fileID: 1939302603}
+  - component: {fileID: 1939302606}
   m_Layer: 5
   m_Name: UIDeleateButton
   m_TagString: ScenarioIgnore
@@ -2061,6 +2093,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1939302601}
   m_CullTransparentMesh: 1
+--- !u!114 &1939302606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1939302601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d54531977ecb194c95e2d3aa7a5d72a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.OnScreen.OnScreenButton
+  m_ControlPath: <Keyboard>/w
 --- !u!1 &1953678175
 GameObject:
   m_ObjectHideFlags: 0
@@ -2521,9 +2566,9 @@ MonoBehaviour:
   _buttonGroupCanvas: {fileID: 432460974}
   _expandedWidth: 1120
   _callapsedWidth: 100
-  _duration: 1
-  _openEase: 0
-  _closeEase: 0
+  _duration: 0.3
+  _openEase: 4
+  _closeEase: 5
 --- !u!114 &2037954936
 MonoBehaviour:
   m_ObjectHideFlags: 0
