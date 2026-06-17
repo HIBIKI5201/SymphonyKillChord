@@ -28,6 +28,21 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             Subscribe();
         }
 
+        private void LateUpdate()
+        {
+            if (_requestShowUI)
+            {
+                _requestShowUI = false;
+                _scenarioUIHideView?.ShowUI();
+            }
+
+            if (_requestHideUI)
+            {
+                _requestHideUI = false;
+                _scenarioUIHideView?.HideUI();
+            }
+        }
+
         private void OnDisable()
         {
             Unsubscribe();
@@ -50,6 +65,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioPauseInput += HandlePauseInput;
             _playerInputView.OnScenarioSkipInput += HandleSkipInput;
             _playerInputView.OnScenarioAutoInput += HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput += HandleHideUIInput;
 
             _isSubscribed = true;
         }
@@ -65,7 +81,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioFastForwardInput -= HandleFastForwardInput;
             _playerInputView.OnScenarioPauseInput -= HandlePauseInput;
             _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
-            _playerInputView.OnScenarioAdvanceInput -= HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioAutoInput -= HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput -= HandleHideUIInput;
 
             _isSubscribed = false;
         }
@@ -79,6 +96,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             if (_scenarioUIRaycastView.IsPointerOverScenarioUI())
             {
+                return;
+            }
+
+            if (_scenarioUIHideView.IsHidden)
+            {
+                _requestShowUI = true;
                 return;
             }
 
@@ -119,6 +142,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             _inputController?.Skip();
         }
+
         private void HandleAutoAdvanceInput(InputContext<float> context)
         {
             if (context.Phase != InputActionPhase.Performed)
@@ -128,11 +152,26 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.ToggleAutoAdvance();
         }
 
+        private void HandleHideUIInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _requestHideUI = true;
+        }
+
         [SerializeField]
         private ScenarioUIRaycastView _scenarioUIRaycastView;
+
+        [SerializeField]
+        private ScenarioUIHideView _scenarioUIHideView;
 
         private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
         private bool _isSubscribed;
+        private bool _requestHideUI;
+        private bool _requestShowUI;
     }
 }

@@ -902,6 +902,15 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HideUI"",
+                    ""type"": ""Button"",
+                    ""id"": ""c0712dc6-395f-44ee-a478-69c1a834fc75"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -959,6 +968,17 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""action"": ""Auto"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0a63a5e0-b8c4-482b-b6ed-b1cb0d634667"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HideUI"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -998,6 +1018,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         m_Scenario_Pause = m_Scenario.FindAction("Pause", throwIfNotFound: true);
         m_Scenario_Skip = m_Scenario.FindAction("Skip", throwIfNotFound: true);
         m_Scenario_Auto = m_Scenario.FindAction("Auto", throwIfNotFound: true);
+        m_Scenario_HideUI = m_Scenario.FindAction("HideUI", throwIfNotFound: true);
     }
 
     ~@KillChordInputActioMap()
@@ -1625,6 +1646,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     private readonly InputAction m_Scenario_Pause;
     private readonly InputAction m_Scenario_Skip;
     private readonly InputAction m_Scenario_Auto;
+    private readonly InputAction m_Scenario_HideUI;
     /// <summary>
     /// Provides access to input actions defined in input action map "Scenario".
     /// </summary>
@@ -1656,6 +1678,10 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "Scenario/Auto".
         /// </summary>
         public InputAction @Auto => m_Wrapper.m_Scenario_Auto;
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/HideUI".
+        /// </summary>
+        public InputAction @HideUI => m_Wrapper.m_Scenario_HideUI;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1697,6 +1723,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Auto.started += instance.OnAuto;
             @Auto.performed += instance.OnAuto;
             @Auto.canceled += instance.OnAuto;
+            @HideUI.started += instance.OnHideUI;
+            @HideUI.performed += instance.OnHideUI;
+            @HideUI.canceled += instance.OnHideUI;
         }
 
         /// <summary>
@@ -1723,6 +1752,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Auto.started -= instance.OnAuto;
             @Auto.performed -= instance.OnAuto;
             @Auto.canceled -= instance.OnAuto;
+            @HideUI.started -= instance.OnHideUI;
+            @HideUI.performed -= instance.OnHideUI;
+            @HideUI.canceled -= instance.OnHideUI;
         }
 
         /// <summary>
@@ -1956,5 +1988,12 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAuto(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "HideUI" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnHideUI(InputAction.CallbackContext context);
     }
 }
