@@ -5,12 +5,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// <summary>
     /// 入力操作を再生制御と送り待ち解除へ変換する。
     /// </summary>
-    public class InputController
+    public class ScenarioInputController
     {
         /// <summary>
         /// 入力操作を再生制御へ変換する依存関係を受け取る。
         /// </summary>
-        public InputController(ScenarioAdvanceGate gate, IScenarioPlaybackControl playbackControl)
+        public ScenarioInputController(ScenarioAdvanceGate gate, IScenarioPlaybackControl playbackControl)
         {
             _gate = gate;
             _playbackControl = playbackControl;
@@ -30,6 +30,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         public void SetFastForward(bool enabled)
         {
             _playbackControl.SetFastForward(enabled);
+        }
+
+        /// <summary>
+        /// 自動送り状態を切り替える。
+        /// </summary>
+        public void ToggleAutoAdvance()
+        {
+            _playbackControl.ToggleAutoAdvance();
         }
 
         /// <summary>
