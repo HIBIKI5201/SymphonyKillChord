@@ -893,6 +893,15 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Auto"",
+                    ""type"": ""Button"",
+                    ""id"": ""e7f1f7f6-bfd1-478f-b66c-5cb09691e382"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -939,6 +948,17 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""action"": ""Skip"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""21f28576-3667-4576-9cd9-ef605eedda1b"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Auto"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -977,6 +997,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         m_Scenario_FastForward = m_Scenario.FindAction("FastForward", throwIfNotFound: true);
         m_Scenario_Pause = m_Scenario.FindAction("Pause", throwIfNotFound: true);
         m_Scenario_Skip = m_Scenario.FindAction("Skip", throwIfNotFound: true);
+        m_Scenario_Auto = m_Scenario.FindAction("Auto", throwIfNotFound: true);
     }
 
     ~@KillChordInputActioMap()
@@ -1603,6 +1624,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     private readonly InputAction m_Scenario_FastForward;
     private readonly InputAction m_Scenario_Pause;
     private readonly InputAction m_Scenario_Skip;
+    private readonly InputAction m_Scenario_Auto;
     /// <summary>
     /// Provides access to input actions defined in input action map "Scenario".
     /// </summary>
@@ -1630,6 +1652,10 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "Scenario/Skip".
         /// </summary>
         public InputAction @Skip => m_Wrapper.m_Scenario_Skip;
+        /// <summary>
+        /// Provides access to the underlying input action "Scenario/Auto".
+        /// </summary>
+        public InputAction @Auto => m_Wrapper.m_Scenario_Auto;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1668,6 +1694,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Skip.started += instance.OnSkip;
             @Skip.performed += instance.OnSkip;
             @Skip.canceled += instance.OnSkip;
+            @Auto.started += instance.OnAuto;
+            @Auto.performed += instance.OnAuto;
+            @Auto.canceled += instance.OnAuto;
         }
 
         /// <summary>
@@ -1691,6 +1720,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Skip.started -= instance.OnSkip;
             @Skip.performed -= instance.OnSkip;
             @Skip.canceled -= instance.OnSkip;
+            @Auto.started -= instance.OnAuto;
+            @Auto.performed -= instance.OnAuto;
+            @Auto.canceled -= instance.OnAuto;
         }
 
         /// <summary>
@@ -1917,5 +1949,12 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkip(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Auto" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAuto(InputAction.CallbackContext context);
     }
 }

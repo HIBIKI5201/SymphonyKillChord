@@ -38,6 +38,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnScenarioFastForwardInput;
         public event Action<InputContext<float>> OnScenarioPauseInput;
         public event Action<InputContext<float>> OnScenarioSkipInput;
+        public event Action<InputContext<float>> OnScenarioAutoInput;
 
         public void OnOption(InputAction.CallbackContext context)
         {
@@ -135,6 +136,14 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioSkipInput?.Invoke(inputContext);
         }
 
+        public void OnScenarioAuto(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.ScenarioAuto, context, time);
+            OnScenarioAutoInput?.Invoke(inputContext);
+        }
+
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
             Action<InputContext<float>> action = actionId switch
@@ -187,6 +196,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string SCENARIO_FAST_FORWARD_ACTION_NAME = "FastForward";
         private const string SCENARIO_PAUSE_ACTION_NAME = "Pause";
         private const string SCENARIO_SKIP_ACTION_NAME = "Skip";
+        private const string SCENARIO_AUTO_ACTION_NAME = "Auto";
 
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
@@ -206,6 +216,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _scenarioFastForwardAction;
         private InputAction _scenarioPauseAction;
         private InputAction _scenarioSkipAction;
+        private InputAction _scenarioAutoAction;
 
         private void Awake()
         {
@@ -240,6 +251,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             RegisterAction(_scenarioPauseAction, OnScenarioPause);
             RegisterAction(_scenarioSkipAction, OnScenarioSkip);
+            RegisterAction(_scenarioAutoAction, OnScenarioAuto);
         }
 
         private void OnDisable()
@@ -256,6 +268,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             UnregisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             UnregisterAction(_scenarioPauseAction, OnScenarioPause);
             UnregisterAction(_scenarioSkipAction, OnScenarioSkip);
+            UnregisterAction(_scenarioAutoAction, OnScenarioAuto);
         }
 
         /// <summary>
@@ -277,6 +290,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             _scenarioFastForwardAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_FAST_FORWARD_ACTION_NAME}", true);
             _scenarioPauseAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_PAUSE_ACTION_NAME}", true);
             _scenarioSkipAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_SKIP_ACTION_NAME}", true);
+            _scenarioAutoAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_AUTO_ACTION_NAME}", true);
         }
 
         /// <summary>

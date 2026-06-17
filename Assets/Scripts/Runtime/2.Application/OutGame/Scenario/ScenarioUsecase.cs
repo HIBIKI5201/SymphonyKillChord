@@ -1,7 +1,7 @@
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Domain.OutGame.Scenario;
 
 namespace KillChord.Runtime.Application.OutGame.Scenario
 {
@@ -32,7 +32,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         /// </summary>
         public async ValueTask PlayScenario(string scenarioId)
         {
-            if(string.IsNullOrWhiteSpace(scenarioId))
+            if (string.IsNullOrWhiteSpace(scenarioId))
             {
                 throw new ArgumentException("シナリオIDが設定されていません。", nameof(scenarioId));
             }
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             try
             {
                 // シナリオデータを読み込む。
-                ScenarioData data = await _scenarioRepo.FindByIdAsync(scenarioId, token); 
+                ScenarioData data = await _scenarioRepo.FindByIdAsync(scenarioId, token);
 
                 for (int i = 0; i < data.Events.Count; i++)
                 {
@@ -57,7 +57,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                         && (!isLastEvent || _settingsRepository.WaitForInputOnLastText);
                     if (shouldWaitForAdvance)
                     {
-                        await _textAdvanceWaiter.WaitNextAsync(token);
+                        await WaitAdvanceAsync(token);
                     }
                 }
             }
@@ -118,10 +118,20 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 自動進行状態を切り替える。
+        /// </summary>
+        public void ToggleAutoAdvance()
+        {
+            IsAutoAdvance = !IsAutoAdvance;
+        }
+
         /// <summary> IsFastForward を取得する。 </summary>
         public bool IsFastForward { get; private set; }
         /// <summary> IsPaused を取得する。 </summary>
         public bool IsPaused { get; private set; }
+        /// <summary> IsAutoAdvance を取得する。 </summary>
+        public bool IsAutoAdvance { get; private set; }
 
         private CancellationTokenSource _playCts;
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
@@ -129,5 +139,29 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
         private readonly IScenarioSettingsRepository _settingsRepository;
+
+        /// <summary>
+        /// シナリオ再生の進行を待機する。
+        /// </summary>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        private async ValueTask WaitAdvanceAsync(CancellationToken ct)
+        {
+            if (!IsAutoAdvance)
+            {
+                await _textAdvanceWaiter.WaitNextAsync(ct);
+                return;
+            }
+
+            while (IsPaused)
+            {
+                await Task.Delay(_settingsRepository.PausePollInterval, ct);
+            }
+
+            if (_settingsRepository.AutoAdvanceDelay > TimeSpan.Zero)
+            {
+                await Task.Delay(_settingsRepository.AutoAdvanceDelay, ct);
+            }
+        }
     }
 }

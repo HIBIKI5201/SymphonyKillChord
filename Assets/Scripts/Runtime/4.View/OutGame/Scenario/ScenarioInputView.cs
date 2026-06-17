@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         ///     依存先を初期化する。
         /// </summary>
-        public void Initialize(InputController inputController)
+        public void Initialize(ScenarioInputController inputController)
         {
             _inputController = inputController;
 
@@ -49,6 +49,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioFastForwardInput += HandleFastForwardInput;
             _playerInputView.OnScenarioPauseInput += HandlePauseInput;
             _playerInputView.OnScenarioSkipInput += HandleSkipInput;
+            _playerInputView.OnScenarioAutoInput += HandleAutoAdvanceInput;
 
             _isSubscribed = true;
         }
@@ -64,6 +65,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioFastForwardInput -= HandleFastForwardInput;
             _playerInputView.OnScenarioPauseInput -= HandlePauseInput;
             _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
+            _playerInputView.OnScenarioAdvanceInput -= HandleAutoAdvanceInput;
 
             _isSubscribed = false;
         }
@@ -112,8 +114,16 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             _inputController?.Skip();
         }
+        private void HandleAutoAdvanceInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+            _inputController?.ToggleAutoAdvance();
+        }
 
-        private InputController _inputController;
+        private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
         private bool _isSubscribed;
     }
