@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.OutGame.Scenario;
+using static UnityEngine.ParticleSystem;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
@@ -10,10 +11,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// 入力操作を再生制御へ変換する依存関係を受け取る。
         /// </summary>
-        public ScenarioInputController(ScenarioAdvanceGate gate, IScenarioPlaybackControl playbackControl)
+        public ScenarioInputController(ScenarioAdvanceGate gate, IScenarioPlaybackControl playbackControl, IScenarioPlaybackState state)
         {
             _gate = gate;
             _playbackControl = playbackControl;
+            _state = state;
         }
 
         /// <summary>
@@ -37,7 +39,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         public void ToggleAutoAdvance()
         {
+            bool wasAutoAdvance = _state.IsAutoAdvance;
+
             _playbackControl.ToggleAutoAdvance();
+
+            if (!wasAutoAdvance && _state.IsAutoAdvance)
+            {
+                // 手動送り待機中にAutoへ切り替えた場合、現在の待機を解除する。
+                _gate.NotifyNext();
+            }
         }
 
         /// <summary>
@@ -58,5 +68,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 
         private readonly ScenarioAdvanceGate _gate;
         private readonly IScenarioPlaybackControl _playbackControl;
+        private readonly IScenarioPlaybackState _state;
     }
 }

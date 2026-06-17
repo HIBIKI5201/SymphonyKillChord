@@ -25,6 +25,13 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
+            if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
+                enabled = false;
+                return;
+            }
+
             Subscribe();
         }
 
@@ -94,12 +101,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
-            if (_scenarioUIRaycastView.IsPointerOverScenarioUI())
+            if (_scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
             {
                 return;
             }
 
-            if (_scenarioUIHideView.IsHidden)
+            if (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden)
             {
                 _requestShowUI = true;
                 return;
