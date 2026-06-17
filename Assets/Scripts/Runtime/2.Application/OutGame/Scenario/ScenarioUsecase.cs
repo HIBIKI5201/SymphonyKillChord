@@ -149,18 +149,52 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         {
             if (!IsAutoAdvance)
             {
+                // Autoではない場合は、クリックなどの手動送り入力が来るまで待機する。
                 await _textAdvanceWaiter.WaitNextAsync(ct);
                 return;
             }
 
-            while (IsPaused)
+            // Autoの場合は、設定された秒数だけ待ってから次のイベントへ進む。
+            await WaitAutoAdvanceDelayAsync(ct);
+        }
+
+        /// <summary>
+        ///     Auto時の次送り待機を行う。
+        ///     Pause中は待機時間を進めない。
+        /// </summary>
+        /// <param name="ct">キャンセルトークン。</param>
+        private async ValueTask WaitAutoAdvanceDelayAsync(CancellationToken ct)
+        {
+            // Autoで次へ進むまでの残り待機時間を設定から取得する。
+            TimeSpan remainingDelay = _settingsRepository.AutoAdvanceDelay;
+
+            while (remainingDelay > TimeSpan.Zero)
             {
-                await Task.Delay(_settingsRepository.PausePollInterval, ct);
+                ct.ThrowIfCancellationRequested();
+
+                if (IsPaused)
+                {
+                    // Pause中は残り時間を減らさず、短い間隔でPause解除を待つ。
+                    await Task.Delay(_settingsRepository.PausePollInterval, ct);
+                    continue;
+                }
+
+                // 残り時間より長く待たないように、今回待つ時間を決める。
+                TimeSpan delay = remainingDelay < _settingsRepository.PausePollInterval
+                    ? remainingDelay
+                    : _settingsRepository.PausePollInterval;
+
+                // 短い単位で待機することで、待機中のPause切り替えを反映しやすくする。
+                await Task.Delay(delay, ct);
+
+                // Pauseしていなかった分だけ、Auto待機の残り時間を減らす。
+                remainingDelay -= delay;
             }
 
-            if (_settingsRepository.AutoAdvanceDelay > TimeSpan.Zero)
+            if (!IsAutoAdvance)
             {
-                await Task.Delay(_settingsRepository.AutoAdvanceDelay, ct);
+                // Auto待機中にAutoがOFFになった場合は、手動送り待機に戻す。
+                await _textAdvanceWaiter.WaitNextAsync(ct);
             }
         }
     }

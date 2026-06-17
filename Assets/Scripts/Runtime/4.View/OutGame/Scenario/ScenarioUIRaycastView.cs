@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -20,9 +21,23 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return false;
             }
 
+            Vector2 pointerPosition = Vector2.zero;
+            if (Mouse.current != null)
+            {
+                pointerPosition = Mouse.current.position.ReadValue();
+            }
+            else if (Touchscreen.current != null && Touchscreen.current.press.isPressed)
+            {
+                pointerPosition = Touchscreen.current.position.ReadValue();
+            }
+            else
+            {
+                return false;
+            }
+
             PointerEventData eventData = new PointerEventData(EventSystem.current)
             {
-                position = Mouse.current.position.ReadValue(),
+                position = pointerPosition
             };
 
             _results.Clear();

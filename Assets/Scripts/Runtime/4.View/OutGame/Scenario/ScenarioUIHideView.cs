@@ -17,9 +17,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             if (_isHidden) return;
 
-            foreach (var target in _hideTargets)
+            _activeStatesBeforeHide = new bool[_hideTargets.Length];
+            for (int i = 0; i < _hideTargets.Length; i++)
             {
-                target.gameObject.SetActive(false);
+                GameObject go = _hideTargets[i].gameObject;
+                _activeStatesBeforeHide[i] = go.activeSelf;
+                go.SetActive(false);
             }
 
             _isHidden = true;
@@ -32,9 +35,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             if (!_isHidden) return;
 
-            foreach (var target in _hideTargets)
+            for (int i = 0; i < _hideTargets.Length; i++)
             {
-                target.gameObject.SetActive(true);
+                if (_activeStatesBeforeHide != null && i < _activeStatesBeforeHide.Length)
+                {
+                    _hideTargets[i].gameObject.SetActive(_activeStatesBeforeHide[i]);
+                }
             }
 
             _isHidden = false;
@@ -44,5 +50,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private RectTransform[] _hideTargets;
 
         private bool _isHidden = false;
+        private bool[] _activeStatesBeforeHide;
     }
 }
