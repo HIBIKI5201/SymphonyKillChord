@@ -77,6 +77,11 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
+            if (_scenarioUIRaycastView.IsPointerOverScenarioUI())
+            {
+                return;
+            }
+
             _inputController?.MouseClick();
         }
 
@@ -122,6 +127,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
             _inputController?.ToggleAutoAdvance();
         }
+
+        [SerializeField]
+        private ScenarioUIRaycastView _scenarioUIRaycastView;
 
         private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
