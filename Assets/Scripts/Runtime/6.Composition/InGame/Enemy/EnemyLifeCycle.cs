@@ -17,6 +17,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading.Tasks;
 using Unity.Behavior;
 using UnityEngine;
 using UnityEngine.AI;
@@ -161,6 +162,22 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
+        ///     マップ外側の実生成地点から、戦闘開始地点まで移動してから有効化する。
+        /// </summary>
+        /// <param name="entryPosition">マップ外側の実生成地点。</param>
+        /// <param name="activePosition">到着後に戦闘を開始する地点。</param>
+        /// <param name="spawnerCallback">無効化時にスポナーへ通知するcallback。</param>
+        public async ValueTask EnterFromOutsideAsync(
+            Vector3 entryPosition,
+            Vector3 activePosition,
+            System.Action spawnerCallback)
+        {
+            PrepareEntrance(entryPosition);
+            await _view.MoveToTargetAysnc(activePosition);
+            Activate(activePosition, spawnerCallback);
+        }
+
+        /// <summary>
         ///     無効化処理。
         ///     コンポーネント無効化、依存解除や購読解除を行う。
         /// </summary>
@@ -271,6 +288,32 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyAttackReservationUsecase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _battleState;
+
+        /// <summary>
+        ///     入場移動に必要な表示とNavMeshAgentのみ有効化する。
+        /// </summary>
+        /// <param name="position">入場開始地点。</param>
+        private void PrepareEntrance(Vector3 position)
+        {
+            if (_behaviorGraphAgent != null)
+            {
+                _behaviorGraphAgent.enabled = false;
+            }
+
+            if (_attackPositionSearchView != null)
+            {
+                _attackPositionSearchView.enabled = false;
+            }
+
+            gameObject.SetActive(true);
+
+            if (_navMeshAgent != null)
+            {
+                _navMeshAgent.enabled = true;
+                _navMeshAgent.Warp(position);
+                _navMeshAgent.isStopped = false;
+            }
+        }
 
         /// <summary>
         ///     敵死亡時に実行する処理。
