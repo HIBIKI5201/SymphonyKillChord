@@ -68,9 +68,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 
             bool loadSuccess = await SceneLoader.LoadScene(
                 sceneName,
-                null,
-                LoadSceneMode.Additive,
-                cancellationToken);
+                token: cancellationToken);
 
             if (!loadSuccess)
             {

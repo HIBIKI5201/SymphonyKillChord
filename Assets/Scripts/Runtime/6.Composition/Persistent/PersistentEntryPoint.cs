@@ -24,9 +24,7 @@ namespace KillChord.Runtime.Composition.Persistent
             if (!SceneLoader.GetExistScene(_firstSceneName, out _))
             {
                 bool success = await SceneLoader.LoadScene(_firstSceneName,
-                    null,
-                    LoadSceneMode.Additive,
-                    _cancellationTokenSource.Token
+                    token: _cancellationTokenSource.Token
                 );
 
                 if (!success)
