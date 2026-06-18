@@ -161,39 +161,81 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Execute Unity - Download Assets and Build
-        # The following processes are executed automatically in this step:
-        # 1. GoogleDriveBatchCI.StartBatchImport downloads assets from Google Drive
-        # 2. after asset import, automatically starts the build with AutoBuilder
+      - name: Execute Unity - Download Assets
         run: |
-          Write-Host "::group::Start Unity Build Process"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity..."
+          Write-Host "::group::Start Unity Import Process"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for asset import..."
           Write-Host "Execution Method: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
-          Write-Host "Log output: unity_build.log"
+          Write-Host "Log output: unity_import.log"
           Write-Host ""
-          
-          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
-          
+
+          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_import.log"
+
           $UnityExitCode = $LASTEXITCODE
           Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity process exited with code $UnityExitCode."
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity import process exited with code $UnityExitCode."
           
           if ($UnityExitCode -eq 0) {
-            Write-Host "OK: Unity build completed successfully."
+            Write-Host "OK: Unity import completed successfully."
           } else {
-            Write-Host "WARNING: Unity process returned a non-zero exit code ($UnityExitCode)."
-            Write-Host "          A build error may have occurred. See unity_build.log for details."
+            Write-Host "WARNING: Unity import process returned a non-zero exit code ($UnityExitCode)."
+            Write-Host "          See unity_import.log for details."
           }
           Write-Host "::endgroup::"
           exit $UnityExitCode
         shell: powershell
 
-      - name: Extract Unity Build Log Summary
+      - name: Execute Unity - Build
+        run: |
+          Write-Host "::group::Start Unity Build Process"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for build..."
+          Write-Host "Execution Method: KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
+          Write-Host "Log output: unity_build.log"
+          Write-Host ""
+
+          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli" -logFile "unity_build.log"
+
+          $UnityExitCode = $LASTEXITCODE
+          Write-Host ""
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity build process exited with code $UnityExitCode."
+          
+          if ($UnityExitCode -eq 0) {
+            Write-Host "OK: Unity build completed successfully."
+          } else {
+            Write-Host "WARNING: Unity build process returned a non-zero exit code ($UnityExitCode)."
+            Write-Host "          See unity_build.log for details."
+          }
+          Write-Host "::endgroup::"
+          exit $UnityExitCode
+        shell: powershell
+
+      - name: Extract Unity Log Summary
         if: always()
         run: |
+          Write-Host "::group::Unity Import Log Summary"
+          if (Test-Path "unity_import.log") {
+            Write-Host "INFO: Extracting key information from unity_import.log..."
+            Write-Host ""
+          
+            # Count errors and warnings
+            $Errors = Select-String -Path "unity_import.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+            $Warnings = Select-String -Path "unity_import.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+          
+            Write-Host "Detected Errors: $Errors"
+            Write-Host "Detected Warnings: $Warnings"
+            Write-Host ""
+          
+            # Output the last 50 lines (final status)
+            Write-Host "[unity_import.log Last 50 lines of:]"
+            Get-Content -Path "unity_import.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "WARNING: unity_import.log was not found."
+          }
+          Write-Host "::endgroup::"
+
           Write-Host "::group::Unity Build Log Summary"
           if (Test-Path "unity_build.log") {
-            Write-Host "INFO: unity_build.log Extracting key information from..."
+            Write-Host "INFO: Extracting key information from unity_build.log..."
             Write-Host ""
           
             # Count errors and warnings
@@ -218,7 +260,9 @@ jobs:
         if: always()
         with:
           name: unity-build-log
-          path: unity_build.log
+          path: |
+            unity_import.log
+            unity_build.log
 
       - name: Check Build Output
         run: |
