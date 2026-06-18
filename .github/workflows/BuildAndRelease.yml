@@ -168,9 +168,27 @@ jobs:
           Write-Host "Log output: unity_import.log"
           Write-Host ""
 
-          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_import.log"
+          $TimeoutSec = 5400
+          Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
+          Write-Host ""
 
-          $UnityExitCode = $LASTEXITCODE
+          $Args = @(
+            "-batchmode",
+            "-projectPath", "${{ github.workspace }}",
+            "-executeMethod", "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport",
+            "-logFile", "unity_import.log"
+          )
+          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+
+          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
+            Write-Host ""
+            Write-Host "ERROR: Unity import timed out after $TimeoutSec seconds."
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 124
+          }
+
+          $UnityExitCode = $UnityProcess.ExitCode
           Write-Host ""
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity import process exited with code $UnityExitCode."
           
@@ -192,9 +210,27 @@ jobs:
           Write-Host "Log output: unity_build.log"
           Write-Host ""
 
-          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli" -logFile "unity_build.log"
+          $TimeoutSec = 5400
+          Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
+          Write-Host ""
 
-          $UnityExitCode = $LASTEXITCODE
+          $Args = @(
+            "-batchmode",
+            "-projectPath", "${{ github.workspace }}",
+            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-logFile", "unity_build.log"
+          )
+          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+
+          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
+            Write-Host ""
+            Write-Host "ERROR: Unity build timed out after $TimeoutSec seconds."
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 124
+          }
+
+          $UnityExitCode = $UnityProcess.ExitCode
           Write-Host ""
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity build process exited with code $UnityExitCode."
           
