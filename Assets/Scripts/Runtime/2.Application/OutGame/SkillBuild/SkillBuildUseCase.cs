@@ -4,8 +4,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Application.OutGame.SkillBuild
 {
     /// <summary>
-    ///    プレイヤーの装備スキルの構成を管理するユースケースクラス。
-    ///    装備スキルの変更や入れ替えなど、スキル編成に関するビジネスロジックを提供する。
+    ///   装備スキルのスロット操作や、装備スキルの保存・読み込みなど、装備スキルに関するビジネスロジックを担当するクラス。
     /// </summary>
     public sealed class SkillBuildUseCase
     {
