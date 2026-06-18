@@ -32,9 +32,6 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 throw new ArgumentNullException(nameof(target));
             }
-
-            var root = target.panel?.visualTree;
-            _skillBuildScreen = root.Query<VisualElement>(SKILL_BUILD_ROOT_NAME);
         }
 
         /// <summary>
@@ -43,9 +40,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         protected override void RegisterCallbacksOnTarget()
         {
-            if (_skillBuildScreen == null)
+            target.RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+
+            if (target.panel != null)
             {
-                Debug.LogError($"SkillElementDragAndDropManipulator: スキルビルド画面のルート要素 '{SKILL_BUILD_ROOT_NAME}' が見つかりません。ドラッグ&ドロップ操作が正しく機能しない可能性があります。");
+                FetchSkillBuildScreen();
             }
 
             target.RegisterCallback<PointerDownEvent>(OnPointerDown);
@@ -60,6 +59,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         protected override void UnregisterCallbacksFromTarget()
         {
+            target.UnregisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+
             target.UnregisterCallback<PointerDownEvent>(OnPointerDown);
             target.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
             target.UnregisterCallback<PointerUpEvent>(OnPointerUp);
@@ -201,6 +202,32 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+        }
+
+        /// <summary>
+        ///    ターゲットの VisualElement がパネルにアタッチされたときのイベントを処理するメソッド。
+        /// </summary>
+        /// <param name="evt"></param>
+        private void OnAttachToPanel(AttachToPanelEvent evt)
+        {
+            FetchSkillBuildScreen();
+        }
+
+
+        /// <summary>
+        ///     ターゲットの VisualElement が属するパネルのビジュアルツリーから、
+        ///     改造画面のルート要素を検索して保存するメソッド。
+        /// </summary>
+        private void FetchSkillBuildScreen()
+        {
+            var root = target.panel?.visualTree;
+            var skillBuildContainer = root.Q<TemplateContainer>("SkillBuildContainer");
+            _skillBuildScreen = skillBuildContainer?.Q<VisualElement>(SKILL_BUILD_ROOT_NAME);
+
+            if (_skillBuildScreen == null)
+            {
+                Debug.LogError($"SkillElementDragAndDropManipulator: スキルビルド画面のルート要素 '{SKILL_BUILD_ROOT_NAME}' が見つかりません。ドラッグ&ドロップ操作が正しく機能しない可能性があります。");
+            }
         }
 
         /// <summary>
