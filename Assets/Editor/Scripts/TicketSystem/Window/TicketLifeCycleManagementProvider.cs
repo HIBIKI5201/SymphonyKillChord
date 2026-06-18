@@ -66,12 +66,13 @@ namespace KillChord.Editor.TicketSystem
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-            GUILayout.Label("シーン名", GUILayout.Width(100));
-            GUILayout.Label("状態", GUILayout.Width(60));
-            GUILayout.Label("最終更新時刻", GUILayout.Width(200));
-            GUILayout.Label("操作", GUILayout.ExpandWidth(true));
-            EditorGUILayout.EndHorizontal();
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("シーン名", GUILayout.Width(100));
+                GUILayout.Label("状態", GUILayout.Width(60));
+                GUILayout.Label("最終更新時刻", GUILayout.Width(200));
+                GUILayout.Label("操作", GUILayout.ExpandWidth(true));
+            }
 
             if (CachedTicketDataSingleton.instance == null)
             {
@@ -80,39 +81,42 @@ namespace KillChord.Editor.TicketSystem
             }
 
             IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-
-            foreach (var ticket in cachedTickets)
+            using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(_scrollPos))
             {
-                EditorGUILayout.BeginHorizontal(GUILayout.Height(20));
-                GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
-                GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
-                GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
-                var isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
-                EditorGUILayout.EndHorizontal();
+                _scrollPos = scrollViewScope.scrollPosition;
 
-                if (!isDispose) continue;
-                var result = EditorDialog.DisplayDecisionDialog(
-                    "チケット破棄の確認",
-                    $"シーン: [{ticket.sceneName}] のチケットを破棄しますか？\nこの操作は元に戻せません。",
-                    "破棄する",
-                    "キャンセル");
-
-                if (result)
+                foreach (var ticket in cachedTickets)
                 {
-                    _isLoading = true;
-                    TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                        .ContinueWith(() =>
-                        {
-                            _isLoading = false;
-                            EditorApplication.delayCall += Repaint;
-                        });
+                    bool isDispose;
+                    using (new EditorGUILayout.HorizontalScope(GUILayout.Height(20)))
+                    {
+                        GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
+                        GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
+                        GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
+                        isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
+                    }
+
+                    if (!isDispose) continue;
+                    var result = EditorDialog.DisplayDecisionDialog(
+                        "チケット破棄の確認",
+                        $"シーン: [{ticket.sceneName}] のチケットを破棄しますか？\nこの操作は元に戻せません。",
+                        "破棄する",
+                        "キャンセル");
+
+                    if (result)
+                    {
+                        _isLoading = true;
+                        TicketSystemWebClient.DisposeTicket(ticket.sceneName)
+                            .ContinueWith(() =>
+                            {
+                                _isLoading = false;
+                                EditorApplication.delayCall += Repaint;
+                            });
+                    }
+
+                    break;
                 }
-
-                break;
             }
-
-            EditorGUILayout.EndScrollView();
         }
 
         /// <summary>
