@@ -95,10 +95,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             for (int i = 0; i < slots.Count; i++)
             {
                 VisualElement slot = slots[i];
-                // ドロップされたスロットが非表示の場合は、スキルがドロップされていない（＝元の位置に戻された）とみなす。
+
+                // 非表示中のスロットはまだ解放されていないため、
+                // スキルがドロップされていない（＝元の位置に戻された）とみなす。
                 if (slot.resolvedStyle.display == DisplayStyle.None)
                 {
-                    _skillBuildViewModel.UpdateSlot(i, EMPTY_SKILL_ID, EMPTY_SKILL_LABEL);
                     continue;
                 }
 
