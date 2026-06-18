@@ -186,7 +186,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 _isDragging = false;
                 _onDropAction?.Invoke(target, targetElement);
             }
-            else if (TryFindSkillList(requireOverlap: false, out targetElement))
+            else if (TryFindSkillList(requireOverlap: true, out targetElement))
             {
                 // ドロップ先が入手済みスキルリストの場合は、スキル要素を入手済みスキルリストへ移動する。
                 MoveSkillToList(target, targetElement);
@@ -295,6 +295,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 _skillBuildScreen.Query<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME);
 
             if (skillListRoot == null) { return false; }
+            if (requireOverlap && !target.worldBound.Overlaps(skillListRoot.worldBound)) { return false; }
 
             element = skillListRoot;
             return true;
