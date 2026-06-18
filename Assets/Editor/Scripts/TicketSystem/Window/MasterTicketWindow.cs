@@ -128,22 +128,20 @@ namespace KillChord.Editor.TicketSystem
 
                 foreach (var ticket in cachedTickets)
                 {
-                    using (var horizontalScope = new EditorGUILayout.HorizontalScope(GUILayout.Height(30)))
+                    using var horizontalScope = new EditorGUILayout.HorizontalScope(GUILayout.Height(30));
+                    var rowRect = horizontalScope.rect;
+                    var rectColor = ticket.isInUse switch
                     {
-                        var rowRect = horizontalScope.rect;
-                        var rectColor = ticket.isInUse switch
-                        {
-                            false => _emptyColor,
-                            true when ticket.userName == _savedUserName => _occupiedBySelfColor,
-                            _ => _occupiedByOtherColor
-                        };
+                        false => _emptyColor,
+                        true when ticket.userName == _savedUserName => _occupiedBySelfColor,
+                        _ => _occupiedByOtherColor
+                    };
 
-                        EditorGUI.DrawRect(rowRect, rectColor);
-                        GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
-                        GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
-                        GUILayout.Label(ticket.userName, GUILayout.Width(100));
-                        GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
-                    }
+                    EditorGUI.DrawRect(rowRect, rectColor);
+                    GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
+                    GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
+                    GUILayout.Label(ticket.userName, GUILayout.Width(100));
+                    GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
 
 
                     var isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == _savedUserName);
