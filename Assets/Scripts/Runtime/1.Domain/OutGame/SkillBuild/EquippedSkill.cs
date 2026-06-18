@@ -1,7 +1,5 @@
-using KillChord.Runtime.Domain.OutGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.OutGame.SkillBuild
 {
@@ -10,10 +8,17 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
     /// </summary>
     public readonly struct EquippedSkill : IEquatable<EquippedSkill>
     {
+        /// <summary>
+        ///     EquippedSkill を初期化する。
+        /// </summary>
+        /// <param name="skillData"> 装備するスキルデータ。 </param>
         public EquippedSkill(SkillData skillData)
         {
             _skillData = skillData;
         }
+
+        /// <summary> スキルが設定されているかどうかを取得する。 </summary>
+        public bool HasSkill => _skillData != null;
 
         /// <summary> スキルのデータを取得するプロパティ。 </summary>
         public SkillData SkillData => _skillData;
@@ -25,7 +30,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         /// <returns> 等しい場合は true、それ以外の場合は false を返す。 </returns>
         public bool Equals(EquippedSkill other)
         {
-            return _skillData.Equals(other._skillData);
+            return Equals(_skillData, other._skillData);
         }
 
         /// <summary>
@@ -39,11 +44,11 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///    ハッシュコードを取得する。
+        ///     ハッシュコードを取得する。
         /// </summary>
         public override int GetHashCode()
         {
-            return _skillData.GetHashCode();
+            return _skillData != null ? _skillData.GetHashCode() : 0;
         }
 
         private readonly SkillData _skillData;
