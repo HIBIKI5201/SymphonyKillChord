@@ -57,7 +57,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private void OnDestroy()
         {
             DisposeComponents();
-            UnregisterServices();
+            // SkillBuildDefinition はゲーム全体の擬似セーブデータとして存在し続けるため解除しない
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return;
             }
 
-                if (_skillBuildRepositoryDebug == null)
+            if (_skillBuildRepositoryDebug == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepositoryDebug が設定されていません。", this);
