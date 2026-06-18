@@ -404,7 +404,7 @@ jobs:
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
-            Write-Host "     Artifact: Builds.zip  アップロードしました。"
+            Write-Host "     Artifact: Builds.zip has been uploaded."
           } else {
             Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }
