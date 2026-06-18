@@ -23,7 +23,7 @@ namespace DevelopProducts.Persistent.Composition
                 bool success = await SceneLoader.LoadScene(_firstSceneName,
                     null,
                     LoadSceneMode.Additive,
-                    _cancellationTokenSource.Token
+                    token: _cancellationTokenSource.Token
                     );
 
                 if (!success)
