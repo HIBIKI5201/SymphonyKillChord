@@ -728,8 +728,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9001659323386563184}
-  - component: {fileID: 2741395297102902762}
-  - component: {fileID: 1641318431912977224}
   m_Layer: 5
   m_Name: SkillInputProgressView
   m_TagString: Untagged
@@ -757,34 +755,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2741395297102902762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1716091389729513114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b8c9caeb3dfd37429e81adcdaa8102c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillInputProgressView
-  _rowRoot: {fileID: 6790183858884239250}
-  _spawner: {fileID: 1641318431912977224}
---- !u!114 &1641318431912977224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1716091389729513114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 047240a05ed03284c8026a84ee6a5d99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillInputProgressSpawner
-  _rowPrefab: {fileID: 7518163132570677971, guid: dc579867c3233e14fb5c950faf354e70, type: 3}
-  _stepPrefab: {fileID: 5679059164787724406, guid: 98c77ce8cb5fa9241bb5591444517747, type: 3}
 --- !u!1 &2251030887027401469
 GameObject:
   m_ObjectHideFlags: 0
@@ -1254,6 +1224,7 @@ GameObject:
   - component: {fileID: 3723493936810495870}
   - component: {fileID: 2811312404926936594}
   - component: {fileID: 2521993967591640120}
+  - component: {fileID: 3515348064184301922}
   m_Layer: 5
   m_Name: InGameCanvas
   m_TagString: Untagged
@@ -1365,6 +1336,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.UI.InGameHudInitializer
   _playerHealthHudView: {fileID: 755936556484570206}
+--- !u!114 &3515348064184301922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4011713318222993239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81248dfc1926454da911f1b6524e509, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInputProgressUIInitializer
+  _skillInputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _rowViewPrefab: {fileID: 7518163132570677971, guid: dc579867c3233e14fb5c950faf354e70, type: 3}
+  _stepViewPrefab: {fileID: 5679059164787724406, guid: 98c77ce8cb5fa9241bb5591444517747, type: 3}
+  _rowRoot: {fileID: 6790183858884239250}
 --- !u!1 &4144755797720839312
 GameObject:
   m_ObjectHideFlags: 0
