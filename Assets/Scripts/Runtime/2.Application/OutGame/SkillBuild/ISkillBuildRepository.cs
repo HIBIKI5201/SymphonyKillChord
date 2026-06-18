@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
     public interface ISkillBuildRepository
     {
         /// <summary> プレイヤーの装備スキル構成を読み込む。 </summary>
-        SkillBuildDefinition LoadSkillBuild();
+        void LoadSkillBuild();
 
         /// <summary> プレイヤーの装備スキル構成を保存する。 </summary>
         /// <param name="skillBuildDefinition"> 保存する装備スキル構成。 </param>

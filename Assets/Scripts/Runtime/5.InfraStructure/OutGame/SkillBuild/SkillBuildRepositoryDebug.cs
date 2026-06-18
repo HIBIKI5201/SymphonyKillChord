@@ -21,7 +21,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             return _equippedSkills.AsReadOnly();
         }
 
-        public SkillBuildDefinition LoadSkillBuild()
+        public void LoadSkillBuild()
         {
             if (_skillDataAssets == null || _skillDataAssets.Count == 0)
             {
@@ -30,7 +30,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
             RebuildEquippedSkills();
             _skillBuildDefinition = new SkillBuildDefinition(_equippedSkills.ToArray());
-            return _skillBuildDefinition;
         }
 
         public void SaveSkillBuild(SkillBuildDefinition skillBuildDefinition)
@@ -38,6 +37,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             // セーブシステムの本実装が行われていないため、ここでは何もしない。
         }
 
+        /// <summary>
+        ///     [SerializeField] のスキルデータアセットから EquippedSkill のリストを再構築する。
+        /// </summary>
         private void RebuildEquippedSkills()
         {
             _equippedSkills ??= new List<EquippedSkill>();
@@ -59,7 +61,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             }
         }
 
-        [Header("仮の入手済みスキルのデータ")]
+        [Header("仮のスキル編成")]
         [SerializeField]
         private List<SkillDataAsset> _skillDataAssets = new List<SkillDataAsset>();
 
