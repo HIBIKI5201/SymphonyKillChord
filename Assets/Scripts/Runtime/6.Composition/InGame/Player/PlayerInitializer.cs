@@ -17,6 +17,7 @@ using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
@@ -31,7 +32,6 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -63,7 +63,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
-        private SkillController _skillController;
 
         private void Awake()
         {
@@ -100,15 +99,35 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
             }
-            // SerializeFieldの装備スキルからskillId配列を作成する
+
             List<int> skillIdList = new List<int>();
-            if (_equippedSkills != null && _equippedSkills.Length > 0)
+
+            // まずはServiceLocatorからSkillBuildDefinitionを取得してみる
+            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
             {
-                for (int i = 0; i < _equippedSkills.Length; i++)
+                // SkillBuildDefinitionからskillId配列を作成する
+                if (buildDefinition.EquippedSkills != null && buildDefinition.EquippedSkills.Count > 0)
                 {
-                    if (_equippedSkills[i] != null)
+                    for (int i = 0; i < buildDefinition.EquippedSkills.Count; i++)
                     {
-                        skillIdList.Add(_equippedSkills[i].Id);
+                        if(buildDefinition.EquippedSkills[i].HasSkill)
+                        {
+                            skillIdList.Add(buildDefinition.EquippedSkills[i].SkillData.Id);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // SerializeFieldの装備スキルからskillId配列を作成する
+                if (_equippedSkills != null && _equippedSkills.Length > 0)
+                {
+                    for (int i = 0; i < _equippedSkills.Length; i++)
+                    {
+                        if (_equippedSkills[i] != null)
+                        {
+                            skillIdList.Add(_equippedSkills[i].Id);
+                        }
                     }
                 }
             }
@@ -182,10 +201,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             SkillCheckService skillCheckService = new SkillCheckService();
             SkillCooldownState skillCooldownState = new SkillCooldownState(skillIds);
-            _skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
-            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, _skillController);
-            _skillController?.SetUsecase(skillUsecase);
-            _skillController.OnSkillAnimationRequested += _player.PlaySkillAnimation;
+            SkillController skillController = new SkillController(_skillRepository, _skillVisuals, musicSyncState, skillCooldownState, skillIds, skillResultPresenter, inputProgressController);
+            SkillUsecase skillUsecase = new SkillUsecase(musicSyncService, skillCheckService, skillController, targetSelectorController, _playerEntity);
+            skillController?.SetUsecase(skillUsecase);
 
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
@@ -195,10 +213,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, _skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed, (int)_playerEntity.BaseDamage.Value);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
+
             var animationComposition = _player.gameObject.AddComponent<AnimationComposition>();
             var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
 
@@ -224,10 +243,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
-            }
-            if (_skillController != null)
-            {
-                _skillController.OnSkillAnimationRequested -= _player.PlaySkillAnimation;
             }
         }
     }
