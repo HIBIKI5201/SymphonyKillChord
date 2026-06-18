@@ -266,11 +266,19 @@ jobs:
       - name: Check Build Output
         run: |
           Write-Host "::group::Validate Build Output"
-          if (Test-Path $env:UNITY_BUILD_OUTPUT_DIR) {
-            Write-Host "OK: Build output directory found: $env:UNITY_BUILD_OUTPUT_DIR"
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          Write-Host "Raw UNITY_BUILD_OUTPUT_DIR from env: $RawOutputDir"
+          
+          # Trim quotes and resolve to absolute path
+          $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+          Write-Host "Resolved Output Path: $ResolvedOutputDir"
+          
+          if (Test-Path $ResolvedOutputDir) {
+            Write-Host "OK: Build output directory found: $ResolvedOutputDir"
             Write-Host ""
           
-            $Items = Get-ChildItem -Path $env:UNITY_BUILD_OUTPUT_DIR -Recurse -File
+            $Items = Get-ChildItem -Path $ResolvedOutputDir -Recurse -File
             $TotalSize = ($Items | Measure-Object -Property Length -Sum).Sum
           
             Write-Host "File Statistics:"
@@ -288,7 +296,13 @@ jobs:
               Write-Host "WARNING: No files found in the build output directory."
             }
           } else {
-            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "ERROR: Build output directory not found: $ResolvedOutputDir"
+            Write-Host ""
+            Write-Host "=== DEBUG INFO ==="
+            Write-Host "Current Directory: $PWD"
+            Write-Host "Listing files/folders in current directory:"
+            Get-ChildItem | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Mode))" }
+            Write-Host "=================="
             Write-Host "ERROR: Build artifacts do not exist. Aborting archive process."
             Write-Host "::endgroup::"
             exit 1
@@ -299,15 +313,19 @@ jobs:
       - name: Zip Build Artifacts
         run: |
           Write-Host "::group::Archive Build Artifacts (ZIP)"
-          if (-not (Test-Path $env:UNITY_BUILD_OUTPUT_DIR)) {
-            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+          
+          if (-not (Test-Path $ResolvedOutputDir)) {
+            Write-Host "ERROR: Build output directory not found: $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
           }
           
           try {
             Write-Host "INFO: Compressing build artifacts..."
-            Compress-Archive -Path "$env:UNITY_BUILD_OUTPUT_DIR\*" -DestinationPath Builds.zip -ErrorAction Stop
+            Compress-Archive -Path "$ResolvedOutputDir\*" -DestinationPath Builds.zip -ErrorAction Stop
           
             $ZipSize = (Get-Item "Builds.zip").Length
             Write-Host "OK: Archive (Builds.zip) created successfully."
@@ -385,7 +403,7 @@ jobs:
           
           try {
               $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
-              Write-Host "OK: BUILD_VERSION   $NextCounter updated successfully."
+              Write-Host "OK: BUILD_VERSION updated to $NextCounter successfully."
           } catch {
               Write-Host "ERROR: BUILD_VERSION Failed to update: $_"
               Write-Host "::endgroup::"
