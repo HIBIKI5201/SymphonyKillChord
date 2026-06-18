@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public event Action<ReadOnlyMemory<int>> OnSaveRequested;
 
         /// <summary> スキル一覧更新イベント。 </summary>
-        public event Action<IReadOnlyList<string>> OnSkillListChanged;
+        public event Action<IReadOnlyList<(int skillId, string skillLabel)>> OnSkillListChanged;
 
         /// <summary> スロット一覧更新イベント。 </summary>
         public event Action<ReadOnlyMemory<SkillBuildSlotView>> OnSlotsChanged;
@@ -46,14 +46,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 _slotViews[i] = new SkillBuildSlotView(slot.SlotIndex, slot.SkillId, slot.SkillLabel);
             }
 
-            _skillLabels = new string[dto.SkillLabels.Length];
-            for (int i = 0; i < dto.SkillLabels.Length; i++)
+            _skills = new (int skillId, string skillLabel)[dto.Skills.Length];
+            for (int i = 0; i < dto.Skills.Length; i++)
             {
-                _skillLabels[i] = dto.SkillLabels[i];
+                _skills[i] = dto.Skills[i];
             }
 
             OnSlotsChanged?.Invoke(_slotViews);
-            OnSkillListChanged?.Invoke(_skillLabels);
+            OnSkillListChanged?.Invoke(_skills);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private readonly OutGameUIEvent _outGameUIEvent;
         private SkillBuildSlotView[] _slotViews = Array.Empty<SkillBuildSlotView>();
-        private string[] _skillLabels = Array.Empty<string>();
+        private (int skillId, string skillLabel)[] _skills = Array.Empty<(int, string)>();
         private bool _isDisposed;
 
         /// <summary>

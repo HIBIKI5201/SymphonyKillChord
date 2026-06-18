@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Application.OutGame.SkillBuild
 {
@@ -14,7 +14,8 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         /// <param name="skillBuildDefinition"> 装備スキルの定義を表すオブジェクト。 </param>
         public SkillBuildUseCase(SkillBuildDefinition skillBuildDefinition)
         {
-            _skillBuildDefinition = skillBuildDefinition;
+            _skillBuildDefinition = skillBuildDefinition
+                ?? throw new ArgumentNullException(nameof(skillBuildDefinition));
         }
         
         /// <summary>

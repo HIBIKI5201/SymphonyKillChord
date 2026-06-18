@@ -52,13 +52,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 slots[i] = new SkillBuildSlotDTO(i, skillId, ConvertSkillLabel(skillId));
             }
 
-            string[] skillLabels = new string[ownedSkills.Count];
+            (int skillId, string skillLabel)[] skills = new (int, string)[ownedSkills.Count];
             for (int i = 0; i < ownedSkills.Count; i++)
             {
-                skillLabels[i] = ConvertSkillLabel(ownedSkills[i].Id);
+                int skillId = ownedSkills[i].Id;
+                skills[i] = (skillId, ConvertSkillLabel(skillId));
             }
 
-            SkillBuildViewDTO dto = new(slots, skillLabels);
+            SkillBuildViewDTO dto = new(slots, skills);
             _viewModel.Apply(in dto);
         }
 

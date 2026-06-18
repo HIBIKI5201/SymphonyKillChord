@@ -11,17 +11,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         ///     DTO を初期化する。
         /// </summary>
         /// <param name="slots"> スロット一覧。 </param>
-        /// <param name="skillLabels"> 入手済みスキル表示一覧。 </param>
-        public SkillBuildViewDTO(ReadOnlySpan<SkillBuildSlotDTO> slots, ReadOnlySpan<string> skillLabels)
+        /// <param name="skills"> 入手済みスキル表示一覧。 </param>
+        public SkillBuildViewDTO(ReadOnlySpan<SkillBuildSlotDTO> slots, ReadOnlySpan<(int skillId, string label)> skills)
         {
             Slots = slots;
-            SkillLabels = skillLabels;
+            Skills = skills;
         }
 
         /// <summary> スロット一覧。 </summary>
         public ReadOnlySpan<SkillBuildSlotDTO> Slots { get; }
 
         /// <summary> 入手済みスキル表示一覧。 </summary>
-        public ReadOnlySpan<string> SkillLabels { get; }
+        public ReadOnlySpan<(int skillId, string label)> Skills { get; }
     }
 }

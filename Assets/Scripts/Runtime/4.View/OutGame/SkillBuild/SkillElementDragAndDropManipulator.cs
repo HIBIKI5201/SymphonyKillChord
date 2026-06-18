@@ -28,12 +28,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _slotContainerName = slotContainerName;
             _slotName = slotName;
 
-            var root = target.panel?.visualTree;
-            _skillBuildScreen = root.Query<VisualElement>("SkillBuildRoot");
-
-            if (_skillBuildScreen == null)
+            if (target == null)
             {
-                Debug.LogError("改造画面のルート要素が見つかりません。");
+                throw new ArgumentNullException(nameof(target));
             }
         }
 
@@ -43,6 +40,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         protected override void RegisterCallbacksOnTarget()
         {
+            target.RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+
+            if (target.panel != null)
+            {
+                FetchSkillBuildScreen();
+            }
+
             target.RegisterCallback<PointerDownEvent>(OnPointerDown);
             target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             target.RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -55,6 +59,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         protected override void UnregisterCallbacksFromTarget()
         {
+            target.UnregisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+
             target.UnregisterCallback<PointerDownEvent>(OnPointerDown);
             target.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
             target.UnregisterCallback<PointerUpEvent>(OnPointerUp);
@@ -67,7 +73,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private const string DRAGGABLE_CLASS_NAME = "draggable";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
-
+        private const string SKILL_BUILD_ROOT_NAME = "SkillBuildRoot";
         private bool _isDragging;
 
         // ドラッグ開始時のパネル・ワールド座標を保持するフィールド。
@@ -180,7 +186,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 _isDragging = false;
                 _onDropAction?.Invoke(target, targetElement);
             }
-            else if (TryFindSkillList(requireOverlap: false, out targetElement))
+            else if (TryFindSkillList(requireOverlap: true, out targetElement))
             {
                 // ドロップ先が入手済みスキルリストの場合は、スキル要素を入手済みスキルリストへ移動する。
                 MoveSkillToList(target, targetElement);
@@ -199,6 +205,32 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
+        ///    ターゲットの VisualElement がパネルにアタッチされたときのイベントを処理するメソッド。
+        /// </summary>
+        /// <param name="evt"></param>
+        private void OnAttachToPanel(AttachToPanelEvent evt)
+        {
+            FetchSkillBuildScreen();
+        }
+
+
+        /// <summary>
+        ///     ターゲットの VisualElement が属するパネルのビジュアルツリーから、
+        ///     改造画面のルート要素を検索して保存するメソッド。
+        /// </summary>
+        private void FetchSkillBuildScreen()
+        {
+            var root = target.panel?.visualTree;
+            var skillBuildContainer = root.Q<TemplateContainer>("SkillBuildContainer");
+            _skillBuildScreen = skillBuildContainer?.Q<VisualElement>(SKILL_BUILD_ROOT_NAME);
+
+            if (_skillBuildScreen == null)
+            {
+                Debug.LogError($"SkillElementDragAndDropManipulator: スキルビルド画面のルート要素 '{SKILL_BUILD_ROOT_NAME}' が見つかりません。ドラッグ&ドロップ操作が正しく機能しない可能性があります。");
+            }
+        }
+
+        /// <summary>
         ///     ドロップ可能なスロットを検索するメソッド。
         ///     requireOverlap が true の場合、スキル要素と重なっているスロットのみを対象とする。
         /// </summary>
@@ -209,7 +241,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             element = null;
             // ドロップ対象のスロットを検索するために、
             // スキル要素が属するパネルのビジュアルツリーを取得する。
-            if (target.panel == null) { return false; }
+            if (target.panel == null || _skillBuildScreen == null) { return false; }
 
             // スロットコンテナを検索する。
             // スロットコンテナが指定されていない場合は、ルートをスロットの検索対象とする。
@@ -257,12 +289,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private bool TryFindSkillList(bool requireOverlap, out VisualElement element)
         {
             element = null;
-            if (target.panel == null) { return false; }
+            if (target.panel == null || _skillBuildScreen == null) { return false; }
 
             VisualElement skillListRoot =
                 _skillBuildScreen.Query<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME);
 
             if (skillListRoot == null) { return false; }
+            if (requireOverlap && !target.worldBound.Overlaps(skillListRoot.worldBound)) { return false; }
 
             element = skillListRoot;
             return true;

@@ -110,6 +110,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             for (int i = 0; i < ownedSkills.Count; i++)
             {
                 SkillData skillData = ownedSkills[i];
+                if(skillData == null)
+                {
+                    throw new ArgumentException($"入手済みスキル一覧に null が存在します。 index={i}", nameof(ownedSkills));
+                }
+
                 if (skillDataMap.ContainsKey(skillData.Id))
                 {
                     throw new ArgumentException($"重複したスキル ID が存在します。 skillId={skillData.Id}", nameof(ownedSkills));
