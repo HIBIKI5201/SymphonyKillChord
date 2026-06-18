@@ -41,7 +41,7 @@ jobs:
           OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
           
           if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT)。Exiting early..."
+            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Exiting early..."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=false" >> $GITHUB_OUTPUT
             echo "SUCCESS: Decision: should_run=false (Skipped due to duplicate execution)"
@@ -125,7 +125,6 @@ jobs:
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
 
-          Write-Host "::group::Build Environment Information"
           Write-Host "::group::Build Workflow Environment Information"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow started."
           Write-Host "Runner: ${{ runner.os }} (Architecture: ${{ runner.arch }})"
@@ -152,7 +151,7 @@ jobs:
             $FileInfo = Get-Item $env:UNITY_EXE_PATH
             Write-Host "OK: Unity executable verified."
             Write-Host "      File Size: $($FileInfo.Length / 1MB) MB"
-            Write-Host "      last days: $($FileInfo.LastWriteTime)"
+            Write-Host "      Last Modified: $($FileInfo.LastWriteTime)"
           } else {
             Write-Host "ERROR: Unity executable not found at the specified path: $env:UNITY_EXE_PATH"
             Write-Host "::endgroup::"
@@ -226,7 +225,7 @@ jobs:
             Write-Host ""
           
             # Output the last 50 lines (final status)
-            Write-Host "[unity_import.log Last 50 lines of:]"
+            Write-Host "[Last 50 lines of unity_import.log:]"
             Get-Content -Path "unity_import.log" -Tail 50 | ForEach-Object { Write-Host $_ }
           } else {
             Write-Host "WARNING: unity_import.log was not found."
@@ -247,7 +246,7 @@ jobs:
             Write-Host ""
           
             # Output the last 50 lines (final status)
-            Write-Host "[unity_build.log Last 50 lines of:]"
+            Write-Host "[Last 50 lines of unity_build.log:]"
             Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
           } else {
             Write-Host "WARNING: unity_build.log was not found."
