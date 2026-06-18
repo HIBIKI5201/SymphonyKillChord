@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
@@ -53,7 +54,49 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             return _target;
         }
+        /// <summary>
+        ///  初期地点までの移動
+        /// </summary>
+        /// <param name="target"></param>
+        public async ValueTask MoveToTargetAysnc(Vector3 target)
+        {
+            if (!CanUseNavMeshAgent())
+            {
+                return;
+            }
 
+            _navMeshAgent.speed = 3f;
+            _navMeshAgent.isStopped = false;
+            _navMeshAgent.updateRotation = true;
+            if (!_navMeshAgent.SetDestination(target))
+            {
+                return;
+            }
+
+            //経路探索まち
+            while (CanUseNavMeshAgent() && _navMeshAgent.pathPending)
+            {
+                await Task.Yield();
+            }
+
+            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+            {
+                return;
+            }
+
+            // 到着待ち
+            while (CanUseNavMeshAgent())
+            {
+                if (!_navMeshAgent.pathPending
+                    && _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance
+                    && (!_navMeshAgent.hasPath || _navMeshAgent.velocity.sqrMagnitude <= 0.01f))
+                {
+                    return;
+                }
+
+                await Task.Yield();
+            }
+        }
         /// <summary>
         ///     攻撃可能な位置まで移動する。
         /// </summary>
