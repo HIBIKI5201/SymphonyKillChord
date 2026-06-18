@@ -125,7 +125,7 @@ namespace KillChord.Editor.AssetImporter
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[GoogleDriveBatchCI] Error during AutoBuilder trigger: {ex.Message}");
+                Debug.LogError($"[GoogleDriveBatchCI] Error while finalizing import: {ex.Message}");
                 EditorApplication.Exit(1);
             }
         }
