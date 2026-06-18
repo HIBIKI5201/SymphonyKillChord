@@ -18,5 +18,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
         ScenarioFastForward = 201,
         ScenarioPause = 202,
         ScenarioSkip = 203,
+        ScenarioAuto = 204,
+        ScenarioHideUI = 205,
     }
 }

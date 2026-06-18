@@ -97,7 +97,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
            
-            _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
+            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
