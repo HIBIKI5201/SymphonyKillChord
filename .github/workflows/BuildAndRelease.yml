@@ -115,7 +115,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -291,7 +291,7 @@ jobs:
         shell: powershell
 
       - name: Upload Unity Log
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46e10f4439c0d38104f4c2c50259838038c # v7.0.1
         if: always()
         with:
           name: unity-build-log
@@ -391,7 +391,7 @@ jobs:
 
       - name: Create Release and Upload Asset
         id: create_release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
+        uses: softprops/action-gh-release@b4309335a901844b2f281e649065005b63013d33 # v3.0.0
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
