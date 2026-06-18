@@ -68,16 +68,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     スキル一覧表示を更新する。
         /// </summary>
-        /// <param name="skillLabels"> 表示するスキル一覧。 </param>
+        /// <param name="skills"> 表示するスキル一覧。 </param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void SetSkillList(IReadOnlyList<string> skillLabels)
+        public void SetSkillList(IReadOnlyList<(int skillId, string skillLabel)> skills)
         {
             if (_skillListView == null)
             {
                 throw new InvalidOperationException("先に SkillListView の初期化が必要です。");
             }
 
-            _skillListView.SetSkills(skillLabels);
+            _skillListView.SetSkills(skills);
             SyncEquippedSkillsToSlots();
         }
 
@@ -181,10 +181,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     ViewModel からのスキル一覧更新を反映する。
         /// </summary>
-        /// <param name="skillLabels"> 表示するスキル一覧。 </param>
-        private void HandleSkillListChangedHandler(IReadOnlyList<string> skillLabels)
+        /// <param name="skills"> 表示するスキル一覧。 </param>
+        private void HandleSkillListChangedHandler(IReadOnlyList<(int skillId, string skillLabel)> skills)
         {
-            SetSkillList(skillLabels);
+            SetSkillList(skills);
         }
     }
 }

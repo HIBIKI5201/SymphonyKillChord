@@ -28,20 +28,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <summary>
         ///     スキル一覧を表示内容に反映する。
         /// </summary>
-        /// <param name="skillLabels"> 表示するスキル一覧。 </param>
+        /// <param name="skills"> 表示するスキル一覧。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void SetSkills(IReadOnlyList<string> skillLabels)
+        public void SetSkills(IReadOnlyList<(int skillId, string skillLabel)> skills)
         {
-            if (skillLabels == null)
+            if (skills == null)
             {
-                throw new ArgumentNullException(nameof(skillLabels), "スキル一覧が null です。");
+                throw new ArgumentNullException(nameof(skills), "スキル一覧が null です。");
             }
 
             Clear();
 
-            for (int i = 0; i < skillLabels.Count; i++)
+            for (int i = 0; i < skills.Count; i++)
             {
-                VisualElement skillElement = CreateSkillElement(skillLabels[i] ?? string.Empty);
+                VisualElement skillElement = CreateSkillElement(skills[i].skillId, skills[i].skillLabel ?? string.Empty);
                 _scrollView.Add(skillElement);
             }
         }
@@ -129,9 +129,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <summary>
         ///     各スキル要素を生成する。
         /// </summary>
+        /// <param name="skillId"> スキル ID。 </param>
         /// <param name="skillLabel"> 表示するスキル名。 </param>
         /// <returns> 生成した要素。 </returns>
-        private VisualElement CreateSkillElement(string skillLabel)
+        private VisualElement CreateSkillElement(int skillId, string skillLabel)
         {
             TemplateContainer skillElement = _skillElementTemplate.Instantiate();
             skillElement.AddToClassList(DRAGGABLE_CLASS_NAME);
@@ -141,11 +142,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             skillElement.name = skillElementName.ToString();
 
-            // SkillId は Label ではなく userData へ保持する。
-            if (int.TryParse(skillLabel, out int skillId))
-            {
-                skillElement.userData = skillId;
-            }
+            skillElement.userData = skillId;
 
             Label label = skillElement.Q<Label>(SKILL_LABEL_NAME);
             if (label == null)
