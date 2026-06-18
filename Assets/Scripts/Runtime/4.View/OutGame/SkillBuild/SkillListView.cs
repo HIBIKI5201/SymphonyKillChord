@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -108,7 +109,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         /// <summary> 空スキル ID。 </summary>
         private const int EMPTY_SKILL_ID = -1;
-
+        private const string SKILL_ELEMENT_PREFIX = "SkillElement_";
         private readonly VisualElement _scrollView;
         private readonly VisualTreeAsset _skillElementTemplate;
 
@@ -134,6 +135,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             TemplateContainer skillElement = _skillElementTemplate.Instantiate();
             skillElement.AddToClassList(DRAGGABLE_CLASS_NAME);
+
+            StringBuilder skillElementName = new StringBuilder(SKILL_ELEMENT_PREFIX);
+            skillElementName.Append(skillLabel);
+
+            skillElement.name = skillElementName.ToString();
 
             // SkillId は Label ではなく userData へ保持する。
             if (int.TryParse(skillLabel, out int skillId))
