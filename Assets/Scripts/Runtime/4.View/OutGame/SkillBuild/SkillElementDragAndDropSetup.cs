@@ -98,6 +98,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 // ドロップされたスロットが非表示の場合は、スキルがドロップされていない（＝元の位置に戻された）とみなす。
                 if (slot.resolvedStyle.display == DisplayStyle.None)
                 {
+                    _skillBuildViewModel.UpdateSlot(i, EMPTY_SKILL_ID, EMPTY_SKILL_LABEL);
                     continue;
                 }
 
