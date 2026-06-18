@@ -1,7 +1,6 @@
-using System;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
-using SymphonyFrameWork.Attribute;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.SkillBuild
