@@ -65,7 +65,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void Initialize()
         {
-            if (_skillBuildRepositoryDebug == null)
+            if (_uiDocument == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] UIDocument が設定されていません。", this);
+#endif
+                return;
+            }
+
+                if (_skillBuildRepositoryDebug == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepositoryDebug が設定されていません。", this);
