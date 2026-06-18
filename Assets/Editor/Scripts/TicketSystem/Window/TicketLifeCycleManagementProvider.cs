@@ -79,7 +79,7 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
-            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
             foreach (var ticket in cachedTickets)
@@ -91,27 +91,25 @@ namespace KillChord.Editor.TicketSystem
                 var isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
                 EditorGUILayout.EndHorizontal();
 
-                if (isDispose)
+                if (!isDispose) continue;
+                var result = EditorDialog.DisplayDecisionDialog(
+                    "チケット破棄の確認",
+                    $"シーン: [{ticket.sceneName}] のチケットを破棄しますか？\nこの操作は元に戻せません。",
+                    "破棄する",
+                    "キャンセル");
+
+                if (result)
                 {
-                    var result = EditorDialog.DisplayDecisionDialog(
-                        "チケット破棄の確認",
-                        $"シーン: [{ticket.sceneName}] のチケットを破棄しますか？\nこの操作は元に戻せません。",
-                        "破棄する",
-                        "キャンセル");
-
-                    if (result)
-                    {
-                        _isLoading = true;
-                        TicketSystemWebClient.DisposeTicket(ticket.sceneName)
-                            .ContinueWith(() =>
-                            {
-                                _isLoading = false;
-                                EditorApplication.delayCall += Repaint;
-                            });
-                    }
-
-                    break;
+                    _isLoading = true;
+                    TicketSystemWebClient.DisposeTicket(ticket.sceneName)
+                        .ContinueWith(() =>
+                        {
+                            _isLoading = false;
+                            EditorApplication.delayCall += Repaint;
+                        });
                 }
+
+                break;
             }
 
             EditorGUILayout.EndScrollView();

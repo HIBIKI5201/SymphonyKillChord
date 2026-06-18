@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -117,7 +118,7 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
-            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
 
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
