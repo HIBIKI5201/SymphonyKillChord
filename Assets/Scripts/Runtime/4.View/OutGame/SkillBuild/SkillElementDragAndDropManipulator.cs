@@ -28,13 +28,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _slotContainerName = slotContainerName;
             _slotName = slotName;
 
-            var root = target.panel?.visualTree;
-            _skillBuildScreen = root.Query<VisualElement>("SkillBuildRoot");
-
-            if (_skillBuildScreen == null)
+            if (target == null)
             {
-                Debug.LogError("改造画面のルート要素が見つかりません。");
+                throw new ArgumentNullException(nameof(target));
             }
+
+            var root = target.panel?.visualTree;
+            _skillBuildScreen = root.Query<VisualElement>(SKILL_BUILD_ROOT_NAME);
         }
 
         /// <summary>
@@ -43,6 +43,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         protected override void RegisterCallbacksOnTarget()
         {
+            if (_skillBuildScreen == null)
+            {
+                Debug.LogError($"SkillElementDragAndDropManipulator: スキルビルド画面のルート要素 '{SKILL_BUILD_ROOT_NAME}' が見つかりません。ドラッグ&ドロップ操作が正しく機能しない可能性があります。");
+            }
+
             target.RegisterCallback<PointerDownEvent>(OnPointerDown);
             target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             target.RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -67,7 +72,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private const string DRAGGABLE_CLASS_NAME = "draggable";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
-
+        private const string SKILL_BUILD_ROOT_NAME = "SkillBuildRoot";
         private bool _isDragging;
 
         // ドラッグ開始時のパネル・ワールド座標を保持するフィールド。
@@ -209,7 +214,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             element = null;
             // ドロップ対象のスロットを検索するために、
             // スキル要素が属するパネルのビジュアルツリーを取得する。
-            if (target.panel == null) { return false; }
+            if (target.panel == null || _skillBuildScreen == null) { return false; }
 
             // スロットコンテナを検索する。
             // スロットコンテナが指定されていない場合は、ルートをスロットの検索対象とする。
@@ -257,7 +262,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private bool TryFindSkillList(bool requireOverlap, out VisualElement element)
         {
             element = null;
-            if (target.panel == null) { return false; }
+            if (target.panel == null || _skillBuildScreen == null) { return false; }
 
             VisualElement skillListRoot =
                 _skillBuildScreen.Query<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME);
