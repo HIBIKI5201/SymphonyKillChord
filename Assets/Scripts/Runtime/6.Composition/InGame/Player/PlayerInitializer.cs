@@ -15,10 +15,10 @@ using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
-using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
@@ -91,6 +91,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _playerEntity = CharacterFactory.Create(_playerData);
+            _playerEntity.OnDamageAvoided += _ => _player.PlayDodgeSuccessFeedback();
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
             if (_missionEventController != null)
@@ -106,13 +107,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _skillInputProgressUIInitializer = ServiceLocator.GetInstance<SkillInputProgressUIInitializer>();
-            if(_skillInputProgressUIInitializer == null)
+            if (_skillInputProgressUIInitializer == null)
             {
                 Debug.LogError($"{nameof(SkillInputProgressUIInitializer)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
                 return;
             }
-            // SerializeFieldの装備スキルからskillId配列を作成する
+
             List<int> skillIdList = new List<int>();
+            // SerializeFieldの装備スキルからskillId配列を作成する
             if (_equippedSkills != null && _equippedSkills.Length > 0)
             {
                 for (int i = 0; i < _equippedSkills.Length; i++)
@@ -173,6 +175,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             skillResultView?.Bind(skillResultViewModel);
 
             SkillCheckService skillCheckService = new SkillCheckService();
+
             SkillUsecase skillUsecase = new SkillUsecase(targetSelectorController, _playerEntity);
             SkillController skillController = new SkillController(musicSyncService);
             skillController.Initialize(BuildSkillExecutionControllers(musicSyncState, skillResultPresenter, skillCheckService, skillUsecase, musicSyncService));
@@ -220,12 +223,29 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return System.Array.Empty<SkillExecutionController>();
             }
 
-            List<SkillExecutionController> executionControllers = new List<SkillExecutionController>(_equippedSkills.Length);
-            for (int i = 0; i < _equippedSkills.Length; i++)
-            {
-                if (_equippedSkills[i] == null) { continue; }
+            List<SkillData> skillData = new List<SkillData>();
 
-                SkillData data = _equippedSkills[i].ToDomain();
+            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
+            {
+                // SkillBuildDefinitionからskillId配列を作成する
+                if (buildDefinition.EquippedSkills != null && buildDefinition.EquippedSkills.Count > 0)
+                {
+                    for (int i = 0; i < buildDefinition.EquippedSkills.Count; i++)
+                    {
+                        if (buildDefinition.EquippedSkills[i].HasSkill)
+                        {
+                            skillData.Add(buildDefinition.EquippedSkills[i].SkillData);
+                        }
+                    }
+                }
+            }
+
+            List<SkillExecutionController> executionControllers = new List<SkillExecutionController>(skillData.Count);
+            for (int i = 0; i < skillData.Count; i++)
+            {
+                if (skillData[i] == null) { continue; }
+
+                SkillData data = skillData[i];
                 SkillDefinition definition = data.ToSkillDefinition(musicSyncState.Bpm);
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillView view = _skillVisuals.FirstOrDefault(n => n.Id == definition.Id.Value);
@@ -264,6 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
+                _playerEntity.OnDamageAvoided -= _ => _player.PlayDodgeSuccessFeedback();
             }
         }
     }

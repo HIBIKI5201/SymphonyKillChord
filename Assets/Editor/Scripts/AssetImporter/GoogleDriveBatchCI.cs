@@ -39,14 +39,13 @@ namespace KillChord.Editor.AssetImporter
         ///     - GOOGLE_DRIVE_FOLDER_ID: ダウンロード対象フォルダID
         ///     
         ///     例:
-        ///     Unity -batchMode -quit -executeMethod KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport
+        ///     Unity -batchMode -executeMethod KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport
         /// </summary>
         public static void StartBatchImport()
         {
             Debug.Log("[GoogleDriveBatchCI] Starting batch import from GitHub Actions...");
 
-            // async void を避けるため、EditorApplication.delayCall でスケジュール登録
-            EditorApplication.delayCall += StartBatchImportAsync;
+            StartBatchImportAsync();
         }
 
         private static async void StartBatchImportAsync()
@@ -104,16 +103,15 @@ namespace KillChord.Editor.AssetImporter
             // queueJson が IsNullOrEmpty = true のとき、インポートキューは完全に空の状態
             if (progress >= 1.0f && string.IsNullOrEmpty(queueJson))
             {
-                TriggerAutoBuilderOnComplete();
+                OnImportComplete();
             }
         }
 
         /// <summary>
-        ///     インポート完了後に一時ファイルをクリーンアップし、AutoBuilder を起動する。
+        ///     インポート完了後に一時ファイルをクリーンアップし、エディタを終了する。
         /// </summary>
-        private static void TriggerAutoBuilderOnComplete()
+        private static void OnImportComplete()
         {
-            Debug.Log("[GoogleDriveBatchCI] All assets imported successfully. Triggering AutoBuilder...");
 
             // エディタ更新の待機を解除
             EditorApplication.update -= MonitorImportProgress;
@@ -122,13 +120,13 @@ namespace KillChord.Editor.AssetImporter
             {
                 // 一時フォルダのクリーンアップ
                 CleanupTemporaryFolder();
-
-                // バッチモードで AutoBuilder を実行
-                AutoBuilder.AutoBuilder.PerformMultipleBuilds(isBatchMode: true);
+                Debug.Log("[GoogleDriveBatchCI] Import completed successfully.");
+                EditorApplication.Exit(0);
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[GoogleDriveBatchCI] Error during AutoBuilder trigger: {ex.Message}");
+                Debug.LogError($"[GoogleDriveBatchCI] Error while finalizing import: {ex.Message}");
+                EditorApplication.Exit(1);
             }
         }
 

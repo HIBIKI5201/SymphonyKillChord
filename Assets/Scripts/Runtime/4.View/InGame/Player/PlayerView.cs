@@ -23,8 +23,12 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
+
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
+
+        [SerializeField,Tooltip("回避成功時の仮エフェクト")]
+        private ParticleSystem _dodgeEffect;
         [Space]
 
         [SerializeField, Tooltip("被弾SE用Source。")]
@@ -167,6 +171,20 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _pendingSkillAnimationKey = animationKey;
+        }
+
+        /// <summary>
+        ///    回避成功時の仮エフェクトを再生します。
+        /// </summary>
+        public void PlayDodgeSuccessFeedback()
+        {
+            if (_dodgeEffect == null)
+            {
+                return;
+            }
+
+            _dodgeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _dodgeEffect.Play();
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
