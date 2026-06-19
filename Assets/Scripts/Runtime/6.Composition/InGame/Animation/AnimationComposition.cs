@@ -45,6 +45,14 @@ namespace KillChord.Runtime.Composition
 
             var oneShotIndices = new Dictionary<string, int>();
             var combinedClips = new List<AnimationClip>(baseClips.Length);
+            float[] clipDurations = new float[combinedClips.Count];
+
+            for (int i = 0; i < combinedClips.Count; i++)
+            {
+                clipDurations[i] = combinedClips[i] != null
+                    ? combinedClips[i].length
+                    : 0f;
+            }
 
             for (int i = 0; i < baseClips.Length; i++)
             {
@@ -83,7 +91,7 @@ namespace KillChord.Runtime.Composition
             ICharacterAnimationApplication application = new CharacterAnimationApplication();
 
             // Adaptor層を作成
-            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState, combinedClips.Count);
+            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState, combinedClips.Count, clipDurations);
 
             // Viewを初期化
             view.Initialize(controller, combinedClips.ToArray());

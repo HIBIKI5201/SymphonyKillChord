@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         {
             SkillCheckService skillCheckService = new SkillCheckService();
             ISkillVisual[] visuals = _skillVisuals;
-            _skillController = new SkillController(_skillRepository, visuals, null, null);
+            //_skillController = new SkillController(_skillRepository, visuals, null, null);
             // SkillUsecase skillUsecase = new SkillUsecase(_musicSyncService, skillCheckService, _skillController,targetSelectorController);
             // _skillController.SetUsecase(skillUsecase);
         }

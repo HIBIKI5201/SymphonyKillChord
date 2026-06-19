@@ -8,7 +8,6 @@ namespace KillChord.Runtime.View
     ///     AdaptorからDTOを受け取りViewModelを介してPlayableに反映する。
     ///     ICharacterAnimationControllerを介するため、プレイヤー・敵どちらにも適用可能。
     /// </summary>
-    [RequireComponent(typeof(Animator))]
     public sealed class CharacterAnimationView : MonoBehaviour
     {
         /// <summary>
@@ -21,8 +20,10 @@ namespace KillChord.Runtime.View
             _controller = controller;
             _viewModel = new CharacterAnimationViewModel();
 
-            Animator animator = GetComponent<Animator>();
-            _playableController = new PlayableAnimationController(animator, clips);
+            if (_animator == null)
+                _animator = GetComponent<Animator>();
+
+            _playableController = new PlayableAnimationController(_animator, clips);
             _isInitialized = true;
             _controller.OnOneShotRequested += HandleOneShotRequested;
         }
@@ -107,6 +108,7 @@ namespace KillChord.Runtime.View
 
         // 立ち上げ比率（総時間に対する）。
         [SerializeField] private float _attackRampUpRatio = 0.25f;
+        [SerializeField] private Animator _animator;
 
         private PlayableAnimationController _playableController;
         private CharacterAnimationViewModel _viewModel;

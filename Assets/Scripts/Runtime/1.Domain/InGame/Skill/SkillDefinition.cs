@@ -16,7 +16,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキルの入力パターン。 </summary>
         public SkillPattern SkillPattern { get; }
 
-        /// <summary> スキルの入力パターン。 </summary>
+        /// <summary> クールダウン時間の長さ。 </summary>
         public SkillCooldownTime CooldownTime { get;  }
 
         /// <summary> スキルの効果実装。 </summary>
@@ -34,13 +34,21 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, ISkillEffect effect, double bpm, string animationKey)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, double cooldownBarRatio, ISkillEffect effect, double bpm, string animationKey)
         {
+            if (!double.IsFinite(bpm) || bpm <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bpm), "BPMは0超えの有限値で設定してください。");
+            }
+            if (!double.IsFinite(cooldownBarRatio) || cooldownBarRatio < 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cooldownBarRatio), "クールダウン時間の小節比率は0以上の有限値で設定してください。");
+            }
             Id = id;
             SkillPattern = skillPattern;
             Effect = effect;
             AnimationKey = animationKey;
-            CooldownTime = new SkillCooldownTime(CalcCooldownTime(bpm));
+            CooldownTime = new SkillCooldownTime(CalcCooldownTime(cooldownBarRatio, bpm));
         }
 
         /// <summary>
@@ -62,20 +70,11 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         ///     現在のBPMを指定し、スキルのクールダウン時間を計算する。
         /// </summary>
         /// <param name="bpm"></param>
-        private double CalcCooldownTime(double bpm)
+        private double CalcCooldownTime(double cooldownBarRatio, double bpm)
         {
-            double cooldown = 0;
             // 1小節の長さ
             double secondsPerBar = MusicConstants.SECONDS_PER_MINUTE / bpm * MusicConstants.STANDARD_BEATS_PER_BAR;
-
-            // スキル発動するための拍の長さの合計をクールタイムとする
-            for (int i = 0; i < SkillPattern.Signatures.Length; i++)
-            {
-                cooldown += secondsPerBar / (double)SkillPattern.Signatures[i];
-            }
-            // 誤差を埋めるため16拍子を一つ足す
-            cooldown += secondsPerBar / 16;
-            return cooldown;
+            return secondsPerBar * cooldownBarRatio;
         }
 
         /// <summary>
