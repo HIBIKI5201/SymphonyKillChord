@@ -91,6 +91,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _playerEntity = CharacterFactory.Create(_playerData);
+            _playerEntity.OnDamageAvoided += _ => _player.PlayDodgeSuccessFeedback();
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
             if (_missionEventController != null)
@@ -283,6 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
+                _playerEntity.OnDamageAvoided -= _ => _player.PlayDodgeSuccessFeedback();
             }
         }
     }

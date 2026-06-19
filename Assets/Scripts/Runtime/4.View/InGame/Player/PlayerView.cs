@@ -24,6 +24,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
 
+        [SerializeField,Tooltip("回避成功時の仮エフェクト")]
+        private ParticleSystem _dodgeEffect;
+
         [SerializeField, Tooltip("攻撃結果ごとの銃声SE設定。")]
         private AttackSoundConfig[] _attackSoundConfigs;
         [Space]
@@ -167,6 +170,20 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _pendingSkillAnimationKey = animationKey;
+        }
+
+        /// <summary>
+        ///    回避成功時の仮エフェクトを再生します。
+        /// </summary>
+        public void PlayDodgeSuccessFeedback()
+        {
+            if (_dodgeEffect == null)
+            {
+                return;
+            }
+
+            _dodgeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _dodgeEffect.Play();
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
