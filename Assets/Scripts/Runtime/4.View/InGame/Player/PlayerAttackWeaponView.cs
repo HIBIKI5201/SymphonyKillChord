@@ -84,6 +84,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private void OnDisable()
         {
+            CancelPlayingWeapon();
             HideAllWeapons();
         }
 

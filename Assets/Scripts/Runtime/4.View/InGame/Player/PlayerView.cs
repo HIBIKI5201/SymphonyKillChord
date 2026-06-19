@@ -27,7 +27,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
-        [SerializeField,Tooltip("回避成功時の仮エフェクト")]
+        [SerializeField, Tooltip("回避成功時の仮エフェクト")]
         private ParticleSystem _dodgeEffect;
         [Space]
 
@@ -265,7 +265,8 @@ namespace KillChord.Runtime.View.InGame.Player
                     attackIndex = oneShotIndex;
                 }
 
-                float attackAnimationLength = _characterAnimationController.GetOneShotAnimationLength(attackIndex);
+                float attackAnimationLength =
+                    _characterAnimationController?.GetOneShotAnimationLength(attackIndex) ?? 0f;
 
                 _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
                 _characterAnimationController?.TriggerOneShot(attackIndex);
