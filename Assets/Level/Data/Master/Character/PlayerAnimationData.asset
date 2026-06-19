@@ -27,10 +27,10 @@ MonoBehaviour:
     Clip: {fileID: 7400000, guid: ad99f450f4f323b46b8d98a222b706d2, type: 2}
   - State: 3
     Key: Attack_Beat1
-    Clip: {fileID: 1827226128182048838, guid: f0cb1225175f01848921da8461c02836, type: 3}
+    Clip: {fileID: 1827226128182048838, guid: a12ddb03c6d69194b8927c7f2ce0b83e, type: 3}
   - State: 3
     Key: Attack_Beat2
-    Clip: {fileID: 1827226128182048838, guid: 0d8885611e53f0c4ebf756e4620a2ac8, type: 3}
+    Clip: {fileID: 1827226128182048838, guid: ecc20323969b04e4080094b599672f80, type: 3}
   - State: 3
     Key: Skill_1
     Clip: {fileID: 5457690334268165388, guid: 781420ab7102ec1458ee7813f85c0185, type: 3}
