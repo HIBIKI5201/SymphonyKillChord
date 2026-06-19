@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -77,9 +78,10 @@ namespace KillChord.Editor.TicketSystem
         /// </summary>
         private void DrawMainUI()
         {
-            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            EditorGUILayout.LabelField($"ユーザー: {_savedUserName}");
-            EditorGUILayout.EndHorizontal();
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                EditorGUILayout.LabelField($"ユーザー: {_savedUserName}");
+            }
 
             if (_isLoading)
             {
@@ -103,13 +105,14 @@ namespace KillChord.Editor.TicketSystem
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-            GUILayout.Label("シーン名", GUILayout.Width(100));
-            GUILayout.Label("状態", GUILayout.Width(60));
-            GUILayout.Label("担当者", GUILayout.Width(100));
-            GUILayout.Label("最終更新時刻", GUILayout.Width(200));
-            GUILayout.Label("操作", GUILayout.ExpandWidth(true));
-            EditorGUILayout.EndHorizontal();
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("シーン名", GUILayout.Width(100));
+                GUILayout.Label("状態", GUILayout.Width(60));
+                GUILayout.Label("担当者", GUILayout.Width(100));
+                GUILayout.Label("最終更新時刻", GUILayout.Width(200));
+                GUILayout.Label("操作", GUILayout.ExpandWidth(true));
+            }
 
             if (CachedTicketDataSingleton.instance == null)
             {
@@ -117,54 +120,53 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
-            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
 
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-
-            foreach (var ticket in cachedTickets)
+            using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(_scrollPos))
             {
-                var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(30));
+                _scrollPos = scrollViewScope.scrollPosition;
 
-                var rectColor = ticket.isInUse switch
+                foreach (var ticket in cachedTickets)
                 {
-                    false => _emptyColor,
-                    true when ticket.userName == _savedUserName => _occupiedBySelfColor,
-                    _ => _occupiedByOtherColor
-                };
+                    using var horizontalScope = new EditorGUILayout.HorizontalScope(GUILayout.Height(30));
+                    var rowRect = horizontalScope.rect;
+                    var rectColor = ticket.isInUse switch
+                    {
+                        false => _emptyColor,
+                        true when ticket.userName == _savedUserName => _occupiedBySelfColor,
+                        _ => _occupiedByOtherColor
+                    };
 
-                EditorGUI.DrawRect(rowRect, rectColor);
-                GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
-                GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
-                GUILayout.Label(ticket.userName, GUILayout.Width(100));
-                GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
+                    EditorGUI.DrawRect(rowRect, rectColor);
+                    GUILayout.Label(ticket.sceneName, GUILayout.Width(100));
+                    GUILayout.Label(ticket.isInUse ? "使用中" : "空き", GUILayout.Width(60));
+                    GUILayout.Label(ticket.userName, GUILayout.Width(100));
+                    GUILayout.Label(ticket.timestamp, GUILayout.Width(200));
 
-                var isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == _savedUserName);
 
-                // 他者のチケットを勝手に解放できないようにする。
-                EditorGUI.BeginDisabledGroup(!isMyTicket && ticket.isInUse);
+                    var isMyTicket = string.IsNullOrEmpty(ticket.userName) || (ticket.userName == _savedUserName);
 
-                if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する", GUILayout.Width(70)))
-                {
-                    _isLoading = true;
-                    TicketSystemWebClient.UpdateTicketStatus(ticket, _savedUserName)
-                        .ContinueWith(() =>
+                    // 他者のチケットを勝手に解放できないようにする。
+                    using (new EditorGUI.DisabledGroupScope(!isMyTicket && ticket.isInUse))
+                    {
+                        if (GUILayout.Button(ticket.isInUse ? "解放する" : "使用する", GUILayout.Width(70)))
                         {
-                            _isLoading = false;
-                            EditorApplication.delayCall += Repaint;
-                        });
+                            _isLoading = true;
+                            TicketSystemWebClient.UpdateTicketStatus(ticket, _savedUserName)
+                                .ContinueWith(() =>
+                                {
+                                    _isLoading = false;
+                                    EditorApplication.delayCall += Repaint;
+                                });
+                        }
+                    }
+
+                    if (GUILayout.Button("シーンの位置まで移動", GUILayout.Width(150)))
+                    {
+                        JumpToAsset(ticket.masterPath);
+                    }
                 }
-
-                EditorGUI.EndDisabledGroup();
-
-                if (GUILayout.Button("シーンの位置まで移動", GUILayout.Width(150)))
-                {
-                    JumpToAsset(ticket.masterPath);
-                }
-
-                EditorGUILayout.EndHorizontal();
             }
-
-            EditorGUILayout.EndScrollView();
         }
 
         // --- その他の機能 ---
