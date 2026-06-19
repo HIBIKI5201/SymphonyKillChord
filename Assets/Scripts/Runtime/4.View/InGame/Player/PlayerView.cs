@@ -24,11 +24,11 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
 
-        [SerializeField,Tooltip("回避成功時の仮エフェクト")]
-        private ParticleSystem _dodgeEffect;
+        [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
+        private PlayerAttackWeaponView _attackWeaponView;
 
-        [SerializeField, Tooltip("攻撃結果ごとの銃声SE設定。")]
-        private AttackSoundConfig[] _attackSoundConfigs;
+        [SerializeField, Tooltip("回避成功時の仮エフェクト")]
+        private ParticleSystem _dodgeEffect;
         [Space]
 
         [SerializeField, Tooltip("被弾SE用Source。")]
@@ -151,6 +151,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _characterAnimationController?.SetVelocity(Vector2.zero);
+            _attackWeaponView?.HideAllWeapons();
         }
 
         /// <summary>
@@ -248,8 +249,6 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
-                PlayAttackSound(resultBeatType);
-
                 string animationKey = _pendingSkillAnimationKey;
                 _pendingSkillAnimationKey = null;
 
@@ -266,6 +265,10 @@ namespace KillChord.Runtime.View.InGame.Player
                     attackIndex = oneShotIndex;
                 }
 
+                float attackAnimationLength =
+                    _characterAnimationController?.GetOneShotAnimationLength(attackIndex) ?? 0f;
+
+                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
                 _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
@@ -383,30 +386,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
-        }
-        /// <summary>
-        ///     BeatTypeに対応する攻撃SEを再生します。
-        /// </summary>
-        private void PlayAttackSound(int beatType)
-        {
-            if (_attackSoundConfigs == null || _attackSoundConfigs.Length == 0)
-            {
-                Debug.LogError("攻撃SE設定が未設定です。");
-                return;
-            }
-
-            for (int i = 0; i < _attackSoundConfigs.Length; i++)
-            {
-                if (_attackSoundConfigs[i].BeatType != beatType)
-                {
-                    continue;
-                }
-
-                PlaySound(_attackSoundConfigs[i].Source, _attackSoundConfigs[i].CueName);
-                return;
-            }
-
-            Debug.LogWarning($"攻撃SE設定が見つかりません。BeatType:{beatType}", this);
         }
 
         /// <summary>
