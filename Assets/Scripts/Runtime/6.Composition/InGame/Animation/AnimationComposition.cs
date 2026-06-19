@@ -45,18 +45,18 @@ namespace KillChord.Runtime.Composition
 
             var oneShotIndices = new Dictionary<string, int>();
             var combinedClips = new List<AnimationClip>(baseClips.Length);
-            float[] clipDurations = new float[combinedClips.Count];
 
+            for (int i = 0; i < baseClips.Length; i++)
+            {
+                combinedClips.Add(baseClips[i]);
+            }
+
+            float[] clipDurations = new float[combinedClips.Count];
             for (int i = 0; i < combinedClips.Count; i++)
             {
                 clipDurations[i] = combinedClips[i] != null
                     ? combinedClips[i].length
                     : 0f;
-            }
-
-            for (int i = 0; i < baseClips.Length; i++)
-            {
-                combinedClips.Add(baseClips[i]);
             }
 
             // AssetからOneShotアニメーションを取得して、Domain enumに対応するAnimationClipリストに追加。
