@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
@@ -7,24 +9,32 @@ namespace KillChord.Runtime.View.InGame.Player
     /// </summary>
     public class PlayerAttackWeaponView : MonoBehaviour
     {
-        public void Play(int beattype)
+        /// <summary>
+        ///     拍子に応じた演出を再生します。
+        /// </summary>
+        /// <param name="beatType"> 拍子。 </param>
+        /// <param name="clipSeconds"> クリップの長さ。 </param>
+        public void Play(int beatType, float clipSeconds)
         {
+            CancelPlayingWeapon();
             HideAllWeapons();
 
-            if (!TryGetDefinition(beattype, out PlayerAttackWeaponConfig definition))
+            if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
-                Debug.LogError($"BeatType {beattype} に対応する武器設定が見つかりませんでした。");
+                Debug.LogError($"BeatType {beatType} に対応する武器設定が見つかりませんでした。");
                 return;
             }
 
-            _currentWeaponModel = definition.WeaponModel;
-
-            if (_currentWeaponModel != null)
+            if (definition.WeaponItem == null)
             {
-                _currentWeaponModel.SetActive(true);
+                Debug.LogError($"BeatType {beatType} の武器Viewが未設定です。", this);
+                return;
             }
 
-            PlayAttackSound(definition);
+            _currentWeaponView = definition.WeaponItem;
+            _cts = new CancellationTokenSource();
+
+            PlayWeaponAsync(_currentWeaponView, clipSeconds, _cts.Token);
         }
 
         /// <summary>
@@ -33,13 +43,8 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void HideCurrentWeapon()
         {
-            if (_currentWeaponModel == null)
-            {
-                return;
-            }
-
-            _currentWeaponModel.SetActive(false);
-            _currentWeaponModel = null;
+            _currentWeaponView?.HideWeapon();
+            _currentWeaponView = null;
         }
 
         /// <summary>
@@ -49,27 +54,28 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             if (_definitions == null)
             {
-                _currentWeaponModel = null;
+                _currentWeaponView = null;
                 return;
             }
 
             for (int i = 0; i < _definitions.Length; i++)
             {
-                if (_definitions[i].WeaponModel == null)
+                if (_definitions[i].WeaponItem == null)
                 {
                     continue;
                 }
 
-                _definitions[i].WeaponModel.SetActive(false);
+                _definitions[i].WeaponItem?.HideWeapon();
             }
 
-            _currentWeaponModel = null;
+            _currentWeaponView = null;
         }
 
         [SerializeField, Tooltip("BeatTypeごとの武器表示と攻撃SE設定。")]
         private PlayerAttackWeaponConfig[] _definitions;
 
-        private GameObject _currentWeaponModel;
+        private WeaponItemView _currentWeaponView;
+        private CancellationTokenSource _cts;
 
         private void Awake()
         {
@@ -79,6 +85,53 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDisable()
         {
             HideAllWeapons();
+        }
+
+        /// <summary>
+        ///     武器に応じた演出を再生する。
+        /// </summary>
+        /// <param name="weaponItemView"> 再生させるItemView。 </param>
+        /// <param name="clipSeconds"> クリップの長さ。 </param>
+        /// <param name="ct"> CancellationToken。 </param>
+        /// <returns></returns>
+        private async Awaitable PlayWeaponAsync(WeaponItemView weaponItemView, float clipSeconds, CancellationToken ct)
+        {
+            try
+            {
+                //TODO : アニメーション時間が短すぎて表示がわかりにくいため、今が+2秒いれている。
+                await weaponItemView.PlayAsync(clipSeconds + 2, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                weaponItemView.HideWeapon();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                weaponItemView.HideWeapon();
+            }
+            finally
+            {
+                if (_currentWeaponView == weaponItemView)
+                {
+                    _currentWeaponView = null;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     再生中の武器表示をキャンセルします。
+        /// </summary>
+        private void CancelPlayingWeapon()
+        {
+            if (_cts == null)
+            {
+                return;
+            }
+
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
         }
 
         /// <summary>
@@ -105,25 +158,6 @@ namespace KillChord.Runtime.View.InGame.Player
 
             definition = default;
             return false;
-        }
-
-        /// <summary>
-        ///     攻撃SEを再生する。
-        /// </summary>
-        private void PlayAttackSound(PlayerAttackWeaponConfig definition)
-        {
-            if (definition.AttackSoundSource == null)
-            {
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(definition.CueName))
-            {
-                definition.AttackSoundSource.Play();
-                return;
-            }
-
-            definition.AttackSoundSource.Play(definition.CueName);
         }
     }
 }
