@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
-using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
@@ -41,6 +40,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private void OnDisable()
         {
             Unsubscribe();
+
+            ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
+
             _screenViewRegistry?.Dispose();
 
             CancelAndDispose(ref _ctsShow);
@@ -153,6 +155,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
+
+            // SkillBuild 専用 Initializer から取得できるように登録する。
+            ServiceLocator.RegisterInstance(skillBuildScreenView);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -411,6 +416,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private UIDocument _uiDocument;
         [SerializeField, Tooltip("画面遷移ルールデータです。")]
         private ScreenRuleData _screenRuleData;
+
         private bool IsTransitioning => _transitionTask != null && !_transitionTask.IsCompleted;
 
         private ScreenController _screenController;
