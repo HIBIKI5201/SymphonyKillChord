@@ -31,9 +31,6 @@ namespace DevelopProducts.Pause
         /// <param name="scale"></param>
         public void SetScale(float scale)
         {
-            if (_pauseCount > 0)
-                return;
-
             _baseScale = scale;
         }
         private float _baseScale;
