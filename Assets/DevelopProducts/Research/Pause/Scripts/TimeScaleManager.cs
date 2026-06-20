@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UIElements;
 
 namespace DevelopProducts.Pause
 {
@@ -45,7 +46,14 @@ namespace DevelopProducts.Pause
         /// <returns></returns>
         public PauseToken PauseByType(TimeScaleType type)
         {
-            return PushScaleByType(type: type, scale: 0);
+            var tokens = _timeScalableData
+                .Where(kvp => kvp.Key.TimeScaleType.HasFlag(flag: type))
+                .Select(kvp => kvp.Value.Pause())
+                .ToList();
+
+            // 全オブジェクトのトークンをまとめたトークン
+            // ポーズの一括解除が行える
+            return new PauseToken(() => tokens.ForEach(token => token.Dispose()));
         }
         /// <summary>
         ///     指定タイプのオブジェクトにスケールを適応する
@@ -53,16 +61,12 @@ namespace DevelopProducts.Pause
         /// <param name="type"></param>
         /// <param name="scale"></param>
         /// <returns></returns>
-        public PauseToken PushScaleByType(TimeScaleType type, float scale)
+        public void SetScaleByType(TimeScaleType type, float scale)
         {
-            var tokens = _timeScalableData
-                .Where(kvp => kvp.Key.TimeScaleType.HasFlag(flag: type))
-                .Select(kvp => kvp.Value.Push(scale: scale))
-                .ToList();
-
-            // 全オブジェクトのトークンをまとめたトークン
-            // ポーズの一括解除が行える
-            return new PauseToken(() => tokens.ForEach(token => token.Dispose()));
+            foreach (var (key, value) in _timeScalableData.Where(kvp => kvp.Key.TimeScaleType.HasFlag(type)))
+            {
+                value.SetScale(scale: scale);
+            }
         }
         #endregion
 
@@ -73,7 +77,7 @@ namespace DevelopProducts.Pause
         /// <returns></returns>
         public PauseToken PauseById(int instanceId)
         {
-            return PushById(instanceId: instanceId, scale: 0f);
+            return _timeScalableData.First(kvp => kvp.Key.InstanceId == instanceId).Value.Pause();
         }
         /// <summary>
         ///     指定されたIDのオブジェクトにスケールを積む
@@ -81,9 +85,11 @@ namespace DevelopProducts.Pause
         /// <param name="instanceId"></param>
         /// <param name="scale"></param>
         /// <returns></returns>
-        public PauseToken PushById(int instanceId, float scale)
+        public void SetScaleById(int instanceId, float scale)
         {
-            return _timeScalableData.First(kvp => kvp.Key.InstanceId == instanceId).Value.Push(scale);
+            var obj = _timeScalableData.FirstOrDefault(kvp => kvp.Key.InstanceId == instanceId);
+
+            obj.Value.SetScale(scale: scale);
         }
         #endregion
 
@@ -94,18 +100,21 @@ namespace DevelopProducts.Pause
         /// <returns></returns>
         public PauseToken PauseAll()
         {
-            return PushAll(scale : 0f);
+            var tokens = _timeScalableData.Values.Select(h => h.Pause()).ToList();
+
+            return new PauseToken(() => tokens.ForEach(token => token.Dispose()));
         }
         /// <summary>
         ///     全体に同じタイムスケールを積む
         /// </summary>
         /// <param name="scale"></param>
         /// <returns></returns>
-        public PauseToken PushAll(float scale)
+        public void SelectScaleAll(float scale)
         {
-            var tokens = _timeScalableData.Values.Select(h => h.Push(scale)).ToList();
-
-            return new PauseToken(() => tokens.ForEach(token => token.Dispose()));
+            foreach (var value in _timeScalableData.Values)
+            {
+                value.SetScale(scale: scale);
+            }
         }
         #endregion
         private Dictionary<ITimeScalable, TimeScaleHandler> _timeScalableData = new();
