@@ -14,28 +14,29 @@ namespace DevelopProducts.Pause
         public TimeScaleHandler(float baseScale)
         {
             _baseScale = baseScale;
-            _scaleStack.Push(baseScale);
+        }
+        public float CurrentScale => _pauseCount > 0 ? 0f : _baseScale;
+        /// <summary>
+        ///     ポーズ
+        /// </summary>
+        /// <returns></returns>
+        public PauseToken Pause()
+        {
+            _pauseCount++;
+            return new PauseToken(() => _pauseCount--);
         }
         /// <summary>
-        ///     必ずポーズ時で呼び出してください
-        ///     
+        ///     タイムスケールを上書きする
         /// </summary>
         /// <param name="scale"></param>
-        /// <returns></returns>
-        public PauseToken Push(float scale)
+        public void SetScale(float scale)
         {
-            _scaleStack.Push(scale);
-            return new PauseToken(() => Pop());
+            if (_pauseCount > 0)
+                return;
+
+            _baseScale = scale;
         }
-        private void Pop()
-        {
-            if (_scaleStack.Count > 0)
-            {
-                _scaleStack.Pop();
-            }
-        }
-        public float CurrentScale => _scaleStack.Count > 0 ? _scaleStack.Peek() : _baseScale;
         private float _baseScale;
-        private readonly Stack<float> _scaleStack = new();
+        private int _pauseCount;
     }
 }
