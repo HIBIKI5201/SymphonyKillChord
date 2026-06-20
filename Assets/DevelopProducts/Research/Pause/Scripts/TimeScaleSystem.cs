@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DevelopProducts.Pause
@@ -24,7 +25,7 @@ namespace DevelopProducts.Pause
 
         private void Update()
         {
-            foreach (var obj in TimeScaleManager.GetAll())
+            foreach (var obj in TimeScaleManager.GetAll().ToArray())
             {
                 obj.Tick();
             }
