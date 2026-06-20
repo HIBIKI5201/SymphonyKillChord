@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
@@ -21,10 +21,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="enemyAIController"></param>
         /// <param name="target"></param>
         public void Initialize(EnemyAIController enemyAIController,
-            Transform target)
+            Transform target,
+            ICharacterAnimationController characterAnimationController,
+            CharacterAnimationIndices characterAnimationIndices)
+
         {
             _enemyAIController = enemyAIController;
             _target = target;
+            _characterAnimationController = characterAnimationController;
+            _characterAnimationIndices = characterAnimationIndices;
             _isPlaying = false;
         }
 
@@ -44,6 +49,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _isPlaying = false;
             StopMoving();
             StopRotating();
+            _characterAnimationController?.SetVelocity(Vector2.zero);
         }
 
         /// <summary>
@@ -54,49 +60,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             return _target;
         }
-        /// <summary>
-        ///  初期地点までの移動
-        /// </summary>
-        /// <param name="target"></param>
-        public async ValueTask MoveToTargetAysnc(Vector3 target)
-        {
-            if (!CanUseNavMeshAgent())
-            {
-                return;
-            }
 
-            _navMeshAgent.speed = 3f;
-            _navMeshAgent.isStopped = false;
-            _navMeshAgent.updateRotation = true;
-            if (!_navMeshAgent.SetDestination(target))
-            {
-                return;
-            }
-
-            //経路探索まち
-            while (CanUseNavMeshAgent() && _navMeshAgent.pathPending)
-            {
-                await Task.Yield();
-            }
-
-            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
-            {
-                return;
-            }
-
-            // 到着待ち
-            while (CanUseNavMeshAgent())
-            {
-                if (!_navMeshAgent.pathPending
-                    && _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance
-                    && (!_navMeshAgent.hasPath || _navMeshAgent.velocity.sqrMagnitude <= 0.01f))
-                {
-                    return;
-                }
-
-                await Task.Yield();
-            }
-        }
         /// <summary>
         ///     攻撃可能な位置まで移動する。
         /// </summary>
@@ -113,7 +77,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
 
+                Vector3 velocity = _navMeshAgent.desiredVelocity;
+                _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+
                 PlayFootstepSound();
+            }
+            else
+            {
+                _characterAnimationController?.SetVelocity(Vector2.zero);
             }
         }
 
@@ -128,6 +99,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             _navMeshAgent.isStopped = true;
+            _characterAnimationController?.SetVelocity(Vector2.zero);
         }
 
         public void StopRotating()
@@ -183,11 +155,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Min(0.01f), Tooltip("足音SEの再生間隔。")]
         private float _footstepInterval;
 
+        [SerializeField, Tooltip("攻撃構えのanimationString")]
+        private string _attackAttackReservedAnimation = "Enemy_AttackReserved";
+
         private float _lastFootstepTime;
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
+        private ICharacterAnimationController _characterAnimationController;
+        private CharacterAnimationIndices _characterAnimationIndices;
         private bool _isPlaying;
+        private bool _isReservedAnimationPlaying;
 
         private void Awake()
         {
@@ -220,6 +198,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (!_isPlaying) return;
 
             ParticleController.Instance.PlayParticleReserve(transform.position);
+            PlayOneShot(_attackAttackReservedAnimation);
+            _isReservedAnimationPlaying = true;
         }
         /// <summary>
         ///     攻撃を実行するエフェクトを再生する。
@@ -228,9 +208,19 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!_isPlaying) return;
 
+            // 構えアニメが再生中の場合、ここで明示的にキャンセル
+            if (_isReservedAnimationPlaying)
+            {
+                // 構えアニメをキャンセルするために、速度をゼロにして状態をリセット
+                _characterAnimationController?.SetVelocity(Vector2.zero);
+                _isReservedAnimationPlaying = false;
+            }
+
             ParticleController.Instance.PlayParticle(transform.position);
             PlaySound(_attackSoundSource, null);
             MoveToAttack();
+            // 攻撃アニメを再生（構えアニメより優先）
+            _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
         }
 
         /// <summary>
@@ -318,6 +308,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             StopMoving();
             StopRotating();
+            _characterAnimationController?.SetVelocity(Vector2.zero);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
@@ -326,6 +317,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
 
         }
+
+        private void PlayOneShot(string key)
+        {
+            if (_characterAnimationController == null)
+            {
+                return;
+            }
+
+            if (_characterAnimationIndices != null
+                && _characterAnimationIndices.TryGetOneShotIndex(key, out int index))
+            {
+                _characterAnimationController.TriggerOneShot(index);
+            }
+        }
+
 #if UNITY_EDITOR
         /// <summary>
         ///     足音判定用RayをSceneビューへ描画します。
