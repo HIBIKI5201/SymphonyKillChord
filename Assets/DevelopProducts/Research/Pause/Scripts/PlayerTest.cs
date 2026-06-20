@@ -8,7 +8,7 @@ namespace DevelopProducts.Pause
         public int InstanceId => this.GetInstanceID();
 
         /// <summary>スケールタイプ</summary>
-        public TimeScaleType TimeScaleType => TimeScaleType.Enemy;
+        public TimeScaleType TimeScaleType => TimeScaleType.Player;
 
         public void Inject(TimeScaleData data)
         {
