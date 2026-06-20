@@ -21,6 +21,7 @@ namespace DevelopProducts.Pause
         }
         private void Awake()
         {
+            _timeScaleController = FindAnyObjectByType<TimeScaleController>(); 
             if (_timeScaleController == null)
             {
                 Debug.LogError($"{nameof(TimeScaleByIdButton)}: {nameof(TimeScaleController)} が見つかりません。", this);
@@ -29,8 +30,6 @@ namespace DevelopProducts.Pause
             {
                 Debug.LogError($"{nameof(TimeScaleByIdButton)}: {nameof(_enemy)} が未設定です。", this);
             }
-
-            _timeScaleController = FindAnyObjectByType<TimeScaleController>();
         }
         [SerializeField] private EnemyTest _enemy;
         private TimeScaleController _timeScaleController;
