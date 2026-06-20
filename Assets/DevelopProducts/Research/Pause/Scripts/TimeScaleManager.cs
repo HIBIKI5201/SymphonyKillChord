@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
@@ -77,7 +78,9 @@ namespace DevelopProducts.Pause
         /// <returns></returns>
         public PauseToken PauseById(int instanceId)
         {
-            return _timeScalableData.First(kvp => kvp.Key.InstanceId == instanceId).Value.Pause();
+            var entry =  _timeScalableData.First(kvp => kvp.Key.InstanceId == instanceId);
+
+            return entry.Value != null ? entry.Value.Pause() : new PauseToken(() => { }); 
         }
         /// <summary>
         ///     指定されたIDのオブジェクトにスケールを積む
@@ -88,6 +91,8 @@ namespace DevelopProducts.Pause
         public void SetScaleById(int instanceId, float scale)
         {
             var obj = _timeScalableData.FirstOrDefault(kvp => kvp.Key.InstanceId == instanceId);
+            if (obj.Value == null)
+                return;
 
             obj.Value.SetScale(scale: scale);
         }
