@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace DevelopProducts.Pause
 {
     /// <summary>
@@ -8,25 +5,22 @@ namespace DevelopProducts.Pause
     /// </summary>
     public class TimeScaleData
     {
-        public float Scale { get; private set; } = 1.0f;
-
         /// <summary>
-        ///     スケールを適用した値を返す。
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="handler"></param>
+        public TimeScaleData(TimeScaleHandler handler)
+        {
+            _handler = handler;
+        }
+        public float Scale => _handler.CurrentScale;
+        /// <summary>
+        ///     オブジェクト側がスケールにDeltaTimeを乗算した値を返す
         /// </summary>
         /// <param name="delta"></param>
         /// <returns></returns>
-        public float ApplayScale(float delta)
-        {
-            return Scale * delta;
-        }
+        public float ApplyScale(float delta) => _handler.CurrentScale * delta;
 
-        /// <summary>
-        ///     スケールを変更する。
-        /// </summary>
-        /// <param name="scale"></param>
-        public void ChangeScale(float scale)
-        {
-            Scale = scale;
-        }
+        private readonly TimeScaleHandler _handler;
     }
 }
