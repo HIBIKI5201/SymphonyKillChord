@@ -14,7 +14,7 @@ namespace DevelopProducts.Pause
         /// <param name="onDispose"></param>
         public PauseToken(Action onDispose)
         {
-            _onDispose = onDispose;
+            _onDispose = onDispose ?? throw new ArgumentNullException(nameof(onDispose));
         }
         /// <summary>
         ///     ポーズ解除
