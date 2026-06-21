@@ -80,7 +80,7 @@ Shader "Custom/SilToon/Base"
                 #pragma multi_compile           _ _FORWARD_PLUS
 
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
-
+                
             ENDHLSL
         }
 
