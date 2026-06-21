@@ -1,21 +1,19 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace KillChord.Runtime.View
+public class SettingManager : MonoBehaviour
 {
-    public class SettingManager : MonoBehaviour
-    {
-        [SerializeField]
-        private SettingBase[] _settingBases;
-        [SerializeField]
-        private UIDocument _uiRoot;
+    [SerializeField] private AudioSetting _audioSetting;
+    [SerializeField] private ScreenSetting _screenSetting;
 
-        private void Start()
-        {
-            for(int i = 0; i < _settingBases.Length ; i++)
-            {
-                _settingBases[i].Create(_uiRoot);
-            }
-        }
+    [SerializeField] private UIDocument _uiDocument;
+
+     private AudioSettingData _audioModel;
+     private ScreenSettingData _screenModel;
+
+    private void Start()
+    {
+        _audioSetting.Build(_uiDocument, _audioModel);
+        _screenSetting.Build(_uiDocument, _screenModel);
     }
 }

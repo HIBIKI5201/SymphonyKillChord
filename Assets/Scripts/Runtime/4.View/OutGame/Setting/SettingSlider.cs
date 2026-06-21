@@ -4,23 +4,31 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    [CreateAssetMenu(fileName = "SliderSetting",menuName ="KillChord/Settings/Slider")]
+    [CreateAssetMenu(fileName = "SliderSetting", menuName = "KillChord/Settings/Slider")]
     public class SettingSlider : SettingBase
     {
         [SerializeField]
         private float _slideValue = 0.3f;
+        private Slider _sliderInstance;
 
-        protected override void Bind()
+        protected override void OnInitialize()
         {
-            Slider slider = _instance.Q<Slider>();
-            if(slider == null) {
+            _sliderInstance = _baseInstance.Q<Slider>();
+            if (_sliderInstance == null)
+            {
                 Debug.LogError($"{typeof(Slider)}Prefabをデータにバインドしてください。");
                 return;
             }
-            slider.value = _slideValue;
-            slider.RegisterValueChangedCallback(evt =>
+            
+        }
+
+        public void Bind(Func<float> getter, Action<float> setter)
+        {
+            _sliderInstance.SetValueWithoutNotify(getter());
+
+            _sliderInstance.RegisterValueChangedCallback(evt =>
             {
-               _slideValue = slider.value; 
+                setter(evt.newValue);
             });
         }
     }

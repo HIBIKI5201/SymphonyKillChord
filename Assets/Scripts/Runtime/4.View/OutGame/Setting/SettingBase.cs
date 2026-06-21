@@ -1,39 +1,46 @@
+using System.Linq;
 using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    public abstract class SettingBase : ScriptableObject
+    public abstract partial class SettingBase : ScriptableObject
     {
         [SerializeField]
         protected VisualTreeAsset _visualPrefab;
-        [SerializeField]
-        protected string _titleText = "Master Volume";
-        [SerializeField]
-        protected string _pageName = "AudioPage";
-        [SerializeField]
-        protected string _categoryName = "AudioCategory";
-        protected VisualElement _instance;
+        protected string _pageName;
+        protected string _categoryName;
+        protected VisualElement _baseInstance;
         protected UIDocument _uiRoot;
-        public void Create(UIDocument uiDocument)
+        public void Create(UIDocument uiDocument, Category category,string title)
         {
+            Initialize(category);
             _uiRoot = uiDocument;
             var root = _uiRoot.rootVisualElement;
             var page = root.Q<VisualElement>(_pageName);
             var button = root.Q<Button>(_categoryName);
-            _instance = _visualPrefab.Instantiate();
+            _baseInstance = _visualPrefab.Instantiate();
+
+
             button.text = _pageName;
             button.clicked += () => ShowPage(_pageName);
-            
-            Bind();
-            page.Add(_instance);
+
+            OnInitialize();
+            var label = _baseInstance.Q<Label>();
+            label.text = title;
+            page.Add(_baseInstance);
         }
 
+        private void Initialize(Category category)
+        {
+            _categoryName = $"{category}Category";
+            _pageName = $"{category}Page";
+        }
         /// <summary>
-        ///     UI特有のバインド処理。
+        ///     UI特有の初期化。
         /// </summary>
-        protected abstract void Bind();
+        protected abstract void OnInitialize();
 
         /// <summary>
         ///     ページ切り替え。

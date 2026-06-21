@@ -12,10 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a76aaf30f2f4ee890dd4a4aa5c9739a, type: 3}
   m_Name: DropDownSetting
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SettingDropDown
-  _visualPrefab: {fileID: 0}
-  _titleText: Master Volume
-  _pageName: AudioPage
-  _categoryName: AudioCategory
+  _visualPrefab: {fileID: 9197481963319205126, guid: 579f722811ba8414baab6bdcc474a78e, type: 3}
   _choices:
   - Option
   _selectedIndex: 0

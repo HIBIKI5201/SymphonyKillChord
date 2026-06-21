@@ -12,8 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3f41a6d6aeb42c8a4c89fa74b07fb91, type: 3}
   m_Name: ToggleSetting
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SettingToggle
-  _visualPrefab: {fileID: 0}
-  _titleText: Master Volume
-  _pageName: AudioPage
-  _categoryName: AudioCategory
+  _visualPrefab: {fileID: 9197481963319205126, guid: d835389672e0ec94194f89e2ba633a73, type: 3}
   _isOn: 0

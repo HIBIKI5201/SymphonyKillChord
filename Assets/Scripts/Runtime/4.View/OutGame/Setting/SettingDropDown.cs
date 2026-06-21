@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,12 +12,14 @@ namespace KillChord.Runtime.View
         private List<string> _choices = new List<string> { "Option" };
         [SerializeField]
         private int _selectedIndex;
+        private DropdownField _dropDownInstance;
 
-        protected override void Bind()
+        protected override void OnInitialize()
         {
-            DropdownField dropDown = _instance.Q<DropdownField>();
-            if(dropDown == null) {
-                Debug.LogError($"{typeof(DropdownField)}Prefabをデータにバインドしてください。");
+            _dropDownInstance = _baseInstance.Q<DropdownField>();
+            if (_dropDownInstance == null)
+            {
+                Debug.LogError($"{typeof(DropdownField)}Prefab is not bound.");
                 return;
             }
 
@@ -25,19 +28,34 @@ namespace KillChord.Runtime.View
                 _choices = new List<string>();
             }
 
-            dropDown.choices = _choices;
+            _dropDownInstance.choices = _choices;
 
             if (_choices.Count <= 0)
             {
-                dropDown.index = -1;
+                _dropDownInstance.index = -1;
                 return;
             }
 
             _selectedIndex = Mathf.Clamp(_selectedIndex, 0, _choices.Count - 1);
-            dropDown.index = _selectedIndex;
-            dropDown.RegisterValueChangedCallback(evt =>
+            _dropDownInstance.index = _selectedIndex;
+            _dropDownInstance.RegisterValueChangedCallback(evt =>
             {
-                _selectedIndex = dropDown.index;
+                _selectedIndex = _dropDownInstance.index;
+            });
+        }
+
+        public void Bind(Func<int> getter, Action<int> setter)
+        {
+            if (_dropDownInstance.choices.Count <= 0)
+            {
+                return;
+            }
+
+            int index = Mathf.Clamp(getter(), 0, _dropDownInstance.choices.Count - 1);
+            _dropDownInstance.SetValueWithoutNotify(_dropDownInstance.choices[index]);
+            _dropDownInstance.RegisterValueChangedCallback(evt =>
+            {
+                setter(_dropDownInstance.index);
             });
         }
     }

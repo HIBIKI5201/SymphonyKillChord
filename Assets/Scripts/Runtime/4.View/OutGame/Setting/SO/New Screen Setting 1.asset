@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f0db4666a924cf3906a81a6c4d01fc8, type: 3}
+  m_Name: New Screen Setting 1
+  m_EditorClassIdentifier: KillChord.View::ScreenSetting
+  _dropDownPrefab: {fileID: 11400000, guid: eb6850ab52e48ed47ad99c31f01e90cb, type: 2}
+  _togglePrefab: {fileID: 11400000, guid: 9404bb766beae48469d903fb880609c8, type: 2}
