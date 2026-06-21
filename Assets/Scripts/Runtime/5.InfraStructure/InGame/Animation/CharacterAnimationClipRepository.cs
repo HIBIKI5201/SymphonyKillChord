@@ -26,12 +26,16 @@ namespace KillChord.Runtime.InfraStructure
                 return;
             }
 
-            // カタログエントリをDictionaryに登録する
+            // Key が空のものだけを通常アニメーションとして登録する
             foreach (var entry in catalog.Entries)
             {
                 if (entry.Clip == null)
                 {
-                    Debug.LogWarning($"[CharacterAnimationClipRepository] {entry.State} のClipがnullです。スキップします。");
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(entry.Key))
+                {
                     continue;
                 }
 

@@ -69,6 +69,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
+        /// <summary> スキル編成が保存されたときのイベント。 </summary>
+        public Action OnSkillBuildSaved;
+
+        /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
+        public Action OnSkillLevelUp;
+
         /// <summary> 
         ///     インゲームへ遷移するイベント。
         ///     引数は遷移先のシーン名。

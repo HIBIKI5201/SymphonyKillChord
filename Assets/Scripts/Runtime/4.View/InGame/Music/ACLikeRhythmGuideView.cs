@@ -44,12 +44,21 @@ namespace KillChord.Runtime.View.InGame.Music
                 _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
             }
 
-            int activeIndex = GetIndex(Mathf.Lerp(_beats[0], _beats[^1], normalizeOffset));
+            int activeIndex = (int)(_totalBeatBoxCount * Mathf.Clamp01(normalizeOffset));
             if (activeIndex == _currentOpenIndex)
             {
                 return;
             }
-            SetBeatAnimation(_currentOpenIndex, activeIndex);
+            bool isJustTiming = false;
+            for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
+            {
+                if (activeIndex == _justTimingBeatBoxIndex[i])
+                {
+                    isJustTiming = true;
+                    break;
+                }
+            }
+            SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
         }
         /// <summary>
@@ -57,51 +66,37 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         /// <param name="closeIndex"></param>
         /// <param name="openIndex"></param>
-        public void SetBeatAnimation(int closeIndex, int openIndex)
+        /// <param name="isJustTiming"></param>
+        public void SetBeatAnimation(int openIndex, bool isJustTiming)
         {
-            if (closeIndex == -1 && openIndex == -1)
-            {
-                return;
-            }
 
-            _handle.TryComplete();
-            if (closeIndex != -1)
-            {
-                _handle = LSequence.Create()
-                    .Join(LMotion.Create(_inTimingSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .BindToSizeDeltaX(_leftBeatRectTransforms[closeIndex]))
-                    .Join(LMotion.Create(_inTimingSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .BindToSizeDeltaX(_rightBeatRectTransforms[closeIndex]))
-                    .Run();
-            }
+            float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
             if (openIndex != -1)
             {
-                _leftBeatRectTransforms[openIndex].sizeDelta = new Vector2(_inTimingSizeDelta, _leftBeatRectTransforms[openIndex].sizeDelta.y);
-                _rightBeatRectTransforms[openIndex].sizeDelta = new Vector2(_inTimingSizeDelta, _rightBeatRectTransforms[openIndex].sizeDelta.y);
+                _handles[openIndex].TryComplete();
+                _handles[openIndex] = LSequence.Create()
+                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .WithEase(Ease.OutCirc)
+                        .BindToSizeDeltaY(_leftBeatRectTransforms[openIndex]))
+                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                        .WithEase(Ease.OutCirc)
+                        .BindToSizeDeltaY(_rightBeatRectTransforms[openIndex]))
+                    .Run();
             }
         }
 
-        [Header("左側のビートのガイド")]
 
-        [Tooltip("落ちてくるビート達のRectTransform")]
-        [SerializeField] private RectTransform[] _leftBeatRectTransforms;
-
-        [Tooltip("落ちてくるビート達のImage(Alpha用)")]
-        [SerializeField] private Image[] _leftBeatImages;
-
-
-        [Header("右側のビートのガイド")]
-
-        [Tooltip("落ちてくるビート達のRectTransform")]
-        [SerializeField] private RectTransform[] _rightBeatRectTransforms;
-
-        [Tooltip("落ちてくるビート達のImage(Alpha用)")]
-        [SerializeField] private Image[] _rightBeatImages;
 
         [Space]
 
         [Tooltip("ビートの位置を決めるための配列。(_beatRectTransforms.Length + 1の長さにしてください)")]
         [SerializeField] private float[] _beats;
+
+        [Tooltip("ビートの色")]
+        [SerializeField] private Color[] _beatColor;
+
+        [Tooltip("ビートの幅")]
+        [SerializeField] private float _beatWidth;
 
         [Tooltip("ビートの位置を決めるためのスケール")]
         [SerializeField] private float _scale;
@@ -125,14 +120,23 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField] private float _noTargetAlpha;
 
         [Space]
+        [Tooltip("ジャストタイミング内にあるビートのSizeDelta")]
+        [SerializeField] private float _justTimingSizeDelta;
         [Tooltip("タイミング内にあるビートのSizeDelta")]
         [SerializeField] private float _inTimingSizeDelta;
         [Tooltip("タイミング外にあるビートのSizeDelta")]
         [SerializeField] private float _outTimingSizeDelta;
         [Tooltip("ビートのアニメーションのDuration")]
         [SerializeField] private float _outTimingDuration;
+
+        private RectTransform[] _leftBeatRectTransforms;
+        private Image[] _leftBeatImages;
+        private RectTransform[] _rightBeatRectTransforms;
+        private Image[] _rightBeatImages;
+        private int[] _justTimingBeatBoxIndex;
+        private MotionHandle[] _handles;
+        private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
-        private MotionHandle _handle;
 
         private void Awake()
         {
@@ -148,98 +152,124 @@ namespace KillChord.Runtime.View.InGame.Music
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
-            _handle.TryCancel();
+            for (int i = 0; i < _handles.Length; i++)
+            {
+                _handles[i].TryCancel();
+            }
         }
 
         [ContextMenu("ビートの位置を初期化")]
         private void InitBeatRectTransforms()
         {
+            InitBeatGUI(
+                _canvasGroup.gameObject,
+                _beats,
+                _beatWidth,
+                _outTimingSizeDelta,
+                _scale,
+                out _totalBeatBoxCount,
+                out _leftBeatImages,
+                out _rightBeatImages,
+                out _leftBeatRectTransforms,
+                out _rightBeatRectTransforms,
+                out _handles,
+                out _justTimingBeatBoxIndex);
+
             _currentOpenIndex = -1;
+        }
+        private void InitBeatGUI(
+            in GameObject parent,
+            in float[] beats,
+            float beatWidth,
+            float beatHeight,
+            float scale,
+            out int totalBeatBoxCount,
+            out Image[] leftBeatImages,
+            out Image[] rightBeatImages,
+            out RectTransform[] leftBeatRT,
+            out RectTransform[] rightBeatRT,
+            out MotionHandle[] handles,
+            out int[] justTimingBeatBoxIndex)
+        {
+            //Outの初期化
+            leftBeatImages = null;
+            rightBeatImages = null;
+            leftBeatRT = null;
+            rightBeatRT = null;
+            handles = null;
+            justTimingBeatBoxIndex = null;
 
-            if (_beatPositionImages.Length != _beatPositionRectTransfroms.Length)
+            //スペクトラム風ビートのブロック数を計算
+            float beatLength = Mathf.Max(beats);
+            float guiLength = beatLength * scale;
+            int beatBlockCount = (int)(guiLength / beatWidth);
+            totalBeatBoxCount = beatBlockCount;
+
+            //Out配列の初期化
+            leftBeatImages = new Image[beatBlockCount];
+            rightBeatImages = new Image[beatBlockCount];
+            leftBeatRT = new RectTransform[beatBlockCount];
+            rightBeatRT = new RectTransform[beatBlockCount];
+            handles = new MotionHandle[beatBlockCount];
+            justTimingBeatBoxIndex = new int[beats.Length - 1];
+
+            //スペクトラム風ビートのブロックを生成
+            for (int i = 0; i < beatBlockCount; i++)
             {
-                Debug.LogError("ビート位置を表示するImageとRectTransformの配列の長さが一致していません。\n_beatPositionImages.Length = _beatPositionRectTransfroms.Lengthになるように設定してください。");
-                return;
+                Color color = _beatColor[GetBeatSectionIndex(i, beats, scale, beatWidth)];
+
+                GameObject leftBeat = new GameObject($"LeftBeat_{i}", typeof(RectTransform), typeof(Image));
+                leftBeat.transform.SetParent(parent.transform, false);
+                RectTransform leftRT = leftBeat.GetComponent<RectTransform>();
+                Image leftImage = leftBeat.GetComponent<Image>();
+                leftImage.color = color; //ビートの色を設定
+                leftRT.anchoredPosition = Vector2.left * (i * beatWidth);
+                leftRT.sizeDelta = new Vector2(beatWidth, beatHeight);
+                leftRT.pivot = new Vector2(1f, 0.5f);
+                leftBeatImages[i] = leftImage;
+                leftBeatRT[i] = leftRT;
+
+                GameObject rightBeat = new GameObject($"RightBeat_{i}", typeof(RectTransform), typeof(Image));
+                rightBeat.transform.SetParent(parent.transform, false);
+                RectTransform rightRT = rightBeat.GetComponent<RectTransform>();
+                Image rightImage = rightBeat.GetComponent<Image>();
+                rightImage.color = color; //ビートの色を設定
+                rightRT.anchoredPosition = Vector2.right * (i * beatWidth);
+                rightRT.sizeDelta = new Vector2(beatWidth, beatHeight);
+                rightRT.pivot = new Vector2(0f, 0.5f);
+                rightBeatImages[i] = rightImage;
+                rightBeatRT[i] = rightRT;
             }
 
-            if (_leftBeatRectTransforms.Length != _beats.Length - 1)
+            for (int i = 0; i < justTimingBeatBoxIndex.Length; i++)
             {
-                Debug.LogError("RectTransformとBeatsの配列の長さが一致していません。\n_leftBeatRectTransforms.Length = _beats.Length - 1になるように設定してください。");
-                return;
-            }
-            if (_rightBeatRectTransforms.Length != _beats.Length - 1)
-            {
-                Debug.LogError("RectTransformとBeatsの配列の長さが一致していません。\n_rightBeatRectTransforms.Length = _beats.Length - 1になるように設定してください。");
-                return;
-            }
-
-            float startY;
-            float endY;
-            for (int i = 0; i < _leftBeatRectTransforms.Length; i++)
-            {
-                if (_leftBeatRectTransforms[i] == null)
-                {
-                    Debug.LogError($"_leftBeatRectTransforms[{i}]がnullです。正しいRectTransformを設定してください。");
-                    continue;
-                }
-                if (_rightBeatRectTransforms[i] == null)
-                {
-                    Debug.LogError($"_rightBeatRectTransforms[{i}]がnullです。正しいRectTransformを設定してください。");
-                    continue;
-                }
-
-                startY = _beats[i] * _scale;
-                endY = _beats[i + 1] * _scale;
-                _leftBeatRectTransforms[i].sizeDelta = new Vector2(_outTimingSizeDelta, Mathf.Abs(endY - startY));
-                _leftBeatRectTransforms[i].anchoredPosition = Vector2.up * ((endY + startY) / 2);
-
-                _rightBeatRectTransforms[i].sizeDelta = new Vector2(_outTimingSizeDelta, Mathf.Abs(endY - startY));
-                _rightBeatRectTransforms[i].anchoredPosition = Vector2.up * ((endY + startY) / 2);
-            }
-
-            for (int i = 0; i < _beatPositionRectTransfroms.Length; i++)
-            {
-                Vector2 size = _beatPositionRectTransfroms[i].sizeDelta;
-                size.x = _beats[^1] * _scale;
-                _beatPositionRectTransfroms[i].sizeDelta = size;
+                float position = (beats[i] + beats[i + 1]) / 2;
+                justTimingBeatBoxIndex[i] = (int)(position * scale / beatWidth);
             }
         }
-        private int GetIndex(float targetValue)
+        /// <summary>
+        /// ブロックインデックスがどのbeats区間に属するかを返す
+        /// </summary>
+        /// <param name="blockIndex">ブロックのインデックス</param>
+        /// <param name="beats">ビートの位置配列</param>
+        /// <param name="scale">ビートのスケール</param>
+        /// <param name="beatWidth">1ブロックの幅</param>
+        /// <returns>属するbeats区間のインデックス（beats[i]～beats[i+1]のi）</returns>
+        private int GetBeatSectionIndex(int blockIndex, float[] beats, float scale, float beatWidth)
         {
-            int activeIndex = -1;
-            if (_beats != null && _beats.Length >= 2)
-            {
-                for (int i = 0; i < _beats.Length - 1; i++)
-                {
-                    float a = _beats[i];
-                    float b = _beats[i + 1];
+            // ブロックインデックスをbeats空間に逆変換
+            float position = (blockIndex * beatWidth) / scale;
 
-                    if (a <= b)
-                    {
-                        if (targetValue >= a && targetValue <= b)
-                        {
-                            activeIndex = i;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (targetValue <= a && targetValue >= b)
-                        {
-                            activeIndex = i;
-                            break;
-                        }
-                    }
-                }
-                if (activeIndex == -1)
+            for (int i = 0; i < beats.Length - 1; i++)
+            {
+                if (position >= beats[i] && position < beats[i + 1])
                 {
-                    if (targetValue <= Mathf.Min(_beats[0], _beats[^1]))
-                        activeIndex = 0;
-                    else
-                        activeIndex = _beats.Length - 2;
+                    return i;
                 }
             }
-            return activeIndex;
+
+            // 末尾のブロックは最後の区間に属する
+            return beats.Length - 2;
         }
     }
 }

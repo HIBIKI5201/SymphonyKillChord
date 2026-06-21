@@ -1,51 +1,49 @@
+using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
-    ///     スキルごとの入力進行状態を管理するクラス。
+    ///     スキルの入力進行状態を管理するクラス。
     /// </summary>
     public class SkillInputProgressState
     {
-        /// <summary>
-        ///     指定スキルの現在の一致数を取得する。
-        /// </summary>
-        /// <param name="skillId"> スキルID。 </param>
-        /// <returns> 指定スキルの現在の一致数。 </returns>
-        public int GetMatchedCount(int skillId)
+        public SkillInputProgressState(SkillDefinition definition)
         {
-            return _matchedCounts.TryGetValue(skillId, out int matchedCount)
-                ? matchedCount
-                : 0;
+            _skillDefinition = definition;
+            _currentMachedCount = 0;
+            _nextBeatTypeIndex = 0;
         }
 
-        /// <summary>
-        ///     指定スキルの現在の一致数を設定する。
-        /// </summary>
-        /// <param name="skillId"> スキルID。 </param>
-        /// <param name="matchedCount"> 設定する一致数。 </param>
-        public void SetMatchedCount(int skillId, int matchedCount)
+        public int CurrentMachedCount => _currentMachedCount;
+
+        public void CheckInputBeatType(BeatType beatType)
         {
-            _matchedCounts[skillId] = matchedCount;
+            // パターンが完了している場合はリセット
+            if (_nextBeatTypeIndex >= _skillDefinition.SkillPattern.Signatures.Length)
+            {
+                ResetProgress();
+            }
+            if (beatType == _skillDefinition.SkillPattern.Signatures[_nextBeatTypeIndex])
+            {
+                _currentMachedCount++;
+                _nextBeatTypeIndex++;
+            }
+            else
+            {
+                ResetProgress();
+            }
         }
 
-        /// <summary>
-        ///     指定スキルの現在の一致数をリセットする。
-        /// </summary>
-        /// <param name="skillId"></param>
-        public void Reset(int skillId)
+        public void ResetProgress()
         {
-            _matchedCounts[skillId] = 0;
+            _currentMachedCount = 0;
+            _nextBeatTypeIndex = 0;
         }
 
-        /// <summary>
-        ///     全スキルの現在の一致数をリセットする。
-        /// </summary>
-        public void Clear()
-        {
-            _matchedCounts.Clear();
-        }
-
-        private readonly Dictionary<int, int> _matchedCounts = new();
+        private SkillDefinition _skillDefinition;
+        private int _currentMachedCount;
+        private int _nextBeatTypeIndex;
     }
 }
