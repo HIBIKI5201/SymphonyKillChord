@@ -15,17 +15,33 @@ namespace KillChord.Runtime.View
         [SerializeField]
         private float _slideValue = 0.3f;
         [SerializeField]
-        private string _tabName = "Audio";
-        private VisualElement _elementRoot;
+        private string _pageName = "AudioPage";
+        [SerializeField]
+        private string _categoryName = "AudioCategory";
 
         private void Start()
         {
-            _elementRoot =  _uiRoot.rootVisualElement.Q<VisualElement>(_tabName);
-            VisualElement element = _visualPrefab.Instantiate();
-            element.Q<Label>().text = _titleText;
-            Slider slider = element.Q<Slider>();
+            var root = _uiRoot.rootVisualElement;
+            var page = root.Q<VisualElement>(_pageName);
+            var button = root.Q<Button>(_categoryName);
+            var prefab = _visualPrefab.Instantiate();
+            button.text = _pageName;
+            button.clicked += () => ShowPage(_pageName);
+            // element.Q<Label>().text = _titleText;
+            Slider slider = prefab.Q<Slider>();
             slider.value = _slideValue;
-            _elementRoot.Add(element);
+            page.Add(prefab);
+        }
+
+        private void ShowPage(string pageName)
+        {
+            var root = _uiRoot.rootVisualElement;
+
+            root.Q<VisualElement>("AudioPage").style.display = DisplayStyle.None;
+            root.Q<VisualElement>("ScreenPage").style.display = DisplayStyle.None;
+            root.Q<VisualElement>("KeyPage").style.display = DisplayStyle.None;
+
+            root.Q<VisualElement>(pageName).style.display = DisplayStyle.Flex;
         }
     }
 }
