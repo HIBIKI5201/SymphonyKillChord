@@ -1,6 +1,8 @@
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -49,10 +51,19 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
         /// <returns>非同期操作のタスク。</returns>
         public async ValueTask SaveAsync<T>(T data) where T : SaveBase
         {
-            await data.WriteAsync();
-            lock (_lock)
+            var writeLock = _writeLocks.GetOrAdd(typeof(T), _ => new SemaphoreSlim(1, 1));
+            await writeLock.WaitAsync();
+            try
             {
-                _cache[typeof(T)] = data;
+                await data.WriteAsync();
+                lock (_lock)
+                {
+                    _cache[typeof(T)] = data;
+                }
+            }
+            finally
+            {
+                writeLock.Release();
             }
         }
         /// <summary>
@@ -129,5 +140,6 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
         private readonly Dictionary<Type, Lazy<Task<SaveBase>>> _loadingTasks = new();
         /// <summary>キャッシュと読み込みタスクへのアクセスを同期するためのロックオブジェクト。</summary>
         private readonly object _lock = new();
+        private readonly ConcurrentDictionary<Type, SemaphoreSlim> _writeLocks = new();
     }
 }

@@ -19,8 +19,15 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
             if (!File.Exists(FilePath))
                 return;
 
-            var json = await File.ReadAllTextAsync(FilePath);
-            JsonUtility.FromJsonOverwrite(json, this);
+            try
+            {
+                var json = await File.ReadAllTextAsync(FilePath);
+                JsonUtility.FromJsonOverwrite(json, this);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SaveBase] Failed to read save file: {ex}");
+            }
         }
         /// <summary>
         ///     セーブデータを非同期で保存します。
