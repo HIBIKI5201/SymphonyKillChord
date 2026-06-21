@@ -13,6 +13,7 @@ public class SettingManager : MonoBehaviour
 
     private void Start()
     {
+        _audioModel = new AudioSettingData(master : 1f, bgm : 1f, se : 1f);
         _audioSetting.Build(_uiDocument, _audioModel);
         _screenSetting.Build(_uiDocument, _screenModel);
     }

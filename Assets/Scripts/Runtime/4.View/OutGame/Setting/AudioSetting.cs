@@ -7,23 +7,17 @@ using UnityEngine.UIElements;
 public class AudioSetting : ScriptableObject
 {
     [SerializeField] private SettingSlider _sliderPrefab;
+    [SerializeField] private string[] _audioSettingTitle;
 
     public void Build(UIDocument document, AudioSettingData model)
     {
-        CreateSlider(document,
-            "Master Volume",
-            () => model.MasterVolume,
-            value => model.MasterVolume = value);
-
-        CreateSlider(document,
-            "BGM Volume",
-            () => model.BgmVolume,
-            value => model.BgmVolume = value);
-
-        CreateSlider(document,
-            "SE Volume",
-            () => model.SeVolume,
-            value => model.SeVolume = value);
+        for(int i = 0; i < model.Settings.Length; i++)
+        {
+            CreateSlider(document,
+            _audioSettingTitle[i],
+            () => model.Settings[i],
+            value => model.Settings[i] = value);
+        }
     }
 
     private void CreateSlider(

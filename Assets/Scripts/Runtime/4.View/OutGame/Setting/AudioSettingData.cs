@@ -1,16 +1,16 @@
 using System;
-
 public struct AudioSettingData
 {
-    public AudioSettingData(float[] settings)
+    /// <summary>
+    ///     モデルのオーディオデータ。
+    /// </summary>
+    /// <param name="master">マスター音量</param>
+    /// <param name="bgm">BGM音量</param>
+    /// <param name="se">SE音量</param>
+    public AudioSettingData(float master, float bgm, float se)
     {
-        SettingsFlaot = settings;
-        MasterVolume = settings[0];
-        BgmVolume = settings[1];
-        SeVolume = settings[2];
+        float[] settings = new float[] { master, bgm, se };
+        Settings = settings;
     }
-    public float[] SettingsFlaot { get; set; }
-    public float MasterVolume { get; set; }
-    public float BgmVolume { get; set; }
-    public float SeVolume { get; set; }
+    public float[] Settings { get; set; }
 }
