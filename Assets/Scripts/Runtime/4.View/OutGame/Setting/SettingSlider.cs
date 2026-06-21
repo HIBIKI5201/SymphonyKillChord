@@ -13,6 +13,10 @@ namespace KillChord.Runtime.View
         protected override void Bind()
         {
             Slider slider = _instance.Q<Slider>();
+            if(slider == null) {
+                Debug.LogError($"{typeof(Slider)}Prefabをデータにバインドしてください。");
+                return;
+            }
             slider.value = _slideValue;
             slider.RegisterValueChangedCallback(evt =>
             {

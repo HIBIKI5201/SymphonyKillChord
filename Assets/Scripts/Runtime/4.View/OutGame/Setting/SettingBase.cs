@@ -1,3 +1,4 @@
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -24,7 +25,7 @@ namespace KillChord.Runtime.View
             _instance = _visualPrefab.Instantiate();
             button.text = _pageName;
             button.clicked += () => ShowPage(_pageName);
-
+            
             Bind();
             page.Add(_instance);
         }
@@ -33,6 +34,7 @@ namespace KillChord.Runtime.View
         ///     UI特有のバインド処理。
         /// </summary>
         protected abstract void Bind();
+
         /// <summary>
         ///     ページ切り替え。
         /// </summary>
@@ -47,5 +49,19 @@ namespace KillChord.Runtime.View
 
             root.Q<VisualElement>(pageName).style.display = DisplayStyle.Flex;
         }
+
+        // protected virtual void Info<T>(object message)
+        // {
+        //     Debug.Log($"{typeof(T).Name}型 {message}");
+        // }
+
+        // protected virtual void Warning<T>(object message)
+        // {
+        //     Debug.LogWarning($"{typeof(T).Name}型 {message}");
+        // }
+        // protected virtual void Error<T>(object message)
+        // {
+        //     Debug.LogError($"{typeof(T).Name}型 {message}");
+        // }
     }
 }
