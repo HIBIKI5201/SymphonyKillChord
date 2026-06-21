@@ -6,6 +6,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     public interface IScenarioPlaybackControl
     {
         void SetFastForward(bool enabled);
+        void ToggleAutoAdvance();
         void TogglePause();
         void RequestSkip();
     }

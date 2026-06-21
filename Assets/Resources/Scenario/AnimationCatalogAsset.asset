@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe01b2257ded1bf4084973162b68334b, type: 3}
   m_Name: AnimationCatalogAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AnimationCatalogAsset
-  _entries:
-  - Id: 
-    AssetKey: 
+  _entries: []

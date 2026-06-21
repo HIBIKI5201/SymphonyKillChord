@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
@@ -39,7 +40,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 new CharacterName(data.CharacterName),
                 new HealthEntity(data.MaxHealth),
                 combatSpec,
-                new AttackInterval(data.AttackInterval));
+                new AttackInterval(data.AttackInterval),
+                new Damage(data.BaseDamage),
+                new BuffSystem()
+            );
         }
     }
 }

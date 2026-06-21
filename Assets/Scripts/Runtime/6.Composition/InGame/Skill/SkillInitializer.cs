@@ -1,3 +1,4 @@
+
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.InGame.Music;
@@ -28,9 +29,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         {
             SkillCheckService skillCheckService = new SkillCheckService();
             ISkillVisual[] visuals = _skillVisuals;
-            _skillController = new SkillController(_skillRepository, visuals, null, null);
-            SkillUsecase skillUsecase = new SkillUsecase(_musicSyncService, skillCheckService, _skillController);
-            _skillController.SetUsecase(skillUsecase);
+            //_skillController = new SkillController(_skillRepository, visuals, null, null);
+            // SkillUsecase skillUsecase = new SkillUsecase(_musicSyncService, skillCheckService, _skillController,targetSelectorController);
+            // _skillController.SetUsecase(skillUsecase);
         }
 
         /// <summary>
