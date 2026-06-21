@@ -1,10 +1,12 @@
-using CriWare;
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Music;
+using KillChord.Runtime.View.Persistent.Voice;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,16 +18,40 @@ namespace KillChord.Runtime.View.InGame.Player
     ///     プレイヤー入力を受け取り、移動と攻撃を更新するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
-    public sealed class PlayerView : MonoBehaviour, IDamageable
+    public sealed class PlayerView : MonoBehaviour, IDamageable, IGameplayControllable
     {
         [SerializeField] private string _blendName;
         [SerializeField] private Animator _animator;
         [SerializeField] private Rigidbody _rb;
-        [SerializeField] private CriAtomSource _seSource;
-        
+
+        [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
+        private PlayerAttackWeaponView _attackWeaponView;
+
+        [SerializeField, Tooltip("回避成功時の仮エフェクト")]
+        private ParticleSystem _dodgeEffect;
+        [Space]
+
+        [SerializeField, Tooltip("被弾SE用Source。")]
+        private SoundEffectSource _damageSoundSource;
+        [Space]
+
+        [SerializeField, Tooltip("仮Voice用Source。")]
+        private VoiceSource _voiceSource;
+        [SerializeField, Tooltip("被弾時VoiceのCueName。空の場合はSource側のCueを再生します。")]
+        private string _damageVoiceCueName;
+        [Space]
+
+        [SerializeField, Tooltip("回避SE用Source。")]
+        private SoundEffectSource _dodgeSoundSource;
+
+        private const string ATTACK_BEAT_1_KEY = "Attack_Beat1";
+        private const string ATTACK_BEAT_2_KEY = "Attack_Beat2";
         private bool _isInitialized;
+        private bool _isPlaying;
         private bool _isDodge;
+        private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
+        private Vector2 _dogeVector;
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
@@ -33,6 +59,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
+        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
@@ -41,7 +68,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
         {
-            if (!_isInitialized || _controller == null)
+            if (!_isInitialized || !_isPlaying || _controller == null)
             {
                 return;
             }
@@ -56,7 +83,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 UnRegisterActions();
             }
 
-            _healthHudPresenter?.Dispose();
+            if (_healthHudPresenter != null)
+            {
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter?.Dispose();
+            }
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -64,6 +95,7 @@ namespace KillChord.Runtime.View.InGame.Player
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
             ICharacterAnimationController characterAnimationController,
+             CharacterAnimationIndices animationIndices,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
@@ -71,17 +103,88 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationController = characterAnimationController;
+            _characterAnimationIndices = animationIndices;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
+
+            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
             Debug.Assert(_cameraTransform != null, $"{nameof(_cameraTransform)} is null", this);
 
             _isInitialized = true;
+        }
+
+        /// <summary> ゲームプレイを開始し、入力イベントを購読する。 </summary>
+        public void StartGameplay()
+        {
+            if (!_isInitialized || _playerInputView == null || _isPlaying)
+            {
+                return;
+            }
+
             RegisterActions();
+            _isPlaying = true;
+        }
+
+        /// <summary> ゲームプレイを停止し、入力イベントの購読を解除する。 </summary>
+        public void StopGameplay()
+        {
+            if (!_isPlaying)
+            {
+                return;
+            }
+
+            UnRegisterActions();
+
+            _moveVector = Vector2.zero;
+            _isDodge = false;
+            _isPlaying = false;
+
+            if (_rb != null)
+            {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+
+            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _attackWeaponView?.HideAllWeapons();
+        }
+
+        /// <summary>
+        ///     被弾時のSEと仮Voiceを再生します。
+        /// </summary>
+        public void PlayDamageFeedbackSound()
+        {
+            PlaySound(_damageSoundSource, null);
+            PlayVoice(_voiceSource, _damageVoiceCueName);
+        }
+
+        public void PlaySkillAnimation(string animationKey)
+        {
+            if (string.IsNullOrWhiteSpace(animationKey))
+            {
+                return;
+            }
+
+            _pendingSkillAnimationKey = animationKey;
+        }
+
+        /// <summary>
+        ///    回避成功時の仮エフェクトを再生します。
+        /// </summary>
+        public void PlayDodgeSuccessFeedback()
+        {
+            if (_dodgeEffect == null)
+            {
+                return;
+            }
+
+            _dodgeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _dodgeEffect.Play();
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
@@ -111,7 +214,15 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             if (input.Phase == InputActionPhase.Started)
             {
+                if (_controller.IsDodging)
+                {
+                    return;
+                }
+                _dogeVector = _moveVector;
                 _isDodge = true;
+
+                PlaySound(_dodgeSoundSource, null);
+                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
             }
         }
 
@@ -125,6 +236,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
+            if (_controller.IsDodging)
+            {
+                return;
+            }
+
             if (PlayerAttackController == null)
             {
                 Debug.LogError("[PlayerView] AttackController is null", this);
@@ -133,44 +249,38 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
-                // 判定ビート種別ごとに再生するSEキュー名を切り替える。
-                string cueName = resultBeatType switch
-                {
-                    1 => "HandgunShoot_3",
-                    2 => "RifleShoot_3",
-                    3 => "HandgunShoot_2",
-                    4 => "RifleShoot_1",
-                    6 => "HandgunShoot_1",
-                    8 => "RifleShoot_2",
-                    _ => string.Empty
-                };
+                string animationKey = _pendingSkillAnimationKey;
+                _pendingSkillAnimationKey = null;
 
-                Play(cueName);
-                _characterAnimationController?.TriggerAttack();
+                if (string.IsNullOrWhiteSpace(animationKey))
+                {
+                    animationKey = GetAttackAnimationKey(resultBeatType);
+                }
+
+                int attackIndex = _characterAnimationIndices.Attack;
+
+                if (!string.IsNullOrEmpty(animationKey)
+                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+                {
+                    attackIndex = oneShotIndex;
+                }
+
+                float attackAnimationLength =
+                    _characterAnimationController?.GetOneShotAnimationLength(attackIndex) ?? 0f;
+
+                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
+                _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
                     CancelAttackRotate();
                     _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(PlayerAttackController.CurrentLockOnTargetPosition, PlayerAttackController.AttackRotationSpeed
-                        , _cancellationTokenSource.Token);
+                    RotateToTargetAsync(
+                        PlayerAttackController.CurrentLockOnTargetPosition,
+                        PlayerAttackController.AttackRotationSpeed,
+                        _cancellationTokenSource.Token);
                 }
             }
-        }
-
-        /// <summary>
-        ///     指定したSEキュー名を再生する。
-        /// </summary>
-        private void Play(string cueName)
-        {
-            if (_seSource == null || string.IsNullOrEmpty(cueName))
-            {
-                Debug.LogWarning("[PlayerView] SE再生をスキップしました（source/cueName不正）", this);
-                return;
-            }
-
-            _seSource.cueName = cueName;
-            _seSource.Play();
         }
 
         /// <summary> 入力に基づいて移動と向きを更新する。 </summary>
@@ -194,15 +304,16 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
+                Vector2 dodgeDir = _dogeVector;
                 // 移動入力がない場合は、前方を回避方向とする
-                if (dir.sqrMagnitude <= float.Epsilon)
+                if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
                     var fwd = _cacheTransform.forward;
-                    dir.x = fwd.x;
-                    dir.y = fwd.z;
+                    dodgeDir.x = fwd.x;
+                    dodgeDir.y = fwd.z;
                 }
-
-                _controller.TryDodge(dir, Time.time);
+                dodgeDir = Rotate(dodgeDir, -_cameraTransform.eulerAngles.y);
+                _controller.TryDodge(dodgeDir, Time.time);
                 _isDodge = false;
             }
 
@@ -275,6 +386,55 @@ namespace KillChord.Runtime.View.InGame.Player
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
+        }
+
+        /// <summary>
+        ///     SE Sourceを再生します。
+        /// </summary>
+        private void PlaySound(SoundEffectSource source, string cueName)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                source.Play();
+                return;
+            }
+
+            source.Play(cueName);
+        }
+
+        /// <summary>
+        ///     Voice Sourceを再生します。
+        /// </summary>
+        private void PlayVoice(VoiceSource source, string cueName)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                source.Play();
+                return;
+            }
+
+            source.Play(cueName);
+        }
+
+        //TODO:今はint直置きだから後で調整しやすいようにしとく。
+        private string GetAttackAnimationKey(int beatType)
+        {
+            return beatType switch
+            {
+                1 or 2 or 3 => ATTACK_BEAT_1_KEY,
+                4 or 6 or 8 => ATTACK_BEAT_2_KEY,
+                _ => string.Empty
+            };
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>

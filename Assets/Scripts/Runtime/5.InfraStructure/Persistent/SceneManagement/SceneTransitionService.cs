@@ -3,6 +3,7 @@ using SymphonyFrameWork.System.SceneLoad;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 {
@@ -46,6 +47,115 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     return false;
                 }
             }
+            return true;
+        }
+
+
+        public async Task<bool> LoadAdditiveAsync(
+            string sceneName, 
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                Debug.LogError("[SceneTransitionService] ロード対象のシーン名が空です。");
+                return false;
+            }
+
+            if (SceneLoader.GetExistScene(sceneName, out Scene loadedScene) && loadedScene.isLoaded)
+            {
+                return true;
+            }
+
+            bool loadSuccess = await SceneLoader.LoadScene(
+                sceneName,
+                null,
+                LoadSceneMode.Additive,
+                cancellationToken);
+
+            if (!loadSuccess)
+            {
+                Debug.LogError($"[SceneTransitionService] シーンのAdditiveロードに失敗しました。SceneName: {sceneName}");
+                return false;
+            }
+
+            return true;
+        }
+
+
+        public async Task<bool> UnloadAsync(string sceneName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return false;
+            }
+
+            if (!SceneLoader.IsExist(sceneName))
+            {
+                return false;
+            }
+
+            return await SceneLoader.UnloadScene(
+                sceneName,
+                null,
+                cancellationToken);
+        }
+
+        public async ValueTask<bool> LoadAdditiveAndSetActiveAsync(
+            string toSceneName,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(toSceneName))
+            {
+                Debug.LogError("シーン名が無効です。");
+                return false;
+            }
+
+            if (!SceneLoader.GetExistScene(toSceneName, out _))
+            {
+                bool loadSuccess = await SceneLoader.LoadScene(
+                    toSceneName,
+                    token: cancellationToken)
+                    ;
+                if (!loadSuccess)
+                {
+                    Debug.LogError($"シーンのロードに失敗 : {toSceneName}");
+                    return false;
+                }
+            }
+
+            if (!SceneLoader.SetActiveScene(toSceneName))
+            {
+                Debug.LogError($"ActiveSceneの切り替えに失敗しました。SceneName:{toSceneName}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public async ValueTask<bool> UnloadAndSetActiveAsync(
+            string unloadSceneName, string activeSceneName,
+            CancellationToken cancellationToken)
+        {
+            if (!SceneLoader.SetActiveScene(activeSceneName))
+            {
+                Debug.LogError($"ActiveSceneの復帰に失敗しました。SceneName:{activeSceneName}");
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(unloadSceneName) &&
+                SceneLoader.GetExistScene(unloadSceneName, out _))
+            {
+                bool unloadSuccess = await SceneLoader.UnloadScene(
+                    unloadSceneName,
+                    token: cancellationToken);
+
+                if (!unloadSuccess)
+                {
+                    Debug.LogError($"シーンのUnloadに失敗しました。SceneName:{unloadSceneName}");
+                    return false;
+                }
+            }
+
             return true;
         }
     }

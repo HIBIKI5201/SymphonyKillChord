@@ -11,8 +11,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     {
         /// <summary> 攻撃名を取得する。 </summary>
         public string AttackName => _attackName;
-        /// <summary> 基本ダメージを取得する。 </summary>
-        public float BaseDamage => _baseDamage;
         /// <summary> 攻撃パラメーターセットを取得する。 </summary>
         public AttackParameterSetData AttackParameterSetData => _attackParameterSetData;
         /// <summary> 攻撃パイプラインアセットを取得する。 </summary>
@@ -25,7 +23,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         public float JustDamageMultiplier => _justDamageMultiplier;
 
         [SerializeField, Tooltip("攻撃名")] private string _attackName;
-        [SerializeField, Tooltip("基本ダメージ")] private float _baseDamage;
         [SerializeField, Tooltip("攻撃パラメーターセット")] private AttackParameterSetData _attackParameterSetData;
         [SerializeField, Tooltip("攻撃パイプラインアセット")] private AttackPipelineAsset _attackPipelineAsset;
         [SerializeField, Tooltip("ジャストダメージ倍率")] private float _justDamageMultiplier;

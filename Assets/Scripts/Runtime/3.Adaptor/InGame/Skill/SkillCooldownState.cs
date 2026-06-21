@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
@@ -8,54 +9,34 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public class SkillCooldownState
     {
-        public SkillCooldownState(int[] skillIds)
+        public SkillCooldownState(in SkillDefinition skill)
         {
-            _skillReadyTimestamp = new();
-            if (skillIds != null && skillIds.Length > 0)
-            {
-                for (int i = 0; i < skillIds.Length; i++)
-                {
-                    _skillReadyTimestamp[skillIds[i]] = 0;
-                }
-            }
+            _skillDefinition = skill;
+            _skillReadyTimestamp = 0f;
         }
 
+        public float SkillReadyTimestamp => _skillReadyTimestamp;
+
         /// <summary>
-        ///     発動したスキルにクールダウン完了時間を設定する。
+        ///     スキルのクールダウン完了時間を設定する。
         /// </summary>
-        /// <param name="skill"></param>
         /// <param name="now"></param>
-        public void SetSkillCooldown(in SkillDefinition skill, float now)
+        public void SetSkillCooldown(float now)
         {
-            _skillReadyTimestamp[skill.Id.Value] = now + skill.CooldownTime.Value;
+            _skillReadyTimestamp = now + (float)_skillDefinition.CooldownTime.Value;
         }
 
         /// <summary>
         ///     スキル発動可能かどうかを判定する。
         /// </summary>
-        /// <param name="skill">発動するスキル定義情報</param>
         /// <param name="now">現在時間</param>
         /// <returns></returns>
-        public bool IsSkillReady(in SkillDefinition skill, float now)
+        public bool IsSkillReady(float now)
         {
-            // クールダウン完了時間が登録されていない場合、発動可能
-            if (!_skillReadyTimestamp.ContainsKey(skill.Id.Value))
-            {
-                return true;
-            }
-            // 現在時間がクールダウン完了時間以降の場合、発動可能
-            if (_skillReadyTimestamp[skill.Id.Value] <= now)
-            {
-                return true;
-            }
-            else
-            {
-                // クールダウン完了時間未到達の場合、発動不可
-                return false;
-            }
+            return now >= _skillReadyTimestamp;
         }
 
-        // スキルIDごとのクールダウン完了時間を保持する
-        private Dictionary<int, double> _skillReadyTimestamp;
+        private readonly SkillDefinition _skillDefinition;
+        private float _skillReadyTimestamp;
     }
 }

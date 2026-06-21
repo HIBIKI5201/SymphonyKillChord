@@ -7,9 +7,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// <summary>
     ///     アウトゲーム UI のイベントを管理するクラス。
     ///     イベント管理クラスのため、他のクラスよりも早く初期化されるように
-    ///     DefaultExecutionOrder を -100 に設定しています。
+    ///     DefaultExecutionOrder を -200 に設定しています。
     /// </summary>
-    [DefaultExecutionOrder(-100)]
+    [DefaultExecutionOrder(-200)]
     public class OutGameUIEvent : MonoBehaviour
     {
         /// <summary> ホーム画面を表示するイベント。 </summary>
@@ -24,8 +24,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 改造画面を表示するイベント。 </summary>
         public Action OnShownSkillBuildScreen;
 
-        /// <summary> 戦闘準備画面を表示するイベント。 </summary>
-        public Action OnShownBattlePreparationScreen;
+        /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
+        public Action<bool> OnOutGameUiVisibilityChanged;
+
+        /// <summary> 
+        ///     戦闘準備画面を表示するイベント。
+        ///     引数は遷移先のシーン名。
+        /// </summary>
+        public Action<string> OnShownBattlePreparationScreen;
 
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
@@ -39,14 +45,41 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
         public Action OnStageDetailClosed;
 
+        /// <summary> スキルノードが選択された時のイベント。 </summary>
+        public Action<string> OnSkillNodeSelected;
+
+        /// <summary> スキルノードが選択された時のイベント。 </summary>
+        public Action OnSkillUnlocked;
+
+        /// <summary> スキル詳細画面を閉じるイベント。 </summary>
+        public Action<int> OnSkillDetailClosed;
+
+        /// <summary> スキルプレビュー動画ボタンをクリックした時のイベント。 </summary>
+        public Action OnSkillPreviewButtonClicked;
+
+        /// <summary> スキルプレビュー動画の閉じるボタンをクリックした時のイベント。 </summary>
+        public Action OnSkillPreviewCloseButtonClicked;
+
         /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを整数で通知します。 </summary>
         public Action<int> OnStageCleared;
 
+        /// <summary> 出撃ボタンが押されたことを通知するイベント。 </summary>
+        public Action OnSortieRequested;
+
+        /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
+        public Action OnStageSelectScreenCompleted;
+
+        /// <summary> スキル編成が保存されたときのイベント。 </summary>
+        public Action OnSkillBuildSaved;
+
+        /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
+        public Action OnSkillLevelUp;
+
         /// <summary> 
         ///     インゲームへ遷移するイベント。
-        ///     TODO : 遷移先のステージを指定できるようにする（OnStageNodeSelected で選択されたステージのIDを引数で受け取るなど）。
+        ///     引数は遷移先のシーン名。
         /// </summary>
-        public Action OnStartGame;
+        public Action<string> OnStartGame;
 
         /// <summary>
         ///     アウトゲームのUIイベントを ServiceLocator に登録します。
