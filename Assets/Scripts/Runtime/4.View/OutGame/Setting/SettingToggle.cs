@@ -1,19 +1,31 @@
+using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
     public class SettingToggle : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
+        [SerializeField]
+        private VisualTreeAsset _visualPrefab;
+        [SerializeField]
+        private UIDocument _uiRoot;
+        [SerializeField]
+        private string _titleText = "Master Volume";
+        [SerializeField]
+        private float _slideValue = 0.3f;
+        [SerializeField]
+        private string _tabName = "Audio";
+        private VisualElement _elementRoot;
 
-        // Update is called once per frame
-        void Update()
+        private void Start()
         {
-        
+            _elementRoot =  _uiRoot.rootVisualElement.Q<VisualElement>(_tabName);
+            VisualElement element = _visualPrefab.Instantiate();
+            element.Q<Label>().text = _titleText;
+            Slider slider = element.Q<Slider>();
+            slider.value = _slideValue;
+            _elementRoot.Add(element);
         }
     }
 }
