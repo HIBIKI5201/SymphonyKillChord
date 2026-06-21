@@ -8,6 +8,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\Smears.hlsl"
 
 
 float _PerspectiveRemovalRatio;
@@ -19,6 +20,9 @@ float _ZOffset;
 float _IsSmoothNormal;
 float _OutlineWidthLit;
 float _OutlineWidthShadow;
+
+float3 _SmearsDirection;
+float3 _SmearsPower;
 
 float4 _OutlineColor;
 
@@ -48,11 +52,14 @@ v2f vert(appdata v)
     // ビュー方向に依存する Z 成分の補正を行うユーティリティ。
     normalOS = GetViewZeroZ_OS(normalOS);
     
+    //normalOS = ApplySmear(normalOS, v.uv3, normalOS, float3(0.7, 0.7, 0));
+    
     // 頂点位置を法線方向に押し出してアウトライン幅を作る。
     float3 pushedOS = v.positionOS.xyz + normalOS * lerp(_OutlineWidthShadow, _OutlineWidthLit, GetOutlineThicknessRatio(v.positionOS, v.normalOS));
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+    pushedOS = ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection);
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     
