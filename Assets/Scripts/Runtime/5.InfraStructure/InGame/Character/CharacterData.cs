@@ -1,5 +1,6 @@
 using UnityEngine;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Battle;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
@@ -23,6 +24,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         public AttackDefinitionData[] AttackDifinitions =>
             _attackDifinitions == null ? null : (AttackDefinitionData[])_attackDifinitions.Clone();
 
+        /// <summary> キャラクターの攻撃の基本ダメージを取得する。 </summary>
+        public int BaseDamage => _baseDamage;
+
         [SerializeField, Tooltip("キャラクターの名前。")]
         private string _characterName;
 
@@ -34,5 +38,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
 
         [SerializeField, Tooltip("キャラクターが使用する攻撃の定義リスト。")]
         private AttackDefinitionData[] _attackDifinitions;
+        [SerializeField, Tooltip("キャラクターの攻撃の基本ダメージ。")]
+        private int _baseDamage;
     }
 }

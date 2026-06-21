@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Camera.Target;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Application.InGame.Skill;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
@@ -8,7 +9,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera.Target
     /// <summary>
     ///     ロックオン対象の選択と、対象に紐づくキャラクターエンティティの取得をセレクターへ委譲するコントローラークラス。
     /// </summary>
-    public class TargetSelectorController
+    public class TargetSelectorController : ISkillTargetResolver
     {
         /// <summary>
         ///     セレクターとレジストリコントローラーを受け取り、コントローラーを初期化するコンストラクタ。
