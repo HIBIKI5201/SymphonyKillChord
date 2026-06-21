@@ -16,6 +16,7 @@ MonoBehaviour:
   _pattern: 030000000300000003000000
   _skillEffect:
     rid: 8153521114334888055
+  _animationKey: Skill_1
   references:
     version: 2
     RefIds:

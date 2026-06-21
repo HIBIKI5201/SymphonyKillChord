@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillBuild/UIToolkit/USS/SkillIcon.uss?fileID=7433441132597879392&amp;guid=1d17646a40a8a0f4b8aff5e72afa5bd4&amp;type=3#SkillIcon"/>
+    <ui:VisualElement name="SkillIconTemplate" class="skill-icon"/>
+</ui:UXML>

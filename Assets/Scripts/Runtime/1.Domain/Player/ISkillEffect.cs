@@ -10,6 +10,6 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary>
         /// スキル効果を実行する。
         /// </summary>
-        void Execute();
+        void Execute(SkillEffectContext context);
     }
 }

@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
     /// <summary>
     ///     音楽同期機能の初期化を行うクラス。
     /// </summary>
-    public class MusicSyncInitializer : MonoBehaviour
+    public class MusicSyncInitializer : MonoBehaviour, IGameplayControllable
     {
         /// <summary> 音楽同期コントローラー。 </summary>
         public MusicSyncController MusicSyncController { get; private set; }
@@ -26,19 +27,44 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public void Initialize()
         {
             MusicSyncState = new();
-            var musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
+            _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
             MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm, _justTimingThreshold), RhythmJustService.Instance.TriggerJustHit);
             MusicSyncController = new(MusicSyncState, MusicSyncService);
             _musicSyncView.Bind(
-                musicPlayer,
+                _musicPlayer,
                 MusicSyncState,
                 MusicSyncController,
                 _testBpm
             );
 
-            musicPlayer.MusicVM.UpdateMusicCue(_testCue);
             ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
             ServiceLocator.RegisterInstance<MusicSyncState>(MusicSyncState);
+        }
+
+        /// <summary>
+        ///　    ゲームプレイを開始し、音楽同期機能を有効にする。
+        /// </summary>
+        public void StartGameplay()
+        {
+            if (_musicPlayer == null)
+            {
+                return;
+            }
+
+            _musicPlayer.MusicVM.UpdateMusicCue(_testCue);
+        }
+
+        /// <summary>
+        ///    ゲームプレイを停止し、音楽同期機能を無効にする。
+        /// </summary>
+        public void StopGameplay()
+        {
+            if (_musicPlayer == null)
+            {
+                return;
+            }
+
+            _musicPlayer.MusicVM.UpdateMusicCue(string.Empty);
         }
 
         [Tooltip("音楽同期View。")]
@@ -50,5 +76,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [Tooltip("ジャスト判定の閾値。")]
         [SerializeField] private float _justTimingThreshold;
 
+        private MusicPlayer _musicPlayer;
     }
 }

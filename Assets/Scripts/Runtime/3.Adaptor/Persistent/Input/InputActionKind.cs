@@ -14,5 +14,11 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
         Attack = 102,
         Look = 103,
         LockOn = 104,
+        ScenarioAdvance = 200,
+        ScenarioFastForward = 201,
+        ScenarioPause = 202,
+        ScenarioSkip = 203,
+        ScenarioAuto = 204,
+        ScenarioHideUI = 205,
     }
 }

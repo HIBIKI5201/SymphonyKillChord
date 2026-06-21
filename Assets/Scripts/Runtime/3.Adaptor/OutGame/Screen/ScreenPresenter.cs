@@ -25,7 +25,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         {
             ScreenViewDTO screenViewDTO = new(
                 result.ScreenToHideId,
-                result.ScreenToShowId);
+                result.ScreenToShowId,
+                result.TargetSceneName);
 
              return _screenViewModel.Apply(in screenViewDTO, token);
         }

@@ -56,7 +56,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
 
             return new AttackDefinition(
                 data.AttackName,
-                new Damage(data.BaseDamage),
                 attackParameterSet,
                 data.AttackPipelineAsset.Create(),
                 resolvedBeatType,
