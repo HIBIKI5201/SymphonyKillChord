@@ -2,6 +2,7 @@ using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -78,7 +79,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         [SerializeField] private EnemyPools _enemyPools;
-        [SerializeField, Tooltip("生成位置")] private Transform _spawnPoint;
+        [FormerlySerializedAs("_spawnPoint")]
+        [SerializeField, Tooltip("マップ外側の実生成地点")]
+        private Transform _outsideSpawnPoint;
         [SerializeField, Tooltip("生成距離")] private float _spawnDistance;
         [SerializeField, Tooltip("生成間隔")] private float _spawnInterval;
         [SerializeField, Tooltip("一度の生成数")] private int _spawnBatchCount = 4;
@@ -119,9 +122,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
                 EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
-                lifeCycle.Activate(_spawnPositions[i], HandleInfantryDeactivated);
-                lifeCycle.StartGameplay();
-                _activeEnemies.Add(lifeCycle);
+                SpawnEnemyAsync(lifeCycle, _spawnPositions[i]);
                 _spawnCount++;
             }
         }
@@ -159,6 +160,55 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     _activeEnemies.RemoveAt(i);
                 }
             }
+        }
+
+        /// <summary>
+        ///     マップ外側から生成地点まで歩かせてから、敵を戦闘状態にする。
+        /// </summary>
+        /// <param name="lifeCycle">生成する敵のライフサイクル。</param>
+        /// <param name="activePosition">戦闘を開始する生成地点。</param>
+        private async void SpawnEnemyAsync(EnemyLifeCycle lifeCycle, Vector3 activePosition)
+        {
+            if (_outsideSpawnPoint == null)
+            {
+                Debug.LogError("[EnemyInfantrySpawner] マップ外側の実生成地点が未設定。");
+                lifeCycle.Activate(activePosition, HandleInfantryDeactivated);
+                _activeEnemies.Add(lifeCycle);
+                StartOrStopSpawnedEnemy(lifeCycle);
+                return;
+            }
+
+            try
+            {
+                await lifeCycle.EnterFromOutsideAsync(
+                    _outsideSpawnPoint.position,
+                    activePosition,
+                    HandleInfantryDeactivated);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception);
+                if (_spawnCount > 0) _spawnCount--;
+                return;
+            }
+
+            _activeEnemies.Add(lifeCycle);
+            StartOrStopSpawnedEnemy(lifeCycle);
+        }
+
+        /// <summary>
+        ///     スポナーの再生状態に合わせて、生成完了した敵の処理を切り替える。
+        /// </summary>
+        /// <param name="lifeCycle">生成完了した敵。</param>
+        private void StartOrStopSpawnedEnemy(EnemyLifeCycle lifeCycle)
+        {
+            if (_isPlaying)
+            {
+                lifeCycle.StartGameplay();
+                return;
+            }
+
+            lifeCycle.StopGameplay();
         }
     }
 }

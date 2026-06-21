@@ -93,7 +93,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 gate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            InputController controller = new InputController(gate, _usecase);
+            ScenarioInputController controller = new ScenarioInputController(gate, _usecase, _usecase);
             TextEventHandler textHandle = new TextEventHandler(
                 presenterFacade,
                 _usecase,
