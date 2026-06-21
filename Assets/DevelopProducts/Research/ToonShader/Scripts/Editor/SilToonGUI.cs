@@ -12,6 +12,7 @@ namespace DevelopProducts.ToonShader
         static bool showNormal = true;
         static bool showFresnel = true;
         static bool showOutline = true;
+        static bool showSmears = true;
         static bool showPerspective = true;
         static bool showRenderState = false;
 
@@ -60,6 +61,9 @@ namespace DevelopProducts.ToonShader
             MaterialProperty smoothNormal = Find("_IsSmoothNormal", props);
             MaterialProperty outlineWidthLit = Find("_OutlineWidthLit", props);
             MaterialProperty outlineWidthShadow = Find("_OutlineWidthShadow", props);
+
+            MaterialProperty smearsPower = Find("_SmearsPower", props);
+            MaterialProperty smearsDirection = Find("_SmearsDirection", props);
 
             MaterialProperty perspectiveRatio = Find("_PerspectiveRemovalRatio", props);
             MaterialProperty perspectiveRadius = Find("_PerspectiveRemovalRadius", props);
@@ -128,6 +132,12 @@ namespace DevelopProducts.ToonShader
                 materialEditor.ShaderProperty(outlineWidthLit, new GUIContent("Width (Lit)", "明部の太さ"));
                 materialEditor.ShaderProperty(outlineWidthShadow, new GUIContent("Width (Shadow)", "影部の太さ"));
                 EditorGUI.indentLevel--;
+            });
+
+            DrawSection("Smears", ref showSmears, () =>
+            {
+                materialEditor.ShaderProperty(smearsPower, new GUIContent("Power", "スメアの変位量"));
+                materialEditor.VectorProperty(smearsDirection, "Direction (World)");
             });
 
             DrawSection("Perspective Removal", ref showPerspective, () =>

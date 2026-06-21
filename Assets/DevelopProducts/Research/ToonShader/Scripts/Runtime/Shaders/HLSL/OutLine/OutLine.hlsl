@@ -22,7 +22,7 @@ float _OutlineWidthLit;
 float _OutlineWidthShadow;
 
 float3 _SmearsDirection;
-float3 _SmearsPower;
+float _SmearsPower;
 
 float4 _OutlineColor;
 
@@ -59,7 +59,7 @@ v2f vert(appdata v)
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
-    pushedOS = ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection);
+    pushedOS = ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection,_SmearsPower);
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     

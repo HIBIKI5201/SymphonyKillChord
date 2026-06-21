@@ -28,6 +28,8 @@ Shader "Custom/SilToon/Base"
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
+        _SmearsPower ("Smears Power", Float) = 0.0
+        _SmearsDirection ("Smears Direction", Vector,3) = (0, 1, 0)
 
         [Header(PerspectiveRemoval)]
         _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0

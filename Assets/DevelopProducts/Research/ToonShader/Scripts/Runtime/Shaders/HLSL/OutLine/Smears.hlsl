@@ -34,7 +34,8 @@ float3 ApplySmear(
     float3 positionOS,
     float2 uv,
     float3 normalOS,
-    float3 smearDirectionWS)
+    float3 smearDirectionWS,
+    float smearsPower)
 {
     float3 smearDirectionOS =  TransformWorldToObject(smearDirectionWS);
     
@@ -42,7 +43,7 @@ float3 ApplySmear(
     float3 noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 10) * smearDirectionOS;
     noise *= saturate(dot(normalOS, smearDirectionOS));
 
-    return positionOS + noise * _SmearsPower;
+    return positionOS + noise * smearsPower;
 }
 
 #endif
