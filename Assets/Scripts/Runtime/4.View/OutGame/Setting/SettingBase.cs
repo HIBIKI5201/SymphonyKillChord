@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    public abstract partial class SettingBase : ScriptableObject
+    public abstract partial class SettingBase : MonoBehaviour
     {
         [SerializeField]
         protected VisualTreeAsset _visualPrefab;

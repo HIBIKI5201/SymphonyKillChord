@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f0db4666a924cf3906a81a6c4d01fc8, type: 3}
   m_Name: New Screen Setting 1
   m_EditorClassIdentifier: KillChord.View::ScreenSetting
-  _dropDownPrefab: {fileID: 11400000, guid: eb6850ab52e48ed47ad99c31f01e90cb, type: 2}
-  _togglePrefab: {fileID: 11400000, guid: 9404bb766beae48469d903fb880609c8, type: 2}
+  _dropDownPrefab: {fileID: 3710425954661281979, guid: 99cb92f454d4e054d909058d7b853fe5, type: 3}
+  _togglePrefab: {fileID: 4194098846092821378, guid: 2c80a27a3c0b4d44686aefd0e07bd5d9, type: 3}

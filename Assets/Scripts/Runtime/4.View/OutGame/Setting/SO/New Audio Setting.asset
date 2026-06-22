@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 997fece38d195964795e51837e024211, type: 3}
   m_Name: New Audio Setting
   m_EditorClassIdentifier: KillChord.View::AudioSetting
-  _sliderPrefab: {fileID: 11400000, guid: 07a3c5ab328292e4d914aae24e8dd209, type: 2}
+  _sliderPrefab: {fileID: 727962246781114858, guid: 972a8ed46857c474cb8771ca47d52c19, type: 3}
+  _audioSettingTitle:
+  - MasterVolume
+  - BGMVolume
+  - SEVolume
+  - VoiceVolume

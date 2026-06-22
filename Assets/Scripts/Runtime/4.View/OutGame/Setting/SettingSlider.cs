@@ -4,7 +4,6 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    [CreateAssetMenu(fileName = "SliderSetting", menuName = "KillChord/Settings/Slider")]
     public class SettingSlider : SettingBase
     {
         [SerializeField]

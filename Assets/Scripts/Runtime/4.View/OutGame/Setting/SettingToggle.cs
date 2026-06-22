@@ -4,7 +4,6 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    [CreateAssetMenu(fileName = "ToggleSetting", menuName = "KillChord/Settings/Toggle")]
     public class SettingToggle : SettingBase
     {
         [SerializeField]

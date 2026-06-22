@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
-    [CreateAssetMenu(fileName = "DropDownSetting", menuName = "KillChord/Settings/DropDown")]
     public class SettingDropDown : SettingBase
     {
         [SerializeField]

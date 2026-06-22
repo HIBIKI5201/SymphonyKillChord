@@ -11,6 +11,8 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     [DefaultExecutionOrder(-1000)]
     public class SoundEffectInitializer : MonoBehaviour
     {
+        [SerializeField]
+        private bool _isDebug = true;
         private static bool _initialized;
 
         private void Awake()
@@ -20,6 +22,16 @@ namespace KillChord.Runtime.Composition.Persistent.Music
 
             ServiceLocator.RegisterInstance(new SoundEffectVolumeManager());
             ServiceLocator.RegisterInstance(new VoiceVolumeManager());
+        }
+
+        private void Update()
+        {
+            if (_isDebug)
+            {
+                Debug.Log(ServiceLocator.GetInstance<VoiceVolumeManager>().GetVolume());
+                Debug.Log(ServiceLocator.GetInstance<SoundEffectVolumeManager>().GetVolume());
+            }
+
         }
     }
 }
