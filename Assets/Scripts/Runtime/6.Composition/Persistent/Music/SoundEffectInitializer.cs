@@ -13,13 +13,12 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     {
         [SerializeField]
         private bool _isDebug = true;
-        private static bool _initialized;
+        private bool _initialized = false;
 
         private void Awake()
         {
             if (_initialized) return;
             _initialized = true;
-
             ServiceLocator.RegisterInstance(new SoundEffectVolumeManager());
             ServiceLocator.RegisterInstance(new VoiceVolumeManager());
         }

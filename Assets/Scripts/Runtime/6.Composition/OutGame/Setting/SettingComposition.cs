@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -10,21 +11,25 @@ public class SettingComposition : MonoBehaviour
     [SerializeField] private ScreenSetting _screenSetting;
 
     [SerializeField] private UIDocument _uiDocument;
-    [SerializeField] private Transform _parent;
+    [SerializeField] private GameObject _parent;
      private AudioSettingData _audioModel;
      private ScreenSettingData _screenModel;
+     private bool _isShowScrren = false;
 
     private void Start()
     {
         var seManager = ServiceLocator.GetInstance<SoundEffectVolumeManager>();
         var voiceManager = ServiceLocator.GetInstance<VoiceVolumeManager>();
-
-
+        var outGameUiEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
         _audioModel = new AudioSettingData(master : 1f, bgm : 1f, se : seManager.GetVolume(),voice : voiceManager.GetVolume());
-
+        outGameUiEvent.OnShownSettingScreen += () =>
+        {
+            _isShowScrren = !_isShowScrren;
+           _parent.SetActive(_isShowScrren);  
+        };
         _audioModel.SEVolume += seManager.SetVolume;
         _audioModel.VoiceVolume += voiceManager.SetVolume;
-        _audioSetting.Build(_uiDocument, _audioModel,_parent);
+        _audioSetting.Build(_uiDocument, _audioModel,_parent.transform);
         _screenSetting.Build(_uiDocument, _screenModel);
     }
 }
