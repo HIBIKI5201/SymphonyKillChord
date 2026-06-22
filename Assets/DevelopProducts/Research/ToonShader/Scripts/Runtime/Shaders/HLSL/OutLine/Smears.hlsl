@@ -30,20 +30,23 @@ float ValueNoise(float2 uv)
 }
 
 // UV座標からノイズを生成し、vertex座標に加算する
-float3 ApplySmear(
+void ApplySmear(
     float3 positionOS,
     float2 uv,
     float3 normalOS,
     float3 smearDirectionWS,
-    float smearsPower)
+    float smearsPower,
+    out float3 smearOS,
+    out float alpha)
 {
     float3 smearDirectionOS =  TransformWorldToObject(smearDirectionWS);
     
     float offset = frac(_Time.y / 50) * 200;
-    float3 noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 10) * smearDirectionOS;
-    noise *= saturate(dot(normalOS, smearDirectionOS));
+    float noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 10);
+    float3 direction = noise * smearDirectionOS * saturate(dot(normalOS, smearDirectionOS));
 
-    return positionOS + noise * smearsPower;
+    smearOS = positionOS + direction * smearsPower;
+    alpha = max(0.1f, saturate(1 - noise * 2));
 }
 
 #endif

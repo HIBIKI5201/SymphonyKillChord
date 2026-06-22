@@ -12,7 +12,7 @@ Shader "Custom/SilToon/Base"
          [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
         _FadeAlpha("Fade Alpha",Range(0,1)) = 0
 
-        [Headedr(Normal)]
+        [Header(Normal)]
         [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
@@ -28,6 +28,9 @@ Shader "Custom/SilToon/Base"
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
+
+        [Header(Smears)]
+        [Toggle(SMEARS_ON)] _SmearsOn("Smears On",Float) = 0 
         _SmearsPower ("Smears Power", Float) = 0.0
         _SmearsDirection ("Smears Direction", Vector,3) = (0, 1, 0)
 
@@ -96,7 +99,7 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex vert
                 #pragma fragment frag
-                #pragma multi_compile _ FADE_ON
+                #pragma multi_compile _ FADE_ON SMEARS_ON
                 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
                 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
                 #pragma multi_compile _ _SHADOWS_SOFT

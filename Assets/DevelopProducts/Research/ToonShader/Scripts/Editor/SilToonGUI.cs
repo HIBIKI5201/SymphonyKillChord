@@ -62,6 +62,7 @@ namespace DevelopProducts.ToonShader
             MaterialProperty outlineWidthLit = Find("_OutlineWidthLit", props);
             MaterialProperty outlineWidthShadow = Find("_OutlineWidthShadow", props);
 
+            MaterialProperty smearsOn = Find("_SmearsOn", props);
             MaterialProperty smearsPower = Find("_SmearsPower", props);
             MaterialProperty smearsDirection = Find("_SmearsDirection", props);
 
@@ -136,6 +137,7 @@ namespace DevelopProducts.ToonShader
 
             DrawSection("Smears", ref showSmears, () =>
             {
+                materialEditor.ShaderProperty(smearsOn, new GUIContent("SmearsOn", "スメアの有効化"));
                 materialEditor.ShaderProperty(smearsPower, new GUIContent("Power", "スメアの変位量"));
                 materialEditor.VectorProperty(smearsDirection, "Direction (World)");
             });

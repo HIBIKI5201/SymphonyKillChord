@@ -37,12 +37,14 @@ struct v2f
 {
     float4 pos : SV_POSITION;
     float4 screenPos : TEXCOORD0;
+    float smearsAlpha : TEXCOORD1;
 };
 
 v2f vert(appdata v)
 {
     // vert: 頂点シェーダーの主要処理ブロック
     v2f o;
+    o.smearsAlpha = 1;
     
     // UV を用いて滑らかな法線を取得。必要に応じて頂点法線の代わりに使う。
     float3 smoothNormalOS = GetSmoothNormalFromUV(v.uv3, v.normalOS, v.tangentOS);
@@ -59,7 +61,12 @@ v2f vert(appdata v)
     
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
-    pushedOS = ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection,_SmearsPower);
+    
+#ifdef SMEARS_ON
+    ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection, _SmearsPower, 
+    pushedOS,
+    o.smearsAlpha);
+#endif
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     
@@ -71,9 +78,10 @@ v2f vert(appdata v)
 
 float4 frag(v2f i) : SV_Target
 {
-#ifdef FADE_ON
+#if  defined(FADE_ON) || defined(SMEARS_ON)
     float2 screenPixel = (i.screenPos.xy / i.screenPos.w) * _ScreenParams.xy / 2;
-    clip(_FadeAlpha - BayerDither(screenPixel) - 0.0001);
+    float fade = (_FadeAlpha * i.smearsAlpha) - BayerDither(screenPixel) - 0.0001;
+    clip(fade);
 #endif
     return _OutlineColor;
 }
