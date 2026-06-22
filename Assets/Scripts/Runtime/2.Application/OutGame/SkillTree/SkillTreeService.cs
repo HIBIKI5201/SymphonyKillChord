@@ -1,6 +1,10 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.OutGame.SkillTree
@@ -14,6 +18,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         {
             _skillNodeEntityDict = skillNodeEntityDict;
             _visitedNodes = new();
+            _savedataSystem = ServiceLocator.GetInstance<SavedataSystem>();
         }
         /// <summary>
         ///     指定されたノードまでの経路にある、全てのノードを解放するための必要ポイントを
@@ -55,6 +60,28 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     セーブデータのスキル解放情報をロードする。
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask<SavedataSkillUnlock> LoadSkillUnlockData()
+        {
+            return await _savedataSystem.LoadAsync<SavedataSkillUnlock>();
+        }
+
+        /// <summary>
+        ///     スキル解放情報をセーブする。
+        /// </summary>
+        /// <param name="unlockedNodes"></param>
+        /// <param name="currentPoints"></param>
+        public async Task SaveSkillUnlockData(List<int> unlockedNodes, int currentPoints)
+        {
+            SavedataSkillUnlock savedata = await _savedataSystem.LoadAsync<SavedataSkillUnlock>();
+            savedata.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
+            savedata.SetResearchPoint(currentPoints);
+            await _savedataSystem.SaveAsync<SavedataSkillUnlock>(savedata);
+        }
+
+        /// <summary>
         ///     指定されたノードまでの経路を取得する。
         /// </summary>
         /// <param name="node"></param>
@@ -78,5 +105,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
         private Dictionary<int, SkillNodeEntity> _skillNodeEntityDict;
         private HashSet<SkillNodeEntity> _visitedNodes;
+        private SavedataSystem _savedataSystem;
     }
 }
