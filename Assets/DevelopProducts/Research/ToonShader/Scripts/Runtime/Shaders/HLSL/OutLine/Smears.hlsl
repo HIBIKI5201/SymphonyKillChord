@@ -7,8 +7,8 @@
 // UV座標からハッシュ値を生成
 float Hash21(float2 uv)
 {
-    uv = frac(uv * float2(127.1, 311.7));
-    uv += dot(uv, uv + 45.32);
+    uv = frac(uv * 1.1234567f);
+    uv += dot(uv, uv + 2.1234f);
     return frac(uv.x * uv.y);
 }
 
