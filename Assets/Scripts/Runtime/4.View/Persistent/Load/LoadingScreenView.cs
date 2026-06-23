@@ -20,8 +20,16 @@ namespace KillChord.Runtime.View.Persistent.Load
             _controller = loadingScreenController;
 
             Subscribe();
-            ApplyProgress(0f);
-            SetVisible(false);
+
+            if (_controller != null && _controller.IsLoading)
+            {
+                SetVisible(true);
+            }
+            else
+            {
+                ApplyProgress(0f);
+                SetVisible(false);
+            }
         }
 
         private void OnDestroy()
