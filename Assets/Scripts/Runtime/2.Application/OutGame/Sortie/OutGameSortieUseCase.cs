@@ -16,10 +16,10 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// <param name="sceneTransitionService"> シーン遷移サービス。 </param>
         /// <param name="outputPort"> 出力ポート。 </param>
         public OutGameSortieUseCase(
-               ISceneTransitionService sceneTransitionService,
+               SceneTransitionUsecase sceneTransitionUsecase,
                IOutGameSortieOutputPort outputPort)
         {
-            _sceneTransitionService = sceneTransitionService;
+            _usecase = sceneTransitionUsecase;
             _outputPort = outputPort;
         }
 
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
 
             try
             {
-                bool success = await _sceneTransitionService.LoadAdditiveAndSetActiveAsync(
+                bool success = await _usecase.LoadAdditiveAndSetActiveAsync(
                     targetSceneName,
                     cancellationToken);
 
@@ -67,7 +67,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
             }
         }
 
-        private readonly ISceneTransitionService _sceneTransitionService;
+        private readonly SceneTransitionUsecase _usecase;
         private readonly IOutGameSortieOutputPort _outputPort;
     }
 }

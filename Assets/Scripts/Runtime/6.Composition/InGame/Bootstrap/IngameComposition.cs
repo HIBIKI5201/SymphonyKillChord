@@ -1,7 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
-using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Application.Persistent.Load;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Camera;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Mission;
@@ -10,6 +12,7 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Sequence;
@@ -17,7 +20,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
-using System.Threading;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
@@ -54,45 +57,97 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
             {
                 Debug.LogError("[IngameComposition] SelectedBattleStageStateが取得できませんでした", this);
+                FailActiveLoadingSession();
                 return;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
+            if (!ServiceLocator.TryGetInstance(out ILoadingOperationExecutor operationExecutor))
             {
-                Debug.LogError("[IngameComposition] SceneTransitionControllerが取得できませんでした", this);
+                Debug.LogError("[IngameComposition] ILoadingOperationExecutorが取得できませんでした", this);
+                FailActiveLoadingSession();
+                return;
+            }
+            if (!ServiceLocator.TryGetInstance(out ISceneTransitionService sceneTransitionService))
+            {
+                Debug.LogError("[IngameComposition] ISceneTransitionServiceが取得できませんでした", this);
+                FailActiveLoadingSession();
                 return;
             }
 
             if (!selectedBattleStageState.HasSelectedBattleStage)
             {
                 Debug.LogError("[IngameComposition] バトルステージが選択されていません", this);
+                FailActiveLoadingSession();
                 return;
             }
 
-            bool loadSuccess = await sceneTransitionController.LoadAdditiveAsync(
-                selectedBattleStageState.CurrentBattleStageName, destroyCancellationToken
-                );
+            var options = LoadingExecutionOptions.ContinueAndComplete(
+                LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
+                1f);
 
-            if (!loadSuccess)
+            try
             {
-                Debug.LogError("[IngameComposition] バトルシーンの読み込みに失敗しました", this);
-                return;
-            }
+                bool success = await operationExecutor.ExecuteAsync(
+                    async totalProgress =>
+                    {
+                        var stageLoadProgress = new LoadingProgressRange(
+                            totalProgress,
+                            0f,
+                            LoadingConstants.STAGE_LOAD_END_PROGRESS);
 
-            if (!await TryInitializeAsync())
+                        bool loadSuccess = await sceneTransitionService.LoadAdditiveAsync(
+                            selectedBattleStageState.CurrentBattleStageName,
+                            stageLoadProgress,
+                            destroyCancellationToken
+                            );
+
+                        if (!loadSuccess)
+                        {
+                            Debug.LogError("[IngameComposition] バトルシーンの読み込みに失敗しました", this);
+                            return false;
+                        }
+
+                        var initializeProgress = new LoadingProgressRange(
+                            totalProgress,
+                            LoadingConstants.STAGE_LOAD_END_PROGRESS,
+                            1f);
+
+                        bool initializeSuccess = await TryInitializeAsync(initializeProgress);
+
+                        if (!initializeSuccess)
+                        {
+                            Debug.LogError("[IngameComposition] 初期化に失敗しました。");
+                            return false;
+                        }
+
+                        return true;
+                    },
+                    options,
+                    destroyCancellationToken);
+
+                if (!success)
+                {
+                    return;
+                }
+
+                _missionruntimeService = ServiceLocator.GetInstance<MissionRuntimeService>();
+                if (_missionruntimeService != null)
+                {
+                    _missionruntimeService.OnMissionFinished += HandleMissionFinished;
+
+                }
+
+                await _inGameSequenceDirector.StartAsync(destroyCancellationToken);
+            }
+            catch (OperationCanceledException)
             {
-                Debug.LogError("[IngameComposition] 初期化に失敗しました。");
-                return;
-            }
 
-            _missionruntimeService = ServiceLocator.GetInstance<MissionRuntimeService>();
-            if (_missionruntimeService != null)
+            }
+            catch (Exception ex)
             {
-                _missionruntimeService.OnMissionFinished += HandleMissionFinished;
-
+                FailActiveLoadingSession();
+                Debug.LogException(ex, this);
             }
-
-            await _inGameSequenceDirector.StartAsync(destroyCancellationToken);
         }
 
         private void OnDestroy()
@@ -107,8 +162,9 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         ///     シーン内の必要なコンポーネントやサービスを非同期に初期化する。
         /// </summary>
         /// <returns> 初期化が成功したかどうかを示す値。 </returns>
-        private async Awaitable<bool> TryInitializeAsync()
+        private async Awaitable<bool> TryInitializeAsync(IProgress<float> progress)
         {
+            progress?.Report(0f);
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
 
             if (_playerInitializer == null)
@@ -118,6 +174,17 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
 
             var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
+
+            if (stageSceneI == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"{nameof(IStageSceneInstance)}の取得に失敗しました。",
+                    this);
+
+                return false;
+            }
+
             Debug.Log(
                 $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
 
@@ -145,6 +212,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _musicSyncInitializer.Initialize();
             _inGameMissionInitializer.Initialize();
             _stageResultUIView.Initialize();
+
+            progress?.Report(0.5f);
 
             var inputC = ServiceLocator.GetInstance<InputComposition>();
             if (inputC == null)
@@ -212,6 +281,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 );
             _inGamePlayDirector.StopGameplay();
 
+            progress?.Report(1f);
             return true;
         }
 
@@ -330,6 +400,19 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     await _inGameSequenceDirector.GameOverAsync(destroyCancellationToken);
                     break;
             }
+        }
+
+        /// <summary>
+        ///     実行中のロードセッションを失敗として終了する。
+        /// </summary>
+        private void FailActiveLoadingSession()
+        {
+            if (!ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController))
+            {
+                return;
+            }
+
+            loadingScreenController.FailActiveSession();
         }
     }
 }
