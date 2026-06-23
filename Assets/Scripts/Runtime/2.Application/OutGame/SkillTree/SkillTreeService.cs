@@ -63,9 +63,10 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         ///     セーブデータのスキル解放情報をロードする。
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<SavedataSkillUnlock> LoadSkillUnlockData()
+        public async ValueTask<SkillUnlockData> LoadSkillUnlockData()
         {
-            return await _savedataSystem.LoadAsync<SavedataSkillUnlock>();
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            return saveData.SkillUnlock;
         }
 
         /// <summary>
@@ -75,10 +76,10 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="currentPoints"></param>
         public async Task SaveSkillUnlockData(List<int> unlockedNodes, int currentPoints)
         {
-            SavedataSkillUnlock savedata = await _savedataSystem.LoadAsync<SavedataSkillUnlock>();
-            savedata.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
-            savedata.SetResearchPoint(currentPoints);
-            await _savedataSystem.SaveAsync<SavedataSkillUnlock>(savedata);
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
+            saveData.SkillUnlock.SetResearchPoint(currentPoints);
+            await _savedataSystem.SaveAsync(saveData);
         }
 
         /// <summary>

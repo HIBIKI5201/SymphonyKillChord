@@ -1,15 +1,14 @@
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using System;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Persistent.Savedata
 {
     /// <summary>
     ///     プレイヤーの装備スキル構成のセーブデータを表すクラス。
     ///     <para> プレイヤーの装備スキルの ID のリストと、スキルレベルアップポイントを保持する。 </para>
     /// </summary>
     [Serializable]
-    public sealed class SaveDataSkillBuild : SaveBase
+    public sealed class SkillBuildData
     {
         /// <summary>
         ///     プレイヤーの装備スキルの ID のリスト。
