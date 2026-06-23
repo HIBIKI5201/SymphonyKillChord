@@ -4,6 +4,7 @@
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="KillChord.Adaptor.csproj" />
   <Project Path="KillChord.Composition.csproj" />
+  <Project Path="KillChord.Utility.csproj" />
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
   <Project Path="KillChord.Structure.csproj" />
@@ -18,6 +19,7 @@
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
+  <Project Path="DevelopProducts-Pause.csproj" />
   <Project Path="UniGLTF.Editor.csproj" />
   <Project Path="SpringBoneJobs.csproj" />
   <Project Path="DevelopProducts-Architecture.csproj" />
@@ -32,7 +34,6 @@
   <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
-  <Project Path="KillChord.Utility.csproj" />
   <Project Path="KillChord.Develop.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="DevelopProducts-RenderingExtension.csproj" />

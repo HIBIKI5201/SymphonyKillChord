@@ -86,7 +86,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput += _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput += _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput += _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput += _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput += _inputAdaptor.HandleLook;
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput -= _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput -= _inputAdaptor.HandleLook;
         }
     }
 }

@@ -29,7 +29,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnDodgeInput;
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
-        public event Action<InputContext<Vector2>> OnLookInput;
+        public event Action<InputContext<Vector2>> OnLookMouseInput;
+        public event Action<InputContext<Vector2>> OnLookGamepadInput;
         /// <summary> ロックオン入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnInput;
         public event Action<InputContext<Vector2>> OnMobileLookInput;
@@ -94,12 +95,21 @@ namespace KillChord.Runtime.View.Persistent.Input
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, context, time);
-            OnLookInput?.Invoke(inputContext);
+
+            if (context.control?.device is Gamepad)
+            {
+                OnLookGamepadInput?.Invoke(inputContext);
+            }
+            else
+            {
+                OnLookMouseInput?.Invoke(inputContext);
+            }
         }
 
         public void OnLockOn(InputAction.CallbackContext context)
         {
             float time = _timestampProvider.GetCurrentTimestamp();
+
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.LockOn, context, time);
             OnLockOnInput?.Invoke(inputContext);
