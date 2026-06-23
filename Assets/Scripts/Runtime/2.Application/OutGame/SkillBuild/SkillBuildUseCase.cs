@@ -1,5 +1,5 @@
-using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -32,11 +32,12 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
 
         /// <summary>
         ///     改造画面のセーブデータを非同期で読み込むメソッド。 
-        ///     <para> 装備スキルの ID リストとスキルレベルアップポイントを含む SaveDataSkillBuild オブジェクトを返す。</para>
+        ///     <para> 装備スキルの ID リストとスキルレベルアップポイントを含む SkillBuildData オブジェクトを返す。</para>
         /// </summary>
-        public async ValueTask<SaveDataSkillBuild> LoadSkillBuildAsync()
+        public async ValueTask<SkillBuildData> LoadSkillBuildAsync()
         {
-            return await _savedataSystem.LoadAsync<SaveDataSkillBuild>();
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            return saveData.SkillBuild;
         }
 
         /// <summary>
@@ -47,11 +48,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
         public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs, int skillLevelupPoint)
         {
-            SaveDataSkillBuild saveData = new SaveDataSkillBuild
-            {
-                EquipmentSkillIDs = equipmentSkillIDs
-            };
-            saveData.SetSkillLevelupPoint(skillLevelupPoint);
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            saveData.SkillBuild.EquipmentSkillIDs = equipmentSkillIDs;
+            saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
 
             await _savedataSystem.SaveAsync(saveData);
         }
