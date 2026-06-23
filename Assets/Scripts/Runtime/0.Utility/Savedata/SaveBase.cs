@@ -11,6 +11,12 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
     public abstract class SaveBase
     {
         /// <summary>
+        ///     セーブデータを読み込んだ後に呼び出されるメソッド。
+        ///   <para>    必要に応じてオーバーライドして、読み込んだ後の処理を実装できます。</para>
+        /// </summary>
+        protected virtual void OnAfterDeserialize() { }
+
+        /// <summary>
         ///     セーブデータを非同期で読み込みます。 
         /// </summary>
         /// <returns></returns>
@@ -23,6 +29,7 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
             {
                 var json = await File.ReadAllTextAsync(FilePath);
                 JsonUtility.FromJsonOverwrite(json, this);
+                OnAfterDeserialize();
             }
             catch (Exception ex)
             {

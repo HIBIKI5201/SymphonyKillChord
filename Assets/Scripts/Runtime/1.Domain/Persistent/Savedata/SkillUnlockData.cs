@@ -1,4 +1,3 @@
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using System;
 
 namespace KillChord.Runtime.Domain.Persistent.Savedata
@@ -7,9 +6,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     ///     スキル解放情報を保持するセーブデータクラス。
     /// </summary>
     [Serializable]
-    public sealed class SavedataSkillUnlock : SaveBase
+    public sealed class SkillUnlockData
     {
-        public SavedataSkillUnlock()
+        public SkillUnlockData()
         {
             ResearchPoint = 0;
             UnlockedSkillNodeIds = new int[0];
