@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,9 +10,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
     /// </summary>
     public class SceneTransitionController
     {
-        public SceneTransitionController(ISceneTransitionService service)
+        public SceneTransitionController(SceneTransitionUsecase usecase)
         {
-            _service = service;
+            _useCase = usecase
+                ?? throw new ArgumentNullException(nameof(usecase));
         }
 
         /// <summary>
@@ -26,17 +28,28 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
             string toSceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
+            return await _useCase.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
+        }
+
+        public Task<bool> ChangeSceneKeepingLoadingAsync(
+            string fromSceneName,
+            string toSceneName,
+            CancellationToken cancellationToken)
+        {
+            return _useCase.ChangeSceneKeepLoadingAsync(
+                fromSceneName,
+                toSceneName,
+                cancellationToken);
         }
 
         /// <summary>
         ///     シーンをAdditiveロードする。
         /// </summary>
-        public async Task<bool> LoadAdditiveAsync(
+        public Task<bool> LoadAdditiveAsync(
             string sceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.LoadAdditiveAsync(
+            return _useCase.LoadAdditiveAsync(
                 sceneName,
                 cancellationToken);
         }
@@ -48,7 +61,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
             string sceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.UnloadAsync(
+            return await _useCase.UnloadAsync(
                 sceneName,
                 cancellationToken);
         }
@@ -56,11 +69,11 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         /// <summary>
         ///     遷移元を残したまま遷移先シーンをAdditiveロードし、ActiveSceneを切り替える。
         /// </summary>
-        public async Task<bool> LoadAdditiveAndSetActiveAsync(
+        public Task<bool> LoadAdditiveAndSetActiveAsync(
             string toSceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.LoadAdditiveAndSetActiveAsync(
+            return _useCase.LoadAdditiveAndSetActiveAsync(
                 toSceneName,
                 cancellationToken);
         }
@@ -68,17 +81,17 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         /// <summary>
         ///     対象シーンをUnloadし、ActiveSceneを指定シーンへ戻す。
         /// </summary>
-        public async Task<bool> UnloadAndSetActiveAsync(
+        public Task<bool> UnloadAndSetActiveAsync(
             string unloadSceneName,
             string activeSceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.UnloadAndSetActiveAsync(
+            return _useCase.UnloadAndSetActiveAsync(
                 unloadSceneName,
                 activeSceneName,
                 cancellationToken);
         }
 
-        private readonly ISceneTransitionService _service;
+        private readonly SceneTransitionUsecase _useCase;
     }
 }
