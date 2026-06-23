@@ -15,7 +15,7 @@ public class AudioSetting : ScriptableObject
         {
             int index = i;
             CreateSlider(document, parent,
-                _audioSettingTitle[index],
+                _audioSettingTitle[index], //実際の設定項目順番と、名前を一致させる必要がある。
                 () => model.Get(index),
                 value => model.Set(index, value));
         }

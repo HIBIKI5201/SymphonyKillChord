@@ -1,4 +1,5 @@
 using CriWare;
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.View.InGame.Music;
 using R3;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
-    public class MusicPlayer : MonoBehaviour
+    public class MusicPlayer : MonoBehaviour, IVolumeManager
     {
         /// <summary> 音楽用ビューモデル。 </summary>
         public MusicViewModel MusicVM => _musicVm;
@@ -33,6 +34,16 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
+        }
+
+        public void SetVolume(float volume)
+        {
+            _cri.volume = volume;
+        }
+
+        public float GetVolume()
+        {
+            return _cri.volume;
         }
 
         private const double MILLISECONDS_PER_SECOND = 1000d;
@@ -76,5 +87,6 @@ namespace KillChord.Runtime.View.Persistent.Music
             _playback.Stop();
             _cri.cueName = string.Empty;
         }
+
     }
 }

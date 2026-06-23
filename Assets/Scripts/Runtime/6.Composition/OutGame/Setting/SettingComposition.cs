@@ -21,12 +21,14 @@ public class SettingComposition : MonoBehaviour
         var seManager = ServiceLocator.GetInstance<SoundEffectVolumeManager>();
         var voiceManager = ServiceLocator.GetInstance<VoiceVolumeManager>();
         var outGameUiEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
-        _audioModel = new AudioSettingData(master : 1f, bgm : 1f, se : seManager.GetVolume(),voice : voiceManager.GetVolume());
-        outGameUiEvent.OnShownSettingScreen += () =>
-        {
-            _isShowScrren = !_isShowScrren;
-           _parent.SetActive(_isShowScrren);  
-        };
+        var bgmManager = ServiceLocator.GetInstance<MusicPlayer>();
+        _audioModel = new AudioSettingData(master : 1f, bgm : bgmManager.GetVolume(), se : seManager.GetVolume(),voice : voiceManager.GetVolume());
+        // outGameUiEvent.OnShownSettingScreen += () =>
+        // {
+        //     _isShowScrren = !_isShowScrren;
+        //    _parent.SetActive(_isShowScrren);  
+        // };
+        _audioModel.BGMVolume += bgmManager.SetVolume;
         _audioModel.SEVolume += seManager.SetVolume;
         _audioModel.VoiceVolume += voiceManager.SetVolume;
         _audioSetting.Build(_uiDocument, _audioModel,_parent.transform);
