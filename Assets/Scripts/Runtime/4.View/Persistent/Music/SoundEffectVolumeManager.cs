@@ -58,6 +58,10 @@ namespace KillChord.Runtime.View.Persistent.Music
                 source.ApplyVolume(_volume);
             }
         }
+        public float GetVolume()
+        {
+            return _volume;
+        }
 
         private readonly List<SoundEffectSource> _sources = new();
         private float _volume = 1f;

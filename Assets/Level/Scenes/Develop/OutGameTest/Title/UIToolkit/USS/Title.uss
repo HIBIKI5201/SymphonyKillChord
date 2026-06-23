@@ -1,0 +1,16 @@
+:root {
+}
+
+.button {
+    width: 8%;
+    aspect-ratio: 1;
+    left: 3%;
+    top: 4%;
+}
+
+.titleLabel {
+    -unity-font-style: bold;
+    font-size: 84px;
+    -unity-text-align: middle-left;
+    color: rgb(253, 253, 253);
+}
