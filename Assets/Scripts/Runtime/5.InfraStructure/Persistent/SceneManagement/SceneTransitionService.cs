@@ -63,6 +63,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
 
             if (!string.IsNullOrEmpty(fromSceneName) &&
+                !string.Equals(fromSceneName, toSceneName, StringComparison.Ordinal) &&
                 SceneLoader.GetExistScene(fromSceneName, out Scene sourceScene) && sourceScene.isLoaded)
             {
                 var unloadProgress = CreateProgressRange(
@@ -225,6 +226,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 
             if (!string.IsNullOrWhiteSpace(unloadSceneName)
                 && !string.IsNullOrWhiteSpace(activeSceneName)
+                && !string.Equals(unloadSceneName, activeSceneName, StringComparison.Ordinal)
                 && SceneLoader.GetExistScene(unloadSceneName, out Scene loadedScene)
                 && loadedScene.isLoaded)
             {

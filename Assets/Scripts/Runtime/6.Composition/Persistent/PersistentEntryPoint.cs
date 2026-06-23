@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -34,15 +35,26 @@ namespace KillChord.Runtime.Composition.Persistent
                 return;
             }
 
-            bool success = await controller.LoadAdditiveAndSetActiveAsync(
-                _firstSceneName,
-                _cancellationTokenSource.Token
-                );
-
-            if (!success)
+            try
             {
-                Debug.LogError($"初回ロードに失敗 : {_firstSceneName}", this);
+                bool success = await controller.LoadAdditiveAndSetActiveAsync(
+                    _firstSceneName,
+                    _cancellationTokenSource.Token
+                    );
+
+                if (!success)
+                {
+                    Debug.LogError($"初回ロードに失敗 : {_firstSceneName}", this);
+                    return;
+                }
+            }
+            catch (OperationCanceledException)
+            {
                 return;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
             }
         }
 

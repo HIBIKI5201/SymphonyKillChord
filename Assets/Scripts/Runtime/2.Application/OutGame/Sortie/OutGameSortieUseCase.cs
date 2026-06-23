@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// <summary>
         ///     ユースケースを初期化する。
         /// </summary>
-        /// <param name="sceneTransitionService"> シーン遷移サービス。 </param>
+        /// <param name="sceneTransitionUsecase"> シーン遷移ユースケース。 </param>
         /// <param name="outputPort"> 出力ポート。 </param>
         public OutGameSortieUseCase(
                SceneTransitionUsecase sceneTransitionUsecase,
