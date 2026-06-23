@@ -8,11 +8,18 @@ namespace KillChord.Runtime.Application.Persistent.Load
     /// </summary>
     public readonly struct LoadingExecutionOptions : IEquatable<LoadingExecutionOptions>
     {
+        /// <summary>
+        ///     ロード実行設定を生成する。
+        /// </summary>
+        /// <param name="startProgress"> 全体進捗上の開始位置。 </param>
+        /// <param name="endProgress"> 全体進捗上の終了位置。 </param>
+        /// <param name="reuseActiveSession"> 実行中のロードセッションを再利用するかどうか。 </param>
+        /// <param name="completeOnSuccess"> 処理成功時にロードセッションを終了するかどうか。 </param>
         public LoadingExecutionOptions(
             float startProgress,
             float endProgress,
             bool reuseActiveSession,
-            bool completeOnSucsess)
+            bool completeOnSuccess)
         {
             // 例外処理。
             if (startProgress < 0f || startProgress > 1f)
@@ -40,7 +47,7 @@ namespace KillChord.Runtime.Application.Persistent.Load
             StartProgress = startProgress;
             EndProgress = endProgress;
             ReuseActiveSession = reuseActiveSession;
-            CompleteOnSuccess = completeOnSucsess;
+            CompleteOnSuccess = completeOnSuccess;
         }
 
         /// <summary>

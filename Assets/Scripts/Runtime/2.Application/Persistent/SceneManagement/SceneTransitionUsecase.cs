@@ -7,8 +7,20 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Application.Persistent.SceneManagement
 {
+    /// <summary>
+    ///     ロード画面を伴うシーン遷移を管理するUsecase。
+    /// </summary>
     public class SceneTransitionUsecase
     {
+        /// <summary>
+        ///     必要な依存関係を指定して生成する。
+        /// </summary>
+        /// <param name="sceneTransitionService">
+        ///     シーン遷移サービス。
+        /// </param>
+        /// <param name="loadingOperationExecutor">
+        ///     ロード画面付き処理の実行機能。
+        /// </param>
         public SceneTransitionUsecase
             (ISceneTransitionService sceneTransitionService,
             ILoadingOperationExecutor loadingOperationExecutor)

@@ -1,12 +1,18 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
-using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.Persistent.Load
 {
+    /// <summary>
+    ///     ロード画面をロード進捗を表示するViewクラス。
+    /// </summary>
     public class LoadingScreenView : MonoBehaviour
     {
+        /// <summary>
+        ///     ロード画面コントローラーを設定する。
+        /// </summary>
+        /// <param name="loadingScreenController"></param>
         public void Initialize(LoadingScreenController loadingScreenController)
         {
             Unsubscribe();
@@ -133,7 +139,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             _canvasGroup.blocksRaycasts = isVisible;
         }
 
-        [SerializeField,Tooltip("ロード画面のCanvasGroup")]
+        [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;
 
         [SerializeField, Tooltip("ロード進捗を表示するSlider")]

@@ -8,6 +8,12 @@ namespace KillChord.Runtime.Application.Persistent.Load
     /// </summary>
     public class LoadingProgressRange : IProgress<float>
     {
+        /// <summary>
+        ///     進捗通知先と変換範囲を指定して生成する。
+        /// </summary>
+        /// <param name="progress"> 変換後の進捗通知先。 </param>
+        /// <param name="startProgress"> 開始進捗。 </param>
+        /// <param name="endProgress"> 終了進捗。 </param>
         public LoadingProgressRange(
             IProgress<float> progress,
             float startProgress,

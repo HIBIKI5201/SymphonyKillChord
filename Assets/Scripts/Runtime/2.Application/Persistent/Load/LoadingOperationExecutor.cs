@@ -10,6 +10,10 @@ namespace KillChord.Runtime.Application.Persistent.Load
     /// </summary>
     public class LoadingOperationExecutor : ILoadingOperationExecutor
     {
+        /// <summary>
+        ///     ロードセッション生成元を指定して生成する。
+        /// </summary>
+        /// <param name="loadingSessionFactory"> ロードセッションを生成するファクトリー。 </param>
         public LoadingOperationExecutor(ILoadingSessionFactory loadingSessionFactory)
         {
             _sessionFactory = loadingSessionFactory

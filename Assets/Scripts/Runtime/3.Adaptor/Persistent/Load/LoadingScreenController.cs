@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.Persistent.Load
 {
+    /// <summary>
+    ///     ロード画面の表示状態と進捗を管理するコントローラー。
+    /// </summary>
     public class LoadingScreenController : ILoadingSessionFactory
     {
         /// <summary>
