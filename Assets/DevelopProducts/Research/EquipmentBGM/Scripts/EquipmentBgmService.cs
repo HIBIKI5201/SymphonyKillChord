@@ -1,5 +1,5 @@
 using System;
-using KillChord.Runtime.Adaptor.InGame.Skill;
+using System.Collections.Generic;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
@@ -7,72 +7,87 @@ using UnityEngine;
 namespace DevelopProducts.EquipmentBGM
 {
     /// <summary>
-    ///     スキル発動に応じてCRIセレクターを切り替えるサービスクラス。
+    ///     装備スキルの構成に基づきCRIセレクターを小節ごとに順番に切り替えるサービスクラス。
+    ///     2スキル時: [原曲, S1, 原曲, S2] の4小節ループ。
+    ///     3スキル時: [原曲, S1, S2, S3] の4小節ループ。
     /// </summary>
-    public class EquipmentBgmService : IDisposable
+    public class EquipmentBgmService
     {
         /// <summary>
-        ///     EquipmentBgmService を初期化する。
+        ///     EquipmentBgmService を初期化し、装備スキルからセレクターシーケンスを構築する。
         /// </summary>
         /// <param name="musicPlayer"> セレクター切り替えの対象となる音楽プレイヤー。 </param>
         /// <param name="table"> スキルIDとセレクターラベル名の対応表。 </param>
-        /// <param name="skillController"> スキル発動イベントの購読元。 </param>
-        /// <param name="skillBuild"> 装備中スキルの参照。スロットインデックスからスキルIDへの変換に使用する。 </param>
-        public EquipmentBgmService(MusicPlayer musicPlayer, BgmSelectorLabelTable table, SkillController skillController, SkillBuildDefinition skillBuild)
+        /// <param name="skillBuild"> 装備中スキルの参照。 </param>
+        /// <param name="measuresPerStep"> シーケンスを1ステップ進める間隔（小節数）。 </param>
+        public EquipmentBgmService(MusicPlayer musicPlayer, BgmSelectorLabelTable table, SkillBuildDefinition skillBuild, int measuresPerStep = 1)
         {
             _musicPlayer = musicPlayer;
-            _table = table;
-            _skillController = skillController;
-            _skillBuild = skillBuild;
+            _measuresPerStep = Mathf.Max(1, measuresPerStep);
+            _sequence = BuildSequence(table, skillBuild);
 
-            _skillController.OnSkillActivated += SwitchSelectorBySkill;
+            if (_sequence.Length == 0)
+            {
+                Debug.LogWarning("[EquipmentBGM] セレクターシーケンスが空です。スキル装備とテーブル設定を確認してください。");
+                return;
+            }
+
+            _musicPlayer.SetSelectorLabel(SELECTOR_NAME, _sequence[0]);
+            Debug.Log($"<color=green>[EquipmentBGM] 初期ラベル設定: {_sequence[0]}（シーケンス全{_sequence.Length}ステップ、{_measuresPerStep}小節/ステップ）</color>");
         }
 
         /// <summary>
-        ///     スキル発動時に呼び出す。スロットインデックスから装備スキルIDを取得し、
-        ///     テーブルを引いてCRIセレクターを切り替える。
+        ///     毎フレーム呼び出す。小節の変わり目を検出して次の小節のセレクターラベルをCRIに予約する。
         ///     CRI側のビート同期設定により、切り替えは次のブロック頭で反映される。
         /// </summary>
-        /// <param name="slotIndex"> 発動したスキルのスロットインデックス。 </param>
-        public void SwitchSelectorBySkill(int slotIndex)
+        /// <param name="currentBeat"> MusicSyncState.CurrentBeat の値。 </param>
+        public void Tick(int currentBeat)
         {
-            if (slotIndex >= _skillBuild.SlotCount)
-            {
-                Debug.LogWarning($"[EquipmentBGM] スロットインデックス {slotIndex} がスロット数の範囲外です。");
-                return;
-            }
+            if (_sequence.Length == 0) return;
 
-            var skill = _skillBuild.EquippedSkills[slotIndex];
-            if (!skill.HasSkill)
-            {
-                Debug.LogWarning($"[EquipmentBGM] スロット {slotIndex} にスキルが装備されていません。");
-                return;
-            }
+            int currentStep = currentBeat / (BEATS_PER_MEASURE * _measuresPerStep);
+            if (currentStep == _previousStep) return;
+            _previousStep = currentStep;
 
-            int skillId = skill.SkillData.Id;
-            if (!_table.TryGetLabel(skillId, out string label))
-            {
-                Debug.LogWarning($"[EquipmentBGM] スキルID {skillId} に対応するラベルがテーブルに未登録。");
-                return;
-            }
-
+            _queuedIndex = (_queuedIndex + 1) % _sequence.Length;
+            string label = _sequence[_queuedIndex];
             _musicPlayer.SetSelectorLabel(SELECTOR_NAME, label);
-            Debug.Log($"<color=green>[EquipmentBGM] スロット{slotIndex}（スキルID:{skillId}）→ セレクター切り替え: {label}</color>");
+            Debug.Log($"<color=green>[EquipmentBGM] ステップ{currentStep}（{_measuresPerStep}小節ごと）→ 次ブロック予約: {label}</color>");
         }
 
-        /// <summary>
-        ///     スキル発動イベントの購読を解除する。
-        /// </summary>
-        public void Dispose()
+        private string[] BuildSequence(BgmSelectorLabelTable table, SkillBuildDefinition skillBuild)
         {
-            _skillController.OnSkillActivated -= SwitchSelectorBySkill;
+            var skillLabels = new List<string>();
+            foreach (var slot in skillBuild.EquippedSkills)
+            {
+                if (!slot.HasSkill) continue;
+                if (table.TryGetLabel(slot.SkillData.Id, out string label))
+                    skillLabels.Add(label);
+            }
+
+            if (skillLabels.Count == 0) return Array.Empty<string>();
+
+            string original = table.OriginalLabel;
+
+            // スキルが2つの場合
+            if (skillLabels.Count == 2)
+                return new[] { original, skillLabels[0], original, skillLabels[1] };
+
+            // スキルが3つの場合
+            if (skillLabels.Count == 3)
+                return new[] { original, skillLabels[0], skillLabels[1], skillLabels[2] };
+
+            Debug.LogWarning($"[EquipmentBGM] 想定外のスキル数: {skillLabels.Count}。スキルラベルのみでシーケンスを構築します。");
+            return skillLabels.ToArray();
         }
 
         private const string SELECTOR_NAME = "Selector_BGM";
+        private const int BEATS_PER_MEASURE = 4;
 
         private readonly MusicPlayer _musicPlayer;
-        private readonly BgmSelectorLabelTable _table;
-        private readonly SkillController _skillController;
-        private readonly SkillBuildDefinition _skillBuild;
+        private readonly string[] _sequence;
+        private readonly int _measuresPerStep;
+        private int _queuedIndex;
+        private int _previousStep = -1;
     }
 }
