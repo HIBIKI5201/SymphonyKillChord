@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -14,8 +14,11 @@ namespace DevelopProducts.EquipmentBGM
     {
         [SerializeField, Tooltip("スキルIDとCRIセレクターラベル名の対応表。")]
         private BgmSelectorLabelTable _table;
+        [SerializeField, Tooltip("シーケンスを1ステップ進める間隔（小節数）。")]
+        private int _measuresPerStep = 1;
 
         private EquipmentBgmService _service;
+        private MusicSyncState _musicSyncState;
 
         /// <summary>
         ///     ServiceLocatorから各依存が登録されるまで待機してEquipmentBgmServiceを初期化する。
@@ -23,19 +26,24 @@ namespace DevelopProducts.EquipmentBGM
         private async void Start()
         {
             MusicPlayer musicPlayer = await ServiceLocator.GetInstanceAsync<MusicPlayer>();
-            SkillController skillController = await ServiceLocator.GetInstanceAsync<SkillController>();
             SkillBuildDefinition skillBuild = await ServiceLocator.GetInstanceAsync<SkillBuildDefinition>();
+            _musicSyncState = await ServiceLocator.GetInstanceAsync<MusicSyncState>();
 
-            _service = new EquipmentBgmService(musicPlayer, _table, skillController, skillBuild);
+            _service = new EquipmentBgmService(musicPlayer, _table, skillBuild, _measuresPerStep);
             ServiceLocator.RegisterInstance(_service);
         }
 
+        private void Update()
+        {
+            if (_service == null || _musicSyncState == null) return;
+            _service.Tick(_musicSyncState.CurrentBeat);
+        }
+
         /// <summary>
-        ///     破棄時にServiceLocatorからEquipmentBgmServiceの登録を解除し、イベント購読を解除する。
+        ///     破棄時にServiceLocatorからEquipmentBgmServiceの登録を解除する。
         /// </summary>
         private void OnDestroy()
         {
-            _service?.Dispose();
             ServiceLocator.UnregisterInstance<EquipmentBgmService>();
         }
     }
