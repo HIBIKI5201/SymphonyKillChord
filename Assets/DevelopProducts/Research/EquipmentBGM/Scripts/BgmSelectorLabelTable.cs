@@ -47,6 +47,11 @@ namespace DevelopProducts.EquipmentBGM
             private string _selectorLabel;
         }
 
+        /// <summary> 原曲のCRIセレクターラベル名。 </summary>
+        public string OriginalLabel => _originalLabel;
+
+        [SerializeField, Tooltip("原曲のCRIセレクターラベル名。例: SelectorLabel_S00")]
+        private string _originalLabel;
         [SerializeField, Tooltip("スキルIDとセレクターラベル名の対応エントリ一覧。")]
         private Entry[] _entries;
     }
