@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/TitleOption.uss?fileID=7433441132597879392&amp;guid=d317849855421ec45937a3da5ae38ede&amp;type=3#TitleOption"/>
+    <ui:VisualElement name="Root" style="width: 100%; height: 100%; background-color: rgb(130, 130, 130); justify-content: center;">
+        <ui:VisualElement name="ButtonRoot" style="align-self: center; width: 100%; height: 100%; justify-content: center;">
+            <ui:Button text="Option" name="OptionButton" class="button"/>
+            <ui:VisualElement name="Space" style="height: 5%;"/>
+            <ui:Button text="Credit" name="CreditButton" class="button"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
