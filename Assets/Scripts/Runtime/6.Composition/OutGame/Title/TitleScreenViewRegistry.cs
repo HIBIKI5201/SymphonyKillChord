@@ -19,14 +19,20 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         /// <param name="titleScreenView"></param>
         /// <param name="titleOptionView"></param>
+        /// <param name="optionsScreenView"></param>
+        /// <param name="creditScreenView"></param>
         public TitleScreenViewRegistry(
             ScreenViewBase titleScreenView,
-            ScreenViewBase titleOptionView)
+            ScreenViewBase titleOptionView,
+            ScreenViewBase optionsScreenView,
+            ScreenViewBase creditScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
             {
                 { ScreenId.Title, titleScreenView },
                 { ScreenId.TitleOption, titleOptionView },
+                { ScreenId.Options, optionsScreenView },
+                { ScreenId.Credit, creditScreenView },
             };
         }
 

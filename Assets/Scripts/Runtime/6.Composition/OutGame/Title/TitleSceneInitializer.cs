@@ -117,11 +117,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
-            TitleSceneView titleSceneView = new (titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
-            TitleOptionScreenView titleOptionScreenView = new (titleOptionRoot, _outGameUIEvent);
-            // TODO : オプション画面とクレジット画面の view を作成する。
+            TitleSceneView titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
+            TitleOptionScreenView titleOptionScreenView = new(titleOptionRoot, _outGameUIEvent);
+            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
+            CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
 
-            _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, titleOptionScreenView);
+            _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, titleOptionScreenView, optionsScreenView, creditScreenView);
 
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
