@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Mission;
+using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -10,20 +11,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <summary>
         ///     OutGameMissionSelectController クラスの新しいインスタンスを初期化します。
         /// </summary>
-        /// <param name="selectedMissionState">選択されたミッションの状態。</param>
+        /// <param name="selectedMissionState"> 選択されたミッションの状態。 </param>
         public OutGameMissionSelectController(SelectedMissionState selectedMissionState)
         {
-            _selectedMissionState = selectedMissionState;
+            _selectedMissionState = selectedMissionState
+                ?? throw new ArgumentNullException(nameof(selectedMissionState));
         }
 
         /// <summary>
         ///     ミッションを選択します。
         /// </summary>
-        /// <param name="missionIdText">ミッションID文字列。</param>
-        public void Select(string missionIdText)
+        /// <param name="missionDefinition">ミッション定義情報。</param>
+        public void Select(MissionDefinition missionDefinition)
         {
-            MissionId missionId = new MissionId(missionIdText);
-            _selectedMissionState.SelectMission(missionId);
+            _selectedMissionState.SelectMission(missionDefinition);
         }
 
         /// <summary> 選択されたミッションの状態。 </summary>
