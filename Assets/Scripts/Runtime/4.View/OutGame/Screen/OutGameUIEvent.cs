@@ -12,6 +12,18 @@ namespace KillChord.Runtime.View.OutGame.Screen
     [DefaultExecutionOrder(-200)]
     public class OutGameUIEvent : MonoBehaviour
     {
+        /// <summary> タイトル画面を表示するイベント。 </summary>
+        public Action OnShowTitleScreen;
+
+        /// <summary> タイトルオプション画面を表示するイベント。 </summary>
+        public Action OnShowTitleOptionScreen;
+
+        /// <summary> オプション画面を表示するイベント。 </summary>
+        public Action OnShowOptionsScreen;
+
+        /// <summary> クレジット画面を表示するイベント。 </summary>
+        public Action OnShowCreditScreen;
+
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
