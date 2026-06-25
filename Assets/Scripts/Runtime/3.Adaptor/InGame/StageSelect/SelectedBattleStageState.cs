@@ -1,4 +1,4 @@
-using UnityEngine;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.StageSelect
@@ -8,37 +8,80 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
     /// </summary>
     public class SelectedBattleStageState
     {
-        /// <summary> 現在選択されているステージの名前。 </summary>
-        public string CurrentBattleStageName
+        /// <summary> 現在選択されているステージ定義。 </summary>
+        public StageDefinition CurrentStageDefinition
         {
             get
             {
-                if(!HasSelectedBattleStage)
+                if (!HasSelectedBattleStage)
                 {
-                    throw new InvalidOperationException("バトルシーンが選択されていません"); 
+                    throw new InvalidOperationException("バトルシーンが選択されていません");
                 }
 
-                return _currentBattleStageName;
+                return _currentBattleStageDefinition;
+            }
+        }
+
+        /// <summary> 現在選択されているステージ名。 </summary>
+        public string StageName =>
+            CurrentStageDefinition.StageName;
+
+        /// <summary> 現在選択されているステージのターゲットシーン名。 </summary>
+        public string InGameSceneName =>
+            CurrentStageDefinition.TargetSceneName;
+
+        /// <summary> 現在選択されているステージのバトルシーン名。 </summary>
+        public string BattleSceneName =>
+            CurrentStageDefinition.BattleSceneName;
+
+        /// <summary> 戦闘終了後に戻るシーン名。 </summary>
+        public string ReturnSceneName
+        {
+            get
+            {
+                if (!HasSelectedBattleStage)
+                {
+                    throw new InvalidOperationException("バトルシーンが選択されていません");
+                }
+
+                return _returnSceneName;
             }
         }
 
         /// <summary> バトルステージが選択されているか。 </summary>
-        public bool HasSelectedBattleStage { get; private set; }
+        public bool HasSelectedBattleStage 
+            => _currentBattleStageDefinition != null;
+
 
         /// <summary>
-        ///     バトルするステージを選択する。
+        ///     バトルステージを選択する。
         /// </summary>
-        /// <param name="battleStageName"> ステージシーン名。 </param>
-        /// <exception cref="ArgumentException"></exception>
-        public void SelectBattleStage(string battleStageName)
+        /// <param name="stageDefinition"> 選択するステージ定義。 </param>
+        /// <param name="returnSceneName"> 戦闘終了後に戻るOutGameシーン名。 </param>
+        public void SelectBattleStage(StageDefinition stageDefinition, string returnSceneName)
         {
-            if(string.IsNullOrWhiteSpace(battleStageName))
+            if (stageDefinition == null)
             {
-                throw new ArgumentException("バトルステージのシーン名はnullまたは空であってはなりません",nameof(battleStageName));
+                throw new ArgumentNullException(nameof(stageDefinition));
             }
 
-            _currentBattleStageName = battleStageName;
-            HasSelectedBattleStage = true;
+            if (stageDefinition.StageType != StageType.Battle)
+            {
+                throw new ArgumentException($"ステージタイプがBattleではありません。StageType={stageDefinition.StageType}", nameof(stageDefinition));
+            }
+
+            if (string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName))
+            {
+                throw new ArgumentException("バトルシーン名が設定されていません。", nameof(stageDefinition));
+            }
+
+            if (string.IsNullOrWhiteSpace(returnSceneName))
+            {
+                throw new ArgumentException("帰還先シーン名が設定されていません", nameof(returnSceneName));
+            }
+
+            _currentBattleStageDefinition = stageDefinition;
+            _returnSceneName = returnSceneName;
         }
 
         /// <summary>
@@ -46,10 +89,11 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
         /// </summary>
         public void Clear()
         {
-            _currentBattleStageName = string.Empty;
-            HasSelectedBattleStage = false;
+            _currentBattleStageDefinition = null;
+            _returnSceneName = string.Empty;
         }
 
-        private string _currentBattleStageName = string.Empty;
+        private StageDefinition _currentBattleStageDefinition = null;
+        private string _returnSceneName = string.Empty;
     }
 }

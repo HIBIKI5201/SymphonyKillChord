@@ -55,61 +55,22 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         }
 
         /// <summary>
-        ///    現在選択中のステージの出撃情報を取得します。
-        ///    選択中のノードがない場合には false を返します。
+        ///     現在選択中のステージ定義を取得します。
         /// </summary>
-        /// <param name="stageType"> 出撃情報のステージタイプ。</param>
-        /// <param name="targetSceneName"> 出撃情報のターゲットシーン名。</param>
-        /// <param name="missionDefinition"> 出撃情報のミッション定義。</param>
-        /// <returns> 出撃情報が取得できた場合は true、取得できなかった場合は false を返します。</returns>
+        /// <param name="stageDefinition"> 選択中のステージ定義。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
         public bool TryGetSortieInfo(
-            out StageType stageType, 
-            out string targetSceneName, 
-            out string battleSceneName,
-            out string scenarioId,
-            out MissionDefinition missionDefinition)
+            out StageDefinition stageDefinition)
         {
-            stageType = default;
-            targetSceneName = default;
-            battleSceneName = default;
-            scenarioId = default;
-            missionDefinition = default;
+            stageDefinition = default;
 
             if (!_stageTree.TryGetNode(_selectedStageId, out var node))
             {
                 return false;
             }
 
-            stageType = node.Definition.StageType;
-            targetSceneName = node.Definition.TargetSceneName;
-            battleSceneName = node.Definition.BattleSceneName;
-            scenarioId = node.Definition.ScenarioId;
-            missionDefinition = node.Definition.MissionDefinition;
-            return true;
-        }
-
-        /// <summary>
-        ///     現在選択中のノードがバトルタイプの場合、ミッション定義を取得します。
-        ///     バトル以外のタイプまたはミッション定義が存在しない場合は false を返します。
-        /// </summary>
-        /// <param name="missionDefinition"> ミッション定義を格納する変数。</param>
-        /// <returns> ミッション定義が取得できた場合は true、取得できなかった場合は false を返します。</returns>
-        public bool TryGetBattleMissionDefinition(out MissionDefinition missionDefinition)
-        {
-            missionDefinition = default;
-
-            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
-            {
-                return false;
-            }
-
-            if (node.Definition.StageType != StageType.Battle)
-            {
-                return false;
-            }
-
-            missionDefinition = node.Definition.MissionDefinition;
-            return true;
+            stageDefinition = node.Definition;
+            return stageDefinition != null;
         }
 
         private readonly StageTree _stageTree;

@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
-using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -13,32 +12,43 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// </summary>
     public class InGameMissionInitializer : MonoBehaviour
     {
-        /// <summary> ミッションカタログアセット。 </summary>
-        [SerializeField, Tooltip("ミッション定義を保持するカタログアセット。")] private MissionCatalogAsset _missionCatalogAsset;
-        /// <summary> ミッションHUDのビュー。 </summary>
-        [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
-        /// <summary> ミッションループのビュー。 </summary>
-        [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
-
         /// <summary>
         ///     初期化処理を行います。
         /// </summary>
-        public void Initialize()
+        public bool TryInitialize(out MissionRuntimeService missionRuntimeService)
         {
-            SelectedMissionState selectedMissionState =
-                ServiceLocator.GetInstance<SelectedMissionState>();
+            missionRuntimeService = null;
 
-            IMissionDefinitionRepository missionDefinitionRepository =
-                new MissionDefinitionRepository(_missionCatalogAsset);
+            if (!ValidateReferences())
+            {
+                return false;
+            }
 
-            MissionFactory missionFactory = new MissionFactory();
-            InGameMissionController controller = new InGameMissionController(
-                selectedMissionState, missionDefinitionRepository, missionFactory);
+            if (!ServiceLocator.TryGetInstance(
+            out SelectedMissionState selectedMissionState))
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(SelectedMissionState)}を取得できませんでした。",
+                    this);
 
-            MissionDefinition definition = controller.LoadDefinition();
-            MissionProgress progress = controller.CreateProgress();
+                return false;
+            }
 
-            MissionRuntimeService missionRuntimeService = new MissionRuntimeService(
+            if (!selectedMissionState.HasSelectedMission)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    "OutGameでミッションが選択されていません。",
+                    this);
+
+                return false;
+            }
+
+            MissionDefinition definition = selectedMissionState.CurrentMissionDefinition;
+            MissionProgress progress = new MissionFactory().CreateMissionProgress();
+
+            missionRuntimeService = new MissionRuntimeService(
                 definition,
                 progress,
                 new MissionTimeAdvanceUsecase(),
@@ -50,9 +60,11 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             MissionHudViewModel missionHudViewModel = new MissionHudViewModel();
 
             MissionHudPresenter missionHudPresenter = new MissionHudPresenter(
-                missionRuntimeService, missionHudViewModel);
+                missionRuntimeService,
+                missionHudViewModel);
 
-            MissionEventController missionEventController = new MissionEventController(missionRuntimeService,
+            MissionEventController missionEventController = new MissionEventController(
+                missionRuntimeService,
                 missionHudPresenter);
 
             _missionHudView.Initialize(missionHudViewModel);
@@ -62,6 +74,61 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             ServiceLocator.RegisterInstance(missionRuntimeService);
             ServiceLocator.RegisterInstance(missionEventController);
+
+            _registeredMissionRuntimeService = true;
+            _registeredMissionEventController = true;
+
+            return true;
+        }
+
+        [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
+        [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
+
+        private bool _registeredMissionRuntimeService;
+        private bool _registeredMissionEventController;
+
+        private void OnDestroy()
+        {
+            if (_registeredMissionRuntimeService)
+            {
+                ServiceLocator.UnregisterInstance<MissionRuntimeService>();
+                _registeredMissionRuntimeService = false;
+            }
+
+            if (_registeredMissionEventController)
+            {
+                ServiceLocator.UnregisterInstance<MissionEventController>();
+                _registeredMissionEventController = false;
+            }
+        }
+
+        /// <summary>
+        ///     Inspector参照を検証します。
+        /// </summary>
+        /// <returns> 参照が有効な場合はtrue。 </returns>
+        private bool ValidateReferences()
+        {
+            if (_missionHudView == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(_missionHudView)}が設定されていません。",
+                    this);
+
+                return false;
+            }
+
+            if (_missionLoopView == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(_missionLoopView)}が設定されていません。",
+                    this);
+
+                return false;
+            }
+
+            return true;
         }
     }
 }
