@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Music;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
@@ -66,11 +67,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     初期地点まで移動する。
         /// </summary>
         /// <param name="target">移動先。</param>
-        public async ValueTask MoveToTargetAysnc(Vector3 target)
+        public async ValueTask<bool> MoveToTargetAysnc(Vector3 target, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             if (!CanUseNavMeshAgent())
             {
-                return;
+                return false;
             }
 
             _navMeshAgent.speed = 3f;
@@ -79,22 +82,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (!_navMeshAgent.SetDestination(target))
             {
                 _characterAnimationController?.SetVelocity(Vector2.zero);
-                return;
+                return false;
             }
 
             while (CanUseNavMeshAgent() && _navMeshAgent.pathPending)
             {
-                await Task.Yield();
+                await Awaitable.NextFrameAsync(ct);
             }
+
+            ct.ThrowIfCancellationRequested();
 
             if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
             {
                 _characterAnimationController?.SetVelocity(Vector2.zero);
-                return;
+                return false;
             }
 
             while (CanUseNavMeshAgent())
             {
+                ct.ThrowIfCancellationRequested();
+
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
                 _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
 
@@ -103,14 +110,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     && (!_navMeshAgent.hasPath || _navMeshAgent.velocity.sqrMagnitude <= 0.01f))
                 {
                     _characterAnimationController?.SetVelocity(Vector2.zero);
-                    return;
+                    return true;
                 }
 
                 PlayFootstepSound();
-                await Task.Yield();
+                await Awaitable.NextFrameAsync(ct);
             }
 
             _characterAnimationController?.SetVelocity(Vector2.zero);
+            return false;
         }
 
         /// <summary>

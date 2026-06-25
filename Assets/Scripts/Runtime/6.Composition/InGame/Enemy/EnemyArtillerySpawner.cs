@@ -1,6 +1,8 @@
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -177,17 +179,43 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
+            CancellationToken cancellationToken = destroyCancellationToken;
+
             try
             {
-                await lifeCycle.EnterFromOutsideAsync(
-                    _outsideSpawnPoint.position,
-                    activePosition,
-                    HandleArtilleryDeactivated);
+                bool activateSuccess =
+                    await lifeCycle.EnterFromOutsideAsync(
+                        _outsideSpawnPoint.position,
+                        activePosition,
+                        HandleArtilleryDeactivated,
+                        cancellationToken);
+
+                if (!activateSuccess)
+                {
+                    if (_spawnCount > 0)
+                    {
+                        _spawnCount--;
+                    }
+
+                    return;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // BattleSceneのアンロードに伴うキャンセルは正常終了として扱う。
+                return;
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception);
                 if (_spawnCount > 0) _spawnCount--;
+                return;
+            }
+
+            if (cancellationToken.IsCancellationRequested
+                || this == null
+                || lifeCycle == null)
+            {
                 return;
             }
 

@@ -52,6 +52,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
             TargetSelectorController targetSelectorController = new(targetSelector, targetEntityRegistryController);
             ServiceLocator.RegisterInstance(targetSelectorController);
+            _isTargetSelectorControllerRegistered = true;
 
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
                 freeLookRotationSystem, rotationSystem, targetSelector);
@@ -81,5 +82,19 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraSystemConfig _config;
+
+        private bool _isTargetSelectorControllerRegistered;
+
+        private void OnDestroy()
+        {
+            if (!_isTargetSelectorControllerRegistered)
+            {
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<TargetSelectorController>();
+
+            _isTargetSelectorControllerRegistered = false;
+        }
     }
 }

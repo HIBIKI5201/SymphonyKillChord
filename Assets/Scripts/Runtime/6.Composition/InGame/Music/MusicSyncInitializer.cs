@@ -39,6 +39,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
             ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
             ServiceLocator.RegisterInstance<MusicSyncState>(MusicSyncState);
+
+            _isRegistered = true;
         }
 
         /// <summary>
@@ -77,5 +79,19 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [SerializeField] private float _justTimingThreshold;
 
         private MusicPlayer _musicPlayer;
+        private bool _isRegistered;
+
+        private void OnDestroy()
+        {
+            if (!_isRegistered)
+            {
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<IMusicSyncService>();
+            ServiceLocator.UnregisterInstance<MusicSyncState>();
+
+            _isRegistered = false;
+        }
     }
 }

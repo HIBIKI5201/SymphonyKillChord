@@ -15,6 +15,7 @@ using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -91,7 +92,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _playerEntity = CharacterFactory.Create(_playerData);
-            _playerEntity.OnDamageAvoided += _ => _player.PlayDodgeSuccessFeedback();
+            _playerEntity.OnDamageAvoided += HandleDamageAvoided;
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
             if (_missionEventController != null)
@@ -274,6 +275,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
             return controller;
         }
 
+        private void HandleDamageAvoided(Damage damage)
+        {
+            _player?.PlayDodgeSuccessFeedback();
+        }
+
         private void HandlePlayerDied(CharacterEntity _)
         {
             _missionEventController?.NotifyPlayerDead();
@@ -284,7 +290,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
-                _playerEntity.OnDamageAvoided -= _ => _player.PlayDodgeSuccessFeedback();
+                _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
             }
         }
     }

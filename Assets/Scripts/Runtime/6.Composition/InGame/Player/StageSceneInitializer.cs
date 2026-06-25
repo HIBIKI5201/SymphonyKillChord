@@ -26,6 +26,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         {
             ServiceLocator.RegisterInstance<IStageSceneInstance>(this);
         }
+
+        private void OnDestroy()
+        {
+            ServiceLocator.UnregisterInstance<IStageSceneInstance>();
+        }
     }
 
     /// <summary>

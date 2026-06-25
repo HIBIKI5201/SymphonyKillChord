@@ -20,6 +20,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Unity.Behavior;
 using UnityEngine;
@@ -176,14 +177,26 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="entryPosition">マップ外側の実生成地点。</param>
         /// <param name="activePosition">到着後に戦闘を開始する地点。</param>
         /// <param name="spawnerCallback">無効化時にスポナーへ通知するcallback。</param>
-        public async ValueTask EnterFromOutsideAsync(
+        public async ValueTask<bool> EnterFromOutsideAsync(
             Vector3 entryPosition,
             Vector3 activePosition,
-            System.Action spawnerCallback)
+            System.Action spawnerCallback,
+            CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             PrepareEntrance(entryPosition);
-            await _view.MoveToTargetAysnc(activePosition);
+            bool hasArrived = await _view.MoveToTargetAysnc(activePosition,ct);
+            ct.ThrowIfCancellationRequested();
+
+            if (!hasArrived || this == null)
+            {
+                CancelEntrance();
+                return false;
+            }
+
             Activate(activePosition, spawnerCallback);
+            return true;
         }
 
         /// <summary>
@@ -438,8 +451,40 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             //TODO エフェクト処理を追加する。
             await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);
-            
-            
+        }
+
+        /// <summary>
+        ///     入場移動を中断して敵をプールへ戻す。
+        /// </summary>
+        private void CancelEntrance()
+        {
+            _view?.StopGameplay();
+
+            if (_behaviorGraphAgent != null)
+            {
+                _behaviorGraphAgent.enabled = false;
+            }
+
+            if (_attackPositionSearchView != null)
+            {
+                _attackPositionSearchView.enabled = false;
+            }
+
+            if (_navMeshAgent != null
+                && _navMeshAgent.enabled)
+            {
+                if (_navMeshAgent.isOnNavMesh)
+                {
+                    _navMeshAgent.isStopped = true;
+                    _navMeshAgent.ResetPath();
+                    _navMeshAgent.velocity = Vector3.zero;
+                }
+
+                _navMeshAgent.enabled = false;
+            }
+
+            gameObject.SetActive(false);
+            _releaseCallback?.Invoke(this);
         }
 
         /// <summary>

@@ -1,6 +1,8 @@
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -178,17 +180,51 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
+            CancellationToken cancellationToken = destroyCancellationToken;
+
             try
             {
-                await lifeCycle.EnterFromOutsideAsync(
-                    _outsideSpawnPoint.position,
-                    activePosition,
-                    HandleInfantryDeactivated);
+                bool activateSuccess =
+                    await lifeCycle.EnterFromOutsideAsync(
+                        _outsideSpawnPoint.position,
+                        activePosition,
+                        HandleInfantryDeactivated,
+                        cancellationToken);
+
+                if (!activateSuccess)
+                {
+                    if (_spawnCount > 0)
+                    {
+                        _spawnCount--;
+                    }
+
+                    return;
+                }
             }
-            catch (System.Exception exception)
+            catch (OperationCanceledException)
             {
-                Debug.LogException(exception);
-                if (_spawnCount > 0) _spawnCount--;
+                // シーン破棄に伴うキャンセルは正常終了として扱う。
+                return;
+            }
+            catch (Exception exception)
+            {
+                if (this != null)
+                {
+                    Debug.LogException(exception, this);
+
+                    if (_spawnCount > 0)
+                    {
+                        _spawnCount--;
+                    }
+                }
+
+                return;
+            }
+
+            if (cancellationToken.IsCancellationRequested
+                || this == null
+                || lifeCycle == null)
+            {
                 return;
             }
 
