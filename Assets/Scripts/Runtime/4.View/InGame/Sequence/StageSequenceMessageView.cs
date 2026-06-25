@@ -6,7 +6,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージの結果表示やシーケンス用メッセージ表示を行うViewクラス。
     /// </summary>
-    public class StageResultUIView : MonoBehaviour
+    public class StageSequenceMessageView : MonoBehaviour
     {
         /// <summary>
         ///     初期化処理。結果画面を非表示にします。
