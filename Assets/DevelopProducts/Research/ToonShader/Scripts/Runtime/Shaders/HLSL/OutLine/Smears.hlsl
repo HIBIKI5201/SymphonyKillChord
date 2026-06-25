@@ -41,12 +41,17 @@ void ApplySmear(
 {
     float3 smearDirectionOS =  TransformWorldToObject(smearDirectionWS);
     
-    float offset = frac(_Time.y / 50) * 200;
-    float noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 10);
+    float offset = frac(_Time.y / 50) * 100;
+    float noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 50);
+    noise = saturate(noise * 1.1);
+    noise *= noise;
     float3 direction = noise * smearDirectionOS * saturate(dot(normalOS, smearDirectionOS));
 
     smearOS = positionOS + direction * smearsPower;
-    alpha = max(0.1f, saturate(1 - noise * 2));
+    
+    alpha = saturate(1 - noise * 2);
+    alpha *=  alpha * alpha * alpha;
+    alpha = max(0.01f, alpha);
 }
 
 #endif
