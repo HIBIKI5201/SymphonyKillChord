@@ -3,7 +3,6 @@ using KillChord.Runtime.Utility.Constant;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.Persistent.SceneManagement
 {
@@ -97,7 +96,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress =>_service.LoadAdditiveAndSetActiveAsync(
+                progress => _service.LoadAdditiveAndSetActiveAsync(
                         toSceneName,
                         progress,
                         ct),
@@ -110,12 +109,136 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress =>_service.UnloadAndSetActiveAsync(
+                progress => _service.UnloadAndSetActiveAsync(
                         unloadSceneName,
                         activeSceneName,
                         progress,
                         ct),
                     ct);
+        }
+
+        /// <summary>
+        ///     Additiveシーンをアンロードしてから、
+        ///     基盤シーンから指定したシーンへ遷移する。
+        /// </summary>
+        /// <param name="additiveSceneName">
+        ///     先にアンロードするAdditiveシーン名。
+        /// </param>
+        /// <param name="fromSceneName">
+        ///     遷移元となる基盤シーン名。
+        /// </param>
+        /// <param name="toSceneName">
+        ///     遷移先となるシーン名。
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     キャンセルトークン。
+        /// </param>
+        /// <returns>
+        ///     すべてのシーン遷移処理に成功した場合はtrue。
+        /// </returns>
+        public Task<bool> UnloadThenChangeSceneAsync(
+            string additiveSceneName,
+            string fromSceneName,
+            string toSceneName,
+            CancellationToken cancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                async progress =>
+                {
+                    IProgress<float> additiveUnloadProgress =
+                        new LoadingProgressRange(
+                            progress,
+                            0f,
+                            LoadingConstants
+                                .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS);
+
+                    bool additiveUnloadSuccess =
+                        await _service.UnloadAsync(
+                            additiveSceneName,
+                            additiveUnloadProgress,
+                            cancellationToken);
+
+                    if (!additiveUnloadSuccess)
+                    {
+                        return false;
+                    }
+
+                    IProgress<float> changeSceneProgress =
+                        new LoadingProgressRange(
+                            progress,
+                            LoadingConstants
+                                .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS,
+                            1f);
+
+                    return await _service.ChangeSceneAsync(
+                        fromSceneName,
+                        toSceneName,
+                        changeSceneProgress,
+                        cancellationToken);
+                },
+                cancellationToken);
+        }
+
+        /// <summary>
+        ///     Additiveシーンをアンロードしてから、
+        ///     基盤シーンを再読み込みする。
+        /// </summary>
+        /// <param name="additiveSceneName">
+        ///     先にアンロードするAdditiveシーン名。
+        /// </param>
+        /// <param name="reloadSceneName">
+        ///     再読み込みする基盤シーン名。
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     キャンセルトークン。
+        /// </param>
+        /// <returns>すべての処理に成功した場合はtrue。</returns>
+        public Task<bool> UnloadThenReloadSceneAsync(
+            string additiveSceneName,
+            string reloadSceneName,
+            CancellationToken cancellationToken)
+        {
+            LoadingExecutionOptions options =
+                LoadingExecutionOptions.KeepOpen(
+                    0f,
+                    LoadingConstants
+                        .IN_GAME_SCENE_LOAD_END_PROGRESS);
+
+            return _executor.ExecuteAsync(
+                async progress =>
+                {
+                    IProgress<float> unloadProgress =
+                        new LoadingProgressRange(
+                            progress,
+                            0f,
+                            LoadingConstants
+                                .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS);
+
+                    bool unloadSuccess =
+                        await _service.UnloadAsync(
+                            additiveSceneName,
+                            unloadProgress,
+                            cancellationToken);
+
+                    if (!unloadSuccess)
+                    {
+                        return false;
+                    }
+
+                    IProgress<float> reloadProgress =
+                        new LoadingProgressRange(
+                            progress,
+                            LoadingConstants
+                                .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS,
+                            1f);
+
+                    return await _service.ReloadSceneAsync(
+                        reloadSceneName,
+                        reloadProgress,
+                        cancellationToken);
+                },
+                options,
+                cancellationToken);
         }
 
         private readonly ISceneTransitionService _service;

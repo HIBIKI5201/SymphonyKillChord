@@ -86,7 +86,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
-
         public async Task<bool> LoadAdditiveAsync(
             string sceneName,
             IProgress<float> progress,
@@ -251,6 +250,116 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+
+        public async Task<bool> ReloadSceneAsync(
+            string sceneName,
+            IProgress<float> progress,
+            CancellationToken cancellationToken)
+        {
+            progress?.Report(0f);
+
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                Debug.LogError(
+                    $"[{nameof(SceneTransitionService)}] " +
+                    "再読み込み対象のシーン名が空です。");
+
+                return false;
+            }
+
+            if (SceneLoader.GetExistScene(
+                sceneName,
+                out Scene loadedScene)
+                && loadedScene.isLoaded)
+            {
+                Scene activeScene = SceneManager.GetActiveScene();
+
+                if (string.Equals(activeScene.name, sceneName, StringComparison.Ordinal))
+                {
+                    if (!TryGetFallbackScene(sceneName, out Scene fallbackScene))
+                    {
+                        Debug.LogError(
+                            $"[{nameof(SceneTransitionService)}] " +
+                            "再読み込み中に一時的にActiveSceneへ設定できるシーンがありません。");
+
+                        return false;
+                    }
+
+                    if (!SceneManager.SetActiveScene(fallbackScene))
+                    {
+                        Debug.LogError(
+                            $"[{nameof(SceneTransitionService)}] " +
+                            "一時的なActiveSceneへの切り替えに失敗しました。");
+
+                        return false;
+                    }
+                }
+
+                IProgress<float> unloadProgress =
+                    CreateProgressRange(progress, 0f, LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
+
+                bool unloadSuccess =
+                    await SceneLoader.UnloadScene(
+                        sceneName,
+                        CreateProgressCallback(unloadProgress),
+                        cancellationToken);
+
+                if (!unloadSuccess)
+                {
+                    Debug.LogError(
+                        $"[{nameof(SceneTransitionService)}] " +
+                        $"シーンのアンロードに失敗しました。" +
+                        $" SceneName: {sceneName}");
+
+                    return false;
+                }
+            }
+            else
+            {
+                progress?.Report(
+                    LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
+            }
+
+            IProgress<float> loadProgress =
+                CreateProgressRange(
+                    progress,
+                    LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS,
+                    1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
+
+            bool loadSuccess =
+                await SceneLoader.LoadScene(
+                    sceneName,
+                    CreateProgressCallback(loadProgress),
+                    LoadSceneMode.Additive,
+                    cancellationToken);
+
+            if (!loadSuccess)
+            {
+                Debug.LogError(
+                    $"[{nameof(SceneTransitionService)}] " +
+                    $"シーンの再読み込みに失敗しました。" +
+                    $" SceneName: {sceneName}");
+
+                return false;
+            }
+
+            progress?.Report(
+                1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
+
+            if (!SceneLoader.SetActiveScene(sceneName))
+            {
+                Debug.LogError(
+                    $"[{nameof(SceneTransitionService)}] " +
+                    $"ActiveSceneの設定に失敗しました。" +
+                    $" SceneName: {sceneName}");
+
+                return false;
+            }
+
+            progress?.Report(1f);
+            return true;
+        }
+
         /// <summary>
         ///     進捗範囲変換クラスを作成する。
         /// </summary>
@@ -274,6 +383,34 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 endProgress);
         }
 
+        /// <summary>
+        ///     再読み込み中に一時的にActiveSceneとして使用するシーンを取得します。
+        /// </summary>
+        /// <param name="reloadSceneName">再読み込み対象シーン名。</param>
+        /// <param name="fallbackScene">一時的に使用するシーン。</param>
+        /// <returns>取得できた場合はtrue。</returns>
+        private static bool TryGetFallbackScene(
+            string reloadSceneName,
+            out Scene fallbackScene)
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+
+                if (!scene.IsValid()
+                    || !scene.isLoaded
+                    || string.Equals(scene.name, reloadSceneName, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                fallbackScene = scene;
+                return true;
+            }
+
+            fallbackScene = default;
+            return false;
+        }
 
         /// <summary>
         ///     進捗通知先をSceneLoaderへ渡せるコールバックへ変換する。

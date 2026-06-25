@@ -63,5 +63,17 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             string activeSceneName,
             IProgress<float> progress,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     指定したシーンをアンロードして再読み込みする。
+        /// </summary>
+        /// <param name="sceneName"> 再読み込みするシーン名。 </param>
+        /// <param name="progress"> 進捗通知先。 </param>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        Task<bool> ReloadSceneAsync(
+            string sceneName,
+            IProgress<float> progress,
+            CancellationToken cancellationToken);
     }
 }
