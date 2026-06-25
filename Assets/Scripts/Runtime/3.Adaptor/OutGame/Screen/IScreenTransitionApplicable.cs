@@ -9,6 +9,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     public interface IScreenTransitionApplicable
     {
         /// <summary>
+        ///    画面遷移結果を適用します。
+        /// </summary>
+        void Apply(in ScreenViewDTO screenViewDTO);
+
+        /// <summary>
         ///     画面遷移結果を適用します。
         /// </summary>
         Task Apply(in ScreenViewDTO screenViewDTO, CancellationToken token);

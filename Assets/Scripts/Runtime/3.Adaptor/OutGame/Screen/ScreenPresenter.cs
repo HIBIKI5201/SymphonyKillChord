@@ -19,6 +19,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
+        ///    画面遷移結果を出力します。
+        /// </summary>
+        public void Present(ScreenTransitionResult result)
+        {
+            ScreenViewDTO screenViewDTO = new(
+                result.ScreenToHideId,
+                result.ScreenToShowId,
+                result.TargetSceneName);
+
+            _screenViewModel.Apply(in screenViewDTO);
+        }
+
+        /// <summary>
         ///     画面遷移結果を出力します。
         /// </summary>
         public Task Present(ScreenTransitionResult result, CancellationToken token)

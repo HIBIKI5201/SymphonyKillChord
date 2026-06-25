@@ -21,6 +21,32 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         }
 
         /// <summary>
+        ///     現在開いている画面を即座に閉じます。
+        /// </summary>
+        public void Execute()
+        {
+            ScreenTransitionState transitionState = _screenStateRepository.TransitionState;
+            ScreenId? currentScreenId = transitionState.CurrentScreenId;
+
+            if (currentScreenId.HasValue == false)
+            {
+                return;
+            }
+
+            if (!transitionState.TryGoBack(out ScreenId previousScreenId))
+            {
+                return;
+            }
+
+            ScreenTransitionResult result = new(
+                currentScreenId,
+                previousScreenId,
+                clearHistory: false);
+
+            _screenPresenter.Present(result);
+        }
+
+        /// <summary>
         ///     現在開いている画面を閉じます。
         /// </summary>
         public async Task Execute(CancellationToken token)
