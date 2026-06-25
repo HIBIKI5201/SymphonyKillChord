@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     歩兵のスポナークラス。
     /// </summary>
-    public class EnemyInfantrySpawner : MonoBehaviour, IGameplayControllable
+    public class EnemyInfantrySpawner : MonoBehaviour, IGameplayControllable, IEnemySpawner
     {
         /// <summary>
         ///     初期化処理。
@@ -17,10 +18,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void Initialize(in Transform[] assignedPositions)
         {
             _assignedPositions = assignedPositions;
-            _spawnPositions = new Vector3[_spawnBatchCount];
+            _spawnPositions = new Vector3[_spawnPositionCount];
             _spawnCount = 0;
             _initialized = true;
-            _timer = 0f;
+            //_timer = 0f;
             _isPlaying = false;
             _spawnedAssignedEnemies = false;
             _activeEnemies.Clear();
@@ -35,11 +36,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
-            if (!_spawnedAssignedEnemies && _assignedPositions != null)
-            {
-                SpawnAssignedEnemy(_assignedPositions);
-                _spawnedAssignedEnemies = true;
-            }
+            //if (!_spawnedAssignedEnemies && _assignedPositions != null)
+            //{
+            //    SpawnAssignedEnemy(_assignedPositions);
+            //    _spawnedAssignedEnemies = true;
+            //}
 
             // 非アクティブな敵をリストから削除し、残りの敵のゲームプレイを開始する。
             ReMoveInactiveEnemies();
@@ -84,47 +85,58 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Transform _outsideSpawnPoint;
         [SerializeField, Tooltip("生成距離")] private float _spawnDistance;
         [SerializeField, Tooltip("生成間隔")] private float _spawnInterval;
-        [SerializeField, Tooltip("一度の生成数")] private int _spawnBatchCount = 4;
+        [SerializeField, Tooltip("生成位置の最大数")] private int _spawnPositionCount = 20;
         [SerializeField, Tooltip("敵の最大数。-1は無限")] private int _maxSpawnCount;
         [SerializeField, Tooltip("敵の生成位置を探索するコンポーネント")]
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 
         private readonly List<EnemyLifeCycle> _activeEnemies = new();
         private bool _spawnedAssignedEnemies;
-        private float _timer;
+        //private float _timer;
         private int _spawnCount;
         private Vector3[] _spawnPositions;
         private bool _initialized = false;
         private Transform[] _assignedPositions;
         private bool _isPlaying = false;
 
-        private void Update()
-        {
-            if (!_initialized || !_isPlaying) return;
-            if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
+        //private void Update()
+        //{
+        //    if (!_initialized || !_isPlaying) return;
+        //    if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
 
-            _timer += Time.deltaTime;
+        //    _timer += Time.deltaTime;
 
-            if (_timer >= _spawnInterval)
-            {
-                _timer = 0f;
-                SpawnEnemy();
-            }
-        }
+        //    if (_timer >= _spawnInterval)
+        //    {
+        //        _timer = 0f;
+        //        SpawnEnemy();
+        //    }
+        //}
 
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        private void SpawnEnemy()
+        public void SpawnEnemy(int amount)
         {
-            _spawnPositionSearcher.FindSpawnPositions(_spawnDistance, _spawnPositions);
-            for (int i = 0; i < _spawnPositions.Length; i++)
+            int positionsFound = _spawnPositionSearcher.FindSpawnPositions(_spawnDistance, _spawnPositions);
+            Debug.Log($"[EnemyInfantrySpawner] positions found:{positionsFound}");
+            int spawnedCount = 0;
+            while (spawnedCount < amount)
             {
-                if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
-                SpawnEnemyAsync(lifeCycle, _spawnPositions[i]);
-                _spawnCount++;
+                // 見つかった位置からランダムで1つ選定する
+                int positionIndex = Random.Range(0, positionsFound);
+                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
+                SpawnEnemyAsync(lifeCycle, _spawnPositions[positionIndex]);
+                spawnedCount++;
             }
+            //_spawnPositionSearcher.FindSpawnPositions(_spawnDistance, _spawnPositions);
+            //for (int i = 0; i < _spawnPositions.Length; i++)
+            //{
+            //    if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
+            //    EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
+            //    SpawnEnemyAsync(lifeCycle, _spawnPositions[i]);
+            //    _spawnCount++;
+            //}
         }
 
         /// <summary>
@@ -180,10 +192,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             try
             {
+                Debug.Log("[EnemyInfantrySpawner] Activated.");
                 await lifeCycle.EnterFromOutsideAsync(
                     _outsideSpawnPoint.position,
                     activePosition,
                     HandleInfantryDeactivated);
+                Debug.Log("[EnemyInfantrySpawner] Activate End.");
             }
             catch (System.Exception exception)
             {

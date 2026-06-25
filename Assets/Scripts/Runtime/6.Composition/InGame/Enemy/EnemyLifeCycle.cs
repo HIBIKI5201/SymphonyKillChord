@@ -52,6 +52,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetEntityRegistryController targetEntityRegistryController,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            EnemyWaveSpawnerState waveSpawnerState,
             Action<EnemyLifeCycle> releaseCallback
             )
         {
@@ -67,6 +68,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
             _enemyEntity = CharacterFactory.Create(_enemyData);
+            _waveSpawnerState = waveSpawnerState;
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
             _attackControllerGenerator = attackControllerGenerator;
@@ -145,6 +147,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void Activate(Vector3 position, System.Action spawnerCallback)
         {
+            Debug.Log($"[EnemyLifeCycle] Enemy Activated._targetManagerController:{_targetManagerController == null}, _targetEntityRegistryController:{_targetEntityRegistryController == null}" );
             _isDying = false;
             _spawnerCallback = spawnerCallback;
             _enemyEntity.Reset();
@@ -215,7 +218,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _spawnerCallback = null;
             gameObject.SetActive(false);
             _releaseCallback?.Invoke(this);
-
         }
 
         /// <summary>
@@ -311,6 +313,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyAttackReservationUsecase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _battleState;
+        private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
 
         /// <summary>
@@ -470,7 +473,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
+            Debug.Log("[EnemyLifeCycle] Enemy Die.");
             DieAsync();
+            _waveSpawnerState.OnEnemyDeath();
+            Debug.Log("[EnemyLifeCycle] Enemy Die End.");
         }
 
         private void OnDestroy()

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.InGame.Camera.Target;
@@ -11,7 +12,9 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
@@ -33,8 +36,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     {
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
-        [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private EnemyInfantrySpawner _enemyInfantrySpawner;
+        [SerializeField] private EnemyArtillerySpawner _enemyArtillerySpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
@@ -45,6 +48,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private StageSequenceView _stageSequenceView;
         [SerializeField] private StageResultUIView _stageResultUIView;
         [SerializeField] private InGamePlayDirector _inGamePlayDirector;
+        [SerializeField] private EnemyWaveDefinitionAsset _enemyWaveDefinition;
+        [SerializeField] private EnemyWaveTimerView _enemyWaveTimerView;
 
         private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
@@ -266,11 +271,17 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             // 敵生成関連
             _enemyPools.Initialize();
-            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
+
+            EnemyWaveSpawnerState enemyWaveSpawnerState = new EnemyWaveSpawnerState();
+            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools, enemyWaveSpawnerState);
 
             _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
-            _enemyInfantryTestSpawner.Initialize(assignedEnemyManager?.Infantries);
-            _enemyArtilleryTestSpawner.Initialize(assignedEnemyManager?.Artillery);
+            _enemyInfantrySpawner.Initialize(assignedEnemyManager?.Infantries);
+            _enemyArtillerySpawner.Initialize(assignedEnemyManager?.Artillery);
+
+            EnemyWaves enemyWaves = _enemyWaveDefinition.ToDefinition();
+            EnemyWaveSpawnerController enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
+            _enemyWaveTimerView.Initialize(enemyWaveSpawnerController);
 
             _rhythmGuideInitializer.Initialize();
 
@@ -342,12 +353,12 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] EnemySpawnPositionSearcherの参照が未設定です。", this);
                 return false;
             }
-            if (_enemyInfantryTestSpawner == null)
+            if (_enemyInfantrySpawner == null)
             {
                 Debug.LogError("[IngameComposition] EnemyInfantryTestSpawnerの参照が未設定です。", this);
                 return false;
             }
-            if (_enemyArtilleryTestSpawner == null)
+            if (_enemyArtillerySpawner == null)
             {
                 Debug.LogError("[IngameComposition] EnemyArtilleryTestSpawnerの参照が未設定です。", this);
                 return false;

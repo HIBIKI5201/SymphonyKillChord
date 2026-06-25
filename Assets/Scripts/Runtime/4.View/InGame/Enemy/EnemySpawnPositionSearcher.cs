@@ -26,12 +26,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="distance">プレイヤーからの距離</param>
         /// <param name="positions">生成位置を格納する配列</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void FindSpawnPositions(float distance, Vector3[] positions)
+        public int FindSpawnPositions(float distance, Vector3[] positions)
         {
             if(positions == null)
             {
                 throw new ArgumentNullException("positions", "生成位置配列がNULL。");
             }
+            int positionsFound = 0;
             int posIndex = 0;
 
             // プレイヤーを中心に、一定距離の円周上に候補位置を取得
@@ -69,30 +70,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 }
                 // 見つかった位置を引数に設定する
                 positions[posIndex] = _candidatePositions[i];
+                positionsFound++;
                 posIndex++;
+                // 引数配列が満タンの場合、処理終了する
                 if(posIndex >= positions.Length)
                 {
-                    return;
+                    return positionsFound;
                 }
             }
-            // 見つかった位置の数が足りない場合、最後に見つかった位置を不足分に設定する
-            if(posIndex < positions.Length)
+            // 一つも見つからなかった場合、既定位置を設定する
+            if (posIndex == 0)
             {
-                // 一つも見つからなかった場合、既定位置を設定する
-                if (posIndex == 0)
+                if(_defaultPosition == null)
                 {
-                    if(_defaultPosition == null)
-                    {
-                        throw new InvalidOperationException("_defaultPosition が未設定です。");
-                    }
-                    positions[0] = _defaultPosition.position;
-                    posIndex++;
+                    throw new InvalidOperationException("_defaultPosition が未設定です。");
                 }
-                for (int i = posIndex; i < positions.Length; i++)
-                {
-                    positions[i] = positions[posIndex - 1];
-                }
+                positions[0] = _defaultPosition.position;
+                posIndex++;
+                positionsFound++;
             }
+            return positionsFound;
         }
 
         /// <summary> カメラ視野を表す平面の数。探索用 </summary>
