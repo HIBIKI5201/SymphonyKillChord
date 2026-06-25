@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.Persistent.Music;
 using UnityEngine;
-
 namespace DevelopProducts.EquipmentBGM
 {
     /// <summary>
@@ -55,6 +54,12 @@ namespace DevelopProducts.EquipmentBGM
             Debug.Log($"<color=green>[EquipmentBGM] ステップ{currentStep}（{_measuresPerStep}小節ごと）→ 次ブロック予約: {label}</color>");
         }
 
+        /// <summary>
+        ///     装備スキルと対応表から、小節ごとに切り替えるセレクターラベルのシーケンスを構築する。
+        /// </summary>
+        /// <param name="table"> スキルIDとセレクターラベル名の対応表。 </param>
+        /// <param name="skillBuild"> 装備中スキルの参照。 </param>
+        /// <returns> 小節ごとに切り替えるセレクターラベルの配列。 </returns>
         private string[] BuildSequence(BgmSelectorLabelTable table, SkillBuildDefinition skillBuild)
         {
             var skillLabels = new List<string>();
@@ -81,13 +86,20 @@ namespace DevelopProducts.EquipmentBGM
             return skillLabels.ToArray();
         }
 
+        /// <summary> CRIのセレクター名。 </summary>
         private const string SELECTOR_NAME = "Selector_BGM";
+        /// <summary> 1小節あたりの拍数。 </summary>
         private const int BEATS_PER_MEASURE = 4;
 
+        /// <summary> セレクター切り替えの対象となる音楽プレイヤー。 </summary>
         private readonly MusicPlayer _musicPlayer;
+        /// <summary> 小節ごとに切り替えるセレクターラベルのシーケンス。 </summary>
         private readonly string[] _sequence;
+        /// <summary> シーケンスを1ステップ進める間隔（小節数）。 </summary>
         private readonly int _measuresPerStep;
+        /// <summary> 現在予約しているシーケンスのインデックス。 </summary>
         private int _queuedIndex;
+        /// <summary> 前回処理したステップ番号。 </summary>
         private int _previousStep = -1;
     }
 }

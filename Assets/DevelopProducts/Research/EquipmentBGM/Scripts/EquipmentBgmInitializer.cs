@@ -17,7 +17,9 @@ namespace DevelopProducts.EquipmentBGM
         [SerializeField, Tooltip("シーケンスを1ステップ進める間隔（小節数）。")]
         private int _measuresPerStep = 1;
 
+        /// <summary> 生成したEquipmentBgmService。 </summary>
         private EquipmentBgmService _service;
+        /// <summary> 拍情報を参照する音楽同期状態。 </summary>
         private MusicSyncState _musicSyncState;
 
         /// <summary>
@@ -33,6 +35,9 @@ namespace DevelopProducts.EquipmentBGM
             ServiceLocator.RegisterInstance(_service);
         }
 
+        /// <summary>
+        ///     毎フレーム、現在の拍をServiceに渡して小節の切り替えを駆動する。
+        /// </summary>
         private void Update()
         {
             if (_service == null || _musicSyncState == null) return;
