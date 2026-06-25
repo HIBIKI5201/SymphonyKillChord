@@ -6,14 +6,14 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.Title
 {
     /// <summary>
-    ///     タイトルオプション画面の View クラス。
+    ///     メニュー画面の View クラス。
     /// </summary>
-    public class TitleOptionScreenView : ScreenViewBase
+    public class MenuScreenView : ScreenViewBase
     {
         /// <summary>
-        ///    タイトルオプション画面の View を初期化します。
+        ///    メニュー画面の View を初期化します。
         /// </summary>
-        public TitleOptionScreenView(
+        public MenuScreenView(
             VisualElement rootElement, 
             OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
@@ -23,7 +23,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///   タイトルオプション画面の View のリソースを解放します。
+        ///   メニュー画面の View のリソースを解放します。
         /// </summary>
         public override void Dispose()
         {
@@ -40,7 +40,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Button _backButton;
 
         /// <summary>
-        ///     タイトルオプション画面の UI 要素を初期化します。
+        ///     メニュー画面の UI 要素を初期化します。
         /// </summary>
         /// <param name="rootElement"></param>
         /// <exception cref="NullReferenceException"></exception>
@@ -49,18 +49,18 @@ namespace KillChord.Runtime.View.OutGame.Title
             if (rootElement == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleOptionScreenView)}: Root VisualElementがnullです。");
+                Debug.LogError($"{nameof(MenuScreenView)}: Root VisualElementがnullです。");
 #endif
                 return;
             }
 
 
             _optionButton = rootElement.Q<Button>(OPTION_BUTTON_NAME)
-                ?? throw new NullReferenceException($"{nameof(TitleOptionScreenView)}: {OPTION_BUTTON_NAME}が見つかりません。");
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {OPTION_BUTTON_NAME}が見つかりません。");
             _creditButton = rootElement.Q<Button>(CREDIT_BUTTON_NAME)
-                ?? throw new NullReferenceException($"{nameof(TitleOptionScreenView)}: {CREDIT_BUTTON_NAME}が見つかりません。");
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {CREDIT_BUTTON_NAME}が見つかりません。");
             _backButton = rootElement.Q<Button>(BACK_BUTTON_NAME)
-                ?? throw new NullReferenceException($"{nameof(TitleOptionScreenView)}: {BACK_BUTTON_NAME}が見つかりません。");
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BACK_BUTTON_NAME}が見つかりません。");
         }
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
     public class TitleSceneInitializer : MonoBehaviour
     {
         private const string TITLE_SCREEN_NAME = "TitleContainer";
-        private const string TITLE_OPTION_SCREEN_NAME = "TitleOptionContainer";
+        private const string MENU_SCREEN_NAME = "MenuContainer";
         private const string OPTION_SCREEN_NAME = "OptionContainer";
         private const string CREDIT_SCREEN_NAME = "CreditContainer";
 
@@ -82,7 +82,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             TitleStartController titleStartController = new(sceneTransitionController);
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
-            var titleOptionRoot = root.Q<VisualElement>(TITLE_OPTION_SCREEN_NAME);
+            var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
             var optionRoot = root.Q<VisualElement>(OPTION_SCREEN_NAME);
             var creditRoot = root.Q<VisualElement>(CREDIT_SCREEN_NAME);
             if (titleRoot == null)
@@ -93,10 +93,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
-            if (titleOptionRoot == null)
+            if (menuRoot == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: タイトルオプション画面のルートVisualElementが見つかりません。{TITLE_OPTION_SCREEN_NAME}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルートVisualElementが見つかりません。{MENU_SCREEN_NAME}");
 #endif
                 return;
             }
@@ -118,11 +118,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             TitleSceneView titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
-            TitleOptionScreenView titleOptionScreenView = new(titleOptionRoot, _outGameUIEvent);
+            MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
 
-            _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, titleOptionScreenView, optionsScreenView, creditScreenView);
+            _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
@@ -191,7 +191,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void RegisterUIEventCallbacks()
         {
             _outGameUIEvent.OnShowTitleScreen += HandleTitleScreenShown;
-            _outGameUIEvent.OnShowTitleOptionScreen += HandleTitleOptionScreenShown;
+            _outGameUIEvent.OnShowMenuScreen += HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen += HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen += HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
@@ -203,7 +203,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void UnRegisterUIEventCallbacks()
         {
             _outGameUIEvent.OnShowTitleScreen -= HandleTitleScreenShown;
-            _outGameUIEvent.OnShowTitleOptionScreen -= HandleTitleOptionScreenShown;
+            _outGameUIEvent.OnShowMenuScreen -= HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen -= HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen -= HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
@@ -219,11 +219,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///    タイトルオプション画面を表示する処理を行う。
+        ///    メニュー画面を表示する処理を行う。
         /// </summary>
-        private void HandleTitleOptionScreenShown()
+        private void HandleMenuScreenShown()
         {
-            _screenController.ShowTitleOption();
+            _screenController.ShowMenu();
         }
 
         /// <summary>

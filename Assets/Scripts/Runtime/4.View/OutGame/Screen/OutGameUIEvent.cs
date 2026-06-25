@@ -15,8 +15,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> タイトル画面を表示するイベント。 </summary>
         public Action OnShowTitleScreen;
 
-        /// <summary> タイトルオプション画面を表示するイベント。 </summary>
-        public Action OnShowTitleOptionScreen;
+        /// <summary> メニュー画面を表示するイベント。 </summary>
+        public Action OnShowMenuScreen;
 
         /// <summary> オプション画面を表示するイベント。 </summary>
         public Action OnShowOptionsScreen;

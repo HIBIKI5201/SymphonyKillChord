@@ -32,11 +32,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
-        ///    タイトルオプション画面を表示します。
+        ///    メニュー画面を表示します。
         /// </summary>
-        public void ShowTitleOption()
+        public void ShowMenu()
         {
-            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.TitleOption));
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Menu));
         }
 
         /// <summary>

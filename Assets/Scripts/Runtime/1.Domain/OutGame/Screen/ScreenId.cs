@@ -19,8 +19,8 @@ namespace KillChord.Runtime.Domain.OutGame.Screen
         BattlePreparation,
         /// <summary> タイトル画面。 </summary>
         Title,
-        /// <summary> タイトルオプション画面。 </summary>
-        TitleOption,
+        /// <summary> メニュー画面。 </summary>
+        Menu,
         /// <summary> オプション画面。 </summary>
         Options,
         /// <summary> クレジット画面。 </summary>

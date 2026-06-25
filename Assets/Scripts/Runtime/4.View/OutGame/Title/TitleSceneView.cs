@@ -178,7 +178,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void OnClickOptionButton()
         {
-            OutGameUIEvent?.OnShowTitleOptionScreen?.Invoke();
+            OutGameUIEvent?.OnShowMenuScreen?.Invoke();
         }
     }
 }

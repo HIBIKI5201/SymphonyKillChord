@@ -18,19 +18,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         ///    Registry を初期化します。
         /// </summary>
         /// <param name="titleScreenView"></param>
-        /// <param name="titleOptionView"></param>
+        /// <param name="menuScreenView"></param>
         /// <param name="optionsScreenView"></param>
         /// <param name="creditScreenView"></param>
         public TitleScreenViewRegistry(
             ScreenViewBase titleScreenView,
-            ScreenViewBase titleOptionView,
+            ScreenViewBase menuScreenView,
             ScreenViewBase optionsScreenView,
             ScreenViewBase creditScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
             {
                 { ScreenId.Title, titleScreenView },
-                { ScreenId.TitleOption, titleOptionView },
+                { ScreenId.Menu, menuScreenView },
                 { ScreenId.Options, optionsScreenView },
                 { ScreenId.Credit, creditScreenView },
             };
@@ -45,7 +45,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns></returns>
         public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
-            Debug.Log($"Show: {screenId}");
             if (_views.TryGetValue(screenId, out var view))
             {
                 await view.Show(token);
