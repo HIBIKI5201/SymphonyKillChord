@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary>
         ///     ミッション定義を生成します。
         /// </summary>
-        /// <returns>ミッション定義。</returns>
+        /// <returns> ミッション定義。 </returns>
         public MissionDefinition Create()
         {
             List<IMissionEvaluationCondition> evaluations = new();
@@ -34,7 +34,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 _mainMissionText,
                 _clearCondition?.Create(),
                 _failCondition?.Create(),
-                evaluations
+                evaluations,
+                _defeatTips
             );
         }
 
@@ -48,6 +49,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
 
         [Header("UI情報")]
         [SerializeField, TextArea, Tooltip("ミッションHUDに表示される説明文。")] private string _mainMissionText;
+        [SerializeField, Tooltip("敗北時に表示する攻略Tips一覧。")] private List<string> _defeatTips = new();
 
         [Header("クリア条件")]
         [SerializeReference, SubclassSelector, Tooltip("ミッションクリアとなる条件。")]
