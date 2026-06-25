@@ -11,5 +11,6 @@
                 </ui:VisualElement>
             </ui:Tab>
         </ui:TabView>
+        <ui:Button text="戻る" name="BackButton" class="back-button button" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
     </ui:VisualElement>
 </ui:UXML>
