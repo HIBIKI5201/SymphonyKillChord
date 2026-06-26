@@ -17,6 +17,22 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
         protected virtual void OnAfterDeserialize() { }
 
         /// <summary>
+        ///     指定型のセーブファイルパスを取得する。
+        /// </summary>
+        internal static string GetFilePath<T>() where T : SaveBase
+        {
+            return Path.Combine(Application.persistentDataPath, $"{typeof(T).Name}.json");
+        }
+
+        /// <summary>
+        ///     指定型のセーブファイルが存在するかを判定する。
+        /// </summary>
+        internal static bool Exists<T>() where T : SaveBase
+        {
+            return File.Exists(GetFilePath<T>());
+        }
+
+        /// <summary>
         ///     セーブデータを非同期で読み込みます。 
         /// </summary>
         /// <returns></returns>
