@@ -275,7 +275,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             EnemyWaveSpawnerState enemyWaveSpawnerState = new EnemyWaveSpawnerState();
             _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools, enemyWaveSpawnerState);
 
-            _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
+            _enemySpawnPositionSearcher.Initialize(_playerInitializer.transform);
             _enemyInfantrySpawner.Initialize(assignedEnemyManager?.Infantries);
             _enemyArtillerySpawner.Initialize(assignedEnemyManager?.Artillery);
 

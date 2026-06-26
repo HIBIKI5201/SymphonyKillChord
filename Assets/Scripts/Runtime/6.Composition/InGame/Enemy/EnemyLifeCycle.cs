@@ -180,13 +180,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="activePosition">到着後に戦闘を開始する地点。</param>
         /// <param name="spawnerCallback">無効化時にスポナーへ通知するcallback。</param>
         public async ValueTask EnterFromOutsideAsync(
-            Vector3 entryPosition,
-            Vector3 activePosition,
+            SpawnPositionPair positionPair,
             System.Action spawnerCallback)
         {
-            PrepareEntrance(entryPosition);
-            await _view.MoveToTargetAysnc(activePosition);
-            Activate(activePosition, spawnerCallback);
+            positionPair.SetInUse(true);
+            PrepareEntrance(positionPair.SpawnPosition.position);
+            await _view.MoveToTargetAysnc(positionPair.EntryPosition.position);
+            Activate(positionPair.EntryPosition.position, spawnerCallback);
+            positionPair.SetInUse(false);
         }
 
         /// <summary>

@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
+    /// <summary>
+    ///     敵生成用のタイマーを管理するクラス。
+    /// </summary>
     public class EnemyWaveTimerView : MonoBehaviour, IGameplayControllable, IEnemyWaveTimerView
     {
-
-        public float WaveTimer => _waveTimer;
         public void StartGameplay()
         {
             _waveSpawnerController.SpawnNextWave();
@@ -25,12 +26,19 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _waveTimer = 0f;
         }
 
+        /// <summary>
+        ///     タイマーを設定する。
+        /// </summary>
+        /// <param name="time"></param>
         public void SetTimer(float time)
         {
             _waveTimer = time;
             _timerActive = true;
         }
 
+        /// <summary>
+        ///     タイマーを停止する。
+        /// </summary>
         public void StopTimer()
         {
             _timerActive = false;

@@ -20,8 +20,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         }
 
         /// <summary>
-        ///     次のWaveの生成を行う。<br/>
-        ///     これ以上のWave定義がない場合、敵全滅関連の処理を行う。
+        ///     次のWaveの生成を行う。
         /// </summary>
         /// <exception cref="Exception"></exception>
         public void SpawnNextWave()
@@ -33,6 +32,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 _waveTimer.StopTimer();
                 return;
             }
+            // これ以上Wave定義がない時、stateクラスの最終Waveフラグを設定する
             if (_waves.IsLastWave)
             {
                 _state.SetLastWave();
@@ -53,7 +53,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 }
                 enemyCount += waveDefinition.Details[i].EnemyAmount;
             }
+            // stateの敵数を更新
             _state.AddEnemyCount(enemyCount);
+            // Waveのタイマーを設定する
             _waveTimer.SetTimer(waveDefinition.WaveDuration);
         }
 
@@ -68,6 +70,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private IEnemySpawner _artillerySpawner;
         private IEnemyWaveTimerView _waveTimer;
 
+        /// <summary>
+        ///     spawnerと数を指定して、敵生成処理を呼び出す。
+        /// </summary>
+        /// <param name="spawner"></param>
+        /// <param name="amount"></param>
         private void SpawnEnemies(IEnemySpawner spawner, int amount)
         {
             spawner.SpawnEnemy(amount);

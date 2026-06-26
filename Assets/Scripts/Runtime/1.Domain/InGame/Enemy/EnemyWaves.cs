@@ -15,6 +15,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
 
         public bool IsLastWave => (!_loopFlg) && (_currentIndex >= _waves.Length);
 
+        /// <summary>
+        ///     次のWave定義を取得する。
+        /// </summary>
+        /// <returns></returns>
         public EnemyWaveDefinition GetNextWave()
         {
             EnemyWaveDefinition ret;

@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
+    /// <summary>
+    ///     敵生成インタフェース。
+    /// </summary>
     public interface IEnemySpawner
     {
         /// <summary>

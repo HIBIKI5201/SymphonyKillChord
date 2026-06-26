@@ -3,11 +3,15 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
+    /// <summary>
+    ///     敵生成処理
+    /// </summary>
     public class EnemyWaveSpawnerState
     {
         public EnemyWaveSpawnerState()
         {
             _enemyCount = 0;
+            _isLastWave = false;
         }
 
         /// <summary> 敵がいなくなった時のイベント </summary>
@@ -16,12 +20,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary> これ以上敵が生成されない、かつ敵がいなくなった時のイベント </summary>
         public event Action OnWaveAllCleared;
 
+        /// <summary>
+        ///     敵数を加算する。
+        /// </summary>
+        /// <param name="count"></param>
         public void AddEnemyCount(int count)
         {
             Debug.Log($"[EnemyWaveSpawnerState] Add Enemy Count. Current: {_enemyCount}, Add:{count}");
             _enemyCount += count;
         }
 
+        /// <summary>
+        ///     敵死亡時に呼び出す処理。
+        /// </summary>
+        /// <exception cref="Exception"></exception>
         public void OnEnemyDeath()
         {
             _enemyCount--;
@@ -42,6 +54,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     最終Waveフラグを設定する。
+        /// </summary>
         public void SetLastWave()
         {
             _isLastWave = true;

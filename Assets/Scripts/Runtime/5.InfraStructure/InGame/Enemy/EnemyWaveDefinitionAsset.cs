@@ -32,29 +32,29 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             return ret;
         }
 
-        [SerializeField]
+        [SerializeField, Tooltip("1Wave分の定義")]
         private SingleWaveDefinition[] _waves;
-        [SerializeField]
+        [SerializeField, Tooltip("全Wave終了後、繰り返して生成するか")]
         private bool _loop;
-        [SerializeField]
+        [SerializeField, Tooltip("繰り返す場合の開始Index")]
         private int _loopStart;
 
         [Serializable]
         private class WaveDetailDefinition
         {
             /// <summary> 敵種類 </summary>
-            public EnemyType EnemyType;
+            [Tooltip("敵種類")]public EnemyType EnemyType;
             /// <summary> 敵の数 </summary>
-            [Range(0, 20)] public int EnemyAmount;
+            [Range(0, 20), Tooltip("敵の生成数")] public int EnemyAmount;
         }
 
         [Serializable]
         private class SingleWaveDefinition
         {
             /// <summary> 敵種類ごとの詳細 </summary>
-            public WaveDetailDefinition[] Details;
+            [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
-            [Range(0, 1800)] public float WaveDuration;
+            [Range(0, 1800), Tooltip("Waveの継続時間")] public float WaveDuration;
         }
     }
 }
