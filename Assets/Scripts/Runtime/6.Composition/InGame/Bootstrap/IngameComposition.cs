@@ -249,25 +249,25 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _inGamePlayDirector.AddGamePlayControllable(playerView);
 
-            // ステージに事前配置されている敵の情報
-            AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
-            if (assignedEnemyManager == null)
-            {
-                Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
-            }
-            else
-            {
-                if (assignedEnemyManager.Infantries == null
-                    || assignedEnemyManager.Infantries.Length == 0)
-                {
-                    Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
-                }
-                if (assignedEnemyManager.Artillery == null
-                    || assignedEnemyManager.Artillery.Length == 0)
-                {
-                    Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
-                }
-            }
+            // ステージに事前配置されている敵の情報（現状不要になった）
+            //AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
+            //if (assignedEnemyManager == null)
+            //{
+            //    Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
+            //}
+            //else
+            //{
+            //    if (assignedEnemyManager.Infantries == null
+            //        || assignedEnemyManager.Infantries.Length == 0)
+            //    {
+            //        Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
+            //    }
+            //    if (assignedEnemyManager.Artillery == null
+            //        || assignedEnemyManager.Artillery.Length == 0)
+            //    {
+            //        Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
+            //    }
+            //}
 
             // 敵生成関連
             _enemyPools.Initialize();
@@ -276,8 +276,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools, enemyWaveSpawnerState);
 
             _enemySpawnPositionSearcher.Initialize(_playerInitializer.transform);
-            _enemyInfantrySpawner.Initialize(assignedEnemyManager?.Infantries);
-            _enemyArtillerySpawner.Initialize(assignedEnemyManager?.Artillery);
+            _enemyInfantrySpawner.Initialize();
+            _enemyArtillerySpawner.Initialize();
 
             EnemyWaves enemyWaves = _enemyWaveDefinition.ToDefinition();
             EnemyWaveSpawnerController enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
