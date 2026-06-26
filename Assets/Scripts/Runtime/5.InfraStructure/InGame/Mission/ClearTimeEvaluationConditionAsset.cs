@@ -16,7 +16,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns>評価条件。</returns>
         public override IMissionEvaluationCondition Create()
         {
-            return new ClearTimeEvaluationCondition(_clearTime, GetDisplayText());
+            return new ClearTimeEvaluationCondition(EvaluationId, _clearTime, GetDisplayText());
         }
 
         /// <summary>

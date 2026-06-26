@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using SymphonyFrameWork.Attribute;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,12 +21,40 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         {
             List<IMissionEvaluationCondition> evaluations = new();
 
+            HashSet<string> evaluationIds = new(StringComparer.Ordinal);
+
             for (int i = 0; i < _evaluationConditions.Count; i++)
             {
-                if (_evaluationConditions[i] != null)
+                MissionEvaluationConditionAssetBase condition = _evaluationConditions[i];
+
+                if (condition == null)
                 {
-                    evaluations.Add(_evaluationConditions[i].Create());
+                    continue;
                 }
+
+                string evaluationId = condition.EvaluationIdValue;
+
+                if (string.IsNullOrWhiteSpace(evaluationId))
+                {
+
+                }
+
+                if (string.IsNullOrWhiteSpace(evaluationId))
+                {
+                    throw new InvalidOperationException(
+                        $"評価条件[{i}]のEvaluationIdが未設定です。" +
+                        $" MissionId: {_missionId}");
+                }
+
+                if (!evaluationIds.Add(evaluationId))
+                {
+                    throw new InvalidOperationException(
+                        $"EvaluationIdが重複しています。" +
+                        $" MissionId: {_missionId}, " +
+                        $"EvaluationId: {evaluationId}");
+                }
+
+                evaluations.Add(condition.Create());
             }
 
             return new MissionDefinition(

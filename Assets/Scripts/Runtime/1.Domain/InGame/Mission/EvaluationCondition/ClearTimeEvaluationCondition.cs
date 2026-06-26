@@ -10,9 +10,10 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
         /// <summary>
         ///     ClearTimeEvaluationCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
+        /// <param name="evaluationId"> サブミッションのId。 </param>
         /// <param name="thresholdTime">しきい値となる時間。</param>
         /// <param name="description">条件の説明文。</param>
-        public ClearTimeEvaluationCondition(float thresholdTime, string description)
+        public ClearTimeEvaluationCondition(MissionEvaluationId evaluationId,float thresholdTime, string description)
         {
             if (thresholdTime < 0f || float.IsNaN(thresholdTime) || float.IsInfinity(thresholdTime))
             {
@@ -21,11 +22,14 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
                     "thresholdTime must be non-negative and finite.");
             }
 
+            MissionEvaluationId = evaluationId;
             _thresholdTime = thresholdTime;
             _description = description;
         }
+        public MissionEvaluationId MissionEvaluationId { get; }
 
         public MissionEvaluationResultTiming ResultTiming => MissionEvaluationResultTiming.Cleared;
+
 
         /// <summary>
         ///     条件が満たされているかどうかを判定します。

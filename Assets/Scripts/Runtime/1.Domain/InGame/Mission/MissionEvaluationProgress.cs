@@ -8,16 +8,21 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <summary>
         ///     MissionEvaluationProgress 構造体の新しいインスタンスを初期化します。
         /// </summary>
+        /// <param name="id"> 評価条件のId。 </param>
         /// <param name="description">条件の説明文。</param>
         /// <param name="displaySituation">HUD表示状態。</param>
         public MissionEvaluationProgress(
+            MissionEvaluationId id,
             string description,
             MissionEvaluationDisplaySituation displaySituation)
         {
+            EvaluationId = id;
             Description = description;
             DisplaySituation = displaySituation;
         }
 
+        /// <summary> 評価条件ID。 </summary>
+        public MissionEvaluationId EvaluationId { get; }
         /// <summary> 条件の説明文を取得します。 </summary>
         public string Description { get; }
         /// <summary> HUD表示状態を取得します。 </summary>
