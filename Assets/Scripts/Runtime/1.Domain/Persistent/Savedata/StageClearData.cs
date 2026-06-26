@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Persistent.Savedata
 {
@@ -23,10 +24,17 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _achievedEvaluationIds = new List<string>();
         }
 
+        /// <summary> クリア済みステージID。 </summary>
         public int StageId => _stageId;
 
+        /// <summary> 一度でも達成したサブミッション一覧。 </summary>
         public IReadOnlyList<string> AchievedEvaluationIds => _achievedEvaluationIds;
 
+        /// <summary>
+        ///     達成したサブミッションIDを追加する。
+        /// </summary>
+        /// <param name="evaluationIds"> 達成したサブミッションIDのリスト。 </param>
+        /// <returns></returns>
         internal bool AddAchievedEvaluationIds(IReadOnlyList<string> evaluationIds)
         {
             if (evaluationIds == null || evaluationIds.Count == 0)
@@ -54,32 +62,6 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         /// <summary>
-        ///     デシリアライズ後のデータを正規化する。
-        /// </summary>
-        internal void NormalizeAfterDeserialize()
-        {
-            _achievedEvaluationIds ??= new List<string>();
-
-            HashSet<string> uniqueIds = new(StringComparer.Ordinal);
-
-            for (int i = 0; i < _achievedEvaluationIds.Count; i++)
-            {
-                string evaluationId = _achievedEvaluationIds[i]?.Trim();
-
-                if (string.IsNullOrWhiteSpace(evaluationId)
-                    || !uniqueIds.Add(evaluationId))
-                {
-                    _achievedEvaluationIds.RemoveAt(i);
-                    i--;
-                    continue;
-                }
-
-                _achievedEvaluationIds[i] =
-                    evaluationId;
-            }
-        }
-
-        /// <summary>
         ///     同じステージの重複記録を統合する。
         /// </summary>
         internal void Merge(StageClearData other)
@@ -92,7 +74,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             AddAchievedEvaluationIds(other._achievedEvaluationIds);
         }
 
-        private int _stageId;
-        private List<string> _achievedEvaluationIds;
+        [SerializeField] private int _stageId;
+        [SerializeField] private List<string> _achievedEvaluationIds;
     }
 }

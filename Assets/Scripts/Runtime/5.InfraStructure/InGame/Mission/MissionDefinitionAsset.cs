@@ -36,11 +36,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
 
                 if (string.IsNullOrWhiteSpace(evaluationId))
                 {
-
-                }
-
-                if (string.IsNullOrWhiteSpace(evaluationId))
-                {
                     throw new InvalidOperationException(
                         $"評価条件[{i}]のEvaluationIdが未設定です。" +
                         $" MissionId: {_missionId}");

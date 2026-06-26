@@ -16,6 +16,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> プレイヤーの装備スキル構成のセーブデータを表すプロパティ。 </summary>
         public SkillBuildData SkillBuild { get; private set; } = new();
 
+        /// <summary> プレイヤーのステージ進行状況のセーブデータを表すプロパティ。 </summary>
+        public StageProgressData StageProgress { get; private set; } = new();
+
         /// <summary>
         ///     セーブデータを読み込んだ後に null チェックを行い、必要に応じて初期化する。
         /// </summary>
@@ -23,6 +26,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         {
             SkillUnlock ??= new();
             SkillBuild ??= new();
+            StageProgress ??= new();
         }
     }
 }
