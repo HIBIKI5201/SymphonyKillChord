@@ -55,6 +55,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         private MusicPlayer _musicPlayer;
         private InGameSequenceDirector _inGameSequenceDirector;
         private MissionRuntimeService _missionruntimeService;
+        private EnemyWaveSpawnerController _enemyWaveSpawnerController;
         private bool _isEnding = false;
 
         private async void Start()
@@ -157,6 +158,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
         private void OnDestroy()
         {
+            _enemyWaveSpawnerController?.Dispose();
             if (_missionruntimeService != null)
             {
                 _missionruntimeService.OnMissionFinished -= HandleMissionFinished;
@@ -280,8 +282,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyArtillerySpawner.Initialize();
 
             EnemyWaves enemyWaves = _enemyWaveDefinition.ToDefinition();
-            EnemyWaveSpawnerController enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
-            _enemyWaveTimerView.Initialize(enemyWaveSpawnerController);
+            _enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
+            _enemyWaveTimerView.Initialize(_enemyWaveSpawnerController);
 
             _rhythmGuideInitializer.Initialize();
 

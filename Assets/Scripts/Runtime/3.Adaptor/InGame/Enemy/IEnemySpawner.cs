@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>

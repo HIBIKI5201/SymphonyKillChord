@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
@@ -7,6 +9,11 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     {
         public EnemyWaves(EnemyWaveDefinition[] waves, bool loopFlg, int loopStart)
         {
+            if (waves == null) throw new ArgumentNullException(nameof(waves));
+            if (loopFlg && (waves.Length == 0 || loopStart < 0 || loopStart >= waves.Length))
+            {
+                throw new ArgumentOutOfRangeException(nameof(loopStart));
+            }
             _waves = waves;
             _loopFlg = loopFlg;
             _loopStart = loopStart;
