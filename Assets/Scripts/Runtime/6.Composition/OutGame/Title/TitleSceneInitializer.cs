@@ -9,8 +9,8 @@ using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
-using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame.Title
@@ -37,14 +37,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
-        // セーブデータの読み込み結果を保持するフィールド
+        [SerializeField, SceneNameSelector, Tooltip("初回起動時の遷移先のシーン名")]
+        private string _firstLaunchTargetSceneName;
+
         private SaveData _saveData;
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private ScreenController _screenController;
 
-        private void Start()
+        private async void Start()
         {
             if (_uiDocument == null)
             {
@@ -124,7 +126,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
-
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_ruleData);
 
@@ -149,10 +150,35 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            LoadSaveData();
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystemがServiceLocatorに登録されていません。");
+#endif
+                return;
+            }
+
+            bool isFirstLaunch = !savedataSystem.Exists<SaveData>();
+
+            _saveData = await savedataSystem.LoadAsync<SaveData>();
             RegisterUIEventCallbacks();
 
             _screenController.ShowTitle();
+
+            if (isFirstLaunch)
+            {
+#if UNITY_EDITOR
+                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{_firstLaunchTargetSceneName}");
+#endif
+                titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+            }
+            else
+            {
+#if UNITY_EDITOR
+                Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
+#endif
+                titleSceneView.SetTargetSceneName(_targetSceneName);
+            }
         }
 
         /// <summary>
@@ -161,28 +187,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void OnDestroy()
         {
             UnRegisterUIEventCallbacks();
-        }
-
-        /// <summary>
-        ///     SaveDataを非同期で読み込む。
-        /// </summary>
-        private void LoadSaveData()
-        {
-            if (ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                ValueTask<SaveData> savedata = savedataSystem.LoadAsync<SaveData>();
-                if (savedata.IsCompletedSuccessfully)
-                {
-                    _saveData = savedata.Result;
-                    Debug.Log($"{nameof(TitleSceneInitializer)}: SaveDataの読み込みに成功しました。");
-                }
-                else
-                {
-#if UNITY_EDITOR
-                    Debug.LogError($"{nameof(TitleSceneInitializer)}: SaveDataの読み込みに失敗しました。");
-#endif
-                }
-            }
         }
 
         /// <summary>

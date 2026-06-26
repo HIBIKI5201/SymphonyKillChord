@@ -89,6 +89,16 @@ namespace KillChord.Runtime.View.OutGame.Title
             _cancellationTokenSource = null;
         }
 
+        /// <summary>
+        ///     遷移先のシーン名を設定する。
+        ///     初回起動時とそれ以外で遷移先のシーンが異なるため、外部から設定できるようにする。
+        /// </summary>
+        /// <param name="targetSceneName"></param>
+        public void SetTargetSceneName(string targetSceneName)
+        {
+            _targetSceneName = targetSceneName;
+        }
+
         private const string TOUCH_AREA_NAME = "TouchArea";
         private const string OPTION_BUTTON_NAME = "OptionButton";
 
@@ -149,7 +159,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             try
             {
                 succes =
-                    await _titleStartController.StartGameAsync(_targetSceneName, _cancellationTokenSource.Token);
+                    await _titleStartController.StartGameAsync(_currentSceneName, _targetSceneName, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
