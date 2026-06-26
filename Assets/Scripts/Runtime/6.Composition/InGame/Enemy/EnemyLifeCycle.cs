@@ -147,7 +147,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void Activate(Vector3 position, System.Action spawnerCallback)
         {
-            Debug.Log($"[EnemyLifeCycle] Enemy Activated._targetManagerController:{_targetManagerController == null}, _targetEntityRegistryController:{_targetEntityRegistryController == null}" );
             _isDying = false;
             _spawnerCallback = spawnerCallback;
             _enemyEntity.Reset();
@@ -184,10 +183,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             System.Action spawnerCallback)
         {
             positionPair.SetInUse(true);
-            PrepareEntrance(positionPair.SpawnPosition.position);
-            await _view.MoveToTargetAysnc(positionPair.EntryPosition.position);
-            Activate(positionPair.EntryPosition.position, spawnerCallback);
-            positionPair.SetInUse(false);
+            try
+            {
+                PrepareEntrance(positionPair.SpawnPosition.position);
+                await _view.MoveToTargetAysnc(positionPair.EntryPosition.position);
+                Activate(positionPair.EntryPosition.position, spawnerCallback);
+            }
+            finally
+            {
+                positionPair.SetInUse(false);
+            }
         }
 
         /// <summary>
@@ -359,6 +364,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 await PlayDeathAnimationAsync();
                 Deactivate();
+                _waveSpawnerState.OnEnemyDeath();
             }
             catch (OperationCanceledException)
             {
@@ -474,10 +480,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
-            Debug.Log("[EnemyLifeCycle] Enemy Die.");
             DieAsync();
-            _waveSpawnerState.OnEnemyDeath();
-            Debug.Log("[EnemyLifeCycle] Enemy Die End.");
         }
 
         private void OnDestroy()

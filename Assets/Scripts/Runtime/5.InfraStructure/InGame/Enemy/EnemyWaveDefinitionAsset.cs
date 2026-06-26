@@ -16,16 +16,18 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// <returns></returns>
         public EnemyWaves ToDefinition()
         {
-            EnemyWaveDefinition[] waves = new EnemyWaveDefinition[_waves.Length];
-            for(int i = 0; i < _waves.Length; i++)
+            SingleWaveDefinition[] sourceWaves = _waves ?? Array.Empty<SingleWaveDefinition>();
+            EnemyWaveDefinition[] waves = new EnemyWaveDefinition[sourceWaves.Length];
+            for (int i = 0; i < sourceWaves.Length; i++)
             {
-                EnemyWaveDetail[] details = new EnemyWaveDetail[_waves[i].Details.Length];
-                for (int j = 0; j < _waves[i].Details.Length; j++)
+                WaveDetailDefinition[] sourceDetails = sourceWaves[i].Details ?? Array.Empty<WaveDetailDefinition>();
+                EnemyWaveDetail[] details = new EnemyWaveDetail[sourceDetails.Length];
+                for (int j = 0; j < sourceDetails.Length; j++)
                 {
-                    EnemyWaveDetail detail = new EnemyWaveDetail(_waves[i].Details[j].EnemyType, _waves[i].Details[j].EnemyAmount);
+                    EnemyWaveDetail detail = new EnemyWaveDetail(sourceDetails[j].EnemyType, sourceDetails[j].EnemyAmount);
                     details[j] = detail;
                 }
-                EnemyWaveDefinition wave = new EnemyWaveDefinition(details, _waves[i].WaveDuration);
+                EnemyWaveDefinition wave = new EnemyWaveDefinition(details, sourceWaves[i].WaveDuration);
                 waves[i] = wave;
             }
             EnemyWaves ret = new EnemyWaves(waves, _loop, _loopStart);
@@ -45,7 +47,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             /// <summary> 敵種類 </summary>
             [Tooltip("敵種類")]public EnemyType EnemyType;
             /// <summary> 敵の数 </summary>
-            [Range(0, 20), Tooltip("敵の生成数")] public int EnemyAmount;
+            [Tooltip("敵の生成数"), Range(0, 20)] public int EnemyAmount;
         }
 
         [Serializable]
@@ -54,7 +56,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             /// <summary> 敵種類ごとの詳細 </summary>
             [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
-            [Range(0, 1800), Tooltip("Waveの継続時間")] public float WaveDuration;
+            [Tooltip("Waveの継続時間(秒)"), Range(0, 1800)] public float WaveDuration;
         }
     }
 }

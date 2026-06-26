@@ -3,7 +3,6 @@ using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -17,7 +16,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void Initialize()
         {
-            _spawnCount = 0;
             _initialized = true;
             _isPlaying = false;
             _activeEnemies.Clear();
@@ -64,8 +62,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void HandleInfantryDeactivated()
         {
-            if (_spawnCount > 0) _spawnCount--;
-
             ReMoveInactiveEnemies();
         }
 
@@ -74,7 +70,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 
         private readonly List<EnemyLifeCycle> _activeEnemies = new();
-        private int _spawnCount;
         private bool _initialized = false;
         private bool _isPlaying = false;
 
@@ -114,19 +109,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             try
             {
-                Debug.Log("[EnemyInfantrySpawner] Activated.");
                 await lifeCycle.EnterFromOutsideAsync(
                     positionPair,
                     HandleInfantryDeactivated);
-                Debug.Log("[EnemyInfantrySpawner] Activate End.");
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception);
-                if (_spawnCount > 0) _spawnCount--;
                 return;
             }
-
             _activeEnemies.Add(lifeCycle);
             StartOrStopSpawnedEnemy(lifeCycle);
         }

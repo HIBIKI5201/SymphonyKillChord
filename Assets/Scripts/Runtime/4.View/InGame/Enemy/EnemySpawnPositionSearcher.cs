@@ -46,9 +46,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 await Task.Delay(_searchDelay);
                 loopCnt++;
             }
-            // 一定回数探索しても生成位置が見つからない場合、初期位置を使う
+            // 一定回数探索しても生成位置が見つからない場合、明示された既定位置を使う
             Debug.LogWarning("[EnemySpawnPositionSearcher] 予期せぬ原因により、敵生成位置取得が失敗しました。初期位置で敵を生成します。");
-            return _positionPairs[0];
+            if (_defaultPositionPair != null && !_defaultPositionPair.IsInUse && IsPositionNearPlayer(_defaultPositionPair))
+            {
+                return _defaultPositionPair;
+            }
+            throw new Exception("[EnemySpawnPositionSearcher] 使用可能な敵生成位置が見つかりませんでした。");
         }
         
         [Header("性能調整")]
@@ -59,7 +63,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [Space]
         [SerializeField, Tooltip("生成位置が見つからない場合の位置")]
-        private Transform _defaultPosition;
+        private SpawnPositionPair _defaultPositionPair;
         [SerializeField, Tooltip("生成可能なプレイヤーとの最小距離")]
         private float _minDistanceToPlayer = 10f;
 

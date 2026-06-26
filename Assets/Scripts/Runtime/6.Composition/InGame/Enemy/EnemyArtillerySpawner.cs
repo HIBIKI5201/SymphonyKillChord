@@ -3,7 +3,6 @@ using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -17,7 +16,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void Initialize()
         {
-            _spawnCount = 0;
             _initialized = true;
             _isPlaying = false;
             _activeEnemies.Clear();
@@ -64,8 +62,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void HandleArtilleryDeactivated()
         {
-            if (_spawnCount > 0) _spawnCount--;
-
             ReMoveInactiveEnemies();
         }
 
@@ -74,7 +70,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 
         private readonly List<EnemyLifeCycle> _activeEnemies = new();
-        private int _spawnCount;
         private bool _initialized = false;
         private bool _isPlaying;
 
@@ -83,7 +78,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public async void SpawnEnemy(int amount)
         {
-            for(int i = 0;  i < amount; i++)
+            for (int i = 0;  i < amount; i++)
             {
                 SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
                 EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
@@ -114,16 +109,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             try
             {
-                Debug.Log("[EnemyArtillerySpawner] Activated.");
                 await lifeCycle.EnterFromOutsideAsync(
                     positionPair,
                     HandleArtilleryDeactivated);
-                Debug.Log("[EnemyArtillerySpawner] Activate End.");
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception);
-                if (_spawnCount > 0) _spawnCount--;
                 return;
             }
             _activeEnemies.Add(lifeCycle);
