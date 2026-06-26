@@ -1,6 +1,13 @@
 :root {
 }
 
+.tab-root {
+    background-color: rgb(123, 123, 123);
+    width: 60%;
+    height: 60%;
+    align-self: center;
+}
+
 .unity-tab {
     width: 100%;
     height: 100%;
@@ -22,13 +29,17 @@
     margin-left: 0;
 }
 
+.unity-tab-view__header-container {
+    align-items: stretch;
+    justify-content: space-between;
+    width: 11%;
+    height: 100%;
+}
+
 .unity-tab__header {
-    width: 122%;
-    height: 81px;
+    width: 200px;
+    height: 80px;
     margin-right: 6px;
-    -unity-font-style: bold;
-    font-size: 30px;
-    -unity-text-align: middle-center;
     border-top-width: 4px;
     border-right-width: 4px;
     border-bottom-width: 4px;
@@ -37,11 +48,12 @@
     border-top-right-radius: 12px;
 }
 
-.unity-tab-view__header-container {
-    align-items: stretch;
-    justify-content: space-between;
-    width: 11%;
+.unity-tab__header-label {
+    width: 100%;
     height: 100%;
+    -unity-font-style: bold;
+    font-size: 22px;
+    -unity-text-align: middle-center;
 }
 
 .unity-tab__header:checked {

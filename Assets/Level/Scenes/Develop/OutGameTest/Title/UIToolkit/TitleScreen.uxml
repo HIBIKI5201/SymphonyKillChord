@@ -6,7 +6,7 @@
     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%;">
         <ui:Instance template="Title" name="TitleContainer" style="width: 100%; height: 100%; display: flex;"/>
         <ui:Instance template="Menu" name="MenuContainer" style="position: absolute; display: none; width: 100%; height: 100%;"/>
-        <ui:Instance template="Option" name="OptionContainer" style="display: none; width: 100%; height: 100%; position: absolute;"/>
+        <ui:Instance template="Option" name="OptionContainer" style="width: 100%; height: 100%; position: absolute; display: none;"/>
         <ui:Instance template="Credit" name="CreditContainer" style="display: none; width: 100%; height: 100%; position: absolute;"/>
     </ui:VisualElement>
 </ui:UXML>
