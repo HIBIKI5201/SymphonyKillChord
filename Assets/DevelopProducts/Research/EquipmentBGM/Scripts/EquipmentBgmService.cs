@@ -32,6 +32,7 @@ namespace DevelopProducts.EquipmentBGM
             }
 
             _musicPlayer.SetSelectorLabel(SELECTOR_NAME, _sequence[0]);
+            _previousStep = 0;
             Debug.Log($"<color=green>[EquipmentBGM] 初期ラベル設定: {_sequence[0]}（シーケンス全{_sequence.Length}ステップ、{_measuresPerStep}小節/ステップ）</color>");
         }
 
