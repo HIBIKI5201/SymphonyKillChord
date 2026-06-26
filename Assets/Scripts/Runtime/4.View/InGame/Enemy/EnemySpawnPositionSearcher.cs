@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 ShuffulePositionPairs();
                 for (int i = 0; i < _positionPairs.Length; i++)
                 {
-                    if ((!_positionPairs[i].IsInUse) && IsPositionNearPlayer(_positionPairs[i]))
+                    if ((!_positionPairs[i].IsInUse) && !IsPositionNearPlayer(_positionPairs[i]))
                     {
                         return _positionPairs[i];
                     }
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
             // 一定回数探索しても生成位置が見つからない場合、明示された既定位置を使う
             Debug.LogWarning("[EnemySpawnPositionSearcher] 予期せぬ原因により、敵生成位置取得が失敗しました。初期位置で敵を生成します。");
-            if (_defaultPositionPair != null && !_defaultPositionPair.IsInUse && IsPositionNearPlayer(_defaultPositionPair))
+            if (_defaultPositionPair != null)
             {
                 return _defaultPositionPair;
             }
@@ -90,7 +90,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private bool IsPositionNearPlayer(SpawnPositionPair positionPair)
         {
             float distance = Vector3.Distance(_playerTransform.position, positionPair.transform.position);
-            return distance > _minDistanceToPlayer;
+            return distance < _minDistanceToPlayer;
         }
     }
 }
