@@ -103,7 +103,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             if (attackDefinition == null) return false;
 
-            _attackIntervalEvaluator.EvaluateInterval();
+            StartAttackInterval();
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
             _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
@@ -128,6 +128,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             resultBeatType = (int)beatType;
             return true;
+        }
+
+        /// <summary>
+        ///     攻撃インターバルを開始する。
+        /// </summary>
+        public void StartAttackInterval()
+        {
+            _attackIntervalEvaluator.EvaluateInterval();
         }
 
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)

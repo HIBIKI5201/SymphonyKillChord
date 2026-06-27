@@ -132,15 +132,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
-
-            PlayerDodgeMovementApplication dodge = new(parameter);
-            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
-            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
-
-            PlayerMovementApplication move = new(parameter);
-            PlayerApplication application = new(move, dodge);
-
-            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
+            
             var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
@@ -194,6 +186,19 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             var animationComposition = _player.gameObject.AddComponent<AnimationComposition>();
             var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
+
+            PlayerDodgeMovementApplication dodge = new(parameter);
+            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
+            dodge.OnDodgeEnded += () =>
+            {
+                _playerEntity.SetInvincible(false);
+                playerAttackController.StartAttackInterval();
+            };
+
+            PlayerMovementApplication move = new(parameter);
+            PlayerApplication application = new(move, dodge);
+
+            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
 
             _player.Initialize(playerMovementController, playerAttackController, animController, animationIndices, ct, inputView, healthHudPresenter);
 
