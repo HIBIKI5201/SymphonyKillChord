@@ -2,8 +2,16 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Mission
 {
+    /// <summary>
+    ///     サブミッションの評価IDを表す値オブジェクト。
+    /// </summary>
     public readonly struct MissionEvaluationId : IEquatable<MissionEvaluationId>
     {
+        /// <summary>
+        ///    サブミッションの評価IDを表す値オブジェクトを初期化します。
+        /// </summary>
+        /// <param name="value"> サブミッションの評価IDの文字列値。 </param>
+        /// <exception cref="ArgumentException"> valueがnull、空、または空白の場合にスローされます。 </exception>
         public MissionEvaluationId(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -16,7 +24,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         public string Value => _value;
 
-        /// <inheritdoc/>
         public bool Equals(MissionEvaluationId other)
         {
             return string.Equals(

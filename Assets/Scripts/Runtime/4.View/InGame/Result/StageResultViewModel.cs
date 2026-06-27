@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///    ステージ結果の表示に必要なデータを保持するビューモデル。
+    /// </summary>
     public class StageResultViewModel : IStageResultViewModel
     {
         public ReactiveProperty<StageResultType> ResultType { get; }

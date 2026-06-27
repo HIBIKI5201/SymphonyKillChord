@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Result
 {
+    /// <summary>
+    ///    ステージ結果画面の表示を行うプレゼンター。
+    /// </summary>
     public class StageResultPresenter
     {
         private const string MAIN_MISSION_CLEAR_TEXT = "達成";
@@ -16,6 +19,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         private const string DEFAULT_DEFEAT_TIP_TEXT = "敵の攻撃をよくみて、回避後の隙に攻撃しましょう。";
         private const int SECOND_PER_MINUTE = 60;
 
+        /// <summary>
+        ///    ステージ結果画面の表示を行うプレゼンターを初期化する。
+        /// </summary>
+        /// <param name="missionRuntimeService"> ミッションのランタイムサービス。 </param>
+        /// <param name="selectedBattleStageState">選択されたバトルステージの状態。 </param>
+        /// <param name="viewModel">ステージ結果のViewModel。 </param>
+        /// <exception cref="ArgumentNullException"></exception>
         public StageResultPresenter(
             MissionRuntimeService missionRuntimeService,
             SelectedBattleStageState selectedBattleStageState,
@@ -35,6 +45,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                     nameof(viewModel));
         }
 
+        /// <summary>
+        ///   ステージクリアの結果を表示する。
+        /// </summary>
         public void PresentVictory()
         {
             MissionEvaluationResult evaluationResult =
@@ -56,6 +69,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             _stageResultViewModel.Apply(dto);
         }
 
+        /// <summary>
+        ///   ステージ敗北の結果を表示する。
+        /// </summary>
         public void PresentDefeat()
         {
             StageResultDTO dto = new(
@@ -76,6 +92,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly IStageResultViewModel _stageResultViewModel;
 
+        /// <summary>
+        ///     サブミッションの結果をDTOに変換する。
+        /// </summary>
+        /// <param name="evaluationResult">ミッション評価の結果。</param>
+        /// <returns>サブミッションのDTO配列。</returns>
         private static StageResultMissionItemDTO[] BuildSubMissionItems(
             MissionEvaluationResult evaluationResult)
         {
@@ -93,6 +114,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             return items;
         }
 
+        /// <summary>
+        ///    経過時間を「mm:ss」形式の文字列に変換する。
+        /// </summary>
+        /// <param name="elapsedSeconds">経過時間（秒）。</param>
+        /// <returns>「mm:ss」形式の文字列。</returns>
         private static string FormatBattleTime(float elapsedSeconds)
         {
             int totalSeconds = Mathf.Max(0, (int)Mathf.Floor(elapsedSeconds));
@@ -103,6 +129,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             return $"{minutes:00}:{seconds:00}";
         }
 
+        /// <summary>
+        ///     敗北時のヒントをランダムに選択する。
+        /// </summary>
+        /// <param name="defeatTips">敗北時のヒントのリスト。</param>
+        /// <returns></returns>
         private string SelectDefeatTip(
             IReadOnlyList<string> defeatTips)
         {
