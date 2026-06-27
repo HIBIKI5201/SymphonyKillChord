@@ -202,7 +202,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 				positionPair.SetInUse(false);
                 if (!hasArrived || this == null)
                 {
-                    CancelEntrance();
+                    if (this != null)
+                    {
+                        CancelEntrance();
+                    }
                     positionPair.SetInUse(false);
                     return false;
                 }

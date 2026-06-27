@@ -82,9 +82,20 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             for (int i = 0;  i < amount; i++)
             {
-                SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
-                EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
-                SpawnEnemyAsync(lifeCycle, positionPair, callback);
+                try
+                {
+                    SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
+                    EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
+                    SpawnEnemyAsync(lifeCycle, positionPair, callback);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, this);
+                }
             }
         }
 
