@@ -9,6 +9,7 @@ Shader "Custom/SilToon/Base"
         [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+
          [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
         _FadeAlpha("Fade Alpha",Range(0,1)) = 0
 
@@ -21,6 +22,14 @@ Shader "Custom/SilToon/Base"
         _FresnelBackLight("Back Light Intensity",Float) = 8
         _FresnelFrontRimLight("Front Rim Light Intensity",Float) = 4
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
+
+        [Header(SSS)]
+        [Toggle(SSS_ON)] _SSSOn("SSS On", Float) = 0
+        _SSSColor("SSS Color", Color) = (1.0, 0.4, 0.3, 1)
+        _SSSWrap("Wrap", Range(0, 1)) = 0.3
+        _SSSIntensity("Intensity", Range(0, 2)) = 0.5
+        _SSSThickness("Thickness", Range(0, 1)) = 0.3
+        _SSSTransmissionPower("Transmission Power", Range(1, 16)) = 4
 
         [Header(OutLine)]
         _OutlineColor("Color",Color) = (1, 1, 1, 1)
@@ -78,7 +87,8 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex vert
                 #pragma fragment frag
-                #pragma multi_compile _ FADE_ON
+                #pragma shader_feature_local _ FADE_ON
+                #pragma shader_feature_local _ SSS_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
@@ -126,5 +136,5 @@ Shader "Custom/SilToon/Base"
             ENDHLSL
         }
     }
-    CustomEditor "DevelopProducts.ToonShader.SilToonGUI"
+    //CustomEditor "DevelopProducts.ToonShader.SilToonGUI"
 }

@@ -31,7 +31,7 @@ void MainLight_float(
     
     Light mainLightWithShadow = GetMainLight(shadowCoord);
     ShadowAtten = mainLightWithShadow.shadowAttenuation;
-
+    
 #else
     ShadowAtten = 1.0;
 #endif

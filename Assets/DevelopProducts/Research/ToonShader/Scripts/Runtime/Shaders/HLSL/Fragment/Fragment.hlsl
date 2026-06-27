@@ -9,6 +9,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SimplifiedSSS.hlsl"
 
 struct Attributes
 {
@@ -52,9 +53,15 @@ half4 _ColorLit;
 half4 _ColorMiddle;
 half4 _ColorShadow;
 
-half _FresnelBackLight; 
-half _FresnelFrontRimLight; 
-half _FresnelBackRimLight; 
+half _FresnelBackLight;
+half _FresnelFrontRimLight;
+half _FresnelBackRimLight;
+
+half3 _SSSColor;
+half _SSSWrap;
+half _SSSIntensity;
+half _SSSThickness;
+half _SSSTransmissionPower;
 
 
 Varyings vert(Attributes IN)
@@ -95,8 +102,16 @@ half4 frag(Varyings IN) : SV_Target
     normalWS = _IsForFace ? (half3) GetFaceNormal(_FaceUp, (float3) normalWS) : normalWS;
 
     half3 color;
+#ifdef SSS_ON
+    GetSSSLights_float(
+        (float3) normalWS, IN.positionWS, GetWorldSpaceNormalizeViewDir(IN.positionWS),
+        _SSSColor, _SSSWrap, _SSSIntensity, _SSSThickness, _SSSTransmissionPower,
+        color
+    );
+#else
     GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, IN.positionWS, (float3) normalWS, color);
-    
+#endif
+
     half backLight, rimLightFront, rimLightBack;
     GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
                backLight, rimLightFront, rimLightBack);
