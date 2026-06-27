@@ -35,6 +35,8 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         public void Show()
         {
+            HideInGameCanvas();
+
             if (_canvasGroup != null)
             {
                 _canvasGroup.alpha = 1f;
@@ -143,6 +145,9 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("敗北時のTipsを表示するUIルート。")]
         private GameObject _tipsRoot;
+
+        [SerializeField, Tooltip("インゲームのCanvas。")]
+        private Canvas[] _inGameCanvas;
 
         [Header("Text")]
         [SerializeField, Tooltip("リザルトタイトルを表示するText。")]
@@ -283,8 +288,7 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="resultType">
         ///     勝利または敗北のリザルト種別。
         /// </param>
-        private void ApplyResultType(
-            StageResultType resultType)
+        private void ApplyResultType(StageResultType resultType)
         {
             bool isVictory =
                 resultType == StageResultType.Victory;
@@ -351,6 +355,29 @@ namespace KillChord.Runtime.View.InGame.Result
             _isTransitioning = false;
 
             SetInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     InGameCanvasを閉じる。
+        /// </summary>
+        private void HideInGameCanvas()
+        {
+            if (_inGameCanvas == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _inGameCanvas.Length; i++)
+            {
+                Canvas canvas = _inGameCanvas[i];
+
+                if (canvas == null)
+                {
+                    continue;
+                }
+
+                canvas.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
