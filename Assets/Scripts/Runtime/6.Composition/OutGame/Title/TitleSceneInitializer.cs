@@ -31,6 +31,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, Tooltip("画面遷移ルールデータ")]
         private ScreenRuleData _ruleData;
 
+        [Header("シーン遷移設定")]
         [SerializeField, SceneNameSelector, Tooltip("遷移元のシーン名")]
         private string _currentSceneName;
 
