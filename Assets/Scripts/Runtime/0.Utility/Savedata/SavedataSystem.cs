@@ -88,6 +88,17 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
                 _loadingTasks.Remove(type);
             }
         }
+
+        /// <summary>
+        ///     指定された型のセーブデータを破棄し、キャッシュから削除します。
+        /// </summary>
+        /// <typeparam name="T"> セーブデータの型。</typeparam>
+        public void DeleteSaveData<T>() where T : SaveBase
+        {
+            SaveBase.DeleteSaveData<T>();
+            Unload<T>();
+        }
+
         /// <summary>
         ///   指定された型のセーブデータの読み込みタスクを待機し、
         ///   完了後にキャッシュからクリーンアップします。

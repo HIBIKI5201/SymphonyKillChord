@@ -33,6 +33,23 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
         }
 
         /// <summary>
+        ///    指定された型のセーブデータを削除します。
+        /// </summary>
+        internal static void DeleteSaveData<T>() where T : SaveBase
+        {
+            var filePath = GetFilePath<T>();
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                Debug.Log($"Deleted Savedata File. Path:{filePath}");
+            }
+            else
+            {
+                Debug.LogWarning($"No savedata file found to delete. Path:{filePath}");
+            }
+        }
+
+        /// <summary>
         ///     セーブデータを非同期で読み込みます。 
         /// </summary>
         /// <returns></returns>
@@ -76,6 +93,7 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
                 throw;
             }
         }
+
         /// <summary> セーブデータのキーを取得します。</summary>
         private string SaveKey => GetType().Name;
         /// <summary> セーブデータのファイルパスを取得します。</summary>
