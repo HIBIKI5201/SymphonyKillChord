@@ -22,9 +22,16 @@ namespace DevelopProducts.SaveSystem
                 return;
             }
 
-            byte[] encrypted = await File.ReadAllBytesAsync(FilePath);
-            var json = Encoding.UTF8.GetString(SaveCryptoUtility.Decrypt(encrypted));
-            JsonUtility.FromJsonOverwrite(json, this);
+            try
+            {
+                byte[] encrypted = await File.ReadAllBytesAsync(FilePath);
+                var json = Encoding.UTF8.GetString(SaveCryptoUtility.Decrypt(encrypted));
+                JsonUtility.FromJsonOverwrite(json, this);
+            }
+            catch (Exception ex) 
+            {
+                throw new InvalidDataException("セーブデータの復号に失敗しました。", ex);
+            }
         }
         /// <summary>
         ///     セーブデータを非同期で保存します。
