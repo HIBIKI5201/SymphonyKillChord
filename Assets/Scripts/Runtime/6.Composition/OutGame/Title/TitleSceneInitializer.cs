@@ -10,6 +10,7 @@ using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -41,11 +42,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("初回起動時の遷移先のシーン名")]
         private string _firstLaunchTargetSceneName;
 
-        private SaveData _saveData;
-
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private ScreenController _screenController;
+        private SavedataSystem _savedataSystem;
 
         private async void Start()
         {
@@ -69,8 +69,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SceneTransitionController sceneTransitionController;
             MusicPlayer musicPlayer;
             SoundEffectVolumeManager sePlayer;
-            SavedataSystem savedataSystem;
-            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out savedataSystem))
+            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out _savedataSystem))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -121,6 +120,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
             VolumeSettingsTabView audioVolumeTab = new(optionRoot, musicPlayer, sePlayer);
+            DataResetTabView dataResetTab = new(optionRoot, _outGameUIEvent);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
@@ -148,9 +148,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            bool isFirstLaunch = !savedataSystem.Exists<SaveData>();
-
-            _saveData = await savedataSystem.LoadAsync<SaveData>();
+            bool isFirstLaunch = !_savedataSystem.Exists<SaveData>();
             RegisterUIEventCallbacks();
 
             _screenController.ShowTitle();
@@ -249,6 +247,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _outGameUIEvent.OnShowOptionsScreen += HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen += HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
+            _outGameUIEvent.OnDataResetButtonClicked += HandleDataResetButtonClicked;
         }
 
         /// <summary>
@@ -261,6 +260,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _outGameUIEvent.OnShowOptionsScreen -= HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen -= HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
+            _outGameUIEvent.OnDataResetButtonClicked -= HandleDataResetButtonClicked;
         }
 
 
@@ -302,6 +302,30 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void HandleScreenClosed()
         {
             _screenController.CloseCurrentImmediately();
+        }
+
+        /// <summary>
+        ///     セーブデータをリセットする処理を行う。
+        /// </summary>
+        private async void HandleDataResetButtonClicked()
+        {
+            _savedataSystem.DeleteSaveData<SaveData>();
+
+
+            // NOTE : セーブデータのリセットがチュートリアルも行うレベルのリセットなのかどうかで
+            // セーブデータのロードをして初期化するのかを判断する必要がある。
+
+            // セーブデータをロードして、初期状態に戻す
+            try
+            {
+                var saveData = await _savedataSystem.LoadAsync<SaveData>();
+            }
+            catch (Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータのロード中にエラーが発生しました。{ex.Message}");
+#endif
+            }
         }
     }
 }
