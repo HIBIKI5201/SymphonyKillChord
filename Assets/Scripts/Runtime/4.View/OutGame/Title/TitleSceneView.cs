@@ -1,8 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.Title;
-using SymphonyFrameWork.Attribute;
+using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,14 +10,34 @@ namespace KillChord.Runtime.View.OutGame.Title
     /// <summary>
     ///     タイトルシーンの View クラス。
     /// </summary>
-    public class TitleSceneView : MonoBehaviour
+    public class TitleSceneView :  ScreenViewBase
     {
         /// <summary>
         ///    タイトルシーンの View を初期化する。
         /// </summary>
-        public void Initialize(VisualElement root, TitleStartController titleStartController)
+        /// <param name="rootElement"></param>
+        /// <param name="outGameUIEvent"></param>
+        /// <param name="titleStartController"></param>
+        /// <param name="currentSceneName"></param>
+        /// <param name="targetSceneName"></param>
+        public TitleSceneView(
+            VisualElement rootElement, 
+            OutGameUIEvent outGameUIEvent,
+            TitleStartController titleStartController,
+            string currentSceneName,
+            string targetSceneName) : base(rootElement, outGameUIEvent)
         {
-            if (root == null)
+            Initialize(rootElement, titleStartController);
+            _currentSceneName = currentSceneName;
+            _targetSceneName = targetSceneName;
+        }
+
+        /// <summary>
+        ///    タイトルシーンの View を初期化する。
+        /// </summary>
+        public void Initialize(VisualElement rootElement, TitleStartController titleStartController)
+        {
+            if (rootElement == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneView)}: Root VisualElementがnullです。");
@@ -26,9 +45,16 @@ namespace KillChord.Runtime.View.OutGame.Title
                 return;
             }
 
-            _touchArea = root.Q<VisualElement>(TOUCH_AREA_NAME);
+            if (titleStartController == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneView)}: TitleStartControllerがnullです。");
+#endif
+                return;
+            }
             _titleStartController = titleStartController;
 
+            _touchArea = rootElement.Q<VisualElement>(TOUCH_AREA_NAME);
             if (_touchArea == null)
             {
 #if UNITY_EDITOR
@@ -37,20 +63,52 @@ namespace KillChord.Runtime.View.OutGame.Title
                 return;
             }
 
+            _optionButton = rootElement.Q<Button>(OPTION_BUTTON_NAME);
+            if (_optionButton == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneView)}: {OPTION_BUTTON_NAME}の取得に失敗しました。");
+#endif
+                return;
+            }
+
+
             _cancellationTokenSource = new CancellationTokenSource();
 
             RegisterCallbacks();
         }
 
-        private const string TOUCH_AREA_NAME = "TouchArea";
+        /// <summary>
+        ///   タイトルシーンの View のリソースを解放する。
+        /// </summary>
+        public override void Dispose()
+        {
+            UnRegisterCallbacks();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
 
-        [SerializeField, SceneNameSelector, Tooltip("遷移元のシーン名を指定します。")]
+        /// <summary>
+        ///     遷移先のシーン名を設定する。
+        ///     初回起動時とそれ以外で遷移先のシーンが異なるため、外部から設定できるようにする。
+        /// </summary>
+        /// <param name="targetSceneName"></param>
+        public void SetTargetSceneName(string targetSceneName)
+        {
+            _targetSceneName = targetSceneName;
+        }
+
+        private const string TOUCH_AREA_NAME = "TouchArea";
+        private const string OPTION_BUTTON_NAME = "OptionButton";
+
         private string _currentSceneName;
-        [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名を指定します。")]
         private string _targetSceneName;
 
         /// <summary> タッチエリアの VisualElement。 </summary>
         private VisualElement _touchArea;
+        private Button _optionButton;
+
         private TitleStartController _titleStartController;
 
         private CancellationTokenSource _cancellationTokenSource;
@@ -60,7 +118,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterCallbacks()
         {
-            if(_touchArea == null)
+            if (_touchArea == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneView)}: タッチエリアがnullです。");
@@ -69,6 +127,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
             _touchArea.RegisterCallback<PointerDownEvent>(OnPointDownEvent);
+            _optionButton.clicked += OnClickOptionButton;
         }
 
         /// <summary>
@@ -85,6 +144,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
             _touchArea.UnregisterCallback<PointerDownEvent>(OnPointDownEvent);
+            _optionButton.clicked -= OnClickOptionButton;
         }
 
         /// <summary>
@@ -98,8 +158,8 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             try
             {
-                succes = 
-                    await _titleStartController.StartGameAsync(_targetSceneName, _cancellationTokenSource.Token);
+                succes =
+                    await _titleStartController.StartGameAsync(_currentSceneName, _targetSceneName, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -123,12 +183,12 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
         }
 
-        private void OnDestroy()
+        /// <summary>
+        ///     オプションボタンがクリックされたときの処理。
+        /// </summary>
+        private void OnClickOptionButton()
         {
-            UnRegisterCallbacks();
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            OutGameUIEvent?.OnShowMenuScreen?.Invoke();
         }
     }
 }

@@ -21,6 +21,14 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
         }
 
         /// <summary>
+        ///     指定された型のセーブファイルが存在するかを判定する。
+        /// </summary>
+        public bool Exists<T>() where T : SaveBase
+        {
+            return SaveBase.Exists<T>();
+        }
+
+        /// <summary>
         ///    指定された型のセーブデータを非同期で読み込みます。
         ///    キャッシュが存在する場合はキャッシュから返し、存在しない場合は新たに読み込みます。
         /// </summary>
@@ -80,6 +88,17 @@ namespace KillChord.Runtime.Utility.OutGame.Savedata
                 _loadingTasks.Remove(type);
             }
         }
+
+        /// <summary>
+        ///     指定された型のセーブデータを破棄し、キャッシュから削除します。
+        /// </summary>
+        /// <typeparam name="T"> セーブデータの型。</typeparam>
+        public void DeleteSaveData<T>() where T : SaveBase
+        {
+            SaveBase.DeleteSaveData<T>();
+            Unload<T>();
+        }
+
         /// <summary>
         ///   指定された型のセーブデータの読み込みタスクを待機し、
         ///   完了後にキャッシュからクリーンアップします。

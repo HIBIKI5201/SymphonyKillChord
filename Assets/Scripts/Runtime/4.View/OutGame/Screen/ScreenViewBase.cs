@@ -22,6 +22,25 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///    即座に画面を表示します。
+        /// </summary>
+        public virtual void ShowImmediately()
+        {
+            RootElement.style.display = DisplayStyle.Flex;
+            RootElement.AddToClassList(VISIBLE_CLASS);
+            RootElement.RemoveFromClassList(HIDDEN_CLASS);
+            RootElement.BringToFront();
+        }
+
+        /// <summary>
+        ///     即座に画面を非表示にします。
+        /// </summary>
+        public virtual void HideImmediately()
+        {
+            RootElement.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>
         ///     画面を表示します。
         /// </summary>
         public virtual async Task Show(CancellationToken token)
@@ -56,14 +75,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RootElement.style.display = DisplayStyle.None;
             _brocker.RemoveFromHierarchy();
-        }
-
-        /// <summary>
-        ///     即座に画面を非表示にします。
-        /// </summary>
-        public virtual void HideImmediately()
-        {
-            RootElement.style.display = DisplayStyle.None;
         }
 
         /// <summary>

@@ -18,10 +18,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         ///     ゲームを開始する。
         ///     アウトゲームシーンに遷移する。
         /// </summary>
+        /// <param name="currentSceneName"> 現在のシーン名。 </param>
         /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
         /// <param name="token"> キャンセルトークン。 </param>
         /// <returns> 遷移が成功したかどうか。 </returns>
-        public async Task<bool> StartGameAsync(string targetSceneName, CancellationToken token)
+        public async Task<bool> StartGameAsync(string currentSceneName, string targetSceneName, CancellationToken token)
         {
             // 多重呼び出しを防ぐため、すでに遷移中の場合は false を返す。
             if (_isActivate)
@@ -36,6 +37,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
             {
                 isSuccess =
                     await _sceneTransitionController.LoadAdditiveAndSetActiveAsync(targetSceneName, token);
+
+                await _sceneTransitionController.UnloadAsync(currentSceneName, token);
 
                 if (!isSuccess)
                 {
