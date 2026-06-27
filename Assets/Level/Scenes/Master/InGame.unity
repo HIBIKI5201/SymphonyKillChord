@@ -858,6 +858,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 176797402388610346, guid: a259115a9df77c44da61ba832833f97b, type: 3}
+      propertyPath: _gamepadLookSensitivity
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 5247649918134476368, guid: a259115a9df77c44da61ba832833f97b, type: 3}
       propertyPath: m_Name
       value: CameraManager
@@ -1338,7 +1342,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyInfantryTestSpawner
   _enemyPools: {fileID: 1599172285}
-  _spawnPoint: {fileID: 1136649844}
+  _outsideSpawnPoint: {fileID: 1136649844}
   _spawnDistance: 10
   _spawnInterval: 5
   _spawnBatchCount: 2
@@ -1712,7 +1716,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyIArtilleryTestSpawner
   _enemyPools: {fileID: 1599172285}
-  _spawnPoint: {fileID: 1772279157}
+  _outsideSpawnPoint: {fileID: 1772279157}
   _spawnDistance: 10
   _spawnInterval: 6
   _spawnBatchCount: 2
