@@ -24,6 +24,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> クレジット画面を表示するイベント。 </summary>
         public Action OnShowCreditScreen;
 
+        /// <summary> データリセットボタンが押されたときのイベント。 </summary>
+        public Action OnDataResetButtonClicked;
+
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
