@@ -24,7 +24,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
         /// <summary> 現在選択されているミッションIDを取得します。 </summary>
         public MissionId CurrentMissionId =>
-            _currentMissionDefinition.MissionId;
+            CurrentMissionDefinition.MissionId;
 
         /// <summary> ミッションが選択されているかどうかを取得します。 </summary>
         public bool HasSelectedMission

@@ -58,7 +58,7 @@ namespace KillChord.Runtime.View
                     item.IsCompleted));
             }
 
-            OnSubMissionItemsUpdated?.Invoke(_subMissionItems.AsReadOnly());
+            OnSubMissionItemsUpdated?.Invoke(_subMissionItems.ToArray());
         }
 
         private readonly List<StageResultMissionItemViewModel> _subMissionItems = new();

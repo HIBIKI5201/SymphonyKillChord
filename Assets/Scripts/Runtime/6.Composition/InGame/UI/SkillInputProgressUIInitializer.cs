@@ -21,11 +21,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
             _inputProgressViewConfig = _skillInputProgressViewConfigAsset.Create();
             ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            _isRegistered = true;
         }
 
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance(this);
+            if (_isRegistered)
+                ServiceLocator.UnregisterInstance(this);
         }
 
         /// <summary>
@@ -60,5 +62,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private Transform _rowRoot;
 
         private SkillInputProgressViewconfig _inputProgressViewConfig;
+        private bool _isRegistered;
     }
 }

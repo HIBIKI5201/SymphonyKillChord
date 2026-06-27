@@ -62,7 +62,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable ClearAsync(CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
-            _stageSequenceMessageView?.SetClearMessage();
+            _stageSequenceMessageView?.ShowClear();
 
             if (_stageSequenceView != null)
             {
@@ -81,7 +81,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable GameOverAsync(CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
-            _stageSequenceMessageView?.SetGameOverMessage();
+            _stageSequenceMessageView?.ShowGameOver();
 
             if (_stageSequenceView != null)
             {
