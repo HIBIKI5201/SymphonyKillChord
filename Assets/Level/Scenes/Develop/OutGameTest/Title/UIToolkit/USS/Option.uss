@@ -81,3 +81,15 @@
     width: 100%;
     height: 100%;
 }
+
+.audio-volume-slider {
+    width: 90%;
+    align-self: center;
+    margin-top: 10%;
+    height: auto;
+}
+
+.unity-slider__label {
+    font-size: 24px;
+    -unity-font-style: bold;
+}
