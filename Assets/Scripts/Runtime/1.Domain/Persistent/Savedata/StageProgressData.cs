@@ -75,6 +75,6 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             return null;
         }
 
-        [SerializeField] private List<StageClearData> _clearDatas;
+        [SerializeField] private List<StageClearData> _clearDatas = new();
     }
 }

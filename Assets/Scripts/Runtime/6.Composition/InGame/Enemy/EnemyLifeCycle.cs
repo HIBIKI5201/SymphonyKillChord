@@ -183,20 +183,49 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             System.Action spawnerCallback,
             CancellationToken ct)
         {
-            ct.ThrowIfCancellationRequested();
+            bool hasPreparedEntrance = false;
 
-            PrepareEntrance(entryPosition);
-            bool hasArrived = await _view.MoveToTargetAysnc(activePosition,ct);
-            ct.ThrowIfCancellationRequested();
-
-            if (!hasArrived || this == null)
+            try
             {
-                CancelEntrance();
-                return false;
-            }
+                ct.ThrowIfCancellationRequested();
 
-            Activate(activePosition, spawnerCallback);
-            return true;
+                PrepareEntrance(entryPosition);
+                hasPreparedEntrance = true;
+
+                bool hasArrived =
+                    await _view.MoveToTargetAysnc(
+                        activePosition,
+                        ct);
+
+                ct.ThrowIfCancellationRequested();
+
+                if (!hasArrived || this == null)
+                {
+                    CancelEntrance();
+                    return false;
+                }
+
+                Activate(activePosition, spawnerCallback);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                if (hasPreparedEntrance && this != null)
+                {
+                    CancelEntrance();
+                }
+
+                throw;
+            }
+            catch
+            {
+                if (hasPreparedEntrance && this != null)
+                {
+                    CancelEntrance();
+                }
+
+                throw;
+            }
         }
 
         /// <summary>

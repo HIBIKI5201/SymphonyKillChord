@@ -411,7 +411,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
             if (_stageSequenceMessageView == null)
             {
-                Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
+                Debug.LogError("[IngameComposition] StageSequenceMessageViewの参照が未設定です。", this);
                 return false;
             }
             if (_inGameMissionInitializer == null)
