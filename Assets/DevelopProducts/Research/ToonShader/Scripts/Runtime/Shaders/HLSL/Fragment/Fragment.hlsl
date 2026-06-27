@@ -67,14 +67,16 @@ half _SSSTransmissionPower;
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
-    float3 perspectiveRemoval = GetPerspectiveRemoval(
-        _Head, IN.positionOS.xyz, IN.normalOS,
+    float3 positionOS = IN.positionOS.xyz;
+    
+#ifdef PERSPECTIVE_REMOVAL
+    positionOS = GetPerspectiveRemoval(
+        _Head, positionOS, IN.normalOS,
         _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+#endif
 
-    OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
+    OUT.positionHCS = TransformObjectToHClip(positionOS);
     OUT.screenPos = ComputeScreenPos(OUT.positionHCS);
-    
-    
     OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
     
     OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);

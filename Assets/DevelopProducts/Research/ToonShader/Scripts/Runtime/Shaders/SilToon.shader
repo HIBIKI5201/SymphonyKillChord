@@ -44,7 +44,8 @@ Shader "Custom/SilToon/Base"
         _SmearsDirection ("Smears Direction", Vector,3) = (0, 1, 0)
 
         [Header(PerspectiveRemoval)]
-        _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
+        [Toggle(PERSPECTIVE_REMOVAL)] _PerspectiveRemovalOn("Perspective Removal On", Float) = 0
+        _PerspectiveRemovalRatio("Ratio", Range(0,1)) = 0
         _PerspectiveRemovalRadius("Radius",Float) = 1
         _Head("HeadPosition", Vector,3) = (0,0,0)
 
@@ -90,10 +91,11 @@ Shader "Custom/SilToon/Base"
 
                 #pragma shader_feature_local_fragment _ FADE_ON
                 #pragma shader_feature_local_fragment _ SSS_ON
+                #pragma shader_feature_local_vertex   _ PERSPECTIVE_REMOVAL
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
-                #pragma multi_compile           _ _FORWARD_PLUS
+                #pragma multi_compile          _ _FORWARD_PLUS
 
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
                 
@@ -112,7 +114,8 @@ Shader "Custom/SilToon/Base"
                 #pragma fragment frag
                 
                 #pragma shader_feature_local_fragment _ FADE_ON
-                #pragma shader_feature_local _ SMEARS_ON
+                #pragma shader_feature_local_vertex   _ PERSPECTIVE_REMOVAL
+                #pragma shader_feature_local          _ SMEARS_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
@@ -141,5 +144,5 @@ Shader "Custom/SilToon/Base"
             ENDHLSL
         }
     }
-    //CustomEditor "DevelopProducts.ToonShader.SilToonGUI"
+    CustomEditor "DevelopProducts.ToonShader.SilToonGUI"
 }

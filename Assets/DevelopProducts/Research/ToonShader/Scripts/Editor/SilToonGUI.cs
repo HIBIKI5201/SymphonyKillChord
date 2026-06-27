@@ -11,6 +11,7 @@ namespace DevelopProducts.ToonShader
         static bool showFade = true;
         static bool showNormal = true;
         static bool showFresnel = true;
+        static bool showSSS = true;
         static bool showOutline = true;
         static bool showSmears = true;
         static bool showPerspective = true;
@@ -56,6 +57,13 @@ namespace DevelopProducts.ToonShader
             MaterialProperty fresnelFront = Find("_FresnelFrontRimLight", props);
             MaterialProperty fresnelBackRim = Find("_FresnelBackRimLight", props);
 
+            MaterialProperty sssOn = Find("_SSSOn", props);
+            MaterialProperty sssColor = Find("_SSSColor", props);
+            MaterialProperty sssWrap = Find("_SSSWrap", props);
+            MaterialProperty sssIntensity = Find("_SSSIntensity", props);
+            MaterialProperty sssThickness = Find("_SSSThickness", props);
+            MaterialProperty sssTransmissionPower = Find("_SSSTransmissionPower", props);
+
             MaterialProperty outlineColor = Find("_OutlineColor", props);
             MaterialProperty zOffset = Find("_ZOffset", props);
             MaterialProperty smoothNormal = Find("_IsSmoothNormal", props);
@@ -66,6 +74,7 @@ namespace DevelopProducts.ToonShader
             MaterialProperty smearsPower = Find("_SmearsPower", props);
             MaterialProperty smearsDirection = Find("_SmearsDirection", props);
 
+            MaterialProperty perspectiveOn = Find("_PerspectiveRemovalOn", props);
             MaterialProperty perspectiveRatio = Find("_PerspectiveRemovalRatio", props);
             MaterialProperty perspectiveRadius = Find("_PerspectiveRemovalRadius", props);
             MaterialProperty head = Find("_Head", props);
@@ -121,6 +130,21 @@ namespace DevelopProducts.ToonShader
                 materialEditor.ShaderProperty(fresnelBackRim, new GUIContent("Back Rim Intensity", "背面エッジのリムライト強度"));
             });
 
+            DrawSection("SSS", ref showSSS, () =>
+            {
+                materialEditor.ShaderProperty(sssOn, new GUIContent("SSS On", "簡易サブサーフェス散乱を有効化"));
+                if (sssOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(sssColor, new GUIContent("SSS Color", "散乱色 (肌の暖色)"));
+                    materialEditor.ShaderProperty(sssWrap, new GUIContent("Wrap", "明暗境界の滲み幅 (0-1)"));
+                    materialEditor.ShaderProperty(sssIntensity, new GUIContent("Intensity", "SSS全体強度"));
+                    materialEditor.ShaderProperty(sssThickness, new GUIContent("Thickness", "透過強度 (耳・指など薄い箇所)"));
+                    materialEditor.ShaderProperty(sssTransmissionPower, new GUIContent("Transmission Power", "透過ローブのシャープさ"));
+                    EditorGUI.indentLevel--;
+                }
+            });
+
             DrawSection("Outline Settings", ref showOutline, () =>
             {
                 materialEditor.ShaderProperty(outlineColor, new GUIContent("Color", "アウトラインの色"));
@@ -144,9 +168,15 @@ namespace DevelopProducts.ToonShader
 
             DrawSection("Perspective Removal", ref showPerspective, () =>
             {
-                materialEditor.ShaderProperty(perspectiveRatio, new GUIContent("Ratio", "透視除去(パース抜き)の強度"));
-                materialEditor.ShaderProperty(perspectiveRadius, new GUIContent("Radius", "効果が及ぶ半径"));
-                materialEditor.VectorProperty(head, "Head Position (World)");
+                materialEditor.ShaderProperty(perspectiveOn, new GUIContent("Perspective Removal On", "パース抜きを有効化"));
+                if (perspectiveOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(perspectiveRatio, new GUIContent("Ratio", "透視除去(パース抜き)の強度"));
+                    materialEditor.ShaderProperty(perspectiveRadius, new GUIContent("Radius", "効果が及ぶ半径"));
+                    materialEditor.VectorProperty(head, "Head Position (World)");
+                    EditorGUI.indentLevel--;
+                }
             });
 
             DrawSection("Render State & Stencil", ref showRenderState, () =>

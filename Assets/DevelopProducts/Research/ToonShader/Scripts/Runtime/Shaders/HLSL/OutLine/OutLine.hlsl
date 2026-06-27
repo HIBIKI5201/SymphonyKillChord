@@ -59,14 +59,18 @@ v2f vert(appdata v)
     // 頂点位置を法線方向に押し出してアウトライン幅を作る。
     float3 pushedOS = v.positionOS.xyz + normalOS * lerp(_OutlineWidthShadow, _OutlineWidthLit, GetOutlineThicknessRatio(v.positionOS, v.normalOS));
     
-    // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
+    
+#ifdef PERSPECTIVE_REMOVAL // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+#endif
+    
     
 #ifdef SMEARS_ON
     ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection, _SmearsPower, 
     pushedOS,
     o.smearsAlpha);
 #endif
+    
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     
