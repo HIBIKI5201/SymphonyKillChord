@@ -24,12 +24,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<InGameHudInitializer>(this);
+            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateType.Locator);
         }
 
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance<InGameHudInitializer>();
+            ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
         }
     }
 }

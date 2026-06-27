@@ -1,8 +1,8 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Camera;
+using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.InfraStructure.InGame.Camera;
 using KillChord.Runtime.Utility.Collections;
@@ -50,8 +50,8 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
             TargetSelector targetSelector = new(targetManager);
             TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
-            TargetSelectorController targetSelectorController = new(targetSelector, targetEntityRegistryController);
-            ServiceLocator.RegisterInstance(targetSelectorController);
+            _targetSelectorController = new(targetSelector, targetEntityRegistryController);
+            ServiceLocator.RegisterInstance(_targetSelectorController);
             _isTargetSelectorControllerRegistered = true;
 
             CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
@@ -83,6 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraSystemConfig _config;
 
+        private TargetSelectorController _targetSelectorController;
         private bool _isTargetSelectorControllerRegistered;
 
         private void OnDestroy()
@@ -92,8 +93,8 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<TargetSelectorController>();
-
+            ServiceLocator.UnregisterInstance(_targetSelectorController);
+            _targetSelectorController = null;
             _isTargetSelectorControllerRegistered = false;
         }
     }

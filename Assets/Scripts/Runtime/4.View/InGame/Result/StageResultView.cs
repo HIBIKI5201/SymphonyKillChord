@@ -1,12 +1,11 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
-using KillChord.Runtime.View.InGame.Result;
 using R3;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Result
 {
     public class StageResultView : MonoBehaviour
     {

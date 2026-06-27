@@ -20,12 +20,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return;
             }
             _inputProgressViewConfig = _skillInputProgressViewConfigAsset.Create();
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
         }
 
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance<SkillInputProgressUIInitializer>();
+            ServiceLocator.UnregisterInstance(this);
         }
 
         /// <summary>

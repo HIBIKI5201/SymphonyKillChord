@@ -71,7 +71,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private void Awake()
         {
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
         }
 
         public CharacterEntity PlayerEntity => _playerEntity;
@@ -287,6 +287,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private void OnDestroy()
         {
+            ServiceLocator.UnregisterInstance(this);
+
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;

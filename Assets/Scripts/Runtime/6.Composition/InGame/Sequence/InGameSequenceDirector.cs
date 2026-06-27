@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
-using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using System;
 using System.Threading;
