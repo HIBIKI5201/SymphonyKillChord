@@ -32,5 +32,16 @@ namespace KillChord.Runtime.Utility.Constant
         ///     InGame側に割り当てられた進捗範囲内で使用する。
         /// </summary>
         public const float STAGE_LOAD_END_PROGRESS = 0.7f;
+
+        /// <summary>
+        ///     リザルトからの遷移における、
+        ///     バトルシーンのアンロード完了位置。
+        /// </summary>
+        public const float RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS = 0.25f;
+
+        /// <summary>
+        ///     シーン再読み込みにおけるアンロード完了位置。
+        /// </summary>
+        public const float SCENE_RELOAD_UNLOAD_END_PROGRESS = 0.35f;
     }
 }
