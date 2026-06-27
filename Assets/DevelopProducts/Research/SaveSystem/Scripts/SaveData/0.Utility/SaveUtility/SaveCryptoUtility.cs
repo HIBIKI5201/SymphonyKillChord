@@ -1,10 +1,12 @@
 using System;
 using System.Security.Cryptography;
+using UnityEngine;
 
 namespace DevelopProducts.SaveSystem
 {
     /// <summary>
     ///     セーブデータをAES-CBCで暗号化・復号し、HMAC-SHA256で改ざん・破損を検出するユーティリティ。
+    ///     鍵は端末ごとに初回ランダム生成してローカル(PlayerPrefs)に保存する。
     /// </summary>
     public static class SaveCryptoUtility
     {
@@ -104,22 +106,17 @@ namespace DevelopProducts.SaveSystem
         private const int IV_SIZE = 16;
         /// <summary>HMAC-SHA256の認証タグ(MAC)サイズ。32バイト。</summary>
         private const int MAC_SIZE = 32;
-        /// <summary> AES-256の暗号鍵（32バイト）。※暫定のハードコード。 </summary>
-        private static readonly byte[] _key =
-        {
-            0xEE, 0x22, 0xED, 0x3B, 0x06, 0xAE, 0xD8, 0x1A,
-            0xD2, 0xDF, 0xF0, 0xC3, 0x7B, 0xC8, 0xBD, 0x65,
-            0xEC, 0x9E, 0xFE, 0x89, 0x71, 0xD4, 0xCB, 0xE0,
-            0x78, 0x68, 0x42, 0x5C, 0x80, 0xB6, 0x9A, 0x5D,
-        };
-        /// <summary> HMAC-SHA256の鍵（32バイト）。暗号鍵とは別にする。※暫定のハードコード。 </summary>
-        private static readonly byte[] _macKey =
-        {
-            0xE4, 0xD0, 0xF4, 0xCF, 0x81, 0x28, 0x6C, 0xBE,
-            0xA8, 0xD2, 0x5D, 0x02, 0xF0, 0xDF, 0x2E, 0x46,
-            0x83, 0xAE, 0x39, 0xAA, 0xF1, 0x77, 0xEE, 0x8F,
-            0x44, 0x85, 0x8D, 0xBE, 0x38, 0x26, 0x4C, 0x87,
-        };
+        /// <summary>暗号鍵のサイズ（32バイト）。</summary>
+        private const int ENC_KEY_SIZE = 32;
+        /// <summary>HMAC鍵のサイズ（32バイト）。</summary>
+        private const int MAC_KEY_SIZE = 32;
+        /// <summary>鍵を保存するPlayerPrefsのキー名。</summary>
+        private const string KEY_PREF = "SaveKeySet_v1";
+
+        /// <summary>キャッシュした暗号鍵。</summary>
+        private static byte[] _encryptionKey;
+        /// <summary>キャッシュしたHMAC鍵。</summary>
+        private static byte[] _macKey;
 
         /// <summary>
         ///     IVと暗号文に対するHMAC-SHA256(MAC)を計算する。
@@ -166,15 +163,56 @@ namespace DevelopProducts.SaveSystem
         }
 
         /// <summary>
+        ///     端末ローカルの鍵を読み込む。無ければ初回として乱数生成して保存する。
+        /// </summary>
+        private static void EnsureKeys()
+        {
+            //  すでに読み込み済みなら何もしない。
+            if (_encryptionKey != null) { return; }
+
+            _encryptionKey = new byte[ENC_KEY_SIZE];
+            _macKey = new byte[MAC_KEY_SIZE];
+
+            if (PlayerPrefs.HasKey(KEY_PREF))
+            {
+                //  保存済みの鍵(暗号鍵+HMAC鍵を連結したもの)を復元する。
+                byte[] combined = Convert.FromBase64String(PlayerPrefs.GetString(KEY_PREF));
+                Buffer.BlockCopy(combined, 0, _encryptionKey, 0, ENC_KEY_SIZE);
+                Buffer.BlockCopy(combined, ENC_KEY_SIZE, _macKey, 0, MAC_KEY_SIZE);
+            }
+            else
+            {
+                //  初回起動：暗号鍵とHMAC鍵を安全な乱数で生成する。
+                RandomNumberGenerator.Fill(_encryptionKey);
+                RandomNumberGenerator.Fill(_macKey);
+
+                //  連結してBase64でPlayerPrefsに保存する。
+                byte[] combined = new byte[ENC_KEY_SIZE + MAC_KEY_SIZE];
+                Buffer.BlockCopy(_encryptionKey, 0, combined, 0, ENC_KEY_SIZE);
+                Buffer.BlockCopy(_macKey, 0, combined, ENC_KEY_SIZE, MAC_KEY_SIZE);
+                PlayerPrefs.SetString(KEY_PREF, Convert.ToBase64String(combined));
+                PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>
         ///     暗号鍵を取得する。
         /// </summary>
         /// <returns>暗号鍵。</returns>
-        private static byte[] GetKey() => _key;
+        private static byte[] GetKey()
+        {
+            EnsureKeys();
+            return _encryptionKey;
+        }
 
         /// <summary>
         ///     HMACの鍵を取得する。
         /// </summary>
         /// <returns>HMACの鍵。</returns>
-        private static byte[] GetMacKey() => _macKey;
+        private static byte[] GetMacKey()
+        {
+            EnsureKeys();
+            return _macKey;
+        }
     }
 }
