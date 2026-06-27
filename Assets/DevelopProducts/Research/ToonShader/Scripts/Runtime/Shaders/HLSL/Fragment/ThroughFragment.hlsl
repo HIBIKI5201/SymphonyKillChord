@@ -6,6 +6,10 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\SilToonInput.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
+
+float _Alpha;
 
 struct Attributes
 {
@@ -25,34 +29,6 @@ struct Varyings
     half3 bitangentWS : TEXCOORD4;
 };
 
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
-float4 _BaseMap_ST;
-
-TEXTURE2D(_NormalMap);
-SAMPLER(sampler_NormalMap);
-float4 _NormalMap_ST;
-
-half _NormalMapIntensity;
-
-float _PerspectiveRemovalRatio;
-float _PerspectiveRemovalRadius;
-float3 _Head;
-
-half _IsForFace;
-float3 _FaceUp; // 方向ベクトルだが正規化前提で half でも可
-
-half4 _ColorLit;
-half4 _ColorMiddle;
-half4 _ColorShadow;
-
-half _FresnelBackLight;
-half _FresnelFrontRimLight;
-half _FresnelBackRimLight;
-
-float _Alpha;
-
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 
 Varyings vert(Attributes IN)
 {

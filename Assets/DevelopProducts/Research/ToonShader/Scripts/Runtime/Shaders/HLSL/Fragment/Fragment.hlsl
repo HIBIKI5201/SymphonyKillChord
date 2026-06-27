@@ -10,6 +10,15 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SimplifiedSSS.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\SilToonInput.hlsl"
+
+float _FadeAlpha;
+
+half3 _SSSColor;
+half _SSSWrap;
+half _SSSIntensity;
+half _SSSThickness;
+half _SSSTransmissionPower;
 
 struct Attributes
 {
@@ -24,44 +33,11 @@ struct Varyings
     float4 positionHCS : SV_POSITION;
     float2 uv : TEXCOORD0;
     float3 positionWS : TEXCOORD1;
-    half3 normalWS : TEXCOORD2; 
+    half3 normalWS : TEXCOORD2;
     half3 tangentWS : TEXCOORD3;
     half3 bitangentWS : TEXCOORD4;
     float4 screenPos : TEXCOORD5;
 };
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
-float4 _BaseMap_ST;
-
-float _FadeAlpha;
-
-TEXTURE2D(_NormalMap);
-SAMPLER(sampler_NormalMap);
-float4 _NormalMap_ST;
-
-half _NormalMapIntensity;
-
-float _PerspectiveRemovalRatio;
-float _PerspectiveRemovalRadius;
-float3 _Head; 
-
-half _IsForFace;
-float3 _FaceUp; // 方向ベクトルだが正規化前提で half でも可
-
-half4 _ColorLit;
-half4 _ColorMiddle;
-half4 _ColorShadow;
-
-half _FresnelBackLight;
-half _FresnelFrontRimLight;
-half _FresnelBackRimLight;
-
-half3 _SSSColor;
-half _SSSWrap;
-half _SSSIntensity;
-half _SSSThickness;
-half _SSSTransmissionPower;
 
 
 Varyings vert(Attributes IN)
