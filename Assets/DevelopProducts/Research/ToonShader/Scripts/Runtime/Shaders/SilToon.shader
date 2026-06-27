@@ -97,7 +97,7 @@ Shader "Custom/SilToon/Base"
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
                 #pragma multi_compile          _ _FORWARD_PLUS
 
-                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
+                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\SilToon\Fragment\Fragment.hlsl"
                 
             ENDHLSL
         }
@@ -120,7 +120,7 @@ Shader "Custom/SilToon/Base"
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
                 
-                #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
+                #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToon/OutLine/OutLine.hlsl"
 
             ENDHLSL
         }

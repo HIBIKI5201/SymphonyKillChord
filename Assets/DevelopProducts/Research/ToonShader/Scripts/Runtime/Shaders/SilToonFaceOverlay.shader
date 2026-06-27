@@ -58,7 +58,7 @@ Shader "Custom/SilToon/FaceOverlay"
 
                 #pragma vertex vert
                 #pragma fragment frag
-                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\ThroughFragment.hlsl"
+                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\SilToon\Fragment\ThroughFragment.hlsl"
 
             ENDHLSL
         }
