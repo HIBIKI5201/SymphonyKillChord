@@ -20,6 +20,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Unity.Behavior;
 using UnityEngine;
@@ -178,20 +179,54 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="entryPosition">マップ外側の実生成地点。</param>
         /// <param name="activePosition">到着後に戦闘を開始する地点。</param>
         /// <param name="spawnerCallback">無効化時にスポナーへ通知するcallback。</param>
-        public async ValueTask EnterFromOutsideAsync(
+        public async ValueTask<bool> EnterFromOutsideAsync(
             SpawnPositionPair positionPair,
-            System.Action spawnerCallback)
+            System.Action spawnerCallback,
+            CancellationToken ct)
         {
-            positionPair.SetInUse(true);
+            bool hasPreparedEntrance = false;
+			positionPair.SetInUse(true);
             try
             {
+                ct.ThrowIfCancellationRequested();
+
                 PrepareEntrance(positionPair.SpawnPosition.position);
-                await _view.MoveToTargetAysnc(positionPair.EntryPosition.position);
+                hasPreparedEntrance = true;
+
+                bool hasArrived =
+                    await _view.MoveToTargetAysnc(
+                        positionPair.EntryPosition.position,
+                        ct);
+
+                ct.ThrowIfCancellationRequested();
+				positionPair.SetInUse(false);
+                if (!hasArrived || this == null)
+                {
+                    CancelEntrance();
+                    positionPair.SetInUse(false);
+                    return false;
+                }
+
                 Activate(positionPair.EntryPosition.position, spawnerCallback);
+                return true;
             }
-            finally
+            catch (OperationCanceledException)
             {
-                positionPair.SetInUse(false);
+                if (hasPreparedEntrance && this != null)
+                {
+                    CancelEntrance();
+                }
+
+                throw;
+            }
+            catch
+            {
+                if (hasPreparedEntrance && this != null)
+                {
+                    CancelEntrance();
+                }
+
+                throw;
             }
         }
 
@@ -448,8 +483,40 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             //TODO エフェクト処理を追加する。
             await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);
-            
-            
+        }
+
+        /// <summary>
+        ///     入場移動を中断して敵をプールへ戻す。
+        /// </summary>
+        private void CancelEntrance()
+        {
+            _view?.StopGameplay();
+
+            if (_behaviorGraphAgent != null)
+            {
+                _behaviorGraphAgent.enabled = false;
+            }
+
+            if (_attackPositionSearchView != null)
+            {
+                _attackPositionSearchView.enabled = false;
+            }
+
+            if (_navMeshAgent != null
+                && _navMeshAgent.enabled)
+            {
+                if (_navMeshAgent.isOnNavMesh)
+                {
+                    _navMeshAgent.isStopped = true;
+                    _navMeshAgent.ResetPath();
+                    _navMeshAgent.velocity = Vector3.zero;
+                }
+
+                _navMeshAgent.enabled = false;
+            }
+
+            gameObject.SetActive(false);
+            _releaseCallback?.Invoke(this);
         }
 
         /// <summary>

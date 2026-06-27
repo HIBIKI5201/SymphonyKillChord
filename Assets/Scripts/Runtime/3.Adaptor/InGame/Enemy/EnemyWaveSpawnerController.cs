@@ -53,8 +53,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 }
                 enemyCount += waveDefinition.Details[i].EnemyAmount;
             }
-            // stateの敵数を更新
-            _state.AddEnemyCount(enemyCount);
             // Waveのタイマーを設定する
             _waveTimer.SetTimer(waveDefinition.WaveDuration);
         }
@@ -77,7 +75,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <param name="amount"></param>
         private void SpawnEnemies(IEnemySpawner spawner, int amount)
         {
-            spawner.SpawnEnemy(amount);
+            spawner.SpawnEnemy(amount, AddStateEnemyCount);
+        }
+
+        private void AddStateEnemyCount()
+        {
+            _state.AddEnemyCount(1);
         }
     }
 }

@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using KillChord.Runtime.Domain.InGame.Mission.FailCondition;
+using System;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.InGame.Mission
@@ -19,13 +20,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <param name="clearCondition">クリア条件。</param>
         /// <param name="failCondition">失敗条件。</param>
         /// <param name="evaluationConditions">評価条件のリスト。</param>
+        /// <param name="defeatTips"> 敗北時に表示する攻略Tips一覧。 </param>
         public MissionDefinition(
             MissionId missionId,
             string displayName,
             string mainMissionText,
             IMissionClearCondition clearCondition,
             IMissionFailCondition failCondition,
-            IReadOnlyList<IMissionEvaluationCondition> evaluationConditions)
+            IReadOnlyList<IMissionEvaluationCondition> evaluationConditions,
+            IReadOnlyList<string> defeatTips)
         {
             MissionId = missionId;
             DisplayName = displayName;
@@ -33,6 +36,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             ClearCondition = clearCondition;
             FailCondition = failCondition;
             EvaluationConditions = evaluationConditions;
+            _defeatTips = CreateDefeatTips(defeatTips);
         }
 
         /// <summary> ミッションIDを取得します。 </summary>
@@ -48,5 +52,38 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public IMissionFailCondition FailCondition { get; }
         /// <summary> 評価条件のリストを取得します。 </summary>
         public IReadOnlyList<IMissionEvaluationCondition> EvaluationConditions { get; }
+        /// <summary> 敗北時に表示するTips一覧。 </summary>
+        public IReadOnlyList<string> DefeatTips => _defeatTips;
+
+        private readonly IReadOnlyList<string> _defeatTips;
+
+        /// <summary>
+        ///     空文字を除外した敗北Tips一覧を生成する。
+        /// </summary>
+        /// <param name="defeatTips"> 元のTips一覧。 </param>
+        /// <returns> 有効なTips一覧。 </returns>
+        private static IReadOnlyList<string> CreateDefeatTips(IReadOnlyList<string> defeatTips)
+        {
+            if (defeatTips == null || defeatTips.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> validTips = new(defeatTips.Count);
+
+            for (int i = 0; i < defeatTips.Count; i++)
+            {
+                string tip = defeatTips[i];
+
+                if (string.IsNullOrWhiteSpace(tip))
+                {
+                    continue;
+                }
+
+                validTips.Add(tip);
+            }
+
+            return validTips.AsReadOnly();
+        }
     }
 }

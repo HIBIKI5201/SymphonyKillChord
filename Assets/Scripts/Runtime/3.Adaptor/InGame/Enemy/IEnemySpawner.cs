@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
     /// <summary>
@@ -8,6 +10,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        public void SpawnEnemy(int amount);
+        public void SpawnEnemy(int amount, Action callback);
     }
 }

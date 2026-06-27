@@ -10,10 +10,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// </summary>
     public class InGameHudInitializer : MonoBehaviour
     {
-        private void Awake()
-        {
-            ServiceLocator.RegisterInstance<InGameHudInitializer>(this);
-        }
         /// <summary>
         ///     HPバーHUDの初期化。
         /// </summary>
@@ -23,6 +19,17 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _playerHealthHudView.Bind(healthHudViewModel);
         }
+
         [SerializeField] private HealthHudView _playerHealthHudView;
+
+        private void Awake()
+        {
+            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateType.Locator);
+        }
+
+        private void OnDestroy()
+        {
+            ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
+        }
     }
 }

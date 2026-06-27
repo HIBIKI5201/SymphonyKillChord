@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         /// </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<ICameraTransform>(this);
+            ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateType.Locator);
         }
     }
 

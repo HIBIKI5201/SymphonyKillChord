@@ -1,7 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -76,13 +78,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        public async void SpawnEnemy(int amount)
+        public async void SpawnEnemy(int amount, Action callback)
         {
             for (int i = 0;  i < amount; i++)
             {
                 SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
                 EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
-                SpawnEnemyAsync(lifeCycle, positionPair);
+                SpawnEnemyAsync(lifeCycle, positionPair, callback);
             }
         }
 
@@ -105,17 +107,46 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         /// <param name="lifeCycle">生成する敵のライフサイクル。</param>
         /// <param name="positionPair">選定された生成位置。</param>
-        private async void SpawnEnemyAsync(EnemyLifeCycle lifeCycle, SpawnPositionPair positionPair)
+        private async void SpawnEnemyAsync(EnemyLifeCycle lifeCycle, SpawnPositionPair positionPair, Action callback)
         {
+            CancellationToken cancellationToken = destroyCancellationToken;
+            positionPair.SetInUse(true);
             try
             {
-                await lifeCycle.EnterFromOutsideAsync(
-                    positionPair,
-                    HandleArtilleryDeactivated);
+                bool activateSuccess =
+                    await lifeCycle.EnterFromOutsideAsync(
+                        positionPair,
+                        HandleArtilleryDeactivated,
+                        cancellationToken);
+
+                if (!activateSuccess)
+                {
+                    positionPair.SetInUse(true);
+                    return;
+                }
+                else
+                {
+                    callback.Invoke();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // BattleSceneのアンロードに伴うキャンセルは正常終了として扱う。
+                return;
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception);
+                return;
+            }
+            finally
+            {
+                positionPair.SetInUse(false);
+            }
+            if (cancellationToken.IsCancellationRequested
+                || this == null
+                || lifeCycle == null)
+            {
                 return;
             }
             _activeEnemies.Add(lifeCycle);
