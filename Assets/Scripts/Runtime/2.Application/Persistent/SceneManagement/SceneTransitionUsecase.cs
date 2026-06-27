@@ -14,12 +14,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         /// <summary>
         ///     必要な依存関係を指定して生成する。
         /// </summary>
-        /// <param name="sceneTransitionService">
-        ///     シーン遷移サービス。
-        /// </param>
-        /// <param name="loadingOperationExecutor">
-        ///     ロード画面付き処理の実行機能。
-        /// </param>
+        /// <param name="sceneTransitionService"> シーン遷移サービス。 </param>
+        /// <param name="loadingOperationExecutor"> ロード画面付き処理の実行機能。 </param>
         public SceneTransitionUsecase
             (ISceneTransitionService sceneTransitionService,
             ILoadingOperationExecutor loadingOperationExecutor)
@@ -33,6 +29,13 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                     nameof(loadingOperationExecutor));
         }
 
+        /// <summary>
+        ///    単純なシーン遷移を行う。
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元のシーン名。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン遷移の成否を示すタスク。 </returns>
         public Task<bool> ChangeSceneAsync(
             string fromSceneName,
             string toSceneName,
@@ -47,6 +50,13 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 ct);
         }
 
+        /// <summary>
+        ///    シーン遷移を行うが、ロード画面を閉じずに進捗を保持する。
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元のシーン名。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン遷移の成否を示すタスク。 </returns>
         public Task<bool> ChangeSceneKeepLoadingAsync(
             string fromSceneName,
             string toSceneName,
@@ -67,6 +77,12 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 ct);
         }
 
+        /// <summary>
+        ///   Additiveシーンを読み込む。
+        /// </summary>
+        /// <param name="scenrName"> 読み込むAdditiveシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン読み込みの成否を示すタスク。 </returns>
         public Task<bool> LoadAdditiveAsync(
             string scenrName,
             CancellationToken ct)
@@ -79,6 +95,12 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 ct);
         }
 
+        /// <summary>
+        ///     Additiveシーンをアンロードする。
+        /// </summary>
+        /// <param name="sceneName"> アンロードするAdditiveシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーンアンロードの成否を示すタスク。 </returns>
         public Task<bool> UnloadAsync(
             string sceneName,
             CancellationToken ct)
@@ -91,6 +113,12 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 ct);
         }
 
+        /// <summary>
+        ///    Additiveシーンを読み込んでアクティブにする。
+        /// </summary>
+        /// <param name="toSceneName"> 読み込んでアクティブにするAdditiveシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン読み込みの成否を示すタスク。 </returns>
         public Task<bool> LoadAdditiveAndSetActiveAsync(
             string toSceneName,
             CancellationToken ct)
@@ -103,6 +131,13 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                     ct);
         }
 
+        /// <summary>
+        ///     指定したシーンをアンロードして、指定したシーンをアクティブにする。
+        /// </summary>
+        /// <param name="unloadSceneName"> アンロードするシーン名。 </param>
+        /// <param name="activeSceneName"> アクティブにするシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン遷移の成否を示すタスク。 </returns>
         public Task<bool> UnloadAndSetActiveAsync(
             string unloadSceneName,
             string activeSceneName,
@@ -121,21 +156,11 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         ///     Additiveシーンをアンロードしてから、
         ///     基盤シーンから指定したシーンへ遷移する。
         /// </summary>
-        /// <param name="additiveSceneName">
-        ///     先にアンロードするAdditiveシーン名。
-        /// </param>
-        /// <param name="fromSceneName">
-        ///     遷移元となる基盤シーン名。
-        /// </param>
-        /// <param name="toSceneName">
-        ///     遷移先となるシーン名。
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     キャンセルトークン。
-        /// </param>
-        /// <returns>
-        ///     すべてのシーン遷移処理に成功した場合はtrue。
-        /// </returns>
+        /// <param name="additiveSceneName"> 先にアンロードするAdditiveシーン名。 </param>
+        /// <param name="fromSceneName"> 遷移元となる基盤シーン名。 </param>
+        /// <param name="toSceneName"> 遷移先となるシーン名。 </param>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
+        /// <returns> すべてのシーン遷移処理に成功した場合はtrue。 </returns>
         public Task<bool> UnloadThenChangeSceneAsync(
             string additiveSceneName,
             string fromSceneName,
@@ -183,16 +208,10 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         ///     Additiveシーンをアンロードしてから、
         ///     基盤シーンを再読み込みする。
         /// </summary>
-        /// <param name="additiveSceneName">
-        ///     先にアンロードするAdditiveシーン名。
-        /// </param>
-        /// <param name="reloadSceneName">
-        ///     再読み込みする基盤シーン名。
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     キャンセルトークン。
-        /// </param>
-        /// <returns>すべての処理に成功した場合はtrue。</returns>
+        /// <param name="additiveSceneName"> 先にアンロードするAdditiveシーン名。 </param>
+        /// <param name="reloadSceneName"> 再読み込みする基盤シーン名。 </param>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
+        /// <returns> すべての処理に成功した場合はtrue。</returns>
         public Task<bool> UnloadThenReloadSceneAsync(
             string additiveSceneName,
             string reloadSceneName,

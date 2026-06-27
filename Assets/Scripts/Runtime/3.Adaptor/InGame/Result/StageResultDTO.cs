@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Result
 {
+    /// <summary>
+    ///    ステージのリザルトを表すDTO。
+    /// </summary>
     public readonly ref struct StageResultDTO
     {
         /// <summary>
@@ -29,22 +32,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             TipsText = tipsText ?? string.Empty;
         }
 
+        /// <summary> リザルトの種類を取得します。 </summary>
         public StageResultType ResultType { get; }
 
+        /// <summary> ステージ名のテキストを取得します。 </summary>
         public string StageNameText { get; }
 
+        /// <summary> メインミッションのテキストを取得します。 </summary>
         public string MainMissionText { get; }
 
+        /// <summary> メインミッションの状態のテキストを取得します。 </summary>
         public string MainMissionStateText { get; }
 
+        /// <summary> サブミッションのアイテムを取得します。 </summary>
         public ReadOnlySpan<StageResultMissionItemDTO> SubMissionItems { get; }
 
+        /// <summary> 戦闘時間のテキストを取得します。 </summary>
         public string BattleTimeText { get; }
 
+        /// <summary> 最大コンボ数のテキストを取得します。 </summary>
         public string MaxComboText { get; }
 
+        /// <summary> ランクのテキストを取得します。 </summary>
         public string RankText { get; }
 
+        /// <summary> ヒントのテキストを取得します。 </summary>
         public string TipsText { get; }
     }
 }

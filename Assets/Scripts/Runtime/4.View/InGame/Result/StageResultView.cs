@@ -7,8 +7,17 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Result
 {
+    /// <summary>
+    ///    ステージリザルト画面の表示を制御するViewクラス。
+    /// </summary>
     public class StageResultView : MonoBehaviour
     {
+        /// <summary>
+        ///    ViewModelとControllerを設定して初期化する。
+        /// </summary>
+        /// <param name="viewModel">ステージリザルトのViewModel。</param>
+        /// <param name="controller">ステージリザルトのController。</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void Initialize(StageResultViewModel viewModel, StageResultController controller)
         {
             UnsubscribeViewModel();
@@ -314,6 +323,9 @@ namespace KillChord.Runtime.View.InGame.Result
             }
         }
 
+        /// <summary>
+        ///    サブミッション一覧の表示をクリアする。
+        /// </summary>
         private void ClearSubMissionItems()
         {
             for (int i = 0; i < _spawnedSubMissionItems.Count; i++)

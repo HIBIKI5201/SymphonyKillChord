@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Adaptor.InGame.Result
 {
+    /// <summary>
+    ///    ステージ結果画面の制御を行うクラス。
+    /// </summary>
     public class StageResultController
     {
         public StageResultController(
