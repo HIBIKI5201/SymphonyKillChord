@@ -14,13 +14,20 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     {
         private void Awake()
         {
-            if(_skillInputProgressViewConfigAsset == null)
+            if (_skillInputProgressViewConfigAsset == null)
             {
                 Debug.LogError("スキル入力進行UIの表示設定が未設定です。");
                 return;
             }
             _inputProgressViewConfig = _skillInputProgressViewConfigAsset.Create();
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            _isRegistered = true;
+        }
+
+        private void OnDestroy()
+        {
+            if (_isRegistered)
+                ServiceLocator.UnregisterInstance(this);
         }
 
         /// <summary>
@@ -55,5 +62,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private Transform _rowRoot;
 
         private SkillInputProgressViewconfig _inputProgressViewConfig;
+        private bool _isRegistered;
     }
 }
