@@ -38,6 +38,7 @@ MonoBehaviour:
     - rid: 8885031662707802230
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _evaluationId: ClearTime_01
         _displayText: "30\u79D2\u4EE5\u4E0B\u306B\u30AF\u30EA\u30A2\u3059\u308B"
         _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C30\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
         _clearTime: 30
@@ -48,6 +49,7 @@ MonoBehaviour:
     - rid: 8885031662707802243
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _evaluationId: ClearTime_02
         _displayText: "60\u79D2\u4EE5\u4E0B\u306B\u30AF\u30EA\u30A2\u3059\u308B"
         _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C60\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
         _clearTime: 60
