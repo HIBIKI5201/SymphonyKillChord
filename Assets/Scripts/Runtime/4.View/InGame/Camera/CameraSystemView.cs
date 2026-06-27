@@ -51,6 +51,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         private int _mouseLookSensitivity = 5;
         [SerializeField, Tooltip("コントローラーのカメラ感度")]
         private int _gamepadLookSensitivity = 20;
+        [SerializeField, Tooltip("モバイルのカメラ感度")]
+        private int _mobileLookSensitivity = 10;
 
         private CameraSystemController _controller;
         private CameraSystemPresenter _presenter;
