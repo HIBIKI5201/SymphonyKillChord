@@ -43,10 +43,14 @@ namespace DevelopProducts.SaveSystem
 
                 if (File.Exists(FilePath))
                 {
-                    File.Delete(FilePath);
+                    //  既存があるなら原子的に置き換える。
+                    File.Replace(tempPath, FilePath, null);
                 }
-
-                File.Move(tempPath, FilePath);
+                else
+                {
+                    //  初回は置き換え先が無いので単純に移動する。
+                    File.Move(tempPath, FilePath);
+                }
             }
             catch (Exception ex)
             {
