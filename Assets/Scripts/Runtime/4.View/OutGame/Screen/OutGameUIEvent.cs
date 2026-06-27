@@ -87,7 +87,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public void RegisterOutGameUIEvent()
         {
             if (_isRegistered) { return; }
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
         }
 
