@@ -7,10 +7,10 @@ using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
+using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame.Title
@@ -52,23 +52,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: UI Documentが設定されていません。");
-#endif
-                return;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionControllerがServiceLocatorに登録されていません。");
-#endif
-                return;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEventがServiceLocatorに登録されていません。");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: UI Document が設定されていません。");
 #endif
                 return;
             }
@@ -77,7 +61,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (root == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: Root VisualElementがnullです。");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: Root VisualElement が null です。");
+#endif
+                return;
+            }
+
+            SceneTransitionController sceneTransitionController;
+            MusicPlayer musicPlayer;
+            SoundEffectVolumeManager sePlayer;
+            SavedataSystem savedataSystem;
+            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out savedataSystem))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
 #endif
                 return;
             }
@@ -91,7 +87,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (titleRoot == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: タイトル画面のルートVisualElementが見つかりません。{TITLE_SCREEN_NAME}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: タイトル画面のルート VisualElement が見つかりません。{TITLE_SCREEN_NAME}");
 #endif
                 return;
             }
@@ -99,7 +95,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (menuRoot == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルートVisualElementが見つかりません。{MENU_SCREEN_NAME}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルート VisualElement が見つかりません。{MENU_SCREEN_NAME}");
 #endif
                 return;
             }
@@ -107,7 +103,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (optionRoot == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: オプション画面のルートVisualElementが見つかりません。{OPTION_SCREEN_NAME}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: オプション画面のルート VisualElement が見つかりません。{OPTION_SCREEN_NAME}");
 #endif
                 return;
             }
@@ -115,7 +111,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             if (creditRoot == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: クレジット画面のルートVisualElementが見つかりません。{CREDIT_SCREEN_NAME}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: クレジット画面のルート VisualElement が見つかりません。{CREDIT_SCREEN_NAME}");
 #endif
                 return;
             }
@@ -124,6 +120,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
+            VolumeSettingsTabView audioVolumeTab = new(optionRoot, musicPlayer, sePlayer);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
@@ -150,14 +147,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 showScreenUseCase,
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
-
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystemがServiceLocatorに登録されていません。");
-#endif
-                return;
-            }
 
             bool isFirstLaunch = !savedataSystem.Exists<SaveData>();
 
@@ -188,6 +177,66 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void OnDestroy()
         {
             UnRegisterUIEventCallbacks();
+        }
+
+        /// <summary>
+        ///    ServiceLocator から必要なインスタンスを取得する。
+        /// </summary>
+        /// <param name="sceneTransitionController"></param>
+        /// <param name="musicPlayer"></param>
+        /// <param name="sePlayer"></param>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        private bool TryGetServiceLocatorInstances(
+            out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
+            out SoundEffectVolumeManager sePlayer, out SavedataSystem savedataSystem)
+        {
+            sceneTransitionController = null;
+            musicPlayer = null;
+            sePlayer = null;
+            savedataSystem = null;
+
+            if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionController が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance<MusicPlayer>(out musicPlayer))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: MusicPlayer が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance<SoundEffectVolumeManager>(out sePlayer))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SoundEffectVolumeManager が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out savedataSystem))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystem が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
