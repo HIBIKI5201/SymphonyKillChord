@@ -31,8 +31,10 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         private const string BACK_BUTTON_NAME = "BackButton";
+        private const string BACK_GROUND_NAME = "BackGround";
 
         private Button _backButton;
+        private VisualElement _backGround;
 
         /// <summary>
         ///     オプション画面の UI 要素を初期化します。
@@ -50,7 +52,10 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
             _backButton = rootElement.Q<Button>(BACK_BUTTON_NAME)
-                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_BUTTON_NAME}が見つかりません。");
+                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_BUTTON_NAME}が見つかりません。"); 
+
+            _backGround = rootElement.Q<VisualElement>(BACK_GROUND_NAME)
+                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_GROUND_NAME}が見つかりません。");
         }
 
         /// <summary>
@@ -59,6 +64,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RegisterButtonCallbacks()
         {
             _backButton.clicked += OnBackButtonClicked;
+
+            _backGround.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                // バックグラウンドの子要素が押された場合は処理を行わない
+                if (evt.target != evt.currentTarget) { return; }
+
+                OnPointDownEvent(evt);
+            });
         }
 
         /// <summary>
@@ -67,13 +80,23 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void UnregisterButtonCallbacks()
         {
             _backButton.clicked -= OnBackButtonClicked;
+            _backGround.UnregisterCallback<PointerDownEvent>(OnPointDownEvent);
         }
 
 
         /// <summary>
-        ///     戻るボタンがクリックされたときの処理。
+        ///     戻るボタンが押されたときの処理。
         /// </summary>
         private void OnBackButtonClicked()
+        {
+            OutGameUIEvent.OnScreenClosed?.Invoke();
+        }
+
+        /// <summary>
+        ///     バックグラウンドが押されたときの処理。
+        /// </summary>
+        /// <param name="evt"></param>
+        private void OnPointDownEvent(PointerDownEvent evt)
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
