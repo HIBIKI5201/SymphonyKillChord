@@ -53,6 +53,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetEntityRegistryController targetEntityRegistryController,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            EnemyWaveSpawnerState waveSpawnerState,
             Action<EnemyLifeCycle> releaseCallback
             )
         {
@@ -68,6 +69,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetManagerController = targetManagerController;
             _targetEntityRegistryController = targetEntityRegistryController;
             _enemyEntity = CharacterFactory.Create(_enemyData);
+            _waveSpawnerState = waveSpawnerState;
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
             _attackControllerGenerator = attackControllerGenerator;
@@ -178,34 +180,37 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="activePosition">到着後に戦闘を開始する地点。</param>
         /// <param name="spawnerCallback">無効化時にスポナーへ通知するcallback。</param>
         public async ValueTask<bool> EnterFromOutsideAsync(
-            Vector3 entryPosition,
-            Vector3 activePosition,
+            SpawnPositionPair positionPair,
             System.Action spawnerCallback,
             CancellationToken ct)
         {
             bool hasPreparedEntrance = false;
-
+			positionPair.SetInUse(true);
             try
             {
                 ct.ThrowIfCancellationRequested();
 
-                PrepareEntrance(entryPosition);
+                PrepareEntrance(positionPair.SpawnPosition.position);
                 hasPreparedEntrance = true;
 
                 bool hasArrived =
                     await _view.MoveToTargetAysnc(
-                        activePosition,
+                        positionPair.EntryPosition.position,
                         ct);
 
                 ct.ThrowIfCancellationRequested();
-
+				positionPair.SetInUse(false);
                 if (!hasArrived || this == null)
                 {
-                    CancelEntrance();
+                    if (this != null)
+                    {
+                        CancelEntrance();
+                    }
+                    positionPair.SetInUse(false);
                     return false;
                 }
 
-                Activate(activePosition, spawnerCallback);
+                Activate(positionPair.EntryPosition.position, spawnerCallback);
                 return true;
             }
             catch (OperationCanceledException)
@@ -257,7 +262,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _spawnerCallback = null;
             gameObject.SetActive(false);
             _releaseCallback?.Invoke(this);
-
         }
 
         /// <summary>
@@ -353,6 +357,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyAttackReservationUsecase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _battleState;
+        private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
 
         /// <summary>
@@ -397,6 +402,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 await PlayDeathAnimationAsync();
                 Deactivate();
+                _waveSpawnerState.OnEnemyDeath();
             }
             catch (OperationCanceledException)
             {
