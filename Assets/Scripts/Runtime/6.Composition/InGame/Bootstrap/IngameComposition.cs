@@ -1,3 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.InGame.Camera.Target;
@@ -13,8 +15,10 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
+using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
@@ -43,18 +47,21 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private EnemyInitializer _enemyInitializer;
         [SerializeField] private EnemySpawnPositionSearcher _enemySpawnPositionSearcher;
         [SerializeField] private StageSequenceView _stageSequenceView;
-        [SerializeField] private StageResultUIView _stageResultUIView;
+        [SerializeField] private StageSequenceMessageView _stageSequenceMessageView;
+        [SerializeField] private StageResultView _stageResultView;
         [SerializeField] private InGamePlayDirector _inGamePlayDirector;
 
         private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
         private InGameSequenceDirector _inGameSequenceDirector;
         private MissionRuntimeService _missionruntimeService;
+        private SelectedBattleStageState _selectedBattleStage;
+        private SceneTransitionUsecase _sceneTransition;
         private bool _isEnding = false;
 
         private async void Start()
         {
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStage))
             {
                 Debug.LogError("[IngameComposition] SelectedBattleStageStateが取得できませんでした", this);
                 FailActiveLoadingSession();
@@ -67,6 +74,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 FailActiveLoadingSession();
                 return;
             }
+
             if (!ServiceLocator.TryGetInstance(out ISceneTransitionService sceneTransitionService))
             {
                 Debug.LogError("[IngameComposition] ISceneTransitionServiceが取得できませんでした", this);
@@ -74,7 +82,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return;
             }
 
-            if (!selectedBattleStageState.HasSelectedBattleStage)
+            if (!ServiceLocator.TryGetInstance(out _sceneTransition))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(SceneTransitionUsecase)}を取得できませんでした。", this);
+                FailActiveLoadingSession();
+                return;
+            }
+
+            if (!_selectedBattleStage.HasSelectedBattleStage)
             {
                 Debug.LogError("[IngameComposition] バトルステージが選択されていません", this);
                 FailActiveLoadingSession();
@@ -96,7 +111,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                             LoadingConstants.STAGE_LOAD_END_PROGRESS);
 
                         bool loadSuccess = await sceneTransitionService.LoadAdditiveAsync(
-                            selectedBattleStageState.CurrentBattleStageName,
+                            _selectedBattleStage.BattleSceneName,
                             stageLoadProgress,
                             destroyCancellationToken
                             );
@@ -130,13 +145,13 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     return;
                 }
 
-                _missionruntimeService = ServiceLocator.GetInstance<MissionRuntimeService>();
-                if (_missionruntimeService != null)
+                if (_missionruntimeService == null)
                 {
-                    _missionruntimeService.OnMissionFinished += HandleMissionFinished;
-
+                    Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(MissionRuntimeService)}が初期化されていません。", this);
+                    return;
                 }
 
+                _missionruntimeService.OnMissionFinished += HandleMissionFinished;
                 await _inGameSequenceDirector.StartAsync(destroyCancellationToken);
             }
             catch (OperationCanceledException)
@@ -210,8 +225,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
-            _inGameMissionInitializer.Initialize();
-            _stageResultUIView.Initialize();
+
+            if (!_inGameMissionInitializer.TryInitialize(out _missionruntimeService))
+            {
+                Debug.LogError("[IngameComposition] " + "ミッションシステムの初期化に失敗しました。", this);
+
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(SelectedMissionState)}を取得できませんでした。", this);
+                return false;
+            }
+
+            StageResultViewModel stageResultViewModel = new();
+
+            StageResultPresenter stageResultPresenter = new(
+                    _missionruntimeService,
+                    _selectedBattleStage,
+                    stageResultViewModel);
+
+            StageResultController stageResultController = new(
+                    _sceneTransition,
+                    _selectedBattleStage,
+                    selectedMissionState);
+
+            _stageResultView.Initialize(stageResultViewModel, stageResultController);
 
             progress?.Report(0.5f);
 
@@ -276,7 +316,9 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _inGameSequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
-                _stageResultUIView,
+                _stageSequenceMessageView,
+                _stageResultView,
+                stageResultPresenter,
                 _inGamePlayDirector
                 );
             _inGamePlayDirector.StopGameplay();
@@ -367,9 +409,19 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] InGamePlayDirectorの参照が未設定です。", this);
                 return false;
             }
-            if (_stageResultUIView == null)
+            if (_stageSequenceMessageView == null)
             {
-                Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
+                Debug.LogError("[IngameComposition] StageSequenceMessageViewの参照が未設定です。", this);
+                return false;
+            }
+            if (_inGameMissionInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] " + "InGameMissionInitializerの参照が未設定です。", this);
+                return false;
+            }
+            if (_stageResultView == null)
+            {
+                Debug.LogError("[IngameComposition] " + "StageResultViewの参照が未設定です。", this);
                 return false;
             }
 
