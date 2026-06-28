@@ -174,7 +174,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void OnDestroy()
         {
-            UnRegisterUIEventCallbacks();
+            if (_outGameUIEvent != null)
+            {
+                UnRegisterUIEventCallbacks();
+            }
         }
 
         /// <summary>
