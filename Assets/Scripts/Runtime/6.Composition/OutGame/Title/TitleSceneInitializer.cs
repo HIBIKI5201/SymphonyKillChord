@@ -49,6 +49,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private ScreenController _screenController;
         private SavedataSystem _savedataSystem;
 
+        // チュートリアルが完了しているかどうかのフラグ
+        private bool _isTutorialCompleted;
+
         private async void Start()
         {
             if (_uiDocument == null)
@@ -314,12 +317,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
+            // セーブデータをリセットする前に、現在のセーブデータをロードして、チュートリアル完了フラグを保持する。
+            var currentSaveData = await LoadSaveData();
+            if (currentSaveData != null)
+            {
+                _isTutorialCompleted = currentSaveData.Tutorial.IsTutorialCompleted;
+            }
+
             _savedataSystem.DeleteSaveData<SaveData>();
 
-            // セーブデータをロードして、初期状態に戻す
+            // セーブデータをロードして、初期状態に戻す。
             var newSaveData = await LoadSaveData();
 
-            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する
+            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する。
             _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
         }
 
