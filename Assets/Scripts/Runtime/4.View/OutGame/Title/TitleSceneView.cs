@@ -70,6 +70,12 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <param name="targetSceneName"></param>
         public void SetTargetSceneName(string targetSceneName)
         {
+            // targetSceneName が null または空文字の場合は例外をスローする。
+            if (string.IsNullOrEmpty(targetSceneName))
+            {
+                throw new ArgumentException("targetSceneName must not be null or empty.", nameof(targetSceneName));
+            }
+
             _targetSceneName = targetSceneName;
         }
 
