@@ -89,55 +89,72 @@ namespace DevelopProducts.SaveSystem
         private static readonly object _keyLock = new object();
 
         /// <summary>
-        ///     端末ローカルの鍵を読み込む。無ければ初回として乱数生成して保存する。
+        ///     端末ローカルの鍵を読み込む。無ければ、または壊れていれば新規生成して保存する。
         /// </summary>
         private static void EnsureKeys()
         {
-            //  すでに読み込み済みなら何もしない（ロック前の高速パス）。
-            if (_encryptionKey != null) { return; }
+            //  既に読み込み済みなら何もしない
+            if (_encryptionKey != null)
+            {
+                return;
+            }
 
             lock (_keyLock)
             {
-                //  ロック取得後に再確認する（ダブルチェック）。
-                if (_encryptionKey != null) { return; }
-
-                //  ローカル変数で構築・検証し、最後にフィールドへ公開する。
-                byte[] encryptionKey = new byte[ENC_KEY_SIZE];
-
-                if (PlayerPrefs.HasKey(KEY_PREF))
+                //  再確認
+                if (_encryptionKey != null)
                 {
-                    //  保存済みの鍵を復元する。
-                    byte[] stored;
-                    try
-                    {
-                        stored = Convert.FromBase64String(PlayerPrefs.GetString(KEY_PREF));
-                    }
-                    catch (FormatException ex)
-                    {
-                        throw new CryptographicException("保存鍵の形式が不正です。", ex);
-                    }
-
-                    //  長さが想定外なら不正な鍵として扱う。
-                    if (stored.Length != ENC_KEY_SIZE)
-                    {
-                        throw new CryptographicException("保存鍵の長さが不正です。");
-                    }
-
-                    Buffer.BlockCopy(stored, 0, encryptionKey, 0, ENC_KEY_SIZE);
+                    return;
                 }
-                else
+
+                byte[] encryptionKey = TryLoadKey();
+                if (encryptionKey == null)
                 {
-                    //  初回起動：暗号鍵を安全な乱数で生成する。
+                    encryptionKey = new byte[ENC_KEY_SIZE];
                     RandomNumberGenerator.Fill(encryptionKey);
 
-                    //  Base64でPlayerPrefsに保存する。
+                    //  保存。壊れた値であれば上書きされる
                     PlayerPrefs.SetString(KEY_PREF, Convert.ToBase64String(encryptionKey));
                     PlayerPrefs.Save();
                 }
 
-                //  完全に構築・検証してから最後にフィールドへ公開する。
                 _encryptionKey = encryptionKey;
             }
+        }
+        /// <summary>
+        ///     PlayerPrefsから鍵を読み込む。未保存・形式不正・長さ不正の場合はnullを返す。
+        /// </summary>
+        /// <returns>有効な鍵。無効ならnull。</returns>
+        private static byte[] TryLoadKey()
+        {
+            if (!PlayerPrefs.HasKey(KEY_PREF))
+            {
+                return null;
+            }
+
+            //  保存されている暗号鍵のバイト列のコピー
+            byte[] stored;
+
+            try
+            {
+                //  文字をバイト列に復元
+                stored = Convert.FromBase64String(PlayerPrefs.GetString(KEY_PREF));
+            }
+            catch (FormatException)
+            {
+                //  Base64として壊れている。復元不能なので破棄対象。
+               Debug.LogWarning("保存鍵の形式が不正です。鍵を再生成します");
+                return null;
+            }
+
+            if (stored.Length != ENC_KEY_SIZE)
+            {
+                //  長さが想定外。復元不能なので破棄対象とする。
+                Debug.LogWarning("保存鍵の長さが不正です。鍵を再生成します。");
+                return null;
+            }
+
+            return stored;
         }
 
         /// <summary>
