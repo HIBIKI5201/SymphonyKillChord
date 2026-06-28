@@ -12,10 +12,18 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     public sealed class SaveData : SaveBase
     {
         /// <summary> プレイヤーのスキル解放情報のセーブデータを表すプロパティ。 </summary>
-        public SkillUnlockData SkillUnlock { get; private set; } = new();
+        public SkillUnlockData SkillUnlock
+        {
+            get => _skillUnlock;
+            set => _skillUnlock = value ?? throw new ArgumentNullException(nameof(value), "SkillUnlockData は null にできません。");
+        }
 
         /// <summary> プレイヤーの装備スキル構成のセーブデータを表すプロパティ。 </summary>
-        public SkillBuildData SkillBuild { get; private set; } = new();
+        public SkillBuildData SkillBuild
+        {
+            get => _skillBuild;
+            set => _skillBuild = value ?? throw new ArgumentNullException(nameof(value), "SkillBuildData は null にできません。");
+        }
 
         /// <summary> プレイヤーのチュートリアル進行状況のセーブデータを表すプロパティ。 </summary>
         public TutorialData Tutorial
@@ -24,6 +32,11 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             set => _tutorial = value ?? throw new ArgumentNullException(nameof(value), "TutorialData は null にできません。");
         }
 
+        // セーブデータの各種データを保持するメンバー変数
+        [SerializeField, Tooltip("プレイヤーのスキル解放情報のセーブデータ")]
+        private SkillUnlockData _skillUnlock;
+        [SerializeField, Tooltip("プレイヤーの装備スキル構成のセーブデータ")]
+        private SkillBuildData _skillBuild;
         [SerializeField, Tooltip("プレイヤーのチュートリアル進行状況のセーブデータ")]
         private TutorialData _tutorial;
 
@@ -32,8 +45,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// </summary>
         protected override void OnAfterDeserialize()
         {
-            SkillUnlock ??= new();
-            SkillBuild ??= new();
+            _skillUnlock ??= new();
+            _skillBuild ??= new();
             _tutorial ??= new();
         }
     }
