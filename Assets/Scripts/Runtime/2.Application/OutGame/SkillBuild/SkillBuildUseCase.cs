@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs, int skillLevelupPoint)
         {
             SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
-            saveData.SkillBuild.EquipmentSkillIDs = equipmentSkillIDs;
+            saveData.SkillBuild.SetEquipmentSkillIDs(equipmentSkillIDs);
             saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
 
             await _savedataSystem.SaveAsync(saveData);
