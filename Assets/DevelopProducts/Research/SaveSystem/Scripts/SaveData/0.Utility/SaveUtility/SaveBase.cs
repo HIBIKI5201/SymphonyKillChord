@@ -30,7 +30,7 @@ namespace DevelopProducts.SaveSystem
             }
             catch (Exception ex) 
             {
-                throw new InvalidDataException("セーブデータの復号に失敗しました。", ex);
+                Debug.LogWarning($"データの復号に失敗しました。{ex.Message}");
             }
         }
         /// <summary>
