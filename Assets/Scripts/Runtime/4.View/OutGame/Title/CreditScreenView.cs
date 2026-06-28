@@ -63,13 +63,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RegisterButtonCallbacks()
         {
             _backButton.clicked += OnBackButtonClicked;
-            _backGround.RegisterCallback<PointerDownEvent>(evt =>
-            {
-                // バックグラウンドの子要素が押された場合は処理を行わない
-                if (evt.target != evt.currentTarget) { return; }
-
-                OnPointDownEvent(evt);
-            });
+            _backGround.RegisterCallback<PointerDownEvent>(OnPointDownEvent);
         }
 
         /// <summary>
@@ -96,6 +90,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <param name="evt"></param>
         private void OnPointDownEvent(PointerDownEvent evt)
         {
+            // バックグラウンドの子要素が押された場合は処理を行わない
+            if (evt.target != evt.currentTarget) { return; }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
     }
