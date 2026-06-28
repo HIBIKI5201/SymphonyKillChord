@@ -34,10 +34,11 @@ namespace KillChord.Runtime.Application.InGame.Mission
             {
                 IMissionEvaluationCondition condition = evaluationConditions[i];
 
+                MissionEvaluationId evaluationId = condition != null ? condition.MissionEvaluationId : default;
                 string description = condition != null ? condition.GetDescription() : string.Empty;
                 MissionEvaluationDisplaySituation situation = GetDisplaySituation(condition, progress);
 
-                progresses[i] = new MissionEvaluationProgress(description, situation);
+                progresses[i] = new MissionEvaluationProgress(evaluationId, description, situation);
             }
 
             return new MissionEvaluationResult(progresses);

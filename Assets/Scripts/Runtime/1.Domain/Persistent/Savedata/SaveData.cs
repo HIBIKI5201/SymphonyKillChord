@@ -40,14 +40,17 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         [SerializeField, Tooltip("プレイヤーのチュートリアル進行状況のセーブデータ")]
         private TutorialData _tutorial;
 
+        /// <summary> プレイヤーのステージ進行状況のセーブデータを表すプロパティ。 </summary>
+        public StageProgressData StageProgress { get; private set; } = new();
+
         /// <summary>
         ///     セーブデータを読み込んだ後に null チェックを行い、必要に応じて初期化する。
         /// </summary>
         protected override void OnAfterDeserialize()
         {
-            _skillUnlock ??= new();
-            _skillBuild ??= new();
-            _tutorial ??= new();
+            SkillUnlock ??= new();
+            SkillBuild ??= new();
+            StageProgress ??= new();
         }
     }
 }

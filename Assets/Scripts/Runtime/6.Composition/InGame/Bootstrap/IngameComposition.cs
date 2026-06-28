@@ -1,3 +1,6 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.InGame.Camera.Target;
@@ -11,10 +14,14 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
+using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
@@ -33,8 +40,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     {
         [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
         [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
-        [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
+        [SerializeField] private EnemyInfantrySpawner _enemyInfantrySpawner;
+        [SerializeField] private EnemyArtillerySpawner _enemyArtillerySpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
         [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
@@ -43,18 +50,25 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private EnemyInitializer _enemyInitializer;
         [SerializeField] private EnemySpawnPositionSearcher _enemySpawnPositionSearcher;
         [SerializeField] private StageSequenceView _stageSequenceView;
-        [SerializeField] private StageResultUIView _stageResultUIView;
+        [SerializeField] private StageSequenceMessageView _stageSequenceMessageView;
+        [SerializeField] private StageResultView _stageResultView;
         [SerializeField] private InGamePlayDirector _inGamePlayDirector;
+        [SerializeField] private EnemyWaveDefinitionAsset _enemyWaveDefinition;
+        [SerializeField] private EnemyWaveTimerView _enemyWaveTimerView;
 
         private PlayerInitializer _playerInitializer;
         private MusicPlayer _musicPlayer;
         private InGameSequenceDirector _inGameSequenceDirector;
         private MissionRuntimeService _missionruntimeService;
+        private EnemyWaveSpawnerController _enemyWaveSpawnerController;
+        private SelectedBattleStageState _selectedBattleStage;
+        private SceneTransitionUsecase _sceneTransition;
+
         private bool _isEnding = false;
 
         private async void Start()
         {
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStage))
             {
                 Debug.LogError("[IngameComposition] SelectedBattleStageStateが取得できませんでした", this);
                 FailActiveLoadingSession();
@@ -67,6 +81,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 FailActiveLoadingSession();
                 return;
             }
+
             if (!ServiceLocator.TryGetInstance(out ISceneTransitionService sceneTransitionService))
             {
                 Debug.LogError("[IngameComposition] ISceneTransitionServiceが取得できませんでした", this);
@@ -74,7 +89,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return;
             }
 
-            if (!selectedBattleStageState.HasSelectedBattleStage)
+            if (!ServiceLocator.TryGetInstance(out _sceneTransition))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(SceneTransitionUsecase)}を取得できませんでした。", this);
+                FailActiveLoadingSession();
+                return;
+            }
+
+            if (!_selectedBattleStage.HasSelectedBattleStage)
             {
                 Debug.LogError("[IngameComposition] バトルステージが選択されていません", this);
                 FailActiveLoadingSession();
@@ -96,7 +118,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                             LoadingConstants.STAGE_LOAD_END_PROGRESS);
 
                         bool loadSuccess = await sceneTransitionService.LoadAdditiveAsync(
-                            selectedBattleStageState.CurrentBattleStageName,
+                            _selectedBattleStage.BattleSceneName,
                             stageLoadProgress,
                             destroyCancellationToken
                             );
@@ -130,13 +152,13 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     return;
                 }
 
-                _missionruntimeService = ServiceLocator.GetInstance<MissionRuntimeService>();
-                if (_missionruntimeService != null)
+                if (_missionruntimeService == null)
                 {
-                    _missionruntimeService.OnMissionFinished += HandleMissionFinished;
-
+                    Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(MissionRuntimeService)}が初期化されていません。", this);
+                    return;
                 }
 
+                _missionruntimeService.OnMissionFinished += HandleMissionFinished;
                 await _inGameSequenceDirector.StartAsync(destroyCancellationToken);
             }
             catch (OperationCanceledException)
@@ -152,6 +174,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
         private void OnDestroy()
         {
+            _enemyWaveSpawnerController?.Dispose();
             if (_missionruntimeService != null)
             {
                 _missionruntimeService.OnMissionFinished -= HandleMissionFinished;
@@ -210,8 +233,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
-            _inGameMissionInitializer.Initialize();
-            _stageResultUIView.Initialize();
+
+            if (!_inGameMissionInitializer.TryInitialize(out _missionruntimeService))
+            {
+                Debug.LogError("[IngameComposition] " + "ミッションシステムの初期化に失敗しました。", this);
+
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] " + $"{nameof(SelectedMissionState)}を取得できませんでした。", this);
+                return false;
+            }
+
+            StageResultViewModel stageResultViewModel = new();
+
+            StageResultPresenter stageResultPresenter = new(
+                    _missionruntimeService,
+                    _selectedBattleStage,
+                    stageResultViewModel);
+
+            StageResultController stageResultController = new(
+                    _sceneTransition,
+                    _selectedBattleStage,
+                    selectedMissionState);
+
+            _stageResultView.Initialize(stageResultViewModel, stageResultController);
 
             progress?.Report(0.5f);
 
@@ -244,39 +292,47 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             _inGamePlayDirector.AddGamePlayControllable(playerView);
 
-            // ステージに事前配置されている敵の情報
-            AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
-            if (assignedEnemyManager == null)
-            {
-                Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
-            }
-            else
-            {
-                if (assignedEnemyManager.Infantries == null
-                    || assignedEnemyManager.Infantries.Length == 0)
-                {
-                    Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
-                }
-                if (assignedEnemyManager.Artillery == null
-                    || assignedEnemyManager.Artillery.Length == 0)
-                {
-                    Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
-                }
-            }
+            // ステージに事前配置されている敵の情報（現状不要になった）
+            //AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
+            //if (assignedEnemyManager == null)
+            //{
+            //    Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
+            //}
+            //else
+            //{
+            //    if (assignedEnemyManager.Infantries == null
+            //        || assignedEnemyManager.Infantries.Length == 0)
+            //    {
+            //        Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
+            //    }
+            //    if (assignedEnemyManager.Artillery == null
+            //        || assignedEnemyManager.Artillery.Length == 0)
+            //    {
+            //        Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
+            //    }
+            //}
 
             // 敵生成関連
             _enemyPools.Initialize();
-            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
 
-            _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
-            _enemyInfantryTestSpawner.Initialize(assignedEnemyManager?.Infantries);
-            _enemyArtilleryTestSpawner.Initialize(assignedEnemyManager?.Artillery);
+            EnemyWaveSpawnerState enemyWaveSpawnerState = new EnemyWaveSpawnerState();
+            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools, enemyWaveSpawnerState);
+
+            _enemySpawnPositionSearcher.Initialize(_playerInitializer.transform);
+            _enemyInfantrySpawner.Initialize();
+            _enemyArtillerySpawner.Initialize();
+
+            EnemyWaves enemyWaves = _enemyWaveDefinition.ToDefinition();
+            _enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
+            _enemyWaveTimerView.Initialize(_enemyWaveSpawnerController);
 
             _rhythmGuideInitializer.Initialize();
 
             _inGameSequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
-                _stageResultUIView,
+                _stageSequenceMessageView,
+                _stageResultView,
+                stageResultPresenter,
                 _inGamePlayDirector
                 );
             _inGamePlayDirector.StopGameplay();
@@ -342,14 +398,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] EnemySpawnPositionSearcherの参照が未設定です。", this);
                 return false;
             }
-            if (_enemyInfantryTestSpawner == null)
+            if (_enemyInfantrySpawner == null)
             {
-                Debug.LogError("[IngameComposition] EnemyInfantryTestSpawnerの参照が未設定です。", this);
+                Debug.LogError("[IngameComposition] EnemyInfantrySpawnerの参照が未設定です。", this);
                 return false;
             }
-            if (_enemyArtilleryTestSpawner == null)
+            if (_enemyArtillerySpawner == null)
             {
-                Debug.LogError("[IngameComposition] EnemyArtilleryTestSpawnerの参照が未設定です。", this);
+                Debug.LogError("[IngameComposition] EnemyArtillerySpawnerの参照が未設定です。", this);
                 return false;
             }
             if (_rhythmGuideInitializer == null)
@@ -367,9 +423,19 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 Debug.LogError("[IngameComposition] InGamePlayDirectorの参照が未設定です。", this);
                 return false;
             }
-            if (_stageResultUIView == null)
+            if (_stageSequenceMessageView == null)
             {
-                Debug.LogError("[IngameComposition] StageResultUIViewの参照が未設定です。", this);
+                Debug.LogError("[IngameComposition] StageSequenceMessageViewの参照が未設定です。", this);
+                return false;
+            }
+            if (_inGameMissionInitializer == null)
+            {
+                Debug.LogError("[IngameComposition] " + "InGameMissionInitializerの参照が未設定です。", this);
+                return false;
+            }
+            if (_stageResultView == null)
+            {
+                Debug.LogError("[IngameComposition] " + "StageResultViewの参照が未設定です。", this);
                 return false;
             }
 
