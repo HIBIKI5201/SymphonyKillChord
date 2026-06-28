@@ -45,10 +45,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns></returns>
         public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
-            if (_views.TryGetValue(screenId, out var view))
+            if (!_views.TryGetValue(screenId, out var view))
             {
-                await view.Show(token);
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
+            await view.Show(token);
         }
 
         /// <summary>
@@ -59,10 +61,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns></returns>
         public async Task Hide(ScreenId screenId, CancellationToken token)
         {
-            if (_views.TryGetValue(screenId, out var view))
+            if (!_views.TryGetValue(screenId, out var view))
             {
-                await view.Hide(token);
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
+            await view.Hide(token);
         }
 
         /// <summary>
@@ -72,10 +76,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="targetSceneName"></param>
         public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
         {
-            if (_views.TryGetValue(screenId, out var view))
+            if (!_views.TryGetValue(screenId, out var view))
             {
-                view.ShowImmediately();
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
+            view.ShowImmediately();
         }
 
         /// <summary>
@@ -84,10 +90,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="screenId"></param>
         public void HideImmediately(ScreenId screenId)
         {
-            if (_views.TryGetValue(screenId, out var view))
+            if (!_views.TryGetValue(screenId, out var view))
             {
-                view.HideImmediately();
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
+            view.HideImmediately();
         }
 
         /// <summary>
@@ -97,7 +105,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             foreach (IScreenView view in _views.Values)
             {
-               view.HideImmediately();
+                view.HideImmediately();
             }
         }
 

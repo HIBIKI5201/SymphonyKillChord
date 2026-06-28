@@ -11,6 +11,7 @@ using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -44,8 +45,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
+        private TitleSceneView _titleSceneView;
         private ScreenController _screenController;
         private SavedataSystem _savedataSystem;
+
+        // チュートリアルが完了しているかどうかのフラグ
+        private bool _isTutorialCompleted;
 
         private async void Start()
         {
@@ -115,14 +120,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
-            TitleSceneView titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
+            _titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
             VolumeSettingsTabView audioVolumeTab = new(optionRoot, musicPlayer, sePlayer);
             DataResetTabView dataResetTab = new(optionRoot, _outGameUIEvent);
 
-            _titleScreenViewRegistry = new TitleScreenViewRegistry(titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
+            _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_ruleData);
@@ -158,14 +163,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{_firstLaunchTargetSceneName}");
 #endif
-                titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+                _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
             }
             else
             {
 #if UNITY_EDITOR
                 Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
 #endif
-                titleSceneView.SetTargetSceneName(_targetSceneName);
+                _titleSceneView.SetTargetSceneName(_targetSceneName);
             }
         }
 
@@ -174,7 +179,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void OnDestroy()
         {
-            UnRegisterUIEventCallbacks();
+            if (_outGameUIEvent != null)
+            {
+                UnRegisterUIEventCallbacks();
+            }
         }
 
         /// <summary>
@@ -309,22 +317,49 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
-            _savedataSystem.DeleteSaveData<SaveData>();
+            // セーブデータをリセットする前に、現在のセーブデータをロードして、チュートリアル完了フラグを保持する。
+            var currentSaveData = await LoadSaveData();
+            if (currentSaveData != null)
+            {
+                _isTutorialCompleted = currentSaveData.Tutorial.IsTutorialCompleted;
+            }
 
-
-            // NOTE : セーブデータのリセットがチュートリアルも行うレベルのリセットなのかどうかで
-            // セーブデータのロードをして初期化するのかを判断する必要がある。
-
-            // セーブデータをロードして、初期状態に戻す
             try
             {
-                var saveData = await _savedataSystem.LoadAsync<SaveData>();
+                await _savedataSystem.DeleteSaveDataAsync<SaveData>();
+            }
+            catch (Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
+#endif
+            }
+
+            // セーブデータをロードして、初期状態に戻す。
+            var newSaveData = await LoadSaveData();
+
+            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する。
+            _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+        }
+
+        /// <summary>
+        ///     セーブデータをロードする処理を行う。
+        /// </summary>
+        /// <returns></returns>
+        private async ValueTask<SaveData> LoadSaveData()
+        {
+            SaveData saveData = null;
+            try
+            {
+                saveData = await _savedataSystem.LoadAsync<SaveData>();
+                return saveData;
             }
             catch (Exception ex)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータのロード中にエラーが発生しました。{ex.Message}");
 #endif
+                return null;
             }
         }
     }

@@ -37,6 +37,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual void HideImmediately()
         {
+            RootElement.AddToClassList(HIDDEN_CLASS);
+            RootElement.RemoveFromClassList(VISIBLE_CLASS);
             RootElement.style.display = DisplayStyle.None;
         }
 
