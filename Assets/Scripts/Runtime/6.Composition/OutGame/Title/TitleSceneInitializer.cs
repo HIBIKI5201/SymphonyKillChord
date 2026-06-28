@@ -324,7 +324,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 _isTutorialCompleted = currentSaveData.Tutorial.IsTutorialCompleted;
             }
 
-            _savedataSystem.DeleteSaveData<SaveData>();
+            try
+            {
+                await _savedataSystem.DeleteSaveDataAsync<SaveData>();
+            }
+            catch (Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
+#endif
+            }
 
             // セーブデータをロードして、初期状態に戻す。
             var newSaveData = await LoadSaveData();
