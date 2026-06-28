@@ -37,41 +37,15 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         public void Initialize(VisualElement rootElement, TitleStartController titleStartController)
         {
-            if (rootElement == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneView)}: Root VisualElementがnullです。");
-#endif
-                return;
-            }
+            if (rootElement == null) { throw new ArgumentNullException(nameof(rootElement)); }
 
-            if (titleStartController == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneView)}: TitleStartControllerがnullです。");
-#endif
-                return;
-            }
+            if (titleStartController == null) { throw new ArgumentNullException(nameof(titleStartController)); }
             _titleStartController = titleStartController;
 
-            _touchArea = rootElement.Q<VisualElement>(TOUCH_AREA_NAME);
-            if (_touchArea == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneView)}: {TOUCH_AREA_NAME}の取得に失敗しました。");
-#endif
-                return;
-            }
-
-            _optionButton = rootElement.Q<Button>(OPTION_BUTTON_NAME);
-            if (_optionButton == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneView)}: {OPTION_BUTTON_NAME}の取得に失敗しました。");
-#endif
-                return;
-            }
-
+            _touchArea = rootElement.Q<VisualElement>(TOUCH_AREA_NAME)
+                ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {TOUCH_AREA_NAME}の取得に失敗しました。");
+            _optionButton = rootElement.Q<Button>(OPTION_BUTTON_NAME)
+                ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {OPTION_BUTTON_NAME}の取得に失敗しました。");
 
             _cancellationTokenSource = new CancellationTokenSource();
 
