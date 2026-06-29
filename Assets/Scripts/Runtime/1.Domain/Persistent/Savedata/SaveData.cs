@@ -11,6 +11,17 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     [Serializable]
     public sealed class SaveData : SaveBase
     {
+        /// <summary>
+        ///     SaveData クラスの新しいインスタンスを初期化する。
+        /// </summary>
+        public SaveData()
+        {
+            _skillUnlock = new();
+            _skillBuild = new();
+            _stageProgress = new();
+            _tutorial = new();
+        }
+
         /// <summary> プレイヤーのスキル解放情報のセーブデータを表すプロパティ。 </summary>
         public SkillUnlockData SkillUnlock => _skillUnlock;
 
