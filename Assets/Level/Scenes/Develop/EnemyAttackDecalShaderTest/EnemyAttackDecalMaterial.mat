@@ -45,7 +45,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7ca9e1c6fb048af49b0ba5482512804c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D_1:
@@ -71,7 +71,7 @@ Material:
     m_Ints: []
     m_Floats:
     - Normal_Blend: 0.5
-    - _Circle: 1
+    - _Circle: 0.3709531
     - _DecalMeshBiasType: 0
     - _DecalMeshDepthBias: 0
     - _DecalMeshViewBias: 0

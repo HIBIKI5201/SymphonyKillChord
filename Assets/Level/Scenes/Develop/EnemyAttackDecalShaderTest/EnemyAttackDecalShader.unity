@@ -554,6 +554,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1980865266}
   - component: {fileID: 1980865265}
+  - component: {fileID: 1980865267}
   m_Layer: 0
   m_Name: Decal Projector
   m_TagString: Untagged
@@ -604,6 +605,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1980865267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980865264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5176063b9300cc446bbdac50174925fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DecalMaterialPlayer
+  _key: _Circle
+  _material: {fileID: 2100000, guid: 2bf7c854ce19d7b47b3dbfa6e80370da, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
