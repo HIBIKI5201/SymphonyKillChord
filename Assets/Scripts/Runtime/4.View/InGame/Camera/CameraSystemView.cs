@@ -33,9 +33,10 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView = playerInputView;
 
 #if UNITY_ANDROID
-            _inputView.OnMobileLookInput += LookHandler;
+            _inputView.OnMobileLookInput += LookHandlerMobile;
 #else
-            _inputView.OnLookInput += LookHandler;
+            _inputView.OnLookMouseInput += LookHandlerMouse;
+            _inputView.OnLookGamepadInput += LookHandlerGamepad;
 #endif
             _inputView.OnMoveInput += MoveHandler;
             _inputView.OnLockOnInput += LockOnHandler;
@@ -47,7 +48,11 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("カメラ更新タイミングの設定")]
         private UpdateModeEnum _updateMode;
         [SerializeField, Tooltip("カメラの感度")]
-        private int _cameraSensitivity = 5;
+        private int _mouseLookSensitivity = 5;
+        [SerializeField, Tooltip("コントローラーのカメラ感度")]
+        private int _gamepadLookSensitivity = 20;
+        [SerializeField, Tooltip("モバイルのカメラ感度")]
+        private int _mobileLookSensitivity = 10;
 
         private CameraSystemController _controller;
         private CameraSystemPresenter _presenter;
@@ -55,6 +60,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Transform _playerT;
         private Vector2 _input;
         private Vector2 _moveInput;
+        private float _lookSensitivity = 1f;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -97,9 +103,10 @@ namespace KillChord.Runtime.View.InGame.Camera
             if (_inputView == null) { return; }
 
 #if UNITY_ANDROID
-            _inputView.OnMobileLookInput -= LookHandler;
+            _inputView.OnMobileLookInput -= LookHandlerMobile;
 #else
-            _inputView.OnLookInput -= LookHandler;
+            _inputView.OnLookMouseInput -= LookHandlerMouse;
+            _inputView.OnLookGamepadInput -= LookHandlerGamepad;
 #endif
             _inputView.OnMoveInput -= MoveHandler;
             _inputView.OnLockOnInput -= LockOnHandler;
@@ -110,10 +117,22 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     視点操作入力を受け取り、入力値を更新する。
         /// </summary>
         /// <param name="context"> 視点操作の入力コンテキスト。</param>
-        private void LookHandler(InputContext<Vector2> context)
+#if UNITY_ANDROID
+        private void LookHandlerMobile(InputContext<Vector2> context)
         {
-            _input = context.Value;
+            _input = context.Value * _mobileLookSensitivity;
         }
+#else
+        private void LookHandlerMouse(InputContext<Vector2> context)
+        {
+            _input = context.Value * _mouseLookSensitivity;
+        }
+
+        private void LookHandlerGamepad(InputContext<Vector2> context)
+        {
+            _input = context.Value * _gamepadLookSensitivity;
+        }
+#endif
 
         /// <summary>
         ///     移動入力を受け取り、入力値を更新する。
@@ -151,13 +170,12 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
         /// </summary>
-        /// <param name="deltaTime"> 前フレームからの経過時間。</param>
         private void Tick(float deltaTime)
         {
-            if (_controller == null || _presenter == null||
+            if (_controller == null || _presenter == null ||
                 _playerT == null || _cameraT == null) { return; }
-            Vector2 input = _input * _cameraSensitivity;
-            _input = Vector2.zero;
+
+            Vector2 input = _input * _lookSensitivity;
 
             _presenter.Update(
                 _playerT.position,
@@ -167,6 +185,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 out Quaternion rotation,
                 out Vector3 position
             );
+
             _cameraT.SetPositionAndRotation(position, rotation);
         }
     }

@@ -54,14 +54,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private StageSelectOpenUseCase _openUseCase;
         private SelectedScenarioState _selectedScenarioState;
         private SelectedBattleStageState _selectedBattleStageState;
-        private bool _registeredSelectedBattleStageState;
+        private SelectedMissionState _selectedMissionState;
 
         /// <summary>
         ///     初期化を行います。
         /// </summary>
         private void Awake()
         {
-            _currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            _currentSceneName = gameObject.scene.name;
             Initialize();
         }
 
@@ -123,19 +123,46 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleSortieRequested()
         {
-            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName,out var battleStageScene, out var scenarioId, out var missionDefinition))
-            {   
+            if (!_stageSelectController.TryGetSortieInfo(out StageDefinition stageDefinition))
+            {
                 return;
             }
 
-            if(stageType == StageType.Battle)
+            if (stageDefinition.StageType == StageType.Battle)
             {
-                _selectedBattleStageState.SelectBattleStage(battleStageScene);
-            }
+                if (stageDefinition.MissionDefinition == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"{nameof(StageSelectInitializer)}" +
+                        "バトルステージにMissionDefinitionが設定されていません。",
+                        this);
+#endif
+                    return;
+                }
 
-            if(stageType == StageType.Scenario)
+                if (string.IsNullOrWhiteSpace(
+                    stageDefinition.BattleSceneName))
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"[{nameof(StageSelectInitializer)}] " +
+                        "バトルシーン名が設定されていません。",
+                        this);
+#endif
+                    return;
+                }
+
+                _selectedBattleStageState.SelectBattleStage(stageDefinition, _currentSceneName);
+
+                _missionSelectController.Select(stageDefinition.MissionDefinition);
+            }
+            else if (stageDefinition.StageType == StageType.Scenario)
             {
-                if (string.IsNullOrWhiteSpace(scenarioId))
+                _selectedBattleStageState.Clear();
+                _selectedMissionState.Clear();
+
+                if (string.IsNullOrWhiteSpace(stageDefinition.ScenarioId))
                 {
 #if UNITY_EDITOR
                     Debug.LogError($"[{nameof(StageSelectInitializer)}] シナリオIDが設定されていません。", this);
@@ -143,15 +170,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return;
                 }
 
-                _selectedScenarioState.SelectScenario(scenarioId);
+                _selectedScenarioState.SelectScenario(stageDefinition.ScenarioId);
             }
 
-            if (_stageSelectController.TryGetBattleMissionDefinition(out var battleMissionDefinition))
-            {
-                _missionSelectController.Select(battleMissionDefinition.MissionId.Value);
-            }
-
-            await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
+            await _outGameSortieController.RequestSortieAsync(
+                stageDefinition.StageType,
+                _currentSceneName,
+                stageDefinition.TargetSceneName,
+                _cts.Token);
         }
 
         /// <summary>
@@ -173,10 +199,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _selectedBattleStageState = new SelectedBattleStageState();
 
                 ServiceLocator.RegisterInstance(_selectedBattleStageState);
-
-                _registeredSelectedBattleStageState = true;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _selectedMissionState))
+            {
+                _selectedMissionState = new SelectedMissionState();
+
+                ServiceLocator.RegisterInstance(_selectedMissionState);
+            }
+            _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
@@ -193,15 +224,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 #endif
                 return;
             }
-
-            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedMissionState が取得できませんでした。", this);
-#endif
-                return;
-            }
-            _missionSelectController = new OutGameMissionSelectController(selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
             {
