@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Build.Profile; // Unity 6のBuildProfile APIを使用
+using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
@@ -11,12 +11,18 @@ namespace KillChord.Editor.AutoBuilder
     public static class AutoBuilder
     {
         /// <summary>
+        /// 【GitHub Actions 用エントリポイント】
+        /// Unity -batchMode -executeMethod KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli
+        /// </summary>
+        public static void RunFromCli()
+        {
+            PerformMultipleBuilds(isBatchMode: true); // CLIフラグに依存せず明示的にtrueを渡す
+        }
+        
+        /// <summary>
         ///     複数のビルドプロファイルに基づいてビルドを実行する。
         /// </summary>
-        /// <param name="isBatchMode">
-        ///     true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。
-        ///     false の場合は手動実行扱い。
-        /// </param>
+        /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
         public static void PerformMultipleBuilds(bool isBatchMode = false)
         {
             Debug.Log("Starting multiple builds process via BuildProfile...");
@@ -31,9 +37,8 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             bool allSuccess = true;
-            var allProfiles = settings.DevelopBuildProfiles.Concat(settings.MasterBuildProfiles);
 
-            foreach (BuildProfile profile in allProfiles)
+            foreach (BuildProfile profile in settings.DevelopBuildProfiles.Concat(settings.MasterBuildProfiles))
             {
                 // BuildProfileごとにビルド実行。
                 Debug.Log($"Building profile: {profile.name}");

@@ -119,6 +119,76 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &40540016
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2982281720216178710, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: _parent
+      value: 
+      objectReference: {fileID: 40540017}
+    - target: {fileID: 2982281720216178710, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: _uiDocument
+      value: 
+      objectReference: {fileID: 2119823347}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.87445
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -10.94252
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353054652239010838, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5763909906653179697, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+      propertyPath: m_Name
+      value: SettingComposition
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+--- !u!1 &40540017 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5763909906653179697, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
+  m_PrefabInstance: {fileID: 40540016}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &48863679
 GameObject:
   m_ObjectHideFlags: 0
@@ -742,6 +812,7 @@ GameObject:
   - component: {fileID: 510963394}
   - component: {fileID: 510963397}
   - component: {fileID: 510963398}
+  - component: {fileID: 510963399}
   m_Layer: 0
   m_Name: ScreenInitializer
   m_TagString: Untagged
@@ -820,8 +891,25 @@ MonoBehaviour:
   _skillNodeDataRepo: {fileID: 11400000, guid: 57ad1f17f7de2804a9744cf5cc3c4316, type: 2}
   _skillNodeBindRepo: {fileID: 11400000, guid: 8bb92b8655a6f724b864e7dac88d6e70, type: 2}
   _skillNodePhaseBindRepo: {fileID: 11400000, guid: 2efcc81dfd565a94a9110b488a8ec243, type: 2}
-  _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
   _videoPlayer: {fileID: 1876322594}
+  _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
+--- !u!114 &510963399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510963393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f4afb80093f83f4e98bdb166e9b2109, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
+  _uiDocument: {fileID: 2119823347}
+  _skillBuildRepositoryDebug: {fileID: 11400000, guid: ed00377b3610b1e45b0f1c7da00f007a, type: 2}
+  _ownedSkillRepositoryDebug: {fileID: 11400000, guid: 8f9f05cd27f2f3a4087a15acbe76d7c3, type: 2}
+  _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
+  _skillBuildDebugger: {fileID: 0}
 --- !u!1 &959266667
 GameObject:
   m_ObjectHideFlags: 0
@@ -1283,3 +1371,4 @@ SceneRoots:
   - {fileID: 510963396}
   - {fileID: 1480631847}
   - {fileID: 1876322595}
+  - {fileID: 40540016}

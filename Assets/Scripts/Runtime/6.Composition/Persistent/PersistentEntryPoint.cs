@@ -1,8 +1,10 @@
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using SymphonyFrameWork.Attribute;
-using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.Composition.Persistent
 {
@@ -21,20 +23,39 @@ namespace KillChord.Runtime.Composition.Persistent
             if (!_active) return;
             _cancellationTokenSource = new CancellationTokenSource();
 
-            if (!SceneLoader.GetExistScene(_firstSceneName, out _))
+            if (!ServiceLocator.TryGetInstance(
+                out SceneTransitionController controller))
             {
-                bool success = await SceneLoader.LoadScene(_firstSceneName,
-                    token: _cancellationTokenSource.Token
-                );
+                Debug.LogError(
+                    $"[{nameof(PersistentEntryPoint)}] " +
+                    $"{nameof(SceneTransitionController)}が取得できません。" +
+                    $"{nameof(SceneTransitionInitializer)}の初期化順を確認してください。",
+                    this);
+
+                return;
+            }
+
+            try
+            {
+                bool success = await controller.LoadAdditiveAndSetActiveAsync(
+                    _firstSceneName,
+                    _cancellationTokenSource.Token
+                    );
 
                 if (!success)
                 {
-                    Debug.LogError($"初回ロードに失敗 : {_firstSceneName}");
+                    Debug.LogError($"初回ロードに失敗 : {_firstSceneName}", this);
                     return;
                 }
             }
-
-            SceneLoader.SetActiveScene(_firstSceneName);
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         private void OnDestroy()

@@ -41,7 +41,7 @@ jobs:
           OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
           
           if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT)。Exiting early..."
+            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Exiting early..."
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=false" >> $GITHUB_OUTPUT
             echo "SUCCESS: Decision: should_run=false (Skipped due to duplicate execution)"
@@ -115,7 +115,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -125,7 +125,6 @@ jobs:
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
 
-          Write-Host "::group::Build Environment Information"
           Write-Host "::group::Build Workflow Environment Information"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Workflow started."
           Write-Host "Runner: ${{ runner.os }} (Architecture: ${{ runner.arch }})"
@@ -152,7 +151,7 @@ jobs:
             $FileInfo = Get-Item $env:UNITY_EXE_PATH
             Write-Host "OK: Unity executable verified."
             Write-Host "      File Size: $($FileInfo.Length / 1MB) MB"
-            Write-Host "      last days: $($FileInfo.LastWriteTime)"
+            Write-Host "      Last Modified: $($FileInfo.LastWriteTime)"
           } else {
             Write-Host "ERROR: Unity executable not found at the specified path: $env:UNITY_EXE_PATH"
             Write-Host "::endgroup::"
@@ -161,39 +160,118 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Execute Unity - Download Assets and Build
-        # The following processes are executed automatically in this step:
-        # 1. GoogleDriveBatchCI.StartBatchImport downloads assets from Google Drive
-        # 2. after asset import, automatically starts the build with AutoBuilder
+      - name: Execute Unity - Download Assets
         run: |
-          Write-Host "::group::Start Unity Build Process"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity..."
+          Write-Host "::group::Start Unity Import Process"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for asset import..."
           Write-Host "Execution Method: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
-          Write-Host "Log output: unity_build.log"
+          Write-Host "Log output: unity_import.log"
           Write-Host ""
-          
-          & "$env:UNITY_EXE_PATH" -batchmode -projectPath "${{ github.workspace }}" -executeMethod "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport" -logFile "unity_build.log"
-          
-          $UnityExitCode = $LASTEXITCODE
+
+          $TimeoutSec = 5400
+          Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
           Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity process exited with code $UnityExitCode."
+
+          $Args = @(
+            "-batchmode",
+            "-ignorecompilererrors",
+            "-projectPath", "${{ github.workspace }}",
+            "-executeMethod", "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport",
+            "-logFile", "unity_import.log"
+          )
+          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+
+          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
+            Write-Host ""
+            Write-Host "ERROR: Unity import timed out after $TimeoutSec seconds."
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 124
+          }
+
+          $UnityExitCode = $UnityProcess.ExitCode
+          Write-Host ""
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity import process exited with code $UnityExitCode."
           
           if ($UnityExitCode -eq 0) {
-            Write-Host "OK: Unity build completed successfully."
+            Write-Host "OK: Unity import completed successfully."
           } else {
-            Write-Host "WARNING: Unity process returned a non-zero exit code ($UnityExitCode)."
-            Write-Host "          A build error may have occurred. See unity_build.log for details."
+            Write-Host "WARNING: Unity import process returned a non-zero exit code ($UnityExitCode)."
+            Write-Host "          See unity_import.log for details."
           }
           Write-Host "::endgroup::"
           exit $UnityExitCode
         shell: powershell
 
-      - name: Extract Unity Build Log Summary
+      - name: Execute Unity - Build
+        run: |
+          Write-Host "::group::Start Unity Build Process"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for build..."
+          Write-Host "Execution Method: KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
+          Write-Host "Log output: unity_build.log"
+          Write-Host ""
+
+          $TimeoutSec = 5400
+          Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
+          Write-Host ""
+
+          $Args = @(
+            "-batchmode",
+            "-projectPath", "${{ github.workspace }}",
+            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-logFile", "unity_build.log"
+          )
+          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+
+          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
+            Write-Host ""
+            Write-Host "ERROR: Unity build timed out after $TimeoutSec seconds."
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 124
+          }
+
+          $UnityExitCode = $UnityProcess.ExitCode
+          Write-Host ""
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity build process exited with code $UnityExitCode."
+          
+          if ($UnityExitCode -eq 0) {
+            Write-Host "OK: Unity build completed successfully."
+          } else {
+            Write-Host "WARNING: Unity build process returned a non-zero exit code ($UnityExitCode)."
+            Write-Host "          See unity_build.log for details."
+          }
+          Write-Host "::endgroup::"
+          exit $UnityExitCode
+        shell: powershell
+
+      - name: Extract Unity Log Summary
         if: always()
         run: |
+          Write-Host "::group::Unity Import Log Summary"
+          if (Test-Path "unity_import.log") {
+            Write-Host "INFO: Extracting key information from unity_import.log..."
+            Write-Host ""
+          
+            # Count errors and warnings
+            $Errors = Select-String -Path "unity_import.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+            $Warnings = Select-String -Path "unity_import.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+          
+            Write-Host "Detected Errors: $Errors"
+            Write-Host "Detected Warnings: $Warnings"
+            Write-Host ""
+          
+            # Output the last 50 lines (final status)
+            Write-Host "[Last 50 lines of unity_import.log:]"
+            Get-Content -Path "unity_import.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "WARNING: unity_import.log was not found."
+          }
+          Write-Host "::endgroup::"
+
           Write-Host "::group::Unity Build Log Summary"
           if (Test-Path "unity_build.log") {
-            Write-Host "INFO: unity_build.log Extracting key information from..."
+            Write-Host "INFO: Extracting key information from unity_build.log..."
             Write-Host ""
           
             # Count errors and warnings
@@ -205,7 +283,7 @@ jobs:
             Write-Host ""
           
             # Output the last 50 lines (final status)
-            Write-Host "[unity_build.log Last 50 lines of:]"
+            Write-Host "[Last 50 lines of unity_build.log:]"
             Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
           } else {
             Write-Host "WARNING: unity_build.log was not found."
@@ -214,20 +292,30 @@ jobs:
         shell: powershell
 
       - name: Upload Unity Log
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: unity-build-log
-          path: unity_build.log
+          path: |
+            unity_import.log
+            unity_build.log
 
       - name: Check Build Output
         run: |
           Write-Host "::group::Validate Build Output"
-          if (Test-Path $env:UNITY_BUILD_OUTPUT_DIR) {
-            Write-Host "OK: Build output directory found: $env:UNITY_BUILD_OUTPUT_DIR"
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          Write-Host "Raw UNITY_BUILD_OUTPUT_DIR from env: $RawOutputDir"
+          
+          # Trim quotes and resolve to absolute path
+          $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+          Write-Host "Resolved Output Path: $ResolvedOutputDir"
+          
+          if (Test-Path $ResolvedOutputDir) {
+            Write-Host "OK: Build output directory found: $ResolvedOutputDir"
             Write-Host ""
           
-            $Items = Get-ChildItem -Path $env:UNITY_BUILD_OUTPUT_DIR -Recurse -File
+            $Items = Get-ChildItem -Path $ResolvedOutputDir -Recurse -File
             $TotalSize = ($Items | Measure-Object -Property Length -Sum).Sum
           
             Write-Host "File Statistics:"
@@ -245,7 +333,13 @@ jobs:
               Write-Host "WARNING: No files found in the build output directory."
             }
           } else {
-            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+            Write-Host "ERROR: Build output directory not found: $ResolvedOutputDir"
+            Write-Host ""
+            Write-Host "=== DEBUG INFO ==="
+            Write-Host "Current Directory: $PWD"
+            Write-Host "Listing files/folders in current directory:"
+            Get-ChildItem | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Mode))" }
+            Write-Host "=================="
             Write-Host "ERROR: Build artifacts do not exist. Aborting archive process."
             Write-Host "::endgroup::"
             exit 1
@@ -256,15 +350,19 @@ jobs:
       - name: Zip Build Artifacts
         run: |
           Write-Host "::group::Archive Build Artifacts (ZIP)"
-          if (-not (Test-Path $env:UNITY_BUILD_OUTPUT_DIR)) {
-            Write-Host "ERROR: Build output directory not found: $env:UNITY_BUILD_OUTPUT_DIR"
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+          
+          if (-not (Test-Path $ResolvedOutputDir)) {
+            Write-Host "ERROR: Build output directory not found: $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
           }
           
           try {
             Write-Host "INFO: Compressing build artifacts..."
-            Compress-Archive -Path "$env:UNITY_BUILD_OUTPUT_DIR\*" -DestinationPath Builds.zip -ErrorAction Stop
+            Compress-Archive -Path "$ResolvedOutputDir\*" -DestinationPath Builds.zip -ErrorAction Stop
           
             $ZipSize = (Get-Item "Builds.zip").Length
             Write-Host "OK: Archive (Builds.zip) created successfully."
@@ -294,7 +392,7 @@ jobs:
 
       - name: Create Release and Upload Asset
         id: create_release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
@@ -342,7 +440,7 @@ jobs:
           
           try {
               $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
-              Write-Host "OK: BUILD_VERSION   $NextCounter updated successfully."
+              Write-Host "OK: BUILD_VERSION updated to $NextCounter successfully."
           } catch {
               Write-Host "ERROR: BUILD_VERSION Failed to update: $_"
               Write-Host "::endgroup::"
@@ -360,7 +458,7 @@ jobs:
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
-            Write-Host "     Artifact: Builds.zip  アップロードしました。"
+            Write-Host "     Artifact: Builds.zip has been uploaded."
           } else {
             Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }

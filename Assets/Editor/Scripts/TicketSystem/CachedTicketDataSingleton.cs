@@ -14,7 +14,7 @@ namespace KillChord.Editor.TicketSystem
         /// キャッシュされたチケットデータをすべて取得する。
         /// </summary>
         /// <returns></returns>
-        public List<TicketData> GetAll()
+        public IReadOnlyList<TicketData> GetAll()
         {
             return _cachedTickets;
         }

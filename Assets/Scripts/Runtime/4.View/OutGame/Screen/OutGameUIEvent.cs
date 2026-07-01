@@ -12,6 +12,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
     [DefaultExecutionOrder(-200)]
     public class OutGameUIEvent : MonoBehaviour
     {
+        /// <summary> タイトル画面を表示するイベント。 </summary>
+        public Action OnShowTitleScreen;
+
+        /// <summary> メニュー画面を表示するイベント。 </summary>
+        public Action OnShowMenuScreen;
+
+        /// <summary> オプション画面を表示するイベント。 </summary>
+        public Action OnShowOptionsScreen;
+
+        /// <summary> クレジット画面を表示するイベント。 </summary>
+        public Action OnShowCreditScreen;
+
+        /// <summary> データリセットボタンが押されたときのイベント。 </summary>
+        public Action OnDataResetButtonClicked;
+
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
@@ -69,6 +84,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
+        /// <summary> スキル編成が保存されたときのイベント。 </summary>
+        public Action OnSkillBuildSaved;
+
+        /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
+        public Action OnSkillLevelUp;
+
         /// <summary> 
         ///     インゲームへ遷移するイベント。
         ///     引数は遷移先のシーン名。
@@ -81,7 +102,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public void RegisterOutGameUIEvent()
         {
             if (_isRegistered) { return; }
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
         }
 

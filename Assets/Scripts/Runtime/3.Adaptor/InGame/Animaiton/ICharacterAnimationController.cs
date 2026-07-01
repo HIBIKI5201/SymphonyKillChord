@@ -22,5 +22,12 @@ namespace KillChord.Runtime.Adaptor
 
         /// <summary> イベント入力が発生したことを通知する。 </summary>
         void TriggerOneShot(int index);
+
+        /// <summary>
+        ///    ワンショットアニメーションの再生時間を取得する。
+        /// </summary>
+        /// <param name="index"> ワンショットアニメーションのインデックス。 </param>
+        /// <returns> ワンショットアニメーションの再生時間（秒）。 </returns>
+        float GetOneShotAnimationLength(int index);
     }
 }

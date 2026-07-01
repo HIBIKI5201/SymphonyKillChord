@@ -50,6 +50,9 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> キャラクターが対象にダメージを与えた時に発火するイベント。 </summary>
         public event Action<Damage> OnSetDamage;
 
+        /// <summary> 回避成功時に発火するイベント。 </summary>
+        public event Action<Damage> OnDamageAvoided;
+
         /// <summary> キャラクター名を取得する。 </summary>
         public CharacterName Name => _name;
 
@@ -99,6 +102,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
             if (_isInvincible)
             {
+                OnDamageAvoided?.Invoke(damage);
                 return;
             }
 

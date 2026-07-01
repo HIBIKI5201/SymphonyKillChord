@@ -1,0 +1,10 @@
+:root {
+}
+
+.title-option-button {
+    width: 15%;
+    align-self: center;
+    -unity-font-style: bold;
+    font-size: 36px;
+    aspect-ratio: 2;
+}

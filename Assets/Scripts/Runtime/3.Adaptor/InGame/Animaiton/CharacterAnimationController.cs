@@ -16,12 +16,13 @@ namespace KillChord.Runtime.Adaptor
         /// <param name="animApplication"> アニメーション処理を委譲するApplication。 </param>
         /// <param name="musicSyncState"> BPM情報を持つ音楽同期状態。 </param>
         /// <param name="clipCount"> アニメーションクリップの数。 </param>
-        public CharacterAnimationController(ICharacterAnimationApplication animApplication, MusicSyncState musicSyncState, int clipCount)
+        public CharacterAnimationController(ICharacterAnimationApplication animApplication, MusicSyncState musicSyncState, int clipCount, float[] durations)
         {
             _animApplication = animApplication ?? throw new ArgumentNullException(nameof(animApplication));
             _musicSyncState = musicSyncState ?? throw new ArgumentNullException(nameof(musicSyncState));
             int baseCount = Enum.GetValues(typeof(CharacterAnimationState)).Length;
             _weights = new float[Mathf.Max(clipCount, baseCount)];
+            _durations = durations;
         }
 
         /// <summary> 入力が発生したことを通知するイベント。 </summary>
@@ -58,8 +59,23 @@ namespace KillChord.Runtime.Adaptor
             OnOneShotRequested?.Invoke(index);
         }
 
+        /// <summary>
+        ///    ワンショットアニメーションの再生時間を取得する。
+        /// </summary>
+        /// <param name="index"> ワンショットアニメーションのインデックス。 </param>
+        /// <returns> ワンショットアニメーションの再生時間（秒）。 </returns>
+        public float GetOneShotAnimationLength(int index)
+        {
+            return _durations != null
+                && index >= 0
+                && index < _durations.Length
+                ? _durations[index]
+                : 0f;
+        }
+
         private readonly ICharacterAnimationApplication _animApplication;
         private readonly MusicSyncState _musicSyncState;
         private readonly float[] _weights;
+        private readonly float[] _durations;
     }
 }

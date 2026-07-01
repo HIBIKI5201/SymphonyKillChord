@@ -24,6 +24,46 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
+        ///    タイトル画面を表示します。
+        /// </summary>
+        public void ShowTitle()
+        {
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Title));
+        }
+
+        /// <summary>
+        ///    メニュー画面を表示します。
+        /// </summary>
+        public void ShowMenu()
+        {
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Menu));
+        }
+
+        /// <summary>
+        ///     オプション画面を表示します。
+        /// </summary>
+        public void ShowOptions()
+        {
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Options));
+        }
+
+        /// <summary>
+        ///    クレジット画面を表示します。
+        /// </summary>
+        public void ShowCredit()
+        {
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Credit));
+        }
+
+        /// <summary>
+        ///    現在画面を即座に閉じます。
+        /// </summary>
+        public void CloseCurrentImmediately()
+        {
+            _closeCurrentScreenUseCase.Execute();
+        }
+
+        /// <summary>
         ///     ホーム画面を表示します。
         /// </summary>
         public async Task ShowHome(CancellationToken token)

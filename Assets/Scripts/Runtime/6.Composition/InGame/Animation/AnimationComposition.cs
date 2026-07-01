@@ -51,6 +51,14 @@ namespace KillChord.Runtime.Composition
                 combinedClips.Add(baseClips[i]);
             }
 
+            float[] clipDurations = new float[combinedClips.Count];
+            for (int i = 0; i < combinedClips.Count; i++)
+            {
+                clipDurations[i] = combinedClips[i] != null
+                    ? combinedClips[i].length
+                    : 0f;
+            }
+
             // AssetからOneShotアニメーションを取得して、Domain enumに対応するAnimationClipリストに追加。
             if (asset != null && asset.Entries != null)
             {
@@ -83,7 +91,7 @@ namespace KillChord.Runtime.Composition
             ICharacterAnimationApplication application = new CharacterAnimationApplication();
 
             // Adaptor層を作成
-            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState, combinedClips.Count);
+            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState, combinedClips.Count, clipDurations);
 
             // Viewを初期化
             view.Initialize(controller, combinedClips.ToArray());
