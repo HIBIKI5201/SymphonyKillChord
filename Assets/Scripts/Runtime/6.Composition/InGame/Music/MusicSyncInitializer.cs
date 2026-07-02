@@ -1,10 +1,13 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -44,6 +47,27 @@ namespace KillChord.Runtime.Composition.InGame.Music
         }
 
         /// <summary>
+        ///     装備スキルに応じたBGMのキュー名を解決して保持する。
+        ///     カタログが未設定の場合は解決を行わず、テスト用キューへフォールバックする。
+        /// </summary>
+        /// <param name="token"> キャンセルトークン。 </param>
+        public async ValueTask PrepareBgmAsync(CancellationToken token)
+        {
+            if (_skillBgmCatalog == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(MusicSyncInitializer)}] {nameof(SkillBgmCatalogAsset)}が未設定です。テスト用キューを使用します。",
+                    this);
+                return;
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            SkillBgmResolveService resolveService = new SkillBgmResolveService(_skillBgmCatalog.ToDomain());
+            _bgmCue = await resolveService.ResolveCueAsync();
+        }
+
+        /// <summary>
         ///　    ゲームプレイを開始し、音楽同期機能を有効にする。
         /// </summary>
         public void StartGameplay()
@@ -53,7 +77,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            _musicPlayer.MusicVM.UpdateMusicCue(_testCue);
+            // 装備スキルから解決したキューを優先し、未解決の場合はテスト用キューを使用する
+            string cueName = string.IsNullOrEmpty(_bgmCue) ? _testCue : _bgmCue;
+            _musicPlayer.MusicVM.UpdateMusicCue(cueName);
         }
 
         /// <summary>
@@ -71,6 +97,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
         [Tooltip("音楽同期View。")]
         [SerializeField] private MusicSyncView _musicSyncView;
+        [Tooltip("装備スキルとBGMの対応カタログ。")]
+        [SerializeField] private SkillBgmCatalogAsset _skillBgmCatalog;
         [Tooltip("テスト用のキュー名。")]
         [SerializeField] private string _testCue;
         [Tooltip("テスト用のBPM。")]
@@ -79,6 +107,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [SerializeField] private float _justTimingThreshold;
 
         private MusicPlayer _musicPlayer;
+        private string _bgmCue;
         private bool _isRegistered;
 
         private void OnDestroy()

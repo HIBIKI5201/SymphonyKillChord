@@ -234,6 +234,9 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
 
+            // 装備スキルに応じたBGMのキューを解決して保持する
+            await _musicSyncInitializer.PrepareBgmAsync(destroyCancellationToken);
+
             if (!_inGameMissionInitializer.TryInitialize(out _missionruntimeService))
             {
                 Debug.LogError("[IngameComposition] " + "ミッションシステムの初期化に失敗しました。", this);
