@@ -109,6 +109,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 sceneName,
                 CreateProgressCallback(progress),
                 LoadSceneMode.Additive,
+                0,
                 cancellationToken);
 
             if (!loadSuccess)
@@ -331,6 +332,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     sceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
+                    0,
                     cancellationToken);
 
             if (!loadSuccess)
