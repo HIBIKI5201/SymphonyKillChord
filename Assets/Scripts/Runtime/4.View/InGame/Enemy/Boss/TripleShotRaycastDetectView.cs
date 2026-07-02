@@ -1,16 +1,17 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
-    /// 敵の攻撃用レイキャストと警告ライン表示を担当するViewです。
+    ///     ボスの3方向攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
-    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
+    public partial class TripleShotRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 
         /// <summary>
-        /// レイキャスト対象と警告ラインの初期設定を行います。
+        ///     レイキャスト対象と警告ラインの初期設定を行います。
         /// </summary>
         public void Initialize(Transform targetTransform, float attackRange)
         {
@@ -18,28 +19,31 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _targetTransform = targetTransform;
             _attackRange = attackRange;
 
-            if (!TryGetComponent(out _lineRenderer))
+            if (_lineRenderers == null || _lineRenderers.Length != AIM_LINE_COUNT)
             {
-                Debug.LogError("[EnemyRaycastDetectView] Failed to find LineRenderer.");
+                Debug.LogError($"[TripleShotRaycastDetectView] LineRendererの数が不正:{_lineRenderers.Length}.");
                 return;
             }
 
             if (targetTransform == null)
             {
-                Debug.LogError("[EnemyRaycastDetectView] Target transform is null.");
+                Debug.LogError("[TripleShotRaycastDetectView] Target transform is null.");
                 return;
             }
 
             if (!targetTransform.TryGetComponent(out _targetCollider))
             {
-                Debug.LogError("[EnemyRaycastDetectView] Target collider is missing.");
+                Debug.LogError("[TripleShotRaycastDetectView] Target collider is missing.");
                 return;
             }
 
-            _lineRenderer.enabled = false;
-            _lineRenderer.positionCount = 2;
-            _lineRenderer.useWorldSpace = true;
-            HideWarningInternal();
+            foreach(LineRenderer lineRenderer in _lineRenderers)
+            {
+                lineRenderer.enabled = false;
+                lineRenderer.positionCount = 2;
+                lineRenderer.useWorldSpace = true;
+                HideWarningInternal();
+            }
 
 #if UNITY_EDITOR
             _initializedFlg = true;
@@ -47,13 +51,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 現在の敵位置からの攻撃レイがターゲットに届くかを返します。
+        ///     現在の敵位置からの攻撃レイがターゲットに届くかを返します。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
 
         /// <summary>
-        /// 指定位置からの自由なレイがターゲットに届くかを返します。
-        /// 探索用途を想定しており、固定済みの警告方向は使用しません。
+        ///     指定位置からの自由なレイがターゲットに届くかを返します。
+        ///     探索用途を想定しており、固定済みの警告方向は使用しません。
         /// </summary>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
@@ -61,7 +65,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 警告ラインのターゲット追従を開始します。
+        ///     警告ラインのターゲット追従を開始します。
         /// </summary>
         public void StartTrackingWarning()
         {
@@ -73,7 +77,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 現在の警告方向を固定し、ラインの長さを維持します。
+        ///     現在の警告方向を固定し、ラインの長さを維持します。
         /// </summary>
         public void LockWarningDirection()
         {
@@ -91,18 +95,27 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 警告ラインを非表示にし、固定方向を解除します。
+        ///     警告ラインを非表示にし、固定方向を解除します。
         /// </summary>
         public void HideWarning()
         {
             HideWarningInternal();
         }
 
+        // 攻撃方向数に関する定数
+        private const int AIM_LINE_COUNT = 3;
+        private const int AIM_LINE_INDEX_LEFT = 0;
+        private const int AIM_LINE_INDEX_CENTER = 1;
+        private const int AIM_LINE_INDEX_RIGHT = 2;
+
         [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-        private LineRenderer _lineRenderer;
+        [SerializeField, Tooltip("振り角の角度")]
+        private float SpreadAngleDegrees = 45f;
+        [SerializeField, Tooltip("各攻撃の警告ライン用LineRenderer")]
+        private LineRenderer[] _lineRenderers;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;
@@ -117,7 +130,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 #endif
 
         /// <summary>
-        /// 現在の敵位置からの攻撃レイがターゲットに命中するかを判定します。
+        ///     現在の敵位置からの攻撃レイがターゲットに命中するかを判定します。
         /// </summary>
         private bool CheckCurrentAttackRaycastHitTarget()
         {
@@ -125,32 +138,55 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 指定位置から飛ばしたレイが最初にターゲットへ到達するかを判定します。
+        ///     指定位置から飛ばしたレイが最初にターゲットへ到達するかを判定します。
         /// </summary>
         private bool CheckRaycastHitTarget(Vector3 sourcePosition)
         {
             if (!IsReadyForRaycast())
             {
-                Debug.LogError("[EnemyRaycastDetectView] Raycast is not initialized.");
+                Debug.LogError("[TripleShotRaycastDetectView] Raycast is not initialized.");
                 return false;
             }
 
-            int hitCount = CastAndGetHitCount(sourcePosition);
-            if (hitCount <= 0)
+            int hitCount = CastAndGetHitCount(sourcePosition, -SpreadAngleDegrees);
+            if (hitCount > 0)
             {
-                return false;
+                RaycastHit hit = FindClosestHit(hitCount);
+                if(hit.colliderEntityId == _targetCollider.GetEntityId())
+                {
+                    return true;
+                }
             }
 
-            RaycastHit hit = FindClosestHit(hitCount);
-            return hit.colliderEntityId == _targetCollider.GetEntityId();
+            hitCount = CastAndGetHitCount(sourcePosition, 0);
+            if (hitCount > 0)
+            {
+                RaycastHit hit = FindClosestHit(hitCount);
+                if (hit.colliderEntityId == _targetCollider.GetEntityId())
+                {
+                    return true;
+                }
+            }
+
+            hitCount = CastAndGetHitCount(sourcePosition, SpreadAngleDegrees);
+            if (hitCount > 0)
+            {
+                RaycastHit hit = FindClosestHit(hitCount);
+                if (hit.colliderEntityId == _targetCollider.GetEntityId())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// 指定位置からレイを飛ばし、記録されたヒット数を返します。
+        ///     指定位置からレイを飛ばし、記録されたヒット数を返します。
         /// </summary>
-        private int CastAndGetHitCount(Vector3 sourcePosition)
+        private int CastAndGetHitCount(Vector3 sourcePosition, float spredAngleDegrees)
         {
-            Ray ray = CreateRay(sourcePosition);
+            Ray ray = CreateRay(sourcePosition, spredAngleDegrees);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
                 return 0;
@@ -160,7 +196,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 現在のレイキャスト結果から最も近いヒットを取得します。
+        ///     現在のレイキャスト結果から最も近いヒットを取得します。
         /// </summary>
         private RaycastHit FindClosestHit(int hitCount)
         {
@@ -186,42 +222,59 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// ターゲット追従中は毎フレーム警告ラインを更新します。
+        ///     ターゲット追従中は毎フレーム警告ラインを更新します。
         /// </summary>
         private void LateUpdate()
         {
-            if (_warningDisplayState != WarningDisplayState.Tracking) return;
-            if (!IsReadyForLineUpdate()) return;
-
+            if (_warningDisplayState != WarningDisplayState.Tracking) {
+                return; 
+            }
+            if (!IsReadyForLineUpdate())
+            {
+                return;
+            }
             UpdateWarningLine();
         }
 
         /// <summary>
-        /// 現在のレイ情報をもとに警告ラインの位置と色を更新します。
+        ///     現在のレイ情報をもとに警告ラインの位置と色を更新します。
         /// </summary>
         private void UpdateWarningLine()
         {
-            Ray ray = CreateRay(transform.position);
+            Ray ray = CreateRay(transform.position, 0);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
-                _lineRenderer.enabled = false;
+                foreach (LineRenderer renderer in _lineRenderers)
+                {
+                    renderer.enabled = false;
+                }
                 return;
             }
 
-            _lineRenderer.enabled = true;
-            _lineRenderer.material.SetColor("_EmissionColor", _currentLineColor);
-            _lineRenderer.SetPosition(0, ray.origin);
-            _lineRenderer.SetPosition(1, ray.origin + ray.direction * _attackRange);
+            _lineRenderers[AIM_LINE_INDEX_LEFT].enabled = true;
+            _lineRenderers[AIM_LINE_INDEX_LEFT].material.SetColor("_EmissionColor", _currentLineColor);
+            _lineRenderers[AIM_LINE_INDEX_LEFT].SetPosition(0, ray.origin);
+            _lineRenderers[AIM_LINE_INDEX_LEFT].SetPosition(1, ray.origin + (Quaternion.Euler(0, -SpreadAngleDegrees, 0) * ray.direction) * _attackRange);
+
+            _lineRenderers[AIM_LINE_INDEX_CENTER].enabled = true;
+            _lineRenderers[AIM_LINE_INDEX_CENTER].material.SetColor("_EmissionColor", _currentLineColor);
+            _lineRenderers[AIM_LINE_INDEX_CENTER].SetPosition(0, ray.origin);
+            _lineRenderers[AIM_LINE_INDEX_CENTER].SetPosition(1, ray.origin + ray.direction * _attackRange);
+
+            _lineRenderers[AIM_LINE_INDEX_RIGHT].enabled = true;
+            _lineRenderers[AIM_LINE_INDEX_RIGHT].material.SetColor("_EmissionColor", _currentLineColor);
+            _lineRenderers[AIM_LINE_INDEX_RIGHT].SetPosition(0, ray.origin);
+            _lineRenderers[AIM_LINE_INDEX_RIGHT].SetPosition(1, ray.origin + (Quaternion.Euler(0, SpreadAngleDegrees, 0) * ray.direction) * _attackRange);
         }
 
         /// <summary>
-        /// 現在のターゲット位置、または固定方向に向かうレイを生成します。
+        ///     現在のターゲット位置、または固定方向に向かうレイを生成します。
         /// </summary>
-        private Ray CreateRay(Vector3 sourcePosition)
+        private Ray CreateRay(Vector3 sourcePosition, float spredAngleDegrees)
         {
             if (ShouldUseLockedDirection(sourcePosition))
             {
-                return new Ray(sourcePosition, _lockedRayDirection);
+                return new Ray(sourcePosition, Quaternion.Euler(0, spredAngleDegrees, 0) * _lockedRayDirection);
             }
 
             Vector3 targetPoint = GetRayTargetPoint(sourcePosition);
@@ -231,11 +284,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return new Ray(sourcePosition, Vector3.zero);
             }
 
-            return new Ray(sourcePosition, direction.normalized);
+            return new Ray(sourcePosition, Quaternion.Euler(0, spredAngleDegrees, 0) * direction.normalized);
         }
 
         /// <summary>
-        /// 警告ラインが固定済み方向を再利用すべきかを返します。
+        ///     警告ラインが固定済み方向を再利用すべきかを返します。
         /// </summary>
         private bool ShouldUseLockedDirection(Vector3 sourcePosition)
         {
@@ -244,7 +297,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 警告ラインを固定表示するために現在のレイ方向を保存します。
+        ///     警告ラインを固定表示するために現在のレイ方向を保存します。
         /// </summary>
         private bool FreezeCurrentRayDirection()
         {
@@ -262,19 +315,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 警告ラインを非表示にし、保持している状態をリセットします。
+        ///     警告ラインを非表示にし、保持している状態をリセットします。
         /// </summary>
         private void HideWarningInternal()
         {
             _warningDisplayState = WarningDisplayState.Hidden;
             _lockedRayDirection = Vector3.zero;
 
-            if (_lineRenderer == null) return;
-            _lineRenderer.enabled = false;
+            foreach(LineRenderer renderer in _lineRenderers)
+            {
+                renderer.enabled = false;
+            }
         }
 
         /// <summary>
-        /// 指定した始点がこの敵自身の位置かを返します。
+        ///     指定した始点がこの敵自身の位置かを返します。
         /// </summary>
         private bool IsEnemyOrigin(Vector3 sourcePosition)
         {
@@ -282,7 +337,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// レイキャストに必要な参照が初期化済みかを返します。
+        ///     レイキャストに必要な参照が初期化済みかを返します。
         /// </summary>
         private bool IsReadyForRaycast()
         {
@@ -290,15 +345,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 警告ラインを更新できる状態かを返します。
+        ///     警告ラインを更新できる状態かを返します。
         /// </summary>
         private bool IsReadyForLineUpdate()
         {
-            return IsReadyForRaycast() && _lineRenderer != null ;
+            return IsReadyForRaycast() && _lineRenderers != null && _lineRenderers.Length == AIM_LINE_COUNT;
         }
 
         /// <summary>
-        /// レイの到達先として使うターゲットコライダー上の最近接点を取得します。
+        ///     レイの到達先として使うターゲットコライダー上の最近接点を取得します。
         /// </summary>
         private Vector3 GetRayTargetPoint(Vector3 sourcePosition)
         {
@@ -330,7 +385,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 #endif
 
         /// <summary>
-        /// このコンポーネントが無効化された際に警告ラインを非表示にします。
+        ///     このコンポーネントが無効化された際に警告ラインを非表示にします。
         /// </summary>
         private void OnDisable()
         {
