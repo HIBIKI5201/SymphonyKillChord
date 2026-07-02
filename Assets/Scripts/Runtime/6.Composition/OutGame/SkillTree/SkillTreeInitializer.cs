@@ -2,8 +2,10 @@ using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
@@ -37,6 +40,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Header("デバッグ用")]
         [SerializeField]
         private SkillTreeTestInputData _inputData;
+        [SerializeField]
+        private bool _isDebugMode = false;
 
         private VisualElement _rootElement;
         private VisualElement _skillDetailRoot;
@@ -52,6 +57,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillTreeController _skillTreeController;
         private SkillDetailPresenter _skillDetailPresenter;
         private PlayerStatusPresenter _playerStatusPresenter;
+
+        private SkillUnlockData _skillUnlockData;
 
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
@@ -73,9 +80,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        private void Awake()
+        private async void Awake()
         {
-            Initialize();
+            await Initialize();
         }
 
         /// <summary>
@@ -99,7 +106,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _cts = null;
         }
 
-        private void Initialize()
+        private async Task Initialize()
         {
             _rootElement = _uiDocument.rootVisualElement;
             _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
@@ -116,6 +123,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _renderTexture = _videoPlayer.targetTexture;
             _previewVideoRoot.style.backgroundImage = Background.FromRenderTexture(_renderTexture);
 
+            // セーブデータをロードして、スキル解放状態を取得する
+            var savedataSystem = ServiceLocator.GetInstance<SavedataSystem>();
+            var saveData = await savedataSystem.LoadAsync<SaveData>();
+            _skillUnlockData = saveData.SkillUnlock;
+
             BuildSkillNodes();
             BuildNodeConns();
             BuildConnBinds();
@@ -128,8 +140,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
 
-            // TODO 今後、所持ポイント、解放済みスキルなどはセーブデータから取得するようにする
-            SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_inputData.currentPoints, _inputData.UnlockedSkillIds);
+            if (_isDebugMode)
+            {
+                _skillUnlockData.SetResearchPoint(_skillUnlockData.ResearchPoint == 0 ? _inputData.currentPoints : _skillUnlockData.ResearchPoint);
+                _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillIds.Length == 0
+                    ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillIds);
+            }
+
+            SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds);
 
             SkillTreeService skillTreeService = new SkillTreeService(_skillNodeEntities);
 
@@ -139,7 +157,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillTreeController = new SkillTreeController(_skillDetailScreenView,
                 _skillDetailPresenter,
                 _currentPointsLabel,
-                skillTreeService, 
+                skillTreeService,
                 _playerStatusPresenter,
                 _previewVideoScreenView,
                 _previewVideoScreenView,
@@ -229,7 +247,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="entity"></param>
         private void SetNodeUnlockState(SkillNodeView view, SkillNodeEntity entity)
         {
-            if (_inputData.UnlockedSkillIds.Contains(entity.SkillNodeIdVO.Id)) {
+            if (_skillUnlockData.UnlockedSkillNodeIds.Contains(entity.SkillNodeIdVO.Id))
+            {
                 view.SetUnlocked();
                 entity.Unlock();
             }
@@ -249,9 +268,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _unlockPhases.Add(phaseBindData.RequiredSkillNodeId, phaseRoot);
                 phaseRoot.visible = false;
             }
-            for(int i = 0; i < _inputData.UnlockedSkillIds.Length; i++)
+            for (int i = 0; i < _skillUnlockData.UnlockedSkillNodeIds.Length; i++)
             {
-                SetUnlockPhaseState(_inputData.UnlockedSkillIds[i]);
+                SetUnlockPhaseState(_skillUnlockData.UnlockedSkillNodeIds[i]);
             }
         }
 
@@ -262,7 +281,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void SetUnlockPhaseState(int nodeId)
         {
             string phaseName;
-            if(_skillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out phaseName))
+            if (_skillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out phaseName))
             {
                 _rootElement.Q(name: phaseName).visible = true;
             }
@@ -305,7 +324,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             _previewVideoScreenView.Dispose();
             _skillDetailScreenView.Dispose();
-            foreach(int key in _skillNodeViews.Keys)
+            foreach (int key in _skillNodeViews.Keys)
             {
                 ((SkillNodeView)_skillNodeViews[key]).Dispose();
             }
