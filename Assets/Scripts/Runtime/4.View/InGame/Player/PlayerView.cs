@@ -72,7 +72,7 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-
+            PlayerAttackController?.UpdateAttackCooldown(Time.deltaTime);
             UpdateMovement();
         }
 
@@ -240,7 +240,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (PlayerAttackController.IsAttacking)
+            if (PlayerAttackController.IsAttacking || PlayerAttackController.IsAttackCooldown)
             {
                 return;
             }

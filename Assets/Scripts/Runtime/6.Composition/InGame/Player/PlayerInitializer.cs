@@ -133,7 +133,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
-            
+
             var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
@@ -180,7 +180,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed, (int)_playerEntity.BaseDamage.Value);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, musicSyncState, (float)parameter.AttackRotationSpeed, (float)parameter.AttackCooldown.Value, (int)_playerEntity.BaseDamage.Value);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
@@ -190,10 +190,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             PlayerDodgeMovementApplication dodge = new(parameter);
             dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
-            dodge.OnDodgeEnded += () =>
+            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+
+            _characterAnimationView.OnOneShotEnded += index =>
             {
-                _playerEntity.SetInvincible(false);
-                playerAttackController.StartAttackInterval();
+                if (index == animationIndices.Dodge)
+                {
+                    playerAttackController.StartAttackCooldown();
+                }
             };
 
             PlayerMovementApplication move = new(parameter);

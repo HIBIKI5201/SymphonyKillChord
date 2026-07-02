@@ -25,6 +25,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
         [SerializeField, Tooltip("回避クールダウン時間。")]
         private float _dodgeCooldown;
 
+        [SerializeField, Tooltip("攻撃クールダウン時間。")]
+        private float _attackCooldown;
+
         /// <summary> ScriptableObjectからドメインパラメータへ変換する。 </summary>
         public PlayerMoveParameter ToDomain()
             => new PlayerMoveParameter(
@@ -32,7 +35,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
                 new AttackRotationSpeed(_attackRotationSpeed),
                 new DodgeSpeed(_dodgeSpeed),
                 new DodgeDuration(_dodgeDuration),
-                new DodgeCooldown(_dodgeCooldown)
+                new DodgeCooldown(_dodgeCooldown),
+                new AttackCooldown(_attackCooldown)
             );
     }
 }
