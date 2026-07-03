@@ -11,5 +11,17 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     {
         public BossAttackEntryDefinition[] AttackEntries => _attackEntries;
         [SerializeField] private BossAttackEntryDefinition[] _attackEntries;
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (_attackEntries == null) return;
+            for (int i = 0; i < _attackEntries.Length; i++)
+            {
+                if (_attackEntries[i] == null)
+                    Debug.LogWarning($"{name}: _attackEntries[{i}] が未設定です。");
+            }
+        }
+#endif
     }
 }

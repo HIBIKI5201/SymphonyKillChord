@@ -80,6 +80,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public void Deactivate()
         {
             if (!_isActive) return;
+            _entity.OnHealthChanged -= HandleHpChange;
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
@@ -148,12 +149,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         public void Dispose()
         {
-            _entity.OnHealthChanged -= HandleHpChange;
-            _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
-            _reservationUsecase.Dispose();
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
-            _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
-            _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
+            Deactivate();
         }
 
         /// <summary>
@@ -173,7 +169,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _current?.Controller.ExecuteAttack();
             _enemyBattleState.AttackExcuted();
-            if (_raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
+            if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
             {
                 view.HideWarning();
             }
@@ -182,7 +178,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private void Handle2BeatBefore()
         {
-            if (_raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
+            if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
             {
                 view.StartTrackingWarning();
             }
@@ -191,8 +187,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private void Handle1BeatBefore()
         {
-            if (_raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
-            {
+            if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))            {
                 view.LockWarningDirection();
             }
             On1BeatBefore?.Invoke();
