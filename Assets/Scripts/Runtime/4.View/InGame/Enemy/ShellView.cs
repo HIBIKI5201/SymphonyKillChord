@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using System;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
@@ -24,10 +25,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _shellSpecPresenter = shellSpecPresenter;
             _dedonateCallback = dedonateCallback;
             _overlapResults = new Collider[1];
+            _material = new Material(_indicator.material);
+            _indicator.material = _material;
 
             // TODO 一時的な攻撃予兆表示。今後素材を差し替える
             ChangeShellColor(ShellColor.Green);
-            _indicator.transform.localScale = new Vector3(_shellSpecPresenter.ExplosionRadius * 2, _indicator.transform.localScale.y, _shellSpecPresenter.ExplosionRadius * 2);
+            _indicator.size = new Vector3(_shellSpecPresenter.ExplosionRadius * 2, _shellSpecPresenter.ExplosionRadius * 2, 2);
         }
 
         /// <summary>
@@ -64,16 +67,23 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         public void ChangeShellColor(ShellColor color)
         {
-            Color unityColor = color switch
+            /*Color unityColor = color switch
             {
                 ShellColor.Red => Color.red,
                 ShellColor.Blue => Color.blue,
                 ShellColor.Green => Color.green,
                 ShellColor.Yellow => Color.yellow,
                 _ => Color.white
-            };
-            _indicator.material.color = new Color(unityColor.r, unityColor.g, unityColor.b, 1f);
-            Debug.Log($"[ShellView] 砲弾の色を{color}に変更しました。");
+            };*/
+            _material.SetFloat("_Circle", color switch
+            {
+                ShellColor.Red => 1f,
+                ShellColor.Blue => 0f,
+                ShellColor.Green => 0.33f,
+                ShellColor.Yellow => 0.66f,
+                _ => 0f
+            });
+            //Debug.Log($"[ShellView] 砲弾の色を{color}に変更しました。");
         }
 
         /// <summary>
@@ -89,8 +99,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("ダメージ判定のレイヤー")]
         private LayerMask _damageLayer;
         [SerializeField, Tooltip("爆発範囲表示用")]
-        private Renderer _indicator;
+        private DecalProjector _indicator;
 
+        private Material _material;
         private Transform _targetTransform;
         private Collider[] _overlapResults;
         private ShellSpecPresenter _shellSpecPresenter;
