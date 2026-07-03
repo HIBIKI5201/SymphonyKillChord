@@ -50,13 +50,29 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             )
         {
             if (_view == null)
+            {
                 Debug.LogError($"{nameof(BossMoveView)}の参照がありません。");
+                return;
+            }
+                
             if (_healthView == null)
+            {
                 Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
+                return;
+            }
+                
             if (_raycastView == null)
+            {
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
+                return;
+            }
+                
             if (_attackPositionSearchView == null)
+            {
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+                return;
+            }
+                
             if (_attackEntryRepo?.AttackEntries == null || _attackEntryRepo.AttackEntries.Length == 0)
             {
                 Debug.LogError("攻撃エントリ(_attackEntryRepo)が設定されていません。");
@@ -89,7 +105,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // UseCase
             EnemyMoveUsecase moveUsecase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
-            EnemyTripleShotAttackUsecase tripleShotAttackUsecase = new EnemyTripleShotAttackUsecase(raycastDetectService);
+            EnemyTripleShotAttackUsecase tripleShotAttackUsecase = new EnemyTripleShotAttackUsecase(tripleRaycastDetectService);
             BossAttackReservationUsecase reservationUsecase = new BossAttackReservationUsecase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
@@ -124,11 +140,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 // 通常銃撃と3方向攻撃のRaycastViewを保持する
                 if (controller is EnemyInfantryAttackController)
                 {
-                    raycastViews.Add(typeof(EnemyInfantryAttackController), _raycastView);
+                    raycastViews[typeof(EnemyInfantryAttackController)] = _raycastView;
                 }
                 if(controller is EnemyTripleShotAttackController)
                 {
-                    raycastViews.Add(typeof(EnemyTripleShotAttackController), _tripleShotRaycastView);
+                    raycastViews[typeof(EnemyTripleShotAttackController)] = _tripleShotRaycastView;
                 }
 
                 patterns.Add(new BossAttackPattern(definition, musicSpec, controller));
@@ -299,7 +315,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private BossAttackReservationUsecase _reservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
-        private BossAttackEntry[] _attackEntries;
 
 
         /// <summary>

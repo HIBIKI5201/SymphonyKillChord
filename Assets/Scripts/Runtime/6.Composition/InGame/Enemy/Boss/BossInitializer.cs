@@ -23,20 +23,25 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         /// <param name="targetManager"></param>
         /// <param name="targetEntityRegistry"></param>
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools)
+        public bool Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools)
         {
+            if(_boss == null)
+            {
+                Debug.LogError("BossLifeCycleが見つかりません。", this);
+                return false;
+            }
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (initializer == null || initializer.MusicSyncService == null)
             {
                 Debug.LogError("MusicSyncInitializerが見つかりません。", this);
-                return;
+                return false;
             }
 
             MusicSyncView musicSyncView = FindAnyObjectByType<MusicSyncView>();
             if (musicSyncView?.MusicSyncState == null)
             {
                 Debug.LogError("MusicSyncViewが見つかりません。", this);
-                return;
+                return false;
             }
             _musicSyncService = initializer.MusicSyncService;
             _musicSyncState = musicSyncView.MusicSyncState;
@@ -46,12 +51,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (_playerInitializer == null)
             {
                 Debug.LogError("PlayerInitializerの取得に失敗しました。", this);
-                return;
+                return false;
             }
             if(enemyPools == null)
             {
                 Debug.LogError("EnemyPoolsの取得に失敗しました。", this);
-                return;
+                return false;
             }
             _enemyPools = enemyPools;
             // ボス初期化。attackControllerGenerator はボスでは未使用のため null。
@@ -66,6 +71,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyPools,
                 null);
             _initialized = true;
+            return true;
         }
 
         /// <summary>

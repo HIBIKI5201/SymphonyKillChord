@@ -21,7 +21,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             if (_lineRenderers == null || _lineRenderers.Length != AIM_LINE_COUNT)
             {
-                Debug.LogError($"[TripleShotRaycastDetectView] LineRendererの数が不正:{_lineRenderers.Length}.");
+                Debug.LogError($"[TripleShotRaycastDetectView] LineRendererの数が不正:{_lineRenderers?.Length.ToString() ?? "null"}.");
                 return;
             }
 
@@ -42,8 +42,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 lineRenderer.enabled = false;
                 lineRenderer.positionCount = 2;
                 lineRenderer.useWorldSpace = true;
-                HideWarningInternal();
             }
+            HideWarningInternal();
 
 #if UNITY_EDITOR
             _initializedFlg = true;
