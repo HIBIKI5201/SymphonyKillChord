@@ -7,7 +7,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     /// 敵の攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
-    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
+    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 
         /// <summary>
