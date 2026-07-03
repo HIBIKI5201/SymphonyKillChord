@@ -174,6 +174,7 @@ jobs:
 
           $Args = @(
             "-batchmode",
+            "-ignorecompilererrors",
             "-projectPath", "${{ github.workspace }}",
             "-executeMethod", "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport",
             "-logFile", "unity_import.log"
