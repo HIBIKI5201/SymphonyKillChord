@@ -113,6 +113,17 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""action"": ""Option"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f6e8584d-4be4-4400-8c01-0b21e30d1ee2"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Option"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -153,8 +164,30 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""121aea04-ccbe-45cf-8244-446ed9a58d9d"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""dc43d5ec-931e-4127-9deb-aec512029fc6"",
                     ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3b51fea5-0d69-4bac-8295-35d8e787622b"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -316,6 +349,17 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""9fe0a5d3-4e29-4047-b5e6-05bb94ae4d5a"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""dcf131ed-e0ee-4536-88e3-500502e29254"",
                     ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",
@@ -327,8 +371,30 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""037faa79-6d80-4697-a522-88bb94ed2ab3"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""ff6698cb-091f-49b0-a028-378202e241dc"",
                     ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LockOn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cbbfbd48-370a-46d2-80dd-c2c19c179cc5"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
