@@ -115,7 +115,7 @@ namespace DevelopProducts.Boss
                     entry.TimingData.TargetBeat);
 
                 EnemyBattleState patternState = new EnemyBattleState(_enemyEntity, targetEntity, definition);
-                EnemyAttackControllerContext ctx = new EnemyAttackControllerContext(attackUsecase, patternState, _shellSpawner);
+                EnemyAttackControllerContext ctx = new EnemyAttackControllerContext(attackUsecase, null, patternState, _shellSpawner);
                 IEnemyAttackController controller = generators[entry.Kind].Generate(ctx);
 
                 patterns.Add(new BossAttackPattern(definition, timing, controller));
