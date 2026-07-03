@@ -6,7 +6,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     /// 敵の攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
-    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
+    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-         private LineRenderer _lineRenderer;
+        private LineRenderer _lineRenderer;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;

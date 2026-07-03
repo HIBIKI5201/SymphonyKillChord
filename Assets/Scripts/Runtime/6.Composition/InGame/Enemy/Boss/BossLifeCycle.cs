@@ -5,7 +5,6 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
@@ -22,7 +21,7 @@ using Unity.Behavior;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace DevelopProducts.Boss
+namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
     ///     ボスの依存関係を構築する。
@@ -51,16 +50,32 @@ namespace DevelopProducts.Boss
             )
         {
             if (_view == null)
-                Debug.LogError($"{nameof(BossMoveView)}の参照がありません。");
-            if (_healthView == null)
-                Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
-            if (_raycastView == null)
-                Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
-            if (_attackPositionSearchView == null)
-                Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
-            if (_attackEntries == null || _attackEntries.Length == 0)
             {
-                Debug.LogError("攻撃エントリ(_attackEntries)が設定されていません。");
+                Debug.LogError($"{nameof(BossMoveView)}の参照がありません。");
+                return;
+            }
+                
+            if (_healthView == null)
+            {
+                Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
+                return;
+            }
+                
+            if (_raycastView == null)
+            {
+                Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
+                return;
+            }
+                
+            if (_attackPositionSearchView == null)
+            {
+                Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+                return;
+            }
+                
+            if (_attackEntryRepo?.AttackEntries == null || _attackEntryRepo.AttackEntries.Length == 0)
+            {
+                Debug.LogError("攻撃エントリ(_attackEntryRepo)が設定されていません。");
                 return;
             }
 
@@ -73,7 +88,9 @@ namespace DevelopProducts.Boss
 
             // 敵射線判定
             EnemyRaycastDetectController raycastController = new EnemyRaycastDetectController(_raycastView);
+            EnemyRaycastDetectController tripleShotRaycastController = new EnemyRaycastDetectController(_tripleShotRaycastView);
             EnemyRaycastDetectService raycastDetectService = new EnemyRaycastDetectService(raycastController);
+            EnemyRaycastDetectService tripleRaycastDetectService = new EnemyRaycastDetectService(tripleShotRaycastController);
 
             // 攻撃位置探索
             NearestAttackPositionSearchController attackPositionSearchController = new NearestAttackPositionSearchController(_attackPositionSearchView);
@@ -88,11 +105,12 @@ namespace DevelopProducts.Boss
             // UseCase
             EnemyMoveUsecase moveUsecase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
+            EnemyTripleShotAttackUsecase tripleShotAttackUsecase = new EnemyTripleShotAttackUsecase(tripleRaycastDetectService);
             BossAttackReservationUsecase reservationUsecase = new BossAttackReservationUsecase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
             // AI判定用（移動・硬直・範囲）の戦闘状態。先頭攻撃の定義で初期化する。
-            AttackDefinition firstDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackEntries[0].AttackIndex);
+            AttackDefinition firstDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackEntryRepo.AttackEntries[0].AttackIndex);
             EnemyBattleState aiBattleState = new EnemyBattleState(_enemyEntity, targetEntity, firstDefinition);
             _aiBattleState = aiBattleState;
 
@@ -105,24 +123,35 @@ namespace DevelopProducts.Boss
             };
 
             // 攻撃パターンを構築。各パターンは定義固定の専用 BattleState を持つ。
-            var patterns = new List<BossAttackPattern>(_attackEntries.Length);
-            foreach (BossAttackEntry entry in _attackEntries)
+            var patterns = new List<BossAttackPattern>(_attackEntryRepo.AttackEntries.Length);
+            Dictionary<Type, IRaycastDetectView> raycastViews = new();
+            foreach (BossAttackEntryDefinition entry in _attackEntryRepo.AttackEntries)
             {
                 AttackDefinition definition = _enemyEntity.CombatSpec.GetAttackDifinition(entry.AttackIndex);
-                EnemyMusicSpec timing = new EnemyMusicSpec(
-                    entry.TimingData.BarFlag,
-                    entry.TimingData.TimeSignature,
-                    entry.TimingData.TargetBeat);
+                EnemyMusicSpec musicSpec = new EnemyMusicSpec(
+                    entry.MusicData.BarFlag,
+                    entry.MusicData.TimeSignature,
+                    entry.MusicData.TargetBeat);
 
                 EnemyBattleState patternState = new EnemyBattleState(_enemyEntity, targetEntity, definition);
-                EnemyAttackControllerContext ctx = new EnemyAttackControllerContext(attackUsecase, patternState, _shellSpawner);
+                EnemyAttackControllerContext ctx = new EnemyAttackControllerContext(attackUsecase, tripleShotAttackUsecase, patternState, _shellSpawner);
                 IEnemyAttackController controller = generators[entry.Kind].Generate(ctx);
 
-                patterns.Add(new BossAttackPattern(definition, timing, controller));
+                // 通常銃撃と3方向攻撃のRaycastViewを保持する
+                if (controller is EnemyInfantryAttackController)
+                {
+                    raycastViews[typeof(EnemyInfantryAttackController)] = _raycastView;
+                }
+                if(controller is EnemyTripleShotAttackController)
+                {
+                    raycastViews[typeof(EnemyTripleShotAttackController)] = _tripleShotRaycastView;
+                }
+
+                patterns.Add(new BossAttackPattern(definition, musicSpec, controller));
             }
 
             // Controller
-            BossAIController aiController = new BossAIController(moveUsecase, reservationUsecase, aiBattleState, _bossStateFacade, patterns);
+            BossAIController aiController = new BossAIController(_enemyEntity, moveUsecase, reservationUsecase, aiBattleState, _bossStateFacade, raycastViews, patterns);
             _aiController = aiController;
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
@@ -137,9 +166,7 @@ namespace DevelopProducts.Boss
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
-            _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
-            _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
-            _aiController.OnAttack += _raycastView.HideWarning;
+            _tripleShotRaycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();
             if (_shellSpawner != null && shellPool != null)
             {
@@ -227,6 +254,7 @@ namespace DevelopProducts.Boss
 
             _bossBattleAIFacade?.StartGameplay();
             _view?.StartGameplay();
+            Activate(transform.position, null);
         }
 
         /// <summary>
@@ -252,6 +280,7 @@ namespace DevelopProducts.Boss
 
             _bossBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
+            Deactivate();
         }
 
         private System.Action _spawnerCallback;
@@ -260,14 +289,13 @@ namespace DevelopProducts.Boss
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
 
-        [Header("攻撃パターン（通常1/通常2/特殊1）")]
-        [SerializeField] private BossAttackEntry[] _attackEntries;
-
         [SerializeField] private BossMoveView _view;
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
+        [SerializeField] private TripleShotRaycastDetectView _tripleShotRaycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
+        [SerializeField] private BossAttackEntryRepo _attackEntryRepo;
         [SerializeField] private BossMovementAIFacade _bossMovementAIFacade;
         [SerializeField] private BossBattleAIFacade _bossBattleAIFacade;
         [SerializeField] private BossStateFacade _bossStateFacade;
@@ -288,6 +316,7 @@ namespace DevelopProducts.Boss
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
 
+
         /// <summary>
         ///     ボス死亡時に実行する処理。
         /// </summary>
@@ -298,7 +327,6 @@ namespace DevelopProducts.Boss
                 _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
             }
             Deactivate();
-
         }
 
         private void OnDestroy()
