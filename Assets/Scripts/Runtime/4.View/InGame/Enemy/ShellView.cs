@@ -95,6 +95,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
             int hits = Physics.OverlapSphereNonAlloc(transform.position, _shellSpecPresenter.ExplosionRadius, _overlapResults, _damageLayer);
             return hits > 0;
         }
+        private void OnDestroy()
+        {
+            if (_material != null)
+            {
+                Destroy(_material);
+                _material = null;
+            }
+        }
 
         [SerializeField, Tooltip("ダメージ判定のレイヤー")]
         private LayerMask _damageLayer;

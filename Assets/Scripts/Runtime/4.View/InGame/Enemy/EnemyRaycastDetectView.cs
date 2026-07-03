@@ -204,6 +204,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             UpdateWarningLine();
         }
+        private void OnDestroy()
+        {
+            if (_decalMaterial != null)
+            {
+                Destroy(_decalMaterial);
+                _decalMaterial = null;
+            }
+        }
 
         /// <summary>
         /// 現在のレイ情報をもとに警告ラインの位置と色を更新します。
