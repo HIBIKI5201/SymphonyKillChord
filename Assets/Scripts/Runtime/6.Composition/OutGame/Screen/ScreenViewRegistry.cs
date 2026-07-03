@@ -34,6 +34,29 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
+        ///    指定画面を即時表示します。
+        /// </summary>
+        /// <param name="screenId"></param>
+        /// <param name="targetSceneName"></param>
+        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
+        {
+            ScreenViewBase view = _views[screenId];
+            if (view is BattlePreparationScreen battlePreparationScreen)
+            {
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+            }
+            _views[screenId].ShowImmediately();
+        }
+
+        /// <summary>
+        ///    指定画面を即時非表示にします。
+        /// </summary>
+        public void HideImmediately(ScreenId screenId)
+        {
+            _views[screenId].HideImmediately();
+        }
+
+        /// <summary>
         ///     指定画面を表示し、トランジションの完了を待機します。
         /// </summary>
         public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)

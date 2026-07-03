@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="Credit" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/Credit.uxml?fileID=9197481963319205126&amp;guid=4c7220de28daf5044b01ddef02418df0&amp;type=3#Credit"/>
+    <ui:Template name="Menu" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/Menu.uxml?fileID=9197481963319205126&amp;guid=4ed03e3d3f789f246875e9e329b8cdf9&amp;type=3#Menu"/>
+    <ui:Template name="Option" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/Options.uxml?fileID=9197481963319205126&amp;guid=75838c51ce70fba4a86ce1be337926bf&amp;type=3#Options"/>
+    <ui:Template name="Title" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/Title.uxml?fileID=9197481963319205126&amp;guid=c02a11bcc2575414d9996ec3d86886c7&amp;type=3#Title"/>
+    <ui:VisualElement name="BackGround" style="width: 100%; height: 100%;">
+        <ui:Instance template="Title" name="TitleContainer" style="width: 100%; height: 100%; display: flex;"/>
+        <ui:Instance template="Menu" name="MenuContainer" style="position: absolute; display: none; width: 100%; height: 100%;"/>
+        <ui:Instance template="Option" name="OptionContainer" style="width: 100%; height: 100%; position: absolute; display: none;"/>
+        <ui:Instance template="Credit" name="CreditContainer" style="display: none; width: 100%; height: 100%; position: absolute;"/>
+    </ui:VisualElement>
+</ui:UXML>

@@ -9,6 +9,11 @@ namespace KillChord.Runtime.Application.OutGame.Screen
     public interface IScreenPresenter
     {
         /// <summary>
+        ///    画面遷移結果を出力します。
+        /// </summary>
+        void Present(ScreenTransitionResult result);
+
+        /// <summary>
         ///     画面遷移結果を出力します。
         /// </summary>
         Task Present(ScreenTransitionResult result, CancellationToken token);
