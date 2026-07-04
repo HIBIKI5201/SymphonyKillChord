@@ -6,7 +6,7 @@ using UnityEngine;
 namespace DevelopProducts.Boss.BehaviorGraphNode
 {
     [Serializable, GeneratePropertyBag]
-    [NodeDescription(name: "BossAttackTarget", story: "対象を攻撃する(Boss) [Battle] [State]", category: "Action/Boss", id: "a1f0c2d3e4b5460789ab12cd34ef5601")]
+    [NodeDescription(name: "BossAttackTarget", story: "dev_対象を攻撃する(Boss) [Battle] [State]", category: "Action/Boss", id: "a1f0c2d3e4b5460789ab12cd34ef5601")]
     public partial class BossAttackTargetAction : Unity.Behavior.Action
     {
         [SerializeReference] public BlackboardVariable<BossBattleAIFacade> Battle;

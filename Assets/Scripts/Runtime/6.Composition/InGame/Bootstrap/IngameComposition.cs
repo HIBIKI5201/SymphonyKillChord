@@ -326,6 +326,13 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyWaveSpawnerController = new EnemyWaveSpawnerController(enemyWaves, enemyWaveSpawnerState, _enemyInfantrySpawner, _enemyArtillerySpawner, _enemyWaveTimerView);
             _enemyWaveTimerView.Initialize(_enemyWaveSpawnerController);
 
+            // ボス関連
+            BossInitializer bossInitializer = TryInitializeBoss(targetManager, targetEntityRegistry, _enemyPools);
+            if(bossInitializer != null)
+            {
+                _inGamePlayDirector.AddGamePlayControllable(bossInitializer.LifeCycle);
+            }
+
             _rhythmGuideInitializer.Initialize();
 
             _inGameSequenceDirector = new InGameSequenceDirector(
@@ -479,6 +486,28 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
 
             loadingScreenController.FailActiveSession();
+        }
+
+        /// <summary>
+        ///     現在シーンからBossInitializerを検索し、初期化を試す。<br/>
+        ///     存在する場合、BossInitializerを返却。存在しない場合、nullを返却。
+        /// </summary>
+        /// <param name="targetManager"></param>
+        /// <param name="targetEntityRegistry"></param>
+        /// <returns></returns>
+        private BossInitializer TryInitializeBoss(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools)
+        {
+            // 現在のシーンからBossInitializerを検索する
+            BossInitializer initializer = GameObject.FindFirstObjectByType<BossInitializer>();
+
+            // BossInitializerが存在しない場合、処理終了
+            if (initializer == null)
+            {
+                return null;
+            }
+
+            initializer.Initialize(targetManager, targetEntityRegistry, enemyPools);
+            return initializer;
         }
     }
 }

@@ -103,7 +103,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _battleState = battleState;
 
             // AttackController生成用コンテキスト
-            EnemyAttackControllerContext attackControllerContext = new EnemyAttackControllerContext(attackUsecase, battleState, _shellSpawner);
+            EnemyAttackControllerContext attackControllerContext = new EnemyAttackControllerContext(attackUsecase, null, battleState, _shellSpawner);
 
             // Controller
             IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
