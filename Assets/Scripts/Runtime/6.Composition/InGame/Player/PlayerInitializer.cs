@@ -34,6 +34,7 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -64,6 +65,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
+        private Action<int> _onOneShotEndedHandler;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -192,13 +194,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
             dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
             dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
 
-            _characterAnimationView.OnOneShotEnded += index =>
+            _onOneShotEndedHandler = index =>
             {
                 if (index == animationIndices.Dodge)
                 {
                     playerAttackController.StartAttackCooldown();
                 }
             };
+
+            _characterAnimationView.OnOneShotEnded += _onOneShotEndedHandler;
 
             PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
@@ -296,12 +300,19 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private void OnDestroy()
         {
+            if (_characterAnimationView != null && _onOneShotEndedHandler != null)
+            {
+                _characterAnimationView.OnOneShotEnded -= _onOneShotEndedHandler;
+                _onOneShotEndedHandler = null;
+            }
+
             ServiceLocator.UnregisterInstance(this);
 
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
+
             }
         }
     }
