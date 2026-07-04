@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -77,10 +76,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         ///     保存要求を受け取り、ユースケースへ反映する。
         /// </summary>
         /// <param name="skillIds"> 保存対象のスキル ID 一覧。 </param>
-        private void HandleSaveRequestedHandler(ReadOnlyMemory<int> skillIds)
+        private async void HandleSaveRequestedHandler(ReadOnlyMemory<int> skillIds)
         {
             EquippedSkill[] equippedSkills = BuildEquippedSkills(skillIds.Span);
             _skillBuildUseCase.UpdateEquippedSkills(equippedSkills);
+
+            try
+            {
+                await _skillBuildUseCase.SaveSkillBuildAsync(new List<int>(skillIds.ToArray()));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"スキルビルドの保存中にエラーが発生しました: {ex.Message}");
+            }
         }
 
         /// <summary>
