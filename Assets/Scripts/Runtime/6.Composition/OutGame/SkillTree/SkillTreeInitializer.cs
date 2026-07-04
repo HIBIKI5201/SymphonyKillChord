@@ -143,11 +143,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             if (_isDebugMode)
             {
                 _skillUnlockData.SetResearchPoint(_skillUnlockData.ResearchPoint == 0 ? _inputData.currentPoints : _skillUnlockData.ResearchPoint);
-                _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillIds.Length == 0
-                    ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillIds);
+
+                _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillNodeIds.Length == 0
+                    ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillNodeIds);
+
+                _skillUnlockData.SetUnlockedSkillIds(_inputData.UnlockedSkillIds.Length == 0
+                    ? _skillUnlockData.UnlockedSkillIds : _inputData.UnlockedSkillIds);
             }
 
-            SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds);
+            SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds, _skillUnlockData.UnlockedSkillIds);
 
             SkillTreeService skillTreeService = new SkillTreeService(_skillNodeEntities);
 

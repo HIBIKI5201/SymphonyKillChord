@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,7 +101,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
                 entity.Unlock();
                 if (!_skillTreeStatusEntity.UnlockedNodes.Contains(nodeId))
+                {
                     _skillTreeStatusEntity.UnlockedNodes.Add(nodeId);
+                }
+                int[] unlockSkillIds = new int[entity.UnlockSkillIds.Length];
+                for (int i = 0; i < entity.UnlockSkillIds.Length; i++)
+                {
+                    unlockSkillIds[i] = entity.UnlockSkillIds[i].Value;
+                }
+                _skillTreeStatusEntity.AddUnlockedSkillIds(unlockSkillIds);
+
                 _skillNodeViews[entity.SkillNodeIdVO.Id].SetUnlocked();
                 UpdateConns(nodeId);
                 UpdateUnlockPhase(nodeId);
@@ -108,7 +118,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
 
             _skillTreeService
-                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.CurrentPoints)
+                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.UnlockedSkillIds, _skillTreeStatusEntity.CurrentPoints)
                 .ContinueWith(
                     t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
                     TaskContinuationOptions.OnlyOnFaulted);
