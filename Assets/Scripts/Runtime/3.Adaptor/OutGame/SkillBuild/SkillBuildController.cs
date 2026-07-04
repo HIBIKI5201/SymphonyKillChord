@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -32,7 +33,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 throw new ArgumentNullException(nameof(ownedSkills));
             }
 
-            _skillDataMap = BuildSkillDataMap(ownedSkills);
+            BuildSkillDataMap(ownedSkills);
             _viewModel.OnSaveRequested += HandleSaveRequestedHandler;
         }
 
@@ -50,11 +51,26 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             _isDisposed = true;
         }
 
+        /// <summary>
+        ///    入手済みスキル一覧を更新する。
+        /// </summary>
+        /// <param name="ownedSkills"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void UpdateOwnedSkills(IReadOnlyList<SkillData> ownedSkills)
+        {
+            if (ownedSkills == null)
+            {
+                throw new ArgumentNullException(nameof(ownedSkills));
+            }
+
+            BuildSkillDataMap(ownedSkills);
+        }
+
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly SkillBuildUseCase _skillBuildUseCase;
         private readonly ISkillBuildViewModel _viewModel;
-        private readonly Dictionary<int, SkillData> _skillDataMap;
+        private Dictionary<int, SkillData> _skillDataMap;
         private bool _isDisposed;
 
         /// <summary>
@@ -103,27 +119,30 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="ownedSkills"> 入手済みスキル一覧。 </param>
         /// <returns> スキル辞書。 </returns>
         /// <exception cref="ArgumentException"></exception>
-        private Dictionary<int, SkillData> BuildSkillDataMap(IReadOnlyList<SkillData> ownedSkills)
+        private void BuildSkillDataMap(IReadOnlyList<SkillData> ownedSkills)
         {
-            Dictionary<int, SkillData> skillDataMap = new Dictionary<int, SkillData>(ownedSkills.Count);
+            if (ownedSkills == null)
+            {
+                throw new ArgumentNullException(nameof(ownedSkills));
+            }
+
+            _skillDataMap = new Dictionary<int, SkillData>(ownedSkills.Count);
 
             for (int i = 0; i < ownedSkills.Count; i++)
             {
                 SkillData skillData = ownedSkills[i];
-                if(skillData == null)
+                if (skillData == null)
                 {
                     throw new ArgumentException($"入手済みスキル一覧に null が存在します。 index={i}", nameof(ownedSkills));
                 }
 
-                if (skillDataMap.ContainsKey(skillData.Id))
+                if (_skillDataMap.ContainsKey(skillData.Id))
                 {
                     throw new ArgumentException($"重複したスキル ID が存在します。 skillId={skillData.Id}", nameof(ownedSkills));
                 }
 
-                skillDataMap.Add(skillData.Id, skillData);
+                _skillDataMap.Add(skillData.Id, skillData);
             }
-
-            return skillDataMap;
         }
     }
 }

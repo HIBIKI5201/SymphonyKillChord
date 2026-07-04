@@ -16,11 +16,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         /// <param name="scrollView"> 表示先の ScrollView。 </param>
         /// <param name="skillElementTemplate"> 各要素のテンプレート。 </param>
+        /// <param name="onSkillElementCreated"> スキル要素生成時に呼ばれるコールバック（ドラッグアンドドロップのセットアップ等に使用）。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillListView(VisualElement scrollView, VisualTreeAsset skillElementTemplate)
+        public SkillListView(VisualElement scrollView, VisualTreeAsset skillElementTemplate, Action<VisualElement> onSkillElementCreated = null)
         {
             _scrollView = scrollView ?? throw new ArgumentNullException(nameof(scrollView));
             _skillElementTemplate = skillElementTemplate ?? throw new ArgumentNullException(nameof(skillElementTemplate));
+            _onSkillElementCreated = onSkillElementCreated;
 
             ConfigureScrollView();
         }
@@ -113,6 +115,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly VisualElement _scrollView;
         private readonly VisualTreeAsset _skillElementTemplate;
 
+        /// <summary> スキル要素生成時に呼び出されるコールバック。 </summary>
+        private readonly Action<VisualElement> _onSkillElementCreated;
+
         /// <summary>
         ///     ScrollView の基本設定を行う。
         /// </summary>
@@ -128,6 +133,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         /// <summary>
         ///     各スキル要素を生成する。
+        ///     生成後に _onSkillElementCreated コールバックを呼び出す。(ドラッグアンドドロップのセットアップ等に使用)
         /// </summary>
         /// <param name="skillId"> スキル ID。 </param>
         /// <param name="skillLabel"> 表示するスキル名。 </param>
@@ -152,6 +158,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
             label.text = skillLabel;
+
+            // 生成した要素に対してドラッグアンドドロップのセットアップ等の外部処理を呼び出す。
+            _onSkillElementCreated?.Invoke(skillElement);
+
             return skillElement;
         }
 

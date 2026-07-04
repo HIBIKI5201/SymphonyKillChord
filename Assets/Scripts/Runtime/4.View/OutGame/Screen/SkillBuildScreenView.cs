@@ -42,9 +42,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     スキル一覧表示を初期化する。
         /// </summary>
         /// <param name="skillElementTemplate"> スキル要素テンプレート。 </param>
-        public void InitializeSkillList(VisualTreeAsset skillElementTemplate)
+        /// <param name="onSkillElementCreated"> スキル要素生成時に呼ばれるコールバック（D&amp;D のセットアップ等に使用）。 </param>
+        public void InitializeSkillList(VisualTreeAsset skillElementTemplate, Action<VisualElement> onSkillElementCreated = null)
         {
-            _skillListView ??= new SkillListView(_skillElementList, skillElementTemplate);
+            _skillListView ??= new SkillListView(_skillElementList, skillElementTemplate, onSkillElementCreated);
         }
 
         /// <summary>
