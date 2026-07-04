@@ -28,7 +28,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Dictionary<string, ISkillNodeConnViewModel> nodeConns,
             Dictionary<int, VisualElement> unlockPhases,
             Dictionary<int, VideoClip> videoClipBinds,
-            SkillTreeStatusEntity skillTreeStatusEntity)
+            SkillTreeStatusEntity skillTreeStatusEntity,
+            Action ownedSkillChanged)
         {
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
@@ -44,6 +45,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _unlockPhases = unlockPhases;
             _videoClipBinds = videoClipBinds;
             _skillTreeStatusEntity = skillTreeStatusEntity;
+            _ownedSkillChanged = ownedSkillChanged;
             _nodesOnPath = new();
 
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
@@ -128,6 +130,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _ownedSkillChanged?.Invoke();
         }
 
         /// <summary>
@@ -167,6 +170,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private SkillTreeStatusEntity _skillTreeStatusEntity;
         private IPreviewVideoScreenViewModel _previewVideoScreenView;
         private IPreviewVideoScreenViewShowable _previewVideoScreenViewShowable;
+        private Action _ownedSkillChanged;
         private int _costToUnlock = -1;
         private int _selectedNodeId = -1;
 

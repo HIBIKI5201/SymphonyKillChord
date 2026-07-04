@@ -66,6 +66,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルノードが選択された時のイベント。 </summary>
         public Action OnSkillUnlocked;
 
+        /// <summary> 入手済みスキル一覧が更新された時のイベント。 </summary>
+        public Action OnOwnedSkillChanged;
+
         /// <summary> スキル詳細画面を閉じるイベント。 </summary>
         public Action<int> OnSkillDetailClosed;
 

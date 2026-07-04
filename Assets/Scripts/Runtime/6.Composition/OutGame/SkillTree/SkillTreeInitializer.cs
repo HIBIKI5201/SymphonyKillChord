@@ -146,9 +146,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
                 _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillNodeIds.Length == 0
                     ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillNodeIds);
-
-                _skillUnlockData.SetUnlockedSkillIds(_inputData.UnlockedSkillIds.Length == 0
-                    ? _skillUnlockData.UnlockedSkillIds : _inputData.UnlockedSkillIds);
             }
 
             SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds, _skillUnlockData.UnlockedSkillIds);
@@ -171,7 +168,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillNodeConnViews,
                 _unlockPhases,
                 _skillPreviewVideos,
-                skillTreeEntity);
+                skillTreeEntity,
+                () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke());
         }
 
         /// <summary>
