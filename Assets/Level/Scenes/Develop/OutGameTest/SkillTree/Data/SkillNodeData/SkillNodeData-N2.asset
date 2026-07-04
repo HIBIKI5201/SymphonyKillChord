@@ -17,3 +17,5 @@ MonoBehaviour:
   UnlockCost: 10
   SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF12\uFF0D\uFF11\n\u3042\n\u3044\n\u3046\n\u3048\n\u304A"
   PreviewVideoClip: {fileID: 32900000, guid: 5e0d75b2b610b0c4eab7a704a940971b, type: 3}
+  _unlockSkills:
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
