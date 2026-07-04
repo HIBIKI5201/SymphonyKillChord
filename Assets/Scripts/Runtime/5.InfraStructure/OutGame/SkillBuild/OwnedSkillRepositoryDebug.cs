@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure
@@ -15,13 +16,13 @@ namespace KillChord.Runtime.InfraStructure
         + nameof(OwnedSkillRepositoryDebug))]
     public class OwnedSkillRepositoryDebug : ScriptableObject, IOwnedSkillRepository
     {
-        public IReadOnlyList<EquippedSkill> GetOwnedSkills()
+        public async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills()
         {
             RebuildEquippedSkills();
             return _equippedSkills.AsReadOnly();
         }
 
-        public void LoadOwnedSkills()
+        public async ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
         {
             if (_skillDataAssets == null || _skillDataAssets.Count == 0)
             {
@@ -29,11 +30,7 @@ namespace KillChord.Runtime.InfraStructure
             }
 
             RebuildEquippedSkills();
-        }
-
-        public void SaveOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills)
-        {
-            // デバッグ用のリポジトリではセーブは行わないため、何もしない
+            return _equippedSkills.AsReadOnly();
         }
 
         [Header("仮の入手済みスキル")]
