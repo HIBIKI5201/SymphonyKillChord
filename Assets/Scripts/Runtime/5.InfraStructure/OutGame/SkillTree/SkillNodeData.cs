@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.InfraStructure.Player;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 using UnityEngine.Video;
@@ -22,9 +23,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <summary> スキルプレビュー動画 </summary>
         public VideoClip PreviewVideoClip;
 
-        //[Header("ノードを解放した時の報酬")]
+        [Header("ノードを解放した時の報酬")]
         //[SerializeReference, SubclassSelector] private IParameterUpgradeEffect[] _nodeUnlockEffets;
-        //[SerializeReference, SubclassSelector] private ISkillUnlockEffect[] _skillUnlockEffets;
+        [SerializeField, Tooltip("ノードを解放した時に解放されるスキル")]
+        private SkillDataAsset[] _unlockSkills;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -32,7 +34,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <returns></returns>
         public SkillNodeEntity ToDomain()
         {
-            return new SkillNodeEntity(NodeId, UnlockCost, SkillDetail);
+            // UnlockSkillId の配列の長さを取得する
+            // _unlockSkills が null の場合は 0 を返す
+            int unlockSkills = _unlockSkills == null ? 0 : _unlockSkills.Length;
+
+            // UnlockSkillId の配列を生成する
+            var skillIds = new UnlockSkillId[unlockSkills];
+            for (var i = 0; i < unlockSkills; i++)
+            {
+                skillIds[i] = new UnlockSkillId(_unlockSkills[i].Id);
+            }
+
+            return new SkillNodeEntity(NodeId, UnlockCost, SkillDetail, skillIds);
         }
     }
 }

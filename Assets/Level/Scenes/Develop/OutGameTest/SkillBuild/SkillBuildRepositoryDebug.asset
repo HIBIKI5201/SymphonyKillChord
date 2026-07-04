@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a68998a4c44127a4185eb316dfa04829, type: 3}
   m_Name: SkillBuildRepositoryDebug
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillBuild.SkillBuildRepositoryDebug
-  _skillDataAssets:
-  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
-  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  _skillDataAssets: []

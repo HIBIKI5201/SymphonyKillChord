@@ -73,11 +73,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         ///     スキル解放情報をセーブする。
         /// </summary>
         /// <param name="unlockedNodes"></param>
+        /// <param name="unlockedSkillIds"></param>
         /// <param name="currentPoints"></param>
-        public async Task SaveSkillUnlockData(List<int> unlockedNodes, int currentPoints)
+        public async Task SaveSkillUnlockData(List<int> unlockedNodes, List<int> unlockedSkillIds, int currentPoints)
         {
             SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
             saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
+            saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillIds.ToArray());
             saveData.SkillUnlock.SetResearchPoint(currentPoints);
             await _savedataSystem.SaveAsync(saveData);
         }

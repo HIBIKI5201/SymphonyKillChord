@@ -46,13 +46,23 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         /// <param name="equipmentSkillIDs"> 装備スキルの ID のリスト。 </param>
         /// <param name="skillLevelupPoint"> スキルレベルアップポイント。 </param>
         /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
-        public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs, int skillLevelupPoint)
+        public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs)
         {
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
-            saveData.SkillBuild.SetEquipmentSkillIDs(equipmentSkillIDs);
-            saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
+            _saveData = await _savedataSystem.LoadAsync<SaveData>();
+            _saveData.SkillBuild.SetEquipmentSkillIDs(equipmentSkillIDs);
+            await _savedataSystem.SaveAsync(_saveData);
+        }
 
-            await _savedataSystem.SaveAsync(saveData);
+        /// <summary>
+        ///    スキルレベルアップポイントを非同期で保存するメソッド。
+        /// </summary>
+        /// <param name="skillLevelupPoint"> スキルレベルアップポイント。 </param>
+        /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
+        public async Task SaveSkillLevelupPointAsync(int skillLevelupPoint)
+        {
+            _saveData = await _savedataSystem.LoadAsync<SaveData>();
+            _saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
+            await _savedataSystem.SaveAsync(_saveData);
         }
 
         /// <summary>
@@ -86,5 +96,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
 
         private readonly SkillBuildDefinition _skillBuildDefinition;
         private readonly SavedataSystem _savedataSystem;
+        private SaveData _saveData;
     }
 }
