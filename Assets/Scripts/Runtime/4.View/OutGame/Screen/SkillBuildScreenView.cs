@@ -151,6 +151,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private SkillListView _skillListView;
         private SkillBuildViewModel _viewModel;
 
+        private bool _isSavingSkillBuild;
+
         /// <summary>
         ///     ボタンのコールバックを登録します。
         /// </summary>
@@ -216,13 +218,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <param name="evt"> クリックイベント。 </param>
         private async void HandleSkillBuildSaveButtonClickedHandler(ClickEvent evt)
         {
-            bool isSaved = await InvokeSkillBuildSavedAsync();
-            if (!isSaved)
-            {
-                return;
-            }
-
-            _viewModel?.MarkCurrentAsSaved();
+            await TrySaveCurrentSkillBuildAsync();
         }
 
         /// <summary>
@@ -248,13 +244,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private async void HandleUnsavedSaveAndCloseButtonClickedHandler(ClickEvent evt)
         {
-            bool isSaved = await InvokeSkillBuildSavedAsync();
+            bool isSaved = await TrySaveCurrentSkillBuildAsync();
             if (!isSaved)
             {
                 return;
             }
 
-            _viewModel?.MarkCurrentAsSaved();
             HideUnsavedChangesDialog();
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
@@ -320,10 +315,39 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///     現在のスキルビルド保存を試行し、成功時は保存済み状態に更新する。
+        /// </summary>
+        /// <returns> 保存が成功したかどうか。 </returns>
+        private async ValueTask<bool> TrySaveCurrentSkillBuildAsync()
+        {
+            if (_isSavingSkillBuild)
+            {
+                return false;
+            }
+
+            _isSavingSkillBuild = true;
+            try
+            {
+                bool isSaved = await InvokeSkillBuildSavedAsync();
+                if (!isSaved)
+                {
+                    return false;
+                }
+            }
+            finally
+            {
+                _isSavingSkillBuild = false;
+            }
+
+            _viewModel?.MarkCurrentAsSaved();
+            return true;
+        }
+
+        /// <summary>
         ///    スキルビルド保存イベントを非同期で呼び出す。
         /// </summary>
         /// <returns> 保存が成功したかどうか。 </returns>
-        private async Task<bool> InvokeSkillBuildSavedAsync()
+        private async ValueTask<bool> InvokeSkillBuildSavedAsync()
         {
             if (OutGameUIEvent.OnSkillBuildSaved == null)
             {
