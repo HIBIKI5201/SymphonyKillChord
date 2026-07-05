@@ -1,8 +1,8 @@
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
@@ -34,7 +34,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             TargetSelectorController targetSelectorController,
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
+            MusicSyncState musicSyncState,
             float attackRotationSpeed,
+            float attackCooldown,
             int baseDamage
         )
         {
@@ -46,10 +48,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _musicSyncService = musicSyncService;
             AttackRotationSpeed = attackRotationSpeed;
             _baseDamage = baseDamage;
+
+            _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
+            _attackCooldownRemainig = 0d;
         }
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
+
+        /// <summary> 攻撃クールダウン中かどうかを表すプロパティ。 </summary>
+        public bool IsAttackCooldown => _attackCooldownRemainig > 0f;
 
         /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
         public bool HasCurrentLockOnTarget { get; private set; }
@@ -96,14 +104,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
-           
+
             _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
             if (attackDefinition == null) return false;
 
-            _attackIntervalEvaluator.EvaluateInterval();
+            StartAttackInterval();
+            StartAttackCooldown();
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
             _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
@@ -115,7 +124,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _battleState.Attacker.BaseDamage
             );
 
-           BuffContext buffContextPost = new BuffContext( _battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, result), BuffExecuteTiming.Attack_Logic_After));
+            BuffContext buffContextPost = new BuffContext(_battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, result), BuffExecuteTiming.Attack_Logic_After));
 
 
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
@@ -128,6 +137,33 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             resultBeatType = (int)beatType;
             return true;
+        }
+
+        /// <summary>
+        ///     攻撃インターバルを開始する。
+        /// </summary>
+        public void StartAttackInterval()
+        {
+            _attackIntervalEvaluator.EvaluateInterval();
+        }
+
+        /// <summary> 攻撃クールダウンを開始する。 </summary>
+        public void StartAttackCooldown()
+        {
+            _attackCooldownRemainig = _attackCooldown;
+        }
+
+        /// <summary> 毎フレームクールダウンを減算する。 </summary>
+        public void UpdateAttackCooldown(double deltaTime)
+        {
+            if (_attackCooldownRemainig > 0f)
+            {
+                _attackCooldownRemainig -= deltaTime;
+                if (_attackCooldownRemainig < 0f)
+                {
+                    _attackCooldownRemainig = 0f;
+                }
+            }
         }
 
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
@@ -150,5 +186,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
         private readonly int _baseDamage;
+        private double _attackCooldownRemainig;
+        private double _attackCooldown;
     }
 }
