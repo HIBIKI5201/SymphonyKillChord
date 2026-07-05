@@ -16,13 +16,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(SkillBuildRepositoryDebug))]
     public class SkillBuildRepositoryDebug : ScriptableObject, ISkillBuildRepository
     {
-        public async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkills()
+        public ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkills()
         {
             RebuildEquippedSkills();
-            return _equippedSkills.AsReadOnly();
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
-        public async ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild()
+        public ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild()
         {
             if (_skillDataAssets == null || _skillDataAssets.Count == 0)
             {
@@ -31,7 +31,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
             RebuildEquippedSkills();
             _skillBuildDefinition = new SkillBuildDefinition(_equippedSkills.ToArray());
-            return _equippedSkills.AsReadOnly();
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
         public void SaveSkillBuild(SkillBuildDefinition skillBuildDefinition)

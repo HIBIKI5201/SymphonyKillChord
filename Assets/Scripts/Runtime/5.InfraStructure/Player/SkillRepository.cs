@@ -27,8 +27,12 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         public SkillDefinition GetSkill(int id, double bpm)
         {
-            SkillDataAsset asset = Array.Find(_skillDataAssets, x => x.Id == id);
-            return asset.ToDomain().ToSkillDefinition(bpm);
+            EnsureSkillDataAssetMap();
+            if (!_skillDataAssetMap.TryGetValue(id, out SkillData skillData))
+            {
+                throw new KeyNotFoundException($"指定されたスキルID {id} に対応するスキルデータが見つかりませんでした。");
+            }
+            return skillData.ToSkillDefinition(bpm);
         }
 
         [SerializeField] private SkillDataAsset[] _skillDataAssets;

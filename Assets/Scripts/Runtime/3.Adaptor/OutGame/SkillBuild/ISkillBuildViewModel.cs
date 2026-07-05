@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 {
@@ -7,8 +8,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
     /// </summary>
     public interface ISkillBuildViewModel
     {
-        /// <summary> 保存要求イベント。 </summary>
-        public event Action<ReadOnlyMemory<int>> OnSaveRequested;
+        /// <summary> 保存要求イベント。true: 保存成功 / false: 保存失敗。 </summary>
+        public event Func<ReadOnlyMemory<int>, Task<bool>> OnSaveRequested;
 
         /// <summary>
         ///     DTO から表示状態を反映する。

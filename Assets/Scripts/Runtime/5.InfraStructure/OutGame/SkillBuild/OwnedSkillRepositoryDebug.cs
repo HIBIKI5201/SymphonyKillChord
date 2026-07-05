@@ -16,13 +16,13 @@ namespace KillChord.Runtime.InfraStructure
         + nameof(OwnedSkillRepositoryDebug))]
     public class OwnedSkillRepositoryDebug : ScriptableObject, IOwnedSkillRepository
     {
-        public async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills()
+        public ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills()
         {
             RebuildEquippedSkills();
-            return _equippedSkills.AsReadOnly();
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
-        public async ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
+        public ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
         {
             if (_skillDataAssets == null || _skillDataAssets.Count == 0)
             {
@@ -30,7 +30,7 @@ namespace KillChord.Runtime.InfraStructure
             }
 
             RebuildEquippedSkills();
-            return _equippedSkills.AsReadOnly();
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
         [Header("仮の入手済みスキル")]

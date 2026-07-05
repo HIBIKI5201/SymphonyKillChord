@@ -26,7 +26,8 @@ namespace KillChord.Runtime.InfraStructure
                 await LoadOwnedSkillsAsync();
             }
 
-            return _ownedSkills.AsReadOnly();
+            // 入手済みスキルのコピーを返す。
+            return new List<EquippedSkill>(_ownedSkills).AsReadOnly();
         }
 
         /// <summary>
@@ -44,7 +45,9 @@ namespace KillChord.Runtime.InfraStructure
 
             SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
             BuildOwnedSkills(saveData.SkillUnlock.UnlockedSkillIds);
-            return _ownedSkills.AsReadOnly();
+
+            // 入手済みスキルのコピーを返す。
+            return new List<EquippedSkill>(_ownedSkills).AsReadOnly();
         }
 
         [SerializeField, Tooltip("スキル ID から SkillData を取得するリポジトリ。")]
@@ -86,7 +89,10 @@ namespace KillChord.Runtime.InfraStructure
 
                 if (!_skillRepository.TryGetSkill(skillId, out var skillData))
                 {
-                    throw new InvalidOperationException($"SkillRepository からスキル ID {skillId} の SkillData を取得できませんでした。");
+#if UNITY_EDITOR
+                    Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillData を取得できませんでした。");
+#endif
+                    continue;
                 }
 
                 _ownedSkills.Add(new EquippedSkill(skillData));
