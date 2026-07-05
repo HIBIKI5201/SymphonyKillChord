@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         [SerializeField] private EnemyArtillerySpawner _enemyArtillerySpawner;
         [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
         [SerializeField] private MobileInput _mobileInput;
-        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
+        [SerializeField] private ACLikeRhythmGuideInitializer _rhythmGuideInitializer;
         [SerializeField, SceneNameSelector] private string _backgroundSceneName;
         [SerializeField] private EnemyPools _enemyPools;
         [SerializeField] private EnemyInitializer _enemyInitializer;
@@ -328,7 +328,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
             // ボス関連
             BossInitializer bossInitializer = TryInitializeBoss(targetManager, targetEntityRegistry, _enemyPools);
-            if(bossInitializer != null)
+            if (bossInitializer != null)
             {
                 _inGamePlayDirector.AddGamePlayControllable(bossInitializer.LifeCycle);
             }
