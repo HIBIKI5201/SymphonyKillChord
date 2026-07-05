@@ -160,47 +160,138 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Execute Unity - Download Assets
+      - name: Execute Unity - Download and Import Packages
         run: |
-          Write-Host "::group::Start Unity Import Process"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for asset import..."
-          Write-Host "Execution Method: KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport"
-          Write-Host "Log output: unity_import.log"
-          Write-Host ""
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
-          $TimeoutSec = 5400
-          Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
-          Write-Host ""
+          # ==========================================
+          # 1. 準備 および Google Drive からの ZIP ダウンロード
+          # ==========================================
+          Write-Host "::group::Downloading ZIP from Google Drive"
 
-          $Args = @(
-            "-batchmode",
-            "-ignorecompilererrors",
-            "-projectPath", "${{ github.workspace }}",
-            "-executeMethod", "KillChord.Editor.AssetImporter.GoogleDriveBatchCI.StartBatchImport",
-            "-logFile", "unity_import.log"
-          )
-          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+          $ApiKey      = $env:GOOGLE_DRIVE_API_KEY
+          $FolderId    = $env:GOOGLE_DRIVE_FOLDER_ID
+          $TempZipPath = "$env:TEMP\src_assets.zip"
+          $ExtractDir  = "$env:TEMP\UnityPackages"
 
-          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
-            Write-Host ""
-            Write-Host "ERROR: Unity import timed out after $TimeoutSec seconds."
-            $UnityProcess.Kill()
+          if (Test-Path $ExtractDir) { Remove-Item $ExtractDir -Recurse -Force }
+          New-Item -ItemType Directory -Path $ExtractDir -Force | Out-Null
+
+          # （name contains '.zip' / trashed = false / modifiedTime desc / pageSize=1）
+          $RawQuery       = "name contains '.zip' and trashed = false and '$FolderId' in parents"
+          $EncodedQuery   = [Uri]::EscapeDataString($RawQuery)
+          $EncodedOrderBy = [Uri]::EscapeDataString("modifiedTime desc")
+          $EncodedFields  = [Uri]::EscapeDataString("files(id,name)")
+          $ListUrl = "https://www.googleapis.com/drive/v3/files?q=$EncodedQuery&orderBy=$EncodedOrderBy&pageSize=1&fields=$EncodedFields&key=$ApiKey"
+
+          try {
+            $ListResponse = Invoke-RestMethod -Uri $ListUrl -Method Get
+          } catch {
+            Write-Host "ERROR: Failed to query Google Drive API: $_"
             Write-Host "::endgroup::"
-            exit 124
+            exit 1
           }
 
-          $UnityExitCode = $UnityProcess.ExitCode
-          Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity import process exited with code $UnityExitCode."
-          
-          if ($UnityExitCode -eq 0) {
-            Write-Host "OK: Unity import completed successfully."
-          } else {
-            Write-Host "WARNING: Unity import process returned a non-zero exit code ($UnityExitCode)."
-            Write-Host "          See unity_import.log for details."
+          if (-not $ListResponse.files -or $ListResponse.files.Count -eq 0) {
+            Write-Host "ERROR: No ZIP file found in the specified Google Drive folder."
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          $FileId   = $ListResponse.files[0].id
+          $FileName = $ListResponse.files[0].name
+          Write-Host "Found ZIP File: $FileName (ID: $FileId)"
+
+          $DownloadUrl = "https://www.googleapis.com/drive/v3/files/$FileId`?alt=media&key=$ApiKey"
+          try {
+            (New-Object Net.WebClient).DownloadFile($DownloadUrl, $TempZipPath)
+          } catch {
+            Write-Host "ERROR: Failed to download ZIP: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "OK: ZIP download completed."
+          Write-Host "::endgroup::"
+
+          # ==========================================
+          # 2. ZIP 解凍と.unitypackage の展開
+          # ==========================================
+          Write-Host "::group::Extracting .unitypackage files from ZIP"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $Zip = [System.IO.Compression.ZipFile]::OpenRead($TempZipPath)
+          $ExtractedCount = 0
+          try {
+            foreach ($Entry in $Zip.Entries) {
+              if (-not $Entry.FullName.EndsWith(".unitypackage", [System.StringComparison]::OrdinalIgnoreCase)) {
+                continue
+              }
+              $EntryFileName = [System.IO.Path]::GetFileName($Entry.FullName)
+              $DestPath      = [System.IO.Path]::Combine($ExtractDir, $EntryFileName)
+              $Entry.ExtractToFile($DestPath, $true)
+              Write-Host "  Extracted: $EntryFileName"
+              $ExtractedCount++
+            }
+          } finally {
+            $Zip.Dispose()
+          }
+
+          if ($ExtractedCount -eq 0) {
+            Write-Host "ERROR: No .unitypackage files found inside the ZIP."
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "OK: Extracted $ExtractedCount package(s) to $ExtractDir"
+          Write-Host "::endgroup::"
+
+          # ==========================================
+          # 3. 各 .unitypackage の順次インポート
+          # ==========================================
+          Write-Host "::group::Sequential Unitypackage Import via CLI"
+          $Packages = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
+          Write-Host "Found $($Packages.Count) packages to import."
+
+          $TimeoutSec     = 1800
+          $FailedPackages = @()
+
+          foreach ($Package in $Packages) {
+            Write-Host "--------------------------------------------------"
+            Write-Host "Starting Import: $($Package.Name)"
+
+            $UnityArgs = @(
+              "-batchmode",
+              "-nographics",
+              "-quit",
+              "-projectPath", "${{ github.workspace }}",
+              "-importPackage", "$($Package.FullName)",
+              "-logFile", "unity_import_$($Package.BaseName).log"
+            )
+
+            $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
+                                          -ArgumentList $UnityArgs `
+                                          -PassThru -NoNewWindow
+
+            if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
+              Write-Host "ERROR: Timeout importing $($Package.Name) after $TimeoutSec seconds."
+              $UnityProcess.Kill()
+              Write-Host "::endgroup::"
+              exit 124
+            }
+
+            if ($UnityProcess.ExitCode -ne 0) {
+              Write-Host "WARNING: Unity returned non-zero code ($($UnityProcess.ExitCode)) for $($Package.Name)."
+              Write-Host "         See unity_import_$($Package.BaseName).log for details."
+              $FailedPackages += $Package.Name
+            } else {
+              Write-Host "SUCCESS: Completed import for $($Package.Name)"
+            }
+          }
+
+          if ($FailedPackages.Count -gt 0) {
+            Write-Host "WARNING: $($FailedPackages.Count) package(s) returned non-zero exit codes:"
+            $FailedPackages | ForEach-Object { Write-Host "  - $_" }
           }
           Write-Host "::endgroup::"
-          exit $UnityExitCode
         shell: powershell
 
       - name: Execute Unity - Build
@@ -249,23 +340,20 @@ jobs:
         if: always()
         run: |
           Write-Host "::group::Unity Import Log Summary"
-          if (Test-Path "unity_import.log") {
-            Write-Host "INFO: Extracting key information from unity_import.log..."
-            Write-Host ""
-          
-            # Count errors and warnings
-            $Errors = Select-String -Path "unity_import.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-            $Warnings = Select-String -Path "unity_import.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-          
-            Write-Host "Detected Errors: $Errors"
-            Write-Host "Detected Warnings: $Warnings"
-            Write-Host ""
-          
-            # Output the last 50 lines (final status)
-            Write-Host "[Last 50 lines of unity_import.log:]"
-            Get-Content -Path "unity_import.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          $ImportLogs = Get-ChildItem -Path "." -Filter "unity_import_*.log"
+          if ($ImportLogs.Count -gt 0) {
+            foreach ($Log in $ImportLogs) {
+              Write-Host "--- $($Log.Name) ---"
+              $Errors   = Select-String -Path $Log.FullName -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+              $Warnings = Select-String -Path $Log.FullName -Pattern "warning"      -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+              Write-Host "Detected Errors: $Errors  Warnings: $Warnings"
+              Write-Host ""
+              Write-Host "[Last 30 lines of $($Log.Name):]"
+              Get-Content -Path $Log.FullName -Tail 30 | ForEach-Object { Write-Host $_ }
+              Write-Host ""
+            }
           } else {
-            Write-Host "WARNING: unity_import.log was not found."
+            Write-Host "WARNING: No unity_import_*.log files found."
           }
           Write-Host "::endgroup::"
 
@@ -297,7 +385,7 @@ jobs:
         with:
           name: unity-build-log
           path: |
-            unity_import.log
+            unity_import_*.log
             unity_build.log
 
       - name: Check Build Output
