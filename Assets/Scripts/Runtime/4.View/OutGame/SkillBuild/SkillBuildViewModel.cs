@@ -2,6 +2,8 @@ using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
 {
@@ -22,7 +24,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary> 保存要求イベント。 </summary>
-        public event Action<ReadOnlyMemory<int>> OnSaveRequested;
+        public event Func<ReadOnlyMemory<int>, Task<bool>> OnSaveRequested;
 
         /// <summary> スキル一覧更新イベント。 </summary>
         public event Action<IReadOnlyList<(int skillId, string skillLabel)>> OnSkillListChanged;
@@ -98,10 +100,40 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <summary>
         ///     保存ボタン押下イベントを処理する。
         /// </summary>
-        private void HandleSkillBuildSavedHandler()
+        private async Task<bool> HandleSkillBuildSavedHandler()
         {
             int[] skillIds = BuildCurrentSkillIds();
-            OnSaveRequested?.Invoke(skillIds);
+
+            if (OnSaveRequested == null)
+            {
+                return false;
+            }
+
+            // 登録されている保存要求イベントのハンドラを順番に実行する。
+            Delegate[] handlers = OnSaveRequested.GetInvocationList();
+            for (int i = 0; i < handlers.Length; i++)
+            {
+                try
+                {
+                    Func<ReadOnlyMemory<int>, Task<bool>> handler =
+                        (Func<ReadOnlyMemory<int>, Task<bool>>)handlers[i];
+
+                    bool isSaved = await handler(skillIds);
+                    if (!isSaved)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError($"保存要求ハンドラ実行中に例外が発生しました: {ex}");
+#endif
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

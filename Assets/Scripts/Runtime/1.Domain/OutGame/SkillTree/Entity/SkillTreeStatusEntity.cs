@@ -23,10 +23,6 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             {
                 _unlockedSkillIds.AddRange(unlockedSkills);
             }
-            if (unlockedNodes != null)
-            {
-                _unlockedNodes.AddRange(unlockedNodes);
-            }
         }
 
         /// <summary> 現在の研究ポイントを取得します。 </summary>

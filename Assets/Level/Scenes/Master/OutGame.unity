@@ -894,6 +894,7 @@ MonoBehaviour:
   _skillNodePhaseBindRepo: {fileID: 11400000, guid: 2efcc81dfd565a94a9110b488a8ec243, type: 2}
   _videoPlayer: {fileID: 1876322594}
   _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
+  _isDebugMode: 1
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0

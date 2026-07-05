@@ -1,6 +1,8 @@
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -212,9 +214,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     スキルビルド保存ボタンがクリックされたときの処理です。
         /// </summary>
         /// <param name="evt"> クリックイベント。 </param>
-        private void HandleSkillBuildSaveButtonClickedHandler(ClickEvent evt)
+        private async void HandleSkillBuildSaveButtonClickedHandler(ClickEvent evt)
         {
-            OutGameUIEvent.OnSkillBuildSaved?.Invoke();
+            bool isSaved = await InvokeSkillBuildSavedAsync();
+            if (!isSaved)
+            {
+                return;
+            }
+
             _viewModel?.MarkCurrentAsSaved();
         }
 
@@ -239,11 +246,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     「保存して戻る」押下時の処理。
         /// </summary>
-        private void HandleUnsavedSaveAndCloseButtonClickedHandler(ClickEvent evt)
+        private async void HandleUnsavedSaveAndCloseButtonClickedHandler(ClickEvent evt)
         {
-            HideUnsavedChangesDialog();
-            OutGameUIEvent.OnSkillBuildSaved?.Invoke();
+            bool isSaved = await InvokeSkillBuildSavedAsync();
+            if (!isSaved)
+            {
+                return;
+            }
+
             _viewModel?.MarkCurrentAsSaved();
+            HideUnsavedChangesDialog();
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
@@ -305,6 +317,42 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             return dialogBackground.ElementAt(0);
+        }
+
+        /// <summary>
+        ///    スキルビルド保存イベントを非同期で呼び出す。
+        /// </summary>
+        /// <returns> 保存が成功したかどうか。 </returns>
+        private async Task<bool> InvokeSkillBuildSavedAsync()
+        {
+            if (OutGameUIEvent.OnSkillBuildSaved == null)
+            {
+                return false;
+            }
+
+            // 登録されているすべてのイベントハンドラを順番に呼び出す。
+            Delegate[] handlers = OutGameUIEvent.OnSkillBuildSaved.GetInvocationList();
+            for (int i = 0; i < handlers.Length; i++)
+            {
+                try
+                {
+                    Func<Task<bool>> handler = (Func<Task<bool>>)handlers[i];
+                    bool isSaved = await handler();
+                    if (!isSaved)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError($"スキルビルド保存イベント実行中に例外が発生しました: {ex}");
+#endif
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

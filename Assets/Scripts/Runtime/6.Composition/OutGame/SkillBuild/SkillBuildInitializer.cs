@@ -37,7 +37,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
         [Header("デバッグ用")]
         [SerializeField]
-        private bool _debugMode = false;
+        private bool _isDebugMode = false;
 
         [SerializeField]
         [Tooltip("デバッグ用のスキルビルドデバッガーです。")]
@@ -195,7 +195,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 入手済みスキル一覧。 </returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkillsAsync()
         {
-            if (_ownedSkillRepository != null && !_debugMode)
+            if (_ownedSkillRepository != null && !_isDebugMode)
             {
                 return await _ownedSkillRepository.LoadOwnedSkillsAsync();
             }
@@ -212,7 +212,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns></returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkillAsync()
         {
-            if(_skillBuildRepository != null && !_debugMode)
+            if(_skillBuildRepository != null && !_isDebugMode)
             {
                 return await _skillBuildRepository.GetEquippedSkills();
             }

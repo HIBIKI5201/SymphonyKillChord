@@ -44,7 +44,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         ///     改造画面のセーブデータを非同期で保存するメソッド。
         /// </summary>
         /// <param name="equipmentSkillIDs"> 装備スキルの ID のリスト。 </param>
-        /// <param name="skillLevelupPoint"> スキルレベルアップポイント。 </param>
         /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
         public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs)
         {

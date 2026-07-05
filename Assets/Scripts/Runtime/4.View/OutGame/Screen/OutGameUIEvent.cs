@@ -1,5 +1,6 @@
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -87,8 +88,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
-        /// <summary> スキル編成が保存されたときのイベント。 </summary>
-        public Action OnSkillBuildSaved;
+        /// <summary> スキル編成が保存されたときのイベント。true: 保存成功 / false: 保存失敗。 </summary>
+        public Func<Task<bool>> OnSkillBuildSaved;
 
         /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
         public Action OnSkillLevelUp;

@@ -42,6 +42,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             var skillIds = new UnlockSkillId[unlockSkills];
             for (var i = 0; i < unlockSkills; i++)
             {
+                if (_unlockSkills[i] == null)
+                {
+                    continue;
+                }
+
                 skillIds[i] = new UnlockSkillId(_unlockSkills[i].Id);
             }
 

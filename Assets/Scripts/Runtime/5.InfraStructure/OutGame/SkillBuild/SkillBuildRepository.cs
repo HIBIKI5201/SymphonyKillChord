@@ -81,7 +81,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 int skillId = skillIds[i];
                 if (!_skillRepository.TryGetSkill(skillId, out var skillData))
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning($"スキル ID '{skillId}' に対応する SkillData が見つかりませんでした。");
+#endif
                     continue;
                 }
 
