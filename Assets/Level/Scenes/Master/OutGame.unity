@@ -512,6 +512,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3745f4fc8486a57438287a4e4325a6ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SceneTransitionInitializer
+  _loadingScreenView: {fileID: 0}
   _debugView: {fileID: 205594943}
 --- !u!114 &205594945
 MonoBehaviour:
@@ -893,6 +894,7 @@ MonoBehaviour:
   _skillNodePhaseBindRepo: {fileID: 11400000, guid: 2efcc81dfd565a94a9110b488a8ec243, type: 2}
   _videoPlayer: {fileID: 1876322594}
   _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
+  _isDebugMode: 1
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,10 +908,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
   _uiDocument: {fileID: 2119823347}
-  _skillBuildRepositoryDebug: {fileID: 11400000, guid: ed00377b3610b1e45b0f1c7da00f007a, type: 2}
-  _ownedSkillRepositoryDebug: {fileID: 11400000, guid: 8f9f05cd27f2f3a4087a15acbe76d7c3, type: 2}
+  _ownedSkillRepository: {fileID: 11400000, guid: 134672bf4f515f4439a46323fff09e2a, type: 2}
+  _skillBuildRepository: {fileID: 11400000, guid: d2b760f47d977174fb177b0d0f9d2480, type: 2}
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
+  _debugMode: 0
   _skillBuildDebugger: {fileID: 0}
+  _ownedSkillRepositoryDebug: {fileID: 11400000, guid: 8f9f05cd27f2f3a4087a15acbe76d7c3, type: 2}
+  _skillBuildRepositoryDebug: {fileID: 11400000, guid: ed00377b3610b1e45b0f1c7da00f007a, type: 2}
 --- !u!1 &959266667
 GameObject:
   m_ObjectHideFlags: 0

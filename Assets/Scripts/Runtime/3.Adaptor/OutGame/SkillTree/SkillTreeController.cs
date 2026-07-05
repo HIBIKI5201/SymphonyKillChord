@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Dictionary<string, ISkillNodeConnViewModel> nodeConns,
             Dictionary<int, VisualElement> unlockPhases,
             Dictionary<int, VideoClip> videoClipBinds,
-            SkillTreeStatusEntity skillTreeStatusEntity)
+            SkillTreeStatusEntity skillTreeStatusEntity,
+            Action ownedSkillChanged)
         {
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
@@ -43,6 +45,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _unlockPhases = unlockPhases;
             _videoClipBinds = videoClipBinds;
             _skillTreeStatusEntity = skillTreeStatusEntity;
+            _ownedSkillChanged = ownedSkillChanged;
             _nodesOnPath = new();
 
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
@@ -100,7 +103,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
                 entity.Unlock();
                 if (!_skillTreeStatusEntity.UnlockedNodes.Contains(nodeId))
+                {
                     _skillTreeStatusEntity.UnlockedNodes.Add(nodeId);
+                }
+                int[] unlockSkillIds = new int[entity.UnlockSkillIds.Length];
+                for (int i = 0; i < entity.UnlockSkillIds.Length; i++)
+                {
+                    unlockSkillIds[i] = entity.UnlockSkillIds[i].Value;
+                }
+                _skillTreeStatusEntity.AddUnlockedSkillIds(unlockSkillIds);
+
                 _skillNodeViews[entity.SkillNodeIdVO.Id].SetUnlocked();
                 UpdateConns(nodeId);
                 UpdateUnlockPhase(nodeId);
@@ -108,7 +120,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
 
             _skillTreeService
-                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.CurrentPoints)
+                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.UnlockedSkillIds, _skillTreeStatusEntity.CurrentPoints)
                 .ContinueWith(
                     t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
                     TaskContinuationOptions.OnlyOnFaulted);
@@ -118,6 +130,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _ownedSkillChanged?.Invoke();
         }
 
         /// <summary>
@@ -157,6 +170,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private SkillTreeStatusEntity _skillTreeStatusEntity;
         private IPreviewVideoScreenViewModel _previewVideoScreenView;
         private IPreviewVideoScreenViewShowable _previewVideoScreenViewShowable;
+        private Action _ownedSkillChanged;
         private int _costToUnlock = -1;
         private int _selectedNodeId = -1;
 

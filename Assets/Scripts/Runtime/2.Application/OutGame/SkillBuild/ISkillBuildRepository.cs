@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.SkillBuild
 {
@@ -9,13 +10,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
     public interface ISkillBuildRepository
     {
         /// <summary> プレイヤーの装備スキル構成を読み込む。 </summary>
-        void LoadSkillBuild();
-
-        /// <summary> プレイヤーの装備スキル構成を保存する。 </summary>
-        /// <param name="skillBuildDefinition"> 保存する装備スキル構成。 </param>
-        void SaveSkillBuild(SkillBuildDefinition skillBuildDefinition);
+        ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild();
 
         /// <summary> プレイヤーの装備スキルのリストを取得する。 </summary>
-        IReadOnlyList<EquippedSkill> GetEquippedSkills();
+        ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkills();
     }
 }

@@ -1,4 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="SkillBuildDialog" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillBuild/UIToolkit/SkillBuildDialog.uxml?fileID=9197481963319205126&amp;guid=00db7cb3a885b6d49b5fb1be611db438&amp;type=3#SkillBuildDialog"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
@@ -50,5 +51,6 @@
                 <ui:VisualElement class="skill-element-list" style="flex-grow: 1; flex-direction: row; height: auto; justify-content: flex-start; align-self: center; margin-left: 3%;"/>
             </ui:ScrollView>
         </ui:VisualElement>
+        <ui:Instance template="SkillBuildDialog" name="SkillBuildDialog" style="position: absolute; width: 100%; height: 100%;"/>
     </ui:VisualElement>
 </ui:UXML>

@@ -12,7 +12,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
     {
         /// <summary>
         ///     SkillElementDragAndDropSetup クラスのコンストラクタ。
-        ///     UIDocument を受け取り、ドラッグ&ドロップのセットアップを行う。
+        ///     UIDocument を受け取り、既存要素へのドラッグ&ドロップのセットアップを行う。
         /// </summary>
         /// <param name="uiDocument"> ドキュメントの UIDocument。 </param>
         /// <param name="skillBuildViewModel"> 一時スロット状態を保持する ViewModel。 </param>
@@ -36,7 +36,28 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string EMPTY_SKILL_LABEL = "未設定";
 
         /// <summary>
-        ///    ドキュメントのルート要素を取得し、ドラッグ可能な要素とドロップターゲットをセットアップするメソッド。
+        ///     単一のスキル要素にドラッグ&ドロップ操作を設定する。
+        ///     新規スキル入手時など、動的に追加された要素に対して呼び出す。
+        /// </summary>
+        /// <param name="element"> セットアップ対象の VisualElement。 </param>
+        public void SetupDraggable(VisualElement element)
+        {
+            if (element == null)
+            {
+                return;
+            }
+
+            SkillElementDragAndDropManipulator manipulator = new SkillElementDragAndDropManipulator(
+                element,
+                OnSkillElementDrop,
+                slotContainerName: SKILL_ELEMENT_CONTAINER_CLASSNAME,
+                slotName: SKILL_ELEMENT_SLOT_CLASSNAME);
+
+            element.AddManipulator(manipulator);
+        }
+
+        /// <summary>
+        ///    ドキュメントのルート要素を取得し、既存のドラッグ可能な要素とドロップターゲットをセットアップするメソッド。
         /// </summary>
         /// <param name="root"> ドキュメントのルート要素。 </param>
         private void SetupDraggables(VisualElement root)
@@ -44,15 +65,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             List<VisualElement> draggables =
                 root.Query<VisualElement>(className: DRAGGABLE_CLASSNAME).ToList();
 
-            foreach (VisualElement element in draggables)
+            for (int i = 0; i < draggables.Count; i++)
             {
-                SkillElementDragAndDropManipulator manipulator = new SkillElementDragAndDropManipulator(
-                    element,
-                    OnSkillElementDrop,
-                    slotContainerName: SKILL_ELEMENT_CONTAINER_CLASSNAME,
-                    slotName: SKILL_ELEMENT_SLOT_CLASSNAME);
-
-                element.AddManipulator(manipulator);
+                SetupDraggable(draggables[i]);
             }
         }
 

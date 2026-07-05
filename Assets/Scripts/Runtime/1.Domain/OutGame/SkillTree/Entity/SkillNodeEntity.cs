@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Domain.OutGame.SkillTree
 {
     /// <summary>
@@ -8,27 +6,32 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     public class SkillNodeEntity
     {
         public SkillNodeEntity(int nodeId,
-            int cost, string skillDetail)
+            int cost, string skillDetail,
+            UnlockSkillId[] unlockSkillIds)
         {
             SkillNodeIdVO = new SkillNodeId(nodeId);
             UnlockCost = new UnlockCost(cost);
             _parents = null;
             SkillDetail = skillDetail;
+            _unlockSkillIds = unlockSkillIds;
         }
-        /// <summary> ノードのID </summary>
+        /// <summary> ノードのID。 </summary>
         public SkillNodeId SkillNodeIdVO { get; }
-        /// <summary> 解放に必要なコスト </summary>
+        /// <summary> 解放に必要なコスト。 </summary>
         public UnlockCost UnlockCost { get; }
-        /// <summary> スキルの詳細文 </summary>
+        /// <summary> スキルの詳細文。 </summary>
         public string SkillDetail { get; }
-        /// <summary> 解放されているか </summary>
+        /// <summary> 解放されているか。 </summary>
         public bool IsUnlocked => _isUnlocked;
 
-        /// <summary> 親ノード </summary>
+        /// <summary> 親ノード。 </summary>
         public SkillNodeEntity[] Parents => _parents;
 
+        /// <summary> 解放されるスキルの ID。 </summary>
+        public UnlockSkillId[] UnlockSkillIds => _unlockSkillIds;
+
         /// <summary>
-        ///     親ノードを設定する
+        ///     親ノードを設定する。
         /// </summary>
         /// <param name="parents"></param>
         public void SetParent(SkillNodeEntity[] parents)
@@ -46,5 +49,6 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         private bool _isUnlocked = false;
         private SkillNodeEntity[] _parents;
+        private UnlockSkillId[] _unlockSkillIds;
     }
 }
