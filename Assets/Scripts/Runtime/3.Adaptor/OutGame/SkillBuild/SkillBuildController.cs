@@ -137,7 +137,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 throw new ArgumentNullException(nameof(ownedSkills));
             }
 
-            _skillDataMap = new Dictionary<int, SkillData>(ownedSkills.Count);
+            Dictionary<int, SkillData> skillDataMap = new Dictionary<int, SkillData>(ownedSkills.Count);
 
             for (int i = 0; i < ownedSkills.Count; i++)
             {
@@ -147,13 +147,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     throw new ArgumentException($"入手済みスキル一覧に null が存在します。 index={i}", nameof(ownedSkills));
                 }
 
-                if (_skillDataMap.ContainsKey(skillData.Id))
+                if (skillDataMap.ContainsKey(skillData.Id))
                 {
                     throw new ArgumentException($"重複したスキル ID が存在します。 skillId={skillData.Id}", nameof(ownedSkills));
                 }
 
-                _skillDataMap.Add(skillData.Id, skillData);
+                skillDataMap.Add(skillData.Id, skillData);
             }
+
+            _skillDataMap = skillDataMap;
         }
     }
 }
