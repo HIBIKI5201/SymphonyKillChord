@@ -154,5 +154,33 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             throw new ArgumentOutOfRangeException(nameof(slotIndex), $"指定されたスロットが見つかりません。 slotIndex={slotIndex}");
         }
+
+        /// <summary>
+        ///     未保存の変更があるかを判定する。
+        /// </summary>
+        public bool HasUnsavedChanges()
+        {
+            for (int i = 0; i < _slotViews.Length; i++)
+            {
+                SkillBuildSlotView slotView = _slotViews[i];
+                if (slotView.CurrentSkillId != slotView.InitialSkillId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     現在のスロット状態を保存済み状態として確定する。
+        /// </summary>
+        public void MarkCurrentAsSaved()
+        {
+            for (int i = 0; i < _slotViews.Length; i++)
+            {
+                _slotViews[i].CommitCurrentAsInitial();
+            }
+        }
     }
 }
