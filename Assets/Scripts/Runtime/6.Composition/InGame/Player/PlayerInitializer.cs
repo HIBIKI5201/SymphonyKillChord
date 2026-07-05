@@ -34,6 +34,7 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -64,6 +65,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
+        private Action<int> _onOneShotEndedHandler;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -134,14 +136,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             PlayerMoveParameter parameter = _playerConfig.ToDomain();
 
-            PlayerDodgeMovementApplication dodge = new(parameter);
-            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
-            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
-
-            PlayerMovementApplication move = new(parameter);
-            PlayerApplication application = new(move, dodge);
-
-            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
             var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
@@ -188,13 +182,32 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, (float)parameter.AttackRotationSpeed, (int)_playerEntity.BaseDamage.Value);
+                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, musicSyncState, (float)parameter.AttackRotationSpeed, (float)parameter.AttackCooldown.Value, (int)_playerEntity.BaseDamage.Value);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             var animationComposition = _player.gameObject.AddComponent<AnimationComposition>();
             var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
+
+            PlayerDodgeMovementApplication dodge = new(parameter);
+            dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
+            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+
+            _onOneShotEndedHandler = index =>
+            {
+                if (index == animationIndices.Dodge)
+                {
+                    playerAttackController.StartAttackCooldown();
+                }
+            };
+
+            _characterAnimationView.OnOneShotEnded += _onOneShotEndedHandler;
+
+            PlayerMovementApplication move = new(parameter);
+            PlayerApplication application = new(move, dodge);
+
+            PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
 
             _player.Initialize(playerMovementController, playerAttackController, animController, animationIndices, ct, inputView, healthHudPresenter);
 
@@ -287,12 +300,19 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private void OnDestroy()
         {
+            if (_characterAnimationView != null && _onOneShotEndedHandler != null)
+            {
+                _characterAnimationView.OnOneShotEnded -= _onOneShotEndedHandler;
+                _onOneShotEndedHandler = null;
+            }
+
             ServiceLocator.UnregisterInstance(this);
 
             if (_playerEntity != null)
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
+
             }
         }
     }
