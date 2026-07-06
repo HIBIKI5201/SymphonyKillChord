@@ -19,8 +19,6 @@ namespace DevelopProducts.ToonShader
         private const string _passName = "SilToonCharacterShadow";
         private const string _shadowCasterPassName = "ShadowCaster";
         private const int _depthBits = 16;
-        private const float _pitchAngle = 50f;
-        private const float _yawAngle = 20f;
 
         private static readonly int _idCharShadowmap = Shader.PropertyToID("_CharShadowmap");
         private static readonly int _idCharWorldToShadow = Shader.PropertyToID("_CharWorldToShadow");
