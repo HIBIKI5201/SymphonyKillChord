@@ -28,7 +28,7 @@ void GetToonMainLight(
 
 #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 
-    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS + mainLight.direction * 0.15));
+    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS + mainLight.direction * 0.5));
 
 #else
     shadowAtten = 1.0h;
@@ -37,7 +37,7 @@ void GetToonMainLight(
 #if defined(_CHAR_SHADOW_ON)
     // キャラ専用シャドウマップによるセルフシャドウ。
     // メインライト側の受け取りバイアス(自己投影の棄却)はこちらには適用しない
-    shadowAtten = min(shadowAtten, SampleCharacterShadow(positionWS));
+    shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
 #endif
 
 #endif
