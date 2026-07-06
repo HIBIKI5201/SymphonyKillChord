@@ -123,7 +123,7 @@ Material:
     - _OutlineWidthShadow: 0.0005
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
-    - _PerspectiveRemovalRatio: 1
+    - _PerspectiveRemovalRatio: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
