@@ -44,6 +44,7 @@ namespace DevelopProducts.ToonShader
             MaterialProperty colorShadow = Find("_ColorShadow", props);
             MaterialProperty isForFace = Find("_IsForFace", props);
             MaterialProperty faceUp = Find("_FaceUp", props);
+            MaterialProperty charShadowOn = Find("_CharShadowOn", props);
 
             MaterialProperty _fadeAlpha = Find("_FadeAlpha", props);
             MaterialProperty _fadeOn = Find("_FadeOn", props);
@@ -89,6 +90,9 @@ namespace DevelopProducts.ToonShader
                     materialEditor.ShaderProperty(faceUp, new GUIContent("Face Up Direction", "顔の上方向ベクトル (ワールド空間)"));
                     EditorGUI.indentLevel--;
                 }
+
+                EditorGUILayout.Space(5);
+                materialEditor.ShaderProperty(charShadowOn, new GUIContent("Character Self Shadow", "キャラ専用シャドウマップ(_CharShadowmap)によるセルフシャドウを受け取る"));
 
             });
 
@@ -233,6 +237,8 @@ namespace DevelopProducts.ToonShader
                 material.HasProperty("_IsForFace") && material.GetFloat("_IsForFace") > 0);
             SetKeyword(material, "_PERSPECTIVE_REMOVAL_ON",
                 material.HasProperty("_PerspectiveRemovalRatio") && material.GetFloat("_PerspectiveRemovalRatio") > 0);
+            SetKeyword(material, "_CHAR_SHADOW_ON",
+                material.HasProperty("_CharShadowOn") && material.GetFloat("_CharShadowOn") > 0);
         }
 
         private static void SetKeyword(Material material, string keyword, bool enabled)

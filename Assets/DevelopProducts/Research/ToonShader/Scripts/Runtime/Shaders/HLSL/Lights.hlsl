@@ -5,6 +5,7 @@
 #ifndef SHADERGRAPH_PREVIEW
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/CharacterShadow.hlsl"
 
 
 #endif
@@ -27,10 +28,16 @@ void GetToonMainLight(
 
 #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 
-    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS));
+    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS + mainLight.direction * 0.15));
 
 #else
     shadowAtten = 1.0h;
+#endif
+
+#if defined(_CHAR_SHADOW_ON)
+    // キャラ専用シャドウマップによるセルフシャドウ。
+    // メインライト側の受け取りバイアス(自己投影の棄却)はこちらには適用しない
+    shadowAtten = min(shadowAtten, SampleCharacterShadow(positionWS));
 #endif
 
 #endif

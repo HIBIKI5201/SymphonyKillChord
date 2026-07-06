@@ -9,6 +9,8 @@ Shader "Custom/SilToon/Base"
         [Toggle(_ISFORFACE_ON)] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
+        [Toggle(_CHAR_SHADOW_ON)] _CharShadowOn("Character Self Shadow", Float) = 0
+
          [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
         _FadeAlpha("Fade Alpha",Range(0,1)) = 0
 
@@ -76,6 +78,7 @@ Shader "Custom/SilToon/Base"
                 #pragma multi_compile _ FADE_ON
                 #pragma shader_feature_local _NORMALMAP
                 #pragma shader_feature_local_fragment _ISFORFACE_ON
+                #pragma shader_feature_local_fragment _CHAR_SHADOW_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
