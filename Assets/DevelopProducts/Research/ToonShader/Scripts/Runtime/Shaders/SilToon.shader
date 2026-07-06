@@ -12,7 +12,7 @@ Shader "Custom/SilToon/Base"
          [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
         _FadeAlpha("Fade Alpha",Range(0,1)) = 0
 
-        [Headedr(Normal)]
+        [Header(Normal)]
         [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
