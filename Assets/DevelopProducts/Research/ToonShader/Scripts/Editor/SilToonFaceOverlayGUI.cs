@@ -138,6 +138,41 @@ namespace DevelopProducts.ToonShader
 
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("SilToon EyeThrough v1.0.1", EditorStyles.centeredGreyMiniLabel);
+
+            foreach (var target in materialEditor.targets)
+            {
+                if (target is Material mat)
+                {
+                    SyncNormalMapKeyword(mat);
+                }
+            }
+        }
+
+        public override void ValidateMaterial(Material material)
+        {
+            SyncNormalMapKeyword(material);
+        }
+
+        /// <summary>
+        /// ノーマルマップ未使用マテリアルではサンプリングとTBN計算を変数ごと省くため、
+        /// テクスチャの有無に合わせて _NORMALMAP キーワードを同期する。
+        /// </summary>
+        private static void SyncNormalMapKeyword(Material material)
+        {
+            if (!material.HasProperty("_NormalMap")) return;
+
+            bool useNormalMap = material.GetTexture("_NormalMap") != null;
+            if (material.IsKeywordEnabled("_NORMALMAP") != useNormalMap)
+            {
+                if (useNormalMap)
+                {
+                    material.EnableKeyword("_NORMALMAP");
+                }
+                else
+                {
+                    material.DisableKeyword("_NORMALMAP");
+                }
+            }
         }
 
         // ===== Helper Methods =====

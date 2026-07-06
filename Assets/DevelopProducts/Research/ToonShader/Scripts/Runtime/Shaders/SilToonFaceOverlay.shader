@@ -58,6 +58,8 @@ Shader "Custom/SilToon/FaceOverlay"
 
                 #pragma vertex vert
                 #pragma fragment frag
+                #pragma shader_feature_local _NORMALMAP
+                #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\ThroughFragment.hlsl"
 
             ENDHLSL
