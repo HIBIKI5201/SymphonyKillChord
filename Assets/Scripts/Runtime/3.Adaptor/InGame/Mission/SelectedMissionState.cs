@@ -8,34 +8,46 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public class SelectedMissionState
     {
-        /// <summary> 現在選択されているミッションIDを取得します。 </summary>
-        public MissionId CurrentMissionId
+        /// <summary> 現在選択されているミッション定義。 </summary>
+        public MissionDefinition CurrentMissionDefinition
         {
             get
             {
                 if (!HasSelectedMission)
                 {
-                    throw new InvalidOperationException("Mission has not been selected.");
+                    throw new InvalidOperationException("ミッションが選択されていません。");
                 }
 
-                return _currentMissionId;
+                return _currentMissionDefinition;
             }
         }
 
+        /// <summary> 現在選択されているミッションIDを取得します。 </summary>
+        public MissionId CurrentMissionId =>
+            CurrentMissionDefinition.MissionId;
+
         /// <summary> ミッションが選択されているかどうかを取得します。 </summary>
-        public bool HasSelectedMission { get; private set; }
+        public bool HasSelectedMission
+            => _currentMissionDefinition != null;
 
         /// <summary>
         ///     ミッションを選択します。
         /// </summary>
-        /// <param name="missionId">選択するミッションID。</param>
-        public void SelectMission(MissionId missionId)
+        /// <param name="missionDefinition"> 選択するミッション情報。 </param>
+        public void SelectMission(MissionDefinition missionDefinition)
         {
-            _currentMissionId = missionId;
-            HasSelectedMission = true;
+            _currentMissionDefinition = missionDefinition;
         }
 
-        /// <summary> 現在選択されているミッションID。 </summary>
-        private MissionId _currentMissionId;
+        /// <summary>
+        ///     選択情報をクリアします。
+        /// </summary>
+        public void Clear()
+        {
+            _currentMissionDefinition = null;
+        }
+
+        /// <summary> 現在選択されているミッション情報。 </summary>
+        private MissionDefinition _currentMissionDefinition;
     }
 }

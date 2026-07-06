@@ -1,5 +1,6 @@
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -12,6 +13,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
     [DefaultExecutionOrder(-200)]
     public class OutGameUIEvent : MonoBehaviour
     {
+        /// <summary> タイトル画面を表示するイベント。 </summary>
+        public Action OnShowTitleScreen;
+
+        /// <summary> メニュー画面を表示するイベント。 </summary>
+        public Action OnShowMenuScreen;
+
+        /// <summary> オプション画面を表示するイベント。 </summary>
+        public Action OnShowOptionsScreen;
+
+        /// <summary> クレジット画面を表示するイベント。 </summary>
+        public Action OnShowCreditScreen;
+
+        /// <summary> データリセットボタンが押されたときのイベント。 </summary>
+        public Action OnDataResetButtonClicked;
+
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
@@ -51,6 +67,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルノードが選択された時のイベント。 </summary>
         public Action OnSkillUnlocked;
 
+        /// <summary> 入手済みスキル一覧が更新された時のイベント。 </summary>
+        public Action OnOwnedSkillChanged;
+
         /// <summary> スキル詳細画面を閉じるイベント。 </summary>
         public Action<int> OnSkillDetailClosed;
 
@@ -69,8 +88,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
-        /// <summary> スキル編成が保存されたときのイベント。 </summary>
-        public Action OnSkillBuildSaved;
+        /// <summary> スキル編成が保存されたときのイベント。true: 保存成功 / false: 保存失敗。 </summary>
+        public Func<Task<bool>> OnSkillBuildSaved;
 
         /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
         public Action OnSkillLevelUp;
@@ -87,7 +106,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public void RegisterOutGameUIEvent()
         {
             if (_isRegistered) { return; }
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
         }
 

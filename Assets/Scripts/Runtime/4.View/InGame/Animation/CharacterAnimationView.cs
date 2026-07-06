@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -27,6 +28,10 @@ namespace KillChord.Runtime.View
             _isInitialized = true;
             _controller.OnOneShotRequested += HandleOneShotRequested;
         }
+
+        /// <summary> ワンショット再生終了イベント。 </summary>
+        public event Action<int> OnOneShotEnded;
+
 
         /// <summary> 毎フレームDTOを取得してViewModelを更新しPlayableに反映する。 </summary>
         private void Update()
@@ -70,6 +75,11 @@ namespace KillChord.Runtime.View
                 }
 
                 _attackOverlayRemaining -= Time.deltaTime;
+                if (_attackOverlayRemaining <= 0f && !_hasNotifiedOneShotEnded)
+                {
+                    _hasNotifiedOneShotEnded = true;
+                    OnOneShotEnded?.Invoke(_overlayIndex);
+                }
             }
 
             // ViewModelの値をPlayableに反映する
@@ -94,6 +104,7 @@ namespace KillChord.Runtime.View
             _attackOverlayDuration = clipLen / speed;
             _attackOverlayRemaining = _attackOverlayDuration;
             _overlayIndex = index;
+            _hasNotifiedOneShotEnded = false;
         }
 
         /// <summary> PlayableGraphを破棄する。 </summary>
@@ -120,5 +131,7 @@ namespace KillChord.Runtime.View
         private float _attackOverlayRemaining;
 
         private int _overlayIndex;
+        // ワンショット再生終了通知済みフラグ
+        private bool _hasNotifiedOneShotEnded;
     }
 }

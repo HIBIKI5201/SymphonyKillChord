@@ -1,6 +1,10 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.OutGame.SkillTree
@@ -14,6 +18,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         {
             _skillNodeEntityDict = skillNodeEntityDict;
             _visitedNodes = new();
+            _savedataSystem = ServiceLocator.GetInstance<SavedataSystem>();
         }
         /// <summary>
         ///     指定されたノードまでの経路にある、全てのノードを解放するための必要ポイントを
@@ -55,6 +60,31 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     セーブデータのスキル解放情報をロードする。
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask<SkillUnlockData> LoadSkillUnlockData()
+        {
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            return saveData.SkillUnlock;
+        }
+
+        /// <summary>
+        ///     スキル解放情報をセーブする。
+        /// </summary>
+        /// <param name="unlockedNodes"></param>
+        /// <param name="unlockedSkillIds"></param>
+        /// <param name="currentPoints"></param>
+        public async Task SaveSkillUnlockData(List<int> unlockedNodes, List<int> unlockedSkillIds, int currentPoints)
+        {
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
+            saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillIds.ToArray());
+            saveData.SkillUnlock.SetResearchPoint(currentPoints);
+            await _savedataSystem.SaveAsync(saveData);
+        }
+
+        /// <summary>
         ///     指定されたノードまでの経路を取得する。
         /// </summary>
         /// <param name="node"></param>
@@ -78,5 +108,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
         private Dictionary<int, SkillNodeEntity> _skillNodeEntityDict;
         private HashSet<SkillNodeEntity> _visitedNodes;
+        private SavedataSystem _savedataSystem;
     }
 }

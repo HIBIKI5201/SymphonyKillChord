@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
 
@@ -36,8 +35,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             shell.Activate(enemyBattleState);
         }
 
-        [SerializeField]
-        private EnemyMoveView _enemyMoveView;
         private IShellPool _shellPool;
     }
 }

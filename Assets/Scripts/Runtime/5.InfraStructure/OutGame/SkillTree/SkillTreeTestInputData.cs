@@ -10,6 +10,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     public class SkillTreeTestInputData : ScriptableObject
     {
         public int currentPoints;
+        public int[] UnlockedSkillNodeIds;
         public int[] UnlockedSkillIds;
         public float PlayerHp;
         public float PlayerAttack;

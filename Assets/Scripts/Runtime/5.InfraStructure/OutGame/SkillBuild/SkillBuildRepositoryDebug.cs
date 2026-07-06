@@ -4,6 +4,7 @@ using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
@@ -15,13 +16,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(SkillBuildRepositoryDebug))]
     public class SkillBuildRepositoryDebug : ScriptableObject, ISkillBuildRepository
     {
-        public IReadOnlyList<EquippedSkill> GetEquippedSkills()
+        public ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkills()
         {
             RebuildEquippedSkills();
-            return _equippedSkills.AsReadOnly();
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
-        public void LoadSkillBuild()
+        public ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild()
         {
             if (_skillDataAssets == null || _skillDataAssets.Count == 0)
             {
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
             RebuildEquippedSkills();
             _skillBuildDefinition = new SkillBuildDefinition(_equippedSkills.ToArray());
+            return new ValueTask<IReadOnlyList<EquippedSkill>>(_equippedSkills.AsReadOnly());
         }
 
         public void SaveSkillBuild(SkillBuildDefinition skillBuildDefinition)
