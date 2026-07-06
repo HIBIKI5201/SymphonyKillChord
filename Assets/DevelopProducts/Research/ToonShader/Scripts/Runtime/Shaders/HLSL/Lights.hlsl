@@ -9,88 +9,88 @@
 
 #endif
 
-void MainLight_float(
+void GetToonMainLight(
     float3 positionWS,
-    out float3 Direction,
-    out float3 Color,
-    out float ShadowAtten)
+    out half3 direction,
+    out half3 color,
+    out half shadowAtten)
 {
 #ifdef SHADERGRAPH_PREVIEW
-    Direction   = float3(0.5, 0.5, 0);
-    Color       = float3(1, 1, 1);
-    ShadowAtten = 1.0;
+    direction   = half3(0.5, 0.5, 0);
+    color       = half3(1, 1, 1);
+    shadowAtten = 1.0h;
 #else
 
     Light mainLight = GetMainLight();
-    Direction = mainLight.direction;
-    Color = mainLight.color;
+    direction = mainLight.direction;
+    color = mainLight.color;
 
 #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 
-    ShadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS));
+    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS));
 
 #else
-    ShadowAtten = 1.0;
+    shadowAtten = 1.0h;
 #endif
 
 #endif
 }
 
-float3 GetToonColor(
-    float3 mainColor,
-    float3 outerColor,
-    float3 shadowColor,
-    float bright,
-    float shadowAtten
+half3 GetToonColor(
+    half3 mainColor,
+    half3 outerColor,
+    half3 shadowColor,
+    half bright,
+    half shadowAtten
 )
 {
     bright = saturate(bright);
     shadowAtten = saturate(shadowAtten);
-    float main = smoothstep(0, 0.5, bright) * shadowAtten;
-    float outer = smoothstep(0, 0.1, bright) * shadowAtten;
+    half main = smoothstep(0.0h, 0.5h, bright) * shadowAtten;
+    half outer = smoothstep(0.0h, 0.1h, bright) * shadowAtten;
 
-    return lerp(lerp(shadowColor, outerColor, outer.rrr), mainColor, main.rrr);
+    return lerp(lerp(shadowColor, outerColor, outer), mainColor, main);
 }
-float3 GetToonColorAdditional(
-    float3 mainColor,
-    float bright,
-    float shadowAtten
+half3 GetToonColorAdditional(
+    half3 mainColor,
+    half bright,
+    half shadowAtten
 )
 {
     bright = saturate(bright);
     shadowAtten = saturate(shadowAtten);
-    float main = smoothstep(0, 0.2, bright) * shadowAtten;
+    half main = smoothstep(0.0h, 0.2h, bright) * shadowAtten;
 
-    return lerp(float3(0, 0, 0), mainColor, main.rrr);
+    return mainColor * main;
 }
 
 #ifndef SHADERGRAPH_PREVIEW
-float3 GetAdditionalToonLight(float3 mainColor, float3 normalWS, Light light)
+half3 GetAdditionalToonLight(half3 mainColor, half3 normalWS, Light light)
 {
-    float atten = light.shadowAttenuation * light.distanceAttenuation;
-    float NdotL = saturate(dot(normalWS, light.direction));
+    half atten = half(light.shadowAttenuation * light.distanceAttenuation);
+    half NdotL = saturate(dot(normalWS, half3(light.direction)));
 
-    return min(light.color * GetToonColorAdditional(mainColor, NdotL, atten), float3(1, 1, 1)) / 2;
+    return min(half3(light.color) * GetToonColorAdditional(mainColor, NdotL, atten), half3(1, 1, 1)) / 2.0h;
 }
 #endif
 
-void GetLights_float(
-    float3 mainColor,
-    float3 outerColor,
-    float3 shadowColor,
+void GetToonLights(
+    half3 mainColor,
+    half3 outerColor,
+    half3 shadowColor,
     float3 positionWS,
-    float3 normalWS,
+    half3 normalWS,
     float2 normalizedScreenSpaceUV,
-    out float3 color
+    out half3 color
 )
 {
 #ifdef SHADERGRAPH_PREVIEW
-    color = float3(0, 0, 0);
+    color = half3(0, 0, 0);
 #else
-    float3 sunNormal, sunColor;
-    float sunShadowAtten;
-    MainLight_float(positionWS, sunNormal, sunColor, sunShadowAtten);
-    color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunNormal, normalWS)), sunShadowAtten);
+    half3 sunDir, sunColor;
+    half sunShadowAtten;
+    GetToonMainLight(positionWS, sunDir, sunColor, sunShadowAtten);
+    color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunDir, normalWS)), sunShadowAtten);
 
 #if USE_CLUSTER_LIGHT_LOOP
     // Forward+(Cluster)ではメインライト以外の平行光源はクラスタに含まれないため先に別ループで処理する

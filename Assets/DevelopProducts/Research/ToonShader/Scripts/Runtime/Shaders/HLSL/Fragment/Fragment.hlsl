@@ -36,11 +36,15 @@ struct Varyings
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
-    float3 perspectiveRemoval = GetPerspectiveRemoval(
+#ifdef _PERSPECTIVE_REMOVAL_ON
+    float3 positionOS = GetPerspectiveRemoval(
         _Head, IN.positionOS.xyz, IN.normalOS,
         _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+#else
+    float3 positionOS = IN.positionOS.xyz;
+#endif
 
-    OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
+    OUT.positionHCS = TransformObjectToHClip(positionOS);
 
     OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 
@@ -73,11 +77,13 @@ half4 frag(Varyings IN) : SV_Target
     half3 normalWS = IN.normalWS;
 #endif
 
-    normalWS = _IsForFace ? (half3) GetFaceNormal(_FaceUp, (float3) normalWS) : normalWS;
+#ifdef _ISFORFACE_ON
+    normalWS = (half3) GetFaceNormal(_FaceUp, (float3) normalWS);
+#endif
 
     half3 color;
-    GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, IN.positionWS, (float3) normalWS,
-                    GetNormalizedScreenSpaceUV(IN.positionHCS), color);
+    GetToonLights(_ColorLit.rgb, _ColorMiddle.rgb, _ColorShadow.rgb, IN.positionWS, normalWS,
+                  GetNormalizedScreenSpaceUV(IN.positionHCS), color);
 
     half backLight, rimLightFront, rimLightBack;
     GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),

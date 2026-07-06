@@ -34,7 +34,6 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineWidthLit;
     float _OutlineWidthShadow;
 
-    half _IsForFace;
     half _NormalMapIntensity;
     half _FresnelBackLight;
     half _FresnelFrontRimLight;

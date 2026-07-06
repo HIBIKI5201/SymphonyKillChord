@@ -143,35 +143,41 @@ namespace DevelopProducts.ToonShader
             {
                 if (target is Material mat)
                 {
-                    SyncNormalMapKeyword(mat);
+                    SyncKeywords(mat);
                 }
             }
         }
 
         public override void ValidateMaterial(Material material)
         {
-            SyncNormalMapKeyword(material);
+            SyncKeywords(material);
         }
 
         /// <summary>
-        /// ノーマルマップ未使用マテリアルではサンプリングとTBN計算を変数ごと省くため、
-        /// テクスチャの有無に合わせて _NORMALMAP キーワードを同期する。
+        /// 未使用機能の計算をシェーダーバリアントごと省くため、
+        /// マテリアルの設定値に合わせてshader_featureキーワードを同期する。
         /// </summary>
-        private static void SyncNormalMapKeyword(Material material)
+        private static void SyncKeywords(Material material)
         {
-            if (!material.HasProperty("_NormalMap")) return;
+            SetKeyword(material, "_NORMALMAP",
+                material.HasProperty("_NormalMap") && material.GetTexture("_NormalMap") != null);
+            SetKeyword(material, "_ISFORFACE_ON",
+                material.HasProperty("_IsForFace") && material.GetFloat("_IsForFace") > 0);
+            SetKeyword(material, "_PERSPECTIVE_REMOVAL_ON",
+                material.HasProperty("_PerspectiveRemovalRatio") && material.GetFloat("_PerspectiveRemovalRatio") > 0);
+        }
 
-            bool useNormalMap = material.GetTexture("_NormalMap") != null;
-            if (material.IsKeywordEnabled("_NORMALMAP") != useNormalMap)
+        private static void SetKeyword(Material material, string keyword, bool enabled)
+        {
+            if (material.IsKeywordEnabled(keyword) == enabled) return;
+
+            if (enabled)
             {
-                if (useNormalMap)
-                {
-                    material.EnableKeyword("_NORMALMAP");
-                }
-                else
-                {
-                    material.DisableKeyword("_NORMALMAP");
-                }
+                material.EnableKeyword(keyword);
+            }
+            else
+            {
+                material.DisableKeyword(keyword);
             }
         }
 
