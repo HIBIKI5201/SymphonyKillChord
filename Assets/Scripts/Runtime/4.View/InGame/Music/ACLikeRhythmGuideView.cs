@@ -44,7 +44,10 @@ namespace KillChord.Runtime.View.InGame.Music
                 _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
             }
 
-            int activeIndex = (int)(_totalBeatBoxCount * Mathf.Clamp01(normalizeOffset));
+            int activeIndex = Mathf.Clamp(
+                                (int)(_totalBeatBoxCount * Mathf.Clamp01(normalizeOffset)),
+                                0,
+                                _totalBeatBoxCount - 1);
             if (activeIndex == _currentOpenIndex)
             {
                 return;
