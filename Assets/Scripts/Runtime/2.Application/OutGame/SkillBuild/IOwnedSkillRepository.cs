@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application
 {
@@ -9,12 +10,9 @@ namespace KillChord.Runtime.Application
     public interface IOwnedSkillRepository
     {
         /// <summary> プレイヤーの取得済みスキルを読み込む。 </summary>
-        void LoadOwnedSkills();
-
-        /// <summary> プレイヤーの取得済みスキルを保存する。 </summary>
-        void SaveOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills);
+        ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync();
 
         /// <summary> プレイヤーの取得済みスキルのリストを取得する。 </summary>
-        IReadOnlyList<EquippedSkill> GetOwnedSkills();
+        ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills();
     }
 }

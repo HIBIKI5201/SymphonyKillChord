@@ -1,9 +1,7 @@
-using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Input;
-using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -35,14 +33,24 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return;
             }
 
-            ISceneTransitionService sceneTransitionService = new SceneTransitionService();
+            if (!ServiceLocator.TryGetInstance(
+                out SceneTransitionUsecase sceneTransitionUseCase))
+            {
+#if UNITY_EDITOR
+                Debug.LogError(
+                    $"[{nameof(OutGameSortieInitializer)}] " +
+                    $"{nameof(SceneTransitionUsecase)}が取得できませんでした。",
+                    this);
+#endif
+                return;
+            }
 
             IOutGameSortieOutputPort outputPort =
                 new OutGameSortieOutputPort(
                     outGameUIEvent,
                     inputComposition);
             OutGameSortieUseCase useCase =
-                new OutGameSortieUseCase(sceneTransitionService, outputPort);
+                new OutGameSortieUseCase(sceneTransitionUseCase, outputPort);
 
             OutGameSortieController controller = new OutGameSortieController(useCase);
 

@@ -78,7 +78,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
-            if(!ServiceLocator.TryGetInstance(out _sceneTransitionController))
+            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] SceneTransitionController が取得できませんでした.", this);
@@ -267,7 +267,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             {
                 await _transitionTask;
             }
-            catch (OperationCanceledException) 
+            catch (OperationCanceledException)
             {
                 throw;
             }
@@ -316,7 +316,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         {
             // 前回の画面の表示が完了していない場合は、完了するまで待機します。
             if (IsTransitioning) { return; }
-            
+
             _transitionTask = _screenController.ShowBattlePreparation(targetSceneName, RenewShowToken());
         }
 
@@ -342,10 +342,37 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _isStartGame = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            await _sceneTransitionController.ChangeSceneAsync(
-                currentSceneName,
-                targetSceneName,
-                _ctsTransition.Token);
+            try
+            {
+                bool success =
+                    await _sceneTransitionController
+                        .ChangeSceneKeepingLoadingAsync(
+                            currentSceneName,
+                            targetSceneName,
+                            _ctsTransition.Token);
+
+                if (success)
+                {
+                    return;
+                }
+
+                _isStartGame = false;
+
+                Debug.LogError(
+                    $"[{nameof(ScreenInitializer)}] " +
+                    "インゲームシーンへの遷移に失敗しました。" +
+                    $" SceneName: {targetSceneName}",
+                    this);
+            }
+            catch (OperationCanceledException)
+            {
+                _isStartGame = false;
+            }
+            catch (Exception exception)
+            {
+                _isStartGame = false;
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>

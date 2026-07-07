@@ -38,10 +38,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public int SlotIndex { get; }
 
         /// <summary> 初期スキル ID。 </summary>
-        public int InitialSkillId { get; }
+        public int InitialSkillId { get; private set; }
 
         /// <summary> 初期表示ラベル。 </summary>
-        public string InitialSkillLabel { get; }
+        public string InitialSkillLabel { get; private set; }
 
         /// <summary> 現在のスキル ID。 </summary>
         public int CurrentSkillId { get; private set; }
@@ -64,6 +64,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             CurrentSkillId = skillId;
             CurrentSkillLabel = skillLabel;
+        }
+
+        /// <summary>
+        ///     現在状態を初期状態として確定する。
+        /// </summary>
+        public void CommitCurrentAsInitial()
+        {
+            InitialSkillId = CurrentSkillId;
+            InitialSkillLabel = CurrentSkillLabel;
         }
 
         /// <summary>

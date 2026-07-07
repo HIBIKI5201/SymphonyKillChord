@@ -1,7 +1,6 @@
 ﻿#ifndef SILTOON_FRESNEL_INCLUDED
 #define SILTOON_FRESNEL_INCLUDED
 
-half Pow5(half x) { half x2 = x * x; return x2 * x2 * x; }
 half Pow10(half x) { half x2 = x * x; half x5 = x2 * x2 * x; return x5 * x5; }
 half Pow20(half x) { half x10 = Pow10(x); return x10 * x10; }
 
@@ -48,17 +47,17 @@ half BackRimFresnel(half3 normalWS, half3 viewDirWS)
 void GetFresnel(
     half3 normalWS,
     half3 viewDirWS,
-    out float backLight,
-    out float rimLightFront,
-    out float rimLightBack)
-{   
+    out half backLight,
+    out half rimLightFront,
+    out half rimLightBack)
+{
     half3 mainLightDirWS = half3(_MainLightPosition.xyz);
     half3 n = normalWS;
     half3 v = viewDirWS;
-    
-    backLight = float(BackLight(n, half3(GetViewForwardDir().xyz), v, mainLightDirWS));
 
-    rimLightFront = float(FrontRimFresnel(mainLightDirWS, n, v));
-    rimLightBack = float(BackRimFresnel(n, v));
+    backLight = BackLight(n, half3(GetViewForwardDir().xyz), v, mainLightDirWS);
+
+    rimLightFront = FrontRimFresnel(mainLightDirWS, n, v);
+    rimLightBack = BackRimFresnel(n, v);
 }
 #endif

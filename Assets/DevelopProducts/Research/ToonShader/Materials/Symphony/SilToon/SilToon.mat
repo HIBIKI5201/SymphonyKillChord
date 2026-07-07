@@ -12,10 +12,10 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - FADE_ON
+  - _CHAR_SHADOW_ON
+  - _NORMALMAP
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
-  - _CHAR_SHADOW_ON
   - _ISSMOOTHNORMAL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -98,6 +98,7 @@ Material:
     - _BumpScale: 1
     - _CharOutline: 1
     - _CharShadow: 1
+    - _CharShadowOn: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -108,7 +109,7 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _FadeAlpha: 1
-    - _FadeOn: 1
+    - _FadeOn: 0
     - _FresnelBackLight: 8
     - _FresnelBackRimLight: 0.3
     - _FresnelFrontRimLight: 3
@@ -125,7 +126,7 @@ Material:
     - _OutlineWidthShadow: 0.001
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
-    - _PerspectiveRemovalRatio: 1
+    - _PerspectiveRemovalRatio: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5

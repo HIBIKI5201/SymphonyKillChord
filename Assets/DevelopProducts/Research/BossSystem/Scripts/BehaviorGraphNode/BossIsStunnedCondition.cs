@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DevelopProducts.Boss.BehaviorGraphNode
 {
     [Serializable, Unity.Properties.GeneratePropertyBag]
-    [Condition(name: "BossIsStunned", story: "スタン状態である(Boss) [Bool] [State]", category: "Conditions/Boss", id: "f6a5b7c8e9da615234fa67bc89de0b56")]
+    [Condition(name: "BossIsStunned", story: "dev_スタン状態である(Boss) [Bool] [State]", category: "Conditions/Boss", id: "f6a5b7c8e9da615234fa67bc89de0b56")]
     public partial class BossIsStunnedCondition : Unity.Behavior.Condition
     {
         [SerializeReference] public BlackboardVariable<BossStateFacade> State;

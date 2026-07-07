@@ -17,3 +17,4 @@ MonoBehaviour:
   _dodgeSpeed: 20
   _dodgeDuration: 0.2
   _dodgeCooldown: 0.3
+  _attackCooldown: 0.2

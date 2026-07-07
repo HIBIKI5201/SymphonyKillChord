@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: SkillTreeTestInputData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillTreeTestInputData
   currentPoints: 100000
-  UnlockedSkillIds: 01000000
+  UnlockedSkillNodeIds: 01000000
+  UnlockedSkillIds: 00000000
   PlayerHp: 100
   PlayerAttack: 10
   PlayerCriticalChance: 0.05

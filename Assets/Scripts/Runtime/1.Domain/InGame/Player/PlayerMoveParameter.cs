@@ -10,13 +10,14 @@ namespace KillChord.Runtime.Domain.InGame.Player
     public sealed class PlayerMoveParameter
     {
         /// <summary> プレイヤー移動パラメータを初期化する。 </summary>
-        public PlayerMoveParameter(MoveSpeed moveSpeed, AttackRotationSpeed attackRotationSpeed, DodgeSpeed dodgeSpeed, DodgeDuration dodgeDuration, DodgeCooldown dodgeCooldown)
+        public PlayerMoveParameter(MoveSpeed moveSpeed, AttackRotationSpeed attackRotationSpeed, DodgeSpeed dodgeSpeed, DodgeDuration dodgeDuration, DodgeCooldown dodgeCooldown, AttackCooldown attackCooldown)
         {
             MoveSpeed = moveSpeed;
             AttackRotationSpeed = attackRotationSpeed;
             DodgeSpeed = dodgeSpeed;
             DodgeDuration = dodgeDuration;
             DodgeCooldown = dodgeCooldown;
+            AttackCooldown = attackCooldown;
         }
 
         /// <summary> 通常移動速度。 </summary>
@@ -33,5 +34,8 @@ namespace KillChord.Runtime.Domain.InGame.Player
 
         /// <summary> 回避クールダウン時間。 </summary>
         public DodgeCooldown DodgeCooldown;
+
+        /// <summary> 攻撃クールダウン時間。 </summary>
+        public AttackCooldown AttackCooldown;
     }
 }

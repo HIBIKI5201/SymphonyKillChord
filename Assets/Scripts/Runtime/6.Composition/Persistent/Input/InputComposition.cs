@@ -21,7 +21,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
 
-        [Header("Bufferの最大容量")] [SerializeField]
+        [Header("Bufferの最大容量")]
+        [SerializeField]
         private int _bufferCapacity;
 
         private PlayerInput _playerInput;
@@ -39,12 +40,17 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
         }
 
         private void OnDisable()
         {
             UnbindViewAdaptor();
+        }
+
+        private void OnDestroy()
+        {
+            ServiceLocator.UnregisterInstance(this);
         }
 
         /// <summary>
@@ -86,7 +92,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput += _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput += _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput += _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput += _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput += _inputAdaptor.HandleLook;
         }
 
         /// <summary>
@@ -100,7 +106,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput -= _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput -= _inputAdaptor.HandleLook;
         }
     }
 }
