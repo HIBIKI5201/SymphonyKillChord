@@ -8,6 +8,7 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
+#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\Smears.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
 
 struct appdata
@@ -20,6 +21,9 @@ struct appdata
 struct v2f
 {
     float4 pos : SV_POSITION;
+#ifdef SMEARS_ON
+    float smearsAlpha : TEXCOORD0;
+#endif
 };
 
 v2f vert(appdata v)
@@ -41,6 +45,13 @@ v2f vert(appdata v)
 #ifdef _PERSPECTIVE_REMOVAL_ON
     pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
 #endif
+
+#ifdef SMEARS_ON
+    ApplySmear(pushedOS, v.uv3, normalOS, _SmearsDirection, _SmearsPower,
+        pushedOS,
+        o.smearsAlpha);
+#endif
+
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
@@ -52,8 +63,16 @@ v2f vert(appdata v)
 
 float4 frag(v2f i) : SV_Target
 {
+#if defined(FADE_ON) || defined(SMEARS_ON)
+    // FADE_OFF時は_FadeAlphaが0でもスメア単体で機能するよう1を基準にする
+    half fadeAlpha = 1.0h;
 #ifdef FADE_ON
-    clip(_FadeAlpha - BayerDither(i.pos.xy * 0.5) - 0.0001);
+    fadeAlpha = _FadeAlpha;
+#endif
+#ifdef SMEARS_ON
+    fadeAlpha *= i.smearsAlpha;
+#endif
+    clip(fadeAlpha - BayerDither(i.pos.xy * 0.5) - 0.0001);
 #endif
     return _OutlineColor;
 }

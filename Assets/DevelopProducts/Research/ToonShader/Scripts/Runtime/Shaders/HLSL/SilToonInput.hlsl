@@ -19,6 +19,7 @@ CBUFFER_START(UnityPerMaterial)
     half4 _ColorMiddle;
     half4 _ColorShadow;
     float4 _OutlineColor;
+    half4 _SSSColor;
 
     float3 _FaceUp;
     float _FadeAlpha;
@@ -34,10 +35,18 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineWidthLit;
     float _OutlineWidthShadow;
 
+    float3 _SmearsDirection;
+    float _SmearsPower;
+
     half _NormalMapIntensity;
     half _FresnelBackLight;
     half _FresnelFrontRimLight;
     half _FresnelBackRimLight;
+
+    half _SSSWrap;
+    half _SSSIntensity;
+    half _SSSThickness;
+    half _SSSTransmissionPower;
 CBUFFER_END
 
 #endif

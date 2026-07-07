@@ -24,12 +24,25 @@ Shader "Custom/SilToon/Base"
         _FresnelFrontRimLight("Front Rim Light Intensity",Float) = 4
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
 
+        [Header(SSS)]
+        [Toggle(SSS_ON)] _SSSOn("SSS On", Float) = 0
+        _SSSColor("SSS Color", Color) = (1.0, 0.4, 0.3, 1)
+        _SSSWrap("Wrap", Range(0, 1)) = 0.3
+        _SSSIntensity("Intensity", Range(0, 2)) = 0.5
+        _SSSThickness("Thickness", Range(0, 1)) = 0.3
+        _SSSTransmissionPower("Transmission Power", Range(1, 16)) = 4
+
         [Header(OutLine)]
         _OutlineColor("Color",Color) = (1, 1, 1, 1)
         _ZOffset("Z Offset",Range(0,0.1)) = 0
         [Toggle] _IsSmoothNormal("Is Smooth Normal", Float) = 0
         _OutlineWidthLit("OutLine Width Lit", Float) = 0
         _OutlineWidthShadow("OutLine Width Shadow", Float) = 0
+
+        [Header(Smears)]
+        [Toggle(SMEARS_ON)] _SmearsOn("Smears On",Float) = 0
+        _SmearsPower ("Smears Power", Float) = 0.0
+        _SmearsDirection ("Smears Direction", Vector,3) = (0, 1, 0)
 
         [Header(PerspectiveRemoval)]
         _PerspectiveRemovalRatio("Perspective Removal", Range(0,1)) = 0
@@ -58,8 +71,10 @@ Shader "Custom/SilToon/Base"
         Pass
         {
             Name "MAIN"
-            Tags { "LightMode" = "UniversalForwardOnly" } 
+            Tags { "LightMode" = "UniversalForwardOnly" }
             Cull Back
+
+            ZWrite On
 
             Stencil{
                 Ref [_StencilRef]
@@ -79,6 +94,7 @@ Shader "Custom/SilToon/Base"
                 #pragma shader_feature_local _NORMALMAP
                 #pragma shader_feature_local_fragment _ISFORFACE_ON
                 #pragma shader_feature_local_fragment _CHAR_SHADOW_ON
+                #pragma shader_feature_local_fragment SSS_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -97,11 +113,14 @@ Shader "Custom/SilToon/Base"
             Tags { "LightMode" = "SRPDefaultUnlit" }
             Cull Front
 
+            ZWrite On
+
             HLSLPROGRAM
 
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma multi_compile _ FADE_ON
+                #pragma shader_feature_local SMEARS_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_vertex _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE

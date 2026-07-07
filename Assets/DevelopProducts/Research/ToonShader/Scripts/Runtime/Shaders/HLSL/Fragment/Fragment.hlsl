@@ -5,6 +5,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Lights.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SimplifiedSSS.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SilToonFresnel.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/FaceLight.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/NormalCombine.hlsl"
@@ -82,8 +83,14 @@ half4 frag(Varyings IN) : SV_Target
 #endif
 
     half3 color;
+#ifdef SSS_ON
+    GetSSSLights(normalWS, IN.positionWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
+                 _SSSColor.rgb, _SSSWrap, _SSSIntensity, _SSSThickness, _SSSTransmissionPower,
+                 GetNormalizedScreenSpaceUV(IN.positionHCS), color);
+#else
     GetToonLights(_ColorLit.rgb, _ColorMiddle.rgb, _ColorShadow.rgb, IN.positionWS, normalWS,
                   GetNormalizedScreenSpaceUV(IN.positionHCS), color);
+#endif
 
     half backLight, rimLightFront, rimLightBack;
     GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),

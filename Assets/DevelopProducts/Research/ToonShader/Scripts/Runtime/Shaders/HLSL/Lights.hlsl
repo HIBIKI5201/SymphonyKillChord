@@ -51,7 +51,7 @@ half3 GetToonColor(
     half shadowAtten
 )
 {
-    bright = saturate(bright);
+    bright = max(0.1, saturate(bright));
     shadowAtten = saturate(shadowAtten);
     half main = smoothstep(0.0h, 0.5h, bright) * shadowAtten;
     half outer = smoothstep(0.0h, 0.1h, bright) * shadowAtten;
