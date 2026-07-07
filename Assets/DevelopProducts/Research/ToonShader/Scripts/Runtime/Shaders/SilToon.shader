@@ -6,15 +6,13 @@ Shader "Custom/SilToon/Base"
         [MainColor] _ColorLit("Lit Color",Color) = (1, 1, 1, 1)
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
         _ColorShadow("Shadow Color",Color) = (1, 1, 1, 1)
-        [Toggle(_ISFORFACE_ON)] _IsForFace("Is For Face", Float) = 0
+        [Toggle] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
-
-        [Toggle(_CHAR_SHADOW_ON)] _CharShadowOn("Character Self Shadow", Float) = 0
 
          [Toggle(FADE_ON)] _FadeOn("Fade", Float) = 0
         _FadeAlpha("Fade Alpha",Range(0,1)) = 0
 
-        [Header(Normal)]
+        [Headedr(Normal)]
         [Normal] _NormalMap("Normal Map", 2D) = "black"{}
         _NormalMapIntensity("Intensity",Float) = 0
 
@@ -76,15 +74,10 @@ Shader "Custom/SilToon/Base"
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma multi_compile _ FADE_ON
-                #pragma shader_feature_local _NORMALMAP
-                #pragma shader_feature_local_fragment _ISFORFACE_ON
-                #pragma shader_feature_local_fragment _CHAR_SHADOW_ON
-                #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
-
-                #pragma multi_compile           _ _CLUSTER_LIGHT_LOOP
+                #pragma multi_compile           _ _FORWARD_PLUS
 
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
 
@@ -102,9 +95,9 @@ Shader "Custom/SilToon/Base"
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma multi_compile _ FADE_ON
-                #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
-
-                #pragma multi_compile_vertex _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+                #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+                #pragma multi_compile _ _SHADOWS_SOFT
                 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
 
             ENDHLSL
@@ -122,7 +115,6 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex ShadowPassVertex
                 #pragma fragment ShadowPassFragment
-                #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
 
                 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"

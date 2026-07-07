@@ -110,7 +110,7 @@ Material:
     - _FadeAlpha: 1
     - _FadeOn: 1
     - _FresnelBackLight: 8
-    - _FresnelBackRimLight: 0.3
+    - _FresnelBackRimLight: 0.5
     - _FresnelFrontRimLight: 3
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -121,8 +121,8 @@ Material:
     - _NormalMapIntensity: 2
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.0005
-    - _OutlineWidthShadow: 0.001
+    - _OutlineWidthLit: 0.001
+    - _OutlineWidthShadow: 0.002
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
     - _PerspectiveRemovalRatio: 1
@@ -147,7 +147,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMiddle: {r: 0.57, g: 0.57, b: 0.6, a: 1}
-    - _ColorShadow: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _ColorShadow: {r: 0.20862745, g: 0.20862745, b: 0.21960784, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FaceUp: {r: -0.00000011920929, g: 0.9999999, b: -0.000000059604645, a: 0}
     - _Head: {r: -0.00000000270408, g: 1.2650561, b: -0.030859653, a: 0}

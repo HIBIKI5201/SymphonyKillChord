@@ -8,7 +8,19 @@
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
+
+
+float _PerspectiveRemovalRatio;
+float _PerspectiveRemovalRadius;
+float3 _Head;
+float _FadeAlpha;
+
+float _ZOffset;
+float _IsSmoothNormal;
+float _OutlineWidthLit;
+float _OutlineWidthShadow;
+
+float4 _OutlineColor;
 
 struct appdata
 {
@@ -20,6 +32,7 @@ struct appdata
 struct v2f
 {
     float4 pos : SV_POSITION;
+    float4 screenPos : TEXCOORD0;
 };
 
 v2f vert(appdata v)
@@ -38,22 +51,22 @@ v2f vert(appdata v)
     // 頂点位置を法線方向に押し出してアウトライン幅を作る。
     float3 pushedOS = v.positionOS.xyz + normalOS * lerp(_OutlineWidthShadow, _OutlineWidthLit, GetOutlineThicknessRatio(v.positionOS, v.normalOS));
     
-#ifdef _PERSPECTIVE_REMOVAL_ON
-    pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
-#endif
     // IncreaseZOffsetは詳細なアウトラインをフラグメントに埋め込むためのZOffset
+    pushedOS = GetPerspectiveRemoval(_Head, pushedOS, v.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
     pushedOS = IncreaseZOffset(pushedOS, -_ZOffset);
     
     
     // オブジェクト空間の位置をクリップ空間（HClip）へ変換し、描画用の位置に設定する。
     o.pos = TransformObjectToHClip(float4(pushedOS, 1.0));
+    o.screenPos = ComputeScreenPos(o.pos);
     return o;
 }
 
 float4 frag(v2f i) : SV_Target
 {
 #ifdef FADE_ON
-    clip(_FadeAlpha - BayerDither(i.pos.xy * 0.5) - 0.0001);
+    float2 screenPixel = (i.screenPos.xy / i.screenPos.w) * _ScreenParams.xy / 2;
+    clip(_FadeAlpha - BayerDither(screenPixel) - 0.0001);
 #endif
     return _OutlineColor;
 }
