@@ -67,7 +67,7 @@ namespace DevelopProducts.ToonShader
 
         private Quaternion _directionEulerOffset = Quaternion.identity;
 
-        public void Setup(int resolution, float depthBias, float normalBias, float boundsPadding, float shadowStrength, Vector3 eulerOffset)
+        public void Setup(int resolution, float depthBias, float normalBias, float boundsPadding, float shadowStrength, in Vector3 eulerOffset)
         {
             _resolution = Mathf.Max(64, resolution);
             _depthBias = depthBias;
@@ -89,7 +89,7 @@ namespace DevelopProducts.ToonShader
             }
 
             UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
-            Vector3 lightDirWS = GetShadowLightDirection(_directionEulerOffset, cameraData.camera);
+            Vector3 lightDirWS = GetShadowLightDirection(_directionEulerOffset, cameraData.camera.transform.position, boundsWS.center);
 
             using (var builder = renderGraph.AddRasterRenderPass<PassData>(_passName, out PassData passData))
             {
@@ -136,7 +136,7 @@ namespace DevelopProducts.ToonShader
             cmd.SetGlobalVector(_idCharShadowParams, data.ShadowParams);
         }
 
-        private void SetupShadowMatrices(PassData data, Vector3 lightDirWS, Bounds boundsWS)
+        private void SetupShadowMatrices(PassData data, in Vector3 lightDirWS, in Bounds boundsWS)
         {
             float radius = boundsWS.extents.magnitude + _boundsPadding;
             float texelSize = radius * 2f / _resolution;
@@ -172,7 +172,7 @@ namespace DevelopProducts.ToonShader
         /// サンプリング用のワールド→シャドウ空間行列を作る。
         /// URPのShadowUtils.GetShadowTransformと同一(internalのため複製)。
         /// </summary>
-        private static Matrix4x4 GetShadowTransform(Matrix4x4 proj, Matrix4x4 view)
+        private static Matrix4x4 GetShadowTransform(Matrix4x4 proj, in Matrix4x4 view)
         {
             // 描画側はSetViewProjectionMatricesが自動でZ反転するが、
             // サンプリング側の行列は手動で反転する必要がある
@@ -201,9 +201,9 @@ namespace DevelopProducts.ToonShader
         /// メインライトの実方向ではなく、メインカメラのヨーに追従する固定仰角の擬似ライト方向を使う。
         /// カメラがどこを向いてもセルフシャドウの見え方が安定する。
         /// </summary>
-        private static Vector3 GetShadowLightDirection(Quaternion offset, Camera renderingCamera)
+        private static Vector3 GetShadowLightDirection(in Quaternion offset, in Vector3 cameraPosition, in Vector3 characterCenter)
         {
-            float cameraYaw = renderingCamera != null ? renderingCamera.transform.eulerAngles.y : 0f;
+            float cameraYaw = Quaternion.LookRotation(characterCenter - cameraPosition).eulerAngles.y;
             return Quaternion.Euler(0f, cameraYaw, 0f) * offset * Vector3.forward;
         }
 
