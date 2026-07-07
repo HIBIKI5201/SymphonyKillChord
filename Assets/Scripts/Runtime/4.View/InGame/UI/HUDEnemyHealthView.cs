@@ -1,5 +1,4 @@
 using LitMotion;
-using LitMotion.Extensions;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,9 +20,13 @@ namespace KillChord.Runtime.View.InGame.UI
                 return;
 
             _handle.TryCancel();
-            _handle = LMotion.Create(_healthImage.fillAmount, Mathf.Clamp01(ratio), 0.1f)
+            _handle = LMotion.Create(_ratio, Mathf.Clamp01(ratio), 0.1f)
                 .WithEase(Ease.InOutCirc)
-                .BindToFillAmount(_healthImage);
+                .Bind(this, static (value, mat) => mat.SetValue(value));
+        }
+        private void Awake()
+        {
+            _material = _healthImage.material;
         }
         private void Update()
         {
@@ -34,8 +37,16 @@ namespace KillChord.Runtime.View.InGame.UI
             OnUpdate = null;
             _handle.TryCancel();
         }
-
+        private void SetValue(float ratio)
+        {
+            _ratio = Mathf.Clamp01(ratio);
+            _material.SetFloat(_shaderPropertyId, 1f - _ratio);
+        }
         [SerializeField] private Image _healthImage;
+
+        private float _ratio;
+        private Material _material;
+        private static int _shaderPropertyId = Shader.PropertyToID("_Ratio");
         private MotionHandle _handle;
     }
 }
