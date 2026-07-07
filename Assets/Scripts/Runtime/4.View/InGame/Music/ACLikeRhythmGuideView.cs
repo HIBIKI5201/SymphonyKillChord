@@ -202,6 +202,13 @@ namespace KillChord.Runtime.View.InGame.Music
             handles = null;
             justTimingBeatBoxIndex = null;
 
+            if (_beatColor == null || _beatColor.Length < beats.Length - 1)
+            {
+                Debug.LogError("_beatColor の長さが beats の区間数(beats.Length - 1)より少ないです。", this);
+                totalBeatBoxCount = 0;
+                return;
+            }
+
             //スペクトラム風ビートのブロック数を計算
             float beatLength = Mathf.Max(beats);
             float guiLength = beatLength * scale;
