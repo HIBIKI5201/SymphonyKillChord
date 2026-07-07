@@ -1,0 +1,140 @@
+
+---
+
+# 📌 基本情報
+
+| 項目 | 内容 |
+| --- | --- |
+| **モジュール名** | Music |
+| **カテゴリ** | InGame + Persistent / Core System |
+| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
+| **概要** | ゲームの根幹である「BPM・ビート情報（拍）・リズム同期判定（ジャスト入力等）・音量管理・BGM/SE/Voice ソースの音響制御」を司る、プロジェクト全体の中核となるモジュールです。 |
+
+---
+
+## 🏗️ クラス（レイヤー構成）
+
+| クラス名 | レイヤー | 役割・機能 |
+| --- | --- | --- |
+| **`BeatType`** | Domain | 一拍・四拍・裏拍などの拍の種類を表す `enum` |
+| **`IMusicSyncService`** | Application | 再生タイムに基づくビート更新・アクション予約・拍履歴取得などを定義するサービスインターフェース |
+| **`IMusicActionScheduler`** | Application | ビートタイミングでコールバックを予約・実行するスケジューラーのインターフェース |
+| **`RhythmJustService`** | Application | ジャストタイミング発生の通知と判定状態の管理を行うシングルトンサービス（`IDisposable` を実装） |
+| **`MusicSyncController`** | Adaptor | 毎フレーム `MusicSyncState.UpdatePlayTime` と `IMusicSyncService.Update` を呼び出すコントローラー |
+| **`MusicSyncState`** | Adaptor | 現在の BPM・再生時間・次の拍までのカウントなどのリズム状態を保持するクラス |
+| **`RhythmGuideDto`** | Adaptor | リズムインジケータ（UI）へ送る readonly ref struct DTO |
+| **`RhythmGuideZoneDto`** | Adaptor | ガイド表示エリアの描画データを保持する readonly struct DTO |
+| **`MusicSyncView`** | View | Unity の `AudioSource` と連携して BGM を再生し、毎フレーム `MusicSyncController.Tick` を呼び出して再生タイムスタンプを更新する MonoBehaviour |
+| **`MusicPlayer`** | View | BGM/SE/Voice の音源管理およびボリュームマネージャーとの仲介を担う MonoBehaviour（`IVolumeManager` を実装） |
+| **`MusicViewModel`** | View | 楽曲情報の表示状態を保持する ViewModel（`IMusicViewModel` を実装） |
+| **`MusicSyncInitializer`** | Composition (InGame) | 楽曲とタイミング制御エンジンの結びつけ・ServiceLocator への登録 |
+| **`RhythmGuideInitializer`** | Composition (InGame) | リズムガイド UI の紐付け初期化 |
+| **`MusicPlayerInitializer`** | Composition (Persistent) | `MusicPlayer` を常駐シーンでセットアップする初期化クラス |
+
+---
+
+## 🔗 モジュール間依存関係
+
+Music モジュールは他のどのモジュールにも依存しない、完全独立のコアモジュールです（外部と接続のない内部レイヤーは省略）。
+
+```mermaid
+graph TD
+    subgraph MusicModule [Music モジュール]
+        M_Domain["Domain\n(BeatType)"]
+        M_App["Application\n(IMusicSyncService, IMusicActionScheduler, RhythmJustService)"]
+        M_Adaptor["Adaptor\n(MusicSyncState, MusicSyncController 等)"]
+        M_View["View\n(MusicSyncView, MusicPlayer 等)"]
+        M_Domain --> M_App
+        M_App --> M_Adaptor
+        M_Adaptor --> M_View
+    end
+
+    subgraph PlayerModule [Player モジュール]
+        P_App["Application\n(PlayerApplication 等)"]
+    end
+
+    subgraph EnemyModule [Enemy モジュール]
+        E_App["Application\n(EnemyAttackReservationUsecase)"]
+    end
+
+    subgraph UIModule [UI モジュール]
+        UI_View["View\n(RhythmGuideView 等)"]
+    end
+
+    subgraph SettingModule [Setting モジュール]
+        S_View["View\n(SettingView)"]
+    end
+
+    P_App -->|"IMusicSyncService, MusicSyncState を参照"| M_App
+    P_App -->|"MusicSyncState から現在拍を取得"| M_Adaptor
+    E_App -->|"IMusicActionScheduler でリズム攻撃予約"| M_App
+    UI_View -->|"RhythmGuideDto / MusicSyncState を参照"| M_Adaptor
+    S_View -->|"IVolumeManager 経由で音量変更"| M_View
+```
+
+---
+
+# 🔄 処理の流れ（シークエンス図）
+
+主要な処理フローごとに分けて記述します。
+
+### ① BGM 再生とリズム同期の更新フロー（毎フレーム）
+AudioSource の再生タイムを元に、毎フレーム BPM・拍情報が更新される処理フローです。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MSView as MusicSyncView
+    participant MPlayer as MusicPlayer
+    participant MSCont as MusicSyncController
+    participant MSState as MusicSyncState
+    participant MSService as IMusicSyncService
+
+    Note over MSView: 毎フレームの Update ループ
+    MSView ->> MPlayer: 現在の再生時間を取得 (MusicPlayer.Time)
+    MPlayer -->> MSView: playTime (double) を返却
+    MSView ->> MSCont: タイミング更新 (Tick: playTime)
+    MSCont ->> MSState: 再生時間を反映 (UpdatePlayTime: playTime)
+    MSCont ->> MSService: ビート進行の更新 (Update: playTime)
+    MSService ->> MSService: 次の拍タイミングを評価・予約済みアクションを実行
+```
+
+### ② プレイヤー入力に対するジャスト判定フロー
+プレイヤーが攻撃/スキル等のアクションを実行した際に、現在のビートタイミングと照合してジャストかどうかを判定するフローです。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PlayerAction as Player Action (呼び出し元)
+    participant MSService as IMusicSyncService
+    participant RJService as RhythmJustService
+    participant MSState as MusicSyncState
+
+    PlayerAction ->> MSService: 現在の BeatType を取得 (GetCurrentBeatType: unscaledTime)
+    MSService -->> PlayerAction: BeatType を返却
+    PlayerAction ->> MSState: BeatLength / 次ビートまでの時間を参照
+    MSState -->> PlayerAction: タイミング情報を返却
+    alt 入力がビートに対して許容範囲内
+        PlayerAction ->> RJService: ジャストヒット通知 (TriggerJustHit)
+        RJService ->> RJService: _isJustHit = true / OnJustHit イベント発火
+    end
+    Note over PlayerAction: 次フレームで IsJustHit() を確認するとリセットされる
+```
+
+### ③ リズムアクション予約フロー（Enemy 等の外部モジュールから）
+Enemy などの外部モジュールが `IMusicActionScheduler` を使って、指定ビート後にコールバックを登録する処理フローです。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Caller as 呼び出し元 (EnemyAttackReservationUsecase 等)
+    participant Scheduler as IMusicActionScheduler
+    participant MSService as IMusicSyncService
+
+    Caller ->> Scheduler: 指定ビート数後のコールバックを予約 (Schedule)
+    Note over MSService: 毎フレームの Update ループで拍の到達を検知
+    MSService ->> Scheduler: 予約済みアクションの実行チェック (毎フレーム)
+    alt 指定ビートタイミングに到達
+        Scheduler -->> Caller: 登録済みコールバックを発火
+    end
+```

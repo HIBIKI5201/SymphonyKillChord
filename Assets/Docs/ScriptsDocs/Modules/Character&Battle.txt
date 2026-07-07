@@ -1,0 +1,53 @@
+# Character & Battle モジュール依存定義書
+
+## 1. 概要
+インゲーム中のキャラクターパラメータ管理、戦闘時の攻撃力・防御力・クリティカル計算、ダメージパイプライン、およびバフ（ステータス効果）システムを司るモジュールです。
+
+## 2. レイヤー構成（レイヤー別のクラス定義）
+*   **Domain**:
+    *   `Health` (体力パラメータ、可変Entity)
+    *   `CharacterName` (名前情報、ValueObject)
+    *   `AttackPower` (攻撃力、ValueObject)
+    *   `CriticalChance` (クリティカル確率、ValueObject)
+    *   `ActionParams` (ダメージ計算に必要なパラメータ群)
+    *   `IAttackPipeline` (攻撃処理の流れを定義するパイプライン抽象)
+*   **Application**:
+    *   `AttackCalculator` (ダメージ数式の評価、ピュアロジック)
+    *   `AttackExecutor` (パイプラインに沿ってダメージを処理するロジック)
+    *   `ConfirmedDamage` (最終計算された確定ダメージ情報)
+    *   `CriticalStep` (クリティカル発生の抽選・判定ステップ)
+    *   `DamageDownBuff` (防御バフの適用ロジック)
+    *   `LifeStealBuff` (与ダメージ回復バフの適用ロジック)
+*   **Adaptor**:
+    *   `PlayerBattleState` (プレイヤーの戦闘中の現在のバフ・ステータス)
+    *   `EnemyBattleState` (敵の戦闘中の現在のバフ・ステータス)
+    *   `AttackResultDTO` (ダメージ通知、クリティカル発生などをViewに伝えるDTO)
+*   **View**:
+    *   `HealthHudDTO` (HPバー更新用のDTO、値型)
+    *   `IHealthHudViewModel` (HPバーの表示バインド用インターフェース)
+
+---
+
+## 3. モジュール間依存関係
+Character & Battle モジュールが他モジュールとどのように関わっているかを定義します。
+
+### [依存しているモジュール]
+*   **InGame/Music**:
+    *   *依存箇所*: `BeatType`, `MusicSyncState`
+    *   *詳細*: リズムに合わせたバフの持続時間計算や、リズム判定に応じたダメージボーナス（ジャスト入力ボーナスなど）の計算で依存します。
+
+### [依存されているモジュール]
+*   **InGame/Player**:
+    *   *参照箇所*: `CharacterEntity` (PlayerEntityの実体), `Health`
+    *   *詳細*: プレイヤー自身のHP増減や、敵攻撃の被弾処理、スキルによる回復などの戦闘処理で、本モジュールのダメージ計算システムを全面的に使用します。
+*   **InGame/Enemy**:
+    *   *参照箇所*: `CharacterEntity` (EnemyEntityの実体), `Health`, `AttackPower`
+    *   *詳細*: 敵の被弾ダメージ、ボスなどのフェーズチェンジHPトリガー、およびプレイヤーへ与えるダメージ計算で使用します。
+
+---
+
+## 4. アーキテクチャ上の特徴と評価
+*   **パイプラインパターンの採用 (IAttackPipeline)**:
+    ダメージ計算がハードコーディングされておらず、パイプライン（`IAttackPipeline`）を通じて、ダメージ算出 → クリティカル判定 → 防御バフ適用 → ライフスティール適用 などの処理が順次実行されるため、後から新しいバフや特殊なダメージ処理をプラグイン形式で極めて容易に追加できます（SOLIDの「開放閉鎖原則」に完全に準拠）。
+*   **演算の純粋性 (Pure Logic)**:
+    `AttackCalculator` や `CriticalStep` などのクラスは、Unityのライフサイクルや `MonoBehaviour` を全く介さない pure C# クラスであり、副作用のない純粋関数として実装されています。これにより、パラメータのみを与えて期待通りのダメージが算出できるかを確認する単体テストを瞬時に実行可能です。

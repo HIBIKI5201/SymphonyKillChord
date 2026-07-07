@@ -1,0 +1,164 @@
+# Symphony Kill Chord アーキテクチャ設計検証レポート
+
+本レポートは、設計書『Architecture.txt』に定義された設計思想（クリーンアーキテクチャ、MVVM、CQRS、DDD、SOLID原則など）に基づき、実際のソースコードを網羅的に解析した検証結果です。
+
+---
+
+## 1. モジュール依存関係の検証
+
+### 依存方向の整理
+プロジェクトの機能モジュールは、主に以下のように分離・実装されています。
+*   **Persistent（永続インフラ・コア）**: `Input`, `Savedata`, `SceneManagement`, `Music`
+*   **OutGame（アウトゲーム画面）**: `Title`, `StageSelect`, `SkillBuild`（改造）, `SkillTree`, `Scenario`, `Screen`, `Sortie`
+*   **InGame（ゲーム本編）**: `Player`, `Enemy`（Bossを含む）, `Music`（リズム同期）, `Mission`, `Sequence`, `UI`（HUD）, `Camera`, `Battle`, `Buff`, `Skill`
+
+### モジュール依存方向図
+```text
+  [ Persistent/Savedata ] <------- [ OutGame/SkillBuild ] <------+
+            ^                                                    |
+            |                                                    |
+  [ Persistent/Input ] <---------+                               | (ServiceLocator)
+            ^                    |                               |
+            |                    |                               |
+  [ InGame/Music ] <-----+       |                               |
+            ^            |       |                               |
+            |            v       v                               v
+  [ InGame/Player ] <--- [ InGame/Camera ] <--- [ InGame/Enemy (Boss) ]
+```
+
+---
+
+## 2. クラス責務の検証
+
+各クラスはフォルダ階層（`1.Domain`〜`6.Composition`）および名前空間（`KillChord.Runtime.*`）で極めて厳格に整理されています。
+特に素晴らしい点として、**`Domain`, `Application`, `Adaptor` レイヤーのクラスが `MonoBehaviour` を一切継承しておらず、純粋なC#クラス（ピュアクラス）として完全に独立していること**がソースコード走査により証明されました。これにより、Unity ライフサイクルに依存しないコアロジックの構築が達成されています。
+
+一方で、設計定義と実装の間に以下の「責務の不整合」が生じています。
+
+### ① DTO（Data Transfer Object）の不整合
+*   **設計定義**: 「型は `readonly ref struct`」
+*   **実装実態**: `readonly struct`（`ref` なし）で実装されているDTOが多数存在します。
+    *   *例*: `AttackResultDTO`, `DamageNumberDTO`, `SkillBuildSlotDTO`, `SkillResultDTO`, `HealthHudDTO`
+    *   *原因分析*: `ref struct` はC#の言語仕様上、ジェネリック引数（`List<T>` など）に指定できない、非同期メソッド（`async/await`）で保持できない、ネストされた非ref構造体のメンバになれない、などの厳しい制限があります。例えば、複数のスロット情報を配列やリストで保持し、かつ非同期処理をまたいで表示するような画面（改造画面など）では、言語制約を回避するために意図的に `readonly struct` にせざるを得なかった形跡が見られます。これは設計規約とC#の言語仕様の間に生じた不整合です。
+
+### ② Application層（UseCase）におけるDIP（依存関係逆転の原則）違反
+*   **設計定義**: 「下層への参照を行いたい場合は、自層にinterfaceを追加し、下層がそれを実装してCompositionがDI注入する」
+*   **実装実態**:
+    *   `SkillBuildUseCase.cs`（Application層）は、コンストラクタ内で `ServiceLocator.TryGetInstance` を使用して `SavedataSystem`（Utility/Infra層）の**具象クラス**を直接引き抜いており、さらに `using KillChord.Runtime.Utility.OutGame.Savedata;` と直接参照しています。
+    *   `SkillTreeService.cs`（Application層）も同様に、コンストラクタ内で直接 `SavedataSystem` の具象に依存しています。
+    *   本来、Application層には `ISkillBuildRepository` という抽象インターフェースが定義されていますが、これが実質的にバイパスされ、直接具象セーブデータシステムに依存しています。これはクリーンアーキテクチャの根幹である「依存関係逆転の原則（DIP）」に反しており、Application層の単体テスト（Mock化）を著しく困難にしています。
+
+---
+
+## 3. DI（依存性注入）の検証
+
+依存性解決は `6.Composition` レイヤー（`SkillBuildInitializer`, `PlayerInitializer`, `IngameComposition` など）で解決される設計になっていますが、実態はコンストラクタDIやメソッドDIではなく、**`ServiceLocator` を介した「サービスロケーションパターン」が主流**となっています。
+
+### 問題点
+1.  **コンストラクタDIの形骸化**: `ServiceLocator` は実質的なグローバル変数であり、依存関係をクラス内部に隠蔽してしまいます。
+2.  **初期化順序（Execution Order）への依存**: 各 Initializer が `Awake` や `Start` で `ServiceLocator.RegisterInstance` を行っており、フレームワークの起動タイミング（Execution Order）のわずかなずれで `NullReferenceException` が発生しやすい脆弱な構造になっています。
+3.  **永続オブジェクトのnew**: ドメインモデルや一部コントローラーは `new` されていますが、それ自体は依存関係が整理されていれば正常です。しかし、それらを `ServiceLocator` に登録・取得し合っているため、インスタンスのライフサイクル管理が不透明になっています。
+
+---
+
+## 4. モジュール間依存の検証
+
+### 「他モジュールへの依存はAdaptor層のみ」の違反状況
+*   **違反**: `BossInitializer`（InGame/EnemyモジュールのComposition層）は、`PlayerInitializer`（InGame/PlayerモジュールのComposition層）の具象コンポーネントを `ServiceLocator.GetInstance<PlayerInitializer>()` で取得し、ボスへプレイヤーの `transform` や `PlayerEntity` を直接渡しています。
+*   **設計意図とのズレ**: `Composition` 層同士が直接、かつ ServiceLocator を介して別モジュールの具象を奪い合う形になっており、モジュール間の境界が融解しています。本来であれば、別モジュールへの直接アクセスは `Adaptor` レイヤーが提供する抽象インターフェースを経由するか、両者を統括する最上位の `IngameComposition`（ブートストラップ）が仲介して参照を配るべきです。
+
+---
+
+## 5. 循環参照の検証
+
+*   **静的コンパイルレベルでの循環参照**: アセンブリの定義や物理的な参照方向（フォルダ階層）により、コンパイルエラーになるような直接の循環参照は回避されています。
+*   **実行時・ServiceLocatorを介した間接的循環参照**:
+    *   `PlayerInitializer`, `BossInitializer`, `InGameHudInitializer`, `MissionEventController` などの間で、互いが `Awake` / `Start` で登録したインスタンスを `ServiceLocator` から引き抜き合っています。これは静的には検出されませんが、実行時に相互依存（実質的な循環参照）を引き起こしており、デッドロックや初期化失敗の温床となっています。
+
+---
+
+## 6. アーキテクチャ品質評価 (100点満点)
+
+| 評価観点 | 得点 | 評価理由 |
+| :--- | :---: | :--- |
+| **レイヤー分離** | **85 / 100** | Domain/Application/AdaptorがMonoBehaviourを排除したピュアクラスであり、レイヤー間の名前空間の分離も極めて美しいため。 |
+| **SOLID原則** | **65 / 100** | SRP（単一責任）は良好。しかし、具象への直接依存や `ServiceLocator` の多用により、DIP（依存関係逆転）が形骸化しているため。 |
+| **DDD** | **80 / 100** | ドメインモデル（Entity/ValueObject）の定義が非常にクリアで、モデルにロジックが凝縮されているため。 |
+| **CQRS** | **90 / 100** | 読み込み（Presenter）と書き込み・実行（Controller）の責務分離が徹底されているため。 |
+| **MVVM** | **95 / 100** | ViewModelがイベント駆動（Reactive指向）で実装されており、Viewとのデータバインド構造が非常に綺麗であるため。 |
+| **保守性** | **70 / 100** | クラスのサイズが適切でコード自体の可読性は極めて高いが、依存関係が `ServiceLocator` に隠蔽されているため。 |
+| **拡張性** | **75 / 100** | 規約に沿ったクラス追加は容易。ただしインフラ具象（セーブシステム等）に依存しているため、インフラの刷新時には影響が広範囲に及ぶ。 |
+| **テスト容易性** | **50 / 100** | ピュアドメイン以外のUseCaseやControllerが内部で `ServiceLocator` に依存しているため、単体テスト時のモック注入が極めて困難。 |
+
+---
+
+## 7. 出力形式に基づく報告
+
+### レイヤー一覧
+
+| Layer | Classes |
+| :--- | :--- |
+| **Domain** | `SaveData`, `SkillBuildData`, `EquippedSkill`, `SkillBuildDefinition`, `CharacterEntity`, `CharacterData`, `ActionParams` など |
+| **Application** | `SkillBuildUseCase`, `SkillTreeService`, `PlayerMovementApplication`, `EnemyMoveUsecase`, `CameraSystemApplication`, `SceneTransitionUsecase` など |
+| **Adaptor** | `SkillBuildPresenter`, `SkillBuildController`, `SkillBuildViewDTO`, `SkillBuildSlotDTO`, `PlayerController`, `EnemyAIController`, `MusicSyncState`, `SelectedBattleStageState` など |
+| **View** | `SkillBuildViewModel`, `SkillBuildScreenView`, `PlayerView`, `MusicSyncView`, `EnemyWaveTimerView`, `OutGameUIEvent`, `PlayerInputView` など |
+| **InfraStructure**| `SkillBuildRepositoryDebug`, `OwnedSkillRepositoryDebug`, `SkillRepository`, `CharacterAnimationCatalogAsset` など |
+| **Composition** | `SkillBuildInitializer`, `IngameComposition`, `PlayerInitializer`, `BossInitializer`, `EnemyInitializer`, `CameraSystemInitializer`, `InGameMissionInitializer`, `RhythmGuideInitializer` など |
+
+### モジュール依存
+
+| Module | Depends On | Referenced By |
+| :--- | :--- | :--- |
+| **Persistent/Savedata** | なし (JSON等、Utility) | `OutGame/SkillBuild`, `OutGame/SkillTree`, `InGame/Player` |
+| **Persistent/Input** | なし (Unity Input System) | `InGame/Player`, `InGame/Camera`, `OutGame/Sortie`, `OutGame/Scenario` |
+| **InGame/Player** | `Persistent/Input`, `InGame/Camera` (TargetSelector), `InGame/Music` | `InGame/Enemy` (BossInitializer), `InGame/Camera` (CameraSystemInitializer) |
+| **InGame/Enemy** | `InGame/Player` (PlayerInitializer), `InGame/Music` (MusicSyncState), `InGame/Camera` (TargetSelector) | なし（InGameCompositionが呼び出し） |
+| **InGame/Music** | なし | `InGame/Player`, `InGame/Enemy`, `InGame/UI` |
+| **OutGame/SkillBuild** | `Persistent/Savedata`, `InGame/Player` (SkillDataを使用) | なし（ScreenInitializerが仲介） |
+| **OutGame/StageSelect**| `InGame/Mission` (SelectedMissionState), `OutGame/Sortie` | なし（ScreenInitializerが仲介） |
+
+### クラス責務違反
+
+| Class | Expected | Actual |
+| :--- | :--- | :--- |
+| `AttackResultDTO`<br>`DamageNumberDTO`<br>`SkillBuildSlotDTO` など | DTOとして **`readonly ref struct`** で定義される。 | 言語仕様の制約（List等での不使用、非同期処理での制限、ネストDTOの制限）を回避するため、**`readonly struct`**（`ref` なし）で実装されている。 |
+| `SkillBuildUseCase`<br>(Application層) | **コンストラクタDI**によって依存を受け取り、下層の具象から完全に独立（Pocoクラス）する。 | `using KillChord.Runtime.Utility.OutGame.Savedata;`<br>コンストラクタ内で **`ServiceLocator` から `SavedataSystem` の具象インスタンスを直接取得** しており、DIP（依存関係逆転）に違反。 |
+| `SkillTreeService`<br>(Application層) | 同上。 | コンストラクタ内で `ServiceLocator.GetInstance<SavedataSystem>()` を実行し、直接具象に依存。 |
+| `BossInitializer`<br>(Composition層) | モジュール間の依存解決を `Adaptor` 層や抽象インターフェース経由で行い、直接結合を避ける。 | `ServiceLocator.GetInstance<PlayerInitializer>()` により、**他モジュールの `Composition` 層の `MonoBehaviour` 具象クラスに直接依存** している。 |
+
+### 循環依存
+
+| Classes | Description |
+| :--- | :--- |
+| `PlayerInitializer`<br>`BossInitializer`<br>`InGameHudInitializer`<br>`MissionEventController` など | **ServiceLocator を介した実行時の間接的循環参照。**<br>静的なコンパイルエラーは回避されているが、各モジュールの初期化コンポーネントが `Awake`/`Start` 内で互いの登録インスタンスを引き抜き合っているため、実質的に緊密な双方向依存（循環参照）が発生している。 |
+| `SkillBuildUseCase` と `SaveData` / `SavedataSystem` | `SkillBuildUseCase` が `SavedataSystem` に依存し、`SavedataSystem` は `SaveData` をロード・キャッシュし、`SaveData` 内に `SkillBuildData` が含まれる。Application層がインフラとドメインデータを直接二重保持することによる概念上の相互依存。 |
+
+### 改善案
+
+| Priority | Class | Recommendation |
+| :---: | :--- | :--- |
+| **High** | `SkillBuildUseCase`<br>`SkillTreeService` | **【問題点】**: `SavedataSystem` の具象クラスに直接依存し、ServiceLocatorから引き抜いている（DIP違反）。<br>**【改善理由】**: Application層をインフラ具象から100%独立させ、コンパイル時および単体テスト時の結合を断つ。<br>**【修正方法】**: コンストラクタでインターフェース（例: `ISavedataSystem` または `ISkillBuildRepository`）を受け取る**真のコンストラクタ注入（DI）**に変更する。実体は `Composition` 層（Initializer）が渡すようにする。<br>**【影響範囲】**: `SkillBuildUseCase`, `SkillBuildInitializer` |
+| **High** | `BossInitializer`<br>(および Enemy 側) | **【問題点】**: 他モジュールの `PlayerInitializer`（MonoBehaviour）に直接依存している。<br>**【改善理由】**: 敵とプレイヤーのモジュールとしての独立性を確保し、個別シーンでのデバッグやテストを容易にする。<br>**【修正方法】**: ボスの初期化に必要なプレイヤー情報（TransformやEntity）は、敵モジュールが直接引き抜くのではなく、最上位の `IngameComposition`（ブートストラップ）が双方から参照を取得して仲介役として引き渡すか、インターフェースを介す。<br>**【影響範囲】**: `BossInitializer`, `BossLifeCycle` |
+| **Medium** | プロジェクト全体における<br>`ServiceLocator` の使用制限 | **【問題点】**: `ServiceLocator` が事実上のグローバル変数（なんでも取得できる箱）としてあらゆるレイヤー（UseCase, View, Composition）で使われすぎている。<br>**【改善理由】**: 依存関係を明示的にし、初期化順序バグを防ぎ、単体テスト容易性を劇的に向上させる。<br>**【修正方法】**: 依存解決はコンストラクタ注入（Constructor Injection）を徹底し、`ServiceLocator` の使用は `Composition` 層（Initializer）の境界内のみに限定する。ピュアクラス（Application, Adaptor）内での使用は原則禁止とする。<br>**【影響範囲】**: プロジェクト全体 |
+| **Medium** | 設計書における<br>DTO仕様の改訂 | **【問題点】**: 設計書の「DTOは `readonly ref struct`」という定義が、実開発でのC#の言語制約と噛み合っていない。<br>**【改善理由】**: 開発者が「規約違反を犯している」という負い目や混乱をなくし、実用に即した一貫性のある規約にする。<br>**【修正方法】**: 設計ドキュメントに例外規定（「非同期処理、ジェネリック化、ネスト構造などを理由に ref 制約を回避せざるを得ない場合は、`readonly struct` を許容する」）を追加、またはアロケーション構造を工夫する。<br>**【影響範囲】**: 設計ドキュメントのみ |
+
+---
+
+## 結論：設計思想への準拠率
+
+### **準拠率： 78%**
+
+#### 総評
+ディレクトリ構成、名前空間の分離、ドメイン駆動設計（Domain/Applicationの分離）、そして `MonoBehaviour` をピュアクラスから100%排除する徹底ぶりは、商用ゲーム開発プロジェクトの中でも極めて高水準です。MVVM、CQRS（PresenterとControllerの分離）についても美しく実装されています。
+
+準拠率が 78% に留まった唯一かつ最大の理由は、**`ServiceLocator` の乱用による DIP（依存関係逆転の原則）とDI（依存性注入）の形骸化**です。これがピュアクラスの高い分離度という最大の強みを、テスト容易性の低下という形で相殺してしまっています。ここをコンストラクタDIへ移行することが、本プロジェクトを「真に堅牢なクリーンアーキテクチャ」へと昇華させる最後のパズルピースです。
+
+---
+
+## さらに追加すると有効な観点
+
+1.  **DIコンテナ（VContainer / Zenject等）の導入**:
+    現在の手動DI ＆ `ServiceLocator` によるサービスロケーションパターンは、規模拡大に伴う初期化順序（Execution Order）の管理限界を迎えます。
+    Unityに特化した超軽量・高速なDIコンテナである `VContainer` を導入することで、`Composition` 層での一括アセンブル（登録・注入）が可能になり、`ServiceLocator` を完全に排除して、本物のコンストラクタ注入を低コストで実現できます。
+2.  **非同期処理の標準化（UniTask の導入）**:
+    非同期処理に標準の `ValueTask` や `Task` を使用されていますが、WebGLビルドなどシングルスレッドの制約が厳しいUnity環境でのパフォーマンスや、ガベージコレクション（アロケーション）、キャンセル処理（CancellationToken）の親和性を最大化するため、プロジェクト全体で `UniTask` を標準採用することを強く推奨します。これにより、DTOのメモリ最適化とも非常に相乗効果が高くなります。

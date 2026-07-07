@@ -1,0 +1,58 @@
+# Enemy モジュール依存定義書
+
+## 1. 概要
+インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約、およびスポナー（出現制御）を司るモジュールです。
+
+## 2. レイヤー構成（レイヤー別のクラス定義）
+*   **Domain**:
+    *   `EnemyTypeEnum` (敵のクラス分け：歩兵、砲兵など)
+    *   `EnemyWaveDefinition` (出現ウェーブのデータ構成)
+    *   `EnemyMoveDecision` (移動AIの次の選択状態)
+*   **Application**:
+    *   `EnemyMoveUsecase` (移動方向の算出やレイキャストによる衝突回避)
+    *   `EnemyAttackUsecase` (攻撃判定の発動と適用)
+    *   `EnemyAttackReservationUsecase` (ジャストタイミングでの攻撃予約システム)
+    *   `EnemyRaycastDetectService` (索敵・壁検知)
+    *   `NearestAttackPositionSearchService` (プレイヤーへ接近する際の最適座標探索)
+*   **Adaptor**:
+    *   `EnemyAIController` (AIのステート切り替えや、予約トリガーをUsecaseに伝達)
+    *   `EnemyWaveSpawnerState` (現在の出現フェーズ管理)
+    *   `EnemyWaveSpawnerController` (スポナーの時間制御)
+    *   `DamageNumberDTO` (被ダメージの表示通知用)
+    *   `IRaycastDetectView` (索敵データの伝達インターフェース)
+*   **View**:
+    *   `EnemyWaveTimerView` (ウェーブの残り時間をUI表示)
+*   **Composition**:
+    *   `BossInitializer` (ボス戦闘のセットアップ、プレイヤー参照の紐付け)
+    *   `EnemyInitializer` (一般敵のセットアップ)
+    *   `EnemyInfantrySpawner` / `EnemyPools` (プール管理と動的生成)
+
+---
+
+## 3. モジュール間依存関係
+Enemy モジュールが他モジュールとどのように関わっているかを定義します。
+
+### [依存しているモジュール]
+*   **InGame/Player**:
+    *   *依存箇所*: `PlayerInitializer` (Compositionでの直接結合), `PlayerEntity`
+    *   *詳細*: AIがプレイヤーを追尾・攻撃対象とするため、プレイヤーの位置（Transform）や現在のHPを参照します。現実装では `BossInitializer` から `PlayerInitializer` の MonoBehaviour を ServiceLocator で直接取得しているため、強い結合（要改善）になっています。
+*   **InGame/Music**:
+    *   *依存箇所*: `IMusicSyncService`, `MusicSyncState`
+    *   *詳細*: 「敵もリズムに合わせて攻撃してくる」という仕様のため、攻撃アニメーションの開始や、ビートタイミングでの攻撃判定発動でリズムシステムに強く依存します。
+*   **InGame/Camera**:
+    *   *依存箇所*: `TargetSelectorController`
+    *   *詳細*: 敵がプレイヤーにロックオンされた際、またはロックオンマーカーを切り替える際の通知に使用します。
+*   **InGame/Mission**:
+    *   *依存箇所*: `MissionEventController`
+    *   *詳細*: 敵が死亡した際、撃破実績やミッションスコアをミッションシステムに通知します。
+
+### [依存されているモジュール]
+*   なし (上位の IngameComposition / Bootstrap から初期化される起動対象)
+
+---
+
+## 4. アーキテクチャ上の特徴と評価
+*   **非同期型リズム攻撃システム (EnemyAttackReservationUsecase)**:
+    敵の攻撃は「2拍前」「1拍前」といったビートを基準に非同期で事前予約され、ジャストなビートで判定が出される高度な設計になっており、リズムゲームと戦闘アクションの完全な同期を担保しています。
+*   **改善のポイント (モジュール直接結合)**:
+    `BossInitializer` が他モジュールの Composition 層である `PlayerInitializer` を直接取得してボスの起動に利用しています。これはモジュール間の独立性を低下させているため、`Player` モジュールの具象を隠蔽し、ドメイン層の抽象インターフェースか、上位の Bootstrap（`IngameComposition`）が仲介してパラメータを渡す形へのリファクタリングが望まれます。

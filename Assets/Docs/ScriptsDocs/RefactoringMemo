@@ -1,0 +1,87 @@
+## シーン
+
+### オブジェクト混在状態
+
+空オブジェクトをもうちょい使って、見やすくしたい
+
+### インゲームシーンのStageオブジェクト
+
+NavMeshSurfaceのみがあり、NavMeshDataがミッシングのオブジェクトがある
+これは必要なものか？
+
+## スクリプト
+
+### ParticleControllerの意義について
+
+これは仮で実装したパーティクルシステムなのか、本実装用のシングルトンクラスなのか
+
+本実装にしては雑なシングルトンだが、仮ならRuntime名前空間にあるのはおかしい
+
+### Cameraのレイヤー構造について
+
+カメラのApplication層でカメラの位置を計算しているが、この位置計算は本質的にはViewの役割なのではないか？
+
+### Playerのモデル生成をスポナー経由でやるべきなのでは
+
+Playerのモデルをステージシーンに設置でやってるのはおかしい
+Playerのプレハブを生成するスポナーを作るべきなのでは？
+
+### CameraLockOnState
+
+これカメラモジュールでしか使ってないし、カメラモジュールのドメインにしてよいのでは
+
+### MusicTimingCalculator
+
+コメント・サマリーが何のこと言ってるか分からない
+
+```csharp
+/// <summary>
+///    現在の拍位置を基準に、指定した小節オフセットおよび拍位置に対応する絶対時刻を計算する。
+/// </summary>
+```
+
+### RhythmDefinition
+
+このクラスはドメインのデータであって、処理をするのはApplicationにした方がよい
+
+あとCalculateBeatTypeメソッドでイベント発火してるけど、ここでやるんじゃなくて戻り値でIsJustedを返してその結果から発火した方が良くない？
+イベント発火は計算と隔離すべきでは
+
+### RhythmState
+
+実装内容はリズム系の入力バッファなので、RhytmCommandBufferクラスに改名していいのでは
+
+### PlayerMoveParameter・EnemyMoveSpec
+
+表記揺れおよびクラス・構造体の設計の違い
+
+そもそもパラメータはAdaptor層が永続化を行い、Applicationは引数で逐次受け取るだけにすべきなのでは
+
+### CameraSystemParameter
+
+直接シリアライズ可能な状態になっている
+インフラにAssetクラスを作るべき
+
+### IBuff
+
+実装と抽象化を1ファイルに書くな！！！！！！
+
+# 用語
+
+### リズムパターン（RhythmPattern）
+
+スキルのコマンド
+
+# 知らないこと
+
+### MulticastDelegate
+
+EventBusで使用
+
+### IProgress
+
+シーンロード系で使用
+
+### HashCode.Add
+
+RhythmPatternのGetHashCodeで使用
