@@ -14,8 +14,11 @@ void GetToonMainLight(
     float3 positionWS,
     out half3 direction,
     out half3 color,
-    out half shadowAtten)
+    out half shadowAtten,
+    out half characterShadowAtten
+)
 {
+    characterShadowAtten = 1.0h;
 #ifdef SHADERGRAPH_PREVIEW
     direction   = half3(0.5, 0.5, 0);
     color       = half3(1, 1, 1);
@@ -37,7 +40,8 @@ void GetToonMainLight(
 #if defined(_CHAR_SHADOW_ON)
     // キャラ専用シャドウマップによるセルフシャドウ。
     // メインライト側の受け取りバイアス(自己投影の棄却)はこちらには適用しない
-    shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
+    //shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
+    characterShadowAtten = SampleCharacterShadow(positionWS);
 #endif
 
 #endif
@@ -48,13 +52,14 @@ half3 GetToonColor(
     half3 outerColor,
     half3 shadowColor,
     half bright,
-    half shadowAtten
+    half shadowAtten,
+    half characterShadowAtten
 )
 {
-    bright = max(0.1, saturate(bright));
-    shadowAtten = saturate(shadowAtten);
-    half main = smoothstep(0.0h, 0.5h, bright) * shadowAtten;
-    half outer = smoothstep(0.0h, 0.1h, bright) * shadowAtten;
+    half atten = saturate(1.0 - ((1.0 - shadowAtten) * 0.5 + (1.0 - characterShadowAtten) * 0.7));
+    bright = max(0.2, saturate(bright));
+    half main = saturate( smoothstep(0.0h, 0.5h, bright) * atten);
+    half outer = saturate( smoothstep(0.0h, 0.1h, bright) * atten);
 
     return lerp(lerp(shadowColor, outerColor, outer), mainColor, main);
 }
@@ -95,9 +100,9 @@ void GetToonLights(
     color = half3(0, 0, 0);
 #else
     half3 sunDir, sunColor;
-    half sunShadowAtten;
-    GetToonMainLight(positionWS, sunDir, sunColor, sunShadowAtten);
-    color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunDir, normalWS)), sunShadowAtten);
+    half sunShadowAtten, characterShadowAtten;
+    GetToonMainLight(positionWS, sunDir, sunColor, sunShadowAtten, characterShadowAtten);
+    color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunDir, normalWS)), sunShadowAtten, characterShadowAtten);
 
 #if USE_CLUSTER_LIGHT_LOOP
     // Forward+(Cluster)ではメインライト以外の平行光源はクラスタに含まれないため先に別ループで処理する
