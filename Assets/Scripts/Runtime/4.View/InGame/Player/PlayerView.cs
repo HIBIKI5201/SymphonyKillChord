@@ -72,7 +72,7 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-
+            PlayerAttackController?.UpdateAttackCooldown(Time.deltaTime);
             UpdateMovement();
         }
 
@@ -108,7 +108,6 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
-
             _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
@@ -237,6 +236,11 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             if (_controller.IsDodging)
+            {
+                return;
+            }
+
+            if (PlayerAttackController.IsAttacking || PlayerAttackController.IsAttackCooldown)
             {
                 return;
             }

@@ -1,11 +1,11 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
-using KillChord.Runtime.Adaptor.OutGame.Screen;
 
 namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 {
@@ -106,6 +106,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 UpdateUnlockPhase(nodeId);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
+
+            _skillTreeService
+                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.CurrentPoints)
+                .ContinueWith(
+                    t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
+                    TaskContinuationOptions.OnlyOnFaulted);
+
             SkillNodeEntity selectedNode = _skillNodeEntities[_selectedNodeId];
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);

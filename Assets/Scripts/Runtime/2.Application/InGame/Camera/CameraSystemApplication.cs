@@ -39,6 +39,9 @@ namespace KillChord.Runtime.Application.InGame.Camera
             _distance = _parameter.Distance;
         }
 
+        /// <summary> 現在のロックオン状態。 </summary>
+        public CameraLockOnState LockOnState => _lockOnState;
+
         /// <summary>
         ///     攻撃時にオートロックオンを発動する。
         ///     マニュアルロックオン中は何もしない。

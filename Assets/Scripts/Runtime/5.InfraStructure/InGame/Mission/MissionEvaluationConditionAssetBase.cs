@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using SymphonyFrameWork.Attribute;
 using System;
@@ -16,6 +17,16 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// </summary>
         /// <returns>評価条件。</returns>
         public abstract IMissionEvaluationCondition Create();
+
+        /// <summary>
+        ///     評価条件を永続的に隙別するId。
+        /// </summary>
+        protected MissionEvaluationId EvaluationId => new(_evaluationId);
+
+        /// <summary>
+        ///     EvaluationのId。
+        /// </summary>
+        public string EvaluationIdValue => _evaluationId;
 
         /// <summary>
         ///     シリアライズ前の処理を行います。
@@ -38,7 +49,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns>表示テキスト。</returns>
         protected string GetDisplayText()
         {
-            if(!string.IsNullOrWhiteSpace(_displayText))
+            if (!string.IsNullOrWhiteSpace(_displayText))
             {
                 return _displayText;
             }
@@ -51,6 +62,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// </summary>
         /// <returns>サマリー文字列。</returns>
         protected abstract string BuildSummary();
+
+        [SerializeField, Header("識別用Id")] private string _evaluationId;
 
         [SerializeField, Header("説明用のテキスト"), Tooltip("ミッションHUDに表示される条件の説明。空の場合は自動生成されます。")] private string _displayText;
 

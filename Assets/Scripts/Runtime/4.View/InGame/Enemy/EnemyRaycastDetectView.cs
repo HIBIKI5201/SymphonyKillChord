@@ -1,12 +1,13 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     /// 敵の攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
-    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
+    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 
         /// <summary>
@@ -18,9 +19,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _targetTransform = targetTransform;
             _attackRange = attackRange;
 
-            if (!TryGetComponent(out _lineRenderer))
+            if (_attackWarningDecal == null)
             {
-                Debug.LogError("[EnemyRaycastDetectView] Failed to find LineRenderer.");
+                Debug.LogError("[EnemyRaycastDetectView] Attack warning decal is not assigned.", this);
+                return;
+            }
+            if (_attackWarningDecal.material == null)
+            {
+                Debug.LogError("[EnemyRaycastDetectView] Attack warning decal material is not assigned.", this);
                 return;
             }
 
@@ -36,9 +42,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            _lineRenderer.enabled = false;
-            _lineRenderer.positionCount = 2;
-            _lineRenderer.useWorldSpace = true;
+            _decalMaterial = new Material(_attackWarningDecal.material);
+            _attackWarningDecal.material = _decalMaterial;
+
+            _attackWarningDecal.enabled = false;
             HideWarningInternal();
 
 #if UNITY_EDITOR
@@ -102,7 +109,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-         private LineRenderer _lineRenderer;
+        [SerializeField]
+        private DecalProjector _attackWarningDecal;
+        private Material _decalMaterial;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;
@@ -195,6 +204,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             UpdateWarningLine();
         }
+        private void OnDestroy()
+        {
+            if (_decalMaterial != null)
+            {
+                Destroy(_decalMaterial);
+                _decalMaterial = null;
+            }
+        }
 
         /// <summary>
         /// 現在のレイ情報をもとに警告ラインの位置と色を更新します。
@@ -204,14 +221,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             Ray ray = CreateRay(transform.position);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
-                _lineRenderer.enabled = false;
+                _attackWarningDecal.enabled = false;
                 return;
             }
 
-            _lineRenderer.enabled = true;
-            _lineRenderer.material.SetColor("_EmissionColor", _currentLineColor);
-            _lineRenderer.SetPosition(0, ray.origin);
-            _lineRenderer.SetPosition(1, ray.origin + ray.direction * _attackRange);
+            _attackWarningDecal.enabled = true;
+            _decalMaterial.SetColor("_BaseColor", _currentLineColor);
+            Vector3 size = _attackWarningDecal.size;
+            size.y = _attackRange;
+            _attackWarningDecal.transform.rotation = Quaternion.Euler(90, Quaternion.LookRotation(ray.direction, Vector3.up).eulerAngles.y, 0);
+            _attackWarningDecal.size = size;
+            _attackWarningDecal.pivot = new Vector3(0, _attackRange * 0.5f, 0);
         }
 
         /// <summary>
@@ -269,8 +289,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _warningDisplayState = WarningDisplayState.Hidden;
             _lockedRayDirection = Vector3.zero;
 
-            if (_lineRenderer == null) return;
-            _lineRenderer.enabled = false;
+            if (_attackWarningDecal != null)
+            {
+                _attackWarningDecal.enabled = false;
+            }
         }
 
         /// <summary>
@@ -294,7 +316,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool IsReadyForLineUpdate()
         {
-            return IsReadyForRaycast() && _lineRenderer != null ;
+            return IsReadyForRaycast() && _attackWarningDecal != null;
         }
 
         /// <summary>

@@ -1,0 +1,11 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Title.uss?fileID=7433441132597879392&amp;guid=aa7e6b8f1a3c44f4395a085a6dc77fd4&amp;type=3#Title"/>
+    <ui:VisualElement name="Title" style="flex-grow: 1;">
+        <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; position: relative; background-color: rgb(94, 94, 94); color: rgb(255, 255, 255);">
+            <ui:VisualElement name="TouchArea" style="position: absolute; width: 100%; height: 100%;"/>
+            <ui:Button text="≡" name="OptionButton" class="button" style="width: 6%; top: 2%; left: 3%; font-size: 140px; -unity-font-style: bold;"/>
+            <ui:Label text="Symphony Kill Chord" name="Title" class="titleLabel" style="position: absolute; top: 10%; left: auto; right: 17%; bottom: auto;"/>
+            <ui:Label text="Tap to&#10;Start" name="Instruction" style="right: 2%; bottom: 4%; position: absolute; font-size: 64px; rotate: -20deg; top: auto; left: auto; -unity-text-align: middle-center;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
