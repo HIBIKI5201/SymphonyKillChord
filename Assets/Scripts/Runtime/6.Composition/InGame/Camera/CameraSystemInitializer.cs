@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Camera;
 using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.InfraStructure.InGame.Camera;
 using KillChord.Runtime.Utility.Collections;
@@ -70,6 +71,15 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
+            if (_hudEnemyHealthInitializer != null)
+            {
+                _hudEnemyHealthInitializer.Initialize(controller, _targetSelectorController, targetSelector);
+            }
+            else
+            {
+                Debug.LogError($"{nameof(_hudEnemyHealthInitializer)} がアサインされていません。");
+            }
+
 #if UNITY_EDITOR
             _cameraSystem.gameObject
                 .AddComponent<CameraSystemParameterDebug>()
@@ -82,6 +92,9 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraSystemConfig _config;
+
+        [SerializeField, Tooltip("ロックオン中の敵HP HUDの初期化クラス。")]
+        private HUDEnemyHealthInitializer _hudEnemyHealthInitializer;
 
         private TargetSelectorController _targetSelectorController;
         private bool _isTargetSelectorControllerRegistered;
