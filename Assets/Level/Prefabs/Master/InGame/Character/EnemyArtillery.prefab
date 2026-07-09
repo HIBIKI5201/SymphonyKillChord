@@ -179,6 +179,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
   _attackSoundSource: {fileID: 0}
+  _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
+  _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
   _defaultFootstepSoundSource: {fileID: 0}
   _defaultFootstepCueName: 
   _footstepSoundConfigs:

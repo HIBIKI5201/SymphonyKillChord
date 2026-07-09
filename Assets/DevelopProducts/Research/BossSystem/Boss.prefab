@@ -263,6 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 516d0c2f863727d4585c30867e02d248, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DevelopProducts.Boss.BossMoveView
+  _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
+  _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
 --- !u!114 &1235429572548650314
 MonoBehaviour:
   m_ObjectHideFlags: 0

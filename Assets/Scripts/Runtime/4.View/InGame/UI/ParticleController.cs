@@ -1,18 +1,12 @@
-using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.UI
 {
     /// <summary>
-    ///     パーティクルエフェクトの再生を管理するシングルトンクラス。
+    ///     パーティクルエフェクトの再生を担当するコンポーネント。
     /// </summary>
     public class ParticleController : MonoBehaviour
     {
-        #region パブリックプロパティ
-        /// <summary> このクラスのシングルトンインスタンス。 </summary>
-        public static ParticleController Instance { get; private set; }
-        #endregion
-
         #region インスペクター表示フィールド
         /// <summary> 再生するヒットエフェクトのパーティクルシステム。 </summary>
         [SerializeField, Tooltip("再生するヒットエフェクトのパーティクルシステム。")]
@@ -20,24 +14,6 @@ namespace KillChord.Runtime.View.InGame.UI
 
         [SerializeField, Tooltip("再生する予約時エフェクトのパーティクルシステム。")]
         private ParticleSystem _reserveEffect;
-        #endregion
-
-        #region Unityライフサイクルメソッド
-        /// <summary>
-        ///     スクリプトインスタンスがロードされたときに呼び出されます。
-        ///     シングルトンインスタンスを設定します。
-        /// </summary>
-        private void Awake()
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject); // 既にインスタンスが存在する場合は自身を破棄する。
-            }
-        }
         #endregion
 
         #region Publicメソッド
@@ -51,6 +27,10 @@ namespace KillChord.Runtime.View.InGame.UI
             _hitEffect.Play();
         }
 
+        /// <summary>
+        ///     指定された位置で予約時パーティクルエフェクトを再生します。
+        /// </summary>
+        /// <param name="position">パーティクルエフェクトを再生するワールド座標。</param>
         public void PlayParticleReserve(Vector3 position)
         {
             _reserveEffect.transform.position = position;

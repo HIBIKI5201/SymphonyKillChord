@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
-using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Music;
 using System.Threading;
 using System.Threading.Tasks;
@@ -196,6 +195,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
         private SoundEffectSource _attackSoundSource;
 
+        [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
+        private ParticleSystem _attackHitEffectPrefab;
+
+        [SerializeField, Tooltip("攻撃予約時に再生するエフェクトPrefab。")]
+        private ParticleSystem _attackReserveEffectPrefab;
+
         [SerializeField, Tooltip("足音SEの共通Source。床設定側にSourceがない場合に使用します。")]
         private SoundEffectSource _defaultFootstepSoundSource;
 
@@ -223,14 +228,31 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private EnemyAIController _enemyAIController;
         private ICharacterAnimationViewModel _characterAnimationViewModel;
         private ICharacterAnimationSignal _characterAnimationSignal;
+        private ParticleSystem _attackHitEffectInstance;
+        private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;
         private bool _isReservedAnimationPlaying;
 
+        /// <summary>
+        ///     初期化時に必要な参照を取得します。
+        /// </summary>
         private void Awake()
         {
             _navMeshAgent = GetComponent<NavMeshAgent>();
+            InitializeAttackEffects();
         }
 
+        /// <summary>
+        ///     無効化時に再利用用のエフェクト状態を初期化します。
+        /// </summary>
+        private void OnDisable()
+        {
+            ResetAttackEffects();
+        }
+
+        /// <summary>
+        ///     破棄時に購読解除とController破棄を行います。
+        /// </summary>
         private void OnDestroy()
         {
             if (_enemyAIController == null) return;
@@ -256,7 +278,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!_isPlaying) return;
 
-            ParticleController.Instance.PlayParticleReserve(transform.position);
+            PlayAttackEffect(_attackReserveEffectInstance);
             PlayOneShot(_attackAttackReservedAnimation);
             _isReservedAnimationPlaying = true;
         }
@@ -275,7 +297,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _isReservedAnimationPlaying = false;
             }
 
-            ParticleController.Instance.PlayParticle(transform.position);
+            PlayAttackEffect(_attackHitEffectInstance);
             PlaySound(_attackSoundSource, null);
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
@@ -377,6 +399,69 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         }
 
+        /// <summary>
+        ///     敵専用の攻撃エフェクトを生成します。
+        /// </summary>
+        private void InitializeAttackEffects()
+        {
+            _attackHitEffectInstance = CreateAttackEffectInstance(_attackHitEffectPrefab);
+            _attackReserveEffectInstance = CreateAttackEffectInstance(_attackReserveEffectPrefab);
+        }
+
+        /// <summary>
+        ///     攻撃エフェクトのインスタンスを生成します。
+        /// </summary>
+        /// <param name="effectPrefab"> 生成元のエフェクトPrefab。 </param>
+        /// <returns> 生成したエフェクトインスタンス。 </returns>
+        private ParticleSystem CreateAttackEffectInstance(ParticleSystem effectPrefab)
+        {
+            if (effectPrefab == null)
+            {
+                return null;
+            }
+
+            ParticleSystem instance = Instantiate(effectPrefab, transform);
+            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            instance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            return instance;
+        }
+
+        /// <summary>
+        ///     指定した攻撃エフェクトを現在位置で再生します。
+        /// </summary>
+        /// <param name="effectInstance"> 再生するエフェクト。 </param>
+        private void PlayAttackEffect(ParticleSystem effectInstance)
+        {
+            if (effectInstance == null)
+            {
+                return;
+            }
+
+            effectInstance.transform.position = transform.position;
+            effectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            effectInstance.Play();
+        }
+
+        /// <summary>
+        ///     攻撃エフェクトの再生状態を初期化します。
+        /// </summary>
+        private void ResetAttackEffects()
+        {
+            if (_attackHitEffectInstance != null)
+            {
+                _attackHitEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
+        /// <summary>
+        ///     指定キーのワンショットアニメーションを要求します。
+        /// </summary>
+        /// <param name="key"> 再生するアニメーションキー。 </param>
         private void PlayOneShot(string key)
         {
             if (_characterAnimationSignal == null)
