@@ -66,6 +66,109 @@ Playerのプレハブを生成するスポナーを作るべきなのでは？
 
 実装と抽象化を1ファイルに書くな！！！！！！
 
+### BuffTestなどのテスト用コードがRuntimeアセンブリに混在している
+
+`BuffTest.cs` というテスト用のクラスが `KillChord.Runtime.Application.InGame.Buff` 名前空間（本番コード用ディレクトリ）に配置されている。また、テスト用アサーション拡張である `UnityEngine.Assertions.Must` の using もRuntimeコードに残ってしまっている。
+テスト用のクラスやモックは、EditorアセンブリやTestsアセンブリ（Assembly Definition等で本番用アセンブリから隔離された場所）に移動するか、不要であれば削除すべきである。
+
+### EventBusの静的イベント（static）によるライフサイクル・メモリリーク問題
+
+`EventBus<T>` が静的（`static`）クラスとして実装され、静的イベント `_onEvent` にリスナーが登録される設計になっている。
+Unityにおいては、シーンロードをまたぐ際やプレイモードを終了した際、明示的に `Unregister` が呼ばれなかったリスナー（ゲームオブジェクトやコンポーネント等）への参照が static イベントに残ったままになり、
+- メモリリーク（解放されるべきオブジェクトがGCされない）
+- すでに破壊されたオブジェクトに対するイベント送信による `MissingReferenceException` / 空参照エラー
+といった致命的な不具合を容易に引き起こす。
+**対策：**
+1. インスタンスベースのイベントマネージャーをDIでライフサイクル管理する。
+2. 静的クラスを維持する場合、シーン遷移時（初期化時または破棄時）にイベントリスナーを全クリアする `Clear()` または `Reset()` メソッドを提供し、適切にコールする。
+
+### ServiceLocator（サービスロケーターパターン）への依存と依存関係のブラックボックス化
+
+`IngameComposition`（インゲームの起動エントリーポイント）等において、`ServiceLocator.TryGetInstance` を使った動的なインスタンス取得が多用されている。
+サービスロケーターパターンは「クラスの本来の依存関係が外部から見えなくなる（ブラックボックス化する）」というデメリットがあり、結合度の高いコードを招く原因となる。
+**対策：**
+可能な限りコンストラクタインジェクションや、VContainerやZenjectなどの純粋なDIフレームワークを導入し、エントリポイント（Composition Root）で明示的に依存関係をバインド・注入する設計へ移行すべきである。
+
+### RhythmDefinition.CalculateBeatType におけるコールバック実行（副作用の混入）
+
+`RhythmDefinition`（Domain層の定義・計算用構造体）内の `CalculateBeatType` メソッドにおいて、引数で `Action action` を受け取り、判定の閾値内だった場合に `action?.Invoke()` を直接実行してイベントを発火させている。
+これは純粋であるべきドメインの計算ロジック内に、「何かしらの副作用をコールバックとして実行する」という処理が入り込んでおり、ドメインのテスト容易性を下げ、アーキテクチャの責務を曖昧にしている。
+**対策：**
+計算メソッドは純粋に関数として結果（例: `BeatType` や、ジャスト判定に合致したかどうかを示すフラグ `IsJusted` 等をまとめた構造体）を返し、その結果をもとに呼び出し元（Application層等）がアクションを呼び出す・イベントを発火させる、というように計算と副作用を明確に隔離すべきである。
+
+### RingBuffer<T>.AsReadonlySpan() における危険な stackalloc と予期せぬ副作用
+
+`RingBuffer<T>` 内の `AsReadonlySpan()` メソッドにおいて、バッファの開始位置が `_head != 0` の場合に以下のような処理が行われている。
+- `stackalloc T[_buffer.Length]` でスタック上に配列サイズの一時バッファをアロケート
+- リングバッファの内容を古い順にコピーし、元の `_buffer` 配列にコピーし直した上で `_head = 0` にリセット
+**問題点：**
+1. **Getterライクなメソッドにおける重大な副作用（不変性の崩壊）:** 単にスパンを取得する目的の `AsReadonlySpan()` を呼ぶだけで、バッファ内部の格納位置（`_head`）がリセットされ、配列の並び替え＆コピーという重い破壊的処理が暗黙的に行われる。
+2. **スタックオーバーフロー（クラッシュ）の危険性:** もしバッファ容量が非常に大きい、または `T` のサイズが大きい場合、`stackalloc` は一瞬でコールスタックを食いつぶし、Unityをクラッシュ（強制終了）させる原因になる。
+**対策：**
+配列全体を無理に1枚の `ReadOnlySpan` として返すのではなく、順番通りに走査するためのカスタムなイテレータ（`IEnumerable<T>` や `IEnumerator<T>`）を提供するか、バッファを崩さずに全要素を走査する `ForEach(Action<T> action)` 等を設計すべきである。
+
+### HealthEntityとCharacterEntityの間の不変量管理・カプセル化の分散
+
+`CharacterEntity.cs` において、`TakeDamage` や `Heal` の際に「現在HPからダメージ値を差し引いて下限を0にする（`Math.Max(0, ...)`）」といった計算を行い、その結果を `HealthEntity.ChangeHealth(nextHealth)` に渡している。
+本来、HPが最大HPを超えないこと、および0未満にならないこと（体力の不変量・整合性）は `HealthEntity` がカプセル化して保証すべき役割である。
+しかし、上限判定（MaxHP）は `HealthEntity.ChangeHealth` 側で行われ、下限判定（0下限）や「ダメージを与える」「回復する」といった計算そのものは `CharacterEntity` 側に分散してしまっている。
+**対策：**
+`HealthEntity` に `TakeDamage(Damage)` や `Heal(Health)` といった明確なドメインアクションメソッドを定義し、HPの境界条件判定（0以下やMaxHP超過など）の計算・不変量の維持を `HealthEntity` 内部に完全にカプセル化すべきである。
+
+### ScenarioCsvUtilityのゲーム中における文字列アロケーション（GC Alloc）の懸念
+
+シナリオCSVのパース処理 `ParseCsvLine` において、`StringBuilder` や `List<string>`、部分文字列が多用されており、何度もトリム（`headers[i]?.Trim()`）などが行われている。
+このCSVロード処理がゲームのプレイ中に走る場合、大量の `string` アロケーションが発生し、UnityのGC（Garbage Collector）を頻繁に刺激してフレーム落ち（スパイク）を発生させる大きな要因となる。
+**対策：**
+1. ロード時間をアロケーションフリーにするために、`ReadOnlySpan<char>` を使って文字列アロケーションなしでCSVをトークナイズするパーサーへの変更。
+2. そもそも実行時にCSVをパースするのではなく、Unityのビルドインまたはインフラ層の機能で事前に `ScriptableObject` やシリアライズドバイナリデータ（MessagePackなど）に変換しておき、実行時はアロケーションなしで直接読み込めるように設計を移行すべき。
+
+### PriorityQueueの自作クラスと.NET標準の重複
+
+`PriorityQueue<TElement, TPriority>` という優先度付きキューが独自にフル実装されているが、.NET 6（または近代的な.NET Standard）以降の環境では、標準で `System.Collections.Generic.PriorityQueue` が提供されている。
+独自実装のコレクションはバグやパフォーマンス問題を生み出しやすいため、もしUnity環境が .NET 6 等の標準ライブラリをサポートしている場合は、これを取り除き、標準の優先度付きキューを使用するべき。古いバージョンへの互換性などの理由から意図して自作している場合は、その旨をサマリーコメント等で明示すべきである。
+
+## 設計理念（DesignPhilosophy.md）からの逸脱指摘
+
+`DesignPhilosophy.md` では、**Domain層**、**Application層**、**Adaptor層**はすべて**ピュアC#クラス（Pure C#）**として定義され、Unityフレームワークへの直接依存は避ける（またはインターフェースを介してComposition層でDIする）方針となっている。しかし、現状のコードベースでは、これらのレイヤーへ `UnityEngine` の依存が著しく漏れ出している。
+
+### 1. Application層における3D座標・回転・Lerp計算（カメラシステム）
+
+* **対象ファイル:**
+  * `CameraSystemApplication.cs`
+  * `CameraFollowApplication.cs`
+  * `CameraRotationApplication.cs`
+* **問題点:**
+  * これらは `Application` 層に属しているピュアクラスであるべきだが、内部で `using UnityEngine;` を行い、`Vector3`, `Quaternion`, `Mathf.Lerp`, `Quaternion.Slerp` などの Unity 独自の3D数学ライブラリを多用している。
+  * さらに、**「カメラの追従位置のLerp計算」「障害物衝突時のカメラ位置の先行計算」「注視対象へのLookRotation計算」**といった、本来 `View` 層（表示・ゲームオブジェクト制御）が担当すべき「表示・物理制御ロジック」そのものが Application 層に実装されてしまっている。
+  * これにより、Application層単体でのPure C#ユニットテストが完全に不可能になり、クリーンアーキテクチャのメリット（テスト容易性・Unityへの非依存性）が失われている。
+* **対策:**
+  * カメラの位置・回転を直接算出する Lerp や Slerp、Raycast などのUnityに依存する数理処理は、すべて `View` 層（`CameraSystemView` 等）に移動する。
+  * Application層は「ターゲットロックオン状態の遷移判断」「どの対象を注視すべきかという抽象的な意思決定（ドメイン概念）」などの純粋なロジックのみを扱い、具体的な座標や回転の補間計算はView層に任せる設計へリファクタリングすべき。
+
+### 2. Adaptor層（Controller / Presenter）への UnityEngine 依存の流出
+
+* **対象ファイル:**
+  * `PlayerController.cs`
+  * `EnemyAIController.cs`
+* **問題点:**
+  * `Adaptor` 層は「ピュアクラス。伝達層」と定義されているが、`PlayerController.cs` で `using UnityEngine;` し、`Vector2`, `Vector3`, `Quaternion` を直接やり取りしている。
+  * `EnemyAIController.cs` でも、`Vector3` を使って位置情報を取得し、`Debug.Log` を呼び出している。
+  * これにより、外部のUIやコントローラー入力とApplication層を仲介するはずのAdaptor層がUnity Engineと密結合してしまっている。
+* **対策:**
+  * ベクトルデータや回転データをそのまま渡すのではなく、必要最小限のピュアC#データ型（または自作のプリミティブな値型オブジェクト）に変換してやり取りするか、インターフェースを介してUnityフレームワークの型を隠蔽すべきである。
+
+### 3. Domain層における UnityEngine 依存（ValueObject / Entity の汚染）
+
+* **対象ファイル:**
+  * `PlayerMoveParameter.cs`
+  * `CameraSystemParameter.cs`
+* **問題点:**
+  * 最もピュアであるべき `Domain` 層のクラスであるにもかかわらず、`PlayerMoveParameter.cs` は `using UnityEngine;` を含んでいる。
+  * `CameraSystemParameter.cs` は `UnityEngine.Vector3` や `UnityEngine.LayerMask` などを抱え、さらにUnityのインスペクターで編集できるようにするためか `[System.Serializable]` で直接装飾されている。
+* **対策:**
+  * `DesignPhilosophy.md` の記述「直接シリアライズ可能な状態になっている。インフラにAssetクラスを作るべき」に従い、シリアライズ（ScriptableObject等）やUnityのデータ型とのバインドは `InfraStructure` 層（ScriptableObjectとしての `Asset` クラス）に隔離し、Domain層はそれらを純粋なC#データ型として受け取るように完全に分離すべきである。
+
 # 用語
 
 ### リズムパターン（RhythmPattern）

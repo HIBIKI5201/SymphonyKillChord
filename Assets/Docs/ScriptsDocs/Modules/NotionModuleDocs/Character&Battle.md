@@ -1,8 +1,7 @@
+# 概要
+> 💡 **モジュール概要**
+> インゲーム中のキャラクターパラメータ管理、戦闘時の攻撃力・防御力・クリティカル計算、ダメージパイプライン、およびバフ（ステータス効果）システムを司るモジュールです。
 
----
-
-# 📌 基本情報
-インゲーム中のキャラクターパラメータ管理、戦闘時の攻撃力・防御力・クリティカル計算、ダメージパイプライン、およびバフ（ステータス効果）システムを司るモジュールです。
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Character & Battle |
@@ -11,7 +10,7 @@
 
 ---
 
-## 🏗️ クラス（レイヤー構成）
+## 🏗️ クラス
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
@@ -47,18 +46,14 @@
 
 ---
 
-## 🔗 モジュール間依存関係
-
-このモジュールはダメージパイプラインの提供元として、Player・Enemy 両モジュールから依存されます（外部と接続のない内部レイヤーは省略）。
+## 🔗 モジュール結合
 
 ```mermaid
 graph TD
+    %% 定義 (接続のないレイヤーは省略)
     subgraph CharacterBattleModule [Character & Battle モジュール]
         CB_Domain["Domain\n(CharacterEntity, IAttackPipeline, ActionParams 等)"]
-        CB_App["Application\n(AttackCalculator, AttackExecutor, CriticalStep 等)"]
         CB_Adaptor["Adaptor\n(PlayerAttackController, PlayerBattleState 等)"]
-        CB_Domain --> CB_App
-        CB_App --> CB_Adaptor
     end
 
     subgraph PlayerModule [Player モジュール]
@@ -74,6 +69,7 @@ graph TD
         M_Adaptor["Adaptor\n(MusicSyncState)"]
     end
 
+    %% 依存関係
     P_Adaptor -->|"CharacterEntity, IAttackPipeline 等を使用"| CB_Domain
     P_Adaptor -->|"PlayerAttackController, AttackExecutor を利用"| CB_Adaptor
     E_Adaptor -->|"CharacterEntity, Health, AttackPower を参照"| CB_Domain
@@ -82,9 +78,46 @@ graph TD
     CB_Adaptor -->|"MusicSyncState から BPM 取得"| M_Adaptor
 ```
 
+### 📥 依存しているもの
+
+* **`Music`**
+  * *依存箇所*: `BeatType`, `MusicSyncState`
+  * *詳細*: 攻撃ヒット時のタイミングに応じたジャスト判定（BeatType）や、現在のBPM情報に連動した処理（MusicSyncState）を行うためにMusicモジュールに依存します。
+
+### 📤 依存されているもの
+
+* **`InGame/Player`**
+  * *参照箇所*: `CharacterEntity`, `PlayerAttackController`, `AttackExecutor`
+  * *詳細*: プレイヤーキャラクターのHP・ステータス情報を `CharacterEntity` として保持し、攻撃アクションのトリガーとして `PlayerAttackController` および `AttackExecutor` を介してダメージフローを実行します。
+* **`InGame/Enemy`**
+  * *参照箇所*: `CharacterEntity`, `EnemyBattleState`, `AttackExecutor`
+  * *詳細*: 敵キャラクターがパラメータを `CharacterEntity` で表現し、被弾時の状態維持やAIの攻撃契機などで `EnemyBattleState` や `AttackExecutor` を使用します。
+
 ---
 
-# 🔄 処理の流れ（シークエンス図）
+# 詳細
+
+<h2>🧅レイヤー情報</h2>
+
+### ① Domain
+> キャラクターの基本戦闘能力（HP、攻撃力、クリティカル率など）を保持するEntityや、ダメージ計算パイプラインのインターフェース（`IAttackPipeline`）、コンテキストを定義する純粋なドメインルール層です。
+
+### ② Application
+> 各種計算処理の抽象化（`AttackCalculator`, `AttackExecutor`）や、ダメージ計算における個別ロジック（`CriticalStep`, `ConfirmedDamage`）、バフシステム（`DamageDownBuff`, `LifeStealBuff`）などのビジネスロジックを実装します。
+
+### ③ Adaptor
+> 攻撃コマンドを実行する `PlayerAttackController`、戦闘中のバフ状態等を管理する `PlayerBattleState` や `EnemyBattleState`、および計算・変動したデータをUI側へ中継する各種Presenter（`AttackResultPresenter`, `PlayerHealthHudPresenter`）を定義します。
+
+### ④ View
+> Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当します。
+
+### ⑤ Infrastructure
+> 当モジュールでは使用していません。
+
+### ⑥ Composition
+> 当モジュールのクラスの依存解決（DI）は、呼び出し側となる Player または Enemy モジュールの初期化コンポーネント内で行われます。
+
+## 🔄処理フロー
 
 主要な処理フローごとに分けて記述します。
 
@@ -148,6 +181,7 @@ sequenceDiagram
     participant BuffSys as BuffSystem (CharacterEntity)
     participant DABuff as DamageDownBuff / LifeStealBuff
 
+    Note over PAC: 攻撃処理開始
     PAC ->> BuffSys: 攻撃前バフ実行 (Execute: Attack_Logic_Before)
     BuffSys ->> DABuff: 各バフのロジック実行
     DABuff -->> BuffSys: 変換後コンテキストを返却

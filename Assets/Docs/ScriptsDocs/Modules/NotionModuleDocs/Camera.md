@@ -1,8 +1,7 @@
+# 概要
+> 💡 **モジュール概要**
+> インゲーム中のカメラシステム（プレイヤーの追従、フリーカメラ操作、および敵のロックオン・ターゲット選択システム）を司るモジュールです。
 
----
-
-# 📌 基本情報
-インゲーム中のカメラシステム（プレイヤーの追従、フリーカメラ操作、および敵のロックオン・ターゲット選択システム）を司るモジュールです。
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Camera |
@@ -11,7 +10,7 @@
 
 ---
 
-## 🏗️ クラス（レイヤー構成）
+## 🏗️ クラス
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
@@ -34,9 +33,7 @@
 
 ---
 
-## 🔗 モジュール間依存関係
-
-カメラモジュールは、他のモジュール（Persistent, Player, Enemy）と疎結合で連携します（外部と接続のない内部レイヤーは省略）。
+## 🔗 モジュール結合
 
 ```mermaid
 graph TD
@@ -66,7 +63,7 @@ graph TD
     Adaptor -->|ロックオン対象取得| Domain
 ```
 
-### 📥 依存しているもの（外部 → Camera）
+### 📥 依存しているもの
 
 * **`Persistent`**
   * *依存箇所*: `PlayerInputView`
@@ -78,7 +75,7 @@ graph TD
   * *依存箇所*: `ITarget` / `ILockOnTarget`
   * *詳細*: ロックオン対象となる敵を取得します。Domain層に用意した抽象インターフェース `ILockOnTarget` を通じて弱結合で参照しています。
 
-### 📤 依存されているもの（Camera → 外部）
+### 📤 依存されているもの
 
 * **`InGame/Player`**
   * *参照箇所*: `ICameraTransform`, `TargetSelectorController`
@@ -89,7 +86,29 @@ graph TD
 
 ---
 
-# 🔄 処理の流れ（シークエンス図）
+# 詳細
+
+## 🧅レイヤー情報
+
+### ① Domain
+> カメラシステムの根幹となる、ロックオン対象（`ILockOnTarget`）や、常駐のカメラ位置・向きを他から参照するための抽象インターフェース（`ICameraTransform`）などを定義します。
+
+### ② Application
+> プレイヤーへの追従（速度に応じた動的ズームを含む）、フリー視点・ロックオン視点のボーン回転処理、および画面中心から最適な敵を選択するターゲット選定（`TargetSelector`）といったコアユースケースを実行します。
+
+### ③ Adaptor
+> プレイヤーの入力イベント受付、他モジュールとのデータ中継、および現在ターゲット情報を外部公開する `TargetSelectorController` などのアダプター層を提供します。
+
+### ④ View
+> Unityの Cinemachine 仮想カメラや実際のカメラコンポーネントへの実反映、およびRaw入力のハンドリングを担当します。
+
+### ⑤ Infrastructure
+> 当モジュールでは使用していません。
+
+### ⑥ Composition
+> `CameraSystemInitializer` を通じて、カメラを構成する各オブジェクトやコントローラーの依存関係（DI）を解決し初期化します。
+
+## 🔄処理フロー
 
 主要な処理フローごとに分けて記述します。
 
@@ -105,7 +124,7 @@ sequenceDiagram
     participant CSPres as CameraSystemPresenter
     participant CSView as CameraSystemView
 
-    Note over CSApp: 毎フレームのUpdate / LateUpdateループ
+    Note over CSApp: 毎フレーム of Update / LateUpdateループ
     CSApp ->> CFA: 追従座標計算依頼 (プレイヤー位置を渡す)
     CFA -->> CSApp: 基本追従座標を返却
     CSApp ->> CFVA: ズーム・ラグ計算依頼 (プレイヤー速度を渡す)
@@ -150,13 +169,13 @@ sequenceDiagram
     participant TSC as TargetSelectorController
     participant OtherUI as ロックオンUI (他モジュール)
 
-    Note over CSApp: 毎フレームの Update / LateUpdateループ (ロックオン時)
+    Note over CSApp: 毎フレーム of Update / LateUpdateループ (ロックオン時)
     CSApp ->> CBLR: ロックオン回転角計算要求 (ターゲット座標・自機座標)
     CBLR -->> CSApp: 計算された回転値（Yaw/Pitch）を返却
     CSApp ->> CSPres: 最新のカメラ位置・回転データを伝達
     CSPres ->> CSView: カメラ用ボーン/Transformに回転を反映
 
-    Note over OtherUI: 毎フレームの描画更新ループ
+    Note over OtherUI: 毎フレーム of 描画更新ループ
     OtherUI ->> TSC: 現在のロックオン対象情報（座標等）を取得
     TSC -->> OtherUI: ターゲット情報返却
     OtherUI ->> OtherUI: 画面上にロックオンマークをレンダリング

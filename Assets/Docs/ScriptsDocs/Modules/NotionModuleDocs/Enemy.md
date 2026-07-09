@@ -1,8 +1,7 @@
+# 概要
+> 💡 **モジュール概要**
+> インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールです。
 
----
-
-# 📌 基本情報
-インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールです。
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Enemy |
@@ -11,7 +10,7 @@
 
 ---
 
-## 🏗️ クラス（レイヤー構成）
+## 🏗️ クラス
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
@@ -36,18 +35,15 @@
 
 ---
 
-## 🔗 モジュール間依存関係
-
-敵 AI とウェーブシステムが複数のモジュールに依存します（外部と接続のない内部レイヤーは省略）。
+## 🔗 モジュール結合
 
 ```mermaid
 graph TD
+    %% 定義 (接続のないレイヤーは省略)
     subgraph EnemyModule [Enemy モジュール]
-        E_Domain["Domain\n(EnemyWaveDefinition, EnemyMoveDecision)"]
         E_App["Application\n(EnemyMoveUsecase, EnemyAttackReservationUsecase 等)"]
         E_Adaptor["Adaptor\n(EnemyAIController, EnemyWaveSpawnerController 等)"]
         E_Composition["Composition\n(EnemyInitializer, BossInitializer, EnemyInfantrySpawner)"]
-        E_Domain --> E_App
         E_App --> E_Adaptor
         E_Adaptor --> E_Composition
     end
@@ -69,16 +65,57 @@ graph TD
         MS_Adaptor["Adaptor\n(MissionEventController)"]
     end
 
-    E_Composition -->|"プレイヤー位置/Entity参照 (要改善: 強結合)"| P_Composition
+    %% 依存関係
+    E_Composition -->|"プレイヤー位置/Entity参照"| P_Composition
     E_Adaptor -->|"追尾ターゲット情報 (PlayerEntity)"| P_Domain
     E_App -->|"リズム攻撃予約トリガー (IMusicSyncService)"| M_Adaptor
     E_Adaptor -->|"ロックオン対象通知"| C_Adaptor
     E_Adaptor -->|"敵撃破通知"| MS_Adaptor
 ```
 
+### 📥 依存しているもの
+
+* **`Player`**
+  * *依存箇所*: `PlayerInitializer` (Composition), `PlayerEntity` (Domain)
+  * *詳細*: AI移動において追従ターゲットとするためにプレイヤーの座標や `PlayerEntity` 情報を参照します。
+* **`Music`**
+  * *依存箇所*: `IMusicSyncService` (Adaptor)
+  * *詳細*: ビート同期攻撃を予約・実行するためにMusicモジュールの提供する非同期アクション予約システム（IMusicActionScheduler）等を利用します。
+
+### 📤 依存されているもの
+
+* **`Camera`**
+  * *参照箇所*: `TargetSelectorController` (Adaptor)
+  * *詳細*: 敵キャラクターがカメラのロックオン対象として検索・登録される際、抽象インターフェース（`ILockOnTarget` 等）を介して接続されます。
+* **`Mission`**
+  * *参照箇所*: `MissionEventController` (Adaptor)
+  * *詳細*: 敵が撃破された際のイベントをミッションモジュールに通知し、ステージクリアの条件判定等に利用されます。
+
 ---
 
-# 🔄 処理の流れ（シークエンス図）
+# 詳細
+
+## 🧅レイヤー情報
+
+### ① Domain
+> 出現敵とウェーブ数の対応データ（`EnemyWaveDefinition`）や、毎フレームAIが移動すべき情報（`EnemyMoveDecision`）といった基本行動データ定義を保持します。
+
+### ② Application
+> 索敵、最適な攻撃立ち位置の探索、移動意思決定（`EnemyMoveUsecase`）、およびビートと同期させて2拍前・1拍前・攻撃のタイミングをコールバック処理する「攻撃予約」（`EnemyAttackReservationUsecase`）などのビジネスロジックを実装します。
+
+### ③ Adaptor
+> AIの主要な状態管理とユースケースの連携を担う `EnemyAIController`、戦闘中フラグ（`EnemyBattleState`）、およびウェーブ撃破を検知して次の出現指示を送る `EnemyWaveSpawnerController` などのアダプターを提供します。
+
+### ④ View
+> ウェーブの制限時間を画面上に描画・表示制御する `EnemyWaveTimerView` などを担当します。
+
+### ⑤ Infrastructure
+> 当モジュールでは使用していません。
+
+### ⑥ Composition
+> 一般敵の `EnemyInitializer`、ボスの `BossInitializer`、オブジェクトプールにより大量の敵歩兵を動的に管理する `EnemyInfantrySpawner` などの生成・依存注入、ライフサイクル管理を担当します。
+
+## 🔄処理フロー
 
 主要な処理フローごとに分けて記述します。
 
@@ -93,7 +130,7 @@ sequenceDiagram
     participant EMoveUC as EnemyMoveUsecase
     participant EBState as EnemyBattleState
 
-    Note over EView: 毎フレームの Update ループ
+    Note over EView: 毎フレーム of Update ループ
     EView ->> EAI: 移動命令の取得 (GetMoveInstruction: enemyPos, targetPos)
     EAI ->> EMoveUC: 移動判定評価 (Evaluate)
     EMoveUC -->> EAI: EnemyMoveDecision を返却

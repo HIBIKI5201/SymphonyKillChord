@@ -1,18 +1,16 @@
-
----
-
-# 📌 基本情報
+# 概要
+> 💡 **モジュール概要**
+> ゲームの根幹である「BPM・ビート情報（拍）・リズム同期判定（ジャスト入力等）・音量管理・BGM/SE/Voice ソースの音響制御」を司る、プロジェクト全体の中核となるモジュールです。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Music |
 | **カテゴリ** | InGame + Persistent / Core System |
 | **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
-| **概要** | ゲームの根幹である「BPM・ビート情報（拍）・リズム同期判定（ジャスト入力等）・音量管理・BGM/SE/Voice ソースの音響制御」を司る、プロジェクト全体の中核となるモジュールです。 |
 
 ---
 
-## 🏗️ クラス（レイヤー構成）
+## 🏗️ クラス
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
@@ -33,18 +31,15 @@
 
 ---
 
-## 🔗 モジュール間依存関係
-
-Music モジュールは他のどのモジュールにも依存しない、完全独立のコアモジュールです（外部と接続のない内部レイヤーは省略）。
+## 🔗 モジュール結合
 
 ```mermaid
 graph TD
+    %% 定義 (接続のないレイヤーは省略)
     subgraph MusicModule [Music モジュール]
-        M_Domain["Domain\n(BeatType)"]
         M_App["Application\n(IMusicSyncService, IMusicActionScheduler, RhythmJustService)"]
         M_Adaptor["Adaptor\n(MusicSyncState, MusicSyncController 等)"]
         M_View["View\n(MusicSyncView, MusicPlayer 等)"]
-        M_Domain --> M_App
         M_App --> M_Adaptor
         M_Adaptor --> M_View
     end
@@ -65,6 +60,7 @@ graph TD
         S_View["View\n(SettingView)"]
     end
 
+    %% 依存関係
     P_App -->|"IMusicSyncService, MusicSyncState を参照"| M_App
     P_App -->|"MusicSyncState から現在拍を取得"| M_Adaptor
     E_App -->|"IMusicActionScheduler でリズム攻撃予約"| M_App
@@ -72,9 +68,51 @@ graph TD
     S_View -->|"IVolumeManager 経由で音量変更"| M_View
 ```
 
+### 📥 依存しているもの
+
+* **依存なし**
+  * *詳細*: Music モジュールは他のどのモジュールにも依存しない、完全独立のコアモジュールです。
+
+### 📤 依存されているもの
+
+* **`InGame/Player`**
+  * *参照箇所*: `IMusicSyncService`, `MusicSyncState`
+  * *詳細*: プレイヤーはジャスト入力判定（ジャストヒットイベント等）や、BPM情報に基づく移動・アニメーション・拍管理を行うために参照します。
+* **`InGame/Enemy`**
+  * *参照箇所*: `IMusicActionScheduler`
+  * *詳細*: 敵キャラクターが特定のビートタイミング（2拍前・1拍前・ジャスト拍）に攻撃予約を登録し、リズムに同期したAI攻撃制御を行うために利用されます。
+* **`InGame/UI`**
+  * *参照箇所*: `RhythmGuideDto`, `MusicSyncState`
+  * *詳細*: 画面上のビートインジケータ（リズムガイドUI）の描画タイミングを正確に同期させるために参照します。
+* **`Setting`**
+  * *参照箇所*: `IVolumeManager`
+  * *詳細*: オプション設定画面などからBGM・SE・Voice音量を変更するためのボリュームマネージャーのインターフェースを参照します。
+
 ---
 
-# 🔄 処理の流れ（シークエンス図）
+# 詳細
+
+## 🧅レイヤー情報
+
+### ① Domain
+> 拍（ビート）の種類を表現する `BeatType` などの、タイミング制御・ジャスト同期に必須のデータ定義を保持します。
+
+### ② Application
+> 再生時間に基づくビート更新（`IMusicSyncService`）、指定ビート後への非同期コールバック管理（`IMusicActionScheduler`）、およびタイミング判定・ジャスト検知（`RhythmJustService`）などの核心的なビジネスロジックを実装します。
+
+### ③ Adaptor
+> 毎フレームのリズム同期処理を回す `MusicSyncController`、現在のBPM情報や拍数データを格納する `MusicSyncState`、およびUI層へと送る `RhythmGuideDto` などのデータブリッジを定義します。
+
+### ④ View
+> Unityの `AudioSource` と直接対話して再生時間を監視する `MusicSyncView`、BGM/SE/Voiceソースのマネジメントを担う `MusicPlayer`（音量変更の窓口インターフェースを含む）などのUnity依存制御を担当します。
+
+### ⑤ Infrastructure
+> 当モジュールでは使用していません。
+
+### ⑥ Composition
+> ゲーム内BGMとタイミング同期システムをリンクさせる `MusicSyncInitializer`、UI側のタイミング連動を行う `RhythmGuideInitializer`、常駐シーンの `MusicPlayerInitializer` など、アプリ全域へのDIセットアップを担当します。
+
+## 🔄処理フロー
 
 主要な処理フローごとに分けて記述します。
 
@@ -90,7 +128,7 @@ sequenceDiagram
     participant MSState as MusicSyncState
     participant MSService as IMusicSyncService
 
-    Note over MSView: 毎フレームの Update ループ
+    Note over MSView: 毎フレーム of Update ループ
     MSView ->> MPlayer: 現在の再生時間を取得 (MusicPlayer.Time)
     MPlayer -->> MSView: playTime (double) を返却
     MSView ->> MSCont: タイミング更新 (Tick: playTime)
@@ -132,7 +170,7 @@ sequenceDiagram
     participant MSService as IMusicSyncService
 
     Caller ->> Scheduler: 指定ビート数後のコールバックを予約 (Schedule)
-    Note over MSService: 毎フレームの Update ループで拍の到達を検知
+    Note over MSService: 毎フレーム of Update ループで拍の到達を検知
     MSService ->> Scheduler: 予約済みアクションの実行チェック (毎フレーム)
     alt 指定ビートタイミングに到達
         Scheduler -->> Caller: 登録済みコールバックを発火
