@@ -228,7 +228,7 @@ jobs:
               }
               $EntryFileName = [System.IO.Path]::GetFileName($Entry.FullName)
               $DestPath      = [System.IO.Path]::Combine($ExtractDir, $EntryFileName)
-              $Entry.ExtractToFile($DestPath, $true)
+              [System.IO.Compression.ZipFileExtensions]::ExtractToFile($Entry, $DestPath, $true)
               Write-Host "  Extracted: $EntryFileName"
               $ExtractedCount++
             }
