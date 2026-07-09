@@ -21,14 +21,14 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Solder11
-  m_Shader: {fileID: -6465566751694194690, guid: 6ce9a46295a327b4d8e38661df0e2497, type: 3}
+  m_Shader: {fileID: 4800000, guid: 6b65efc8265b986478cf2235fd235bb8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _SHADOWS_SOFT
+  m_InvalidKeywords:
   - _ADDITIONAL_LIGHTS
   - _ADDITIONAL_LIGHT_SHADOWS
-  - _SHADOWS_SOFT
-  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -76,6 +76,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MetallicMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MetalnessTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -84,11 +88,19 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -128,6 +140,7 @@ Material:
     - _BlendModePreserveSpecular: 1
     - _Boolean: 1
     - _BumpScale: 1
+    - _CharShadowOn: 0
     - _CharaMaxY: 1
     - _CharaMinY: 0
     - _ClearCoatMask: 0
@@ -138,48 +151,82 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EnvReflectionIntensity: 1
     - _EnvironmentReflections: 1
+    - _FadeAlpha: 0
+    - _FadeOn: 0
     - _Float: 0
     - _ForFace: 0
     - _ForHair: 0
+    - _FresnelBackLight: 8
+    - _FresnelBackRimLight: 0.5
+    - _FresnelFrontRimLight: 4
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _IsForFace: 0
+    - _IsSmoothNormal: 0
     - _Metallic: 0
     - _MetallicApply: 0
     - _NPRorPBR: 0.2
     - _NormalMap: 0
+    - _NormalMapIntensity: 0
     - _OcclusionStrength: 1
     - _OldType: 0
+    - _OutlineWidthLit: 0.0005
+    - _OutlineWidthShadow: 0.001
+    - _PBROn: 0
     - _Parallax: 0.005
     - _Perspective: 0.5
+    - _PerspectiveRemovalRadius: 1
+    - _PerspectiveRemovalRatio: 0
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Radius: 0
     - _ReceiveShadows: 1
     - _RimLight: 1
+    - _Roughness: 1
     - _SHADOWS_SOFT: 1
+    - _SSSIntensity: 0.5
+    - _SSSOn: 0
+    - _SSSThickness: 0.3
+    - _SSSTransmissionPower: 4
+    - _SSSWrap: 0.3
     - _Shadow: 1
+    - _SmearsOn: 0
+    - _SmearsPower: 0
     - _Smoothness: 0.5
     - _SmoothnessApply: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _SpecularIntensity: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
+    - _StencilComp: 8
+    - _StencilFail: 0
+    - _StencilPass: 0
+    - _StencilRef: 1
     - _Surface: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
+    - _ZOffset: 0
     - _ZWrite: 1
     - _metallic: 0
     - _smoothness: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorMiddle: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _ColorShadow: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
     - _Head: {r: 0, g: 1, b: 0, a: 0}
     - _MiddleColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SSSColor: {r: 1, g: 0.39999998, b: 0.29999998, a: 1}
     - _ShadowColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _SmearsDirection: {r: 0, g: 1, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
