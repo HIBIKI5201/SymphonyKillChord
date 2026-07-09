@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Camera;
 using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 
@@ -18,7 +19,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <param name="targetSelectorController"> 現在のロックオン対象エンティティを解決するコントローラー。</param>
         public void Initialize(
             CameraSystemController cameraSystemController,
-            TargetSelectorController targetSelectorController)
+            TargetSelectorController targetSelectorController,
+            TargetSelector targetSelector)
         {
             if (_view == null)
             {
@@ -28,8 +30,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _viewModel = new HUDEnemyHealthViewModel(_view);
             _presenter = new HUDEnemyHealthPresenter(
-                cameraSystemController, targetSelectorController, _viewModel);
-            _view.OnUpdate += _presenter.Tick;
+                cameraSystemController, targetSelectorController, _viewModel, targetSelector);
+            _view.OnUpdate += _presenter.Update;
         }
 
         [SerializeField, Tooltip("ロックオン中の敵HPを表示する View コンポーネント。")]

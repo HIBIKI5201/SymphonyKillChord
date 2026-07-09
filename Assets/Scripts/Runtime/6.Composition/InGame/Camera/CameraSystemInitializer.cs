@@ -73,7 +73,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
             if (_hudEnemyHealthInitializer != null)
             {
-                _hudEnemyHealthInitializer.Initialize(controller, _targetSelectorController);
+                _hudEnemyHealthInitializer.Initialize(controller, _targetSelectorController, targetSelector);
             }
             else
             {
