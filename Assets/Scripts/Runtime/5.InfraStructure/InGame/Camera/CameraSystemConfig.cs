@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Camera;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Camera
@@ -9,28 +8,50 @@ namespace KillChord.Runtime.InfraStructure.InGame.Camera
     [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
     public sealed class CameraSystemConfig : ScriptableObject
     {
-        /// <summary>
-        ///     設定値をもとにカメラシステムのドメインパラメータを生成して返す。
-        /// </summary>
-        /// <returns> 生成したカメラシステムパラメータ。</returns>
-        public CameraSystemParameter ToDomain()
-            => new(
-                _cameraOffset,
-                _characterCenterOffset,
-                _distance,
-                _followOffsetPower,
-                _followLerpSpeed,
-                _boneRotateSpeed,
-                _lockOnAngleMargin,
-                _followRotationSpeed,
-                _lockOnLookAtRatio,
-                _lockOnRotationSpeed,
-                _collisionRadius,
-                _collisionMask,
-                _pitchRange,
-                _invertVertical,
-                _invertHorizontal
-                );
+        /// <summary> カメラの基本オフセット。 </summary>
+        public Vector3 Offset => _cameraOffset;
+
+        /// <summary> キャラクターモデルの中心オフセット。 </summary>
+        public Vector3 CharacterCenterOffset => _characterCenterOffset;
+
+        /// <summary> 通常時のカメラ距離。 </summary>
+        public float Distance => _distance;
+
+        /// <summary> 移動追従オフセットの強さ。 </summary>
+        public float FollowOffsetPower => _followOffsetPower;
+
+        /// <summary> 移動追従オフセットの補間速度。 </summary>
+        public float FollowLerpSpeed => _followLerpSpeed;
+
+        /// <summary> ロックオン時のボーン回転速度。 </summary>
+        public float BoneRotateSpeed => _boneRotateSpeed;
+
+        /// <summary> ロックオン時の角度許容範囲。 </summary>
+        public float LockOnAngleMargin => _lockOnAngleMargin;
+
+        /// <summary> フリールック時の回転速度。 </summary>
+        public float FollowRotationSpeed => _followRotationSpeed;
+
+        /// <summary> ロックオン注視点の補間比率。 </summary>
+        public float LockOnLookAtRatio => _lockOnLookAtRatio;
+
+        /// <summary> ロックオン時のカメラ回転速度。 </summary>
+        public float LockOnRotationSpeed => _lockOnRotationSpeed;
+
+        /// <summary> 衝突判定半径。 </summary>
+        public float CollisionRadius => _collisionRadius;
+
+        /// <summary> 衝突判定レイヤー。 </summary>
+        public int CollisionMask => _collisionMask;
+
+        /// <summary> ピッチ角度の制限範囲。 </summary>
+        public Vector2 PitchRange => _pitchRange;
+
+        /// <summary> 垂直方向の入力反転フラグ。 </summary>
+        public bool IsInvertVertical => _invertVertical;
+
+        /// <summary> 水平方向の入力反転フラグ。 </summary>
+        public bool IsInvertHorizontal => _invertHorizontal;
 
         [Header("Main")]
         [Tooltip("追従先を中心としたカメラの基本的オフセット位置")]

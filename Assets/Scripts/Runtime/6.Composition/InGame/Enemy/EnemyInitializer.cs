@@ -1,11 +1,10 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -20,10 +19,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="targetManager"></param>
-        /// <param name="targetEntityRegistry"></param>
         /// <param name="enemyPools"></param>
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools, EnemyWaveSpawnerState waveSpawnerState)
+        public void Initialize(TargetingSystem targetingSystem, EnemyPools enemyPools, EnemyWaveSpawnerState waveSpawnerState)
         {
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (initializer == null || initializer.MusicSyncService == null)
@@ -40,8 +37,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
             _musicSyncState = view.MusicSyncState;
-            _targetManagerController = new(targetManager);
-            _targetEntityRegistryController = new(targetEntityRegistry);
+            _targetingSystem = targetingSystem;
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
             if (_playerInitializer == null)
             {
@@ -67,7 +63,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             EnemyInfantryAttackControllerGenerator attackControllerGenerator = new EnemyInfantryAttackControllerGenerator();
             lifeCycle.Initialize(_playerInitializer.transform, _playerInitializer.PlayerEntity,
-            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController, attackControllerGenerator, null, _waveSpawnState, releaseCallback);
+            _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, null, _waveSpawnState, releaseCallback);
         }
 
         /// <summary>
@@ -84,14 +80,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             EnemyArtilleryAttackControllerGenerator attackControllerGenerator = new EnemyArtilleryAttackControllerGenerator();
             lifeCycle.Initialize(_playerInitializer.transform, _playerInitializer.PlayerEntity,
-            _musicSyncState, _musicSyncService, _targetManagerController, _targetEntityRegistryController, attackControllerGenerator, _enemyPools, _waveSpawnState, releaseCallback);
+            _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, _enemyPools, _waveSpawnState, releaseCallback);
         }
 
         private PlayerInitializer _playerInitializer;
         private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
-        private TargetManagerController _targetManagerController;
-        private TargetEntityRegistryController _targetEntityRegistryController;
+        private TargetingSystem _targetingSystem;
         private EnemyPools _enemyPools;
         private EnemyWaveSpawnerState _waveSpawnState;
         private bool _initialized = false;

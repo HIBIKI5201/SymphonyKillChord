@@ -1,13 +1,11 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Battle;
-using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
@@ -31,6 +29,7 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -78,10 +77,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         public CharacterEntity PlayerEntity => _playerEntity;
 
-        public void Initialize(
-            TargetManager targetManager,
-            TargetEntityRegistry targetEntityRegistry,
-            InputComposition inputComposition)
+        public void Initialize(InputComposition inputComposition)
         {
             if (_player == null)
                 Debug.LogError($"{nameof(PlayerView)}がNullです", this);
@@ -140,10 +136,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
-            TargetSelectorController targetSelectorController = ServiceLocator.GetInstance<TargetSelectorController>();
-            if (targetSelectorController == null)
+            TargetingSystem targetingSystem = ServiceLocator.GetInstance<TargetingSystem>();
+            if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetSelectorController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(TargetingSystem)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
 
@@ -171,7 +167,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             SkillCheckService skillCheckService = new SkillCheckService();
 
-            SkillUsecase skillUsecase = new SkillUsecase(targetSelectorController, _playerEntity);
+            SkillUsecase skillUsecase = new SkillUsecase(targetingSystem, _playerEntity);
             SkillController skillController = new SkillController(musicSyncService);
             skillController.Initialize(BuildSkillExecutionControllers(musicSyncState, skillResultPresenter, skillCheckService, skillUsecase, musicSyncService));
 
@@ -182,7 +178,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
 
             PlayerAttackController playerAttackController = new PlayerAttackController(attackResultPresenter,
-                playerBattleState, skillController, targetSelectorController, attackIntervalEvaluator, musicSyncService, musicSyncState, (float)parameter.AttackRotationSpeed, (float)parameter.AttackCooldown.Value, (int)_playerEntity.BaseDamage.Value);
+                playerBattleState, skillController, targetingSystem, attackIntervalEvaluator, musicSyncService, musicSyncState, (float)parameter.AttackRotationSpeed, (float)parameter.AttackCooldown.Value, (int)_playerEntity.BaseDamage.Value);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);

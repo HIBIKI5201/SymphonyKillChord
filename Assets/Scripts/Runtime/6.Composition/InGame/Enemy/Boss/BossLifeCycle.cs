@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
@@ -12,6 +11,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -42,8 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             CharacterEntity targetEntity,
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
-            TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController,
+            TargetingSystem targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             Action<BossLifeCycle> releaseCallback
@@ -79,8 +78,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
 
-            _targetManagerController = targetManagerController;
-            _targetEntityRegistryController = targetEntityRegistryController;
+            _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_enemyData);
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
@@ -159,7 +157,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _lockOnTargetGateway = new LockOnTargetGateway(transform);
+            _targetable = new TransformTargetable(transform);
 
             // View接続
             _view.Initialize(aiController, target);
@@ -195,8 +193,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
-            _targetManagerController?.Register(_lockOnTargetGateway);
-            _targetEntityRegistryController?.RegisterTargetEntity(_lockOnTargetGateway, _enemyEntity);
+            _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
 
             // コンポーネント有効化
             _view.Activate();
@@ -223,8 +220,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _targetingSystem?.UnregisterTarget(_targetable);
 
             _reservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -306,9 +302,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [Header("砲撃攻撃を含む場合に必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
-        private TargetEntityRegistryController _targetEntityRegistryController;
-        private TargetManagerController _targetManagerController;
-        private LockOnTargetGateway _lockOnTargetGateway;
+        private TargetingSystem _targetingSystem;
+        private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
@@ -336,9 +331,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _lockOnTargetGateway?.Dispose();
+            _targetingSystem?.UnregisterTarget(_targetable);
+            _targetable?.Dispose();
         }
     }
 }

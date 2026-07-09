@@ -3,7 +3,6 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
-using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
@@ -13,6 +12,8 @@ using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
@@ -23,6 +24,7 @@ using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
@@ -63,6 +65,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         private EnemyWaveSpawnerController _enemyWaveSpawnerController;
         private SelectedBattleStageState _selectedBattleStage;
         private SceneTransitionUsecase _sceneTransition;
+        private TargetSystemInitializer _targetSystemInitializer;
 
         private bool _isEnding = false;
 
@@ -175,6 +178,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         private void OnDestroy()
         {
             _enemyWaveSpawnerController?.Dispose();
+            _targetSystemInitializer?.Dispose();
             if (_missionruntimeService != null)
             {
                 _missionruntimeService.OnMissionFinished -= HandleMissionFinished;
@@ -228,8 +232,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return false;
             }
 
-            TargetManager targetManager = new();
-            TargetEntityRegistry targetEntityRegistry = new();
+            _targetSystemInitializer = new TargetSystemInitializer();
+            _targetSystemInitializer.Initialize();
 
             // 初期化順序の実行
             _musicSyncInitializer.Initialize();
@@ -273,14 +277,20 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             inputC.GetInputMapController.EnableOnly(InputMapNames.Common);
 
 #if UNITY_ANDROID
-            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _camerasystemInitializer.Initialize(_targetSystemInitializer.TargetingSystem);
             _mobileInput.Initialize(inputC.GetInputView);
 #else
-            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
+            _camerasystemInitializer.Initialize(_targetSystemInitializer.TargetingSystem);
             Cursor.lockState = CursorLockMode.Locked;
 #endif
 
-            _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
+            HUDEnemyHealthInitializer hudEnemyHealthInitializer = FindFirstObjectByType<HUDEnemyHealthInitializer>();
+            if (hudEnemyHealthInitializer != null)
+            {
+                hudEnemyHealthInitializer.Initialize(_targetSystemInitializer.TargetingSystem);
+            }
+
+            _playerInitializer.Initialize(inputC);
 
             PlayerView playerView = FindFirstObjectByType<PlayerView>();
 
@@ -316,7 +326,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyPools.Initialize();
 
             EnemyWaveSpawnerState enemyWaveSpawnerState = new EnemyWaveSpawnerState();
-            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools, enemyWaveSpawnerState);
+            _enemyInitializer.Initialize(_targetSystemInitializer.TargetingSystem, _enemyPools, enemyWaveSpawnerState);
 
             _enemySpawnPositionSearcher.Initialize(_playerInitializer.transform);
             _enemyInfantrySpawner.Initialize();
@@ -327,7 +337,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _enemyWaveTimerView.Initialize(_enemyWaveSpawnerController);
 
             // ボス関連
-            BossInitializer bossInitializer = TryInitializeBoss(targetManager, targetEntityRegistry, _enemyPools);
+            BossInitializer bossInitializer = TryInitializeBoss(_targetSystemInitializer.TargetingSystem, _enemyPools);
             if (bossInitializer != null)
             {
                 _inGamePlayDirector.AddGamePlayControllable(bossInitializer.LifeCycle);
@@ -492,10 +502,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         ///     現在シーンからBossInitializerを検索し、初期化を試す。<br/>
         ///     存在する場合、BossInitializerを返却。存在しない場合、nullを返却。
         /// </summary>
-        /// <param name="targetManager"></param>
-        /// <param name="targetEntityRegistry"></param>
         /// <returns></returns>
-        private BossInitializer TryInitializeBoss(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools)
+        private BossInitializer TryInitializeBoss(TargetingSystem targetingSystem, EnemyPools enemyPools)
         {
             // 現在のシーンからBossInitializerを検索する
             BossInitializer initializer = GameObject.FindFirstObjectByType<BossInitializer>();
@@ -506,7 +514,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return null;
             }
 
-            initializer.Initialize(targetManager, targetEntityRegistry, enemyPools);
+            initializer.Initialize(targetingSystem, enemyPools);
             return initializer;
         }
     }

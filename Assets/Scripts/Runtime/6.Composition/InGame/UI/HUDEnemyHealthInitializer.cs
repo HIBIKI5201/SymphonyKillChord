@@ -1,7 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.Camera;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
-using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 
@@ -15,12 +13,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <summary>
         ///     敵HP HUDを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
-        /// <param name="cameraSystemController"> カメラのロックオン状態を提供するコントローラー。</param>
-        /// <param name="targetSelectorController"> 現在のロックオン対象エンティティを解決するコントローラー。</param>
-        public void Initialize(
-            CameraSystemController cameraSystemController,
-            TargetSelectorController targetSelectorController,
-            TargetSelector targetSelector)
+        /// <param name="targetingSystem"> 現在のターゲット情報を解決するシステム。</param>
+        public void Initialize(TargetingSystem targetingSystem)
         {
             if (_view == null)
             {
@@ -29,8 +23,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _viewModel = new HUDEnemyHealthViewModel(_view);
-            _presenter = new HUDEnemyHealthPresenter(
-                cameraSystemController, targetSelectorController, _viewModel, targetSelector);
+            _presenter = new HUDEnemyHealthPresenter(targetingSystem, _viewModel);
             _view.OnUpdate += _presenter.Update;
         }
 

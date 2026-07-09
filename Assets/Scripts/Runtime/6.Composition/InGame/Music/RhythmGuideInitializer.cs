@@ -1,9 +1,9 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -34,12 +34,12 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            TargetSelectorController targetSelectorController =
-                ServiceLocator.GetInstance<TargetSelectorController>();
+            TargetingSystem targetingSystem =
+                ServiceLocator.GetInstance<TargetingSystem>();
 
-            if (targetSelectorController == null)
+            if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetSelectorController)} が見つかりません。TargetSelectorController が登録されているか確認してください。");
+                Debug.LogError($"{nameof(TargetingSystem)} が見つかりません。TargetingSystem が登録されているか確認してください。");
                 return;
             }
 
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
                 usecase,
-                targetSelectorController
+                targetingSystem
             );
 
             RhythmGuideViewModel viewModel = new RhythmGuideViewModel();

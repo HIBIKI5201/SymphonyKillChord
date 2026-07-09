@@ -1,13 +1,8 @@
-using KillChord.Runtime.Adaptor.InGame.Camera;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
-using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.UI;
-using KillChord.Runtime.Domain.InGame.Camera;
 using KillChord.Runtime.InfraStructure.InGame.Camera;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -26,9 +21,8 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         /// <summary>
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
-        /// <param name="targetManager"> ロックオン対象の一覧を管理するマネージャー。</param>
-        /// <param name="targetEntityRegistry"> ロックオン対象とキャラクターエンティティの対応を管理するレジストリ。</param>
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        /// <param name="targetingSystem"> カメラが参照するターゲット選択機能。</param>
+        public void Initialize(TargetingSystem targetingSystem)
         {
             if (_config == null)
             {
@@ -42,24 +36,27 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return;
             }
 
-            CameraSystemParameter parameter = _config.ToDomain();
+            CameraViewSettings viewSettings = new(
+                _config.Offset,
+                _config.CharacterCenterOffset,
+                _config.Distance,
+                _config.FollowOffsetPower,
+                _config.FollowLerpSpeed,
+                _config.BoneRotateSpeed,
+                _config.LockOnAngleMargin,
+                _config.FollowRotationSpeed,
+                _config.LockOnLookAtRatio,
+                _config.LockOnRotationSpeed,
+                _config.CollisionRadius,
+                _config.CollisionMask,
+                _config.PitchRange,
+                _config.IsInvertVertical,
+                _config.IsInvertHorizontal);
 
-            CameraBoneLockOnRotationApplication boneRotationSystem = new(parameter);
-            CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
-            CameraRotationApplication rotationSystem = new(parameter);
-            CameraFollowApplication followSystem = new(parameter);
-
-            TargetSelector targetSelector = new(targetManager);
-            TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
-            _targetSelectorController = new(targetSelector, targetEntityRegistryController);
-            ServiceLocator.RegisterInstance(_targetSelectorController);
-            _isTargetSelectorControllerRegistered = true;
-
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
-                freeLookRotationSystem, rotationSystem, targetSelector);
-
-            CameraSystemController controller = new(application);
-            CameraSystemPresenter presenter = new(application);
+            CameraLockOnRotationCalculator lockOnRotationCalculator = new(viewSettings);
+            CameraFreeLookRotationCalculator freeLookRotationCalculator = new(viewSettings);
+            CameraLookAtRotationCalculator lookAtRotationCalculator = new(viewSettings);
+            CameraFollowCalculator followCalculator = new(viewSettings);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
             if (stageSceneObj == null)
@@ -68,23 +65,17 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return;
             }
 
-            _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
+            _cameraSystem.Initialize(
+                (playerPosition, direction) => targetingSystem.ChangeTarget(playerPosition, direction),
+                () => targetingSystem.ClearTarget(),
+                () =>
+                {
+                    bool hasTarget = targetingSystem.TryGetCurrentTargetPosition(out Vector3 targetPosition);
+                    return (hasTarget, targetPosition);
+                },
+                followCalculator, lockOnRotationCalculator,
+                freeLookRotationCalculator, lookAtRotationCalculator, viewSettings, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
-
-            if (_hudEnemyHealthInitializer != null)
-            {
-                _hudEnemyHealthInitializer.Initialize(controller, _targetSelectorController, targetSelector);
-            }
-            else
-            {
-                Debug.LogError($"{nameof(_hudEnemyHealthInitializer)} がアサインされていません。");
-            }
-
-#if UNITY_EDITOR
-            _cameraSystem.gameObject
-                .AddComponent<CameraSystemParameterDebug>()
-                .SetCameraParameter(parameter);
-#endif
         }
 
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
@@ -92,23 +83,5 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraSystemConfig _config;
-
-        [SerializeField, Tooltip("ロックオン中の敵HP HUDの初期化クラス。")]
-        private HUDEnemyHealthInitializer _hudEnemyHealthInitializer;
-
-        private TargetSelectorController _targetSelectorController;
-        private bool _isTargetSelectorControllerRegistered;
-
-        private void OnDestroy()
-        {
-            if (!_isTargetSelectorControllerRegistered)
-            {
-                return;
-            }
-
-            ServiceLocator.UnregisterInstance(_targetSelectorController);
-            _targetSelectorController = null;
-            _isTargetSelectorControllerRegistered = false;
-        }
     }
 }

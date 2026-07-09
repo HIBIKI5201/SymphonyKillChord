@@ -1,10 +1,9 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application.InGame.Camera.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -21,9 +20,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     初期化処理
         /// </summary>
-        /// <param name="targetManager"></param>
-        /// <param name="targetEntityRegistry"></param>
-        public bool Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry, EnemyPools enemyPools)
+        public bool Initialize(TargetingSystem targetingSystem, EnemyPools enemyPools)
         {
             if(_boss == null)
             {
@@ -45,8 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             _musicSyncService = initializer.MusicSyncService;
             _musicSyncState = musicSyncView.MusicSyncState;
-            _targetManagerController = new(targetManager);
-            _targetEntityRegistryController = new(targetEntityRegistry);
+            _targetingSystem = targetingSystem;
             _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
             if (_playerInitializer == null)
             {
@@ -65,8 +61,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _playerInitializer.PlayerEntity,
                 _musicSyncState,
                 _musicSyncService,
-                _targetManagerController,
-                _targetEntityRegistryController,
+                _targetingSystem,
                 null,
                 _enemyPools,
                 null);
@@ -85,8 +80,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private PlayerInitializer _playerInitializer;
         private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
-        private TargetManagerController _targetManagerController;
-        private TargetEntityRegistryController _targetEntityRegistryController;
+        private TargetingSystem _targetingSystem;
         private EnemyPools _enemyPools;
         private bool _initialized = false;
     }
