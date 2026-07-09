@@ -3,51 +3,54 @@ using KillChord.Runtime.View;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[CreateAssetMenu(menuName = "KillChord/Settings/Screen")]
-public class ScreenSetting : ScriptableObject
+namespace KillChord.Runtime.View.OutGame.Setting
 {
-    [SerializeField] private SettingDropDown _dropDownPrefab;
-    [SerializeField] private SettingToggle _togglePrefab;
-
-    public void Build(UIDocument document, ScreenSettingData model)
+    [CreateAssetMenu(menuName = "KillChord/Settings/Screen")]
+    public class ScreenSetting : ScriptableObject
     {
-        CreateDropDown(document,
-            "Resolution",
-            () => model.ResolutionIndex,
-            value => model.ResolutionIndex = value);
+        [SerializeField] private SettingDropDown _dropDownPrefab;
+        [SerializeField] private SettingToggle _togglePrefab;
 
-        CreateDropDown(document,
-            "Screen Mode",
-            () => model.ScreenModeIndex,
-            value => model.ScreenModeIndex = value);
+        public void Build(UIDocument document, ScreenSettingData model)
+        {
+            CreateDropDown(document,
+                "Resolution",
+                () => model.ResolutionIndex,
+                value => model.ResolutionIndex = value);
 
-        CreateToggle(document,
-            "VSync",
-            () => model.IsVSync,
-            value => model.IsVSync = value);
-    }
+            CreateDropDown(document,
+                "Screen Mode",
+                () => model.ScreenModeIndex,
+                value => model.ScreenModeIndex = value);
 
-    private void CreateDropDown(
-        UIDocument document,
-        string title,
-        Func<int> getter,
-        Action<int> setter)
-    {
-        var dropDown = Instantiate(_dropDownPrefab);
+            CreateToggle(document,
+                "VSync",
+                () => model.IsVSync,
+                value => model.IsVSync = value);
+        }
 
-        dropDown.Create(document, Category.Screen, title);
-        dropDown.Bind(getter, setter);
-    }
+        private void CreateDropDown(
+            UIDocument document,
+            string title,
+            Func<int> getter,
+            Action<int> setter)
+        {
+            var dropDown = Instantiate(_dropDownPrefab);
 
-    private void CreateToggle(
-        UIDocument document,
-        string title,
-        Func<bool> getter,
-        Action<bool> setter)
-    {
-        var toggle = Instantiate(_togglePrefab);
+            dropDown.Create(document, Category.Screen, title);
+            dropDown.Bind(getter, setter);
+        }
 
-        toggle.Create(document, Category.Screen, title);
-        toggle.Bind(getter, setter);
+        private void CreateToggle(
+            UIDocument document,
+            string title,
+            Func<bool> getter,
+            Action<bool> setter)
+        {
+            var toggle = Instantiate(_togglePrefab);
+
+            toggle.Create(document, Category.Screen, title);
+            toggle.Bind(getter, setter);
+        }
     }
 }
