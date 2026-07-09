@@ -1,8 +1,8 @@
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Camera;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
-using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -22,7 +22,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
         /// <param name="targetingSystem"> カメラが参照するターゲット選択機能。</param>
-        public void Initialize(TargetingSystem targetingSystem)
+        public void Initialize(ITargetSystemViewModel targetingSystem)
         {
             if (_config == null)
             {
