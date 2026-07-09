@@ -12,6 +12,7 @@
 
 void GetToonMainLight(
     float3 positionWS,
+    half3 normalWS,
     out half3 direction,
     out half3 color,
     out half shadowAtten,
@@ -41,7 +42,7 @@ void GetToonMainLight(
     // キャラ専用シャドウマップによるセルフシャドウ。
     // メインライト側の受け取りバイアス(自己投影の棄却)はこちらには適用しない
     //shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
-    characterShadowAtten = SampleCharacterShadow(positionWS);
+    characterShadowAtten = SampleCharacterShadow(positionWS, normalWS);
 #endif
 
 #endif
@@ -101,7 +102,7 @@ void GetToonLights(
 #else
     half3 sunDir, sunColor;
     half sunShadowAtten, characterShadowAtten;
-    GetToonMainLight(positionWS, sunDir, sunColor, sunShadowAtten, characterShadowAtten);
+    GetToonMainLight(positionWS, normalWS, sunDir, sunColor, sunShadowAtten, characterShadowAtten);
     color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunDir, normalWS)), sunShadowAtten, characterShadowAtten);
 
 #if USE_CLUSTER_LIGHT_LOOP

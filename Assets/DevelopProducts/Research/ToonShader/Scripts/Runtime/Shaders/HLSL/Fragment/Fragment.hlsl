@@ -6,6 +6,7 @@
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Lights.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SimplifiedSSS.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/ToonPBR.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SilToonFresnel.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/FaceLight.hlsl"
 #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/NormalCombine.hlsl"
@@ -92,8 +93,10 @@ half4 frag(Varyings IN) : SV_Target
                   GetNormalizedScreenSpaceUV(IN.positionHCS), color);
 #endif
 
+    half3 viewDirWS = (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS);
+
     half backLight, rimLightFront, rimLightBack;
-    GetFresnel(IN.normalWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
+    GetFresnel(IN.normalWS, viewDirWS,
                backLight, rimLightFront, rimLightBack);
 
     color += backLight * _FresnelBackLight;
@@ -103,6 +106,16 @@ half4 frag(Varyings IN) : SV_Target
 #ifdef FADE_ON
     clip(_FadeAlpha - BayerDither(IN.positionHCS.xy * 0.5) - 0.0001);
 #endif
-    return half4(color, 1.0h) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+
+    half4 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+
+#ifdef _PBR_ON
+    color = ApplyToonPBR(color, baseColor.rgb, IN.uv, IN.positionWS, normalWS, viewDirWS,
+                         GetNormalizedScreenSpaceUV(IN.positionHCS));
+#else
+    color *= baseColor.rgb;
+#endif
+
+    return half4(color, baseColor.a);
 }
 #endif

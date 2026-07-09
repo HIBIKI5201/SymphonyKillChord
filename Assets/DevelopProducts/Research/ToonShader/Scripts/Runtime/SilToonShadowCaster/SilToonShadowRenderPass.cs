@@ -25,6 +25,7 @@ namespace DevelopProducts.ToonShader
         private static readonly int _idCharShadowParams = Shader.PropertyToID("_CharShadowParams");
         private static readonly int _idShadowBias = Shader.PropertyToID("_ShadowBias");
         private static readonly int _idLightDirection = Shader.PropertyToID("_LightDirection");
+        private static readonly int _idCharShadowLightDirection = Shader.PropertyToID("_CharShadowLightDirection");
 
         private static readonly GlobalKeyword _castingPunctualLightShadow =
             GlobalKeyword.Create("_CASTING_PUNCTUAL_LIGHT_SHADOW");
@@ -134,6 +135,7 @@ namespace DevelopProducts.ToonShader
 
             cmd.SetGlobalMatrix(_idCharWorldToShadow, data.WorldToShadow);
             cmd.SetGlobalVector(_idCharShadowParams, data.ShadowParams);
+            cmd.SetGlobalVector(_idCharShadowLightDirection, data.LightDirection);
         }
 
         private void SetupShadowMatrices(PassData data, in Vector3 lightDirWS, in Bounds boundsWS)

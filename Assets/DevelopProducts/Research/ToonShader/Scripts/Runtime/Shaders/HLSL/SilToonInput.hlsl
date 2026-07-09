@@ -9,6 +9,10 @@ SAMPLER(sampler_BaseMap);
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 
+// PBR用(sampler_BaseMapを共用)
+TEXTURE2D(_MetallicMap);
+TEXTURE2D(_RoughnessMap);
+
 // SRP Batcher対応:
 // マテリアルプロパティは全パスで同一レイアウトの UnityPerMaterial に置く必要がある。
 // SilToon / SilToonFaceOverlay の全パスがこのファイルをincludeすること。
@@ -47,6 +51,11 @@ CBUFFER_START(UnityPerMaterial)
     half _SSSIntensity;
     half _SSSThickness;
     half _SSSTransmissionPower;
+
+    half _Metallic;
+    half _Roughness;
+    half _SpecularIntensity;
+    half _EnvReflectionIntensity;
 CBUFFER_END
 
 #endif
