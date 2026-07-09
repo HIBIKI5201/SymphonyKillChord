@@ -14,6 +14,7 @@ Material:
   m_ValidKeywords:
   - _CHAR_SHADOW_ON
   - _NORMALMAP
+  - _PBR_ON
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
   - _ISSMOOTHNORMAL_ON
@@ -27,9 +28,23 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _MetallicMap:
+        m_Texture: {fileID: 2800000, guid: a8ffae7ac7dd71342b6c863cc392614f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
+        m_Texture: {fileID: 2800000, guid: e360932f36ec55044bf98cc328ffa253, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _EnvReflectionIntensity: 0
+    - _Metallic: 1
+    - _NormalMapIntensity: 2
+    - _PBROn: 1
+    - _Roughness: 1
+    - _SpecularIntensity: 2
     m_Colors:
     - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
   m_BuildTextureStacks: []

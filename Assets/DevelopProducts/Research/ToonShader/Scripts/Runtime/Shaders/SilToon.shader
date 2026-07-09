@@ -24,6 +24,15 @@ Shader "Custom/SilToon/Base"
         _FresnelFrontRimLight("Front Rim Light Intensity",Float) = 4
         _FresnelBackRimLight("Back Rim Light Intensity",Float) = 0.5
 
+        [Header(PBR)]
+        [Toggle(_PBR_ON)] _PBROn("PBR On", Float) = 0
+        _MetallicMap("Metalness", 2D) = "black" {}
+        _Metallic("Metallic Scale", Range(0, 1)) = 1
+        _RoughnessMap("Roughness", 2D) = "white" {}
+        _Roughness("Roughness Scale", Range(0, 1)) = 1
+        _SpecularIntensity("Specular Intensity", Range(0, 4)) = 1
+        _EnvReflectionIntensity("Env Reflection Intensity", Range(0, 4)) = 1
+
         [Header(SSS)]
         [Toggle(SSS_ON)] _SSSOn("SSS On", Float) = 0
         _SSSColor("SSS Color", Color) = (1.0, 0.4, 0.3, 1)
@@ -95,9 +104,11 @@ Shader "Custom/SilToon/Base"
                 #pragma shader_feature_local_fragment _ISFORFACE_ON
                 #pragma shader_feature_local_fragment _CHAR_SHADOW_ON
                 #pragma shader_feature_local_fragment SSS_ON
+                #pragma shader_feature_local_fragment _PBR_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+                #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
                 #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW
 
                 #pragma multi_compile           _ _CLUSTER_LIGHT_LOOP

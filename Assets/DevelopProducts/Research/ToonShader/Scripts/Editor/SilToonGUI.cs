@@ -11,6 +11,7 @@ namespace DevelopProducts.ToonShader
         static bool showFade = true;
         static bool showNormal = true;
         static bool showFresnel = true;
+        static bool showPBR = true;
         static bool showSSS = true;
         static bool showOutline = true;
         static bool showSmears = true;
@@ -57,6 +58,14 @@ namespace DevelopProducts.ToonShader
             MaterialProperty fresnelBack = Find("_FresnelBackLight", props);
             MaterialProperty fresnelFront = Find("_FresnelFrontRimLight", props);
             MaterialProperty fresnelBackRim = Find("_FresnelBackRimLight", props);
+
+            MaterialProperty pbrOn = Find("_PBROn", props);
+            MaterialProperty metallicMap = Find("_MetallicMap", props);
+            MaterialProperty metallic = Find("_Metallic", props);
+            MaterialProperty roughnessMap = Find("_RoughnessMap", props);
+            MaterialProperty roughness = Find("_Roughness", props);
+            MaterialProperty specularIntensity = Find("_SpecularIntensity", props);
+            MaterialProperty envReflectionIntensity = Find("_EnvReflectionIntensity", props);
 
             MaterialProperty sssOn = Find("_SSSOn", props);
             MaterialProperty sssColor = Find("_SSSColor", props);
@@ -131,6 +140,20 @@ namespace DevelopProducts.ToonShader
                 materialEditor.ShaderProperty(fresnelBack, new GUIContent("Back Light Intensity", "背面からの回り込み光強度"));
                 materialEditor.ShaderProperty(fresnelFront, new GUIContent("Front Rim Intensity", "正面エッジのリムライト強度"));
                 materialEditor.ShaderProperty(fresnelBackRim, new GUIContent("Back Rim Intensity", "背面エッジのリムライト強度"));
+            });
+
+            DrawSection("PBR", ref showPBR, () =>
+            {
+                materialEditor.ShaderProperty(pbrOn, new GUIContent("PBR On", "トゥーンランプにGGXスペキュラと環境反射を合成(装備・金属向け)"));
+                if (pbrOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Metalness", "金属度マップ(未設定時は黒=非金属)"), metallicMap, metallic);
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Roughness", "粗さマップ(未設定時は白=マット)"), roughnessMap, roughness);
+                    materialEditor.ShaderProperty(specularIntensity, new GUIContent("Specular Intensity", "直接スペキュラの強度"));
+                    materialEditor.ShaderProperty(envReflectionIntensity, new GUIContent("Env Reflection", "リフレクションプローブ反射の強度"));
+                    EditorGUI.indentLevel--;
+                }
             });
 
             DrawSection("SSS", ref showSSS, () =>
@@ -279,6 +302,8 @@ namespace DevelopProducts.ToonShader
                 material.HasProperty("_PerspectiveRemovalRatio") && material.GetFloat("_PerspectiveRemovalRatio") > 0);
             SetKeyword(material, "_CHAR_SHADOW_ON",
                 material.HasProperty("_CharShadowOn") && material.GetFloat("_CharShadowOn") > 0);
+            SetKeyword(material, "_PBR_ON",
+                material.HasProperty("_PBROn") && material.GetFloat("_PBROn") > 0);
         }
 
         private static void SetKeyword(Material material, string keyword, bool enabled)

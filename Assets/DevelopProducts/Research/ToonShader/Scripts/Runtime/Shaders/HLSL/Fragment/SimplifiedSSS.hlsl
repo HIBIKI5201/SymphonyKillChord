@@ -63,7 +63,7 @@ void GetSSSLights(
     shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS + mainLight.direction * 0.15));
 #endif
 #if defined(_CHAR_SHADOW_ON)
-    shadowAtten = min(shadowAtten, SampleCharacterShadow(positionWS));
+    shadowAtten = min(shadowAtten, SampleCharacterShadow(positionWS, normalWS));
 #endif
 
     half NdotL = dot(normalWS, lightDir);

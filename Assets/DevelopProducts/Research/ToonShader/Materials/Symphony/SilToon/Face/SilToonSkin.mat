@@ -40,6 +40,7 @@ Material:
     m_Floats:
     - _IsForFace: 1
     - _NormalMapIntensity: 0
+    - _SSSOn: 0
     - _ZOffset: 0.01
     m_Colors:
     - _ColorMiddle: {r: 1, g: 0.7905139, b: 0.798419, a: 1}
