@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     Camera View 用パラメータを受け取り、ロックオン回転制御を初期化するコンストラクタ。
         /// </summary>
         /// <param name="parameter"> Camera View 用パラメータ。</param>
-        public CameraLockOnRotationCalculator(CameraViewSettings parameter)
+        public CameraLockOnRotationCalculator(CameraConfig parameter)
         {
             _parameter = parameter;
         }
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             return TryCalcTargetRotation(followPosition, targetPosition, currentBoneRotation, out targetRotation);
         }
 
-        private readonly CameraViewSettings _parameter;
+        private readonly CameraConfig _parameter;
 
         /// <summary>
         ///     対象方向へのボーン目標回転を計算する共通ロジック。

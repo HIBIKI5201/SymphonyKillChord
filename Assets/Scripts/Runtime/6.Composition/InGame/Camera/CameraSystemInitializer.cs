@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Camera;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
@@ -36,27 +35,10 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return;
             }
 
-            CameraViewSettings viewSettings = new(
-                _config.Offset,
-                _config.CharacterCenterOffset,
-                _config.Distance,
-                _config.FollowOffsetPower,
-                _config.FollowLerpSpeed,
-                _config.BoneRotateSpeed,
-                _config.LockOnAngleMargin,
-                _config.FollowRotationSpeed,
-                _config.LockOnLookAtRatio,
-                _config.LockOnRotationSpeed,
-                _config.CollisionRadius,
-                _config.CollisionMask,
-                _config.PitchRange,
-                _config.IsInvertVertical,
-                _config.IsInvertHorizontal);
-
-            CameraLockOnRotationCalculator lockOnRotationCalculator = new(viewSettings);
-            CameraFreeLookRotationCalculator freeLookRotationCalculator = new(viewSettings);
-            CameraLookAtRotationCalculator lookAtRotationCalculator = new(viewSettings);
-            CameraFollowCalculator followCalculator = new(viewSettings);
+            CameraLockOnRotationCalculator lockOnRotationCalculator = new(_config);
+            CameraFreeLookRotationCalculator freeLookRotationCalculator = new(_config);
+            CameraLookAtRotationCalculator lookAtRotationCalculator = new(_config);
+            CameraFollowCalculator followCalculator = new(_config);
 
             var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
             if (stageSceneObj == null)
@@ -74,7 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                     return (hasTarget, targetPosition);
                 },
                 followCalculator, lockOnRotationCalculator,
-                freeLookRotationCalculator, lookAtRotationCalculator, viewSettings, stageSceneObj.PlayerTransform,
+                freeLookRotationCalculator, lookAtRotationCalculator, _config, stageSceneObj.PlayerTransform,
                 ServiceLocator.GetInstance<PlayerInputView>());
         }
 
@@ -82,6 +64,6 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         private CameraSystemView _cameraSystem;
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
-        private CameraSystemConfig _config;
+        private CameraConfig _config;
     }
 }

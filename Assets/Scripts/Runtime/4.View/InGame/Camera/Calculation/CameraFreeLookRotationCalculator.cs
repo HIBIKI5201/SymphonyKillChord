@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     Camera View 用パラメータを受け取り、フリー視点回転制御を初期化するコンストラクタ。
         /// </summary>
         /// <param name="parameter"> Camera View 用パラメータ。</param>
-        public CameraFreeLookRotationCalculator(CameraViewSettings parameter)
+        public CameraFreeLookRotationCalculator(CameraConfig parameter)
         {
             _parameter = parameter;
         }
@@ -45,6 +45,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> オイラー角の全周（負方向ピッチの正規化に使用するオフセット）。 </summary>
         private const float EULER_ANGLE_FULL = 360f;
 
-        private readonly CameraViewSettings _parameter;
+        private readonly CameraConfig _parameter;
     }
 }

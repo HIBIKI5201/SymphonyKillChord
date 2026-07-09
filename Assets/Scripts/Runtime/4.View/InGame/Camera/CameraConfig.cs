@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure.InGame.Camera
+namespace KillChord.Runtime.View.InGame.Camera
 {
     /// <summary>
     ///     カメラシステムの各種パラメータを設定するためのScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(CameraSystemConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
-    public sealed class CameraSystemConfig : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(CameraConfig), menuName = "KillChord/InGame/CameraSystemConfig")]
+    public sealed class CameraConfig : ScriptableObject
     {
         /// <summary> カメラの基本オフセット。 </summary>
         public Vector3 Offset => _cameraOffset;

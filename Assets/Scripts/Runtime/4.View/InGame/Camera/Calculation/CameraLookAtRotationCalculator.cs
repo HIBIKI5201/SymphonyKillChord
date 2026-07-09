@@ -12,7 +12,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     Camera View 用パラメータを受け取り、カメラ回転制御を初期化するコンストラクタ。
         /// </summary>
         /// <param name="parameter"> Camera View 用パラメータ。</param>
-        public CameraLookAtRotationCalculator(CameraViewSettings parameter)
+        public CameraLookAtRotationCalculator(CameraConfig parameter)
         {
             _parameter = parameter;
         }
@@ -61,7 +61,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             rotation = Quaternion.Slerp(rotation, target, _ratio);
         }
 
-        private readonly CameraViewSettings _parameter;
+        private readonly CameraConfig _parameter;
 
         /// <summary> ロックオン切り替えの補間比率。0: フリー状態, 1: ロックオン完了状態。 </summary>
         private float _ratio;

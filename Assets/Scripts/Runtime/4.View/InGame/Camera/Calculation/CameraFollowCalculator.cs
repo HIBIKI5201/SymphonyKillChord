@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     Camera View 用パラメータを受け取り、追従移動制御を初期化するコンストラクタ。
         /// </summary>
         /// <param name="parameter"> Camera View 用パラメータ。</param>
-        public CameraFollowCalculator(CameraViewSettings parameter)
+        public CameraFollowCalculator(CameraConfig parameter)
         {
             _parameter = parameter;
         }
@@ -36,7 +36,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * context.DeltaTime);
         }
 
-        private readonly CameraViewSettings _parameter;
+        private readonly CameraConfig _parameter;
         private CameraFollowVelocityTracker _followVelocity;
     }
 }

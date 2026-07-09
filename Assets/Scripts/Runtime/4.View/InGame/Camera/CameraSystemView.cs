@@ -35,7 +35,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             CameraLockOnRotationCalculator lockOnRotationCalculator,
             CameraFreeLookRotationCalculator freeLookRotationCalculator,
             CameraLookAtRotationCalculator lookAtRotationCalculator,
-            CameraViewSettings viewSettings,
+            CameraConfig viewSettings,
             Transform playerT,
             PlayerInputView playerInputView)
         {
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _viewSettings = viewSettings;
             _playerT = playerT;
             _inputView = playerInputView;
-            _currentDistance = viewSettings.DefaultDistance;
+            _currentDistance = viewSettings.Distance;
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
@@ -92,7 +92,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Vector3 _cameraCenterOffset;
         private Quaternion _cameraRotation = Quaternion.identity;
         private Quaternion _cameraBoneRotation = Quaternion.identity;
-        private CameraViewSettings _viewSettings;
+        private CameraConfig _viewSettings;
         private CameraFollowCalculator _followCalculator;
         private CameraLockOnRotationCalculator _lockOnRotationCalculator;
         private CameraFreeLookRotationCalculator _freeLookRotationCalculator;
@@ -240,7 +240,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             Vector3 cameraAnchorPosition = frame.Context.FollowPosition + _cameraCenterOffset + _viewSettings.Offset;
             Vector3 cameraDirection = _cameraBoneRotation * Vector3.back;
-            float targetDistance = ResolveDistance(cameraAnchorPosition, cameraDirection, _viewSettings.DefaultDistance);
+            float targetDistance = ResolveDistance(cameraAnchorPosition, cameraDirection, _viewSettings.Distance);
             _currentDistance = Mathf.Lerp(Mathf.Min(_currentDistance, targetDistance), targetDistance, deltaTime * DISTANCE_LERP_SPEED);
             Vector3 position = cameraAnchorPosition + cameraDirection * _currentDistance;
             Vector3 cameraPositionForRotation = frame.IsLockOn
