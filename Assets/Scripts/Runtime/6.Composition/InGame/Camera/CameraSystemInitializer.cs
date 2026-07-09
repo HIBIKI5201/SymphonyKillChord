@@ -1,4 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
@@ -15,8 +17,48 @@ namespace KillChord.Runtime.Composition.InGame.Camera
     ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
-    public sealed class CameraSystemInitializer : MonoBehaviour
+    public sealed class CameraSystemInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(CameraSystemInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 600;
+
+        /// <summary>
+        ///     他モジュールへ結合してカメラシステムを初期化する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            if (_config == null || _cameraSystem == null)
+            {
+                Debug.LogError($"[{nameof(CameraSystemInitializer)}] カメラ初期化参照が不足しています。", this);
+                return false;
+            }
+
+            TargetSystemModuleContainer targetContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            if (targetContainer == null)
+            {
+                Debug.LogError($"[{nameof(CameraSystemInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);
+                return false;
+            }
+
+            Initialize(targetContainer.TargetSystemViewModel);
+
+#if UNITY_ANDROID
+            MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
+            PlayerInputView playerInputView = ServiceLocator.GetInstance<PlayerInputView>();
+            if (mobileInput != null && playerInputView != null)
+            {
+                mobileInput.Initialize(playerInputView);
+            }
+#else
+            Cursor.lockState = CursorLockMode.Locked;
+#endif
+            return true;
+        }
+
         /// <summary>
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>

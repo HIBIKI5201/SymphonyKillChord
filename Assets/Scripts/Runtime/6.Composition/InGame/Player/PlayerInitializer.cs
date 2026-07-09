@@ -11,7 +11,11 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
 using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
@@ -48,8 +52,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
     ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
-    public sealed class PlayerInitializer : MonoBehaviour
+    public sealed class PlayerInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(PlayerInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 500;
+
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
@@ -79,6 +89,42 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         public CharacterEntity PlayerEntity => _playerEntity;
 
+        /// <summary>
+        ///     プレイヤーモジュールのContainerを登録する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
+        {
+            _moduleContainer = new PlayerModuleContainer(this, _player);
+            ServiceLocator.RegisterInstance(_moduleContainer);
+            _isModuleRegistered = true;
+            return _player != null;
+        }
+
+        /// <summary>
+        ///     他モジュールと結合してプレイヤーを初期化する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            SceneDependencyModuleContainer sceneDependencyContainer = ServiceLocator.GetInstance<SceneDependencyModuleContainer>();
+            if (sceneDependencyContainer == null)
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SceneDependencyModuleContainer)} が見つかりません。", this);
+                return false;
+            }
+
+            Initialize(sceneDependencyContainer.InputComposition);
+
+            InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (inGamePlayDirector != null && _player != null)
+            {
+                inGamePlayDirector.AddGamePlayControllable(_player);
+            }
+
+            return _playerEntity != null;
+        }
+
         public void Initialize(InputComposition inputComposition)
         {
             if (_player == null)
@@ -100,7 +146,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
-            MusicSyncState musicSyncState = ServiceLocator.GetInstance<MusicSyncState>();
+            MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            if (musicSyncContainer == null)
+            {
+                Debug.LogError($"{nameof(MusicSyncModuleContainer)}が見つかりません。", this);
+                return;
+            }
+
+            MusicSyncState musicSyncState = musicSyncContainer.MusicSyncState;
             if (musicSyncState == null)
             {
                 Debug.LogError($"{nameof(MusicSyncState)}が見つかりません。ServiceLocatorに登録されているか確認してください。", this);
@@ -138,14 +191,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
-            TargetSystemController targetingSystem = ServiceLocator.GetInstance<TargetSystemController>();
-            if (targetingSystem == null)
+            TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
             {
-                Debug.LogError($"{nameof(TargetSystemController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(TargetSystemModuleContainer)}が見つかりません。", this);
                 return;
             }
+            TargetSystemController targetingSystem = targetSystemContainer.TargetSystemController;
 
-            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<IMusicSyncService>();
+            IMusicSyncService musicSyncService = musicSyncContainer.MusicSyncService;
             if (musicSyncService == null)
             {
                 Debug.LogError($"{nameof(IMusicSyncService)}が見つかりません。MusicSyncInitializerが先に実行されているか確認してください。");
@@ -301,6 +355,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             ServiceLocator.UnregisterInstance(this);
+            if (_isModuleRegistered)
+            {
+                ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
+                _moduleContainer = null;
+                _isModuleRegistered = false;
+            }
 
             if (_playerEntity != null)
             {
@@ -309,5 +369,23 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             }
         }
+
+        /// <summary>
+        ///     登録済みContainerを解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (!_isModuleRegistered)
+            {
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
+            _moduleContainer = null;
+            _isModuleRegistered = false;
+        }
+
+        private bool _isModuleRegistered;
+        private PlayerModuleContainer _moduleContainer;
     }
 }

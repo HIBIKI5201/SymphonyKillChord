@@ -1,9 +1,8 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.View.InGame.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -22,34 +21,35 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public bool Initialize(TargetSystemController targetingSystem, EnemyPools enemyPools)
         {
-            if(_boss == null)
+            if (_boss == null)
             {
                 Debug.LogError("BossLifeCycleが見つかりません。", this);
                 return false;
             }
-            MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
-            if (initializer == null || initializer.MusicSyncService == null)
+
+            MusicSyncModuleContainer musicSyncModuleContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            if (musicSyncModuleContainer == null || musicSyncModuleContainer.MusicSyncService == null)
             {
                 Debug.LogError("MusicSyncInitializerが見つかりません。", this);
                 return false;
             }
 
-            MusicSyncView musicSyncView = FindAnyObjectByType<MusicSyncView>();
-            if (musicSyncView?.MusicSyncState == null)
+            if (musicSyncModuleContainer.MusicSyncState == null)
             {
                 Debug.LogError("MusicSyncViewが見つかりません。", this);
                 return false;
             }
-            _musicSyncService = initializer.MusicSyncService;
-            _musicSyncState = musicSyncView.MusicSyncState;
+            _musicSyncService = musicSyncModuleContainer.MusicSyncService;
+            _musicSyncState = musicSyncModuleContainer.MusicSyncState;
             _targetingSystem = targetingSystem;
-            _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            _playerInitializer = playerModuleContainer?.PlayerInitializer;
             if (_playerInitializer == null)
             {
                 Debug.LogError("PlayerInitializerの取得に失敗しました。", this);
                 return false;
             }
-            if(enemyPools == null)
+            if (enemyPools == null)
             {
                 Debug.LogError("EnemyPoolsの取得に失敗しました。", this);
                 return false;

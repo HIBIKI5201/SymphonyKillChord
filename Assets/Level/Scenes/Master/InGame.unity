@@ -1283,6 +1283,10 @@ GameObject:
   - component: {fileID: 438459090}
   - component: {fileID: 438459089}
   - component: {fileID: 438459091}
+  - component: {fileID: 438459092}
+  - component: {fileID: 438459093}
+  - component: {fileID: 438459094}
+  - component: {fileID: 438459095}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1348,6 +1352,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
   _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
   _skillVisuals: []
+--- !u!114 &438459092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 208bb055827da3d4b97ec1a912c9a3a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Bootstrap.SceneDependencyInitializationModule
+--- !u!114 &438459093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd9971376440fc4d8aac6b195823cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Target.TargetSystemInitializationModule
+--- !u!114 &438459094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ba5dc2496ca7646849ce9afd825a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Result.StageResultInitializationModule
+--- !u!114 &438459095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2eaabd98139b1143b8a961726363cef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.SequenceInitializationModule
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
@@ -3482,6 +3534,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38a73cab12d86aa45893103822914a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.EnemyInitializer
+  _enemyPools: {fileID: 1599172285}
+  _enemySpawnPositionSearcher: {fileID: 1443016744}
+  _enemyInfantrySpawner: {fileID: 1136649845}
+  _enemyArtillerySpawner: {fileID: 1772279158}
+  _enemyWaveDefinitionAsset: {fileID: 11400000, guid: e769e9900eed0c94eaa8d71f564c1966, type: 2}
+  _enemyWaveTimerView: {fileID: 708479945}
 --- !u!1 &1699432267
 GameObject:
   m_ObjectHideFlags: 0
