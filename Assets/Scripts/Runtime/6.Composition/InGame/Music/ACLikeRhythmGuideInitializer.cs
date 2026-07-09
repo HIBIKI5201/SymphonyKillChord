@@ -1,8 +1,8 @@
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
-using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -26,12 +26,12 @@ namespace KillChord.Runtime.Composition
                 return;
             }
 
-            TargetingSystem targetingSystem =
-                ServiceLocator.GetInstance<TargetingSystem>();
+            TargetSystemController targetingSystem =
+                ServiceLocator.GetInstance<TargetSystemController>();
 
             if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetingSystem)} が見つかりません。TargetingSystem が登録されているか確認してください。");
+                Debug.LogError($"{nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。");
                 return;
             }
 

@@ -1,10 +1,10 @@
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.View.InGame.Music;
-using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         ///     初期化処理。
         /// </summary>
         /// <param name="enemyPools"></param>
-        public void Initialize(TargetingSystem targetingSystem, EnemyPools enemyPools, EnemyWaveSpawnerState waveSpawnerState)
+        public void Initialize(TargetSystemController targetingSystem, EnemyPools enemyPools, EnemyWaveSpawnerState waveSpawnerState)
         {
             MusicSyncInitializer initializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (initializer == null || initializer.MusicSyncService == null)
@@ -86,7 +86,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private PlayerInitializer _playerInitializer;
         private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
-        private TargetingSystem _targetingSystem;
+        private TargetSystemController _targetingSystem;
         private EnemyPools _enemyPools;
         private EnemyWaveSpawnerState _waveSpawnState;
         private bool _initialized = false;

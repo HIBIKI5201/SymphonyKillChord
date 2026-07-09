@@ -1,5 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
-using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 
@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         ///     敵HP HUDを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
         /// <param name="targetingSystem"> 現在のターゲット情報を解決するシステム。</param>
-        public void Initialize(TargetingSystem targetingSystem)
+        public void Initialize(TargetSystemController targetingSystem)
         {
             if (_view == null)
             {

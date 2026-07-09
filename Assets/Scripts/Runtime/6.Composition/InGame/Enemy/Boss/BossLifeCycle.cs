@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -11,8 +12,8 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
-using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -42,7 +43,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             CharacterEntity targetEntity,
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
-            TargetingSystem targetingSystem,
+            TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             Action<BossLifeCycle> releaseCallback
@@ -157,7 +158,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
 
             // View接続
             _view.Initialize(aiController, target);
@@ -302,7 +303,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [Header("砲撃攻撃を含む場合に必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
-        private TargetingSystem _targetingSystem;
+        private TargetSystemController _targetingSystem;
         private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;

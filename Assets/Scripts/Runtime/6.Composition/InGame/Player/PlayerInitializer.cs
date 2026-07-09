@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
@@ -29,7 +30,6 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
-using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -136,10 +136,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
 
 
-            TargetingSystem targetingSystem = ServiceLocator.GetInstance<TargetingSystem>();
+            TargetSystemController targetingSystem = ServiceLocator.GetInstance<TargetSystemController>();
             if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetingSystem)}が見つかりません。シーン内に配置されていることを確認してください。", this);
+                Debug.LogError($"{nameof(TargetSystemController)}が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
 

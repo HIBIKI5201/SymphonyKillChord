@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -48,7 +49,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             CharacterEntity targetEntity,
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
-            TargetingSystem targetingSystem,
+            TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             EnemyWaveSpawnerState waveSpawnerState,
@@ -112,7 +113,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
 
             // View接続
             var animationComposition = new AnimationComposition();
@@ -342,7 +343,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
-        private TargetingSystem _targetingSystem;
+        private TargetSystemController _targetingSystem;
         private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
