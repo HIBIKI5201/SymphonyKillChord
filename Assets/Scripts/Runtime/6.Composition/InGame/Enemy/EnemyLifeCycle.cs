@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -117,10 +118,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             var animationComposition = new AnimationComposition();
-            var animationController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
-            _characterAnimationController = animationController;
-            _characterAnimationIndices = animationIndices;
-            _view.Initialize(aiController, target, animationController,animationIndices);
+            ICharacterAnimationViewContext animationContext = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+            _characterAnimationContext = animationContext;
+            _view.Initialize(aiController, target, animationContext);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
@@ -307,8 +307,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
-        private ICharacterAnimationController _characterAnimationController;
-        private CharacterAnimationIndices _characterAnimationIndices;
+        private ICharacterAnimationViewContext _characterAnimationContext;
 
         [SerializeField] private CharacterData _enemyData;
         [SerializeField] private EnemyMoveData _moveData;
@@ -451,13 +450,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             //TODO 拡張性をもたせた設計にする。
             float waitSeconds = _deathAnimationFallbackSeconds;
 
-            if (_characterAnimationController != null
-                && _characterAnimationIndices != null
-                && _characterAnimationIndices.TryGetOneShotIndex(_deathAnimationKey, out int deathIndex))
+            if (_characterAnimationContext != null
+                && _characterAnimationContext.Signal.TryRequestOneShot(_deathAnimationKey, out waitSeconds))
             {
-                _characterAnimationController.SetVelocity(Vector2.zero);
-                _characterAnimationController.TriggerOneShot(deathIndex);
-                waitSeconds = _characterAnimationController.GetOneShotAnimationLength(deathIndex);
+                _characterAnimationContext.ViewModel.SetVelocity(Vector2.zero);
             }
 
             if (waitSeconds <= 0f)
@@ -468,9 +464,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);//floatで時間を渡すためにAwatable
 
 
-           if( _characterAnimationIndices.TryGetOneShotIndex(_destroyAniamtionKey,out int destoryIndex)){
-            _characterAnimationController.TriggerOneShot(destoryIndex);
-            waitSeconds = _characterAnimationController.GetOneShotAnimationLength(destoryIndex);
+           if( _characterAnimationContext != null
+               && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey,out float destroyDuration)){
+            waitSeconds = destroyDuration;
             }
 
             if(waitSeconds <= 0f)

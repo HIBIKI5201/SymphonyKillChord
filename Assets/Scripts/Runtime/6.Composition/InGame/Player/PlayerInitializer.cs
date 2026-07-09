@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
@@ -64,7 +65,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("装備中スキル（テスト用）")]
         [SerializeField] private SkillDataAsset[] _equippedSkills;
 
-        private Action<int> _onOneShotEndedHandler;
+        private Action _onDodgeEndedHandler;
+        private ICharacterAnimationSignal _characterAnimationSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -183,29 +185,24 @@ namespace KillChord.Runtime.Composition.InGame.Player
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
-            var animationComposition = _player.gameObject.AddComponent<AnimationComposition>();
-            var animController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
+            var animationComposition = new AnimationComposition();
+            ICharacterAnimationViewContext animationContext = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
 
             PlayerDodgeMovementApplication dodge = new(parameter);
             dodge.OnDodgeStarted += (float duration) => _playerEntity.SetInvincible(true);
             dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
 
-            _onOneShotEndedHandler = index =>
-            {
-                if (index == animationIndices.Dodge)
-                {
-                    playerAttackController.StartAttackCooldown();
-                }
-            };
+            _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
 
-            _characterAnimationView.OnOneShotEnded += _onOneShotEndedHandler;
+            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal.OnDodgeEnded += _onDodgeEndedHandler;
 
             PlayerMovementApplication move = new(parameter);
             PlayerApplication application = new(move, dodge);
 
             PlayerController playerMovementController = new(application, inputComposition.GetBufferedInputBuffer);
 
-            _player.Initialize(playerMovementController, playerAttackController, animController, animationIndices, ct, inputView, healthHudPresenter);
+            _player.Initialize(playerMovementController, playerAttackController, animationContext, ct, inputView, healthHudPresenter);
 
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
@@ -296,10 +293,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private void OnDestroy()
         {
-            if (_characterAnimationView != null && _onOneShotEndedHandler != null)
+            if (_characterAnimationSignal != null && _onDodgeEndedHandler != null)
             {
-                _characterAnimationView.OnOneShotEnded -= _onOneShotEndedHandler;
-                _onOneShotEndedHandler = null;
+                _characterAnimationSignal.OnDodgeEnded -= _onDodgeEndedHandler;
+                _onDodgeEndedHandler = null;
+                _characterAnimationSignal = null;
             }
 
             ServiceLocator.UnregisterInstance(this);

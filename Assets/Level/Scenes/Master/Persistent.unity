@@ -631,6 +631,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dc9f31b4cd45b74f8a69d72a9c4125e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.SoundEffectInitializer
+  _isDebug: 1
 --- !u!4 &509160716
 Transform:
   m_ObjectHideFlags: 0

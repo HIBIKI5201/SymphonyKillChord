@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
@@ -55,11 +55,11 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
-        private ICharacterAnimationController _characterAnimationController;
+        private ICharacterAnimationViewModel _characterAnimationViewModel;
+        private ICharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
-        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
@@ -94,16 +94,15 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Initialize(
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
-            ICharacterAnimationController characterAnimationController,
-             CharacterAnimationIndices animationIndices,
+            ICharacterAnimationViewContext animationContext,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
-            _characterAnimationController = characterAnimationController;
-            _characterAnimationIndices = animationIndices;
+            _characterAnimationViewModel = animationContext.ViewModel;
+            _characterAnimationSignal = animationContext.Signal;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -149,7 +148,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 _rb.angularVelocity = Vector3.zero;
             }
 
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
             _attackWeaponView?.HideAllWeapons();
         }
 
@@ -221,7 +220,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = true;
 
                 PlaySound(_dodgeSoundSource, null);
-                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
+                _characterAnimationSignal?.RequestDodge();
             }
         }
 
@@ -261,19 +260,10 @@ namespace KillChord.Runtime.View.InGame.Player
                     animationKey = GetAttackAnimationKey(resultBeatType);
                 }
 
-                int attackIndex = _characterAnimationIndices.Attack;
-
-                if (!string.IsNullOrEmpty(animationKey)
-                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
-                {
-                    attackIndex = oneShotIndex;
-                }
-
-                float attackAnimationLength =
-                    _characterAnimationController?.GetOneShotAnimationLength(attackIndex) ?? 0f;
-
+                float attackAnimationLength = _characterAnimationSignal != null
+                    ? _characterAnimationSignal.RequestAttack(animationKey)
+                    : 0f;
                 _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
-                _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -329,7 +319,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
-            _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+            _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
         }
 
         /// <summary>

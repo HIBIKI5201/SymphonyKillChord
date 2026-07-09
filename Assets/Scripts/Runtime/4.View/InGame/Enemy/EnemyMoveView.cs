@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.UI;
@@ -24,14 +24,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="target"></param>
         public void Initialize(EnemyAIController enemyAIController,
             Transform target,
-            ICharacterAnimationController characterAnimationController,
-            CharacterAnimationIndices characterAnimationIndices)
+            ICharacterAnimationViewContext animationContext)
 
         {
             _enemyAIController = enemyAIController;
             _target = target;
-            _characterAnimationController = characterAnimationController;
-            _characterAnimationIndices = characterAnimationIndices;
+            _characterAnimationViewModel = animationContext.ViewModel;
+            _characterAnimationSignal = animationContext.Signal;
             _isPlaying = false;
         }
 
@@ -51,7 +50,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _isPlaying = false;
             StopMoving();
             StopRotating();
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
         }
 
         /// <summary>
@@ -81,7 +80,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.updateRotation = true;
             if (!_navMeshAgent.SetDestination(target))
             {
-                _characterAnimationController?.SetVelocity(Vector2.zero);
+                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                 return false;
             }
 
@@ -94,7 +93,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
             {
-                _characterAnimationController?.SetVelocity(Vector2.zero);
+                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                 return false;
             }
 
@@ -103,13 +102,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 ct.ThrowIfCancellationRequested();
 
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
-                _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+                _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
 
                 if (!_navMeshAgent.pathPending
                     && _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance
                     && (!_navMeshAgent.hasPath || _navMeshAgent.velocity.sqrMagnitude <= 0.01f))
                 {
-                    _characterAnimationController?.SetVelocity(Vector2.zero);
+                    _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                     return true;
                 }
 
@@ -117,7 +116,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 await Awaitable.NextFrameAsync(ct);
             }
 
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
             return false;
         }
 
@@ -138,13 +137,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _navMeshAgent.SetDestination(intruction.Destination);
 
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
-                _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+                _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
 
                 PlayFootstepSound();
             }
             else
             {
-                _characterAnimationController?.SetVelocity(Vector2.zero);
+                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
             }
         }
 
@@ -159,7 +158,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             _navMeshAgent.isStopped = true;
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
         }
 
         public void StopRotating()
@@ -222,8 +221,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
-        private ICharacterAnimationController _characterAnimationController;
-        private CharacterAnimationIndices _characterAnimationIndices;
+        private ICharacterAnimationViewModel _characterAnimationViewModel;
+        private ICharacterAnimationSignal _characterAnimationSignal;
         private bool _isPlaying;
         private bool _isReservedAnimationPlaying;
 
@@ -272,7 +271,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (_isReservedAnimationPlaying)
             {
                 // 構えアニメをキャンセルするために、速度をゼロにして状態をリセット
-                _characterAnimationController?.SetVelocity(Vector2.zero);
+                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                 _isReservedAnimationPlaying = false;
             }
 
@@ -280,7 +279,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             PlaySound(_attackSoundSource, null);
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
-            _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Attack);
+            _characterAnimationSignal?.RequestAttack();
         }
 
         /// <summary>
@@ -368,7 +367,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             StopMoving();
             StopRotating();
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
@@ -380,16 +379,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         private void PlayOneShot(string key)
         {
-            if (_characterAnimationController == null)
+            if (_characterAnimationSignal == null)
             {
                 return;
             }
 
-            if (_characterAnimationIndices != null
-                && _characterAnimationIndices.TryGetOneShotIndex(key, out int index))
-            {
-                _characterAnimationController.TriggerOneShot(index);
-            }
+            _characterAnimationSignal?.TryRequestOneShot(key, out _);
         }
 
 #if UNITY_EDITOR
