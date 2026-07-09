@@ -857,7 +857,7 @@ MonoBehaviour:
   - {fileID: 1772279158}
   - {fileID: 1249666141}
   - {fileID: 866643815}
-  - {fileID: 887821557}
+  - {fileID: 0}
   - {fileID: 708479945}
 --- !u!4 &255723356
 Transform:
@@ -1308,7 +1308,7 @@ MonoBehaviour:
   _enemyArtillerySpawner: {fileID: 1772279158}
   _inGameMissionInitializer: {fileID: 866643817}
   _mobileInput: {fileID: 1660467405200683237}
-  _rhythmGuideInitializer: {fileID: 678096161}
+  _rhythmGuideInitializer: {fileID: 887821557}
   _backgroundSceneName: Stage_01
   _enemyPools: {fileID: 1599172285}
   _enemyInitializer: {fileID: 1599172287}
@@ -1814,8 +1814,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.RhythmGuideInitializer
   _rhythmGuideDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
-  _rhythmGuideView: {fileID: 887821558}
-  _rhythmGuideUpdateView: {fileID: 887821557}
+  _rhythmGuideView: {fileID: 0}
+  _rhythmGuideUpdateView: {fileID: 0}
 --- !u!4 &678096162
 Transform:
   m_ObjectHideFlags: 0
@@ -2227,26 +2227,15 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
 --- !u!114 &887821557 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7740924343983719544, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5306966441488033859, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
   m_PrefabInstance: {fileID: 887821556}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 888acde840dd7e646b3d3f83c4cebe36, type: 3}
+  m_Script: {fileID: 11500000, guid: 77d94ae253256f24aaafff6b7c73cf7b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.RhythmGuideUpdeteView
---- !u!114 &887821558 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6013868925677270723, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
-  m_PrefabInstance: {fileID: 887821556}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffbe35183663de548aa63606bd7d19ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.RhythmGuideView
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ACLikeRhythmGuideInitializer
 --- !u!223 &887821559 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 8359850208577834624, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
