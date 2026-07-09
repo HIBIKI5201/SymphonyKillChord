@@ -1,11 +1,11 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -48,10 +48,13 @@ namespace DevelopProducts.Boss
             // ターゲット管理。IngameComposition が ServiceLocator に公開した
             // 共有インスタンスを使うことで、プレイヤーのロックオン候補にボスが入る。
             // 取得できない（ボス単独シーン等）場合のみ単独生成にフォールバックする。
-            TargetManager targetManager = ServiceLocator.GetInstance<TargetManager>() ?? new TargetManager();
-            TargetEntityRegistry targetEntityRegistry = ServiceLocator.GetInstance<TargetEntityRegistry>() ?? new TargetEntityRegistry();
-            TargetManagerController targetManagerController = new(targetManager);
-            TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
+            TargetSystemController targetSystemController = ServiceLocator.GetInstance<TargetSystemController>();
+            if (targetSystemController == null)
+            {
+                ITargetSystemViewModel targetSystemViewModel = new TargetingSystem();
+                TargetEntityRegistry targetEntityRegistry = new();
+                targetSystemController = new TargetSystemController(targetSystemViewModel, targetEntityRegistry);
+            }
 
             if (_enemyPools != null)
             {
@@ -64,8 +67,7 @@ namespace DevelopProducts.Boss
                 playerInitializer.PlayerEntity,
                 musicSyncState,
                 musicSyncService,
-                targetManagerController,
-                targetEntityRegistryController,
+                targetSystemController,
                 null,
                 _enemyPools,
                 _ => { });
