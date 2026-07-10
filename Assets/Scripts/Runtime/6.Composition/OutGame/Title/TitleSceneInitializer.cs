@@ -79,6 +79,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
+            _outGameUIEvent = await ServiceLocator.GetInstanceAsync<OutGameUIEvent>(token: destroyCancellationToken);
+            if (_outGameUIEvent == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
+#endif
+                return;
+            }
+
             SceneTransitionController sceneTransitionController;
             MusicPlayer musicPlayer;
             SoundEffectVolumeManager sePlayer;
@@ -217,14 +226,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionController が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
