@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -21,8 +22,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     初期化を行います。
         /// </summary>
-        private void Awake()
+        private async void Awake()
         {
+            _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            if (_loadedScreenRuleData == null)
+            {
+                return;
+            }
+
             Initialize();
         }
 
@@ -47,6 +54,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             CancelAndDispose(ref _ctsShow);
             CancelAndDispose(ref _ctsHide);
+            _screenRuleDataKey.ReleaseLoadedAsset(this);
+            _loadedScreenRuleData = null;
         }
 
         /// <summary>
@@ -70,7 +79,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 #endif
                 return;
             }
-            if (_screenRuleData == null)
+            if (_loadedScreenRuleData == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] ScreenRuleData が設定されていません。", this);
@@ -172,7 +181,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // InfraStructure 層
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
-            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_screenRuleData);
+            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedScreenRuleData);
 
             //  Adaptor 層
             IScreenTransitionApplicable screenViewModel = new ScreenViewApplicator(screenViewRegistry);
@@ -441,8 +450,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField]
         [Tooltip("画面表示に使用する UIDocument です。")]
         private UIDocument _uiDocument;
-        [SerializeField, Tooltip("画面遷移ルールデータです。")]
-        private ScreenRuleData _screenRuleData;
+        [SerializeField, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        private string _screenRuleDataKey;
 
         private bool IsTransitioning => _transitionTask != null && !_transitionTask.IsCompleted;
 
@@ -450,6 +459,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private OutGameUIEvent _outGameUIEvent;
         private ScreenViewRegistry _screenViewRegistry;
         private SceneTransitionController _sceneTransitionController;
+        private ScreenRuleData _loadedScreenRuleData;
         private bool _isInitialized = false;
         private bool _isStartGame = false;
 

@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.Utility.OutGame.Savedata;
@@ -28,18 +29,18 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
         [SerializeField]
         private UIDocument _uiDocument;
-        [SerializeField]
-        private SkillNodeDataRepo _skillNodeDataRepo;
-        [SerializeField]
-        private SkillNodeBindRepo _skillNodeBindRepo;
-        [SerializeField]
-        private SkillNodePhaseBindDataRepo _skillNodePhaseBindRepo;
+        [SerializeField, Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
+        private string _skillNodeDataRepoKey;
+        [SerializeField, Tooltip("スキルノード接続定義リポジトリの Addressables キーです。")]
+        private string _skillNodeBindRepoKey;
+        [SerializeField, Tooltip("スキルツリー段階定義リポジトリの Addressables キーです。")]
+        private string _skillNodePhaseBindRepoKey;
         [SerializeField]
         private VideoPlayer _videoPlayer;
         [Space]
         [Header("デバッグ用")]
-        [SerializeField]
-        private SkillTreeTestInputData _inputData;
+        [SerializeField, Tooltip("デバッグ入力データの Addressables キーです。")]
+        private string _inputDataKey;
         [SerializeField]
         private bool _isDebugMode = false;
 
@@ -70,6 +71,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
         private Dictionary<int, VideoClip> _skillPreviewVideos;
+        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
+        private SkillNodeBindRepo _loadedSkillNodeBindRepo;
+        private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
+        private SkillTreeTestInputData _loadedInputData;
 
         private const string E_NAME_SKILL_DETAIL = "SkillDetail";
         private const string E_NAME_PLAYER_STATUS = "PlayerStatus";
@@ -104,10 +109,43 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = null;
+            _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
+            _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
+            _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
+            _inputDataKey.ReleaseLoadedAsset(this);
+            _loadedSkillNodeDataRepo = null;
+            _loadedSkillNodeBindRepo = null;
+            _loadedSkillNodePhaseBindRepo = null;
+            _loadedInputData = null;
         }
 
+        /// <summary>
+        ///     Addressables 経由で必要アセットをロードして初期化します。
+        /// </summary>
         private async Task Initialize()
         {
+            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, destroyCancellationToken);
+            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepo>(this, destroyCancellationToken);
+            _loadedSkillNodePhaseBindRepo =
+                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepo>(this, destroyCancellationToken);
+
+            if (_isDebugMode)
+            {
+                _loadedInputData = await _inputDataKey.LoadAssetAsync<SkillTreeTestInputData>(this, destroyCancellationToken);
+            }
+
+            if (_loadedSkillNodeDataRepo == null
+                || _loadedSkillNodeBindRepo == null
+                || _loadedSkillNodePhaseBindRepo == null)
+            {
+                return;
+            }
+
+            if (_isDebugMode && _loadedInputData == null)
+            {
+                return;
+            }
+
             _rootElement = _uiDocument.rootVisualElement;
             _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
             _skillDetailRoot = _rootElement.Q<VisualElement>(E_NAME_SKILL_DETAIL);
@@ -142,10 +180,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             if (_isDebugMode)
             {
-                _skillUnlockData.SetResearchPoint(_skillUnlockData.ResearchPoint == 0 ? _inputData.currentPoints : _skillUnlockData.ResearchPoint);
+                _skillUnlockData.SetResearchPoint(_skillUnlockData.ResearchPoint == 0 ? _loadedInputData.currentPoints : _skillUnlockData.ResearchPoint);
 
-                _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillNodeIds.Length == 0
-                    ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillNodeIds);
+                _skillUnlockData.SetUnlockedSkillNodeIds(_loadedInputData.UnlockedSkillNodeIds.Length == 0
+                    ? _skillUnlockData.UnlockedSkillNodeIds : _loadedInputData.UnlockedSkillNodeIds);
             }
 
             SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds, _skillUnlockData.UnlockedSkillIds);
@@ -178,7 +216,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void BuildConnBinds()
         {
             _skillNodeConnBinds = new();
-            foreach (SkillNodeBindData bind in _skillNodeBindRepo.SkillNodeBinds)
+            foreach (SkillNodeBindData bind in _loadedSkillNodeBindRepo.SkillNodeBinds)
             {
                 _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId, bind.FromConnNames);
             }
@@ -196,7 +234,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             for (int i = 0; i < nodes.Count; i++)
             {
                 string nodeName = nodes[i].name;
-                SkillNodeData nodeData = _skillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
+                SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
                 if (nodeData == null)
                 {
                     throw new KeyNotFoundException($"SkillNodeBindDataが見つかりません：{nodeName}");
@@ -212,7 +250,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
             {
-                SkillNodeData data = _skillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO.Id);
+                SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO.Id);
                 SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeIds.Length];
                 for (int i = 0; i < data.ParentNodeIds.Length; i++)
                 {
@@ -262,9 +300,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void InitializePhaseState()
         {
             _unlockPhases = new();
-            for (int i = 0; i < _skillNodePhaseBindRepo.PhaseBindData.Length; i++)
+            for (int i = 0; i < _loadedSkillNodePhaseBindRepo.PhaseBindData.Length; i++)
             {
-                SkillNodePhaseBindData phaseBindData = _skillNodePhaseBindRepo.PhaseBindData[i];
+                SkillNodePhaseBindData phaseBindData = _loadedSkillNodePhaseBindRepo.PhaseBindData[i];
                 string phaseName = phaseBindData.PhaseName;
                 VisualElement phaseRoot = _rootElement.Q(name: phaseName);
                 _unlockPhases.Add(phaseBindData.RequiredSkillNodeId, phaseRoot);
@@ -283,7 +321,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void SetUnlockPhaseState(int nodeId)
         {
             string phaseName;
-            if (_skillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out phaseName))
+            if (_loadedSkillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out phaseName))
             {
                 _rootElement.Q(name: phaseName).visible = true;
             }
@@ -295,7 +333,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void BuildVideoClipDict()
         {
             _skillPreviewVideos = new();
-            foreach (SkillNodeData node in _skillNodeDataRepo.SkillNodes)
+            foreach (SkillNodeData node in _loadedSkillNodeDataRepo.SkillNodes)
             {
                 if (node.PreviewVideoClip != null)
                 {
@@ -338,7 +376,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="nodeName"></param>
         private void HandleSkillNodeSelected(string nodeName)
         {
-            SkillNodeData nodeData = _skillNodeBindRepo.FindByName(nodeName).SkillNodeData;
+            SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
             _skillTreeController.OnSkillNodeSelected(nodeData.NodeId, _cts.Token);
         }
 

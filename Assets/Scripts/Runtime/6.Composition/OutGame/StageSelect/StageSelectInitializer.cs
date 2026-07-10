@@ -5,6 +5,7 @@ using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
@@ -35,8 +36,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("ステージツリーの定義アセットです。")]
-        private StageTreeAsset _stageTreeAsset;
+        [SerializeField, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        private string _stageTreeAssetKey;
 
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
@@ -55,13 +56,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SelectedScenarioState _selectedScenarioState;
         private SelectedBattleStageState _selectedBattleStageState;
         private SelectedMissionState _selectedMissionState;
+        private StageTreeAsset _loadedStageTreeAsset;
 
         /// <summary>
         ///     初期化を行います。
         /// </summary>
-        private void Awake()
+        private async void Awake()
         {
             _currentSceneName = gameObject.scene.name;
+            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, destroyCancellationToken);
+            if (_loadedStageTreeAsset == null)
+            {
+                return;
+            }
+
             Initialize();
         }
 
@@ -82,6 +90,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _cts?.Cancel();
             DisposeNodeComponents();
             _cts?.Dispose();
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _loadedStageTreeAsset = null;
         }
 
         /// <summary>
@@ -241,7 +251,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
-            if (_stageTreeAsset == null)
+            if (_loadedStageTreeAsset == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] StageTreeAsset が設定されていません。", this);
@@ -262,7 +272,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             // --- Domain 層 ---
-            _stageTree = _stageTreeAsset.Create();
+            _stageTree = _loadedStageTreeAsset.Create();
 
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);

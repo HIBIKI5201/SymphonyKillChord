@@ -14,7 +14,177 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Default Local Group
   m_GUID: c521adcb33534f544ad957856080f76a
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 1c411bf35748d284584af4d0f16a0ccc
+    m_Address: Assets/Level/Data/Master/OutGame/Screen/TitleScreenRuleData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 258321da291460949a3505c9ef2f85fe
+    m_Address: Assets/Level/Data/Master/OutGame/StageSelect/StageTreeAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed3d6973f36d66844852d3391a8a18df
+    m_Address: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57ad1f17f7de2804a9744cf5cc3c4316
+    m_Address: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bb92b8655a6f724b864e7dac88d6e70
+    m_Address: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2efcc81dfd565a94a9110b488a8ec243
+    m_Address: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa8820e093edab1489d8bbed0db664af
+    m_Address: Assets/Level/Data/Master/OutGame/SkillTree/SkillTreeTestInputData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 134672bf4f515f4439a46323fff09e2a
+    m_Address: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2b760f47d977174fb177b0d0f9d2480
+    m_Address: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f9f05cd27f2f3a4087a15acbe76d7c3
+    m_Address: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/OwnedSkillRepositoryDebug.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
+    m_Address: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/SkillBuildRepositoryDebug.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 03ab59b5cc1893e4eaf97352ba51df87
+    m_Address: Assets/Level/Data/Master/Scenario/BackgroundCatalogAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c44a325b8ad84f498216394b6a9d584
+    m_Address: Assets/Level/Data/Master/Scenario/AnimationCatalogAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
+    m_Address: Assets/Level/Data/Master/Scenario/PortraitCatalogAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 888c47664981fed459937f475b632964
+    m_Address: Assets/Level/Data/Master/Scenario/ScenarioSettingsAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
+    m_Address: Assets/Level/Data/Master/InGame/Music/RhythmGuideDefinitionAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e769e9900eed0c94eaa8d71f564c1966
+    m_Address: Assets/Level/Data/Master/InGame/Enemy/EnemyWaveDefinitionAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 02ac4acd11c13e94f951e778560963f3
+    m_Address: Assets/Level/Scenes/Develop/TestPlayer/PlayerConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f8d7fb175cdb054bb9439f0d1bb8dda
+    m_Address: Assets/Level/Data/Master/Skill/Repositories/OutGameSkillRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
+    m_Address: Assets/Level/Data/Develop/SkillInputProgressViewConfigAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2cee708fc7c125b4da0f98ba5b7b994f
+    m_Address: Assets/Level/Data/Master/Character/PlayerAnimationData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 358a8447b7fd7f54690a994853695aa1
+    m_Address: Assets/Level/Scenes/Develop/AttackPipelineTest/Config/Player.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 114f8ed06b070604fbf83641b90742c9
+    m_Address: Assets/Level/Data/Master/Skill/Templates/TestSkillData1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8836b3eb044a4af4fbfcb41d68328252
+    m_Address: Assets/Level/Data/Master/Skill/Templates/TestSkillData2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9264ef7716ed4f47bc258f02a4823b9
+    m_Address: Assets/Level/Data/Develop/Boss/BossAttackEntryRepo.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
+    m_Address: Assets/Level/Data/Master/InGame/Enemy/ShellAttackData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93524034675db3e489e93312c0366c23
+    m_Address: Assets/Level/Data/Master/Character/Enemy.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71243b714fe682a479522c36402275ac
+    m_Address: Assets/Level/Data/Master/InGame/Battle/ExampleEnemyMoveData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bad017c822c5b8c4da79df297d30324c
+    m_Address: Assets/Level/Data/Master/InGame/Battle/ExampleEncountMusicData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d1972e01a7a86243aac0caff66ff428
+    m_Address: Assets/Level/Data/Master/InGame/Battle/ExampleBattleMusicData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5e72162da6cb4a54fb6e019bf90f79c3
+    m_Address: Assets/Level/Data/Master/OutGame/StageSelect/Mission/EnemyMissionKeyAsset.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d4bf747a9f8ccab419e014df8b73ef72
+    m_Address: Assets/Level/Data/Master/Character/EnemyAnimationData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d96aa53a8bf8e3e49ac87fa3cd9fbb2b
+    m_Address: Assets/Level/Data/Develop/Boss/BossCharacterData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d69421e5dc9278446a38b4415677e2aa
+    m_Address: Assets/Level/Data/Master/InGame/Enemy/ShellMusicData.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d50a7120a39130c4f981d12c9d268c81, type: 2}
   m_SchemaSet:

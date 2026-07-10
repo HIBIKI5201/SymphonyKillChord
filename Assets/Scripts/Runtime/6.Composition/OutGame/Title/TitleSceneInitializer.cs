@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.OutGame.Savedata;
@@ -30,8 +31,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, Tooltip("UI Document")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("画面遷移ルールデータ")]
-        private ScreenRuleData _ruleData;
+        [SerializeField, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        private string _ruleDataKey;
 
         [Header("シーン遷移設定")]
         [SerializeField, SceneNameSelector, Tooltip("遷移元のシーン名")]
@@ -48,12 +49,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleSceneView _titleSceneView;
         private ScreenController _screenController;
         private SavedataSystem _savedataSystem;
+        private ScreenRuleData _loadedRuleData;
 
         // チュートリアルが完了しているかどうかのフラグ
         private bool _isTutorialCompleted;
 
         private async void Start()
         {
+            _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            if (_loadedRuleData == null)
+            {
+                return;
+            }
+
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
@@ -130,7 +138,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
-            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_ruleData);
+            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
 
             IScreenTransitionApplicable screenViewModel = new ScreenViewApplicator(_titleScreenViewRegistry);
             IScreenPresenter screenPresenter = new ScreenPresenter(screenViewModel);
@@ -183,6 +191,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
                 UnRegisterUIEventCallbacks();
             }
+
+            _ruleDataKey.ReleaseLoadedAsset(this);
+            _loadedRuleData = null;
         }
 
         /// <summary>

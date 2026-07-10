@@ -8,9 +8,11 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using UnityEngine;
 using KillChord.Runtime.View.InGame.Enemy;
 
@@ -26,6 +28,37 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         /// <summary> 実行順です。 </summary>
         public override int Order => 700;
+
+        /// <summary>
+        ///     Addressables 経由で敵システム用アセットをロードする。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            _loadedEnemyWaveDefinitionAsset =
+                await _enemyWaveDefinitionAssetKey.LoadAssetAsync<EnemyWaveDefinitionAsset>(this, cancellationToken);
+
+            if (_loadedEnemyWaveDefinitionAsset == null)
+            {
+                return false;
+            }
+
+            if (_enemyPools == null || !await _enemyPools.LoadAddressableAssetsAsync(cancellationToken))
+            {
+                Debug.LogError($"[{nameof(EnemyInitializer)}] 敵プール用アセットのロードに失敗しました。", this);
+                return false;
+            }
+
+            BossInitializer bossInitializer = GameObject.FindFirstObjectByType<BossInitializer>();
+            if (bossInitializer != null && !await bossInitializer.ResourceLoadAsync(cancellationToken))
+            {
+                Debug.LogError($"[{nameof(EnemyInitializer)}] ボス用アセットのロードに失敗しました。", this);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         ///     敵関連のローカル生成物を構築して公開する。
@@ -76,7 +109,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
-            EnemyWaves enemyWaves = _enemyWaveDefinitionAsset.ToDefinition();
+            EnemyWaves enemyWaves = _loadedEnemyWaveDefinitionAsset.ToDefinition();
             _moduleContainer.EnemyWaveSpawnerController = new EnemyWaveSpawnerController(
                 enemyWaves,
                 _moduleContainer.EnemyWaveSpawnerState,
@@ -181,6 +214,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _moduleContainer = null;
             _initialized = false;
+            _enemyWaveDefinitionAssetKey.ReleaseLoadedAsset(this);
+            _loadedEnemyWaveDefinitionAsset = null;
         }
 
         [SerializeField, Tooltip("敵プールです。")]
@@ -195,8 +230,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("砲兵スポナーです。")]
         private EnemyArtillerySpawner _enemyArtillerySpawner;
 
-        [SerializeField, Tooltip("敵ウェーブ定義アセットです。")]
-        private EnemyWaveDefinitionAsset _enemyWaveDefinitionAsset;
+        [SerializeField, Tooltip("敵ウェーブ定義アセットの Addressables キーです。")]
+        private string _enemyWaveDefinitionAssetKey;
 
         [SerializeField, Tooltip("敵ウェーブタイマーViewです。")]
         private EnemyWaveTimerView _enemyWaveTimerView;
@@ -209,6 +244,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _initialized = false;
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
+        private EnemyWaveDefinitionAsset _loadedEnemyWaveDefinitionAsset;
 
         /// <summary>
         ///     Inspector参照を検証する。
@@ -220,7 +256,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 || _enemySpawnPositionSearcher == null
                 || _enemyInfantrySpawner == null
                 || _enemyArtillerySpawner == null
-                || _enemyWaveDefinitionAsset == null
+                || string.IsNullOrWhiteSpace(_enemyWaveDefinitionAssetKey)
                 || _enemyWaveTimerView == null)
             {
                 Debug.LogError($"[{nameof(EnemyInitializer)}] 敵モジュール参照が不足しています。", this);

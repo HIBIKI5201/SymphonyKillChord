@@ -4,6 +4,8 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -16,6 +18,22 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class BossInitializer : MonoBehaviour
     {
+        /// <summary>
+        ///     ボス用 Addressables アセットを先行ロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public async Task<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            if (_boss == null)
+            {
+                Debug.LogError("BossLifeCycleが見つかりません。", this);
+                return false;
+            }
+
+            return await _boss.LoadAddressableAssetsAsync(cancellationToken);
+        }
+
         /// <summary>
         ///     初期化処理
         /// </summary>

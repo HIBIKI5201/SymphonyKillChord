@@ -603,7 +603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 452244044}
-  _screenRuleData: {fileID: 11400000, guid: ed3d6973f36d66844852d3391a8a18df, type: 2}
+  _screenRuleDataKey: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
 --- !u!114 &1010127604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,7 +617,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 452244044}
-  _stageTreeAsset: {fileID: 11400000, guid: 258321da291460949a3505c9ef2f85fe, type: 2}
+  _stageTreeAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/StageTreeAsset.asset
 --- !u!114 &1010127605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -644,8 +644,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
   _uiDocument: {fileID: 452244044}
-  _skillBuildRepositoryDebug: {fileID: 11400000, guid: ed00377b3610b1e45b0f1c7da00f007a, type: 2}
-  _ownedSkillRepositoryDebug: {fileID: 11400000, guid: 8f9f05cd27f2f3a4087a15acbe76d7c3, type: 2}
+  _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
+  _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
+  _ownedSkillRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/OwnedSkillRepositoryDebug.asset
+  _skillBuildRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/SkillBuildRepositoryDebug.asset
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
   _skillBuildDebugger: {fileID: 0}
 --- !u!1 &1517114467

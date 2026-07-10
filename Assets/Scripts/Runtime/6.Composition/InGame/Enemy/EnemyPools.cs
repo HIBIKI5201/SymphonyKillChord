@@ -1,4 +1,6 @@
 using KillChord.Runtime.View.InGame.Enemy;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -9,6 +11,19 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyPools : MonoBehaviour, IShellPool
     {
+        /// <summary>
+        ///     プールが参照するプレハブ群の Addressables アセットを先行ロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
+        {
+            bool infantryLoaded = _infantryPrefab != null && await _infantryPrefab.LoadAddressableAssetsAsync(cancellationToken);
+            bool artilleryLoaded = _artilleryPrefab != null && await _artilleryPrefab.LoadAddressableAssetsAsync(cancellationToken);
+            bool shellLoaded = _shellPrefab != null && await _shellPrefab.LoadAddressableAssetsAsync(cancellationToken);
+            return infantryLoaded && artilleryLoaded && shellLoaded;
+        }
+
         /// <summary>
         ///     初期化処理。
         /// </summary>
@@ -60,6 +75,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public EnemyLifeCycle InstantiateInfantry()
         {
             EnemyLifeCycle lifeCycle = Instantiate(_infantryPrefab);
+            lifeCycle.CopyLoadedAssetsFrom(_infantryPrefab);
             _initializer.InitializeInfantry(lifeCycle, ReleaseInfantry);
             return lifeCycle;
         }
@@ -71,6 +87,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public EnemyLifeCycle InstantiateArtillery()
         {
             EnemyLifeCycle lifeCycle = Instantiate(_artilleryPrefab);
+            lifeCycle.CopyLoadedAssetsFrom(_artilleryPrefab);
             _initializer.InitializeArtillery(lifeCycle, ReleaseArtillery);
             return lifeCycle;
         }
@@ -82,6 +99,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public ShellLifeCycle InstantiateShell()
         {
             ShellLifeCycle shell = Instantiate(_shellPrefab);
+            shell.CopyLoadedAssetsFrom(_shellPrefab);
             shell.Initialize(ReleaseShell);
             return shell;
         }

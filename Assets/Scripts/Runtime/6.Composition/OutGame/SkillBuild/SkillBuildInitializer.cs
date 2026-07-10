@@ -1,8 +1,9 @@
-﻿using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
@@ -24,12 +25,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private UIDocument _uiDocument;
 
         [SerializeField]
-        [Tooltip("セーブデータから入手済みスキルを取得するリポジトリです。")]
-        private OwnedSkillRepository _ownedSkillRepository;
+        [Tooltip("セーブデータから入手済みスキルを取得するリポジトリの Addressables キーです。")]
+        private string _ownedSkillRepositoryKey;
 
         [SerializeField]
-        [Tooltip("セーブデータから装備済みスキルを取得するリポジトリです。")]
-        private SkillBuildRepository _skillBuildRepository;
+        [Tooltip("セーブデータから装備済みスキルを取得するリポジトリの Addressables キーです。")]
+        private string _skillBuildRepositoryKey;
 
         [SerializeField]
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
@@ -44,12 +45,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildDebugger _skillBuildDebugger;
 
         [SerializeField]
-        [Tooltip("デバッグ用の入手済みスキルリポジトリです。")]
-        private OwnedSkillRepositoryDebug _ownedSkillRepositoryDebug;
+        [Tooltip("デバッグ用の入手済みスキルリポジトリの Addressables キーです。")]
+        private string _ownedSkillRepositoryDebugKey;
 
         [SerializeField]
-        [Tooltip("デバッグ用のスキルビルドリポジトリです。")]
-        private SkillBuildRepositoryDebug _skillBuildRepositoryDebug;
+        [Tooltip("デバッグ用のスキルビルドリポジトリの Addressables キーです。")]
+        private string _skillBuildRepositoryDebugKey;
 
         private SkillBuildScreenView _skillBuildScreenView;
         private SkillBuildViewModel _skillBuildViewModel;
@@ -58,6 +59,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildPresenter _skillBuildPresenter;
         private OutGameUIEvent _outGameUIEvent;
         private SkillElementDragAndDropSetup _skillElementDragAndDropSetup;
+        private OwnedSkillRepository _loadedOwnedSkillRepository;
+        private SkillBuildRepository _loadedSkillBuildRepository;
+        private OwnedSkillRepositoryDebug _loadedOwnedSkillRepositoryDebug;
+        private SkillBuildRepositoryDebug _loadedSkillBuildRepositoryDebug;
 
         /// <summary>
         ///     スキル編成機能の初期化を行う。
@@ -75,6 +80,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             Unsubscribe();
             DisposeComponents();
             // SkillBuildDefinition はゲーム全体の擬似セーブデータとして存在し続けるため解除しない
+            _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
+            _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
+            _ownedSkillRepositoryDebugKey.ReleaseLoadedAsset(this);
+            _skillBuildRepositoryDebugKey.ReleaseLoadedAsset(this);
+            _loadedOwnedSkillRepository = null;
+            _loadedSkillBuildRepository = null;
+            _loadedOwnedSkillRepositoryDebug = null;
+            _loadedSkillBuildRepositoryDebug = null;
         }
 
         /// <summary>
@@ -82,6 +95,17 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private async Task InitializeAsync()
         {
+            _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<OwnedSkillRepository>(this, destroyCancellationToken);
+            _loadedSkillBuildRepository = await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, destroyCancellationToken);
+
+            if (_isDebugMode)
+            {
+                _loadedOwnedSkillRepositoryDebug =
+                    await _ownedSkillRepositoryDebugKey.LoadAssetAsync<OwnedSkillRepositoryDebug>(this, destroyCancellationToken);
+                _loadedSkillBuildRepositoryDebug =
+                    await _skillBuildRepositoryDebugKey.LoadAssetAsync<SkillBuildRepositoryDebug>(this, destroyCancellationToken);
+            }
+
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
@@ -90,7 +114,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return;
             }
 
-            if (_skillBuildRepository == null)
+            if (!_isDebugMode && _loadedSkillBuildRepository == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepository が設定されていません。", this);
@@ -98,10 +122,26 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return;
             }
 
-            if (_ownedSkillRepository == null)
+            if (!_isDebugMode && _loadedOwnedSkillRepository == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] OwnedSkillRepository が設定されていません。", this);
+#endif
+                return;
+            }
+
+            if (_isDebugMode && _loadedSkillBuildRepositoryDebug == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepositoryDebug が設定されていません。", this);
+#endif
+                return;
+            }
+
+            if (_isDebugMode && _loadedOwnedSkillRepositoryDebug == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] OwnedSkillRepositoryDebug が設定されていません。", this);
 #endif
                 return;
             }
@@ -195,14 +235,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 入手済みスキル一覧。 </returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkillsAsync()
         {
-            if (_ownedSkillRepository != null && !_isDebugMode)
+            if (!_isDebugMode)
             {
-                return await _ownedSkillRepository.LoadOwnedSkillsAsync();
+                return await _loadedOwnedSkillRepository.LoadOwnedSkillsAsync();
             }
-            else
-            {
-                return await _ownedSkillRepositoryDebug.GetOwnedSkills();
-            }
+
+            return await _loadedOwnedSkillRepositoryDebug.GetOwnedSkills();
         }
 
         /// <summary>
@@ -212,14 +250,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns></returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkillAsync()
         {
-            if(_skillBuildRepository != null && !_isDebugMode)
+            if (!_isDebugMode)
             {
-                return await _skillBuildRepository.GetEquippedSkills();
+                return await _loadedSkillBuildRepository.GetEquippedSkills();
             }
-            else
-            {
-                return await _skillBuildRepositoryDebug.GetEquippedSkills();
-            }
+
+            return await _loadedSkillBuildRepositoryDebug.GetEquippedSkills();
         }
 
         /// <summary>

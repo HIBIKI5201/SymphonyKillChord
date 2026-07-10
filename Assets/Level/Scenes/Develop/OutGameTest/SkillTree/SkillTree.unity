@@ -527,9 +527,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 452244044}
-  _skillNodeDataRepo: {fileID: 11400000, guid: 57ad1f17f7de2804a9744cf5cc3c4316, type: 2}
-  _skillNodeBindRepo: {fileID: 11400000, guid: 8bb92b8655a6f724b864e7dac88d6e70, type: 2}
-  _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
+  _skillNodeDataRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
+  _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
+  _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
+  _inputDataKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillTreeTestInputData.asset
 --- !u!1 &1370918365
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,7 +561,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 452244044}
-  _screenRuleData: {fileID: 11400000, guid: ed3d6973f36d66844852d3391a8a18df, type: 2}
+  _screenRuleDataKey: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
 --- !u!4 &1370918367
 Transform:
   m_ObjectHideFlags: 0

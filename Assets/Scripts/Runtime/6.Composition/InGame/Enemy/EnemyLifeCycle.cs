@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
@@ -10,6 +10,7 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -35,6 +36,43 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyLifeCycle : MonoBehaviour, IGameplayControllable
     {
+        /// <summary>
+        ///     敵用 Addressables アセットをロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
+        {
+            _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
+            _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
+            _loadedEncounterMusicData = await _encounterMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            _loadedBattleMusicData = await _battleMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+            _loadedCharacterAnimationCatalogAsset =
+                await _characterAnimationCatalogAssetKey.LoadAssetAsync<CharacterAnimationCatalogAsset>(this, cancellationToken);
+
+            return _loadedEnemyData != null
+                && _loadedMoveData != null
+                && _loadedEncounterMusicData != null
+                && _loadedBattleMusicData != null
+                && _loadedMissionKeyAsset != null
+                && _loadedCharacterAnimationCatalogAsset != null;
+        }
+
+        /// <summary>
+        ///     ロード済みアセット参照を別インスタンスへコピーします。
+        /// </summary>
+        /// <param name="source"> コピー元です。 </param>
+        public void CopyLoadedAssetsFrom(EnemyLifeCycle source)
+        {
+            _loadedEnemyData = source._loadedEnemyData;
+            _loadedMoveData = source._loadedMoveData;
+            _loadedEncounterMusicData = source._loadedEncounterMusicData;
+            _loadedBattleMusicData = source._loadedBattleMusicData;
+            _loadedMissionKeyAsset = source._loadedMissionKeyAsset;
+            _loadedCharacterAnimationCatalogAsset = source._loadedCharacterAnimationCatalogAsset;
+        }
+
 
         /// <summary>
         ///     初期化処理。
@@ -67,7 +105,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
 
             _targetingSystem = targetingSystem;
-            _enemyEntity = CharacterFactory.Create(_enemyData);
+            _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
@@ -83,8 +121,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             NearestAttackPositionSearchService attackPositionSearchService = new NearestAttackPositionSearchService(attackPositionSearchController);
 
             // Domain生成
-            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
-            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
+            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_loadedMoveData);
+            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_loadedEncounterMusicData, _loadedBattleMusicData);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -118,7 +156,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // View接続
             var animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+            ICharacterAnimationViewContext animationContext =
+                animationComposition.Init(_characterAnimationView, _loadedCharacterAnimationCatalogAsset, musicSyncState);
             _characterAnimationContext = animationContext;
             _view.Initialize(aiController, target, animationContext);
             _healthView.Bind(viewModel);
@@ -153,7 +192,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.Activate();
             _healthHudPresenter.Activate();
 
-            if (_missionEventController != null && _missionKeyAsset != null)
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
@@ -243,10 +282,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             SetDyingCollidersEnabled(true);
             _view.Deactivate();
 
-            if (_missionEventController != null && _missionKeyAsset != null)
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
-                _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
+                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
             _targetingSystem?.UnregisterTarget(_targetable);
 
@@ -309,10 +348,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField] private CharacterDefinitionAsset _enemyData;
-        [SerializeField] private EnemyMoveSpecAsset _moveData;
-        [SerializeField] private EnemyMusicSpecAsset _encounterMusicData;
-        [SerializeField] private EnemyMusicSpecAsset _battleMusicData;
+        [SerializeField, Tooltip("敵定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
+        [SerializeField, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
+        [SerializeField, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
 
         [SerializeField] private int _attackIndex;
 
@@ -320,7 +359,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
+        [SerializeField, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -328,7 +367,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
         [SerializeField] private NavMeshAgent _navMeshAgent;
         [SerializeField] private CharacterAnimationView _characterAnimationView;
-        [SerializeField] private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
+        [SerializeField, Tooltip("敵アニメーション設定の Addressables キーです。")] private string _characterAnimationCatalogAssetKey;
         [SerializeField, Tooltip("死亡時に再生するワンショットアニメーションキー。")]
         private string _deathAnimationKey = "Enemy_Death";
         [SerializeField,Tooltip("死体消滅時のワンショットアニメーションキー。")]
@@ -353,6 +392,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyBattleState _battleState;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
+        private CharacterDefinitionAsset _loadedEnemyData;
+        private EnemyMoveSpecAsset _loadedMoveData;
+        private EnemyMusicSpecAsset _loadedEncounterMusicData;
+        private EnemyMusicSpecAsset _loadedBattleMusicData;
+        private EnemyMissionKeyAsset _loadedMissionKeyAsset;
+        private CharacterAnimationCatalogAsset _loadedCharacterAnimationCatalogAsset;
 
         /// <summary>
         ///     入場移動に必要な表示とNavMeshAgentのみ有効化する。
@@ -543,6 +588,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             DieAsync();
         }
 
+        /// <summary>
+        ///     ロード済みアセットを解放します。
+        /// </summary>
         private void OnDestroy()
         {
             if (_enemyEntity != null)
@@ -552,6 +600,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
+            _enemyDataKey.ReleaseLoadedAsset(this);
+            _moveDataKey.ReleaseLoadedAsset(this);
+            _encounterMusicDataKey.ReleaseLoadedAsset(this);
+            _battleMusicDataKey.ReleaseLoadedAsset(this);
+            _missionKeyAssetKey.ReleaseLoadedAsset(this);
+            _characterAnimationCatalogAssetKey.ReleaseLoadedAsset(this);
+            _loadedEnemyData = null;
+            _loadedMoveData = null;
+            _loadedEncounterMusicData = null;
+            _loadedBattleMusicData = null;
+            _loadedMissionKeyAsset = null;
+            _loadedCharacterAnimationCatalogAsset = null;
         }
     }
 }

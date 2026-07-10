@@ -143,16 +143,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535ba71651c02f2469918f19291b4862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.View.EnemyMoveDebugInitializer
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
-  _moveData: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
-  _encounterMusicData: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
-  _battleMusicData: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
+  _enemyDataKey: Assets/Level/Data/Master/Character/Enemy.asset
+  _moveDataKey: Assets/Level/Data/Master/InGame/Battle/ExampleEnemyMoveData.asset
+  _encounterMusicDataKey: Assets/Level/Data/Master/InGame/Battle/ExampleEncountMusicData.asset
+  _battleMusicDataKey: Assets/Level/Data/Master/InGame/Battle/ExampleBattleMusicData.asset
   _attackIndex: 0
   _view: {fileID: 6024709665745219317}
   _healthView: {fileID: -8573756187886522192}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -117008544252888282}
-  _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
+  _missionKeyAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/Mission/EnemyMissionKeyAsset.asset
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
@@ -160,7 +160,7 @@ MonoBehaviour:
   _behaviorGraphAgent: {fileID: 2029437041226520640}
   _navMeshAgent: {fileID: 3385280616353316531}
   _characterAnimationView: {fileID: 4514743631212080455}
-  _characterAnimationCatalogAsset: {fileID: 11400000, guid: d4bf747a9f8ccab419e014df8b73ef72, type: 2}
+  _characterAnimationCatalogAssetKey: Assets/Level/Data/Master/Character/EnemyAnimationData.asset
   _deathAnimationKey: Enemy_Death
   _destroyAniamtionKey: Enemy_Destroy
   _deathAnimationFallbackSeconds: 0.5

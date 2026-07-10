@@ -3435,7 +3435,7 @@ MonoBehaviour:
   _enemySpawnPositionSearcher: {fileID: 1443016744}
   _enemyInfantrySpawner: {fileID: 1136649845}
   _enemyArtillerySpawner: {fileID: 1772279158}
-  _enemyWaveDefinitionAsset: {fileID: 11400000, guid: e769e9900eed0c94eaa8d71f564c1966, type: 2}
+  _enemyWaveDefinitionAssetKey: Assets/Level/Data/Master/InGame/Enemy/EnemyWaveDefinitionAsset.asset
   _enemyWaveTimerView: {fileID: 708479945}
 --- !u!1 &1699432267
 GameObject:
