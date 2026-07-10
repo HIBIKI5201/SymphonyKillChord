@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -19,7 +19,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// シナリオ ID から再生用データを読み込む。
         /// </summary>
-        public async ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
+        public async ValueTask<ScenarioDefinition> FindByIdAsync(string id, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -38,13 +38,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string[] lines = await ReadScenarioLinesAsync(authoringPath, scenarioPath, isUrlPath, ct);
             if (lines.Length == 0)
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             string firstDataLine = FindFirstDataLine(lines);
             if (string.IsNullOrWhiteSpace(firstDataLine))
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             if (firstDataLine.TrimStart().StartsWith("Type,", StringComparison.OrdinalIgnoreCase))
@@ -58,11 +58,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// 正規化済み CSV をシナリオデータへ変換する。
         /// </summary>
-        private static ScenarioData ParseNormalizedCsv(string[] lines)
+        private static ScenarioDefinition ParseNormalizedCsv(string[] lines)
         {
             if (lines.Length <= 1)
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             List<string> headers = ParseCsvLine(lines[0]);
@@ -136,13 +136,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 events.Add(definitions[step].ToEvent());
             }
 
-            return new ScenarioData(events);
+            return new ScenarioDefinition(events);
         }
 
         /// <summary>
         /// オーサリング形式の CSV をシナリオデータへ変換する。
         /// </summary>
-        private static ScenarioData ParseAuthoringCsv(string[] lines)
+        private static ScenarioDefinition ParseAuthoringCsv(string[] lines)
         {
             var definitions = new Dictionary<int, EventDefinition>();
             var orderedSteps = new List<int>(Math.Max(4, lines.Length));
@@ -205,7 +205,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 events.Add(definitions[step].ToEvent());
             }
 
-            return new ScenarioData(events);
+            return new ScenarioDefinition(events);
         }
 
         /// <summary>

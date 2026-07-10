@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 
 
@@ -7,13 +7,13 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
     /// <summary>
     /// シナリオ再生に使用するイベント列を保持する。
     /// </summary>
-    public class ScenarioData
+    public class ScenarioDefinition
     {
 
         /// <summary>
         /// シナリオ再生に使うイベント列を初期化する。
         /// </summary>
-        public ScenarioData(IReadOnlyList<IScenarioEvent> events)
+        public ScenarioDefinition(IReadOnlyList<IScenarioEvent> events)
         {
             Events = events ?? throw new ArgumentNullException(nameof(events));
         }

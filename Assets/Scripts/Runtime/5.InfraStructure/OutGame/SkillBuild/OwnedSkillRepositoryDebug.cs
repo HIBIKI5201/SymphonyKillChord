@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application;
+﻿using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
@@ -35,7 +35,7 @@ namespace KillChord.Runtime.InfraStructure
 
         [Header("仮の入手済みスキル")]
         [SerializeField]
-        private List<SkillDataAsset> _skillDataAssets;
+        private List<SkillTemplateAsset> _skillDataAssets;
 
         private List<EquippedSkill> _equippedSkills;
 
@@ -64,3 +64,4 @@ namespace KillChord.Runtime.InfraStructure
         }
     }
 }
+

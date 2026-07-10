@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Character;
+﻿using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="System.ArgumentException"></exception>
-        public static EnemyMoveSpec CreateEnemyMoveSpec(EnemyMoveData enemyMoveData)
+        public static EnemyMoveSpec CreateEnemyMoveSpec(EnemyMoveSpecAsset enemyMoveData)
         {
             if(enemyMoveData == null)
             {
@@ -36,7 +36,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// </summary>
         /// <param name="enemyMusicData"></param>
         /// <returns></returns>
-        public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicData enemyMusicData)
+        public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicSpecAsset enemyMusicData)
         {
             return new EnemyMusicSpec(
                 enemyMusicData.BarFlag,
@@ -51,8 +51,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// <param name="battleMusicData"></param>
         /// <returns></returns>
         public static EnemyAttackMusicSpec CreateEnemyAttackMusicSpec(
-            EnemyMusicData encounterData,
-            EnemyMusicData battleMusicData)
+            EnemyMusicSpecAsset encounterData,
+            EnemyMusicSpecAsset battleMusicData)
         {
             return new EnemyAttackMusicSpec(
                 CreateEnemyMusicSpec(encounterData),
@@ -60,3 +60,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         }
     }
 }
+

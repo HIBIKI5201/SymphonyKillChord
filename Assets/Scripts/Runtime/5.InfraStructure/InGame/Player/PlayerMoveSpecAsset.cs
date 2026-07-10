@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Character;
+﻿using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
@@ -7,8 +7,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
     /// <summary>
     ///     プレイヤー移動と回避の設定値を保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(PlayerConfig), menuName = "KillChord/InGame/PlayerConfig")]
-    public sealed class PlayerConfig : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(PlayerMoveSpecAsset), menuName = "KillChord/InGame/PlayerMoveSpecAsset")]
+    public sealed class PlayerMoveSpecAsset : ScriptableObject
     {
         [SerializeField, Tooltip("通常移動速度。")]
         private float _moveSpeed;
@@ -29,8 +29,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
         private float _attackCooldown;
 
         /// <summary> ScriptableObjectからドメインパラメータへ変換する。 </summary>
-        public PlayerMoveParameter ToDomain()
-            => new PlayerMoveParameter(
+        public PlayerMoveSpec ToDomain()
+            => new PlayerMoveSpec(
                 new MoveSpeed(_moveSpeed),
                 new AttackRotationSpeed(_attackRotationSpeed),
                 new DodgeSpeed(_dodgeSpeed),
@@ -40,3 +40,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
             );
     }
 }
+

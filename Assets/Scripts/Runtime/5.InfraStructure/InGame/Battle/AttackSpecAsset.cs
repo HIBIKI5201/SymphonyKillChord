@@ -1,12 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Battle
 {
     /// <summary>
     ///     攻撃のパラメーターセットを保持するScriptableObjectクラス。
     /// </summary>
-    [CreateAssetMenu(fileName = "AttackParameterSetData", menuName = "KillChord/Attack/" + nameof(AttackParameterSetData))]
-    public class AttackParameterSetData : ScriptableObject
+    [CreateAssetMenu(fileName = "AttackSpecAsset", menuName = "KillChord/Attack/" + nameof(AttackSpecAsset))]
+    public class AttackSpecAsset : ScriptableObject
     {
         /// <summary> クリティカルヒットの確率を取得する。 </summary>
         public float CriticalChance => _criticalChance;
@@ -20,3 +20,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         [SerializeField, Tooltip("確定ダメージ")] private float _confirmedDamage;
     }
 }
+

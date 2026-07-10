@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility.Constant;
+﻿using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -6,8 +6,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// <summary>
     ///     敵移動のデータを保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(EnemyMoveData), menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(EnemyMoveData))]
-    public class EnemyMoveData : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(EnemyMoveSpecAsset), menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(EnemyMoveSpecAsset))]
+    public class EnemyMoveSpecAsset : ScriptableObject
     {
         /// <summary> 移動速度 </summary>
         public float MoveSpeed => _moveSpeed;
@@ -21,3 +21,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [SerializeField, Tooltip("最大攻撃距離")] private float _attackRangeMax;
     }
 }
+

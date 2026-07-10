@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KillChord.Runtime.View;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.Setting
 {
     [CreateAssetMenu(menuName = "KillChord/Settings/Audio")]
-    public class AudioSetting : ScriptableObject
+    public class AudioConfig : ScriptableObject
     {
         [SerializeField] private SettingSlider _sliderPrefab; // MonoBehaviour の Prefab
         [SerializeField] private string[] _audioSettingTitle;
@@ -37,3 +37,4 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
     }
 }
+

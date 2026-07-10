@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Enemy;
+﻿using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
@@ -124,7 +124,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // 攻撃パターンを構築。各パターンは定義固定の専用 BattleState を持つ。
             var patterns = new List<BossAttackPattern>(_attackEntryRepo.AttackEntries.Length);
             Dictionary<Type, IRaycastDetectView> raycastViews = new();
-            foreach (BossAttackEntryDefinition entry in _attackEntryRepo.AttackEntries)
+            foreach (BossAttackEntryAsset entry in _attackEntryRepo.AttackEntries)
             {
                 AttackDefinition definition = _enemyEntity.CombatSpec.GetAttackDifinition(entry.AttackIndex);
                 EnemyMusicSpec musicSpec = new EnemyMusicSpec(
@@ -283,8 +283,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField] private CharacterData _enemyData;
-        [SerializeField] private EnemyMoveData _moveData;
+        [SerializeField] private CharacterDefinitionAsset _enemyData;
+        [SerializeField] private EnemyMoveSpecAsset _moveData;
 
         [SerializeField] private BossMoveView _view;
         [SerializeField] private EnemyHealthView _healthView;
@@ -337,3 +337,4 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
     }
 }
+

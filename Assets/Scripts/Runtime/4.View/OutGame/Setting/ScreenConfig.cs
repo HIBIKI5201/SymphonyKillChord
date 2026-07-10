@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KillChord.Runtime.View;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.Setting
 {
     [CreateAssetMenu(menuName = "KillChord/Settings/Screen")]
-    public class ScreenSetting : ScriptableObject
+    public class ScreenConfig : ScriptableObject
     {
         [SerializeField] private SettingDropDown _dropDownPrefab;
         [SerializeField] private SettingToggle _togglePrefab;
@@ -54,3 +54,4 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
     }
 }
+

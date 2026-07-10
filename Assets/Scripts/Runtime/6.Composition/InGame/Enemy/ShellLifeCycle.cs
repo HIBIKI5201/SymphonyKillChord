@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Enemy;
+﻿using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
@@ -81,8 +81,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         [SerializeField] private ShellView _view;
-        [SerializeField] private ShellAttackData _attackData;
-        [SerializeField] private EnemyMusicData _musicData;
+        [SerializeField] private ShellAttackSpecAsset _attackData;
+        [SerializeField] private EnemyMusicSpecAsset _musicData;
 
         private PlayerInitializer _playerInitializer;
         private MusicSyncInitializer _musicSyncInitializer;
@@ -91,3 +91,4 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ShellController _controller;
     }
 }
+

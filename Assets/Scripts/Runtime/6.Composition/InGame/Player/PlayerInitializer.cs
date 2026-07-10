@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor;
+﻿using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -60,7 +60,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> 実行順です。 </summary>
         public override int Order => 500;
 
-        [SerializeField] private PlayerConfig _playerConfig;
+        [SerializeField] private PlayerMoveSpecAsset _playerConfig;
         [SerializeField] private PlayerView _player;
         [SerializeField] private SkillRepository _skillRepository;
         [SerializeField] private SkillView[] _skillVisuals;
@@ -71,9 +71,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Space]
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField]
-        private CharacterData _playerData;
+        private CharacterDefinitionAsset _playerData;
         [Header("装備中スキル（テスト用）")]
-        [SerializeField] private SkillDataAsset[] _equippedSkills;
+        [SerializeField] private SkillTemplateAsset[] _equippedSkills;
 
         private Action _onDodgeEndedHandler;
         private ICharacterAnimationSignal _characterAnimationSignal;
@@ -185,7 +185,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 skillIds = skillIdList.ToArray();
             }
 
-            PlayerMoveParameter parameter = _playerConfig.ToDomain();
+            PlayerMoveSpec parameter = _playerConfig.ToDomain();
 
             var ct = ServiceLocator.GetInstance<ICameraTransform>().Transform;
             var inputView = ServiceLocator.GetInstance<PlayerInputView>();
@@ -263,8 +263,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
 #if UNITY_EDITOR
             _player.gameObject
-                .AddComponent<PlayerMoveParameterDebug>()
-                .SetPlayerMoveParameter(parameter);
+                .AddComponent<PlayerMoveSpecDebug>()
+                .SetPlayerMoveSpec(parameter);
 #endif
         }
 
@@ -284,7 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return System.Array.Empty<SkillExecutionController>();
             }
 
-            List<SkillData> skillData = new List<SkillData>();
+            List<SkillTemplate> skillData = new List<SkillTemplate>();
 
             if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
             {
@@ -295,7 +295,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                     {
                         if (buildDefinition.EquippedSkills[i].HasSkill)
                         {
-                            skillData.Add(buildDefinition.EquippedSkills[i].SkillData);
+                            skillData.Add(buildDefinition.EquippedSkills[i].SkillTemplate);
                         }
                     }
                 }
@@ -306,7 +306,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 if (skillData[i] == null) { continue; }
 
-                SkillData data = skillData[i];
+                SkillTemplate data = skillData[i];
                 SkillDefinition definition = data.ToSkillDefinition(musicSyncState.Bpm);
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillView view = _skillVisuals.FirstOrDefault(n => n.Id == definition.Id.Value);
@@ -389,3 +389,4 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerModuleContainer _moduleContainer;
     }
 }
+

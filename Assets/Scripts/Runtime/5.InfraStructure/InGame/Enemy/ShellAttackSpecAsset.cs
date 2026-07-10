@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility.Constant;
+﻿using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -6,8 +6,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// <summary>
     ///     砲弾固有の攻撃関連情報。
     /// </summary>
-    [CreateAssetMenu(fileName = "ShellAttackData", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(ShellAttackData))]
-    public class ShellAttackData : ScriptableObject
+    [CreateAssetMenu(fileName = "ShellAttackSpecAsset", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(ShellAttackSpecAsset))]
+    public class ShellAttackSpecAsset : ScriptableObject
     {
         /// <summary>
         ///     爆発半径。
@@ -18,3 +18,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         private float _explosionRadius;
     }
 }
+

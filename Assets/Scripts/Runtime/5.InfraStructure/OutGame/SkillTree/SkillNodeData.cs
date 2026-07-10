@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.OutGame.SkillTree;
+﻿using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Player;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [Header("ノードを解放した時の報酬")]
         //[SerializeReference, SubclassSelector] private IParameterUpgradeEffect[] _nodeUnlockEffets;
         [SerializeField, Tooltip("ノードを解放した時に解放されるスキル")]
-        private SkillDataAsset[] _unlockSkills;
+        private SkillTemplateAsset[] _unlockSkills;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。

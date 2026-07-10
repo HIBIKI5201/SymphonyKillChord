@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.OutGame.SkillBuild;
+﻿using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using System;
 using UnityEngine;
@@ -62,7 +62,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             for (int i = 0; i < _skillBuildDefinition.EquippedSkills.Count; i++)
             {
                 EquippedSkill equippedSkill = _skillBuildDefinition.EquippedSkills[i];
-                ApplySlot(i, equippedSkill.SkillData);
+                ApplySlot(i, equippedSkill.SkillTemplate);
             }
         }
 
@@ -93,7 +93,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         /// <param name="slotIndex"> スロット番号。 </param>
         /// <param name="skillData"> スキルデータ。 </param>
-        private void ApplySlot(int slotIndex, SkillData skillData)
+        private void ApplySlot(int slotIndex, SkillTemplate skillData)
         {
             if (skillData == null)
             {

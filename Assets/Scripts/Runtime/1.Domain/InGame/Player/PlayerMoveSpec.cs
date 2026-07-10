@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KillChord.Runtime.Domain.InGame.Character;
 using UnityEngine;
 
@@ -7,10 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Player
     /// <summary>
     ///     プレイヤー移動に関するパラメータを保持するドメインクラス。
     /// </summary>
-    public sealed class PlayerMoveParameter
+    public sealed class PlayerMoveSpec
     {
         /// <summary> プレイヤー移動パラメータを初期化する。 </summary>
-        public PlayerMoveParameter(MoveSpeed moveSpeed, AttackRotationSpeed attackRotationSpeed, DodgeSpeed dodgeSpeed, DodgeDuration dodgeDuration, DodgeCooldown dodgeCooldown, AttackCooldown attackCooldown)
+        public PlayerMoveSpec(MoveSpeed moveSpeed, AttackRotationSpeed attackRotationSpeed, DodgeSpeed dodgeSpeed, DodgeDuration dodgeDuration, DodgeCooldown dodgeCooldown, AttackCooldown attackCooldown)
         {
             MoveSpeed = moveSpeed;
             AttackRotationSpeed = attackRotationSpeed;
@@ -39,3 +39,4 @@ namespace KillChord.Runtime.Domain.InGame.Player
         public AttackCooldown AttackCooldown;
     }
 }
+

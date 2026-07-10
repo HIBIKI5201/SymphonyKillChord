@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor;
+﻿using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
@@ -309,10 +309,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField] private CharacterData _enemyData;
-        [SerializeField] private EnemyMoveData _moveData;
-        [SerializeField] private EnemyMusicData _encounterMusicData;
-        [SerializeField] private EnemyMusicData _battleMusicData;
+        [SerializeField] private CharacterDefinitionAsset _enemyData;
+        [SerializeField] private EnemyMoveSpecAsset _moveData;
+        [SerializeField] private EnemyMusicSpecAsset _encounterMusicData;
+        [SerializeField] private EnemyMusicSpecAsset _battleMusicData;
 
         [SerializeField] private int _attackIndex;
 
@@ -555,3 +555,4 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
     }
 }
+

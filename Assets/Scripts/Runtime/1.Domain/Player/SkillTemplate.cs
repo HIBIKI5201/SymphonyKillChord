@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Music;
+﻿using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
 
@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Domain.Player
     /// <summary>
     ///     スキルの設定データを保持するドメインクラス。
     /// </summary>
-    public class SkillData
+    public class SkillTemplate
     {
         public int Id { get; }
         public BeatType[] Pattern { get; }
@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Domain.Player
         public ISkillEffect SkillEffect { get; }
         public string AnimationKey { get; }
 
-        public SkillData(
+        public SkillTemplate(
             int id,
             BeatType[] pattern,
             int cooldownNumerator,

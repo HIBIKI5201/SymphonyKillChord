@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application;
+﻿using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
@@ -50,7 +50,7 @@ namespace KillChord.Runtime.InfraStructure
             return new List<EquippedSkill>(_ownedSkills).AsReadOnly();
         }
 
-        [SerializeField, Tooltip("スキル ID から SkillData を取得するリポジトリ。")]
+        [SerializeField, Tooltip("スキル ID から SkillTemplate を取得するリポジトリ。")]
         private SkillRepository _skillRepository;
 
         private List<EquippedSkill> _ownedSkills;
@@ -90,7 +90,7 @@ namespace KillChord.Runtime.InfraStructure
                 if (!_skillRepository.TryGetSkill(skillId, out var skillData))
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillData を取得できませんでした。");
+                    Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillTemplate を取得できませんでした。");
 #endif
                     continue;
                 }
@@ -100,3 +100,4 @@ namespace KillChord.Runtime.InfraStructure
         }
     }
 }
+

@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application.OutGame.SkillBuild;
+﻿using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
@@ -65,9 +65,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
         [Header("仮のスキル編成")]
         [SerializeField]
-        private List<SkillDataAsset> _skillDataAssets = new List<SkillDataAsset>();
+        private List<SkillTemplateAsset> _skillDataAssets = new List<SkillTemplateAsset>();
 
         private List<EquippedSkill> _equippedSkills = new List<EquippedSkill>();
         private SkillBuildDefinition _skillBuildDefinition;
     }
 }
+

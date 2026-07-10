@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain;
+﻿using KillChord.Runtime.Domain;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
 using SymphonyFrameWork.Attribute;
@@ -9,8 +9,8 @@ namespace KillChord.Runtime.InfraStructure.Player
     /// <summary>
     ///     スキルデータの設定を保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = "SkillData", menuName = "Game/SkillData")]
-    public class SkillDataAsset : ScriptableObject
+    [CreateAssetMenu(fileName = "SkillTemplate", menuName = "Game/SkillTemplate")]
+    public class SkillTemplateAsset : ScriptableObject
     {
         public int Id => _id;
         public BeatType[] Pattern => _pattern;
@@ -22,9 +22,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <summary>
         ///     Domain層のSkillDataに変換する。
         /// </summary>
-        public SkillData ToDomain()
+        public SkillTemplate ToDomain()
         {
-            return new SkillData(_id, _pattern, _cooldownNumerator, _cooldownDenomimator, _skillEffect, _animationKey);
+            return new SkillTemplate(_id, _pattern, _cooldownNumerator, _cooldownDenomimator, _skillEffect, _animationKey);
         }
 
         [SerializeField] private int _id;

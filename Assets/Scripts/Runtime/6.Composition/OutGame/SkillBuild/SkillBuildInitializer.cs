@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+﻿using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -133,7 +133,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             // 装備スキルと入手済みスキルを取得する。
             IReadOnlyList<EquippedSkill> loadedEquippedSkills = await GetEquippedSkillAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
-            SkillData[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+            SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
 
             if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
             {
@@ -176,13 +176,13 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         /// <param name="ownedSkills"> 現在所持しているスキル一覧。 </param>
         /// <returns> 入手済みスキル一覧。 </returns>
-        private SkillData[] BuildOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills)
+        private SkillTemplate[] BuildOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills)
         {
-            SkillData[] result = new SkillData[ownedSkills.Count];
+            SkillTemplate[] result = new SkillTemplate[ownedSkills.Count];
 
             for (int i = 0; i < ownedSkills.Count; i++)
             {
-                result[i] = ownedSkills[i].SkillData;
+                result[i] = ownedSkills[i].SkillTemplate;
             }
 
             return result;
@@ -230,7 +230,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             try
             {
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
-                SkillData[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+                SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(_skillBuildDefinition.EquippedSkills, ownedSkillData);
             }
@@ -324,3 +324,4 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         }
     }
 }
+

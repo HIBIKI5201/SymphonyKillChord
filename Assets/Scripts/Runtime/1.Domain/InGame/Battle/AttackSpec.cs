@@ -1,11 +1,11 @@
-using KillChord.Runtime.Domain.InGame.Character;
+﻿using KillChord.Runtime.Domain.InGame.Character;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
     /// <summary>
     ///     攻撃に使うパラメータをまとめた構造体。
     /// </summary>
-    public readonly struct AttackParameterSet
+    public readonly struct AttackSpec
     {
         /// <summary>
         ///     攻撃関係のパラメータのインスタンスを初期化するコンストラクタ。
@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="criticalChance"></param>
         /// <param name="criticalDamage"></param>
         /// <param name="confirmedDamage"></param>
-        public AttackParameterSet(
+        public AttackSpec(
             CriticalChance criticalChance,
             CriticalMultiplier criticalMultiplier,
             Damage confirmedDamage
@@ -33,3 +33,4 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public Damage ConfirmedDamage { get; }
     }
 }
+

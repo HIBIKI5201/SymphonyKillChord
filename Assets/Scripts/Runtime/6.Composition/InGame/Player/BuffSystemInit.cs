@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.InGame.Buff;
@@ -40,6 +40,7 @@ namespace KillChord.Runtime.Composition
         private readonly Damage _finalDamage = new(10);
 
         [SerializeField]
-        private CharacterData characterData;
+        private CharacterDefinitionAsset characterData;
     }
 }
+

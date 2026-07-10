@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
+﻿using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
@@ -255,8 +255,8 @@ namespace DevelopProducts.Boss
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField] private CharacterData _enemyData;
-        [SerializeField] private EnemyMoveData _moveData;
+        [SerializeField] private CharacterDefinitionAsset _enemyData;
+        [SerializeField] private EnemyMoveSpecAsset _moveData;
 
         [Header("攻撃パターン（通常1/通常2/特殊1）")]
         [SerializeField] private BossAttackEntry[] _attackEntries;
@@ -310,3 +310,4 @@ namespace DevelopProducts.Boss
         }
     }
 }
+

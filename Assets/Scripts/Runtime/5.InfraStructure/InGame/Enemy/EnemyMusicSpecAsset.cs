@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility.Constant;
+﻿using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -6,9 +6,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// <summary>
     ///     敵の音楽同期に関するデータを保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(EnemyMusicData),
-    menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(EnemyMusicData))]
-    public class EnemyMusicData : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(EnemyMusicSpecAsset),
+    menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(EnemyMusicSpecAsset))]
+    public class EnemyMusicSpecAsset : ScriptableObject
     {
         /// <summary> 小節フラグ。0は現在小節、1は次の小節 </summary>
         public byte BarFlag => _barFlag;
@@ -22,3 +22,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [SerializeField, Tooltip("拍目")] private double _targetBeat;
     }
 }
+

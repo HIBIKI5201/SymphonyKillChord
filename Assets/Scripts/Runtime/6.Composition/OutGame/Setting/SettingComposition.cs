@@ -1,4 +1,4 @@
-using KillChord.Runtime.View.OutGame.Screen;
+﻿using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Setting;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
@@ -10,8 +10,8 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
 {
     public class SettingComposition : MonoBehaviour
     {
-        [SerializeField] private AudioSetting _audioSetting;
-        [SerializeField] private ScreenSetting _screenSetting;
+        [SerializeField] private AudioConfig _audioSetting;
+        [SerializeField] private ScreenConfig _screenSetting;
 
         [SerializeField] private UIDocument _uiDocument;
         [SerializeField] private GameObject _parent;
@@ -39,3 +39,4 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         }
     }
 }
+

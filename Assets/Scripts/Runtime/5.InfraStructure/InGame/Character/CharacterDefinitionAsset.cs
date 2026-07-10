@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 
@@ -7,9 +7,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     /// <summary>
     ///     キャラクターの基本的なデータを保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(CharacterData),
-    menuName = "KillChord/Character/CharacterData")]
-    public class CharacterData : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(CharacterDefinitionAsset),
+    menuName = "KillChord/Character/CharacterDefinitionAsset")]
+    public class CharacterDefinitionAsset : ScriptableObject
     {
         /// <summary> キャラクター名を取得する。 </summary>
         public string CharacterName => _characterName;
@@ -21,8 +21,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         public float MaxHealth => _maxHealth;
 
         /// <summary> 攻撃定義の配列を取得する。 </summary>
-        public AttackDefinitionData[] AttackDifinitions =>
-            _attackDifinitions == null ? null : (AttackDefinitionData[])_attackDifinitions.Clone();
+        public AttackDefinitionAsset[] AttackDefinitionAssets =>
+            _attackDifinitions == null ? null : (AttackDefinitionAsset[])_attackDifinitions.Clone();
 
         /// <summary> キャラクターの攻撃の基本ダメージを取得する。 </summary>
         public int BaseDamage => _baseDamage;
@@ -37,8 +37,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         private float _maxHealth;
 
         [SerializeField, Tooltip("キャラクターが使用する攻撃の定義リスト。")]
-        private AttackDefinitionData[] _attackDifinitions;
+        private AttackDefinitionAsset[] _attackDifinitions;
         [SerializeField, Tooltip("キャラクターの攻撃の基本ダメージ。")]
         private int _baseDamage;
     }
 }
+
