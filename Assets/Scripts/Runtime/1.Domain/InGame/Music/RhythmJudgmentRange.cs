@@ -3,9 +3,9 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
-    ///     リズムガイドの判定範囲を表す構造体。
+    ///     リズム判定範囲を表す構造体。
     /// </summary>
-    public readonly struct RhythmGuideRange : IEquatable<RhythmGuideRange>
+    public readonly struct RhythmJudgmentRange : IEquatable<RhythmJudgmentRange>
     {
         /// <summary>
         ///     新しい判定範囲を生成する。
@@ -13,10 +13,17 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="beatType"> 拍の種類。 </param>
         /// <param name="startNormalized"> 開始位置（正規化）。 </param>
         /// <param name="endNormalized"> 終了位置（正規化）。 </param>
-        public RhythmGuideRange(BeatType beatType, float startNormalized, float endNormalized)
+        public RhythmJudgmentRange(BeatType beatType, float startNormalized, float endNormalized)
         {
-            if (startNormalized < 0f || startNormalized > 1f) throw new ArgumentOutOfRangeException(nameof(startNormalized));
-            if (endNormalized < startNormalized || endNormalized > 1f) throw new ArgumentOutOfRangeException(nameof(endNormalized));
+            if (startNormalized < 0f || startNormalized > 1f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startNormalized));
+            }
+
+            if (endNormalized < startNormalized || endNormalized > 1f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(endNormalized));
+            }
 
             _beatType = beatType;
             _startNormalized = startNormalized;
@@ -33,11 +40,11 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <summary>
         ///     指定された時間が範囲内に含まれるか判定する。
         /// </summary>
-        /// <param name="elapsedBeat"> 小節内の経過拍数。 </param>
+        /// <param name="normalizedBarProgress"> 小節内の正規化進捗。 </param>
         /// <returns> 範囲内であれば true。 </returns>
-        public bool Contains(float elapsedBeat)
+        public bool Contains(float normalizedBarProgress)
         {
-            return elapsedBeat >= _startNormalized && elapsedBeat <= _endNormalized;
+            return normalizedBarProgress >= _startNormalized && normalizedBarProgress <= _endNormalized;
         }
 
         /// <summary>
@@ -45,7 +52,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// </summary>
         /// <param name="other"> 比較対象。 </param>
         /// <returns> 等しければ true。 </returns>
-        public bool Equals(RhythmGuideRange other)
+        public bool Equals(RhythmJudgmentRange other)
         {
             return _beatType == other._beatType &&
                      _startNormalized.Equals(other._startNormalized) &&

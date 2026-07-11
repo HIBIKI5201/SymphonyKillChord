@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Composition
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            if (_rhythmGuideDefinitionAsset == null || _rhythmGuideView == null)
+            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null)
             {
                 Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] リズムガイド参照が不足しています。", this);
                 return false;
@@ -58,7 +58,7 @@ namespace KillChord.Runtime.Composition
         /// <returns> 初期化に成功した場合はtrueです。 </returns>
         public bool Initialize()
         {
-            Debug.Assert(_rhythmGuideDefinitionAsset != null, "RhythmGuideDefinitionAsset の参照が未設定です。RhythmGuideDefinitionAsset を設定してください。");
+            Debug.Assert(_rhythmJudgmentDefinitionAsset != null, "RhythmJudgmentDefinitionAsset の参照が未設定です。RhythmJudgmentDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
             MusicSyncModuleContainer musicSyncModuleContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
@@ -79,7 +79,7 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-            RhythmGuideUsecase usecase = new RhythmGuideUsecase(_rhythmGuideDefinitionAsset.ToDefinition());
+            RhythmGuideUsecase usecase = new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition());
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
@@ -112,8 +112,8 @@ namespace KillChord.Runtime.Composition
             _isRegisteredToPlayDirector = true;
         }
 
-        [Tooltip("リズムガイド定義アセット。")]
-        [SerializeField] private RhythmGuideDefinitionAsset _rhythmGuideDefinitionAsset;
+        [Tooltip("リズム判定定義アセット。")]
+        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
 

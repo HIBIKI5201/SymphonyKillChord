@@ -91,7 +91,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
-    m_Address: Assets/Level/Data/Master/InGame/Music/RhythmGuideDefinitionAsset.asset
+    m_Address: Assets/Level/Data/Master/InGame/Music/RhythmJudgmentDefinitionAsset.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

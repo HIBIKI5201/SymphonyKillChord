@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             _zones.Clear();
 
-            foreach (RhythmGuideRange range in _rhythmGuideUsecase.RhythmGuideDefinition.GuideRanges)
+            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
             {
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,

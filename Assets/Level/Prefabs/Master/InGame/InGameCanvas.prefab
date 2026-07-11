@@ -1646,7 +1646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77d94ae253256f24aaafff6b7c73cf7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ACLikeRhythmGuideInitializer
-  _rhythmGuideDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
+  _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
   _rhythmGuideView: {fileID: 3310711898840515315}
 --- !u!114 &3245619258000581200
 MonoBehaviour:

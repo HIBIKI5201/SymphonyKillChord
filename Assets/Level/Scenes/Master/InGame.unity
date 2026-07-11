@@ -2786,7 +2786,7 @@ MonoBehaviour:
   _musicSyncView: {fileID: 1249666142}
   _testCue: BGM_Ingame
   _testBpm: 105
-  _justTimingThreshold: 0.1
+  _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0

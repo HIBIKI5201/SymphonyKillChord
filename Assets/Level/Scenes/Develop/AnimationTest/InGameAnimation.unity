@@ -549,7 +549,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e17c8f2e10d1bb54488505b31b452916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.RhythmGuideInitializer
-  _rhythmGuideDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
+  _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
   _rhythmGuideView: {fileID: 887821558}
   _rhythmGuideUpdateView: {fileID: 887821557}
 --- !u!4 &678096162
@@ -894,7 +894,7 @@ MonoBehaviour:
   _musicSyncView: {fileID: 1249666142}
   _testCue: Cyber
   _testBpm: 10
-  _justTimingThreshold: 0.1
+  _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
 --- !u!114 &1249666142
 MonoBehaviour:
   m_ObjectHideFlags: 0

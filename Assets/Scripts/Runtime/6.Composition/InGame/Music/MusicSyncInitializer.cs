@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
@@ -34,9 +35,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            if (_musicSyncView == null)
+            if (_musicSyncView == null || _rhythmJudgmentDefinitionAsset == null)
             {
-                Debug.LogError($"[{nameof(MusicSyncInitializer)}] {nameof(_musicSyncView)} が設定されていません。", this);
+                Debug.LogError($"[{nameof(MusicSyncInitializer)}] {nameof(_musicSyncView)} または {nameof(_rhythmJudgmentDefinitionAsset)} が設定されていません。", this);
                 return false;
             }
 
@@ -59,7 +60,10 @@ namespace KillChord.Runtime.Composition.InGame.Music
         {
             MusicSyncState = new();
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-            MusicSyncService = new MusicSyncService(new RhythmDefinition(_testBpm, _justTimingThreshold), RhythmJustService.Instance.TriggerJustHit);
+            MusicSyncService = new MusicSyncService(
+                new RhythmDefinition(_testBpm),
+                _rhythmJudgmentDefinitionAsset.ToDefinition(),
+                RhythmJustService.Instance.TriggerJustHit);
             MusicSyncController = new(MusicSyncState, MusicSyncService);
             _musicSyncView.Bind(
                 _musicPlayer,
@@ -121,8 +125,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [SerializeField] private string _testCue;
         [Tooltip("テスト用のBPM。")]
         [SerializeField] private double _testBpm;
-        [Tooltip("ジャスト判定の閾値。")]
-        [SerializeField] private float _justTimingThreshold;
+        [Tooltip("リズム判定定義アセット。")]
+        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
 
         private MusicPlayer _musicPlayer;
         private bool _isRegistered;

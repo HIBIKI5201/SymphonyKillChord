@@ -2,50 +2,50 @@ using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Music
 {
     /// <summary>
-    ///     リズムガイドの定義を保持するScriptableObject。
+    ///     リズム判定の定義を保持するScriptableObject。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(RhythmGuideDefinitionAsset), menuName = "KillChord/RhythmGuideDefinition")]
-    public class RhythmGuideDefinitionAsset : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(RhythmJudgmentDefinitionAsset), menuName = "KillChord/RhythmJudgmentDefinition")]
+    public class RhythmJudgmentDefinitionAsset : ScriptableObject
     {
         /// <summary>
         ///     ScriptableObjectのデータからドメイン層の定義オブジェクトを生成する。
         /// </summary>
-        /// <returns> リズムガイド定義。 </returns>
-        public RhythmGuideDefinition ToDefinition()
+        /// <returns> リズム判定定義。 </returns>
+        public RhythmJudgmentDefinition ToDefinition()
         {
             if (_rangeData == null || _rangeData.Length == 0)
             {
-                return new RhythmGuideDefinition(Array.Empty<RhythmGuideRange>());
+                return new RhythmJudgmentDefinition(Array.Empty<RhythmJudgmentRange>());
             }
 
-            List<RhythmGuideRange> guideRanges = new(_rangeData.Length);
+            List<RhythmJudgmentRange> judgmentRanges = new(_rangeData.Length);
 
             for (int i = 0; i < _rangeData.Length; i++)
             {
-                RhythmGuideRangeData range = _rangeData[i];
+                RhythmJudgmentRangeData range = _rangeData[i];
                 if (range == null)
                 {
                     throw new InvalidOperationException($"_rangeData[{i}] is null.");
                 }
-                guideRanges.Add(new RhythmGuideRange(range.BeatType, range.StartNormalized, range.EndNormalized));
+
+                judgmentRanges.Add(new RhythmJudgmentRange(range.BeatType, range.StartNormalized, range.EndNormalized));
             }
 
-            return new RhythmGuideDefinition(guideRanges);
+            return new RhythmJudgmentDefinition(judgmentRanges);
         }
 
         [Tooltip("判定範囲データのリスト。")]
-        [SerializeField] private RhythmGuideRangeData[] _rangeData;
+        [SerializeField] private RhythmJudgmentRangeData[] _rangeData;
 
         /// <summary>
         ///     インスペクター設定用の判定範囲データ構造。
         /// </summary>
         [Serializable]
-        private class RhythmGuideRangeData
+        private class RhythmJudgmentRangeData
         {
             /// <summary> 拍の種類。 </summary>
             public BeatType BeatType;
