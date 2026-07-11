@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3115950524344334010}
   - component: {fileID: 3999279957434474579}
   - component: {fileID: 9223034822626770349}
-  - component: {fileID: 347656024251436478}
   - component: {fileID: 7788193785904620614}
   - component: {fileID: 1047834828965851563}
   m_Layer: 2
@@ -76,27 +75,6 @@ MonoBehaviour:
   _animator: {fileID: 6433880049114778529}
   _rb: {fileID: 7788193785904620614}
   _cameraTransform: {fileID: 0}
---- !u!114 &347656024251436478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1265923734034419227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
-  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
-  _player: {fileID: 9223034822626770349}
-  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
-  _enemyData: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
-  _normalPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
-  _skillAPipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
-  _skillBPipelineAsset: {fileID: 11400000, guid: 2ca131e6c4633a041942231a6c025113, type: 2}
-  _ultimatePipelineAsset: {fileID: 11400000, guid: cdd72d8eb0e1d4a4c84cd4d8b73b952f, type: 2}
-  _enemyTestSpawner: {fileID: 0}
 --- !u!54 &7788193785904620614
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -373,8 +373,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             SceneManager.MoveGameObjectToScene(_player.gameObject, gameObject.scene);
 
             _skillVisuals = _player.GetComponentsInChildren<SkillView>(true);
-            _characterAnimationView = _player.GetComponentInChildren<CharacterAnimationView>(true);
-            if (_characterAnimationView == null)
+            if (!TryResolveCharacterAnimationView(out _characterAnimationView))
             {
                 Destroy(_player.gameObject);
                 _player = null;
@@ -402,6 +401,35 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             spawnPointTransform = stageSceneInstance.PlayerSpawnPointTransform;
             return true;
+        }
+
+        /// <summary>
+        ///     プレイヤー配下の CharacterAnimationView を解決します。
+        /// </summary>
+        /// <param name="characterAnimationView"> 解決したViewです。 </param>
+        /// <returns> 解決に成功した場合はtrue。 </returns>
+        private bool TryResolveCharacterAnimationView(out CharacterAnimationView characterAnimationView)
+        {
+            characterAnimationView = _player.GetComponentInChildren<CharacterAnimationView>(true);
+            if (characterAnimationView != null)
+            {
+                return true;
+            }
+
+            Animator animator = _player.GetComponentInChildren<Animator>(true);
+            if (animator == null)
+            {
+                return false;
+            }
+
+            characterAnimationView = animator.GetComponent<CharacterAnimationView>();
+            if (characterAnimationView != null)
+            {
+                return true;
+            }
+
+            characterAnimationView = animator.gameObject.AddComponent<CharacterAnimationView>();
+            return characterAnimationView != null;
         }
     }
 }
