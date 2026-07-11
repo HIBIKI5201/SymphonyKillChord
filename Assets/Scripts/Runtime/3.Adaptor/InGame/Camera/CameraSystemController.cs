@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Camera;
+using KillChord.Runtime.Utility.InGame;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Camera
@@ -16,6 +17,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Camera
         {
             _application = application;
         }
+
+        /// <summary> 現在のロックオン状態。 </summary>
+        public CameraLockOnState LockOnState => _application.LockOnState;
 
         /// <summary>
         ///     攻撃時のオートロックオン発動をアプリケーション層へ委譲する。
