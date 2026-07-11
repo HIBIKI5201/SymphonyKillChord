@@ -1,5 +1,6 @@
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Persistent.Savedata
@@ -11,6 +12,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     [Serializable]
     public sealed class SaveData : SaveBase
     {
+        private static readonly int[] INITIAL_UNLOCKED_SKILL_IDS = { 0, 13 };
+        private static readonly int[] INITIAL_EQUIPPED_SKILL_IDS = { 0, 13 };
+
         /// <summary>
         ///     SaveData クラスの新しいインスタンスを初期化する。
         /// </summary>
@@ -20,6 +24,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _skillBuild = new();
             _stageProgress = new();
             _tutorial = new();
+            EnsureInitialSkillState();
         }
 
         /// <summary> プレイヤーのスキル解放情報のセーブデータを表すプロパティ。 </summary>
@@ -54,6 +59,23 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _skillBuild ??= new();
             _stageProgress ??= new();
             _tutorial ??= new();
+            EnsureInitialSkillState();
+        }
+
+        /// <summary>
+        ///     初期スキル状態が未設定の場合に、既定の解放・装備状態を補完する。
+        /// </summary>
+        private void EnsureInitialSkillState()
+        {
+            if (_skillUnlock.UnlockedSkillIds.Length == 0)
+            {
+                _skillUnlock.SetUnlockedSkillIds((int[])INITIAL_UNLOCKED_SKILL_IDS.Clone());
+            }
+
+            if (_skillBuild.EquipmentSkillIDs.Count == 0)
+            {
+                _skillBuild.SetEquipmentSkillIDs(new List<int>(INITIAL_EQUIPPED_SKILL_IDS));
+            }
         }
     }
 }
