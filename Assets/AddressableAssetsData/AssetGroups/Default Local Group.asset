@@ -101,7 +101,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 02ac4acd11c13e94f951e778560963f3
-    m_Address: Assets/Level/Scenes/Develop/TestPlayer/PlayerConfig.asset
+    m_Address: Assets/Level/Data/Master/InGame/Player/PlayerConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
-    m_Address: Assets/Level/Data/Develop/SkillInputProgressViewConfigAsset.asset
+    m_Address: Assets/Level/Data/Master/InGame/Skill/SkillInputProgressViewConfigAsset.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -121,7 +121,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 358a8447b7fd7f54690a994853695aa1
-    m_Address: Assets/Level/Scenes/Develop/AttackPipelineTest/Config/Player.asset
+    m_Address: Assets/Level/Data/Master/Character/Player.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
