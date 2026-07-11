@@ -94,6 +94,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillNodeBindRepo _loadedSkillNodeBindRepo;
         private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
         private SkillTreeTestInputData _loadedInputData;
+        private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -132,7 +133,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            _savedataSystem = savedataSystem;
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
             if (saveData == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] SaveData が取得できませんでした。", this);
@@ -186,6 +188,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _loadedSkillNodePhaseBindRepo = null;
             _loadedInputData = null;
             _skillUnlockData = null;
+            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -256,7 +259,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillUnlockData.ResearchPoint,
                 _skillUnlockData.UnlockedSkillNodeIds,
                 _skillUnlockData.UnlockedSkillIds);
-            SkillTreeService skillTreeService = new(_skillNodeEntities);
+            SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
             _playerStatusPresenter = new PlayerStatusPresenter();

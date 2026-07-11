@@ -6,9 +6,11 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,6 +78,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildRepositoryDebug _loadedSkillBuildRepositoryDebug;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
+        private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -100,6 +103,20 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             if (!ValidateLoadedRepositories())
             {
                 return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SavedataSystem が取得できませんでした。", this);
+                return false;
+            }
+
+            _savedataSystem = savedataSystem;
+
+            if (!_isDebugMode)
+            {
+                _loadedOwnedSkillRepository.Initialize(_savedataSystem);
+                _loadedSkillBuildRepository.Initialize(_savedataSystem);
             }
 
             _loadedEquippedSkills = await GetEquippedSkillAsync();
@@ -154,6 +171,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _loadedSkillBuildRepositoryDebug = null;
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
+            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -214,7 +232,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                         : SkillBuildDefinition.INITIAL_SLOT_COUNT);
             }
 
-            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition);
+            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition, _savedataSystem);
             _skillBuildViewModel = new(_outGameUIEvent);
             _skillBuildPresenter = new(_skillBuildViewModel);
             _skillBuildController = new(skillBuildUseCase, _skillBuildViewModel, _loadedOwnedSkillTemplates);

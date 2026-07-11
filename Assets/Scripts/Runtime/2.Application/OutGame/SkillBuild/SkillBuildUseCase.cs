@@ -1,7 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.OutGame.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,17 +16,15 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         ///     SkillBuildUseCase クラスのコンストラクタ。
         /// </summary>
         /// <param name="skillBuildDefinition"> 装備スキルの定義を表すオブジェクト。 </param>
-        public SkillBuildUseCase(SkillBuildDefinition skillBuildDefinition)
+        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
+        public SkillBuildUseCase(
+            SkillBuildDefinition skillBuildDefinition,
+            SavedataSystem savedataSystem)
         {
             _skillBuildDefinition = skillBuildDefinition
                 ?? throw new ArgumentNullException(nameof(skillBuildDefinition));
-
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                throw new InvalidOperationException("SavedataSystem のインスタンスが見つかりません。");
-            }
-
-            _savedataSystem = savedataSystem;
+            _savedataSystem = savedataSystem
+                ?? throw new ArgumentNullException(nameof(savedataSystem));
         }
 
         /// <summary>

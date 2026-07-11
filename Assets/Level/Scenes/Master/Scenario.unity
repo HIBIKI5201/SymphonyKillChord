@@ -1402,6 +1402,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1230537158}
+  - component: {fileID: 1230537159}
   - component: {fileID: 1230537157}
   m_Layer: 0
   m_Name: ScenarioCom
@@ -1431,6 +1432,18 @@ MonoBehaviour:
   _returnSceneName: OutGame
   _scenarioView: {fileID: 66726728}
   _scenarioInputView: {fileID: 1267567894}
+--- !u!114 &1230537159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230537156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7bb2f1a0d34c4b9db6c7d8474b2e91, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Scenario.OutGameScenarioSceneInitializer
 --- !u!4 &1230537158
 Transform:
   m_ObjectHideFlags: 0

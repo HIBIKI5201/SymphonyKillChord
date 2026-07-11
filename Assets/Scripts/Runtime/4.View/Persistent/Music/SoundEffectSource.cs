@@ -1,6 +1,6 @@
 using CriWare;
 using KillChord.Runtime.Adaptor.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.View.Persistent.Audio;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Music
@@ -45,7 +45,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         private CriAtomSource _source;
-        private SoundEffectVolumeManager _volumeManager;
+        private PersistentAudioVolumeRegistryView _volumeRegistryView;
 
         private void Awake()
         {
@@ -54,13 +54,13 @@ namespace KillChord.Runtime.View.Persistent.Music
 
         private void OnEnable()
         {
-            ServiceLocator.TryGetInstance(out _volumeManager);
-            _volumeManager?.Register(this);
+            _volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();
+            _volumeRegistryView?.RegisterSoundEffectSource(this);
         }
 
         private void OnDisable()
         {
-            _volumeManager?.UnRegister(this);
+            _volumeRegistryView?.UnregisterSoundEffectSource(this);
         }
     }
 }

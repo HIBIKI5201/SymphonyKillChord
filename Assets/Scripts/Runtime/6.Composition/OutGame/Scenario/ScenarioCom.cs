@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -10,6 +11,7 @@ using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,8 +24,14 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
     /// <summary>
     /// シナリオ再生に必要な依存関係を組み立てて起動する。
     /// </summary>
-    public class ScenarioCom : MonoBehaviour
+    public sealed class ScenarioCom : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(ScenarioCom);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 10;
+
         [SerializeField]
         private ScenarioView _chatText;
         [SerializeField]
@@ -43,40 +51,43 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         [SerializeField, Tooltip("シナリオ入力View。Scenarioシーンに事前配置したものを指定します。")]
         private ScenarioInputView _scenarioInputView;
         private ScenarioUsecase _usecase;
+        private ScenarioInputController _inputController;
+        private ViewModel _viewModel;
+        private InputComposition _inputComposition;
+        private SelectedScenarioState _selectedScenarioState;
+        private SceneTransitionController _sceneTransitionController;
+        private OutGameUIEvent _outGameUIEvent;
         private BackgroundCatalogAsset _loadedBackgroundCatalog;
         private AnimationCatalogAsset _loadedAnimationCatalog;
         private PortraitCatalogAsset _loadedPortraitCatalog;
         private ScenarioSettingsAsset _loadedScenarioSettings;
+        private bool _isInitialized;
 
         /// <summary>
-        /// シナリオ再生の初期化を開始する。
+        /// シナリオ用アセットをロードします。
         /// </summary>
-        private async void Start()
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> すべてロードできた場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            try
-            {
-                bool isLoaded = await LoadAssetsAsync();
-                if (!isLoaded)
-                {
-                    enabled = false;
-                    return;
-                }
-
-                await Init();
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogException(ex, this);
-                enabled = false;
-            }
+            _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
+            _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
+            _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
+            _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
+            return _loadedBackgroundCatalog != null
+                && _loadedAnimationCatalog != null
+                && _loadedPortraitCatalog != null
+                && _loadedScenarioSettings != null;
         }
+
         /// <summary>
-        /// 依存関係を組み立ててシナリオ再生を開始する。
+        /// 依存関係を組み立ててシナリオ再生の基盤を構築する。
         /// </summary>
-        private async ValueTask Init()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
-            ViewModel viewModel = new ViewModel();
+            _viewModel = new ViewModel();
             ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
@@ -84,12 +95,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             IPortraitRepository portraitRepository = new PortraitRepository(_loadedPortraitCatalog);
             IScenarioSettingsRepository scenarioSettingsRepository = new ScenarioSettingsRepository(_loadedScenarioSettings);
 
-            TextPresenter textPresenter = new TextPresenter(viewModel);
-            FadePresenter fadePresenter = new FadePresenter(viewModel);
-            BackgroundPresenter backgroundPresenter = new BackgroundPresenter(viewModel);
-            AnimationPresenter animationPresenter = new AnimationPresenter(viewModel);
-            PortraitPresenter portraitPresenter = new PortraitPresenter(viewModel);
-            LayerPresenter layerPresenter = new LayerPresenter(viewModel);
+            TextPresenter textPresenter = new TextPresenter(_viewModel);
+            FadePresenter fadePresenter = new FadePresenter(_viewModel);
+            BackgroundPresenter backgroundPresenter = new BackgroundPresenter(_viewModel);
+            AnimationPresenter animationPresenter = new AnimationPresenter(_viewModel);
+            PortraitPresenter portraitPresenter = new PortraitPresenter(_viewModel);
+            LayerPresenter layerPresenter = new LayerPresenter(_viewModel);
             ScenarioPresenterFacade presenterFacade = new ScenarioPresenterFacade(
                 textPresenter,
                 fadePresenter,
@@ -97,7 +108,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 animationPresenter,
                 portraitPresenter,
                 layerPresenter,
-                viewModel);
+                _viewModel);
 
             _usecase = new ScenarioUsecase(
                 repository,
@@ -105,7 +116,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 gate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            ScenarioInputController controller = new ScenarioInputController(gate, _usecase, _usecase);
+            _inputController = new ScenarioInputController(gate, _usecase, _usecase);
             TextEventHandler textHandle = new TextEventHandler(
                 presenterFacade,
                 _usecase,
@@ -127,46 +138,56 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             var backgroundMap = BuildBackgroundMap(_loadedBackgroundCatalog);
             var animationMap = BuildAnimationMap(_loadedAnimationCatalog);
             var portraitMap = BuildPortraitMap(_loadedPortraitCatalog);
-            _scenarioView.Initialize(viewModel, backgroundMap, animationMap, portraitMap);
-            _scenarioInputView.Initialize(controller);
 
-            if (!ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState))
+            if (_scenarioView == null || _scenarioInputView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] ScenarioView / ScenarioInputView が未設定です。", this);
+                return false;
+            }
+
+            _scenarioView.Initialize(_viewModel, backgroundMap, animationMap, portraitMap);
+            _isInitialized = true;
+            return true;
+        }
+
+        /// <summary>
+        /// 他モジュールとの結合を行い、シナリオ再生を開始する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            if (!_isInitialized)
+            {
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _inputComposition))
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] InputComposition が取得できませんでした。", this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] SelectedScenarioState が取得できませんでした。", this);
-                return;
+                return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController))
+            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
-                return;
+                return false;
             }
 
-            await _usecase.PlayScenario(selectedScenarioState.CurrentScenarioId);
-
-            bool transitioned = await sceneTransitionController.UnloadAndSetActiveAsync(
-                SceneManager.GetActiveScene().name,
-                _returnSceneName,
-                CancellationToken.None);
-
-            if (!transitioned)
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
-                Debug.LogError($"[{nameof(ScenarioCom)}] シーン復帰に失敗しました。", this);
-                return;
+                Debug.LogError($"[{nameof(ScenarioCom)}] OutGameUIEvent が取得できませんでした。", this);
+                return false;
             }
 
-            selectedScenarioState.Clear();
-
-            if (ServiceLocator.TryGetInstance(out InputComposition inputComposition))
-            {
-                inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
-            }
-
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
-            {
-                outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(true);
-                outGameUIEvent.OnShownHomeScreen?.Invoke();
-            }
+            _scenarioInputView.Initialize(_inputController, _inputComposition.GetInputView);
+            _ = RunScenarioAsync();
+            return true;
         }
 
         /// <summary>
@@ -183,7 +204,56 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private void OnDestroy()
         {
             _usecase?.RequestSkip();
+        }
+
+        /// <summary>
+        /// 登録済みの状態とロード済みアセットを解放する。
+        /// </summary>
+        public override void Shutdown()
+        {
             ReleaseAssets();
+            _usecase = null;
+            _inputController = null;
+            _viewModel = null;
+            _inputComposition = null;
+            _selectedScenarioState = null;
+            _sceneTransitionController = null;
+            _outGameUIEvent = null;
+            _isInitialized = false;
+        }
+
+        /// <summary>
+        /// シナリオ進行とシーン復帰を非同期で実行する。
+        /// </summary>
+        private async Task RunScenarioAsync()
+        {
+            try
+            {
+                await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
+
+                bool transitioned = await _sceneTransitionController.UnloadAndSetActiveAsync(
+                    SceneManager.GetActiveScene().name,
+                    _returnSceneName,
+                    destroyCancellationToken);
+
+                if (!transitioned)
+                {
+                    Debug.LogError($"[{nameof(ScenarioCom)}] シーン復帰に失敗しました。", this);
+                    return;
+                }
+
+                _selectedScenarioState.Clear();
+                _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+                _outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(true);
+                _outGameUIEvent.OnShownHomeScreen?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -241,22 +311,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             }
 
             return map;
-        }
-
-        /// <summary>
-        ///     Addressables 経由でシナリオ用アセットをロードします。
-        /// </summary>
-        /// <returns> すべてロードできた場合はtrue。</returns>
-        private async Task<bool> LoadAssetsAsync()
-        {
-            _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
-            _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
-            _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
-            _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
-            return _loadedBackgroundCatalog != null
-                && _loadedAnimationCatalog != null
-                && _loadedPortraitCatalog != null
-                && _loadedScenarioSettings != null;
         }
 
         /// <summary>
