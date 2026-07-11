@@ -20,11 +20,10 @@ void GetToonMainLight(
 )
 {
     characterShadowAtten = 1.0h;
-#ifdef SHADERGRAPH_PREVIEW
     direction   = half3(0.5, 0.5, 0);
     color       = half3(1, 1, 1);
     shadowAtten = 1.0h;
-#else
+    return;
 
     Light mainLight = GetMainLight();
     direction = mainLight.direction;
@@ -44,7 +43,24 @@ void GetToonMainLight(
     //shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
     characterShadowAtten = SampleCharacterShadow(positionWS, normalWS);
 #endif
+}
 
+void GetMainLightShadowAtten(
+    Light light,
+    float3 positionWS,
+    half3 normalWS,
+    out half shadowAtten,
+    out half characterShadowAtten
+)
+{
+    shadowAtten = 1.0h;
+    characterShadowAtten = 1.0h;
+#if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+    shadowAtten = MainLightRealtimeShadow(TransformWorldToShadowCoord(positionWS + light.direction * 0.5));
+#endif
+
+#if defined(_CHAR_SHADOW_ON)
+    characterShadowAtten = SampleCharacterShadow(positionWS, normalWS);
 #endif
 }
 
@@ -64,28 +80,14 @@ half3 GetToonColor(
 
     return lerp(lerp(shadowColor, outerColor, outer), mainColor, main);
 }
-half3 GetToonColorAdditional(
-    half3 mainColor,
-    half bright,
-    half shadowAtten
-)
+
+void AddSumLight(inout half3 color, inout half3 direction, Light light, half3 normalWS)
 {
-    bright = saturate(bright);
-    shadowAtten = saturate(shadowAtten);
-    half main = smoothstep(0.0h, 0.2h, bright) * shadowAtten;
-
-    return mainColor * main;
+    half factor = saturate(dot(normalWS, light.direction) + 0.5);
+    half3 lightColor = light.color * saturate(light.shadowAttenuation * light.distanceAttenuation);
+    direction += light.direction * dot(lightColor,0.333333) * factor;
+    color += lightColor * factor;
 }
-
-#ifndef SHADERGRAPH_PREVIEW
-half3 GetAdditionalToonLight(half3 mainColor, half3 normalWS, Light light)
-{
-    half atten = half(light.shadowAttenuation * light.distanceAttenuation);
-    half NdotL = saturate(dot(normalWS, half3(light.direction)));
-
-    return min(half3(light.color) * GetToonColorAdditional(mainColor, NdotL, atten), half3(1, 1, 1)) / 2.0h;
-}
-#endif
 
 void GetToonLights(
     half3 mainColor,
@@ -100,18 +102,20 @@ void GetToonLights(
 #ifdef SHADERGRAPH_PREVIEW
     color = half3(0, 0, 0);
 #else
-    half3 sunDir, sunColor;
+    color = half3(0, 0, 0);
+    half3 dir = half3(0, 0, 0);
+    Light mainLight = GetMainLight();
+    AddSumLight(color, dir, mainLight, normalWS);
     half sunShadowAtten, characterShadowAtten;
-    GetToonMainLight(positionWS, normalWS, sunDir, sunColor, sunShadowAtten, characterShadowAtten);
-    color = sunColor * GetToonColor(mainColor, outerColor, shadowColor, saturate(dot(sunDir, normalWS)), sunShadowAtten, characterShadowAtten);
-
+    GetMainLightShadowAtten(mainLight, positionWS, normalWS, sunShadowAtten, characterShadowAtten);
+    
 #if USE_CLUSTER_LIGHT_LOOP
     // Forward+(Cluster)ではメインライト以外の平行光源はクラスタに含まれないため先に別ループで処理する
     [loop] for (uint dirIndex = 0u; dirIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); dirIndex++)
     {
         CLUSTER_LIGHT_LOOP_SUBTRACTIVE_LIGHT_CHECK
         Light light = GetAdditionalLight(dirIndex, positionWS, half4(1, 1, 1, 1));
-        color += GetAdditionalToonLight(mainColor, normalWS, light);
+        AddSumLight(color, dir, light, normalWS);
     }
 #endif
 
@@ -123,8 +127,16 @@ void GetToonLights(
     uint lightCount = GetAdditionalLightsCount();
     LIGHT_LOOP_BEGIN(lightCount)
         Light light = GetAdditionalLight(lightIndex, positionWS, half4(1, 1, 1, 1));
-        color += GetAdditionalToonLight(mainColor, normalWS, light);
+        AddSumLight(color, dir, light, normalWS);
     LIGHT_LOOP_END
+    
+    
+    dir = normalize(dir);
+
+    //color *= saturate(sunShadowAtten * min(0.2, characterShadowAtten));
+    half bright = saturate((dot(dir, normalWS) + 1.0h) / 2.0h) * saturate(max(0.2, sunShadowAtten) * min(characterShadowAtten, 0.7));
+    color *= GetToonColor(mainColor, outerColor, shadowColor, bright, 1.0h, 1.0h);
+    color = clamp(color, outerColor, 5.0h);
 #endif
 }
 #endif
