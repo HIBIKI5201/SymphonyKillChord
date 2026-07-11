@@ -673,7 +673,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4877291778978284914}
-  - component: {fileID: -6880971324520778393}
   - component: {fileID: 7750579596343814766}
   - component: {fileID: 6619117660693068914}
   - component: {fileID: -8556356520204914904}
@@ -712,35 +711,6 @@ Transform:
   - {fileID: 3995544741731007589}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-6880971324520778393
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3339157675331060313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
-  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
-  _player: {fileID: 7750579596343814766}
-  _skillRepository: {fileID: 11400000, guid: 8f8d7fb175cdb054bb9439f0d1bb8dda, type: 2}
-  _skillVisuals:
-  - {fileID: 1160853068716909059}
-  - {fileID: -4916133229582652887}
-  - {fileID: 1192430313035069498}
-  - {fileID: 7852414029176531134}
-  _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
-  _characterAnimationView: {fileID: 3246823200832017395}
-  _characterAnimationCatalogAsset: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
-  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
-  _equippedSkills:
-  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
-  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
-  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
-  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
 --- !u!114 &7750579596343814766
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,13 +1,11 @@
-using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
-using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -33,8 +31,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary> 実行順です。 </summary>
         public override int Order => 450;
 
-        [SerializeField, Tooltip("スキル定義リポジトリです。")]
-        private SkillRepository _skillRepository;
         [SerializeField, Tooltip("スキル演出View一覧です。")]
         private SkillView[] _skillVisuals;
         [SerializeField, Tooltip("入力進捗UI設定です。未設定時はPlayer側設定を流用します。")]

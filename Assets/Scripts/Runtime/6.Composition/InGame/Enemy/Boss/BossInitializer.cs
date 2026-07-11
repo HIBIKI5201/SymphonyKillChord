@@ -7,6 +7,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -62,7 +63,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
             _playerInitializer = playerModuleContainer?.PlayerInitializer;
-            if (_playerInitializer == null)
+            _playerView = playerModuleContainer?.PlayerView;
+            if (_playerInitializer == null || _playerView == null)
             {
                 Debug.LogError("PlayerInitializerの取得に失敗しました。", this);
                 return false;
@@ -75,7 +77,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyPools = enemyPools;
             // ボス初期化。attackControllerGenerator はボスでは未使用のため null。
             _boss.Initialize(
-                _playerInitializer.transform,
+                _playerView.transform,
                 _playerInitializer.PlayerEntity,
                 _musicSyncState,
                 _musicSyncService,
@@ -96,6 +98,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private BossLifeCycle _boss;
 
         private PlayerInitializer _playerInitializer;
+        private PlayerView _playerView;
         private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
         private TargetSystemController _targetingSystem;

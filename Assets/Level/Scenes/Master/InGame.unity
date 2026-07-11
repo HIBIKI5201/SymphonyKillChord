@@ -1219,6 +1219,7 @@ GameObject:
   - component: {fileID: 438459090}
   - component: {fileID: 438459089}
   - component: {fileID: 438459091}
+  - component: {fileID: 438459096}
   - component: {fileID: 438459092}
   - component: {fileID: 438459093}
   - component: {fileID: 438459094}
@@ -1269,8 +1270,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d24540182c664045867ee6da2f0dd10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
-  _skillRepository: {fileID: 11400000, guid: 0837f0ef1d99b414fa1c14e525be2eb4, type: 2}
   _skillVisuals: []
+  _inputProgressViewConfigAsset: {fileID: 0}
+  _equippedSkills: []
 --- !u!114 &438459092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1319,6 +1321,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2eaabd98139b1143b8a961726363cef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.SequenceInitializationModule
+--- !u!114 &438459096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6f332f07cc85f04fa71f060e5fcda34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
+  _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
+  _playerViewPrefab: {fileID: 9223034822626770349, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
+  _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _characterAnimationCatalogAsset: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
+  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
+  _equippedSkills:
+  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0

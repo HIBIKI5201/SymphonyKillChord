@@ -14,6 +14,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -59,7 +60,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 throw new ArgumentNullException("MusicSyncStateが見つかりません。");
             }
-            if (!_playerInitializer) _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            if (_playerModuleContainer == null)
+            {
+                _playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            }
+
+            if (_playerModuleContainer == null || _playerModuleContainer.PlayerView == null)
+            {
+                throw new ArgumentNullException(nameof(_playerModuleContainer), "PlayerModuleContainerが見つかりません。");
+            }
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(_musicSyncView.MusicSyncState, _musicSyncInitializer.MusicSyncService);
             ShellAttackSpec attackSpec = ShellFactory.CreateAttackSpec(_loadedAttackData);
             EnemyMusicSpec musicSpec = ShellFactory.CreateMusicSpec(_loadedMusicData);
@@ -79,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 attackUsecase);
             _controller = controller;
 
-            _view.Initialize(_playerInitializer.transform, shellSpecPresenter, Deactivate);
+            _view.Initialize(_playerModuleContainer.PlayerView.transform, shellSpecPresenter, Deactivate);
             _releaseCallback = releaseCallback;
         }
 
@@ -109,7 +118,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
         [SerializeField, Tooltip("砲弾音楽仕様の Addressables キーです。")] private string _musicDataKey;
 
-        private PlayerInitializer _playerInitializer;
+        private PlayerModuleContainer _playerModuleContainer;
         private MusicSyncInitializer _musicSyncInitializer;
         private MusicSyncView _musicSyncView;
         private Action<ShellLifeCycle> _releaseCallback;

@@ -15,6 +15,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 using KillChord.Runtime.View.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -99,13 +100,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _musicSyncService = musicSyncContainer.MusicSyncService;
             _musicSyncState = musicSyncContainer.MusicSyncState;
             _playerInitializer = playerModuleContainer.PlayerInitializer;
+            _playerView = playerModuleContainer.PlayerView;
 
             if (!_initialized)
             {
                 return false;
             }
 
-            _enemySpawnPositionSearcher.Initialize(_playerInitializer.transform);
+            _enemySpawnPositionSearcher.Initialize(_playerView.transform);
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
@@ -151,9 +153,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
             _playerInitializer = playerModuleContainer?.PlayerInitializer;
-            if (_playerInitializer == null)
+            _playerView = playerModuleContainer?.PlayerView;
+            if (_playerInitializer == null || _playerView == null)
             {
-                Debug.LogError("PlayerInitializerの取得に失敗しました。", this);
+                Debug.LogError("Playerモジュールの取得に失敗しました。", this);
                 return;
             }
             _enemyPools = enemyPools;
@@ -174,7 +177,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
             EnemyInfantryAttackControllerGenerator attackControllerGenerator = new EnemyInfantryAttackControllerGenerator();
-            lifeCycle.Initialize(_playerInitializer.transform, _playerInitializer.PlayerEntity,
+            lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
             _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, null, _waveSpawnState, releaseCallback);
         }
 
@@ -191,7 +194,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return;
             }
             EnemyArtilleryAttackControllerGenerator attackControllerGenerator = new EnemyArtilleryAttackControllerGenerator();
-            lifeCycle.Initialize(_playerInitializer.transform, _playerInitializer.PlayerEntity,
+            lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
             _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, _enemyPools, _waveSpawnState, releaseCallback);
         }
 
@@ -237,6 +240,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyWaveTimerView _enemyWaveTimerView;
 
         private PlayerInitializer _playerInitializer;
+        private PlayerView _playerView;
         private MusicSyncState _musicSyncState;
         private IMusicSyncService _musicSyncService;
         private TargetSystemController _targetingSystem;

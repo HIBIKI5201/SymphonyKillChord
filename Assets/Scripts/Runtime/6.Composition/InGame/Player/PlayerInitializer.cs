@@ -1,11 +1,9 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
@@ -20,12 +18,12 @@ using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Skill;
-using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
@@ -36,6 +34,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.Composition.InGame.Player
 {
@@ -53,16 +52,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         [SerializeField, Tooltip("プレイヤー移動設定です。")]
         private PlayerMoveSpecAsset _playerConfig;
-        [SerializeField, Tooltip("プレイヤーViewです。")]
-        private PlayerView _player;
-        [SerializeField, Tooltip("スキル定義リポジトリです。")]
-        private SkillRepository _skillRepository;
-        [SerializeField, Tooltip("スキル演出View一覧です。")]
-        private SkillView[] _skillVisuals;
+        [SerializeField, Tooltip("プレイヤーViewプレハブです。")]
+        private PlayerView _playerViewPrefab;
         [SerializeField, Tooltip("入力進捗UI設定です。")]
         private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
-        [SerializeField, Tooltip("キャラクターアニメーションViewです。")]
-        private CharacterAnimationView _characterAnimationView;
         [SerializeField, Tooltip("キャラクターアニメーション設定です。")]
         private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
 
@@ -81,9 +74,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private InGameHudInitializer _inGameHudInitializer;
         private bool _isModuleRegistered;
         private PlayerModuleContainer _moduleContainer;
+        private PlayerView _player;
+        private SkillView[] _skillVisuals;
+        private CharacterAnimationView _characterAnimationView;
 
         /// <summary> プレイヤーEntityです。 </summary>
         public CharacterEntity PlayerEntity => _playerEntity;
+
+        /// <summary> プレイヤーViewです。 </summary>
+        public PlayerView PlayerView => _player;
 
         /// <summary> スキル演出View一覧です。 </summary>
         public SkillView[] SkillVisuals => _skillVisuals;
@@ -108,9 +107,22 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            if (!ValidateBuildReferences())
+            {
+                return false;
+            }
+
+            if (!TryInstantiatePlayerView(out Transform spawnPointTransform))
+            {
+                return false;
+            }
+
             _playerEntity = CharacterFactory.Create(_playerData);
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
 
+            _player.transform.SetPositionAndRotation(
+                spawnPointTransform.position,
+                spawnPointTransform.rotation);
             _moduleContainer = new PlayerModuleContainer(this, _player, _playerEntity);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
@@ -320,6 +332,76 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
+        }
+
+        /// <summary>
+        ///     Buildフェーズで必要な参照を検証します。
+        /// </summary>
+        /// <returns> 参照が有効な場合はtrue。 </returns>
+        private bool ValidateBuildReferences()
+        {
+            if (_playerConfig == null
+                || _playerViewPrefab == null
+                || _playerData == null
+                || _characterAnimationCatalogAsset == null)
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤー初期化参照が不足しています。", this);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     ステージ側のスポーン地点へプレイヤーViewを生成します。
+        /// </summary>
+        /// <param name="spawnPointTransform"> 使用したスポーン地点です。 </param>
+        /// <returns> 生成に成功した場合はtrue。 </returns>
+        private bool TryInstantiatePlayerView(out Transform spawnPointTransform)
+        {
+            if (!TryResolvePlayerSpawnPointTransform(out spawnPointTransform))
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(IStageSceneInstance)} または PlayerSpawnPoint が見つかりません。", this);
+                return false;
+            }
+
+            _player = Instantiate(
+                _playerViewPrefab,
+                spawnPointTransform.position,
+                spawnPointTransform.rotation);
+            _player.name = _playerViewPrefab.name;
+            SceneManager.MoveGameObjectToScene(_player.gameObject, gameObject.scene);
+
+            _skillVisuals = _player.GetComponentsInChildren<SkillView>(true);
+            _characterAnimationView = _player.GetComponentInChildren<CharacterAnimationView>(true);
+            if (_characterAnimationView == null)
+            {
+                Destroy(_player.gameObject);
+                _player = null;
+                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(CharacterAnimationView)} の取得に失敗しました。", this);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     プレイヤー生成位置のTransformを解決します。
+        /// </summary>
+        /// <param name="spawnPointTransform"> 解決結果です。 </param>
+        /// <returns> 解決に成功した場合はtrue。 </returns>
+        private bool TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform)
+        {
+            spawnPointTransform = null;
+
+            IStageSceneInstance stageSceneInstance = ServiceLocator.GetInstance<IStageSceneInstance>();
+            if (stageSceneInstance == null || stageSceneInstance.PlayerSpawnPointTransform == null)
+            {
+                return false;
+            }
+
+            spawnPointTransform = stageSceneInstance.PlayerSpawnPointTransform;
+            return true;
         }
     }
 }

@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
@@ -62,6 +64,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                         if (!loadSuccess)
                         {
                             Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの読み込みに失敗しました。", this);
+                            return false;
+                        }
+
+                        if (!await WaitForStageSceneReadyAsync(
+                                selectedBattleStageState.BattleSceneName,
+                                destroyCancellationToken))
+                        {
+                            Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの初期化待機に失敗しました。", this);
                             return false;
                         }
 
@@ -195,6 +205,41 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             loadingScreenController.FailActiveSession();
         }
 
+        /// <summary>
+        ///     ステージシーンのロード完了とシーン参照登録完了を待機します。
+        /// </summary>
+        /// <param name="stageSceneName"> ステージシーン名です。 </param>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 準備完了した場合はtrue。 </returns>
+        private static async Awaitable<bool> WaitForStageSceneReadyAsync(
+            string stageSceneName,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(stageSceneName))
+            {
+                return false;
+            }
+
+            for (int retryCount = 0; retryCount < MAX_STAGE_READY_WAIT_FRAME; retryCount++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                Scene stageScene = SceneManager.GetSceneByName(stageSceneName);
+                if (stageScene.isLoaded
+                    && ServiceLocator.TryGetInstance(out IStageSceneInstance stageSceneInstance)
+                    && stageSceneInstance != null
+                    && stageSceneInstance.PlayerSpawnPointTransform != null)
+                {
+                    return true;
+                }
+
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
+
+            return false;
+        }
+
+        private const int MAX_STAGE_READY_WAIT_FRAME = 120;
         private readonly InGameInitializationCoordinator _initializationCoordinator = new();
         private List<IInGameInitializationModule> _modules;
     }

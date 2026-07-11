@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
-using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
@@ -82,10 +82,10 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraLookAtRotationCalculator lookAtRotationCalculator = new(_config);
             CameraFollowCalculator followCalculator = new(_config);
 
-            var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            if (stageSceneObj == null)
+            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            if (playerModuleContainer == null || playerModuleContainer.PlayerView == null)
             {
-                Debug.LogError($"{nameof(IStageSceneInstance)} が見つかりません。");
+                Debug.LogError($"{nameof(PlayerModuleContainer)} が見つかりません。");
                 return;
             }
 
@@ -98,7 +98,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                     return (hasTarget, targetPosition);
                 },
                 followCalculator, lockOnRotationCalculator,
-                freeLookRotationCalculator, lookAtRotationCalculator, _config, stageSceneObj.PlayerTransform,
+                freeLookRotationCalculator, lookAtRotationCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
         }
 
