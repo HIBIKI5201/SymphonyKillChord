@@ -957,14 +957,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ef8bd0dc7acc3d4a83d952b15cae9c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideView
-  _beats:
-  - 0
-  - 20
-  - 30
-  - 37
-  - 52
-  - 91
-  - 120
   _beatColor:
   - {r: 1, g: 0.6117647, b: 0, a: 1}
   - {r: 0.99215686, g: 1, b: 0, a: 1}
@@ -974,6 +966,7 @@ MonoBehaviour:
   - {r: 0.8627451, g: 0, b: 1, a: 1}
   _beatWidth: 5
   _scale: 5
+  _displayLength: 120
   _beatPositionImages:
   - {fileID: 5842707344676001019}
   - {fileID: 4768117164477014876}
