@@ -1,7 +1,9 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
+using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -57,6 +59,17 @@ namespace KillChord.Runtime.Composition.Persistent
             {
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     常駐シーン自身のロード優先度を登録する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Init()
+        {
+            return SceneLoader.RegisterLoadedScene(
+                gameObject.scene.name,
+                ScenePriorityResolver.Resolve(gameObject.scene.name));
         }
 
         /// <summary>
@@ -118,7 +131,7 @@ namespace KillChord.Runtime.Composition.Persistent
 
             try
             {
-                bool success = await controller.LoadAdditiveAndSetActiveAsync(
+                bool success = await controller.LoadAdditiveAsync(
                     _firstSceneName,
                     _cancellationTokenSource.Token);
 

@@ -14,6 +14,7 @@
   <Project Path="KillChord.Application.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="DevelopProducts-BindingSystem.csproj" />
+  <Project Path="KillChord.Develop.csproj" />
   <Project Path="KillChord.View.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
@@ -34,7 +35,6 @@
   <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
-  <Project Path="KillChord.Develop.csproj" />
   <Project Path="DevelopProducts-EquipmentBGM.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="DevelopProducts-RenderingExtension.csproj" />

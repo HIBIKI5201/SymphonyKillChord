@@ -1,5 +1,7 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.OutGame.Screen;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,17 @@ namespace KillChord.Runtime.Composition.OutGame
 
         /// <summary> 実行順です。 </summary>
         public override int Order => 0;
+
+        /// <summary>
+        ///     現在のアウトゲームシーン優先度を登録します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Init()
+        {
+            return SceneLoader.RegisterLoadedScene(
+                gameObject.scene.name,
+                ScenePriorityResolver.Resolve(gameObject.scene.name));
+        }
 
         /// <summary>
         ///     アウトゲーム初期化ライフサイクルを開始します。

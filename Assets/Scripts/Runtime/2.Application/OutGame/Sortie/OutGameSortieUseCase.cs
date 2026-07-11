@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
 
             try
             {
-                bool success = await _usecase.LoadAdditiveAndSetActiveAsync(
+                bool success = await _usecase.LoadAdditiveAsync(
                     targetSceneName,
                     cancellationToken);
 

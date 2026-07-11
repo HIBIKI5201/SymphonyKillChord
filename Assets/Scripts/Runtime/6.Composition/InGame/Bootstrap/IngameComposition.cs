@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private async void Start()
         {
+            RegisterCurrentScenePriority();
+
             if (!TryResolveBootDependencies(
                 out SelectedBattleStageState selectedBattleStageState,
                 out ILoadingOperationExecutor operationExecutor,
@@ -94,6 +97,20 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             {
                 FailActiveLoadingSession();
                 Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     現在のインゲームシーン優先度を登録します。
+        /// </summary>
+        private void RegisterCurrentScenePriority()
+        {
+            bool isRegistered = SceneLoader.RegisterLoadedScene(
+                gameObject.scene.name,
+                ScenePriorityResolver.Resolve(gameObject.scene.name));
+            if (!isRegistered)
+            {
+                Debug.LogWarning($"[{nameof(IngameComposition)}] シーン優先度登録に失敗しました。{gameObject.scene.name}", this);
             }
         }
 

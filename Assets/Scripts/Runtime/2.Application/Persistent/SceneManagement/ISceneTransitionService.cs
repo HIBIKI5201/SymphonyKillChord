@@ -40,18 +40,6 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///    指定したシーンを加算ロードし、アクティブにする。
-        /// </summary>
-        /// <param name="toSceneName"> 加算ロードするシーン名。 </param>
-        /// <param name="progress"> シーン遷移全体の進捗通知先。 </param>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        /// <returns> 成功したらtrue。 </returns>
-        Task<bool> LoadAdditiveAndSetActiveAsync(
-            string toSceneName,
-            IProgress<float> progress,
-            CancellationToken cancellationToken);
-
-        /// <summary>
         ///    指定したシーンをアンロードし、別のシーンをアクティブにする。
         /// </summary>
         /// <param name="unloadSceneName"> アンロードするシーン名。 </param>

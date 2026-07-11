@@ -41,6 +41,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
+                    ScenePriorityResolver.Resolve(toSceneName),
                     token: cancellationToken);
 
                 if (!loadSuccess)
@@ -51,16 +52,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
 
             progress?.Report(LoadingConstants.SCENE_LOAD_END_PROGRESS);
-
-            if (!SceneLoader.SetActiveScene(toSceneName))
-            {
-                Debug.LogError(
-                    $"[{nameof(SceneTransitionService)}] " +
-                    $"ActiveSceneの切り替えに失敗しました。" +
-                    $" SceneName: {toSceneName}");
-
-                return false;
-            }
 
             if (!string.IsNullOrEmpty(fromSceneName) &&
                 !string.Equals(fromSceneName, toSceneName, StringComparison.Ordinal) &&
@@ -109,7 +100,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 sceneName,
                 CreateProgressCallback(progress),
                 LoadSceneMode.Additive,
-                0,
+                ScenePriorityResolver.Resolve(sceneName),
                 cancellationToken);
 
             if (!loadSuccess)
@@ -156,51 +147,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     $"シーンのアンロードに失敗しました。" +
                     $" SceneName: {sceneName}");
 
-                return false;
-            }
-
-            progress?.Report(1f);
-            return true;
-        }
-
-        public async Task<bool> LoadAdditiveAndSetActiveAsync(
-            string toSceneName,
-            IProgress<float> progress,
-            CancellationToken cancellationToken)
-        {
-            progress?.Report(0f);
-
-            if (string.IsNullOrEmpty(toSceneName))
-            {
-                Debug.LogError("シーン名が無効です。");
-                return false;
-            }
-
-            if (!SceneLoader.GetExistScene(toSceneName, out Scene loadedScene) || !loadedScene.isLoaded)
-            {
-                var loadProgress = CreateProgressRange(
-                    progress,
-                    0f,
-                    1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
-
-                bool loadSuccess = await SceneLoader.LoadScene(
-                    toSceneName,
-                    CreateProgressCallback(loadProgress),
-                    LoadSceneMode.Additive,
-                    token: cancellationToken)
-                    ;
-                if (!loadSuccess)
-                {
-                    Debug.LogError($"シーンのロードに失敗 : {toSceneName}");
-                    return false;
-                }
-            }
-
-            progress?.Report(1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
-
-            if (!SceneLoader.SetActiveScene(toSceneName))
-            {
-                Debug.LogError($"ActiveSceneの切り替えに失敗しました。SceneName:{toSceneName}");
                 return false;
             }
 
@@ -332,7 +278,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     sceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
-                    0,
+                    ScenePriorityResolver.Resolve(sceneName),
                     cancellationToken);
 
             if (!loadSuccess)
