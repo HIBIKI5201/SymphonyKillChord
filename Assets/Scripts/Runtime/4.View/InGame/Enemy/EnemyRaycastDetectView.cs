@@ -19,17 +19,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _targetTransform = targetTransform;
             _attackRange = attackRange;
 
-            if (_attackWarningDecal == null)
-            {
-                Debug.LogError("[EnemyRaycastDetectView] Attack warning decal is not assigned.", this);
-                return;
-            }
-            if (_attackWarningDecal.material == null)
-            {
-                Debug.LogError("[EnemyRaycastDetectView] Attack warning decal material is not assigned.", this);
-                return;
-            }
-
             if (targetTransform == null)
             {
                 Debug.LogError("[EnemyRaycastDetectView] Target transform is null.");
@@ -42,10 +31,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            _decalMaterial = new Material(_attackWarningDecal.material);
-            _attackWarningDecal.material = _decalMaterial;
-
-            _attackWarningDecal.enabled = false;
+            InitializeWarningDecal();
             HideWarningInternal();
 
 #if UNITY_EDITOR
@@ -140,7 +126,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForRaycast())
             {
-                Debug.LogError("[EnemyRaycastDetectView] Raycast is not initialized.");
                 return false;
             }
 
@@ -211,6 +196,29 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 Destroy(_decalMaterial);
                 _decalMaterial = null;
             }
+        }
+
+        /// <summary>
+        ///     警告デカールがあれば専用マテリアルを初期化します。
+        /// </summary>
+        private void InitializeWarningDecal()
+        {
+            if (_attackWarningDecal == null)
+            {
+                Debug.LogWarning("[EnemyRaycastDetectView] Attack warning decal is not assigned. Warning display is disabled.", this);
+                return;
+            }
+
+            if (_attackWarningDecal.material == null)
+            {
+                Debug.LogWarning("[EnemyRaycastDetectView] Attack warning decal material is not assigned. Warning display is disabled.", this);
+                _attackWarningDecal.enabled = false;
+                return;
+            }
+
+            _decalMaterial = new Material(_attackWarningDecal.material);
+            _attackWarningDecal.material = _decalMaterial;
+            _attackWarningDecal.enabled = false;
         }
 
         /// <summary>

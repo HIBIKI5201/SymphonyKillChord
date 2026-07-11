@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
@@ -42,14 +43,20 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-            Initialize();
+            if (!Initialize())
+            {
+                return false;
+            }
+
+            RegisterGameplayControllable();
             return true;
         }
 
         /// <summary>
         ///     リズムガイド機能を初期化する。
         /// </summary>
-        public void Initialize()
+        /// <returns> 初期化に成功した場合はtrueです。 </returns>
+        public bool Initialize()
         {
             Debug.Assert(_rhythmGuideDefinitionAsset != null, "RhythmGuideDefinitionAsset の参照が未設定です。RhythmGuideDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
@@ -60,7 +67,7 @@ namespace KillChord.Runtime.Composition
             if (musicSyncService == null)
             {
                 Debug.LogError($"{nameof(IMusicSyncService)} が見つかりません。MusicSyncInitializer が先に初期化されているか確認してください。");
-                return;
+                return false;
             }
 
             TargetSystemModuleContainer targetSystemModuleContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
@@ -69,7 +76,7 @@ namespace KillChord.Runtime.Composition
             if (targetingSystem == null)
             {
                 Debug.LogError($"{nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。");
-                return;
+                return false;
             }
 
             RhythmGuideUsecase usecase = new RhythmGuideUsecase(_rhythmGuideDefinitionAsset.ToDefinition());
@@ -80,12 +87,37 @@ namespace KillChord.Runtime.Composition
                 targetingSystem
             );
 
-            ACLikeRhythmGuideViewModel viewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+            _viewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+            return true;
+        }
+
+        /// <summary>
+        ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
+        /// </summary>
+        private void RegisterGameplayControllable()
+        {
+            if (_isRegisteredToPlayDirector)
+            {
+                return;
+            }
+
+            InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (inGamePlayDirector == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(InGamePlayDirector)} が見つかりません。", this);
+                return;
+            }
+
+            inGamePlayDirector.AddGamePlayControllable(_rhythmGuideView);
+            _isRegisteredToPlayDirector = true;
         }
 
         [Tooltip("リズムガイド定義アセット。")]
         [SerializeField] private RhythmGuideDefinitionAsset _rhythmGuideDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
+
+        private ACLikeRhythmGuideViewModel _viewModel;
+        private bool _isRegisteredToPlayDirector;
     }
 }

@@ -31,5 +31,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         {
             Target = target ?? throw new ArgumentNullException(nameof(target));
         }
+
+        /// <summary>
+        ///     攻撃対象を解除します。
+        /// </summary>
+        public void ClearTarget()
+        {
+            Target = null;
+        }
     }
 }

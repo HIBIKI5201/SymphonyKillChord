@@ -82,25 +82,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
-            if (!_targetingSystem.TryGetCurrentTargetEntity(out var targetEntity))
-            {
-                Debug.Log("攻撃対象が選択されていません。");
-                return false;
-            }
-
-            _battleState.ChangeTarget(targetEntity);
-
-            // 現在のターゲットを取得して保持する。
-            if (_targetingSystem.TryGetCurrentTarget(out var lockOnTarget))
-            {
-                HasCurrentLockOnTarget = true;
-                CurrentLockOnTargetPosition = lockOnTarget.Position;
-            }
-            else
-            {
-                HasCurrentLockOnTarget = false;
-                CurrentLockOnTargetPosition = Vector3.zero;
-            }
+            bool hasTarget = TryUpdateCurrentTarget();
 
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
@@ -113,6 +95,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             StartAttackInterval();
             StartAttackCooldown();
+
+            if (!hasTarget)
+            {
+                resultBeatType = (int)beatType;
+                return true;
+            }
+
+            CharacterEntity targetEntity = _battleState.Target as CharacterEntity;
+            if (targetEntity == null)
+            {
+                resultBeatType = (int)beatType;
+                return true;
+            }
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
             _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
@@ -164,6 +159,36 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                     _attackCooldownRemainig = 0f;
                 }
             }
+        }
+
+        /// <summary>
+        ///     現在のターゲット状態を更新します。
+        /// </summary>
+        /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
+        private bool TryUpdateCurrentTarget()
+        {
+            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity))
+            {
+                _battleState.ClearTarget();
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
+                return false;
+            }
+
+            _battleState.ChangeTarget(targetEntity);
+
+            if (_targetingSystem.TryGetCurrentTarget(out ITargetableViewModel lockOnTarget))
+            {
+                HasCurrentLockOnTarget = true;
+                CurrentLockOnTargetPosition = lockOnTarget.Position;
+            }
+            else
+            {
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
+            }
+
+            return true;
         }
 
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)

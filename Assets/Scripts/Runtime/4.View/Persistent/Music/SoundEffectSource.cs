@@ -16,6 +16,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void Play()
         {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.Play();
         }
 
@@ -31,6 +36,11 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.cueName = cueName;
             _source.Play();
         }
@@ -41,6 +51,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="volume"> 音量。 </param>
         public void ApplyVolume(float volume)
         {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.volume = volume;
         }
 
@@ -61,6 +76,27 @@ namespace KillChord.Runtime.View.Persistent.Music
         private void OnDisable()
         {
             _volumeRegistryView?.UnregisterSoundEffectSource(this);
+        }
+
+        /// <summary>
+        ///     CriAtomSource参照を必要時に解決します。
+        /// </summary>
+        /// <returns> 参照解決に成功した場合はtrueです。 </returns>
+        private bool TryEnsureSource()
+        {
+            if (_source != null)
+            {
+                return true;
+            }
+
+            _source = GetComponent<CriAtomSource>();
+            if (_source != null)
+            {
+                return true;
+            }
+
+            Debug.LogError("[SoundEffectSource] CriAtomSource is not assigned.", this);
+            return false;
         }
     }
 }
