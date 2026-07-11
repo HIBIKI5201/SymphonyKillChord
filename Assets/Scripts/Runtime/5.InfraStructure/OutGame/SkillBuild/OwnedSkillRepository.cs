@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Application;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
