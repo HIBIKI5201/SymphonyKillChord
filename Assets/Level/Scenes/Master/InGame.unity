@@ -1334,7 +1334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
   _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
-  _playerViewPrefab: {fileID: 9223034822626770349, guid: fec609d1de3613344bc449b8bfad714b, type: 3}
+  _playerViewPrefab: {fileID: 7750579596343814766, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _characterAnimationCatalogAsset: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
