@@ -21,5 +21,5 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 8153521114334888054
-      type: {class: TestSkillEffect, ns: KillChord.Runtime.Application.Player.SkillEffect, asm: KillChord.Application}
+      type: {class: Skill_00, ns: KillChord.Runtime.Application.Player.SkillEffect, asm: KillChord.Application}
       data: 

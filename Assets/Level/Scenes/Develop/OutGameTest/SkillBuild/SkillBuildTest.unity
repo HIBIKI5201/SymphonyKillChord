@@ -646,10 +646,7 @@ MonoBehaviour:
   _uiDocument: {fileID: 452244044}
   _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
   _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
-  _ownedSkillRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/OwnedSkillRepositoryDebug.asset
-  _skillBuildRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/SkillBuildRepositoryDebug.asset
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
-  _skillBuildDebugger: {fileID: 0}
 --- !u!1 &1517114467
 GameObject:
   m_ObjectHideFlags: 0

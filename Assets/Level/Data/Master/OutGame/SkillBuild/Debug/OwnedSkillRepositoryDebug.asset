@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46abe02971d717a45a21251178ce1bae, type: 3}
   m_Name: OwnedSkillRepositoryDebug
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OwnedSkillRepositoryDebug
+  m_EditorClassIdentifier: KillChord.Develop::KillChord.Runtime.InfraStructure.OwnedSkillRepositoryDebug
   _skillDataAssets:
   - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
   - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}

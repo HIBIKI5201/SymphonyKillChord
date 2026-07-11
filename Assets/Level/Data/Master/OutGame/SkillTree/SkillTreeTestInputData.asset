@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebfbf15e78f77074da4f5dff785b18ba, type: 3}
   m_Name: SkillTreeTestInputData
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillTreeTestInputData
+  m_EditorClassIdentifier: KillChord.Develop::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillTreeTestInputData
   currentPoints: 100000
   UnlockedSkillNodeIds: 01000000
   UnlockedSkillIds: 00000000

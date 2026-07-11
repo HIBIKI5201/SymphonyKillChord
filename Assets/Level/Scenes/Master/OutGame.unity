@@ -893,8 +893,6 @@ MonoBehaviour:
   _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
   _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
   _videoPlayer: {fileID: 1876322594}
-  _inputDataKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillTreeTestInputData.asset
-  _isDebugMode: 1
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -911,10 +909,6 @@ MonoBehaviour:
   _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
   _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
-  _isDebugMode: 0
-  _skillBuildDebugger: {fileID: 0}
-  _ownedSkillRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/OwnedSkillRepositoryDebug.asset
-  _skillBuildRepositoryDebugKey: Assets/Level/Data/Master/OutGame/SkillBuild/Debug/SkillBuildRepositoryDebug.asset
 --- !u!1 &959266667
 GameObject:
   m_ObjectHideFlags: 0

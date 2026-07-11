@@ -58,16 +58,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Tooltip("スキルプレビュー動画を再生する VideoPlayer です。")]
         private VideoPlayer _videoPlayer;
 
-        [Space]
-        [Header("デバッグ用")]
-        [SerializeField]
-        [Tooltip("デバッグ入力データの Addressables キーです。")]
-        private string _inputDataKey;
-
-        [SerializeField]
-        [Tooltip("デバッグモードを使用するかどうかです。")]
-        private bool _isDebugMode = false;
-
         private VisualElement _rootElement;
         private VisualElement _skillDetailRoot;
         private VisualElement _playerStatusRoot;
@@ -93,7 +83,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillNodeDataRepo _loadedSkillNodeDataRepo;
         private SkillNodeBindRepo _loadedSkillNodeBindRepo;
         private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
-        private SkillTreeTestInputData _loadedInputData;
         private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -110,19 +99,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _loadedSkillNodePhaseBindRepo =
                 await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepo>(this, destroyCancellationToken);
 
-            if (_isDebugMode)
-            {
-                _loadedInputData = await _inputDataKey.LoadAssetAsync<SkillTreeTestInputData>(this, destroyCancellationToken);
-            }
-
             if (_loadedSkillNodeDataRepo == null
                 || _loadedSkillNodeBindRepo == null
                 || _loadedSkillNodePhaseBindRepo == null)
-            {
-                return false;
-            }
-
-            if (_isDebugMode && _loadedInputData == null)
             {
                 return false;
             }
@@ -182,11 +161,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
             _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
             _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
-            _inputDataKey.ReleaseLoadedAsset(this);
             _loadedSkillNodeDataRepo = null;
             _loadedSkillNodeBindRepo = null;
             _loadedSkillNodePhaseBindRepo = null;
-            _loadedInputData = null;
             _skillUnlockData = null;
             _savedataSystem = null;
             _outGameUIEvent = null;
@@ -240,8 +217,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _videoPlayer.isLooping = true;
             _renderTexture = _videoPlayer.targetTexture;
             _previewVideoRoot.style.backgroundImage = Background.FromRenderTexture(_renderTexture);
-
-            ApplyDebugInputIfNeeded();
 
             BuildSkillNodes();
             BuildNodeConns();
@@ -416,26 +391,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                     _skillPreviewVideos.Add(node.NodeId, node.PreviewVideoClip);
                 }
             }
-        }
-
-        /// <summary>
-        ///     デバッグ入力が有効な場合にスキル解放状態を上書きします。
-        /// </summary>
-        private void ApplyDebugInputIfNeeded()
-        {
-            if (!_isDebugMode || _loadedInputData == null)
-            {
-                return;
-            }
-
-            _skillUnlockData.SetResearchPoint(
-                _skillUnlockData.ResearchPoint == 0
-                    ? _loadedInputData.currentPoints
-                    : _skillUnlockData.ResearchPoint);
-            _skillUnlockData.SetUnlockedSkillNodeIds(
-                _loadedInputData.UnlockedSkillNodeIds.Length == 0
-                    ? _skillUnlockData.UnlockedSkillNodeIds
-                    : _loadedInputData.UnlockedSkillNodeIds);
         }
 
         /// <summary>

@@ -530,7 +530,6 @@ MonoBehaviour:
   _skillNodeDataRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
   _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
   _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
-  _inputDataKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillTreeTestInputData.asset
 --- !u!1 &1370918365
 GameObject:
   m_ObjectHideFlags: 0

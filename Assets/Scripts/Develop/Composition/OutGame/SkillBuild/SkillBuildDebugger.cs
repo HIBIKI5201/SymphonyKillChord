@@ -1,5 +1,6 @@
-﻿using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
+using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
 
@@ -39,7 +40,21 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void LateUpdate()
         {
+            TryResolveDefinition();
             Refresh();
+        }
+
+        /// <summary>
+        ///     未設定時にサービス登録済みのスキル編成定義を取得する。
+        /// </summary>
+        private void TryResolveDefinition()
+        {
+            if (_skillBuildDefinition != null)
+            {
+                return;
+            }
+
+            ServiceLocator.TryGetInstance(out _skillBuildDefinition);
         }
 
         /// <summary>
