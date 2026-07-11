@@ -1,5 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
 using System.Threading;
@@ -19,18 +21,24 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="enemyAIController"></param>
-        /// <param name="target"></param>
-        public void Initialize(EnemyAIController enemyAIController,
+        /// <param name="enemyAIController"> 敵AIコントローラーです。 </param>
+        /// <param name="target"> 攻撃対象です。 </param>
+        /// <param name="animationContext"> アニメーション文脈です。 </param>
+        /// <param name="musicSyncState"> 音楽同期状態です。 </param>
+        public void Initialize(
+            EnemyAIController enemyAIController,
             Transform target,
-            ICharacterAnimationViewContext animationContext)
+            ICharacterAnimationViewContext animationContext,
+            MusicSyncState musicSyncState)
 
         {
             _enemyAIController = enemyAIController;
             _target = target;
             _characterAnimationViewModel = animationContext.ViewModel;
             _characterAnimationSignal = animationContext.Signal;
+            _musicSyncState = musicSyncState;
             _isPlaying = false;
+            SyncFootstepTiming();
         }
 
         /// <summary>
@@ -38,6 +46,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void StartGameplay()
         {
+            SyncFootstepTiming();
             _isPlaying = true;
         }
 
@@ -50,6 +59,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            SyncFootstepTiming();
         }
 
         /// <summary>
@@ -108,14 +118,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     && (!_navMeshAgent.hasPath || _navMeshAgent.velocity.sqrMagnitude <= 0.01f))
                 {
                     _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+                    SyncFootstepTiming();
                     return true;
                 }
 
-                PlayFootstepSound();
+                PlayFootstepSound(velocity);
                 await Awaitable.NextFrameAsync(ct);
             }
 
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            SyncFootstepTiming();
             return false;
         }
 
@@ -138,11 +150,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
                 _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
 
-                PlayFootstepSound();
+                PlayFootstepSound(velocity);
             }
             else
             {
                 _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+                SyncFootstepTiming();
             }
         }
 
@@ -158,6 +171,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _navMeshAgent.isStopped = true;
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            SyncFootstepTiming();
         }
 
         public void StopRotating()
@@ -201,8 +215,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("攻撃予約時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackReserveEffectPrefab;
 
-        [SerializeField, Tooltip("足音SEの共通Source。床設定側にSourceがない場合に使用します。")]
-        private SoundEffectSource _defaultFootstepSoundSource;
+        [SerializeField, Tooltip("足音演出Viewです。")]
+        private FootStepView _footStepView;
 
         [SerializeField, Tooltip("足音SEの共通CueName。床設定側にCueNameがない場合に使用します。")]
         private string _defaultFootstepCueName;
@@ -216,18 +230,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Min(0.01f), Tooltip("足元判定の距離。")]
         private float _footstepRayDistance;
 
-        [SerializeField, Min(0.01f), Tooltip("足音SEの再生間隔。")]
+        [SerializeField, Min(0.01f), Tooltip("音楽同期が使えない場合の足音SE再生間隔です。")]
         private float _footstepInterval;
 
         [SerializeField, Tooltip("攻撃構えのanimationString")]
         private string _attackAttackReservedAnimation = "Enemy_AttackReserved";
 
+        private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private float _lastFootstepTime;
+        private int _lastFootstepEighthIndex = int.MinValue;
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
         private ICharacterAnimationViewModel _characterAnimationViewModel;
         private ICharacterAnimationSignal _characterAnimationSignal;
+        private MusicSyncState _musicSyncState;
         private ParticleSystem _attackHitEffectInstance;
         private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;
@@ -339,29 +356,80 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        ///     足音SEを一定間隔で再生します。
+        ///     足音SEをテンポ同期で再生します。
         /// </summary>
-        private void PlayFootstepSound()
+        /// <param name="velocity"> 現在速度です。 </param>
+        private void PlayFootstepSound(Vector3 velocity)
         {
-            if (Time.time - _lastFootstepTime < _footstepInterval)
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+            if (horizontalVelocity.sqrMagnitude <= MIN_FOOTSTEP_VELOCITY_SQR)
+            {
+                SyncFootstepTiming();
+                return;
+            }
+
+            if (!TryConsumeFootstepTiming())
             {
                 return;
             }
 
             FootstepSoundConfig config = GetCurrentFootstepSoundConfig();
 
-            // 床専用Sourceがある場合、それを再生。
-            // ない場合はdefaultで。
-            SoundEffectSource source = config.Source != null
-                ? config.Source
-                : _defaultFootstepSoundSource;
-
             string cueName = string.IsNullOrWhiteSpace(config.CueName)
                 ? _defaultFootstepCueName
                 : config.CueName;
 
-            PlaySound(source, cueName);
+            _footStepView?.Play(cueName);
+        }
+
+        /// <summary>
+        ///     足音再生タイミングを消費可能か判定します。
+        /// </summary>
+        /// <returns> 再生可能な場合はtrue。 </returns>
+        private bool TryConsumeFootstepTiming()
+        {
+            if (_musicSyncState != null && _musicSyncState.BeatLength > 0d)
+            {
+                int currentEighthIndex = GetCurrentFootstepEighthIndex();
+                if (_lastFootstepEighthIndex == currentEighthIndex)
+                {
+                    return false;
+                }
+
+                _lastFootstepEighthIndex = currentEighthIndex;
+                return true;
+            }
+
+            if (Time.time - _lastFootstepTime < _footstepInterval)
+            {
+                return false;
+            }
+
             _lastFootstepTime = Time.time;
+            return true;
+        }
+
+        /// <summary>
+        ///     現在時刻の足音タイミングへ同期します。
+        /// </summary>
+        private void SyncFootstepTiming()
+        {
+            if (_musicSyncState != null && _musicSyncState.BeatLength > 0d)
+            {
+                _lastFootstepEighthIndex = GetCurrentFootstepEighthIndex();
+                return;
+            }
+
+            _lastFootstepTime = Time.time;
+        }
+
+        /// <summary>
+        ///     現在の八分音符インデックスを取得します。
+        /// </summary>
+        /// <returns> 八分音符インデックスです。 </returns>
+        private int GetCurrentFootstepEighthIndex()
+        {
+            return Mathf.FloorToInt((float)(_musicSyncState.AccurateBeat * 2d));
         }
         /// <summary>
         ///     SE Sourceを再生します。

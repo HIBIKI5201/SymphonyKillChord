@@ -159,7 +159,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ICharacterAnimationViewContext animationContext =
                 animationComposition.Init(_characterAnimationView, _loadedCharacterAnimationCatalogAsset, musicSyncState);
             _characterAnimationContext = animationContext;
-            _view.Initialize(aiController, target, animationContext);
+            _view.Initialize(aiController, target, animationContext, musicSyncState);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);

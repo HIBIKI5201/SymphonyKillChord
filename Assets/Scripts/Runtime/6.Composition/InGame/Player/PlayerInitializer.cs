@@ -261,6 +261,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 playerMovementController,
                 playerAttackController,
                 animationContext,
+                musicSyncState,
                 cameraTransform.Transform,
                 inputView,
                 healthHudPresenter);

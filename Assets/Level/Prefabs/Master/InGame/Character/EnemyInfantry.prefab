@@ -122,14 +122,13 @@ MonoBehaviour:
   _attackSoundSource: {fileID: 0}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
-  _defaultFootstepSoundSource: {fileID: 0}
-  _defaultFootstepCueName: RifleShoot_2
+  _footStepView: {fileID: 733036131092522326}
+  _defaultFootstepCueName: FootStep
   _footstepSoundConfigs:
   - SurfaceLayer:
       serializedVersion: 2
       m_Bits: 4294967295
-    Source: {fileID: 0}
-    CueName: RifleShoot_2
+    CueName: FootStep
   _footstepRayOffset: {x: 0, y: 0.2, z: 0}
   _footstepRayDistance: 1.5
   _footstepInterval: 0.5
@@ -484,6 +483,7 @@ GameObject:
   - component: {fileID: 6523754249061918103}
   - component: {fileID: 3594108406411558928}
   - component: {fileID: 733036131092522325}
+  - component: {fileID: 733036131092522326}
   m_Layer: 8
   m_Name: FootstepSound
   m_TagString: Untagged
@@ -551,6 +551,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
+--- !u!114 &733036131092522326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8919238060812858001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c8d84e6c87546c1b3518f1127b491aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.FootStepView
+  _oneShotVisualEffects:
+  - rid: 733036131092522327
+  references:
+    version: 2
+    RefIds:
+    - rid: 733036131092522327
+      type: {class: SoundEffectOneShotVisualEffect, ns: KillChord.Runtime.View.InGame.Character, asm: KillChord.View}
+      data:
+        _soundEffectSource: {fileID: 733036131092522325}
+        _cueNameOverride: 
 --- !u!1001 &2599204113999987400
 PrefabInstance:
   m_ObjectHideFlags: 0
