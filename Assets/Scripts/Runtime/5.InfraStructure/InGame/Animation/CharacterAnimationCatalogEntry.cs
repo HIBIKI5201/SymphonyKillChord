@@ -15,9 +15,19 @@ namespace KillChord.Runtime.InfraStructure
         [FormerlySerializedAs("State")]
         [Tooltip("アニメーション状態に対応するクリップ")]
         public CharacterAnimationClipType ClipType;
+
         [Tooltip("ワンショット用の識別キー")]
         public string Key;
+
         [Tooltip("対応するアニメーションクリップ")]
         public AnimationClip Clip;
+
+        [Min(0)]
+        [Tooltip("このクリップ専用の開始ブレンドフレーム数です。0の場合はCatalog全体の既定値を使用します。")]
+        public int EnterBlendFrameCount;
+
+        [Min(0)]
+        [Tooltip("このクリップ専用の終了ブレンドフレーム数です。0の場合はCatalog全体の既定値を使用します。")]
+        public int ExitBlendFrameCount;
     }
 }

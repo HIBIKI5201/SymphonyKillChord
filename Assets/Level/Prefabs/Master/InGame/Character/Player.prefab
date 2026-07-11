@@ -1403,7 +1403,7 @@ GameObject:
   - component: {fileID: 6123456789012345680}
   - component: {fileID: 6123456789012345681}
   - component: {fileID: 6123456789012345682}
-  - component: {fileID: 6123456789012345683}
+  - component: {fileID: 79335607091635813}
   m_Layer: 7
   m_Name: FootstepView
   m_TagString: Untagged
@@ -1420,7 +1420,7 @@ Transform:
   m_GameObject: {fileID: 6123456789012345678}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1497,8 +1497,8 @@ MonoBehaviour:
     - rid: 4420303087731042
       type: {class: PooledParticleSystemOneShotVisualEffect, ns: KillChord.Runtime.View.InGame.Character, asm: KillChord.View}
       data:
-        _particleSystemPlaybackView: {fileID: 6123456789012345683}
---- !u!114 &6123456789012345683
+        _particleSystemPlaybackView: {fileID: 79335607091635813}
+--- !u!114 &79335607091635813
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1507,12 +1507,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6123456789012345678}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f7a5317d2fd48579d1a768ba2e7d2ae, type: 3}
+  m_Script: {fileID: 11500000, guid: d7c16c9f0c5f4fb18ba7b2b0136729fc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ParticleSystemPoolView
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ParticleSystemRingBufferView
   _particleSystemTemplate: {fileID: 6765814888231409618, guid: b70c8652d1a9cfc4f8b9c12c10e20c65, type: 3}
-  _defaultCapacity: 4
-  _maxPoolSize: 16
+  _bufferSize: 8
 --- !u!1 &7381308627360093480
 GameObject:
   m_ObjectHideFlags: 0
@@ -4280,8 +4279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e4266b03dd11a847a990b9971a7cad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
-  _attackRampUpRatio: 0.25
-  _animator: {fileID: 0}
+  _animator: {fileID: 7554209699097654958}
 --- !u!4 &3902374432798108195 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1123473033512182044, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}

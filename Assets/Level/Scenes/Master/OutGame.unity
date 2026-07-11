@@ -304,7 +304,6 @@ GameObject:
   - component: {fileID: 86621105}
   - component: {fileID: 86621104}
   - component: {fileID: 86621103}
-  - component: {fileID: 86621102}
   m_Layer: 5
   m_Name: ChangeScene_1
   m_TagString: Untagged
@@ -312,19 +311,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &86621102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 86621101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b987d4cfefaa1c74d82f6965dff626cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGameMissionButtonView
-  _missionId: 
 --- !u!114 &86621103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,19 +358,6 @@ MonoBehaviour:
       - m_Target: {fileID: 205594943}
         m_TargetAssemblyTypeName: KillChord.Runtime.View.SceneTransitionView, KillChord.View
         m_MethodName: ChangeScene
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 86621102}
-        m_TargetAssemblyTypeName: KillChord.Runtime.View.OutGameMissionButtonView,
-          KillChord.View
-        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1149,7 +1122,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1995936540}
-  - component: {fileID: 1995936539}
   m_Layer: 0
   m_Name: Mission
   m_TagString: Untagged
@@ -1157,21 +1129,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1995936539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1995936538}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cf35a1743a31bf4b8918eec68ee7979, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGameMissionInitializer
-  _buttons:
-  - {fileID: 2088528359}
-  - {fileID: 86621102}
 --- !u!4 &1995936540
 Transform:
   m_ObjectHideFlags: 0
@@ -1199,7 +1156,6 @@ GameObject:
   - component: {fileID: 2088528358}
   - component: {fileID: 2088528357}
   - component: {fileID: 2088528356}
-  - component: {fileID: 2088528359}
   m_Layer: 5
   m_Name: ChangeScene
   m_TagString: Untagged
@@ -1283,19 +1239,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 2088528359}
-        m_TargetAssemblyTypeName: KillChord.Runtime.View.OutGameMissionButtonView,
-          KillChord.View
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &2088528357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1334,19 +1277,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088528354}
   m_CullTransparentMesh: 1
---- !u!114 &2088528359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2088528354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b987d4cfefaa1c74d82f6965dff626cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGameMissionButtonView
-  _missionId: AllKill
 --- !u!1 &2119823346
 GameObject:
   m_ObjectHideFlags: 0

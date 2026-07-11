@@ -13,12 +13,16 @@ namespace KillChord.Runtime.View
         /// <param name="attack"> 攻撃アニメーションのインデックス。 </param>
         /// <param name="dodge"> 回避アニメーションのインデックス。 </param>
         /// <param name="clipLengths"> インデックス順のクリップ長一覧。 </param>
+        /// <param name="enterBlendFrameCounts"> インデックス順の開始ブレンドフレーム数一覧。 </param>
+        /// <param name="exitBlendFrameCounts"> インデックス順の終了ブレンドフレーム数一覧。 </param>
         /// <param name="damage"> ダメージアニメーションのインデックス。 </param>
         /// <param name="oneShotIndices"> ワンショットキーとインデックスの対応表。 </param>
         public CharacterAnimationPlaybackMap(
             int attack,
             int dodge,
             float[] clipLengths,
+            int[] enterBlendFrameCounts,
+            int[] exitBlendFrameCounts,
             int damage = -1,
             IDictionary<string, int> oneShotIndices = null)
         {
@@ -28,6 +32,12 @@ namespace KillChord.Runtime.View
             _clipLengths = clipLengths != null
                 ? (float[])clipLengths.Clone()
                 : System.Array.Empty<float>();
+            _enterBlendFrameCounts = enterBlendFrameCounts != null
+                ? (int[])enterBlendFrameCounts.Clone()
+                : System.Array.Empty<int>();
+            _exitBlendFrameCounts = exitBlendFrameCounts != null
+                ? (int[])exitBlendFrameCounts.Clone()
+                : System.Array.Empty<int>();
             _oneShotIndices = oneShotIndices != null
                 ? new Dictionary<string, int>(oneShotIndices)
                 : new Dictionary<string, int>();
@@ -68,6 +78,30 @@ namespace KillChord.Runtime.View
                 : 0f;
         }
 
+        /// <summary>
+        ///     指定インデックスの開始ブレンドフレーム数を取得する。
+        /// </summary>
+        /// <param name="index"> 再生インデックス。 </param>
+        /// <returns> 開始ブレンドフレーム数です。 </returns>
+        public int GetEnterBlendFrameCount(int index)
+        {
+            return index >= 0 && index < _enterBlendFrameCounts.Length
+                ? _enterBlendFrameCounts[index]
+                : 0;
+        }
+
+        /// <summary>
+        ///     指定インデックスの終了ブレンドフレーム数を取得する。
+        /// </summary>
+        /// <param name="index"> 再生インデックス。 </param>
+        /// <returns> 終了ブレンドフレーム数です。 </returns>
+        public int GetExitBlendFrameCount(int index)
+        {
+            return index >= 0 && index < _exitBlendFrameCounts.Length
+                ? _exitBlendFrameCounts[index]
+                : 0;
+        }
+
         /// <summary> 攻撃アニメーションの再生時間です。 </summary>
         public float AttackDuration => GetClipLength(Attack);
 
@@ -75,6 +109,8 @@ namespace KillChord.Runtime.View
         public float DodgeDuration => GetClipLength(Dodge);
 
         private readonly float[] _clipLengths;
+        private readonly int[] _enterBlendFrameCounts;
+        private readonly int[] _exitBlendFrameCounts;
         private readonly Dictionary<string, int> _oneShotIndices;
     }
 }

@@ -218,7 +218,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _decalMaterial = new Material(_attackWarningDecal.material);
             _attackWarningDecal.material = _decalMaterial;
+            ApplyWarningDecalColor(Color.clear);
+            _attackWarningDecal.fadeFactor = 1f;
             _attackWarningDecal.enabled = false;
+            _attackWarningDecal.gameObject.SetActive(true);
         }
 
         /// <summary>
@@ -233,8 +236,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
+            _attackWarningDecal.gameObject.SetActive(true);
             _attackWarningDecal.enabled = true;
-            _decalMaterial.SetColor("_BaseColor", _currentLineColor);
+            _attackWarningDecal.fadeFactor = 1f;
+            ApplyWarningDecalColor(_currentLineColor);
             Vector3 size = _attackWarningDecal.size;
             size.y = _attackRange;
             _attackWarningDecal.transform.rotation = Quaternion.Euler(90, Quaternion.LookRotation(ray.direction, Vector3.up).eulerAngles.y, 0);
@@ -300,6 +305,34 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (_attackWarningDecal != null)
             {
                 _attackWarningDecal.enabled = false;
+            }
+        }
+
+        /// <summary>
+        ///     警告デカールの色をシェーダープロパティへ適用します。
+        /// </summary>
+        /// <param name="color"> 適用色です。 </param>
+        private void ApplyWarningDecalColor(Color color)
+        {
+            if (_decalMaterial == null)
+            {
+                return;
+            }
+
+            Color appliedColor = color;
+            if (appliedColor.a <= 0f && color != Color.clear)
+            {
+                appliedColor.a = 1f;
+            }
+
+            if (_decalMaterial.HasProperty("_BaseColor"))
+            {
+                _decalMaterial.SetColor("_BaseColor", appliedColor);
+            }
+
+            if (_decalMaterial.HasProperty("_Color"))
+            {
+                _decalMaterial.SetColor("_Color", appliedColor);
             }
         }
 

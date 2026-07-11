@@ -28,6 +28,7 @@ namespace KillChord.Runtime.View.InGame.Character
             _nextIndex = (_nextIndex + 1) % _particleSystems.Length;
 
             PrepareInstanceForPlayback(particleSystem);
+            particleSystem.transform.position = transform.position;
             particleSystem.Play();
         }
 

@@ -857,7 +857,6 @@ MonoBehaviour:
   - {fileID: 1772279158}
   - {fileID: 1249666141}
   - {fileID: 866643815}
-  - {fileID: 0}
   - {fileID: 708479945}
 --- !u!4 &255723356
 Transform:

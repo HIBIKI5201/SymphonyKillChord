@@ -24,6 +24,7 @@ namespace KillChord.Runtime.View
             _context = context;
             _musicSyncState = musicSyncState;
             _locomotionCalculator = new CharacterAnimationLocomotionCalculator();
+            _oneShotTimingCalculator = new CharacterAnimationOneShotTimingCalculator();
             _weights = clips != null
                 ? new float[clips.Length]
                 : System.Array.Empty<float>();
@@ -95,12 +96,11 @@ namespace KillChord.Runtime.View
 
             int index = request.Index;
             _playableController.PlayOneShot(index);
-
-            float clipLength = _playableController.GetClipLength(index);
-            float speed = Mathf.Max(0.0001f, _locomotionCalculator.AnimationSpeed);
-            _overlayDuration = clipLength / speed;
-            _overlayRemaining = _overlayDuration;
             _overlayIndex = index;
+            _overlayBaseDuration = request.BaseDurationSeconds;
+            _overlayEnterBlendDuration = request.EnterBlendDurationSeconds;
+            _overlayExitBlendDuration = request.ExitBlendDurationSeconds;
+            _overlayElapsedBaseTime = 0f;
             _shouldNotifyDodgeEnded = request.ShouldNotifyDodgeEnded;
             _hasNotifiedOneShotEnded = false;
         }
@@ -110,25 +110,12 @@ namespace KillChord.Runtime.View
         /// </summary>
         private void ApplyOverlayWeight()
         {
-            if (_overlayRemaining <= 0f || _weights == null || _overlayIndex < 0 || _overlayIndex >= _weights.Length)
+            if (!HasActiveOverlay())
             {
                 return;
             }
 
-            float elapsed = _overlayDuration - _overlayRemaining;
-            float rampUp = Mathf.Max(0.001f, _overlayDuration * _attackRampUpRatio);
-            float weight;
-
-            if (elapsed < rampUp)
-            {
-                weight = Mathf.InverseLerp(0f, rampUp, elapsed);
-            }
-            else
-            {
-                float downElapsed = elapsed - rampUp;
-                float downDuration = Mathf.Max(0.0001f, _overlayDuration - rampUp);
-                weight = Mathf.Lerp(1f, 0f, downElapsed / downDuration);
-            }
+            float weight = CalculateOverlayWeight();
 
             _weights[_overlayIndex] = Mathf.Max(_weights[_overlayIndex], weight);
 
@@ -143,8 +130,11 @@ namespace KillChord.Runtime.View
                 _weights[i] *= otherScale;
             }
 
-            _overlayRemaining -= Time.deltaTime;
-            if (_overlayRemaining <= 0f && !_hasNotifiedOneShotEnded)
+            _overlayElapsedBaseTime += _oneShotTimingCalculator.GetBaseProgressDelta(
+                Time.deltaTime,
+                _locomotionCalculator.AnimationSpeed);
+
+            if (_overlayElapsedBaseTime >= _overlayBaseDuration && !_hasNotifiedOneShotEnded)
             {
                 _hasNotifiedOneShotEnded = true;
                 if (_shouldNotifyDodgeEnded
@@ -152,25 +142,68 @@ namespace KillChord.Runtime.View
                 {
                     signal.NotifyDodgeEnded();
                 }
+
+                _overlayIndex = -1;
             }
         }
-
-        [SerializeField, Tooltip("ワンショット再生時の立ち上がり比率です。")]
-        private float _attackRampUpRatio = 0.25f;
 
         [SerializeField, Tooltip("Playableを駆動するAnimatorです。")]
         private Animator _animator;
 
         private PlayableAnimationController _playableController;
         private CharacterAnimationLocomotionCalculator _locomotionCalculator;
+        private CharacterAnimationOneShotTimingCalculator _oneShotTimingCalculator;
         private ICharacterAnimationViewContext _context;
         private MusicSyncState _musicSyncState;
         private float[] _weights;
         private bool _isInitialized;
-        private float _overlayDuration;
-        private float _overlayRemaining;
+        private float _overlayBaseDuration;
+        private float _overlayEnterBlendDuration;
+        private float _overlayExitBlendDuration;
+        private float _overlayElapsedBaseTime;
         private int _overlayIndex = -1;
         private bool _shouldNotifyDodgeEnded;
         private bool _hasNotifiedOneShotEnded;
+
+        /// <summary>
+        ///     ワンショットオーバーレイが有効か判定する。
+        /// </summary>
+        /// <returns> 有効な場合はtrue。 </returns>
+        private bool HasActiveOverlay()
+        {
+            return _overlayBaseDuration > 0f
+                && _overlayElapsedBaseTime < _overlayBaseDuration
+                && _weights != null
+                && _overlayIndex >= 0
+                && _overlayIndex < _weights.Length;
+        }
+
+        /// <summary>
+        ///     現在のオーバーレイウェイトを計算する。
+        /// </summary>
+        /// <returns> オーバーレイウェイトです。 </returns>
+        private float CalculateOverlayWeight()
+        {
+            if (_overlayBaseDuration <= 0f)
+            {
+                return 1f;
+            }
+
+            float enterBlendDuration = Mathf.Clamp(_overlayEnterBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendStart = Mathf.Max(0f, _overlayBaseDuration - exitBlendDuration);
+
+            if (enterBlendDuration > 0f && _overlayElapsedBaseTime < enterBlendDuration)
+            {
+                return Mathf.InverseLerp(0f, enterBlendDuration, _overlayElapsedBaseTime);
+            }
+
+            if (exitBlendDuration > 0f && _overlayElapsedBaseTime >= exitBlendStart)
+            {
+                return 1f - Mathf.InverseLerp(exitBlendStart, _overlayBaseDuration, _overlayElapsedBaseTime);
+            }
+
+            return 1f;
+        }
     }
 }
