@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.View.InGame.Target;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
-using KillChord.Runtime.View.InGame.Target;
 
 namespace KillChord.Runtime.Composition.InGame.Target
 {
@@ -16,14 +16,17 @@ namespace KillChord.Runtime.Composition.InGame.Target
         /// <summary> ターゲットシステムのコントローラー。 </summary>
         public TargetSystemController TargetSystemController { get; private set; }
 
+        /// <summary> ターゲットEntityレジストリです。 </summary>
+        public TargetEntityRegistry TargetEntityRegistry { get; private set; }
+
         /// <summary>
         ///     ターゲットシステムを初期化する。
         /// </summary>
         public void Initialize()
         {
-            TargetEntityRegistry targetEntityRegistry = new();
+            TargetEntityRegistry = new TargetEntityRegistry();
             TargetingSystemViewModel = new TargetingSystem();
-            TargetSystemController = new TargetSystemController(TargetingSystemViewModel, targetEntityRegistry);
+            TargetSystemController = new TargetSystemController(TargetingSystemViewModel, TargetEntityRegistry);
             ServiceLocator.RegisterInstance(TargetingSystemViewModel);
             ServiceLocator.RegisterInstance(TargetSystemController);
             _isRegistered = true;
@@ -43,6 +46,7 @@ namespace KillChord.Runtime.Composition.InGame.Target
             ServiceLocator.UnregisterInstance(TargetingSystemViewModel);
             TargetSystemController = null;
             TargetingSystemViewModel = null;
+            TargetEntityRegistry = null;
             _isRegistered = false;
         }
 

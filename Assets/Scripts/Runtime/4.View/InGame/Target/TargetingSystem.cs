@@ -1,5 +1,5 @@
-using System;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -14,7 +14,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     ターゲットを登録する。
         /// </summary>
-        /// <param name="targetable"> 登録するターゲット。</param>
+        /// <param name="targetable"> 登録するターゲット。 </param>
         public void RegisterTarget(ITargetableViewModel targetable)
         {
             if (targetable == null)
@@ -29,7 +29,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     ターゲットの登録を解除する。
         /// </summary>
-        /// <param name="targetable"> 解除するターゲット。</param>
+        /// <param name="targetable"> 解除するターゲット。 </param>
         public void UnregisterTarget(ITargetableViewModel targetable)
         {
             if (targetable == null)
@@ -47,8 +47,8 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     現在のターゲットIDの取得を試みる。
         /// </summary>
-        /// <param name="targetId"> 取得したターゲットID。取得失敗時は <see cref="Guid.Empty"/>。</param>
-        /// <returns> 取得に成功した場合は true。</returns>
+        /// <param name="targetId"> 取得したターゲットID。取得失敗時は <see cref="Guid.Empty"/>。 </param>
+        /// <returns> 取得に成功した場合は true。 </returns>
         public bool TryGetCurrentTargetId(out Guid targetId)
         {
             targetId = Guid.Empty;
@@ -65,8 +65,8 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     現在のターゲットの取得を試みる。
         /// </summary>
-        /// <param name="targetable"> 取得したターゲット。取得失敗時は null。</param>
-        /// <returns> 取得に成功した場合は true。</returns>
+        /// <param name="targetable"> 取得したターゲット。取得失敗時は null。 </param>
+        /// <returns> 取得に成功した場合は true。 </returns>
         public bool TryGetCurrentTarget(out ITargetableViewModel targetable)
         {
             targetable = _currentTarget;
@@ -89,8 +89,8 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     現在のターゲット位置の取得を試みる。
         /// </summary>
-        /// <param name="result"> 取得した位置。取得失敗時は <see cref="Vector3.zero"/>。</param>
-        /// <returns> 取得に成功した場合は true。</returns>
+        /// <param name="result"> 取得した位置。取得失敗時は <see cref="Vector3.zero"/>。 </param>
+        /// <returns> 取得に成功した場合は true。 </returns>
         public bool TryGetCurrentTargetPosition(out Vector3 result)
         {
             result = Vector3.zero;
@@ -105,10 +105,21 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     現在登録されているターゲット一覧のスナップショットを取得する。
+        /// </summary>
+        /// <returns> 登録ターゲット一覧です。 </returns>
+        public ITargetableViewModel[] GetRegisteredTargetsSnapshot()
+        {
+            ITargetableViewModel[] targets = new ITargetableViewModel[_targets.Count];
+            _targets.CopyTo(targets);
+            return targets;
+        }
+
+        /// <summary>
         ///     プレイヤー位置と方向をもとに最適なターゲットへ切り替える。
         /// </summary>
-        /// <param name="playerPosition"> プレイヤーの現在位置。</param>
-        /// <param name="direction"> 選択基準に使用する方向。</param>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
             _currentTarget = SelectTarget(playerPosition, direction);
@@ -137,8 +148,8 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     ターゲットが選択可能な状態かを判定する。
         /// </summary>
-        /// <param name="targetable"> 判定対象のターゲット。</param>
-        /// <returns> 選択可能な場合は true。</returns>
+        /// <param name="targetable"> 判定対象のターゲット。 </param>
+        /// <returns> 選択可能な場合は true。 </returns>
         private bool IsSelectableTarget(ITargetableViewModel targetable)
         {
             if (targetable == null)
@@ -152,9 +163,9 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     優先順位に従って最適なターゲットを選択する。
         /// </summary>
-        /// <param name="center"> 基準位置。</param>
-        /// <param name="direction"> 基準方向。</param>
-        /// <returns> 選択されたターゲット。候補がない場合は null。</returns>
+        /// <param name="center"> 基準位置。 </param>
+        /// <param name="direction"> 基準方向。 </param>
+        /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ITargetableViewModel SelectTarget(in Vector3 center, in Vector3 direction)
         {
@@ -192,9 +203,9 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary>
         ///     二つのベクトルの正規化内積を返す。
         /// </summary>
-        /// <param name="from"> 基準ベクトル。</param>
-        /// <param name="to"> 比較ベクトル。</param>
-        /// <returns> 正規化された内積。</returns>
+        /// <param name="from"> 基準ベクトル。 </param>
+        /// <param name="to"> 比較ベクトル。 </param>
+        /// <returns> 正規化された内積。 </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float NormalizeDot(in Vector3 from, in Vector3 to)
         {

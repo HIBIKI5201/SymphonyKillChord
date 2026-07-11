@@ -119,9 +119,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             string animationKey = string.IsNullOrEmpty(skillData.AnimationKey)
                 ? EMPTY_ANIMATION_KEY
                 : skillData.AnimationKey;
-            string effectTypeName = skillData.SkillEffect == null
-                ? EMPTY_EFFECT_TYPE
-                : skillData.SkillEffect.GetType().Name;
+            string effectTypeName = skillData.EffectSpec.EffectType.ToString();
 
             _slotDebugDataArray[slotIndex].Apply(slotIndex, skillData.Id, animationKey, effectTypeName);
         }

@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         ///     スキル効果を実行するメソッド。スキルの効果を対象のキャラクターエンティティに適用する。
         /// </summary>
         /// <param name="context">スキル効果の発動に必要な情報をまとめた構造体。</param>
-        public override void Execute(SkillEffectContext context)
+        public override void Execute(in SkillEffectContext context)
         {
              AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             //  武器なし攻撃を実装するための箱替え。

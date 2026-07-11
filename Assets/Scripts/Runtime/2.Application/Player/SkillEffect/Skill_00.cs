@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         public Skill_00(IBuff buff) : base(buff)
         {
         }
-        public override void Execute(SkillEffectContext context)
+        public override void Execute(in SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             //  武器なし攻撃を実装するための箱替え。

@@ -14,11 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
   _id: 3
   _pattern: 020000000400000001000000
-  _skillEffect:
-    rid: 8153521114334888057
-  references:
-    version: 2
-    RefIds:
-    - rid: 8153521114334888057
-      type: {class: Skill_03, ns: KillChord.Runtime.Application.Player.SkillEffect, asm: KillChord.Application}
-      data: 
+  _skillEffectType: 3
+  _skillTargetingType: 4

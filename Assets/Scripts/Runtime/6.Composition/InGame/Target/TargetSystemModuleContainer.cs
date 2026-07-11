@@ -12,12 +12,15 @@ namespace KillChord.Runtime.Composition.InGame.Target
         /// </summary>
         /// <param name="targetSystemController"> ターゲット制御Controllerです。 </param>
         /// <param name="targetSystemViewModel"> ターゲットViewModelです。 </param>
+        /// <param name="targetEntityRegistry"> ターゲットEntityレジストリです。 </param>
         public TargetSystemModuleContainer(
             TargetSystemController targetSystemController,
-            ITargetSystemViewModel targetSystemViewModel)
+            ITargetSystemViewModel targetSystemViewModel,
+            TargetEntityRegistry targetEntityRegistry)
         {
             TargetSystemController = targetSystemController;
             TargetSystemViewModel = targetSystemViewModel;
+            TargetEntityRegistry = targetEntityRegistry;
         }
 
         /// <summary> ターゲット制御Controllerです。 </summary>
@@ -25,5 +28,8 @@ namespace KillChord.Runtime.Composition.InGame.Target
 
         /// <summary> ターゲットViewModelです。 </summary>
         public ITargetSystemViewModel TargetSystemViewModel { get; }
+
+        /// <summary> ターゲットEntityレジストリです。 </summary>
+        public TargetEntityRegistry TargetEntityRegistry { get; }
     }
 }

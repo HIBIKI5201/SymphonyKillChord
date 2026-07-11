@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
 
@@ -9,45 +9,67 @@ namespace KillChord.Runtime.Domain.Player
     /// </summary>
     public class SkillTemplate
     {
+        /// <summary> スキルIDです。 </summary>
         public int Id { get; }
+
+        /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern { get; }
+
+        /// <summary> クールダウンの小節比率です。 </summary>
         public double CooldownBarRatio { get; }
-        public ISkillEffect SkillEffect { get; }
+
+        /// <summary> 効果定義です。 </summary>
+        public SkillEffectSpec EffectSpec { get; }
+
+        /// <summary> 再生するアニメーションキーです。 </summary>
         public string AnimationKey { get; }
 
+        /// <summary>
+        ///     スキルテンプレートを初期化します。
+        /// </summary>
+        /// <param name="id"> スキルIDです。 </param>
+        /// <param name="pattern"> 入力パターンです。 </param>
+        /// <param name="cooldownNumerator"> クールダウン分子です。 </param>
+        /// <param name="cooldownDenomimator"> クールダウン分母です。 </param>
+        /// <param name="effectSpec"> 効果定義です。 </param>
+        /// <param name="animationKey"> アニメーションキーです。 </param>
         public SkillTemplate(
             int id,
             BeatType[] pattern,
             int cooldownNumerator,
             int cooldownDenomimator,
-            ISkillEffect skillEffect,
+            SkillEffectSpec effectSpec,
             string animationKey)
         {
             if (cooldownDenomimator <= 0)
             {
-                throw new ArgumentException($"クールダウン時間の分母は0以下では設定できません。");
+                throw new ArgumentException("クールダウン時間の分母は0以下では設定できません。");
             }
+
             if (cooldownNumerator < 0)
             {
-                throw new ArgumentException($"クールダウンの分子は0未満では設定できません。");
+                throw new ArgumentException("クールダウンの分子は0未満では設定できません。");
             }
+
             Id = id;
             Pattern = pattern;
             CooldownBarRatio = (double)cooldownNumerator / cooldownDenomimator;
-            SkillEffect = skillEffect;
+            EffectSpec = effectSpec;
             AnimationKey = animationKey;
         }
 
         /// <summary>
         ///     SkillDefinitionに変換する。
         /// </summary>
+        /// <param name="bpm"> 変換時に使用するBPMです。 </param>
+        /// <returns> 変換後のスキル定義です。 </returns>
         public SkillDefinition ToSkillDefinition(double bpm)
         {
             return new SkillDefinition(
                 new SkillId(Id),
                 new SkillPattern(new(Pattern)),
                 CooldownBarRatio,
-                SkillEffect,
+                EffectSpec,
                 bpm,
                 AnimationKey);
         }

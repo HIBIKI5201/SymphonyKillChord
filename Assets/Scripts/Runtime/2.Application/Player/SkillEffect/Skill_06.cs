@@ -1,24 +1,28 @@
-using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.Player;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
-     /// <summary>
+    /// <summary>
     ///     スキルID 06 のスキル効果を実装するクラス。
     /// </summary>
     public class Skill_06 : SkillBase
     {
-        public Skill_06(IBuff buff):base(buff)
+        /// <summary>
+        ///     スキル効果を初期化します。
+        /// </summary>
+        /// <param name="buff"> 付与バフです。 </param>
+        public Skill_06(IBuff buff) : base(buff)
         {
-            _buff = buff;
         }
-        public override void Execute(SkillEffectContext context)
+
+        /// <summary>
+        ///     スキル効果を実行します。
+        /// </summary>
+        /// <param name="context"> 実行コンテキストです。 </param>
+        public override void Execute(in SkillEffectContext context)
         {
             context.PlayerEntity.BuffSystem.Add(_buff);
         }
-
-        private float _m = 5f; // ダメージ倍率。
-        private float _n = 0.3f; // 体力消費量。
-        private IBuff _buff;
     }
 }

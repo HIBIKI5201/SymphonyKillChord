@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         public Skill_05(IBuff buff) : base(buff)
         {
         }
-        public override void Execute(SkillEffectContext context)
+        public override void Execute(in SkillEffectContext context)
         {
             Damage selfDamage = new Damage(context.PlayerEntity.CurrentHealth.Value * _n);
             context.PlayerEntity.TakeDamage(selfDamage); // _N%消費する。

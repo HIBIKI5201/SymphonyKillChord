@@ -1,6 +1,5 @@
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using SymphonyFrameWork.System.ServiceLocate;
-using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Target
 {
@@ -25,11 +24,13 @@ namespace KillChord.Runtime.Composition.InGame.Target
             _initializer.Initialize();
             _container = new TargetSystemModuleContainer(
                 _initializer.TargetSystemController,
-                _initializer.TargetingSystemViewModel);
+                _initializer.TargetingSystemViewModel,
+                _initializer.TargetEntityRegistry);
             ServiceLocator.RegisterInstance(_container);
             _isRegistered = true;
             return _container.TargetSystemController != null
-                && _container.TargetSystemViewModel != null;
+                && _container.TargetSystemViewModel != null
+                && _container.TargetEntityRegistry != null;
         }
 
         /// <summary>
