@@ -18,7 +18,8 @@ MonoBehaviour:
   _isInitiallyUnlocked: 1
   _stageName: "\u30B7\u30CA\u30EA\u30AA1"
   _flavorText: "\u30B7\u30CA\u30EA\u30AA1"
-  _targetSceneName: Scenario
+  _targetSceneName: InGame
+  _battleSceneName: Stage_01
   _scenarioId: ScenarioTest
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2

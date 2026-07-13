@@ -18,7 +18,9 @@ MonoBehaviour:
   _isInitiallyUnlocked: 0
   _stageName: "\u30D0\u30C8\u30EB"
   _flavorText: "\u30D0\u30C8\u30EB"
-  _targetSceneName: Persistent
+  _targetSceneName: InGame
+  _battleSceneName: Stage_01
+  _scenarioId: 
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
