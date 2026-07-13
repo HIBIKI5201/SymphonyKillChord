@@ -88,6 +88,10 @@ void AddSumLight(inout half3 color, inout half3 direction, Light light, half3 no
     direction += light.direction * dot(lightColor,0.333333) * factor;
     color += lightColor * factor;
 }
+half easeOutQuad(half x)
+{
+    return 1.0 - (1.0 - x) * (1.0 - x);
+}
 
 void GetToonLights(
     half3 mainColor,
@@ -134,7 +138,7 @@ void GetToonLights(
     dir = SafeNormalize(dir);
 
     //color *= saturate(sunShadowAtten * min(0.2, characterShadowAtten));
-    half bright = saturate((dot(dir, normalWS))) * saturate(sunShadowAtten * characterShadowAtten);
+    half bright = saturate((dot(dir, normalWS))) * easeOutQuad(saturate(sunShadowAtten * characterShadowAtten));
     color *= GetToonColor(mainColor, outerColor, shadowColor, bright, 1.0h, 1.0h);
     color = clamp(color, shadowColor, 5.0h);
 #endif
