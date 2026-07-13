@@ -102,7 +102,7 @@ void GetToonLights(
 #ifdef SHADERGRAPH_PREVIEW
     color = half3(0, 0, 0);
 #else
-    color = half3(0, 0, 0);
+    color = SampleSH(normalWS);
     half3 dir = half3(0, 0, 0);
     Light mainLight = GetMainLight();
     AddSumLight(color, dir, mainLight, normalWS);
@@ -131,12 +131,12 @@ void GetToonLights(
     LIGHT_LOOP_END
     
     
-    dir = normalize(dir);
+    dir = SafeNormalize(dir);
 
     //color *= saturate(sunShadowAtten * min(0.2, characterShadowAtten));
-    half bright = saturate((dot(dir, normalWS) + 1.0h) / 2.0h) * saturate(max(0.2, sunShadowAtten) * min(characterShadowAtten, 0.7));
+    half bright = saturate((dot(dir, normalWS))) * saturate(sunShadowAtten * characterShadowAtten);
     color *= GetToonColor(mainColor, outerColor, shadowColor, bright, 1.0h, 1.0h);
-    color = clamp(color, outerColor, 5.0h);
+    color = clamp(color, shadowColor, 5.0h);
 #endif
 }
 #endif
