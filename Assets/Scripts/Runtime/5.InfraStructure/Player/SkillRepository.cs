@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application.InGame.Skill;
+﻿using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using System;
@@ -14,63 +14,64 @@ namespace KillChord.Runtime.InfraStructure.Player
     public class SkillRepository : ScriptableObject, ISkillRepository
     {
         /// <summary>
-        ///     指定されたスキル ID に対応する SkillDataAsset を取得しようとします。
+        ///     指定されたスキル ID に対応する SkillTemplateAsset を取得しようとします。
         /// </summary>
         /// <param name="id"></param>
         /// <param name="skillData"></param>
         /// <returns></returns>
-        public bool TryGetSkill(int id, out SkillData skillData)
+        public bool TryGetSkill(int id, out SkillTemplate skillData)
         {
-            EnsureSkillDataAssetMap();
-            return _skillDataAssetMap.TryGetValue(id, out skillData);
+            EnsureSkillTemplateAssetMap();
+            return _skillTemplateMap.TryGetValue(id, out skillData);
         }
 
         public SkillDefinition GetSkill(int id, double bpm)
         {
-            EnsureSkillDataAssetMap();
-            if (!_skillDataAssetMap.TryGetValue(id, out SkillData skillData))
+            EnsureSkillTemplateAssetMap();
+            if (!_skillTemplateMap.TryGetValue(id, out SkillTemplate skillData))
             {
                 throw new KeyNotFoundException($"指定されたスキルID {id} に対応するスキルデータが見つかりませんでした。");
             }
             return skillData.ToSkillDefinition(bpm);
         }
 
-        [SerializeField] private SkillDataAsset[] _skillDataAssets;
+        [SerializeField] private SkillTemplateAsset[] _skillDataAssets;
 
-        private Dictionary<int, SkillData> _skillDataAssetMap;
+        private Dictionary<int, SkillTemplate> _skillTemplateMap;
 
         /// <summary>
         ///     Inspector 上の設定が変わった際に検索用辞書を破棄する。
         /// </summary>
         private void OnValidate()
         {
-            _skillDataAssetMap = null;
+            _skillTemplateMap = null;
         }
 
         /// <summary>
-        ///     SkillDataAsset の ID 検索用辞書を構築する。
+        ///     SkillTemplateAsset の ID 検索用辞書を構築する。
         /// </summary>
-        private void EnsureSkillDataAssetMap()
+        private void EnsureSkillTemplateAssetMap()
         {
-            if (_skillDataAssetMap != null) { return; }
+            if (_skillTemplateMap != null) { return; }
 
-            _skillDataAssetMap = new Dictionary<int, SkillData>();
+            _skillTemplateMap = new Dictionary<int, SkillTemplate>();
 
             if (_skillDataAssets == null) { return; }
 
             for (int i = 0; i < _skillDataAssets.Length; i++)
             {
-                SkillDataAsset skillDataAsset = _skillDataAssets[i];
-                if (skillDataAsset == null) { continue; }
+                SkillTemplateAsset skillTemplateAsset = _skillDataAssets[i];
+                if (skillTemplateAsset == null) { continue; }
 
-                if (_skillDataAssetMap.ContainsKey(skillDataAsset.Id))
+                if (_skillTemplateMap.ContainsKey(skillTemplateAsset.Id))
                 {
-                    Debug.LogWarning($"重複したスキルIDが検出されました: {skillDataAsset.Id}. このエントリはスキップされます。");
+                    Debug.LogWarning($"重複したスキルIDが検出されました: {skillTemplateAsset.Id}. このエントリはスキップされます。");
                     continue;
                 }
 
-                _skillDataAssetMap.Add(skillDataAsset.Id, skillDataAsset.ToDomain());
+                _skillTemplateMap.Add(skillTemplateAsset.Id, skillTemplateAsset.ToDomain());
             }
         }
     }
 }
+

@@ -2,6 +2,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using LitMotion;
 using LitMotion.Extensions;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +33,20 @@ namespace KillChord.Runtime.View.InGame.Music
             _canvasGroup.alpha = hasTarget ? _targetAlpha : _noTargetAlpha;
         }
 
+        /// <summary>
+        ///     判定ゾーン定義に応じてビートGUIを再構築する。
+        /// </summary>
+        /// <param name="zones"> 判定ゾーンの一覧。 </param>
+        public void ConfigureZones(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        {
+            if (!NeedsRebuild(zones))
+            {
+                return;
+            }
+
+            CacheZones(zones);
+            RebuildBeatRectTransforms();
+        }
 
         /// <summary>
         ///    ビートの位置を更新する。
@@ -39,6 +54,11 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="normalizeOffset"> ビートの位置(0～1の値範囲)</param>
         public void SetBeatsOffset(float normalizeOffset)
         {
+            if (_beatPositionImages == null || _beatPositionImages.Length == 0 || _totalBeatBoxCount <= 0)
+            {
+                return;
+            }
+
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
                 _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
@@ -72,6 +92,10 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="isJustTiming"></param>
         public void SetBeatAnimation(int openIndex, bool isJustTiming)
         {
+            if (_handles == null || _leftBeatRectTransforms == null || _rightBeatRectTransforms == null)
+            {
+                return;
+            }
 
             float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
             if (openIndex != -1)
@@ -92,17 +116,16 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [Space]
 
-        [Tooltip("ビートの位置を決めるための配列。(_beatRectTransforms.Length + 1の長さにしてください)")]
-        [SerializeField] private float[] _beats;
-
-        [Tooltip("ビートの色")]
+        [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;
 
         [Tooltip("ビートの幅")]
         [SerializeField] private float _beatWidth;
 
-        [Tooltip("ビートの位置を決めるためのスケール")]
+        [Tooltip("ビート描画全長に掛けるスケールです。")]
         [SerializeField] private float _scale;
+        [Tooltip("ビート描画の基準全長です。")]
+        [SerializeField] private float _displayLength = DEFAULT_DISPLAY_LENGTH;
 
         [Space]
         [Tooltip("ビート位置を表示するImage")]
@@ -140,10 +163,13 @@ namespace KillChord.Runtime.View.InGame.Music
         private MotionHandle[] _handles;
         private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
+        private float[] _zoneStarts = Array.Empty<float>();
+        private float[] _zoneEnds = Array.Empty<float>();
+        private int[] _zoneBeatCounts = Array.Empty<int>();
 
         private void Awake()
         {
-            InitBeatRectTransforms();
+            RebuildBeatRectTransforms();
         }
 
         private void Update()
@@ -155,6 +181,11 @@ namespace KillChord.Runtime.View.InGame.Music
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
+            if (_handles == null)
+            {
+                return;
+            }
+
             for (int i = 0; i < _handles.Length; i++)
             {
                 _handles[i].TryCancel();
@@ -162,11 +193,11 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         [ContextMenu("ビートの位置を初期化")]
-        private void InitBeatRectTransforms()
+        private void RebuildBeatRectTransforms()
         {
+            ClearGeneratedBeatObjects();
             InitBeatGUI(
                 _canvasGroup.gameObject,
-                _beats,
                 _beatWidth,
                 _outTimingSizeDelta,
                 _scale,
@@ -180,9 +211,93 @@ namespace KillChord.Runtime.View.InGame.Music
 
             _currentOpenIndex = -1;
         }
+
+        /// <summary>
+        ///     生成済みビートオブジェクトを破棄する。
+        /// </summary>
+        private void ClearGeneratedBeatObjects()
+        {
+            if (_leftBeatRectTransforms != null)
+            {
+                for (int i = 0; i < _leftBeatRectTransforms.Length; i++)
+                {
+                    if (_leftBeatRectTransforms[i] != null)
+                    {
+                        Destroy(_leftBeatRectTransforms[i].gameObject);
+                    }
+                }
+            }
+
+            if (_rightBeatRectTransforms != null)
+            {
+                for (int i = 0; i < _rightBeatRectTransforms.Length; i++)
+                {
+                    if (_rightBeatRectTransforms[i] != null)
+                    {
+                        Destroy(_rightBeatRectTransforms[i].gameObject);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     判定ゾーン再構築が必要か判定する。
+        /// </summary>
+        /// <param name="zones"> 判定ゾーンの一覧。 </param>
+        /// <returns> 再構築が必要な場合はtrue。 </returns>
+        private bool NeedsRebuild(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        {
+            if (zones == null)
+            {
+                return false;
+            }
+
+            if (zones.Count != _zoneStarts.Length)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < zones.Count; i++)
+            {
+                if (!Mathf.Approximately(_zoneStarts[i], zones[i].StartNormalized) ||
+                    !Mathf.Approximately(_zoneEnds[i], zones[i].EndNormalized) ||
+                    _zoneBeatCounts[i] != zones[i].BeatCount)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     判定ゾーン内容をキャッシュする。
+        /// </summary>
+        /// <param name="zones"> 判定ゾーンの一覧。 </param>
+        private void CacheZones(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        {
+            if (zones == null || zones.Count == 0)
+            {
+                _zoneStarts = Array.Empty<float>();
+                _zoneEnds = Array.Empty<float>();
+                _zoneBeatCounts = Array.Empty<int>();
+                return;
+            }
+
+            _zoneStarts = new float[zones.Count];
+            _zoneEnds = new float[zones.Count];
+            _zoneBeatCounts = new int[zones.Count];
+
+            for (int i = 0; i < zones.Count; i++)
+            {
+                _zoneStarts[i] = zones[i].StartNormalized;
+                _zoneEnds[i] = zones[i].EndNormalized;
+                _zoneBeatCounts[i] = zones[i].BeatCount;
+            }
+        }
+
         private void InitBeatGUI(
             in GameObject parent,
-            in float[] beats,
             float beatWidth,
             float beatHeight,
             float scale,
@@ -202,17 +317,22 @@ namespace KillChord.Runtime.View.InGame.Music
             handles = null;
             justTimingBeatBoxIndex = null;
 
-            if (_beatColor == null || _beatColor.Length < beats.Length - 1)
+            if (_zoneStarts == null || _zoneStarts.Length == 0)
             {
-                Debug.LogError("_beatColor の長さが beats の区間数(beats.Length - 1)より少ないです。", this);
+                totalBeatBoxCount = 0;
+                return;
+            }
+
+            if (_beatColor == null || _beatColor.Length < _zoneStarts.Length)
+            {
+                Debug.LogError("_beatColor の長さが判定ゾーン数より少ないです。", this);
                 totalBeatBoxCount = 0;
                 return;
             }
 
             //スペクトラム風ビートのブロック数を計算
-            float beatLength = Mathf.Max(beats);
-            float guiLength = beatLength * scale;
-            int beatBlockCount = (int)(guiLength / beatWidth);
+            float guiLength = _displayLength * scale;
+            int beatBlockCount = Mathf.Max(1, Mathf.FloorToInt(guiLength / beatWidth));
             totalBeatBoxCount = beatBlockCount;
 
             //Out配列の初期化
@@ -221,12 +341,12 @@ namespace KillChord.Runtime.View.InGame.Music
             leftBeatRT = new RectTransform[beatBlockCount];
             rightBeatRT = new RectTransform[beatBlockCount];
             handles = new MotionHandle[beatBlockCount];
-            justTimingBeatBoxIndex = new int[beats.Length - 1];
+            justTimingBeatBoxIndex = new int[_zoneStarts.Length];
 
             //スペクトラム風ビートのブロックを生成
             for (int i = 0; i < beatBlockCount; i++)
             {
-                Color color = _beatColor[GetBeatSectionIndex(i, beats, scale, beatWidth)];
+                Color color = _beatColor[GetBeatSectionIndex(i, scale, beatWidth)];
 
                 GameObject leftBeat = new GameObject($"LeftBeat_{i}", typeof(RectTransform), typeof(Image));
                 leftBeat.transform.SetParent(parent.transform, false);
@@ -253,33 +373,38 @@ namespace KillChord.Runtime.View.InGame.Music
 
             for (int i = 0; i < justTimingBeatBoxIndex.Length; i++)
             {
-                float position = (beats[i] + beats[i + 1]) / 2;
-                justTimingBeatBoxIndex[i] = (int)(position * scale / beatWidth);
+                float position = ((_zoneStarts[i] + _zoneEnds[i]) * 0.5f) * _displayLength;
+                justTimingBeatBoxIndex[i] = Mathf.Clamp(
+                    Mathf.FloorToInt(position * scale / beatWidth),
+                    0,
+                    beatBlockCount - 1);
             }
         }
+
         /// <summary>
-        /// ブロックインデックスがどのbeats区間に属するかを返す
+        ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
         /// </summary>
-        /// <param name="blockIndex">ブロックのインデックス</param>
-        /// <param name="beats">ビートの位置配列</param>
-        /// <param name="scale">ビートのスケール</param>
-        /// <param name="beatWidth">1ブロックの幅</param>
-        /// <returns>属するbeats区間のインデックス（beats[i]～beats[i+1]のi）</returns>
-        private int GetBeatSectionIndex(int blockIndex, float[] beats, float scale, float beatWidth)
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <param name="scale"> ビートのスケール。 </param>
+        /// <param name="beatWidth"> 1ブロックの幅。 </param>
+        /// <returns> 属する判定ゾーンのインデックス。 </returns>
+        private int GetBeatSectionIndex(int blockIndex, float scale, float beatWidth)
         {
-            // ブロックインデックスをbeats空間に逆変換
             float position = (blockIndex * beatWidth) / scale;
 
-            for (int i = 0; i < beats.Length - 1; i++)
+            for (int i = 0; i < _zoneStarts.Length; i++)
             {
-                if (position >= beats[i] && position < beats[i + 1])
+                float start = _zoneStarts[i] * _displayLength;
+                float end = _zoneEnds[i] * _displayLength;
+
+                if (position >= start && position < end)
                 {
                     return i;
                 }
             }
 
-            // 末尾のブロックは最後の区間に属する
-            return beats.Length - 2;
+            return _zoneStarts.Length - 1;
         }
+        private const float DEFAULT_DISPLAY_LENGTH = 120f;
     }
 }

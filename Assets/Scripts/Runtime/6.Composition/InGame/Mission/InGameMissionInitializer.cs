@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -10,8 +11,38 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// <summary>
     ///     インゲームにおけるミッションシステムの初期化を行うクラス。
     /// </summary>
-    public class InGameMissionInitializer : MonoBehaviour
+    public class InGameMissionInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(InGameMissionInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 300;
+
+        /// <summary>
+        ///     ミッションシステムを構築してContainerを登録します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
+        {
+            if (!TryInitialize(out MissionRuntimeService missionRuntimeService))
+            {
+                return false;
+            }
+
+            MissionEventController missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (missionEventController == null)
+            {
+                Debug.LogError($"[{nameof(InGameMissionInitializer)}] {nameof(MissionEventController)} を取得できませんでした。", this);
+                return false;
+            }
+
+            _moduleContainer = new MissionModuleContainer(missionRuntimeService, missionEventController);
+            ServiceLocator.RegisterInstance(_moduleContainer);
+            _isModuleRegistered = true;
+            return true;
+        }
+
         /// <summary>
         ///     初期化処理を行います。
         /// </summary>
@@ -81,11 +112,28 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             return true;
         }
 
+        /// <summary>
+        ///     登録済みContainerを解除します。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (!_isModuleRegistered)
+            {
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<MissionModuleContainer>();
+            _moduleContainer = null;
+            _isModuleRegistered = false;
+        }
+
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
+        private bool _isModuleRegistered;
+        private MissionModuleContainer _moduleContainer;
 
         private void OnDestroy()
         {

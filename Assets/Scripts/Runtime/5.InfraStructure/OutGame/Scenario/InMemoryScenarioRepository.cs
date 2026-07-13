@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// シナリオ ID から再生用データを読み込む。
         /// </summary>
-        public ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
+        public ValueTask<ScenarioDefinition> FindByIdAsync(string id, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -40,7 +40,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                     TextTimingTrigger.AtCharIndex(1, _fadeOut))),
             };
 
-            return new ValueTask<ScenarioData>(new ScenarioData(events));
+            return new ValueTask<ScenarioDefinition>(new ScenarioDefinition(events));
         }
 
         /// <summary>

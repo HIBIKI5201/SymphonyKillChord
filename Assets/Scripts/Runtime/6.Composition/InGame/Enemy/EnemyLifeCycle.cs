@@ -1,14 +1,16 @@
 using KillChord.Runtime.Adaptor;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -17,6 +19,7 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -33,6 +36,43 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyLifeCycle : MonoBehaviour, IGameplayControllable
     {
+        /// <summary>
+        ///     敵用 Addressables アセットをロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
+        {
+            _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
+            _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
+            _loadedEncounterMusicData = await _encounterMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            _loadedBattleMusicData = await _battleMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+            _loadedCharacterAnimationCatalogAsset =
+                await _characterAnimationCatalogAssetKey.LoadAssetAsync<CharacterAnimationCatalogAsset>(this, cancellationToken);
+
+            return _loadedEnemyData != null
+                && _loadedMoveData != null
+                && _loadedEncounterMusicData != null
+                && _loadedBattleMusicData != null
+                && _loadedMissionKeyAsset != null
+                && _loadedCharacterAnimationCatalogAsset != null;
+        }
+
+        /// <summary>
+        ///     ロード済みアセット参照を別インスタンスへコピーします。
+        /// </summary>
+        /// <param name="source"> コピー元です。 </param>
+        public void CopyLoadedAssetsFrom(EnemyLifeCycle source)
+        {
+            _loadedEnemyData = source._loadedEnemyData;
+            _loadedMoveData = source._loadedMoveData;
+            _loadedEncounterMusicData = source._loadedEncounterMusicData;
+            _loadedBattleMusicData = source._loadedBattleMusicData;
+            _loadedMissionKeyAsset = source._loadedMissionKeyAsset;
+            _loadedCharacterAnimationCatalogAsset = source._loadedCharacterAnimationCatalogAsset;
+        }
+
 
         /// <summary>
         ///     初期化処理。
@@ -41,16 +81,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="targetEntity"></param>
         /// <param name="musicSyncState"></param>
         /// <param name="musicSyncService"></param>
-        /// <param name="targetManagerController"></param>
-        /// <param name="targetEntityRegistryController"></param>
+        /// <param name="targetingSystem"></param>
         /// <param name="attackControllerGenerator"></param>
         public void Initialize(
             Transform target,
             CharacterEntity targetEntity,
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
-            TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController,
+            TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             EnemyWaveSpawnerState waveSpawnerState,
@@ -66,9 +104,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
 
-            _targetManagerController = targetManagerController;
-            _targetEntityRegistryController = targetEntityRegistryController;
-            _enemyEntity = CharacterFactory.Create(_enemyData);
+            _targetingSystem = targetingSystem;
+            _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
@@ -84,8 +121,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             NearestAttackPositionSearchService attackPositionSearchService = new NearestAttackPositionSearchService(attackPositionSearchController);
 
             // Domain生成
-            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_moveData);
-            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_encounterMusicData, _battleMusicData);
+            EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_loadedMoveData);
+            EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_loadedEncounterMusicData, _loadedBattleMusicData);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -115,14 +152,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _lockOnTargetGateway = new LockOnTargetGateway(transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
 
             // View接続
             var animationComposition = new AnimationComposition();
-            var animationController = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState, out CharacterAnimationIndices animationIndices);
-            _characterAnimationController = animationController;
-            _characterAnimationIndices = animationIndices;
-            _view.Initialize(aiController, target, animationController,animationIndices);
+            ICharacterAnimationViewContext animationContext =
+                animationComposition.Init(_characterAnimationView, _loadedCharacterAnimationCatalogAsset, musicSyncState);
+            _characterAnimationContext = animationContext;
+            _view.Initialize(aiController, target, animationContext, musicSyncState);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
@@ -155,12 +192,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.Activate();
             _healthHudPresenter.Activate();
 
-            if (_missionEventController != null && _missionKeyAsset != null)
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
-            _targetManagerController?.Register(_lockOnTargetGateway);
-            _targetEntityRegistryController?.RegisterTargetEntity(_lockOnTargetGateway, _enemyEntity);
+            _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
 
             // コンポーネント有効化
             SetDyingCollidersEnabled(true);
@@ -246,13 +282,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             SetDyingCollidersEnabled(true);
             _view.Deactivate();
 
-            if (_missionEventController != null && _missionKeyAsset != null)
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
-                _missionEventController.NotifyEnemyKilled(_missionKeyAsset.Id);
+                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _targetingSystem?.UnregisterTarget(_targetable);
 
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -311,13 +346,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
-        private ICharacterAnimationController _characterAnimationController;
-        private CharacterAnimationIndices _characterAnimationIndices;
+        private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField] private CharacterData _enemyData;
-        [SerializeField] private EnemyMoveData _moveData;
-        [SerializeField] private EnemyMusicData _encounterMusicData;
-        [SerializeField] private EnemyMusicData _battleMusicData;
+        [SerializeField, Tooltip("敵定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
+        [SerializeField, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
+        [SerializeField, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
 
         [SerializeField] private int _attackIndex;
 
@@ -325,7 +359,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField] private EnemyMissionKeyAsset _missionKeyAsset;
+        [SerializeField, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -333,7 +367,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
         [SerializeField] private NavMeshAgent _navMeshAgent;
         [SerializeField] private CharacterAnimationView _characterAnimationView;
-        [SerializeField] private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
+        [SerializeField, Tooltip("敵アニメーション設定の Addressables キーです。")] private string _characterAnimationCatalogAssetKey;
         [SerializeField, Tooltip("死亡時に再生するワンショットアニメーションキー。")]
         private string _deathAnimationKey = "Enemy_Death";
         [SerializeField,Tooltip("死体消滅時のワンショットアニメーションキー。")]
@@ -347,9 +381,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
-        private TargetEntityRegistryController _targetEntityRegistryController;
-        private TargetManagerController _targetManagerController;
-        private LockOnTargetGateway _lockOnTargetGateway;
+        private TargetSystemController _targetingSystem;
+        private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private IEnemyAttackControllerGenerator _attackControllerGenerator;
@@ -359,6 +392,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyBattleState _battleState;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
+        private CharacterDefinitionAsset _loadedEnemyData;
+        private EnemyMoveSpecAsset _loadedMoveData;
+        private EnemyMusicSpecAsset _loadedEncounterMusicData;
+        private EnemyMusicSpecAsset _loadedBattleMusicData;
+        private EnemyMissionKeyAsset _loadedMissionKeyAsset;
+        private CharacterAnimationCatalogAsset _loadedCharacterAnimationCatalogAsset;
 
         /// <summary>
         ///     入場移動に必要な表示とNavMeshAgentのみ有効化する。
@@ -444,8 +483,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _attackPositionSearchView.enabled = false;
             }
 
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _targetingSystem?.UnregisterTarget(_targetable);
             SetDyingCollidersEnabled(false);
         }
 
@@ -457,13 +495,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             //TODO 拡張性をもたせた設計にする。
             float waitSeconds = _deathAnimationFallbackSeconds;
 
-            if (_characterAnimationController != null
-                && _characterAnimationIndices != null
-                && _characterAnimationIndices.TryGetOneShotIndex(_deathAnimationKey, out int deathIndex))
+            if (_characterAnimationContext != null
+                && _characterAnimationContext.Signal.TryRequestOneShot(_deathAnimationKey, out waitSeconds))
             {
-                _characterAnimationController.SetVelocity(Vector2.zero);
-                _characterAnimationController.TriggerOneShot(deathIndex);
-                waitSeconds = _characterAnimationController.GetOneShotAnimationLength(deathIndex);
+                _characterAnimationContext.ViewModel.SetVelocity(Vector2.zero);
             }
 
             if (waitSeconds <= 0f)
@@ -474,9 +509,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);//floatで時間を渡すためにAwatable
 
 
-           if( _characterAnimationIndices.TryGetOneShotIndex(_destroyAniamtionKey,out int destoryIndex)){
-            _characterAnimationController.TriggerOneShot(destoryIndex);
-            waitSeconds = _characterAnimationController.GetOneShotAnimationLength(destoryIndex);
+           if( _characterAnimationContext != null
+               && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey,out float destroyDuration)){
+            waitSeconds = destroyDuration;
             }
 
             if(waitSeconds <= 0f)
@@ -553,6 +588,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             DieAsync();
         }
 
+        /// <summary>
+        ///     ロード済みアセットを解放します。
+        /// </summary>
         private void OnDestroy()
         {
             if (_enemyEntity != null)
@@ -560,9 +598,21 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _lockOnTargetGateway?.Dispose();
+            _targetingSystem?.UnregisterTarget(_targetable);
+            _targetable?.Dispose();
+            _enemyDataKey.ReleaseLoadedAsset(this);
+            _moveDataKey.ReleaseLoadedAsset(this);
+            _encounterMusicDataKey.ReleaseLoadedAsset(this);
+            _battleMusicDataKey.ReleaseLoadedAsset(this);
+            _missionKeyAssetKey.ReleaseLoadedAsset(this);
+            _characterAnimationCatalogAssetKey.ReleaseLoadedAsset(this);
+            _loadedEnemyData = null;
+            _loadedMoveData = null;
+            _loadedEncounterMusicData = null;
+            _loadedBattleMusicData = null;
+            _loadedMissionKeyAsset = null;
+            _loadedCharacterAnimationCatalogAsset = null;
         }
     }
 }
+

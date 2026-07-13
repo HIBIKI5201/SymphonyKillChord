@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.Player;
+﻿using KillChord.Runtime.Domain.Player;
 using System;
 
 namespace KillChord.Runtime.Domain.OutGame.SkillBuild
@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         ///     EquippedSkill を初期化する。
         /// </summary>
         /// <param name="skillData"> 装備するスキルデータ。 </param>
-        public EquippedSkill(SkillData skillData)
+        public EquippedSkill(SkillTemplate skillData)
         {
             _skillData = skillData;
         }
@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         public bool HasSkill => _skillData != null;
 
         /// <summary> スキルのデータを取得するプロパティ。 </summary>
-        public SkillData SkillData => _skillData;
+        public SkillTemplate SkillTemplate => _skillData;
 
         /// <summary>
         ///     等値比較を行う。
@@ -51,6 +51,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             return _skillData != null ? _skillData.GetHashCode() : 0;
         }
 
-        private readonly SkillData _skillData;
+        private readonly SkillTemplate _skillData;
     }
 }
+

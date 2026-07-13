@@ -4,7 +4,6 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.OutGame.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +18,19 @@ namespace KillChord.Runtime.InfraStructure
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(OwnedSkillRepository))]
     public class OwnedSkillRepository : ScriptableObject, IOwnedSkillRepository
     {
+        /// <summary>
+        ///     セーブデータシステムを初期化する。
+        /// </summary>
+        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
+        public void Initialize(SavedataSystem savedataSystem)
+        {
+            _savedataSystem = savedataSystem ?? throw new ArgumentNullException(nameof(savedataSystem));
+        }
+
+        /// <summary>
+        ///     入手済みスキル一覧を取得する。
+        /// </summary>
+        /// <returns> 入手済みスキル一覧です。 </returns>
         public async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills()
         {
             if (_ownedSkills == null)
@@ -38,22 +50,20 @@ namespace KillChord.Runtime.InfraStructure
         public async ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
         {
             ValidateDependencies();
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                throw new InvalidOperationException("SavedataSystem が ServiceLocator に登録されていません。");
-            }
+            ValidateSavedataSystem();
 
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
             BuildOwnedSkills(saveData.SkillUnlock.UnlockedSkillIds);
 
             // 入手済みスキルのコピーを返す。
             return new List<EquippedSkill>(_ownedSkills).AsReadOnly();
         }
 
-        [SerializeField, Tooltip("スキル ID から SkillData を取得するリポジトリ。")]
+        [SerializeField, Tooltip("スキル ID から SkillTemplate を取得するリポジトリ。")]
         private SkillRepository _skillRepository;
 
         private List<EquippedSkill> _ownedSkills;
+        private SavedataSystem _savedataSystem;
 
         /// <summary>
         ///     依存関係が設定されているか確認する。
@@ -64,6 +74,18 @@ namespace KillChord.Runtime.InfraStructure
             if (_skillRepository == null)
             {
                 throw new InvalidOperationException($"{nameof(_skillRepository)}: SkillRepository が設定されていません。");
+            }
+        }
+
+        /// <summary>
+        ///     セーブデータシステムが設定されているか確認する。
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        private void ValidateSavedataSystem()
+        {
+            if (_savedataSystem == null)
+            {
+                throw new InvalidOperationException($"{nameof(_savedataSystem)} が設定されていません。");
             }
         }
 
@@ -90,7 +112,7 @@ namespace KillChord.Runtime.InfraStructure
                 if (!_skillRepository.TryGetSkill(skillId, out var skillData))
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillData を取得できませんでした。");
+                    Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillTemplate を取得できませんでした。");
 #endif
                     continue;
                 }
@@ -100,3 +122,4 @@ namespace KillChord.Runtime.InfraStructure
         }
     }
 }
+

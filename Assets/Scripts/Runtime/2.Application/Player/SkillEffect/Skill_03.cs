@@ -1,8 +1,9 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Domain.InGame.Buff;
-
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.Player;
+using System;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -11,24 +12,41 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_03 : SkillBase
     {
+        /// <summary>
+        ///     スキル効果を初期化します。
+        /// </summary>
+        /// <param name="buff"> 付与バフです。 </param>
         public Skill_03(IBuff buff) : base(buff)
         {
         }
-        public override void Execute(SkillEffectContext context)
+
+        /// <summary>
+        ///     スキル効果を実行します。
+        /// </summary>
+        /// <param name="context"> 実行コンテキストです。 </param>
+        public override void Execute(in SkillEffectContext context)
         {
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage * _damageMultiPlier);
-            //ターゲットに対して単発高火力（通常攻撃の2倍くらいの威力）
+            AttackResult result = AttackCalculator.Calculate(
+                attackDefinition,
+                context.PlayerEntity,
+                context.TargetEntity,
+                false,
+                context.PlayerEntity.BaseDamage * _damageMultiPlier);
 
-            var targets = context.Repository.FindByRule(); //直線上にいるキャラクタを取得する。
-            if (targets == null) return;
-
+            ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
             for (int i = 0; i < targets.Length; i++)
-                targets[i].TakeDamage(result.FinalDamage / _damageMultiPlier);
-            //ターゲットに的中した後、プレイヤーと敵との半直線状にいる敵に対してスキル火力の50％のダメージを与える
+            {
+                CharacterEntity target = targets[i];
+                if (target == null || ReferenceEquals(target, context.TargetEntity))
+                {
+                    continue;
+                }
+
+                target.TakeDamage(result.FinalDamage / _damageMultiPlier);
+            }
         }
 
         private readonly float _damageMultiPlier = 2f;
-
     }
 }

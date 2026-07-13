@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
@@ -25,13 +25,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="presenter"></param>
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
-        /// <param name="targetSelectorController"></param>
+        /// <param name="targetingSystem"></param>
         /// <param name="musicSyncService"></param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
             SkillController skillController,
-            TargetSelectorController targetSelectorController,
+            TargetSystemController targetingSystem,
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
             MusicSyncState musicSyncState,
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _presenter = presenter;
             _battleState = battleState;
             _skillController = skillController;
-            _targetSelectorController = targetSelectorController;
+            _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
             AttackRotationSpeed = attackRotationSpeed;
             _baseDamage = baseDamage;
@@ -76,31 +76,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public bool ExecuteAttack(out int resultBeatType) //TODO : outでBeatTypeを返す構造を修正する
         {
             resultBeatType = 0;
-            if (_targetSelectorController == null)
+            if (_targetingSystem == null)
             {
-                Debug.LogError("TargetSelectorControllerが設定されていません。");
+                Debug.LogError("TargetingSystemが設定されていません。");
                 return false;
             }
 
-            if (!_targetSelectorController.TryGetCurrentTargetEntity(out var targetEntity))
-            {
-                Debug.Log("攻撃対象が選択されていません。");
-                return false;
-            }
-
-            _battleState.ChangeTarget(targetEntity);
-
-            // 現在の ILockOnTarget を取得して保持（View 側が参照する）
-            if (_targetSelectorController.TryGetCurrentTarget(out var lockOnTarget))
-            {
-                HasCurrentLockOnTarget = true;
-                CurrentLockOnTargetPosition = lockOnTarget.Position;
-            }
-            else
-            {
-                HasCurrentLockOnTarget = false;
-                CurrentLockOnTargetPosition = Vector3.zero;
-            }
+            bool hasTarget = TryUpdateCurrentTarget();
 
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
@@ -113,6 +95,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             StartAttackInterval();
             StartAttackCooldown();
+
+            if (!hasTarget)
+            {
+                resultBeatType = (int)beatType;
+                return true;
+            }
+
+            CharacterEntity targetEntity = _battleState.Target as CharacterEntity;
+            if (targetEntity == null)
+            {
+                resultBeatType = (int)beatType;
+                return true;
+            }
 
             BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
             _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
@@ -166,6 +161,36 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
         }
 
+        /// <summary>
+        ///     現在のターゲット状態を更新します。
+        /// </summary>
+        /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
+        private bool TryUpdateCurrentTarget()
+        {
+            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity))
+            {
+                _battleState.ClearTarget();
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
+                return false;
+            }
+
+            _battleState.ChangeTarget(targetEntity);
+
+            if (_targetingSystem.TryGetCurrentTarget(out ITargetableViewModel lockOnTarget))
+            {
+                HasCurrentLockOnTarget = true;
+                CurrentLockOnTargetPosition = lockOnTarget.Position;
+            }
+            else
+            {
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
+            }
+
+            return true;
+        }
+
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
         {
             try
@@ -182,7 +207,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly AttackResultPresenter _presenter;
         private readonly PlayerBattleState _battleState;
         private readonly SkillController _skillController;
-        private readonly TargetSelectorController _targetSelectorController;
+        private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
         private readonly int _baseDamage;

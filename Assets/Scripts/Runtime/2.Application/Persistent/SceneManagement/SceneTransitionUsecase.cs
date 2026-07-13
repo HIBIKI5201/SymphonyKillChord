@@ -114,24 +114,6 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         }
 
         /// <summary>
-        ///    Additiveシーンを読み込んでアクティブにする。
-        /// </summary>
-        /// <param name="toSceneName"> 読み込んでアクティブにするAdditiveシーン名。 </param>
-        /// <param name="ct"> キャンセルトークン。 </param>
-        /// <returns> シーン読み込みの成否を示すタスク。 </returns>
-        public Task<bool> LoadAdditiveAndSetActiveAsync(
-            string toSceneName,
-            CancellationToken ct)
-        {
-            return _executor.ExecuteAsync(
-                progress => _service.LoadAdditiveAndSetActiveAsync(
-                        toSceneName,
-                        progress,
-                        ct),
-                    ct);
-        }
-
-        /// <summary>
         ///     指定したシーンをアンロードして、指定したシーンをアクティブにする。
         /// </summary>
         /// <param name="unloadSceneName"> アンロードするシーン名。 </param>

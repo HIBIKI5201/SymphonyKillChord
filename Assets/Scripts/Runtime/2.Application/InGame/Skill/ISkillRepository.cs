@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Skill;
+﻿using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 
 namespace KillChord.Runtime.Application.InGame.Skill
@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
         /// <param name="id"> 取得するスキルの ID。 </param>
         /// <param name="skillData"> 取得したスキルデータ。 </param>
         /// <returns> スキルデータが存在する場合は true、存在しない場合は false。 </returns>
-        bool TryGetSkill(int id, out SkillData skillData);
+        bool TryGetSkill(int id, out SkillTemplate skillData);
 
         /// <summary>
         /// 指定したIDに対応するSkillDefinitionを取得する。
@@ -22,3 +22,4 @@ namespace KillChord.Runtime.Application.InGame.Skill
         SkillDefinition GetSkill(int id, double bpm);
     }
 }
+

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="equippedSkills"> 現在装備中のスキル一覧。 </param>
         /// <param name="ownedSkills"> 入手済みスキル一覧。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void Push(IReadOnlyList<EquippedSkill> equippedSkills, IReadOnlyList<SkillData> ownedSkills)
+        public void Push(IReadOnlyList<EquippedSkill> equippedSkills, IReadOnlyList<SkillTemplate> ownedSkills)
         {
             if (equippedSkills == null)
             {
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     continue;
                 }
 
-                int skillId = equippedSkill.SkillData.Id;
+                int skillId = equippedSkill.SkillTemplate.Id;
                 slots[i] = new SkillBuildSlotDTO(i, skillId, ConvertSkillLabel(skillId));
             }
 
@@ -79,3 +79,4 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         }
     }
 }
+

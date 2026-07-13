@@ -13,24 +13,40 @@ MonoBehaviour:
   m_Name: PlayerAnimationData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterAnimationCatalogAsset
   _entries:
-  - State: 0
+  - ClipType: 0
     Key: 
     Clip: {fileID: 7400000, guid: a8d1919c2564f4a4699209a8ed04bd19, type: 2}
-  - State: 1
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 1
     Key: 
     Clip: {fileID: 7400000, guid: 9785a2c3720f7bd49bf7221facacfc0e, type: 2}
-  - State: 2
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 2
     Key: 
     Clip: {fileID: 7400000, guid: a002d9273920bbb47840e3e6f3f0ced8, type: 2}
-  - State: 3
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
     Key: 
     Clip: {fileID: 7400000, guid: ad99f450f4f323b46b8d98a222b706d2, type: 2}
-  - State: 3
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
     Key: Attack_Beat1
     Clip: {fileID: 1827226128182048838, guid: a12ddb03c6d69194b8927c7f2ce0b83e, type: 3}
-  - State: 3
+    EnterBlendFrameCount: 4
+    ExitBlendFrameCount: 12
+  - ClipType: 3
     Key: Attack_Beat2
     Clip: {fileID: 1827226128182048838, guid: ecc20323969b04e4080094b599672f80, type: 3}
-  - State: 3
+    EnterBlendFrameCount: 4
+    ExitBlendFrameCount: 12
+  - ClipType: 3
     Key: Skill_1
     Clip: {fileID: 5457690334268165388, guid: 781420ab7102ec1458ee7813f85c0185, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 12
+  _enterBlendFrameCount: 4
+  _exitBlendFrameCount: 8

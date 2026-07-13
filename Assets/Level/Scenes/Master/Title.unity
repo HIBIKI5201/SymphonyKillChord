@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Title.TitleSceneInitializer
   _uiDocument: {fileID: 2119823347}
-  _ruleData: {fileID: 11400000, guid: 1c411bf35748d284584af4d0f16a0ccc, type: 2}
+  _ruleDataKey: Assets/Level/Data/Master/OutGame/Screen/TitleScreenRuleData.asset
   _currentSceneName: Title
   _targetSceneName: OutGame
   _firstLaunchTargetSceneName: OutGame
@@ -254,7 +254,7 @@ GameObject:
   - component: {fileID: 1266340407}
   - component: {fileID: 1266340406}
   m_Layer: 0
-  m_Name: OutGameUIEvent
+  m_Name: OutGameSceneInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,9 +269,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1266340405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fbd60ffeeebe9343aed807180f93228, type: 3}
+  m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Screen.OutGameUIEvent
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
 --- !u!4 &1266340407
 Transform:
   m_ObjectHideFlags: 0

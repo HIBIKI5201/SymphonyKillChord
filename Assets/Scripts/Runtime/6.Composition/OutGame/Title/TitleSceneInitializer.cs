@@ -2,6 +2,8 @@ using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.OutGame.Savedata;
@@ -20,8 +22,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
     /// <summary>
     ///     タイトルシーンの初期化を行うクラス。
     /// </summary>
-    public class TitleSceneInitializer : MonoBehaviour
+    public sealed class TitleSceneInitializer : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(TitleSceneInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 20;
+
         private const string TITLE_SCREEN_NAME = "TitleContainer";
         private const string MENU_SCREEN_NAME = "MenuContainer";
         private const string OPTION_SCREEN_NAME = "OptionContainer";
@@ -30,8 +38,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, Tooltip("UI Document")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("画面遷移ルールデータ")]
-        private ScreenRuleData _ruleData;
+        [SerializeField, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        private string _ruleDataKey;
 
         [Header("シーン遷移設定")]
         [SerializeField, SceneNameSelector, Tooltip("遷移元のシーン名")]
@@ -48,18 +56,36 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleSceneView _titleSceneView;
         private ScreenController _screenController;
         private SavedataSystem _savedataSystem;
+        private ScreenRuleData _loadedRuleData;
 
         // チュートリアルが完了しているかどうかのフラグ
         private bool _isTutorialCompleted;
+        private bool _isInitialized;
+        private bool _isSubscribed;
 
-        private async void Start()
+        /// <summary>
+        ///     タイトル画面に必要なアセットをロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
+        {
+            _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            return _loadedRuleData != null;
+        }
+
+        /// <summary>
+        ///     タイトル画面を構築します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: UI Document が設定されていません。");
 #endif
-                return;
+                return false;
             }
 
             var root = _uiDocument.rootVisualElement;
@@ -68,7 +94,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: Root VisualElement が null です。");
 #endif
-                return;
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
+#endif
+                return false;
             }
 
             SceneTransitionController sceneTransitionController;
@@ -79,7 +113,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
 #endif
-                return;
+                return false;
             }
 
             TitleStartController titleStartController = new(sceneTransitionController);
@@ -93,7 +127,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: タイトル画面のルート VisualElement が見つかりません。{TITLE_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (menuRoot == null)
@@ -101,7 +135,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルート VisualElement が見つかりません。{MENU_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (optionRoot == null)
@@ -109,7 +143,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: オプション画面のルート VisualElement が見つかりません。{OPTION_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (creditRoot == null)
@@ -117,7 +151,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: クレジット画面のルート VisualElement が見つかりません。{CREDIT_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
@@ -130,7 +164,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
-            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_ruleData);
+            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
 
             IScreenTransitionApplicable screenViewModel = new ScreenViewApplicator(_titleScreenViewRegistry);
             IScreenPresenter screenPresenter = new ScreenPresenter(screenViewModel);
@@ -154,9 +188,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 resetToHomeScreenUseCase);
 
             bool isFirstLaunch = !_savedataSystem.Exists<SaveData>();
-            RegisterUIEventCallbacks();
-
-            _screenController.ShowTitle();
 
             if (isFirstLaunch)
             {
@@ -172,17 +203,46 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #endif
                 _titleSceneView.SetTargetSceneName(_targetSceneName);
             }
+
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
-        ///   コールバックの登録を解除する。
+        ///     他モジュールとの結合と初期表示を行います。
         /// </summary>
-        private void OnDestroy()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
         {
-            if (_outGameUIEvent != null)
+            if (!_isInitialized)
+            {
+                return false;
+            }
+
+            RegisterUIEventCallbacks();
+            _screenController.ShowTitle();
+            return true;
+        }
+
+        /// <summary>
+        ///     登録済みサービスやイベント購読を解除します。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
             }
+
+            _ruleDataKey.ReleaseLoadedAsset(this);
+            _loadedRuleData = null;
+            _titleScreenViewRegistry = null;
+            _titleSceneView = null;
+            _screenController = null;
+            _savedataSystem = null;
+            _outGameUIEvent = null;
+            _isInitialized = false;
+            _isSubscribed = false;
         }
 
         /// <summary>
@@ -206,14 +266,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionController が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
@@ -250,12 +302,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void RegisterUIEventCallbacks()
         {
+            if (_outGameUIEvent == null || _isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnShowTitleScreen += HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen += HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen += HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen += HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked += HandleDataResetButtonClicked;
+            _isSubscribed = true;
         }
 
         /// <summary>
@@ -263,12 +321,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void UnRegisterUIEventCallbacks()
         {
+            if (_outGameUIEvent == null || !_isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnShowTitleScreen -= HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen -= HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen -= HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen -= HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked -= HandleDataResetButtonClicked;
+            _isSubscribed = false;
         }
 
 

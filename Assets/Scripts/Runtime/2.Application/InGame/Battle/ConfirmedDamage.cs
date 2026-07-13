@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Battle;
+﻿using KillChord.Runtime.Domain.InGame.Battle;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
@@ -16,7 +16,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            Damage confirmedDamage = context.AttackDefinition.AttackParameterSet.ConfirmedDamage;
+            Damage confirmedDamage = context.AttackDefinition.AttackSpec.ConfirmedDamage;
 
             if (context.Damage.Value < confirmedDamage.Value)
             {
@@ -28,3 +28,4 @@ namespace KillChord.Runtime.Application.InGame.Battle
         }
     }
 }
+

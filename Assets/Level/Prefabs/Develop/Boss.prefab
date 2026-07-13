@@ -527,15 +527,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aed2956d7ea5fc44abc8b90c67daec98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.BossLifeCycle
-  _enemyData: {fileID: 11400000, guid: d96aa53a8bf8e3e49ac87fa3cd9fbb2b, type: 2}
-  _moveData: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
+  _enemyDataKey: Assets/Level/Data/Develop/Boss/BossCharacterData.asset
+  _moveDataKey: Assets/Level/Data/Master/InGame/Battle/ExampleEnemyMoveData.asset
   _view: {fileID: 6675541117173250289}
   _healthView: {fileID: 1235429572548650314}
   _raycastView: {fileID: 8457508100998247417}
   _tripleShotRaycastView: {fileID: 1663985275118639641}
   _attackPositionSearchView: {fileID: 7234215661414305059}
-  _missionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
-  _attackEntryRepo: {fileID: 11400000, guid: c9264ef7716ed4f47bc258f02a4823b9, type: 2}
+  _missionKeyAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/Mission/EnemyMissionKeyAsset.asset
+  _attackEntryRepoKey: Assets/Level/Data/Develop/Boss/BossAttackEntryRepo.asset
   _bossMovementAIFacade: {fileID: 6946616038599445502}
   _bossBattleAIFacade: {fileID: -9177679704855439460}
   _bossStateFacade: {fileID: -6114743387119597843}
@@ -555,6 +555,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a11a9ddb6b358c24bb8c225c74a8287d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.BossMoveView
+  _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
+  _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
 --- !u!114 &1235429572548650314
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -29,11 +29,14 @@ namespace KillChord.Runtime.View.InGame.Music
         private void Update()
         {
             if (!_isPlaying)
+            {
                 return;
+            }
 
 
             RhythmGuideDto dto = _presenter.CreateDto(Time.unscaledTime);
 
+            _view.ConfigureZones(dto.Zones);
             _view.SetAlpha(dto.HasTarget);
             _view.SetBeatsOffset(dto.IndicatorNormalized);
         }

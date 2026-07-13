@@ -1,4 +1,4 @@
-using KillChord.Runtime.Utility.Constant;
+﻿using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -9,8 +9,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(fileName = "BossAttackEntryRepo", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(BossAttackEntryRepo))]
     public class BossAttackEntryRepo : ScriptableObject
     {
-        public BossAttackEntryDefinition[] AttackEntries => _attackEntries;
-        [SerializeField] private BossAttackEntryDefinition[] _attackEntries;
+        public BossAttackEntryAsset[] AttackEntries => _attackEntries;
+        [SerializeField] private BossAttackEntryAsset[] _attackEntries;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -25,3 +25,4 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 #endif
     }
 }
+

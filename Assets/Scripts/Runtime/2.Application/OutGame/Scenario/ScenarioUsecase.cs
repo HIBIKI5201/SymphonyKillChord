@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.OutGame.Scenario;
+﻿using KillChord.Runtime.Domain.OutGame.Scenario;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             try
             {
                 // シナリオデータを読み込む。
-                ScenarioData data = await _scenarioRepo.FindByIdAsync(scenarioId, token);
+                ScenarioDefinition data = await _scenarioRepo.FindByIdAsync(scenarioId, token);
 
                 for (int i = 0; i < data.Events.Count; i++)
                 {

@@ -1,18 +1,18 @@
-using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Skill;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
     /// <summary>
-    ///     スキルの対象を解決するためのインターフェース。
+    ///     スキル対象の解決を行うインターフェースです。
     /// </summary>
     public interface ISkillTargetResolver
     {
         /// <summary>
-        ///     スキルの現在の対象を取得する。
-        ///     対象が存在しない場合は false を返す。
+        ///     スキル対象の解決を試みます。
         /// </summary>
-        /// <param name="entity">   取得された対象エンティティ。存在しない場合はnull </param>
-        /// <returns>   対象エンティティが存在する場合は true。</returns>
-        public bool TryGetCurrentTargetEntity(out CharacterEntity entity);
+        /// <param name="targetingType"> 対象解決ルールです。 </param>
+        /// <param name="result"> 解決結果です。 </param>
+        /// <returns> 解決に成功した場合はtrue。 </returns>
+        bool TryResolveTargets(SkillTargetingType targetingType, out SkillTargetResolveResult result);
     }
 }

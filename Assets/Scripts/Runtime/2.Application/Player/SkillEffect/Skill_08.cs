@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         {
             
         }
-        public override void Execute(SkillEffectContext context)
+        public override void Execute(in SkillEffectContext context)
         {
             Debug.Log("TestSkillEffect executed!");
             // ここにスキルの効果を実装する

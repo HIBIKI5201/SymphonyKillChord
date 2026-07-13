@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="value"></param>
         public void ChangeHealth(Health value)
         {
-            if ((float)value > (float)MaxHealth) { value = MaxHealth; }
+            if (value > MaxHealth) { value = MaxHealth; }
             CurrentHealth = value;
         }
     }

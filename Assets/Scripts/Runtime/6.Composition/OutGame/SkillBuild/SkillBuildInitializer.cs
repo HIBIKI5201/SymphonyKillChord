@@ -1,13 +1,18 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,39 +22,31 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
     /// <summary>
     ///     改造画面の依存解決と初期化を行うクラス。
     /// </summary>
-    public sealed class SkillBuildInitializer : MonoBehaviour
+    public sealed class SkillBuildInitializer : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(SkillBuildInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 130;
+
+        private const string SKILL_BUILD_CONTAINER_NAME = "SkillBuildContainer";
+
         [SerializeField]
         [Tooltip("UI Document コンポーネント。")]
         private UIDocument _uiDocument;
 
         [SerializeField]
-        [Tooltip("セーブデータから入手済みスキルを取得するリポジトリです。")]
-        private OwnedSkillRepository _ownedSkillRepository;
+        [Tooltip("セーブデータから入手済みスキルを取得するリポジトリの Addressables キーです。")]
+        private string _ownedSkillRepositoryKey;
 
         [SerializeField]
-        [Tooltip("セーブデータから装備済みスキルを取得するリポジトリです。")]
-        private SkillBuildRepository _skillBuildRepository;
+        [Tooltip("セーブデータから装備済みスキルを取得するリポジトリの Addressables キーです。")]
+        private string _skillBuildRepositoryKey;
 
         [SerializeField]
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
         private VisualTreeAsset _skillElementTemplate;
-
-        [Header("デバッグ用")]
-        [SerializeField]
-        private bool _isDebugMode = false;
-
-        [SerializeField]
-        [Tooltip("デバッグ用のスキルビルドデバッガーです。")]
-        private SkillBuildDebugger _skillBuildDebugger;
-
-        [SerializeField]
-        [Tooltip("デバッグ用の入手済みスキルリポジトリです。")]
-        private OwnedSkillRepositoryDebug _ownedSkillRepositoryDebug;
-
-        [SerializeField]
-        [Tooltip("デバッグ用のスキルビルドリポジトリです。")]
-        private SkillBuildRepositoryDebug _skillBuildRepositoryDebug;
 
         private SkillBuildScreenView _skillBuildScreenView;
         private SkillBuildViewModel _skillBuildViewModel;
@@ -58,52 +55,97 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildPresenter _skillBuildPresenter;
         private OutGameUIEvent _outGameUIEvent;
         private SkillElementDragAndDropSetup _skillElementDragAndDropSetup;
+        private OwnedSkillRepository _loadedOwnedSkillRepository;
+        private SkillBuildRepository _loadedSkillBuildRepository;
+        private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
+        private SkillTemplate[] _loadedOwnedSkillTemplates;
+        private SavedataSystem _savedataSystem;
+        private bool _isInitialized;
+        private bool _isSubscribed;
 
         /// <summary>
-        ///     スキル編成機能の初期化を行う。
+        ///     非同期のリソースロードを行います。
         /// </summary>
-        private async void Start()
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            await InitializeAsync();
+            _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<OwnedSkillRepository>(this, destroyCancellationToken);
+            _loadedSkillBuildRepository = await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, destroyCancellationToken);
+
+            if (!ValidateLoadedRepositories())
+            {
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SavedataSystem が取得できませんでした。", this);
+                return false;
+            }
+
+            _savedataSystem = savedataSystem;
+            _loadedOwnedSkillRepository.Initialize(_savedataSystem);
+            _loadedSkillBuildRepository.Initialize(_savedataSystem);
+
+            _loadedEquippedSkills = await GetEquippedSkillAsync();
+            IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
+            _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
+
+            return _loadedEquippedSkills != null && _loadedOwnedSkillTemplates != null;
         }
 
         /// <summary>
-        ///     登録した依存関係を解放する。
+        ///     システムを構築します。
         /// </summary>
-        private void OnDestroy()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
+        {
+            return Initialize();
+        }
+
+        /// <summary>
+        ///     他モジュールとの結合を行います。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            Subscribe();
+            return _isInitialized;
+        }
+
+        /// <summary>
+        ///     登録済みサービスやイベント購読を解除します。
+        /// </summary>
+        public override void Shutdown()
         {
             Unsubscribe();
             DisposeComponents();
-            // SkillBuildDefinition はゲーム全体の擬似セーブデータとして存在し続けるため解除しない
+
+            _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
+            _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedOwnedSkillRepository = null;
+            _loadedSkillBuildRepository = null;
+            _loadedEquippedSkills = null;
+            _loadedOwnedSkillTemplates = null;
+            _savedataSystem = null;
+            _outGameUIEvent = null;
+            _isInitialized = false;
+            _isSubscribed = false;
         }
 
         /// <summary>
-        ///     スキル編成機能の依存解決を行う。
+        ///     スキル編成機能の依存解決を行います。
         /// </summary>
-        private async Task InitializeAsync()
+        /// <returns> 初期化に成功した場合はtrue。 </returns>
+        private bool Initialize()
         {
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] UIDocument が設定されていません。", this);
 #endif
-                return;
-            }
-
-            if (_skillBuildRepository == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepository が設定されていません。", this);
-#endif
-                return;
-            }
-
-            if (_ownedSkillRepository == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(SkillBuildInitializer)}] OwnedSkillRepository が設定されていません。", this);
-#endif
-                return;
+                return false;
             }
 
             if (_skillElementTemplate == null)
@@ -111,7 +153,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillElementTemplate が設定されていません。", this);
 #endif
-                return;
+                return false;
             }
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
@@ -119,118 +161,118 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] OutGameUIEvent が取得できませんでした。", this);
 #endif
-                return;
+                return false;
             }
 
             if (!ServiceLocator.TryGetInstance(out _skillBuildScreenView))
             {
+                _skillBuildScreenView = CreateSkillBuildScreenView();
+                if (_skillBuildScreenView == null)
+                {
 #if UNITY_EDITOR
-                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildScreenView が取得できませんでした。", this);
+                    Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildScreenView が取得できませんでした。", this);
 #endif
-                return;
+                    return false;
+                }
             }
-
-            // 装備スキルと入手済みスキルを取得する。
-            IReadOnlyList<EquippedSkill> loadedEquippedSkills = await GetEquippedSkillAsync();
-            IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
-            SkillData[] ownedSkillData = BuildOwnedSkills(ownedSkills);
 
             if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
             {
-                _skillBuildDefinition = new SkillBuildDefinition(ToArray(loadedEquippedSkills));
+                _skillBuildDefinition = new SkillBuildDefinition(ToArray(_loadedEquippedSkills));
                 ServiceLocator.RegisterInstance(_skillBuildDefinition);
             }
             else
             {
                 _skillBuildDefinition.EnsureSlotCount(
-                    loadedEquippedSkills.Count > SkillBuildDefinition.INITIAL_SLOT_COUNT
-                        ? loadedEquippedSkills.Count
+                    _loadedEquippedSkills.Count > SkillBuildDefinition.INITIAL_SLOT_COUNT
+                        ? _loadedEquippedSkills.Count
                         : SkillBuildDefinition.INITIAL_SLOT_COUNT);
             }
 
-            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition);
+            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition, _savedataSystem);
             _skillBuildViewModel = new(_outGameUIEvent);
             _skillBuildPresenter = new(_skillBuildViewModel);
-            _skillBuildController = new(skillBuildUseCase, _skillBuildViewModel, ownedSkillData);
+            _skillBuildController = new(skillBuildUseCase, _skillBuildViewModel, _loadedOwnedSkillTemplates);
 
-            // ドラッグアンドドロップのセットアップを先に生成し、スキル要素生成コールバックとして渡す。
-            // これにより、Push() で生成される要素にもマニピュレーターが即座にアタッチされる。
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(_uiDocument, _skillBuildViewModel);
 
             _skillBuildScreenView.InitializeSkillList(_skillElementTemplate, _skillElementDragAndDropSetup.SetupDraggable);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
+            _skillBuildPresenter.Push(_skillBuildDefinition.EquippedSkills, _loadedOwnedSkillTemplates);
 
-            _skillBuildPresenter.Push(_skillBuildDefinition.EquippedSkills, ownedSkillData);
-            Subscribe();
-
-#if UNITY_EDITOR
-            if (_skillBuildDebugger != null)
-            {
-                _skillBuildDebugger.Initialize(_skillBuildDefinition);
-            }
-#endif
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
-        ///     初期表示用の入手済みスキル一覧を構築する。
+        ///     ロード済みリポジトリの妥当性を検証します。
+        /// </summary>
+        /// <returns> 有効な場合はtrue。 </returns>
+        private bool ValidateLoadedRepositories()
+        {
+            if (_loadedSkillBuildRepository == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildRepository が設定されていません。", this);
+#endif
+                return false;
+            }
+
+            if (_loadedOwnedSkillRepository == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(SkillBuildInitializer)}] OwnedSkillRepository が設定されていません。", this);
+#endif
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     初期表示用の入手済みスキル一覧を構築します。
         /// </summary>
         /// <param name="ownedSkills"> 現在所持しているスキル一覧。 </param>
-        /// <returns> 入手済みスキル一覧。 </returns>
-        private SkillData[] BuildOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills)
+        /// <returns> 入手済みスキル一覧です。 </returns>
+        private SkillTemplate[] BuildOwnedSkills(IReadOnlyList<EquippedSkill> ownedSkills)
         {
-            SkillData[] result = new SkillData[ownedSkills.Count];
+            SkillTemplate[] result = new SkillTemplate[ownedSkills.Count];
 
             for (int i = 0; i < ownedSkills.Count; i++)
             {
-                result[i] = ownedSkills[i].SkillData;
+                result[i] = ownedSkills[i].SkillTemplate;
             }
 
             return result;
         }
 
         /// <summary>
-        ///     入手済みスキル一覧を取得する。
-        ///     デバッグモードの場合はデバッグ用リポジトリから取得する。
+        ///     入手済みスキル一覧を取得します。
         /// </summary>
-        /// <returns> 入手済みスキル一覧。 </returns>
+        /// <returns> 入手済みスキル一覧です。 </returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkillsAsync()
         {
-            if (_ownedSkillRepository != null && !_isDebugMode)
-            {
-                return await _ownedSkillRepository.LoadOwnedSkillsAsync();
-            }
-            else
-            {
-                return await _ownedSkillRepositoryDebug.GetOwnedSkills();
-            }
+            return await _loadedOwnedSkillRepository.LoadOwnedSkillsAsync();
         }
 
         /// <summary>
-        ///    装備済みスキル一覧を取得する。
-        ///    デバッグモードの場合はデバッグ用リポジトリから取得する。
+        ///     装備済みスキル一覧を取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns> 装備済みスキル一覧です。 </returns>
         private async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkillAsync()
         {
-            if(_skillBuildRepository != null && !_isDebugMode)
-            {
-                return await _skillBuildRepository.GetEquippedSkills();
-            }
-            else
-            {
-                return await _skillBuildRepositoryDebug.GetEquippedSkills();
-            }
+            return await _loadedSkillBuildRepository.GetEquippedSkills();
         }
 
         /// <summary>
-        ///     入手済みスキル一覧を再取得して画面へ反映する。
+        ///     入手済みスキル一覧を再取得して画面へ反映します。
         /// </summary>
         private async void RefreshOwnedSkills()
         {
             try
             {
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
-                SkillData[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+                SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(_skillBuildDefinition.EquippedSkills, ownedSkillData);
             }
@@ -241,10 +283,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     読み取り専用一覧を配列へ変換する。
+        ///     読み取り専用一覧を配列へ変換します。
         /// </summary>
         /// <param name="equippedSkills"> 変換元のスキル一覧。 </param>
-        /// <returns> 配列化したスキル一覧。 </returns>
+        /// <returns> 配列化したスキル一覧です。 </returns>
         private EquippedSkill[] ToArray(IReadOnlyList<EquippedSkill> equippedSkills)
         {
             EquippedSkill[] result = new EquippedSkill[equippedSkills.Count];
@@ -258,7 +300,22 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     生成したコンポーネントを解放する。
+        ///     改造画面の View をその場で生成します。
+        /// </summary>
+        /// <returns> 生成した View。生成できない場合は null です。 </returns>
+        private SkillBuildScreenView CreateSkillBuildScreenView()
+        {
+            VisualElement skillBuildRoot = _uiDocument.rootVisualElement.Q<VisualElement>(SKILL_BUILD_CONTAINER_NAME);
+            if (skillBuildRoot == null)
+            {
+                return null;
+            }
+
+            return new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+        }
+
+        /// <summary>
+        ///     生成したコンポーネントを解放します。
         /// </summary>
         private void DisposeComponents()
         {
@@ -274,33 +331,41 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _skillBuildViewModel?.Dispose();
             _skillBuildViewModel = null;
             _skillBuildPresenter = null;
+            _skillElementDragAndDropSetup = null;
         }
 
         /// <summary>
-        ///     イベントを購読する。
+        ///     イベントを購読します。
         /// </summary>
         private void Subscribe()
         {
+            if (!_isInitialized || _outGameUIEvent == null || _isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnOwnedSkillChanged += HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen += HandleShownSkillBuildScreenHandler;
+            _isSubscribed = true;
         }
 
         /// <summary>
-        ///     イベント購読を解除する。
+        ///     イベント購読を解除します。
         /// </summary>
         private void Unsubscribe()
         {
-            if (_outGameUIEvent == null)
+            if (_outGameUIEvent == null || !_isSubscribed)
             {
                 return;
             }
 
             _outGameUIEvent.OnOwnedSkillChanged -= HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen -= HandleShownSkillBuildScreenHandler;
+            _isSubscribed = false;
         }
 
         /// <summary>
-        ///     入手済みスキル更新イベントを処理する。
+        ///     入手済みスキル更新イベントを処理します。
         /// </summary>
         private void HandleOwnedSkillChangedHandler()
         {
@@ -308,19 +373,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     改造画面表示イベントを処理する。
+        ///     改造画面表示イベントを処理します。
         /// </summary>
         private void HandleShownSkillBuildScreenHandler()
         {
             RefreshOwnedSkills();
-        }
-
-        /// <summary>
-        ///     ServiceLocator へ登録したサービスを解除する。
-        /// </summary>
-        private void UnregisterServices()
-        {
-            ServiceLocator.UnregisterInstance<SkillBuildDefinition>();
         }
     }
 }

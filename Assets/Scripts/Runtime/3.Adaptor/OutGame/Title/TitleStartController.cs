@@ -36,7 +36,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
             try
             {
                 isSuccess =
-                    await _sceneTransitionController.LoadAdditiveAndSetActiveAsync(targetSceneName, token);
+                    await _sceneTransitionController.LoadAdditiveAsync(targetSceneName, token);
 
                 if (!isSuccess)
                 {

@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
+  m_Name: ""
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
   m_IgnoreReversedGraphics: 1
   m_BlockingObjects: 0
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
@@ -304,7 +304,6 @@ GameObject:
   - component: {fileID: 86621105}
   - component: {fileID: 86621104}
   - component: {fileID: 86621103}
-  - component: {fileID: 86621102}
   m_Layer: 5
   m_Name: ChangeScene_1
   m_TagString: Untagged
@@ -312,19 +311,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &86621102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 86621101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b987d4cfefaa1c74d82f6965dff626cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGameMissionButtonView
-  _missionId: 
 --- !u!114 &86621103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,19 +358,6 @@ MonoBehaviour:
       - m_Target: {fileID: 205594943}
         m_TargetAssemblyTypeName: KillChord.Runtime.View.SceneTransitionView, KillChord.View
         m_MethodName: ChangeScene
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 86621102}
-        m_TargetAssemblyTypeName: KillChord.Runtime.View.OutGameMissionButtonView,
-          KillChord.View
-        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -834,7 +807,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 2119823347}
-  _stageTreeAsset: {fileID: 11400000, guid: 258321da291460949a3505c9ef2f85fe, type: 2}
+  _stageTreeAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/StageTreeAsset.asset
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -848,7 +821,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
-  _screenRuleData: {fileID: 11400000, guid: ed3d6973f36d66844852d3391a8a18df, type: 2}
+  _screenRuleDataKey: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -889,12 +862,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 2119823347}
-  _skillNodeDataRepo: {fileID: 11400000, guid: 57ad1f17f7de2804a9744cf5cc3c4316, type: 2}
-  _skillNodeBindRepo: {fileID: 11400000, guid: 8bb92b8655a6f724b864e7dac88d6e70, type: 2}
-  _skillNodePhaseBindRepo: {fileID: 11400000, guid: 2efcc81dfd565a94a9110b488a8ec243, type: 2}
+  _skillNodeDataRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
+  _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
+  _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
   _videoPlayer: {fileID: 1876322594}
-  _inputData: {fileID: 11400000, guid: fa8820e093edab1489d8bbed0db664af, type: 2}
-  _isDebugMode: 1
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -908,13 +879,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
   _uiDocument: {fileID: 2119823347}
-  _ownedSkillRepository: {fileID: 11400000, guid: 134672bf4f515f4439a46323fff09e2a, type: 2}
-  _skillBuildRepository: {fileID: 11400000, guid: d2b760f47d977174fb177b0d0f9d2480, type: 2}
+  _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
+  _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
-  _debugMode: 0
-  _skillBuildDebugger: {fileID: 0}
-  _ownedSkillRepositoryDebug: {fileID: 11400000, guid: 8f9f05cd27f2f3a4087a15acbe76d7c3, type: 2}
-  _skillBuildRepositoryDebug: {fileID: 11400000, guid: ed00377b3610b1e45b0f1c7da00f007a, type: 2}
 --- !u!1 &959266667
 GameObject:
   m_ObjectHideFlags: 0
@@ -1001,7 +968,7 @@ GameObject:
   - component: {fileID: 1480631847}
   - component: {fileID: 1480631846}
   m_Layer: 0
-  m_Name: OutGameUIEvent
+  m_Name: OutGameSceneInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1016,9 +983,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1480631845}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fbd60ffeeebe9343aed807180f93228, type: 3}
+  m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Screen.OutGameUIEvent
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
 --- !u!4 &1480631847
 Transform:
   m_ObjectHideFlags: 0
@@ -1029,6 +996,50 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.41972, y: 0, z: 0.13352}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1480631848
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1480631850}
+  - component: {fileID: 1480631849}
+  m_Layer: 0
+  m_Name: DevelopSkillUnlockInitializer
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1480631849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480631848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 434490ef9a2c4724b8cb7984f7150eb1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.Composition.OutGame.DevelopSkillUnlockInitializer
+--- !u!4 &1480631850
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480631848}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1111,7 +1122,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1995936540}
-  - component: {fileID: 1995936539}
   m_Layer: 0
   m_Name: Mission
   m_TagString: Untagged
@@ -1119,21 +1129,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1995936539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1995936538}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cf35a1743a31bf4b8918eec68ee7979, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGameMissionInitializer
-  _buttons:
-  - {fileID: 2088528359}
-  - {fileID: 86621102}
 --- !u!4 &1995936540
 Transform:
   m_ObjectHideFlags: 0
@@ -1161,7 +1156,6 @@ GameObject:
   - component: {fileID: 2088528358}
   - component: {fileID: 2088528357}
   - component: {fileID: 2088528356}
-  - component: {fileID: 2088528359}
   m_Layer: 5
   m_Name: ChangeScene
   m_TagString: Untagged
@@ -1245,19 +1239,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 2088528359}
-        m_TargetAssemblyTypeName: KillChord.Runtime.View.OutGameMissionButtonView,
-          KillChord.View
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &2088528357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1296,19 +1277,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088528354}
   m_CullTransparentMesh: 1
---- !u!114 &2088528359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2088528354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b987d4cfefaa1c74d82f6965dff626cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGameMissionButtonView
-  _missionId: AllKill
 --- !u!1 &2119823346
 GameObject:
   m_ObjectHideFlags: 0

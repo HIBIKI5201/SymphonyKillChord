@@ -67,18 +67,6 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         /// <summary>
-        ///     遷移元を残したまま遷移先シーンをAdditiveロードし、ActiveSceneを切り替える。
-        /// </summary>
-        public Task<bool> LoadAdditiveAndSetActiveAsync(
-            string toSceneName,
-            CancellationToken cancellationToken)
-        {
-            return _useCase.LoadAdditiveAndSetActiveAsync(
-                toSceneName,
-                cancellationToken);
-        }
-
-        /// <summary>
         ///     対象シーンをUnloadし、ActiveSceneを指定シーンへ戻す。
         /// </summary>
         public Task<bool> UnloadAndSetActiveAsync(

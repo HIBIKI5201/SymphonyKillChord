@@ -1,5 +1,4 @@
 using System;
-using KillChord.Runtime.Adaptor.InGame.Camera;
 using UnityEngine;
 
 namespace DevelopProducts.BindingSystem

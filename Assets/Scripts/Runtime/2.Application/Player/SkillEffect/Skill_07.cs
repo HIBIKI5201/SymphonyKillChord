@@ -1,9 +1,12 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using KillChord.Runtime.Domain.InGame.Buff;
+using Random = UnityEngine.Random;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -12,17 +15,36 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_07 : SkillBase
     {
-        public Skill_07(IBuff buff,IAttackController attackController) : base(buff)
+        /// <summary>
+        ///     スキル効果を初期化します。
+        /// </summary>
+        /// <param name="buff"> 付与バフです。 </param>
+        /// <param name="attackController"> 攻撃実行器です。 </param>
+        public Skill_07(IBuff buff, IAttackController attackController) : base(buff)
         {
             _attackController = attackController;
         }
-        public override void Execute(SkillEffectContext context)
+
+        /// <summary>
+        ///     スキル効果を実行します。
+        /// </summary>
+        /// <param name="context"> 実行コンテキストです。 </param>
+        public override void Execute(in SkillEffectContext context)
         {
-            //自身の前方60度（仮）射程12m内にいる敵に対して4拍子の通常攻撃を3回行う。
-            var targets = context.Repository.FindByRule();
-            float BeforeTargetsTotalDamageValue = 0;
-            foreach(var target in targets) BeforeTargetsTotalDamageValue += target.BaseDamage.Value;
-            Damage BeforeTargetsTotalDamage = new(BeforeTargetsTotalDamageValue);
+            ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
+            if (targets.Length == 0)
+            {
+                return;
+            }
+
+            float beforeTargetsTotalDamageValue = 0f;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                beforeTargetsTotalDamageValue += targets[i].BaseDamage.Value;
+            }
+
+            Damage beforeTargetsTotalDamage = new Damage(beforeTargetsTotalDamageValue);
+
             if (_attackCount <= targets.Length)
             {
                 int targetNumber = Random.Range(0, targets.Length);
@@ -36,9 +58,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             }
             else
             {
-                //範囲内に敵が2体以下の場合、
-                //通常攻撃2回目以降の攻撃対象選択時に範囲内のすべての敵に攻撃が的中してた場合はターゲット内にいる敵に残りHPが高い順で通常攻撃が再度Hitする。
-                _hitNumbers = new int[targets.Length];
+                ResetHitNumbers(targets.Length);
 
                 for (int i = 0; i < targets.Length; i++)
                 {
@@ -48,9 +68,15 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     BuffContext buffcontext = new BuffContext(context.PlayerEntity, context.TargetEntity);
                     targets[targetNumber].BuffSystem.Execute(buffcontext, BuffExecuteTiming.Skill);
                     _hitNumbers[targetNumber]++;
+
                     bool isAllhit = true;
-                    foreach (var hit in _hitNumbers) if (hit == 0)
+                    for (int j = 0; j < _hitNumbers.Count; j++)
                     {
+                        if (_hitNumbers[j] != 0)
+                        {
+                            continue;
+                        }
+
                         isAllhit = false;
                         break;
                     }
@@ -59,35 +85,51 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     {
                         float maxValue = float.MinValue;
                         int maxHealthTarget = 0;
-                        CharacterEntity targetCharacter;
                         for (int k = 0; k < targets.Length; k++)
                         {
-                            if (targets[i].CurrentHealth.Value > maxValue)
+                            if (targets[k].CurrentHealth.Value <= maxValue)
                             {
-                                maxValue = targets[i].CurrentHealth.Value;
-                                maxHealthTarget = i;
+                                continue;
                             }
+
+                            maxValue = targets[k].CurrentHealth.Value;
+                            maxHealthTarget = k;
                         }
-                        
-                        targetCharacter =  targets[maxHealthTarget];
+
+                        CharacterEntity targetCharacter = targets[maxHealthTarget];
                         _attackController.Execute((int)_beatType, targetCharacter);
                         targetCharacter.BuffSystem.Execute(buffcontext, BuffExecuteTiming.Skill);
                     }
                 }
             }
 
-            float AfterTargetsTotalDamageValue = 0;
-            foreach(var target in targets) AfterTargetsTotalDamageValue += target.BaseDamage.Value;
-            Damage AfterTargetsTotalDamage = new(BeforeTargetsTotalDamageValue);
-            
-            Damage targetsDownBaseDamage = BeforeTargetsTotalDamage - AfterTargetsTotalDamage.Value;
-            context.PlayerEntity.ChangeBaseDamage(targetsDownBaseDamage);
+            float afterTargetsTotalDamageValue = 0f;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                afterTargetsTotalDamageValue += targets[i].BaseDamage.Value;
+            }
 
+            Damage afterTargetsTotalDamage = new Damage(afterTargetsTotalDamageValue);
+            Damage targetsDownBaseDamage = beforeTargetsTotalDamage - afterTargetsTotalDamage.Value;
+            context.PlayerEntity.ChangeBaseDamage(targetsDownBaseDamage);
         }
 
-        private IAttackController _attackController;
-        private BeatType _beatType = BeatType.Four;
-        private int _attackCount = 3;
-        private int[] _hitNumbers;
+        private readonly IAttackController _attackController;
+        private readonly BeatType _beatType = BeatType.Four;
+        private readonly int _attackCount = 3;
+        private readonly List<int> _hitNumbers = new();
+
+        /// <summary>
+        ///     対象数に合わせて命中回数を初期化します。
+        /// </summary>
+        /// <param name="targetCount"> 対象数です。 </param>
+        private void ResetHitNumbers(int targetCount)
+        {
+            _hitNumbers.Clear();
+            for (int i = 0; i < targetCount; i++)
+            {
+                _hitNumbers.Add(0);
+            }
+        }
     }
 }

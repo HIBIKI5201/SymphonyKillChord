@@ -1,0 +1,411 @@
+あなたはソフトウェアアーキテクトです。
+
+このプロジェクトが設計思想に従って実装されているかを調査してください。
+
+## 最重要事項
+
+推測ではなく、実際のコードから依存関係を解析してください。
+
+必ず
+
+- 名前空間
+- クラス名
+- using
+- 継承
+- Interface実装
+- コンストラクタDI
+- メソッド呼び出し
+- static参照
+- イベント
+- Unity SerializeField
+- ScriptableObject参照
+
+などを根拠として判断してください。
+
+---
+
+# **基底概念**
+
+- 大規模に拡張性のあるシステムであること
+- 仕様の変更に柔軟であること
+- 大人数での開発に対応できること
+
+## **指向**
+
+- クリーンアーキテクチャ
+- ドメイン駆動設計
+- SOLID原則
+- GRASP原則
+- KISS法則
+- クエリ・コマンド原則
+- MVVM
+
+# **アーキテクチャ**
+
+基礎概念はクリーンアーキテクチャ。 副次概念はドメイン駆動設計。
+
+ただしUnityフレームワークへの依存は許容する。 Unityライフサイクルへの依存は抑える。
+
+レイヤーを
+
+- Domain
+- Application
+- Adaptor
+- View
+- InfraStructure
+- Composition
+
+に分ける。
+
+下層への参照を行いたい場合は、自層にintarfaceを追加し、下層がそれを実装してCompositionがDI注入する。
+
+他モジュールへの依存は、Adaptor層のみが依存し、Composition層が依存性解決を行う。
+
+## **各レイヤーの説明**
+
+!image.png
+
+### **Domain**
+
+データ層。ピュアクラス。 参照レイヤーはなし。
+
+ロジックで使用するデータの保存層。 データに関するロジックを持つ。
+
+### **Application**
+
+処理層。ピュアクラス。 参照レイヤーはDomain。
+
+Domainを操作してロジックを処理する。
+
+### **Adaptor**
+
+伝達層。ピュアクラス。 参照レイヤーはDomain/Application。
+
+Applicationの処理を呼び出したり、Domainのデータを他のApplicationへ橋渡しする。 View層へデータを受け渡すViewからの入力をApplicationに受け渡す。
+
+Viewへの受け渡しはViewModelを使用する。
+
+### **View**
+
+表示層。Unityフレームワーク。 参照レイヤーはAdaptor。
+
+ゲームオブジェクトやレンダリングの操作を行う。 入力を受け取ってAdaptorに受け渡す。
+
+### **InfraStructure**
+
+データ転送層。Unityフレームワーク。参照レイヤーはDomain、Application、View。
+
+ScriptableObjectやDataBaseを使用して取得する実装を行う。
+
+### **Composition**
+
+初期化層。Unityフレームワーク/ピュアクラスのハイブリッド。 参照レイヤーはDomain/Application/Adaptor/View/InfraStructure。
+
+Domain、Application、Adaptor、View、InfraStructureのシステムの依存性注入を行う。
+
+# **クラス設計**
+
+## Domain層
+
+### Entity
+
+Domain層にある値が可変な参照型オブジェクト。
+
+型は`class` 。
+
+```csharp
+public class Entity
+{
+    public Entity(string id)
+    {
+        _id = id;
+        _value = 0;
+    }
+
+    public string ID => _id;
+    public float Value => _value;
+
+    public void ChangeValue(float value) => _value = value;
+
+    private readonly string _id;
+    private float _value;
+}
+```
+
+### ValueObject（VO）
+
+Domain層にある値が不変な値型オブジェクト。
+
+型は`readonly struct` 。
+
+```csharp
+public readonly struct ValueObject : IEquatable<ValueObject>
+{
+    public ValueObject(float value)
+    {
+        if (_value < 0) { throw new ArgumentException("value is can't negative", nameof(value)); }
+        _value = value;
+    }
+
+    public float Value => _value;
+
+    public bool Equals(ValueObject other) => _value == other._value;
+
+    private readonly float _value;
+}
+```
+
+## Application層
+
+### Factory
+
+Application層にあるApplicationとDomainのインスタンスを生成するクラス。
+Factoryパターンを使用する。
+
+## Adaptor層
+
+### Presenter
+
+Adaptor層にあるViewとDomainを仲介するクラス。
+
+Query CommandのQueryを担当する。
+
+### Controller
+
+Adaptor層にあるDomainやApplicationの処理を実行するクラス。
+
+Query CommandのCommandを担当する。
+
+### State
+
+Adaptor層にあるデータ状態の永続性を持つクラス。
+
+### DataTransferObject（DTO）
+
+Adaptor層にあるViewModelへ更新データを送る値型オブジェクト。
+
+型は`readonly ref struct` 。
+
+## View層
+
+### ViewModel（VM）
+
+View層にあるUIに表示するデータを保持するクラス。
+ReactivePropaty指向で実装する。
+
+DTOを受け取るメソッドを用意する。
+DTOは`in` を使用する。
+
+### Signal
+
+View層にあるイベントバス。
+
+DTOを受け取るメソッドを用意する。
+DTOは`in` を使用する。
+
+### Spawner
+
+View層にあるViewのオブジェクトを生成するクラス。
+Factoryパターンを使用する。
+
+### Config
+
+View層にある、Viewの設定データを格納するクラス。
+ScriptableObjectで実装する。
+
+Viewのみで完結する設定データがある場合に使用する。
+ドメインロジックに関連する場合は **Asset** を使用する。
+
+## InfraStructure層
+
+### **Asset**
+
+InfraStructure層にある、データを入力するScriptableObjectクラス。
+
+Domain層などに対となるクラスが存在し、それのパラメータを導入できるようにする。
+
+### Repository
+
+InfraStructure層に実装があり、Application層に抽象がある。
+
+DBの取得処理やScriptableObjectなど。
+
+## **Composition層**
+
+### Initializer
+
+Composition層にある初期化やDIを実行するクラス。
+
+### Debugger
+
+Composition層にあるエディタ向け機能のクラス。
+
+# 設計パターン
+
+Application層からView層の多態な処理を実行する方法
+
+# 参考資料
+
+デザインパターンとSOLIDでコードをレベルアップ
+
+リファクタリング・カタログ（抜粋）
+
+Unityにおける「設計レベル」を定義してみた
+
+Clean Architecture for Unity
+
+ふわっと理解するDDD ~ドメイン駆動設計~
+---
+
+# 調査内容
+---
+
+## 1. モジュール依存関係
+
+各モジュールについて
+
+- 参照しているモジュール
+- 参照されているモジュール
+
+を一覧化してください。
+
+依存方向を図でも整理してください。
+
+---
+
+## 2. クラス責務の検証
+
+各クラスが設計書で定義された責務になっているか確認してください。
+
+例
+
+Entity
+ValueObject
+Factory
+Controller
+Presenter
+State
+DTO
+ViewModel
+Signal
+Spawner
+Config
+Asset
+Repository
+Initializer
+Debugger
+
+責務と異なる実装があれば報告してください。
+
+---
+
+
+## 3. DIの確認
+
+依存性が
+
+Composition
+
+で解決されているか確認してください。
+
+永続的なオブジェクトをnewしている箇所があれば報告してください。
+
+---
+
+## 4. モジュール間依存
+
+設計では
+
+「他モジュールへの依存はAdaptor層のみ」
+
+となっています。
+
+これを満たしているか確認してください。
+
+違反箇所を一覧化してください。
+
+
+---
+
+## 5. 循環参照
+
+循環依存を検出してください。
+
+クラス単位
+モジュール単位
+名前空間単位
+
+それぞれ確認してください。
+
+---
+
+## 6. アーキテクチャ品質
+
+以下を100点満点で評価してください。
+
+- レイヤー分離
+- SOLID
+- DDD
+- CQRS
+- MVVM
+- 保守性
+- 拡張性
+- テスト容易性
+
+---
+
+## 7. 改善案
+
+改善案には
+
+- 修正対象クラス
+- 問題点
+- 改善理由
+- 修正方法
+- 影響範囲
+
+を具体的に記述してください。
+
+---
+
+## 出力形式
+
+### レイヤー一覧
+
+| Layer | Classes |
+|--------|---------|
+
+---
+
+### モジュール依存
+
+| Module | Depends On | Referenced By |
+
+---
+
+### クラス責務違反
+
+| Class | Expected | Actual |
+
+---
+
+### 循環依存
+
+| Classes | Description |
+
+---
+
+### 改善案
+
+| Priority | Class | Recommendation |
+
+---
+
+最後に
+
+この設計思想への準拠率を
+
+〇〇%
+
+として評価してください。
+さらに追加すると有効な観点
