@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c03476bdb348df749aa2410de68f7601, type: 3}
-  m_Name: EnemyAnimationData
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterAnimationCatalogAsset
+  m_Name: EnemyAnimationConfig
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationCatalogConfig
   _entries:
   - State: 0
     Key: 

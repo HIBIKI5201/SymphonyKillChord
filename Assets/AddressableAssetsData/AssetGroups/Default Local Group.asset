@@ -115,11 +115,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2cee708fc7c125b4da0f98ba5b7b994f
-    m_Address: Assets/Level/Data/Master/Character/PlayerAnimationData.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 358a8447b7fd7f54690a994853695aa1
     m_Address: Assets/Level/Data/Master/Character/Player.asset
     m_ReadOnly: 0
@@ -167,11 +162,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5e72162da6cb4a54fb6e019bf90f79c3
     m_Address: Assets/Level/Data/Master/OutGame/StageSelect/Mission/EnemyMissionKeyAsset.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d4bf747a9f8ccab419e014df8b73ef72
-    m_Address: Assets/Level/Data/Master/Character/EnemyAnimationData.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

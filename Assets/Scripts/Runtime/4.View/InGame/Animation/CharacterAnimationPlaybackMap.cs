@@ -17,6 +17,7 @@ namespace KillChord.Runtime.View
         /// <param name="exitBlendFrameCounts"> インデックス順の終了ブレンドフレーム数一覧。 </param>
         /// <param name="damage"> ダメージアニメーションのインデックス。 </param>
         /// <param name="oneShotIndices"> ワンショットキーとインデックスの対応表。 </param>
+        /// <param name="attackIndices"> 攻撃BeatTypeとインデックスの対応表。 </param>
         public CharacterAnimationPlaybackMap(
             int attack,
             int dodge,
@@ -24,7 +25,8 @@ namespace KillChord.Runtime.View
             int[] enterBlendFrameCounts,
             int[] exitBlendFrameCounts,
             int damage = -1,
-            IDictionary<string, int> oneShotIndices = null)
+            IDictionary<string, int> oneShotIndices = null,
+            IDictionary<int, int> attackIndices = null)
         {
             Attack = attack;
             Dodge = dodge;
@@ -41,6 +43,9 @@ namespace KillChord.Runtime.View
             _oneShotIndices = oneShotIndices != null
                 ? new Dictionary<string, int>(oneShotIndices)
                 : new Dictionary<string, int>();
+            _attackIndices = attackIndices != null
+                ? new Dictionary<int, int>(attackIndices)
+                : new Dictionary<int, int>();
         }
 
         /// <summary> 攻撃アニメーションのインデックスです。 </summary>
@@ -64,6 +69,17 @@ namespace KillChord.Runtime.View
         public bool TryGetOneShotIndex(string key, out int index)
         {
             return _oneShotIndices.TryGetValue(key, out index);
+        }
+
+        /// <summary>
+        ///     攻撃BeatTypeに対応するアニメーションの再生インデックスを取得します。
+        /// </summary>
+        /// <param name="attackType"> 攻撃BeatTypeです。 </param>
+        /// <param name="index"> 取得した再生インデックスです。 </param>
+        /// <returns> 対応する設定が存在する場合はtrueです。 </returns>
+        public bool TryGetAttackIndex(int attackType, out int index)
+        {
+            return _attackIndices.TryGetValue(attackType, out index);
         }
 
         /// <summary>
@@ -112,5 +128,6 @@ namespace KillChord.Runtime.View
         private readonly int[] _enterBlendFrameCounts;
         private readonly int[] _exitBlendFrameCounts;
         private readonly Dictionary<string, int> _oneShotIndices;
+        private readonly Dictionary<int, int> _attackIndices;
     }
 }

@@ -53,6 +53,21 @@ namespace KillChord.Runtime.View
         }
 
         /// <summary>
+        ///     攻撃BeatTypeに対応するアニメーションの再生を要求します。
+        /// </summary>
+        /// <param name="attackType"> 攻撃結果のBeatTypeです。 </param>
+        /// <returns> 再生時間です。 </returns>
+        public float RequestAttack(int attackType)
+        {
+            if (_playbackMap.TryGetAttackIndex(attackType, out int attackIndex))
+            {
+                return RequestOneShot(attackIndex, false);
+            }
+
+            return RequestOneShot(_playbackMap.Attack, false);
+        }
+
+        /// <summary>
         ///     任意キーのワンショットアニメーション再生を要求する。
         /// </summary>
         /// <param name="animationKey"> 再生したいアニメーションキー。 </param>

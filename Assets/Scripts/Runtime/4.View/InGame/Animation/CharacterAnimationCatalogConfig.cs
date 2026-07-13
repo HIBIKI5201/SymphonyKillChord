@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KillChord.Runtime.InfraStructure
+namespace KillChord.Runtime.View
 {
     /// <summary>
-    ///     キャラクターアニメーションクリップのカタログを保持するScriptableObject。
+    ///     キャラクターアニメーションクリップの表示設定です。
     /// </summary>
-    [CreateAssetMenu(fileName = "CharacterAnimationCatalog", menuName = "KillChord/CharacterAnimationCatalog")]
-    public sealed class CharacterAnimationCatalogAsset : ScriptableObject
+    [CreateAssetMenu(fileName = "CharacterAnimationConfig", menuName = "KillChord/View/Character Animation Config")]
+    public sealed class CharacterAnimationCatalogConfig : ScriptableObject
     {
-        /// <summary> カタログエントリ一覧。 </summary>
+        /// <summary> カタログエントリ一覧です。 </summary>
         public IReadOnlyList<CharacterAnimationCatalogEntry> Entries => _entries;
 
         /// <summary> ワンショット再生開始時のブレンドフレーム数です。 </summary>
@@ -19,7 +19,7 @@ namespace KillChord.Runtime.InfraStructure
         /// <summary> ワンショット再生終了時のブレンドフレーム数です。 </summary>
         public int ExitBlendFrameCount => _exitBlendFrameCount;
 
-        [SerializeField, Tooltip("アニメーションクリップのカタログ。")]
+        [SerializeField, Tooltip("アニメーションクリップのカタログです。")]
         private CharacterAnimationCatalogEntry[] _entries = Array.Empty<CharacterAnimationCatalogEntry>();
 
         [SerializeField, Min(0), Tooltip("ワンショット再生開始時のブレンドフレーム数です。30FPS基準で扱います。")]

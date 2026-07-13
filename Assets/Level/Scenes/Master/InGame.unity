@@ -1335,7 +1335,8 @@ MonoBehaviour:
   _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
   _playerViewPrefab: {fileID: 7750579596343814766, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
-  _characterAnimationCatalogAsset: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
+  _characterAnimationConfig: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
+  _playerAttackAnimationConfig: {fileID: 11400000, guid: 1db9fea642254577a56f08077cf48952, type: 2}
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
   _equippedSkills:
   - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
