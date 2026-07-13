@@ -23,27 +23,33 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         public bool IsLastWave => (!_loopFlg) && (_currentIndex >= _waves.Length);
 
         /// <summary>
-        ///     次のWave定義を取得する。
+        ///     次のWave定義とインデックスを取得します。
         /// </summary>
-        /// <returns></returns>
-        public EnemyWaveDefinition GetNextWave()
+        /// <param name="waveIndex"> 取得したWaveインデックスです。 </param>
+        /// <param name="waveDefinition"> 取得したWave定義です。 </param>
+        /// <returns> 次のWaveが存在する場合はtrueです。 </returns>
+        public bool TryGetNextWave(
+            out int waveIndex,
+            out EnemyWaveDefinition waveDefinition)
         {
-            EnemyWaveDefinition ret;
-            if (_currentIndex < _waves.Length)
+            if (_currentIndex >= _waves.Length)
             {
-                ret = _waves[_currentIndex];
-                _currentIndex++;
+                waveIndex = -1;
+                waveDefinition = null;
+                return false;
             }
-            else
-            {
-                ret = null;
-            }
+
+            waveIndex = _currentIndex;
+            waveDefinition = _waves[_currentIndex];
+            _currentIndex++;
+
             // ループ設定がある場合、ループ開始のindexに戻る
             if (_currentIndex >= _waves.Length && _loopFlg)
             {
                 _currentIndex = _loopStart;
             }
-            return ret;
+
+            return true;
         }
 
         private readonly EnemyWaveDefinition[] _waves;

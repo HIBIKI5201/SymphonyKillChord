@@ -16,10 +16,12 @@ MonoBehaviour:
   _stageId: 4
   _stageType: 0
   _isInitiallyUnlocked: 0
+  _isTutorial: 0
   _stageName: "\u30D0\u30C8\u30EB"
   _flavorText: "\u30D0\u30C8\u30EB"
   _targetSceneName: InGame
   _battleSceneName: Stage_01
+  _enemyWaveDefinitionAssetKey: Assets/Level/Data/Master/InGame/Enemy/EnemyWaveDefinitionAsset.asset
   _scenarioId: 
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2

@@ -238,6 +238,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value,
                 (int)_playerEntity.BaseDamage.Value);
+            _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);

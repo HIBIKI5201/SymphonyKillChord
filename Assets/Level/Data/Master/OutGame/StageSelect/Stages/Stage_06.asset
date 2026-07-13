@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Stage_06
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: 5
+  _stageId: 6
   _stageType: 0
   _isInitiallyUnlocked: 1
+  _isTutorial: 0
   _stageName: "\u30C6\u30B9\u30C8"
   _flavorText: "\u30C6\u30B9\u30C8\u30B7\u30FC\u30F3"
   _targetSceneName: InGame
-  _battleSceneName: Stage_01
+  _battleSceneName: Stage_02
+  _enemyWaveDefinitionAssetKey: Assets/Level/Data/Master/InGame/Enemy/EnemyWaveDefinitionAsset.asset
   _scenarioId: 
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2

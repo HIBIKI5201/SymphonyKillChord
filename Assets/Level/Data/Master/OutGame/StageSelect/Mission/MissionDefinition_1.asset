@@ -26,6 +26,7 @@ MonoBehaviour:
   _evaluationConditions:
   - rid: 8885031662707802230
   - rid: 8885031662707802243
+  - rid: 8885031662707802244
   references:
     version: 2
     RefIds:
@@ -36,20 +37,27 @@ MonoBehaviour:
         _enemyMissionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
         _requiredKillCount: 30
     - rid: 8885031662707802230
-      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _evaluationId: ClearTime_01
-        _displayText: "30\u79D2\u4EE5\u4E0B\u306B\u30AF\u30EA\u30A2\u3059\u308B"
-        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C30\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _clearTime: 30
+        _evaluationId: DamageTaken_01
+        _displayText: "100\u30C0\u30E1\u30FC\u30B8\u4EE5\u5185\u3067\u30AF\u30EA\u30A2\u3059\u308B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C100\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 100
     - rid: 8885031662707802242
       type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
     - rid: 8885031662707802243
-      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      type: {class: WeaponVarietyEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _evaluationId: ClearTime_02
-        _displayText: "60\u79D2\u4EE5\u4E0B\u306B\u30AF\u30EA\u30A2\u3059\u308B"
-        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C60\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _clearTime: 60
+        _evaluationId: WeaponVariety_01
+        _displayText: "2\u7A2E\u985E\u4EE5\u4E0A\u306E\u9283\u3092\u4F7F\u7528\u3059\u308B"
+        _inspectorSummary: "2\u7A2E\u985E\u4EE5\u4E0A\u306E\u6B66\u5668\u3092\u4F7F\u7528\u3059\u308B\u6761\u4EF6"
+        _requiredVariety: 2
+    - rid: 8885031662707802244
+      type: {class: ComboEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: Combo_01
+        _displayText: "10\u30B3\u30F3\u30DC\u4EE5\u4E0A\u3092\u9054\u6210\u3059\u308B"
+        _inspectorSummary: "\u6700\u5927\u30B3\u30F3\u30DC\u6570\u304C10\u4EE5\u4E0A\u3067\u3042\u308B\u6761\u4EF6"
+        _requiredCombo: 10
