@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
@@ -35,18 +36,18 @@ namespace KillChord.Runtime.Composition.Persistent
         /// </summary>
         private async void Start()
         {
-            _modules = CollectModules();
-            if (_modules == null || _modules.Count == 0)
-            {
-                return;
-            }
+            bool isSuccess = false;
 
             try
             {
-                bool isSuccess = await _initializationCoordinator.InitializeAsync(
-                    _modules,
-                    null,
-                    destroyCancellationToken);
+                _modules = CollectModules();
+                isSuccess = _modules == null
+                    || _modules.Count == 0
+                    || await _initializationCoordinator.InitializeAsync(
+                        _modules,
+                        null,
+                        destroyCancellationToken);
+
                 if (!isSuccess)
                 {
                     Debug.LogError($"[{nameof(PersistentEntryPoint)}] 常駐シーン初期化に失敗しました。", this);
@@ -58,6 +59,10 @@ namespace KillChord.Runtime.Composition.Persistent
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
+            }
+            finally
+            {
+                CompleteSceneInitialization(isSuccess);
             }
         }
 
@@ -162,6 +167,24 @@ namespace KillChord.Runtime.Composition.Persistent
                 .Cast<IPersistentInitializationModule>()
                 .OrderBy(module => module.Order)
                 .ToList();
+        }
+
+        /// <summary>
+        ///     常駐シーンの初期化結果を通知する。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrue。 </param>
+        private void CompleteSceneInitialization(bool isSuccess)
+        {
+            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            {
+                Debug.LogError(
+                    $"[{nameof(PersistentEntryPoint)}] " +
+                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
+                    this);
+                return;
+            }
+
+            readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
         private readonly PersistentInitializationCoordinator _initializationCoordinator = new();
