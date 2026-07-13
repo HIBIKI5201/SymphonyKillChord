@@ -45,9 +45,9 @@ MonoBehaviour:
     - rid: 4420335376793719
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "Boss\u30923\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _inspectorSummary: "Boss\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
         _enemyMissionKeyAsset: {fileID: 11400000, guid: 5f7d0445e780f7d4388f8a3fa59e25be, type: 2}
-        _requiredKillCount: 3
+        _requiredKillCount: 1
     - rid: 8885031662707802230
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:

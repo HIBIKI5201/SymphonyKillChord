@@ -1,8 +1,8 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SymphonyFrameWork.System.SceneLoad;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
     /// <summary>
     ///     シナリオシーン専用の初期化ライフサイクルを起動するクラスです。
     /// </summary>
-    [DefaultExecutionOrder(-100)]
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class OutGameScenarioSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -87,12 +87,36 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private List<IOutGameInitializationModule> CollectModules()
         {
             UnityEngine.SceneManagement.Scene currentScene = gameObject.scene;
+            OutGameInitializationModuleBase[] foundModules =
+                FindObjectsByType<OutGameInitializationModuleBase>(FindObjectsSortMode.None);
+            List<IOutGameInitializationModule> modules = new(foundModules.Length);
 
-            return FindObjectsByType<OutGameInitializationModuleBase>(FindObjectsSortMode.None)
-                .Where(module => module.isActiveAndEnabled && module.gameObject.scene == currentScene)
-                .Cast<IOutGameInitializationModule>()
-                .OrderBy(module => module.Order)
-                .ToList();
+            for (int i = 0; i < foundModules.Length; i++)
+            {
+                OutGameInitializationModuleBase module = foundModules[i];
+                if (!module.isActiveAndEnabled || module.gameObject.scene != currentScene)
+                {
+                    continue;
+                }
+
+                modules.Add(module);
+            }
+
+            modules.Sort(CompareModuleOrder);
+            return modules;
+        }
+
+        /// <summary>
+        ///     初期化モジュールの実行順を比較します。
+        /// </summary>
+        /// <param name="left"> 比較する左側のモジュールです。 </param>
+        /// <param name="right"> 比較する右側のモジュールです。 </param>
+        /// <returns> 実行順の比較結果です。 </returns>
+        private static int CompareModuleOrder(
+            IOutGameInitializationModule left,
+            IOutGameInitializationModule right)
+        {
+            return left.Order.CompareTo(right.Order);
         }
 
         private readonly OutGameInitializationCoordinator _initializationCoordinator = new();

@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
-using UnityEngine;
+using System;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
@@ -40,8 +40,8 @@ namespace KillChord.Runtime.Application.InGame.Skill
 
             if (!_effectExecutorResolver.TryResolve(skillDefinition.EffectSpec.EffectType, out ISkillEffectExecutor executor))
             {
-                Debug.LogError($"[{nameof(SkillUsecase)}] 対応するスキル実行器が見つかりません。 EffectType: {skillDefinition.EffectSpec.EffectType}");
-                return false;
+                throw new InvalidOperationException(
+                    $"対応するスキル実行器が見つかりません。EffectType: {skillDefinition.EffectSpec.EffectType}");
             }
 
             SkillEffectContext context = new SkillEffectContext(

@@ -39,13 +39,17 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 return true;
             }
 
-            _initialized = true;
             _volumeRegistryView = GetComponent<PersistentAudioVolumeRegistryView>();
             _soundEffectVolumeManager = new SoundEffectVolumeManager();
             _voiceVolumeManager = new VoiceVolumeManager();
-            _volumeRegistryView.Initialize(_soundEffectVolumeManager, _voiceVolumeManager);
+            if (!_volumeRegistryView.Initialize(_soundEffectVolumeManager, _voiceVolumeManager))
+            {
+                return false;
+            }
+
             ServiceLocator.RegisterInstance(_soundEffectVolumeManager);
             ServiceLocator.RegisterInstance(_voiceVolumeManager);
+            _initialized = true;
             return true;
         }
 

@@ -51,7 +51,11 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             _audioModel.BGMVolume += bgmManager.SetVolume;
             _audioModel.SEVolume += seManager.SetVolume;
             _audioModel.VoiceVolume += voiceManager.SetVolume;
-            _audioSetting.Build(_uiDocument, _audioModel, _parent.transform);
+            if (!_audioSetting.Build(_uiDocument, _audioModel, _parent.transform))
+            {
+                return false;
+            }
+
             _screenSetting.Build(_uiDocument, _screenModel);
             return true;
         }

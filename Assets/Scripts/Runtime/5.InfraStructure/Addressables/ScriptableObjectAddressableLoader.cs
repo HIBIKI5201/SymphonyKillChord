@@ -19,6 +19,9 @@ namespace KillChord.Runtime.InfraStructure.Addressables
         /// <param name="context"> ログ出力に使うコンテキストです。 </param>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> ロード結果です。 </returns>
+        /// <exception cref="System.ArgumentException"> キーが未設定の場合に発生します。 </exception>
+        /// <exception cref="System.OperationCanceledException"> ロードがキャンセルされた場合に発生します。 </exception>
+        /// <exception cref="System.InvalidOperationException"> アセットのロードに失敗した場合に発生します。 </exception>
         public static async Task<TAsset> LoadAssetAsync<TAsset>(
             this string key,
             Object context,
@@ -27,14 +30,10 @@ namespace KillChord.Runtime.InfraStructure.Addressables
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                Debug.LogError($"[{nameof(ScriptableObjectAddressableLoader)}] Addressables キーが未設定です。", context);
-                return null;
+                throw new System.ArgumentException("Addressables キーが未設定です。", nameof(key));
             }
 
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return null;
-            }
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (TryGetHandle(context, key, out AsyncOperationHandle loadedHandle))
             {
@@ -43,17 +42,7 @@ namespace KillChord.Runtime.InfraStructure.Addressables
 
             AsyncOperationHandle<TAsset> handle = UnityAddressables.LoadAssetAsync<TAsset>(key);
             RegisterHandle(context, key, handle);
-
-            try
-            {
-                return await AwaitLoadedHandleAsync(handle, key, context, cancellationToken);
-            }
-            catch (System.Exception exception)
-            {
-                Debug.LogException(exception, context);
-                ReleaseHandle(key, context);
-                return null;
-            }
+            return await AwaitLoadedHandleAsync(handle, key, context, cancellationToken);
         }
 
         /// <summary>
@@ -87,22 +76,25 @@ namespace KillChord.Runtime.InfraStructure.Addressables
             CancellationToken cancellationToken)
             where TAsset : ScriptableObject
         {
-            TAsset asset = await handle.Task;
+            try
+            {
+                TAsset asset = await handle.Task;
+                cancellationToken.ThrowIfCancellationRequested();
 
-            if (cancellationToken.IsCancellationRequested)
+                if (handle.Status != AsyncOperationStatus.Succeeded || asset == null)
+                {
+                    throw new System.InvalidOperationException(
+                        $"{typeof(TAsset).Name} のロードに失敗しました。Key={key}",
+                        handle.OperationException);
+                }
+
+                return asset;
+            }
+            catch
             {
                 ReleaseHandle(key, context);
-                return null;
+                throw;
             }
-
-            if (asset == null)
-            {
-                Debug.LogError(
-                    $"[{nameof(ScriptableObjectAddressableLoader)}] {typeof(TAsset).Name} のロードに失敗しました。Key={key}",
-                    context);
-            }
-
-            return asset;
         }
 
         /// <summary>

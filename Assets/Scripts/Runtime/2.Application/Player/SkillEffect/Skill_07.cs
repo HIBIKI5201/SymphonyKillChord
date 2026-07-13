@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -57,7 +58,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             }
             else
             {
-                _hitNumbers = new int[targets.Length];
+                ResetHitNumbers(targets.Length);
 
                 for (int i = 0; i < targets.Length; i++)
                 {
@@ -69,7 +70,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     _hitNumbers[targetNumber]++;
 
                     bool isAllhit = true;
-                    for (int j = 0; j < _hitNumbers.Length; j++)
+                    for (int j = 0; j < _hitNumbers.Count; j++)
                     {
                         if (_hitNumbers[j] != 0)
                         {
@@ -116,6 +117,19 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         private readonly IAttackController _attackController;
         private readonly BeatType _beatType = BeatType.Four;
         private readonly int _attackCount = 3;
-        private int[] _hitNumbers;
+        private readonly List<int> _hitNumbers = new();
+
+        /// <summary>
+        ///     対象数に合わせて命中回数を初期化します。
+        /// </summary>
+        /// <param name="targetCount"> 対象数です。 </param>
+        private void ResetHitNumbers(int targetCount)
+        {
+            _hitNumbers.Clear();
+            for (int i = 0; i < targetCount; i++)
+            {
+                _hitNumbers.Add(0);
+            }
+        }
     }
 }

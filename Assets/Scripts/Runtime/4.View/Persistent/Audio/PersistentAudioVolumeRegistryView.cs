@@ -1,6 +1,5 @@
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
-using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Audio
@@ -15,14 +14,20 @@ namespace KillChord.Runtime.View.Persistent.Audio
         /// </summary>
         /// <param name="soundEffectVolumeManager"> SE音量管理です。 </param>
         /// <param name="voiceVolumeManager"> Voice音量管理です。 </param>
-        public void Initialize(
+        /// <returns>登録に成功した場合はtrueです。</returns>
+        public bool Initialize(
             SoundEffectVolumeManager soundEffectVolumeManager,
             VoiceVolumeManager voiceVolumeManager)
         {
-            _soundEffectVolumeManager = soundEffectVolumeManager
-                ?? throw new ArgumentNullException(nameof(soundEffectVolumeManager));
-            _voiceVolumeManager = voiceVolumeManager
-                ?? throw new ArgumentNullException(nameof(voiceVolumeManager));
+            if (soundEffectVolumeManager == null || voiceVolumeManager == null)
+            {
+                Debug.LogError($"[{nameof(PersistentAudioVolumeRegistryView)}] 音量管理システムが設定されていません。", this);
+                return false;
+            }
+
+            _soundEffectVolumeManager = soundEffectVolumeManager;
+            _voiceVolumeManager = voiceVolumeManager;
+            return true;
         }
 
         /// <summary>

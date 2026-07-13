@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -17,7 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     /// <summary>
     ///     インゲーム初期化ライフサイクルを実行するクラスです。
     /// </summary>
-    [DefaultExecutionOrder(-100)]
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class IngameComposition : MonoBehaviour
     {
         /// <summary>
