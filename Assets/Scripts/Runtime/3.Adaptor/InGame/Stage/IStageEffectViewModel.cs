@@ -17,14 +17,4 @@ namespace KillChord.Runtime.Adaptor.InGame.Stage
         /// <param name="kind"> 演出種類です。 </param>
         void Apply(string effectId, StageEffectViewKind kind);
     }
-
-    /// <summary>
-    ///     Viewへ通知するステージ演出種類です。
-    /// </summary>
-    public enum StageEffectViewKind
-    {
-        Explosion = 0,
-        BuildingCollapse = 1,
-        Obstacle = 2,
-    }
 }

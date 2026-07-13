@@ -33,9 +33,9 @@ MonoBehaviour:
     - rid: 4163005358158643306
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "\u8D64\u3044\u5175\u58EB\u309230\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _inspectorSummary: "\u8D64\u3044\u5175\u58EB\u309210\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
         _enemyMissionKeyAsset: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
-        _requiredKillCount: 30
+        _requiredKillCount: 10
     - rid: 8885031662707802230
       type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
