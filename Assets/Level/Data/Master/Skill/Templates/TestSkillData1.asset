@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
   _id: 0
   _pattern: 04000000040000000400000004000000
+  _cooldownNumerator: 1
+  _cooldownDenomimator: 1
   _skillEffectType: 0
   _skillTargetingType: 2
-  _animationKey: Skill_0
+  _animationKey: Skill_1
