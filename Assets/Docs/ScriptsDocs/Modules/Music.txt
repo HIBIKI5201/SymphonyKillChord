@@ -1,23 +1,28 @@
 # Music モジュール依存定義書
 
 ## 1. 概要
-ゲームの根幹である「BPM、ビート情報（拍）、リズム同期判定（ジャスト入力等）、音量管理、およびBGM/SE/Voiceソースの音響制御」を司る極めて重要なモジュールです。
+ゲームの根幹である「BPM、ビート情報（拍）、リズム同期判定（ジャスト入力等）、ビート同期コールバック予約、音量管理、およびBGM/SE/Voiceソースの音響制御」を司る極めて重要なモジュールです。
 
 ## 2. レイヤー構成（レイヤー別のクラス定義）
 *   **Domain**:
     *   `BeatType` (一拍、四拍、裏拍などの拍の種類を表現するValueObject)
 *   **Application**:
     *   `RhythmJustService` (入力タイムスタンプとビート位置を比較し、ジャストタイミング判定を算出するピュアロジック)
+    *   `IMusicSyncService` (ビート同期コールバック予約`RegisterAction(double accurateBeat, ExecuteRequestTiming timing, Action action, CancellationToken ct)`を提供する中核インターフェース。実装は`MusicSyncService`)
+    *   `IMusicActionScheduler` (`EnemyMusicSpec`を受け取り、敵専用のビート同期スケジューリングを行う抽象)
 *   **Adaptor**:
     *   `MusicSyncState` (現在のBPMや曲の再生時間、次の拍までのカウントなどの状態を保持するクラス)
+    *   `MusicSyncController` (`MusicSyncState`の更新と`IMusicSyncService`のTickを橋渡しするクラス)
+    *   `MusicSchedulerAdaptor` (`IMusicActionScheduler`の実装。`EnemyMusicSpec`を`ExecuteRequestTiming`に変換して`IMusicSyncService.RegisterAction`を呼ぶ。Enemy/Stageモジュールから利用される)
     *   `RhythmGuideDto` (リズムインジケータ（UI）へ送るDTO、ref struct)
+    *   `RhythmGuideZoneDto` (ガイド表示エリアの描画DTO。旧ドキュメントはViewと誤記していたが実際はAdaptor)
 *   **View**:
     *   `MusicSyncView` (UnityのAudioSourceと連携してBGMを再生し、現在の再生タイムスタンプを発行するコンポーネント)
-    *   `RhythmGuideZoneDto` (ガイド表示エリアの描画DTO)
     *   `MusicPlayer` (BGM/SE/Voiceの音源管理およびボリュームマネージャーとの仲介)
 *   **Composition**:
     *   `MusicSyncInitializer` (曲とタイミング制御エンジンの結びつけ)
-    *   `RhythmGuideInitializer` (リズムガイドUIの紐付け)
+    *   `RhythmGuideInitializer` / `ACLikeRhythmGuideInitializer` (リズムガイドUIの紐付け。用途違いの2つの初期化クラスが並存)
+    *   `MusicPlayerInitializer` (Persistent。BGM/SE/Voiceプレイヤーの初期化)
 
 ---
 
@@ -25,23 +30,31 @@
 Music モジュールが他モジュールとどのように関わっているかを定義します。
 
 ### [依存しているモジュール]
-*   なし (他モジュールへの依存は一切ありません。ピュアなコア独立モジュールです。)
+*   **InGame/Battle（Domain型のみ）**:
+    *   *依存箇所*: `BattleActionType`
+    *   *詳細*: `IMusicSyncService`が`GetActionHistory()`/`RegisterBattleActionHistory(BattleActionType, ...)`という形で、戦闘アクション種別をDomain型として直接扱っています。「他モジュールに一切依存しない」という旧ドキュメントの記載は誤りです。
+*   **InGame/Enemy（Domain型のみ）**:
+    *   *依存箇所*: `EnemyMusicSpec`
+    *   *詳細*: `IMusicActionScheduler.Schedule(in EnemyMusicSpec musicSpec, ...)`がEnemyモジュールのDomain型を直接引数に取ります。
 
 ### [依存されているモジュール]
 *   **プロジェクト内のほぼ全てのインゲーム・アウトゲームモジュール**:
-    *   *参照箇所*: `IMusicSyncService`, `MusicSyncState`
-    *   *詳細*: 
+    *   *参照箇所*: `IMusicSyncService`, `IMusicActionScheduler`, `MusicSyncState`
+    *   *詳細*:
         *   `Player` モジュール: スキル攻撃時のタイミング評価（Perfect/Greatなど）や移動・回避のリズム同期で使用。
-        *   `Enemy` モジュール: リズムに合わせた攻撃予約（2拍前/1拍前のトリガー）で使用。
+        *   `Enemy` モジュール: リズムに合わせた攻撃予約（2拍前/1拍前のトリガー）で`IMusicActionScheduler`を使用。
+        *   `Stage` モジュール: `StageEffectInitializer`がWave開始演出をBGM同期で再生するために`MusicSchedulerAdaptor`経由で`IMusicSyncService.RegisterAction`を利用（新規）。
         *   `UI` モジュール: リズムガイドインジケータの伸縮や、BPMに同期したUIアニメーションで参照。
-        *   `Setting` モジュール: 音量スライダーからの音量変更要求の受取。
+        *   `OutGame/Title`: 音量スライダー（`VolumeSettingsTabView`）から`MusicPlayer`/`SoundEffectVolumeManager`の具象クラスを直接操作して音量変更を行う（旧ドキュメントは「Setting」モジュールが`IVolumeManager`経由で参照すると記載していたが、実際は`OutGame/Title`が具象クラスを直接参照している）。
 
 ---
 
 ## 4. アーキテクチャ上の特徴と評価
-*   **究極の独立性（完璧なクリーン境界）**:
-    他のどのゲーム内モジュール（Player, Enemy, UIなど）の概念も持たず、自身の内部（曲の再生・BPM・ジャスト判定）だけで完結しています。このため、他のいかなる機能に不具合が生じても、タイミング同期エンジンは完全に正常動作し続けます。
+*   **中核APIは`IMusicSyncService`/`IMusicActionScheduler`**:
+    `MusicSyncState`/`RhythmJustService`は状態保持・ジャスト判定という一部の役割に過ぎず、他モジュールが実際に利用する主要な窓口は`IMusicSyncService.RegisterAction`（任意のビートタイミングでコールバックを予約する汎用API）と、それを敵専用にラップした`IMusicActionScheduler`/`MusicSchedulerAdaptor`です。
+*   **「完全独立」ではない**:
+    Music自身のAPI設計上、`BattleActionType`（Battleモジュール）や`EnemyMusicSpec`（Enemyモジュール）というDomain型を直接引数・戻り値に持つため、厳密には他モジュールのDomain型に依存しています。ただし、これらはいずれも軽量なDomain型であり、Music側にビジネスロジックの逆流は起きていません。
 *   **高性能・低遅延の入力評価 (RhythmJustService)**:
     入力時の絶対時間をキャッシュし、AudioSourceの正確な再生サンプル数から逆算してタイミング誤差をミリ秒単位で割り出す純粋演算サービスであり、Unityエンジンのオーディオ遅延に左右されにくい安定したジャスト判定を実現しています。
 *   **ServiceLocatorへの登録境界**:
-    ゲーム全体の生命線であるため、`MusicSyncInitializer` が `IMusicSyncService` および `MusicSyncState` を ServiceLocator に登録し、他モジュールが容易にタイミング評価を参照できるようにしています。
+    ゲーム全体の生命線であるため、`MusicSyncInitializer`が`IMusicSyncService`および`MusicSyncState`をServiceLocatorに登録し、他モジュールが容易にタイミング評価を参照できるようにしています。

@@ -32,10 +32,10 @@ Skill モジュールが他モジュールとどのように関わっている�
 ### [依存しているモジュール]
 *   **Persistent/Savedata**:
     *   *依存箇所*: `SaveData`, `SavedataSystem`
-    *   *詳細*: プレイヤーが解放したスキルや装備中のスキルスロットをJSONデータへ永続化・ロードするため、セーブシステムに依存します。現在の実装では `SkillBuildUseCase`（Application）が `SavedataSystem` の具象クラスを ServiceLocator 経由で直接 using しており、DIP違反（改善推奨ポイント）となっています。
+    *   *詳細*: プレイヤーが解放したスキルや装備中のスキルスロットをJSONデータへ永続化・ロードするため、セーブシステムに依存します。`SkillBuildUseCase`（Application）のコンストラクタは抽象（`ISkillBuildRepository`）ではなく`SavedataSystem`の**具象クラス**を直接受け取ります（DIP違反、改善推奨ポイント）。ただし`ServiceLocator`から取得しているのは`SkillBuildUseCase`自身ではなく、呼び出し元の`SkillBuildInitializer`（Composition）であり、そこからコンストラクタ注入されています。`ISkillBuildRepository`（Addressables経由でロードされる`SkillBuildRepository`）自体は実在しますが、`SkillBuildInitializer`がView初期化用に使うのみで`SkillBuildUseCase`へは渡されておらず、DIP違反は解消されていません。
 *   **InGame/Player**:
-    *   *依存箇所*: `SkillData`, `SkillRepository`
-    *   *詳細*: プレイヤーキャラクターが扱えるスキルのアセット（ScriptableObject）や、現在入手済みのスキルデータを参照します。
+    *   *依存箇所*: `SkillTemplate`, `SkillRepository`
+    *   *詳細*: プレイヤーキャラクターが扱えるスキルのアセット（ScriptableObject）や、現在入手済みのスキルデータを参照します。旧ドキュメントの`SkillData`という型名は存在せず、実際は`SkillTemplate`です。
 
 ### [依存されているモジュール]
 *   **InGame/Player**:
@@ -48,4 +48,4 @@ Skill モジュールが他モジュールとどのように関わっている�
 *   **アウトゲーム/インゲームの情報の橋渡し**:
     セーブデータに保存されるスキルのID構成（ドメイン）が、`SkillBuildUseCase` を通じて極めてシンプルに管理されており、そのデータ構造がインゲームの `PlayerInitializer` で対応するスキル実体にスムーズにバインドされる秀逸な構造になっています。
 *   **改善のポイント (セーブシステムへの密結合)**:
-    `SkillBuildUseCase` (Application層) が、`SavedataSystem` (Utility/具象) に直接依存しています。本来はApplication層の `ISkillBuildRepository` インターフェースを実装したリポジトリ（Infra層）を、Composition層（Initializer）が `SkillBuildUseCase` のコンストラクタに注入すべきですが、これが無視されて ServiceLocator から具象を取得しています。ここを疎結合化することで、セーブ先（JSON / DB / Cloud）の切り替えが容易になり、単体テストも可能になります。
+    `SkillBuildUseCase` (Application層) のコンストラクタは `SavedataSystem` (Utility/具象) をそのまま受け取る形になっています。`SkillBuildInitializer`（Composition層）が `ServiceLocator.TryGetInstance<SavedataSystem>()` で取得した具象インスタンスをそのままコンストラクタ注入しているため、抽象を挟まない依存になっています。Application層には `ISkillBuildRepository` という抽象・実装（`SkillBuildRepository`、Addressables経由でロード）が既に存在しますが、現状は`SkillBuildInitializer`がView初期化用データの取得にのみ使っており、`SkillBuildUseCase`へは渡していません。`SkillBuildUseCase`のコンストラクタ引数を`SavedataSystem`から`ISkillBuildRepository`（またはそれに準ずる抽象）へ差し替えることで、セーブ先（JSON / DB / Cloud）の切り替えが容易になり、単体テストも可能になります。

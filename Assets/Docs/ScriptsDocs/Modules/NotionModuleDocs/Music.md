@@ -7,6 +7,8 @@
 | **モジュール名** | Music |
 | **カテゴリ** | InGame + Persistent / Core System |
 | **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
+| **ステータス** | 実装済み |
+| **最終更新日** | 2026-07-15 |
 
 ---
 
@@ -20,6 +22,7 @@
 | **`RhythmJustService`** | Application | ジャストタイミング発生の通知と判定状態の管理を行うシングルトンサービス（`IDisposable` を実装） |
 | **`MusicSyncController`** | Adaptor | 毎フレーム `MusicSyncState.UpdatePlayTime` と `IMusicSyncService.Update` を呼び出すコントローラー |
 | **`MusicSyncState`** | Adaptor | 現在の BPM・再生時間・次の拍までのカウントなどのリズム状態を保持するクラス |
+| **`MusicSchedulerAdaptor`** | Adaptor | `IMusicActionScheduler` の実装。`EnemyMusicSpec` を `ExecuteRequestTiming` に変換し `IMusicSyncService.RegisterAction` を呼ぶ。Enemy/Stageモジュールから利用される |
 | **`RhythmGuideDto`** | Adaptor | リズムインジケータ（UI）へ送る readonly ref struct DTO |
 | **`RhythmGuideZoneDto`** | Adaptor | ガイド表示エリアの描画データを保持する readonly struct DTO |
 | **`MusicSyncView`** | View | Unity の `AudioSource` と連携して BGM を再生し、毎フレーム `MusicSyncController.Tick` を呼び出して再生タイムスタンプを更新する MonoBehaviour |
@@ -50,28 +53,44 @@ graph TD
 
     subgraph EnemyModule [Enemy モジュール]
         E_App["Application\n(EnemyAttackReservationUsecase)"]
+        E_Domain["Domain\n(EnemyMusicSpec)"]
+    end
+
+    subgraph BattleModule [Battle モジュール]
+        B_Domain["Domain\n(BattleActionType)"]
+    end
+
+    subgraph StageModule [Stage モジュール]
+        ST_Composition["Composition\n(StageEffectInitializer)"]
     end
 
     subgraph UIModule [UI モジュール]
         UI_View["View\n(RhythmGuideView 等)"]
     end
 
-    subgraph SettingModule [Setting モジュール]
-        S_View["View\n(SettingView)"]
+    subgraph TitleModule [OutGame/Title モジュール]
+        T_View["View\n(VolumeSettingsTabView)"]
     end
 
     %% 依存関係
     P_App -->|"IMusicSyncService, MusicSyncState を参照"| M_App
     P_App -->|"MusicSyncState から現在拍を取得"| M_Adaptor
     E_App -->|"IMusicActionScheduler でリズム攻撃予約"| M_App
+    M_App -->|"BattleActionType / EnemyMusicSpec をDomain型として参照"| B_Domain
+    M_App -->|"　"| E_Domain
+    ST_Composition -->|"MusicSchedulerAdaptor 経由でStage演出をBGM同期"| M_App
     UI_View -->|"RhythmGuideDto / MusicSyncState を参照"| M_Adaptor
-    S_View -->|"IVolumeManager 経由で音量変更"| M_View
+    T_View -->|"MusicPlayer / SoundEffectVolumeManager を直接操作"| M_View
 ```
 
 ### 📥 依存しているもの
 
-* **依存なし**
-  * *詳細*: Music モジュールは他のどのモジュールにも依存しない、完全独立のコアモジュールです。
+* **`InGame/Battle`（Domain型のみ）**
+  * *依存箇所*: `BattleActionType`
+  * *詳細*: `IMusicSyncService`が`GetActionHistory()`/`RegisterBattleActionHistory(BattleActionType, ...)`という形でBattleモジュールのDomain型を直接扱います。「他モジュールに依存しない完全独立モジュール」という記載は誤りでした。
+* **`InGame/Enemy`（Domain型のみ）**
+  * *依存箇所*: `EnemyMusicSpec`
+  * *詳細*: `IMusicActionScheduler.Schedule(in EnemyMusicSpec, ...)`がEnemyモジュールのDomain型を直接引数に取ります。
 
 ### 📤 依存されているもの
 
@@ -81,12 +100,15 @@ graph TD
 * **`InGame/Enemy`**
   * *参照箇所*: `IMusicActionScheduler`
   * *詳細*: 敵キャラクターが特定のビートタイミング（2拍前・1拍前・ジャスト拍）に攻撃予約を登録し、リズムに同期したAI攻撃制御を行うために利用されます。
+* **`InGame/Stage`**
+  * *参照箇所*: `MusicSchedulerAdaptor`, `IMusicSyncService.RegisterAction`
+  * *詳細*: `StageEffectInitializer`がWave開始時の演出（爆発・建物倒壊等）をBGM同期で再生するために利用します（新規）。
 * **`InGame/UI`**
   * *参照箇所*: `RhythmGuideDto`, `MusicSyncState`
   * *詳細*: 画面上のビートインジケータ（リズムガイドUI）の描画タイミングを正確に同期させるために参照します。
-* **`Setting`**
-  * *参照箇所*: `IVolumeManager`
-  * *詳細*: オプション設定画面などからBGM・SE・Voice音量を変更するためのボリュームマネージャーのインターフェースを参照します。
+* **`OutGame/Title`**
+  * *参照箇所*: `MusicPlayer`, `SoundEffectVolumeManager`（具象クラスを直接参照。`IVolumeManager`のようなインターフェース経由ではない）
+  * *詳細*: `VolumeSettingsTabView`がタイトル/設定タブからBGM・SE音量を変更するために、これらの具象クラスの`GetVolume()`/`SetVolume()`を直接呼び出します（旧ドキュメントは「Setting」モジュールが`IVolumeManager`を参照すると記載していましたが、実際のモジュール・参照方法は異なります）。
 
 ---
 
@@ -98,7 +120,7 @@ graph TD
 > 拍（ビート）の種類を表現する `BeatType` などの、タイミング制御・ジャスト同期に必須のデータ定義を保持します。
 
 ### ② Application
-> 再生時間に基づくビート更新（`IMusicSyncService`）、指定ビート後への非同期コールバック管理（`IMusicActionScheduler`）、およびタイミング判定・ジャスト検知（`RhythmJustService`）などの核心的なビジネスロジックを実装します。
+> 再生時間に基づくビート更新（`IMusicSyncService`）、指定ビート後への非同期コールバック管理（`IMusicActionScheduler`）、およびタイミング判定・ジャスト検知（`RhythmJustService`）などの核心的なビジネスロジックを実装します。`IMusicSyncService`/`IMusicActionScheduler`のAPI設計上、`BattleActionType`（Battleモジュール）や`EnemyMusicSpec`（Enemyモジュール）というDomain型を直接扱うため、厳密には他モジュールへの依存が存在します。
 
 ### ③ Adaptor
 > 毎フレームのリズム同期処理を回す `MusicSyncController`、現在のBPM情報や拍数データを格納する `MusicSyncState`、およびUI層へと送る `RhythmGuideDto` などのデータブリッジを定義します。

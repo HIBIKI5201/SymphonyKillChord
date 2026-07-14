@@ -9,22 +9,25 @@
     *   `CharacterName` (名前情報、ValueObject)
     *   `AttackPower` (攻撃力、ValueObject)
     *   `CriticalChance` (クリティカル確率、ValueObject)
-    *   `ActionParams` (ダメージ計算に必要なパラメータ群)
+    *   `AttackStepContext` (ダメージ計算に必要なパラメータ群、`readonly ref struct`。旧`ActionParams`から改名)
     *   `IAttackPipeline` (攻撃処理の流れを定義するパイプライン抽象)
+    *   `IBuff` (バフの振る舞いを定義する抽象。`BuffContext`/`BuffMetaData`/`BuffExecuteTiming`という別ファイルの型を組み合わせて構成される)
+    *   `IBuffSystem` (バフ実行機構の抽象)
 *   **Application**:
     *   `AttackCalculator` (ダメージ数式の評価、ピュアロジック)
     *   `AttackExecutor` (パイプラインに沿ってダメージを処理するロジック)
     *   `ConfirmedDamage` (最終計算された確定ダメージ情報)
     *   `CriticalStep` (クリティカル発生の抽選・判定ステップ)
-    *   `DamageDownBuff` (防御バフの適用ロジック)
-    *   `LifeStealBuff` (与ダメージ回復バフの適用ロジック)
+    *   `BuffBase` / `BuffSystem` (バフの実行基盤。`IBuff`実装を`BuffExecuteTiming`のタイミングで実行する)
+    *   `DamageDownBuff` (防御バフの適用ロジック、`IBuff`実装)
+    *   `LifeStealBuff` (与ダメージ回復バフの適用ロジック、`IBuff`実装)
 *   **Adaptor**:
     *   `PlayerBattleState` (プレイヤーの戦闘中の現在のバフ・ステータス)
     *   `EnemyBattleState` (敵の戦闘中の現在のバフ・ステータス)
     *   `AttackResultDTO` (ダメージ通知、クリティカル発生などをViewに伝えるDTO)
-*   **View**:
-    *   `HealthHudDTO` (HPバー更新用のDTO、値型)
-    *   `IHealthHudViewModel` (HPバーの表示バインド用インターフェース)
+    *   `PlayerAttackController` (プレイヤーの攻撃実行を制御。`OnAttackExecuted`イベントを公開し、Missionモジュール等から購読される。実体はPlayerモジュールのComposition層が保持する)
+
+`HealthHudDTO` / `IHealthHudViewModel` は本モジュールのクラスではありません（`InGame/UI`モジュールのAdaptor層に属します）。旧ドキュメントの記載は誤りのため削除しました。
 
 ---
 
@@ -34,7 +37,10 @@ Character & Battle モジュールが他モジュールとどのように関わ�
 ### [依存しているモジュール]
 *   **InGame/Music**:
     *   *依存箇所*: `BeatType`, `MusicSyncState`
-    *   *詳細*: リズムに合わせたバフの持続時間計算や、リズム判定に応じたダメージボーナス（ジャスト入力ボーナスなど）の計算で依存します。
+    *   *詳細*: `PlayerAttackController`が攻撃クールダウンの時間をBPMに基づいてスケーリングするために`MusicSyncState.Bpm`を参照します。ジャスト入力ボーナスは`BeatStep`が`AttackDefinition.JustDamageMultiplier`を用いて計算しており、バフの持続時間計算とは無関係です（旧ドキュメントの記載は不正確でした）。
+*   **InGame/Target**:
+    *   *依存箇所*: `TargetSystemController`, `ITargetableViewModel`
+    *   *詳細*: `PlayerAttackController`が攻撃対象の解決にTargetモジュールを利用します。
 
 ### [依存されているモジュール]
 *   **InGame/Player**:
@@ -43,11 +49,14 @@ Character & Battle モジュールが他モジュールとどのように関わ�
 *   **InGame/Enemy**:
     *   *参照箇所*: `CharacterEntity` (EnemyEntityの実体), `Health`, `AttackPower`
     *   *詳細*: 敵の被弾ダメージ、ボスなどのフェーズチェンジHPトリガー、およびプレイヤーへ与えるダメージ計算で使用します。
+*   **InGame/Mission**:
+    *   *参照箇所*: `CharacterEntity.OnHealthChanged`, `PlayerAttackController.OnAttackExecuted`
+    *   *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をミッション評価条件として記録します。
 
 ---
 
 ## 4. アーキテクチャ上の特徴と評価
-*   **パイプラインパターンの採用 (IAttackPipeline)**:
-    ダメージ計算がハードコーディングされておらず、パイプライン（`IAttackPipeline`）を通じて、ダメージ算出 → クリティカル判定 → 防御バフ適用 → ライフスティール適用 などの処理が順次実行されるため、後から新しいバフや特殊なダメージ処理をプラグイン形式で極めて容易に追加できます（SOLIDの「開放閉鎖原則」に完全に準拠）。
+*   **パイプラインとバフは別機構**:
+    ダメージ計算は`IAttackPipeline`（`IAttackStep`実装である`CriticalStep`等を順次実行）が担い、バフは`IBuff`実装（`DamageDownBuff`/`LifeStealBuff`）を`BuffSystem`が`BuffExecuteTiming`のタイミングで実行するという、**別々の仕組み**です。旧ドキュメントは「ダメージ算出→クリティカル判定→防御バフ適用→ライフスティール適用」という一本のパイプラインであるかのように記述していましたが、バフはパイプラインのステップ（`IAttackStep`）ではありません（`PlayerAttackController.cs`が両者を個別に呼び出しています）。
 *   **演算の純粋性 (Pure Logic)**:
     `AttackCalculator` や `CriticalStep` などのクラスは、Unityのライフサイクルや `MonoBehaviour` を全く介さない pure C# クラスであり、副作用のない純粋関数として実装されています。これにより、パラメータのみを与えて期待通りのダメージが算出できるかを確認する単体テストを瞬時に実行可能です。

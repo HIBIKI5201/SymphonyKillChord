@@ -1,12 +1,13 @@
 # Enemy モジュール依存定義書
 
 ## 1. 概要
-インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約、およびスポナー（出現制御）を司るモジュールです。
+インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約、およびスポナー（出現制御）を司るモジュールです。ステージごとに異なるWave定義をAddressables経由でロードし、Wave開始をイベントで他モジュール（Stage演出等）へ通知します。
 
 ## 2. レイヤー構成（レイヤー別のクラス定義）
 *   **Domain**:
-    *   `EnemyTypeEnum` (敵のクラス分け：歩兵、砲兵など)
-    *   `EnemyWaveDefinition` (出現ウェーブのデータ構成)
+    *   `EnemyType` (敵のクラス分け：歩兵、砲兵など。旧ドキュメントの`EnemyTypeEnum`は型名の誤りで、実際の型名は`EnemyType`)
+    *   `EnemyWaveDefinition` (1ウェーブ分のデータ構成。敵情報・時間に加え、Wave開始時に発生するステージ演出定義`StageEffects`を保持する)
+    *   `EnemyWaves` (`EnemyWaveDefinition[]`をラップし、ループ設定・次ウェーブ取得（`TryGetNextWave`）・最終ウェーブ判定（`IsLastWave`）を提供するクラス)
     *   `EnemyMoveDecision` (移動AIの次の選択状態)
 *   **Application**:
     *   `EnemyMoveUsecase` (移動方向の算出やレイキャストによる衝突回避)
@@ -16,15 +17,16 @@
     *   `NearestAttackPositionSearchService` (プレイヤーへ接近する際の最適座標探索)
 *   **Adaptor**:
     *   `EnemyAIController` (AIのステート切り替えや、予約トリガーをUsecaseに伝達)
-    *   `EnemyWaveSpawnerState` (現在の出現フェーズ管理)
-    *   `EnemyWaveSpawnerController` (スポナーの時間制御)
+    *   `EnemyWaveSpawnerState` (現在の出現フェーズ管理。`OnWaveStarted(int, EnemyWaveDefinition)`イベントを公開し、Wave開始を他モジュールへ通知する)
+    *   `EnemyWaveSpawnerController` (スポナーの時間制御。歩兵・砲兵の2種のスポナーを扱い、Wave開始時に`EnemyWaveSpawnerState.NotifyWaveStarted`を呼ぶ)
     *   `DamageNumberDTO` (被ダメージの表示通知用)
     *   `IRaycastDetectView` (索敵データの伝達インターフェース)
 *   **View**:
     *   `EnemyWaveTimerView` (ウェーブの残り時間をUI表示)
 *   **Composition**:
-    *   `BossInitializer` (ボス戦闘のセットアップ、プレイヤー参照の紐付け)
-    *   `EnemyInitializer` (一般敵のセットアップ)
+    *   `EnemyModuleContainer` (Enemyモジュールが公開する`EnemyWaveSpawnerState`等をServiceLocatorへ登録するContainer。Stageモジュール等が参照する)
+    *   `BossInitializer` (ボス戦闘のセットアップ、プレイヤー参照の紐付け。※本体コメントに「テスト専用。本番では通常敵と同様にスポナー/ブートストラップへ統合する想定」との記載があり、現状はまだ本実装への統合前段階)
+    *   `EnemyInitializer` (一般敵のセットアップ。`ResourceLoadAsync()`で選択中ステージの`StageDefinition.EnemyWaveDefinitionAssetKey`からステージ固有のWave定義をAddressablesロードする)
     *   `EnemyInfantrySpawner` / `EnemyPools` (プール管理と動的生成)
 
 ---
@@ -34,25 +36,34 @@ Enemy モジュールが他モジュールとどのように関わっている�
 
 ### [依存しているモジュール]
 *   **InGame/Player**:
-    *   *依存箇所*: `PlayerInitializer` (Compositionでの直接結合), `PlayerEntity`
-    *   *詳細*: AIがプレイヤーを追尾・攻撃対象とするため、プレイヤーの位置（Transform）や現在のHPを参照します。現実装では `BossInitializer` から `PlayerInitializer` の MonoBehaviour を ServiceLocator で直接取得しているため、強い結合（要改善）になっています。
+    *   *依存箇所*: `PlayerModuleContainer`（Compositionでの直接結合。旧ドキュメントは`PlayerInitializer`を直接取得すると記載していたが、現在は`PlayerModuleContainer`経由）, `PlayerEntity`
+    *   *詳細*: AIがプレイヤーを追尾・攻撃対象とするため、プレイヤーの位置（Transform）や現在のHPを参照します。`EnemyInitializer`・`BossInitializer`双方が`ServiceLocator.GetInstance<PlayerModuleContainer>()`で取得しているため、強い結合（要改善）は変わらず残っています。
 *   **InGame/Music**:
-    *   *依存箇所*: `IMusicSyncService`, `MusicSyncState`
+    *   *依存箇所*: `IMusicSyncService`, `IMusicActionScheduler`, `MusicSyncState`
     *   *詳細*: 「敵もリズムに合わせて攻撃してくる」という仕様のため、攻撃アニメーションの開始や、ビートタイミングでの攻撃判定発動でリズムシステムに強く依存します。
-*   **InGame/Camera**:
-    *   *依存箇所*: `TargetSelectorController`
-    *   *詳細*: 敵がプレイヤーにロックオンされた際、またはロックオンマーカーを切り替える際の通知に使用します。
+*   **InGame/Target**:
+    *   *依存箇所*: `ITargetable`実装の登録
+    *   *詳細*: 敵がプレイヤーやカメラからロックオン対象として扱われるよう、Targetモジュールへ自身を登録します（旧ドキュメントが挙げていたCamera直結の`TargetSelectorController`は現存しません）。
+*   **OutGame/StageSelect**:
+    *   *依存箇所*: `SelectedBattleStageState`, `StageDefinition.EnemyWaveDefinitionAssetKey`
+    *   *詳細*: `EnemyInitializer`が選択中ステージに紐づくWave定義のAddressablesキーを取得し、ステージごとに異なる敵Wave構成をロードします（新規）。
 *   **InGame/Mission**:
     *   *依存箇所*: `MissionEventController`
-    *   *詳細*: 敵が死亡した際、撃破実績やミッションスコアをミッションシステムに通知します。
+    *   *詳細*: 敵が死亡した際、`NotifyEnemyKilled`で撃破実績やミッションスコアをミッションシステムに通知します。
 
 ### [依存されているモジュール]
-*   なし (上位の IngameComposition / Bootstrap から初期化される起動対象)
+*   **InGame/Stage**:
+    *   *参照箇所*: `EnemyWaveSpawnerState.OnWaveStarted`（`EnemyModuleContainer`経由）
+    *   *詳細*: `StageEffectInitializer`がこのイベントを購読し、Wave開始時に`EnemyWaveDefinition.StageEffects`で定義された演出（爆発・建物倒壊・障害物発生等）をBGM同期で再生します（新規）。初期化順は`EnemyInitializer`(Order 700) → `StageEffectInitializer`(Order 800)。
 
 ---
 
 ## 4. アーキテクチャ上の特徴と評価
 *   **非同期型リズム攻撃システム (EnemyAttackReservationUsecase)**:
     敵の攻撃は「2拍前」「1拍前」といったビートを基準に非同期で事前予約され、ジャストなビートで判定が出される高度な設計になっており、リズムゲームと戦闘アクションの完全な同期を担保しています。
+*   **Wave開始通知によるモジュール分離 (OnWaveStarted)**:
+    Wave開始時に発生する演出（爆発・障害物等）は、Enemyモジュール自身が直接処理するのではなく、`EnemyWaveSpawnerState.OnWaveStarted`イベントを介してStageモジュールへ通知し、Stage側が独立して反応する構成になっています。敵生成・演出・音楽同期をひとつのクラスに集約しない、疎結合な設計です。
 *   **改善のポイント (モジュール直接結合)**:
-    `BossInitializer` が他モジュールの Composition 層である `PlayerInitializer` を直接取得してボスの起動に利用しています。これはモジュール間の独立性を低下させているため、`Player` モジュールの具象を隠蔽し、ドメイン層の抽象インターフェースか、上位の Bootstrap（`IngameComposition`）が仲介してパラメータを渡す形へのリファクタリングが望まれます。
+    `EnemyInitializer`・`BossInitializer`の双方が、他モジュールのComposition層である`PlayerModuleContainer`を`ServiceLocator`経由で直接取得してプレイヤー情報を得ています。モジュール間の独立性を低下させているため、`Player`モジュールの具象を隠蔽し、ドメイン層の抽象インターフェースか、上位のBootstrap（`IngameComposition`）が仲介してパラメータを渡す形へのリファクタリングが引き続き望まれます。
+*   **BossInitializerの位置づけ**:
+    `BossInitializer`はコメント上「テスト専用」と明記されており、通常敵と同じスポナー/ブートストラップ経路への統合は未完了です。本番導線として扱う前に、この統合状況を確認する必要があります。
