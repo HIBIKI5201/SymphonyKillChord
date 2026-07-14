@@ -53,6 +53,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _attackCooldownRemainig = 0d;
         }
 
+        /// <summary> プレイヤーが攻撃を実行したときに発火します。 </summary>
+        public event Action<string, bool> OnAttackExecuted;
+
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
 
@@ -98,6 +101,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             if (!hasTarget)
             {
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
                 resultBeatType = (int)beatType;
                 return true;
             }
@@ -105,6 +109,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             CharacterEntity targetEntity = _battleState.Target as CharacterEntity;
             if (targetEntity == null)
             {
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
                 resultBeatType = (int)beatType;
                 return true;
             }
@@ -129,6 +134,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             buffContext.Attacker.SetDamage(buffContextPost.AttackResult.FinalDamage);
             _presenter.Push(buffContextPost.AttackResult);
+            OnAttackExecuted?.Invoke(attackDefinition.AttackName, true);
 
             resultBeatType = (int)beatType;
             return true;

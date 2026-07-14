@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: ""
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
   m_IgnoreReversedGraphics: 1
   m_BlockingObjects: 0
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
@@ -487,6 +487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SceneTransitionInitializer
   _loadingScreenView: {fileID: 0}
   _debugView: {fileID: 205594943}
+  _sceneInitializationTimeoutFrameCount: 3600
 --- !u!114 &205594945
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -807,7 +808,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 2119823347}
-  _stageTreeAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/StageTreeAsset.asset
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,7 +822,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
-  _screenRuleDataKey: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
+  _screenRuleDataKey: ScreenRuleData
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -862,9 +863,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 2119823347}
-  _skillNodeDataRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
-  _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
-  _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
+  _skillNodeDataRepoKey: SkillNodeDataRepo
+  _skillNodeBindRepoKey: SkillNodeBindRepo
+  _skillNodePhaseBindRepoKey: SkillNodePhaseBindDataRepo
   _videoPlayer: {fileID: 1876322594}
 --- !u!114 &510963399
 MonoBehaviour:
@@ -879,8 +880,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
   _uiDocument: {fileID: 2119823347}
-  _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
-  _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
+  _ownedSkillRepositoryKey: OwnedSkillRepository
+  _skillBuildRepositoryKey: SkillBuildRepository
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
 --- !u!1 &959266667
 GameObject:
@@ -1028,7 +1029,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 434490ef9a2c4724b8cb7984f7150eb1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.Composition.OutGame.DevelopSkillUnlockInitializer
 --- !u!4 &1480631850
 Transform:
@@ -1345,3 +1346,4 @@ SceneRoots:
   - {fileID: 1480631847}
   - {fileID: 1876322595}
   - {fileID: 40540016}
+  - {fileID: 1480631850}

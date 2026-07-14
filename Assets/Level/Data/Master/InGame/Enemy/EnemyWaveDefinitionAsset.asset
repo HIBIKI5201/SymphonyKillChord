@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8351cdae6b9c6c14aa15be57fd69b4c7, type: 3}
-  m_Name: EnemyWaveDefinition001
+  m_Name: EnemyWaveDefinitionAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset
   _waves:
   - Details:
@@ -19,41 +19,51 @@ MonoBehaviour:
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30
+    StageEffects: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 2
     - EnemyType: 1
       EnemyAmount: 2
     WaveDuration: 30
+    StageEffects: []
   _loop: 1
   _loopStart: 5
+  references:
+    version: 2
+    RefIds: []

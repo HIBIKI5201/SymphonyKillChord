@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.OutGame.StageSelect
@@ -17,8 +18,15 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             IReadOnlyList<StageNode> nodes,
             IReadOnlyList<StageNodeConnection> connections)
         {
-            if (nodes == null) { throw new System.ArgumentNullException(nameof(nodes)); }
-            if (connections == null) { throw new System.ArgumentNullException(nameof(connections)); }
+            if (nodes == null)
+            {
+                throw new ArgumentNullException(nameof(nodes));
+            }
+
+            if (connections == null)
+            {
+                throw new ArgumentNullException(nameof(connections));
+            }
 
             _nodes = new Dictionary<StageId, StageNode>(nodes.Count);
             for (var i = 0; i < nodes.Count; i++)
@@ -31,7 +39,24 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                     continue;
                 }
 
-                _nodes[nodes[i].Id] = nodes[i];
+                if (!_nodes.TryAdd(nodes[i].Id, nodes[i]))
+                {
+                    throw new InvalidOperationException(
+                        $"StageIdが重複しています。StageId: {nodes[i].Id.Value}");
+                }
+
+                if (!nodes[i].Definition.IsTutorial)
+                {
+                    continue;
+                }
+
+                if (_tutorialNode != null)
+                {
+                    throw new InvalidOperationException(
+                        "チュートリアルステージが複数定義されています。");
+                }
+
+                _tutorialNode = nodes[i];
             }
 
             _connections = connections;
@@ -48,6 +73,17 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <returns> 見つかった場合は true。</returns>
         public bool TryGetNode(StageId stageId, out StageNode node)
             => _nodes.TryGetValue(stageId, out node);
+
+        /// <summary>
+        ///     チュートリアルとして定義されたステージを取得します。
+        /// </summary>
+        /// <param name="node"> チュートリアルステージです。 </param>
+        /// <returns> チュートリアルステージが存在する場合はtrueです。 </returns>
+        public bool TryGetTutorialNode(out StageNode node)
+        {
+            node = _tutorialNode;
+            return node != null;
+        }
 
         /// <summary>
         ///     指定ノードの後続ノードIDを取得します。
@@ -93,5 +129,6 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
 
         private readonly Dictionary<StageId, StageNode> _nodes;
         private readonly IReadOnlyList<StageNodeConnection> _connections;
+        private readonly StageNode _tutorialNode;
     }
 }

@@ -1,12 +1,14 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲーム中のカメラシステム（プレイヤーの追従、フリーカメラ操作、および敵のロックオン・ターゲット選択システム）を司るモジュールです。
+> インゲーム中のカメラ追従・視点操作・ロックオン演出を司るモジュールです。ロックオン対象の選択・管理そのものは、別モジュール「Target」に分離されています。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Camera |
-| **カテゴリ** | InGame / System |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
+| **カテゴリ** | InGame / Persistent |
+| **アーキテクチャ** | クリーンアーキテクチャ（現状はView・Composition層のみで構成） |
+| **ステータス** | 実装済み |
+| **最終更新日** | 2026-07-15 |
 
 ---
 
@@ -14,22 +16,27 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
-| **`ICameraTransform`** | Composition (Persistent) | カメラの座標/向きを提供する抽象インターフェース（常駐シーンの CameraInitializer.cs 内に定義） |
-| **`CameraSystemParameter`** | Domain | カメラ動作の設定用SOなどに対となるピュアデータ |
-| **`ILockOnTarget`** | Domain | ロックオン対象が実装すべきインターフェース |
-| **`CameraSystemApplication`** | Application | カメラシステム全体を束ねるロジック |
-| **`CameraFollowApplication`** | Application | プレイヤーへの追従制御 |
-| **`CameraFollowVelocityApplication`** | Application | 速度に基づく動的追従ズーム等（※実際は struct） |
-| **`CameraRotationApplication`** | Application | カメラの向き回転 |
-| **`CameraBoneFreeLookRotationApplication`** | Application | フリー視点時のボーン回転制御 |
-| **`CameraBoneLockOnRotationApplication`** | Application | ロックオン時のボーン追従回転制御 |
-| **`TargetSelector`** | Application | ロックオン候補となるターゲットの検索・判定と選択管理を行うロジッククラス |
-| **`CameraSystemController`** | Adaptor | 入力やステートに応じた操作伝達をアプリケーション層へ仲介する |
-| **`CameraSystemPresenter`** | Adaptor | ビュー側への表示パラメータ伝達 |
-| **`TargetSelectorController`** | Adaptor | 他モジュール（バトル・スキル等）が現在のターゲット情報を取得するためのアダプター窓口 |
-| **`LockOnTargetGateway`** | Adaptor | ターゲット選択の実装仲介 |
-| **`CameraSystemView`** | View | 実際のUnityシネマシーンやカメラコンポーネントおよびプレイヤー入力の受け口 |
-| **`CameraSystemInitializer`** | Composition | インプットとカメラコンポーネントのDI（依存注入） |
+| **`CameraConfig`** | View | カメラの各種パラメータを保持するScriptableObject（旧`CameraSystemParameter`の後継） |
+| **`CameraSystemView`** | View | 入力購読・毎フレームの追従／回転計算・Transform反映まで一括して行うMonoBehaviour |
+| **`CameraUpdateContext`** | View | 1フレーム分の入力データを表すreadonly struct |
+| **`CameraUpdateFrame`** | View | 1フレーム分の計算状態を表すreadonly struct |
+| **`CameraFollowCalculator`** | View | 追従位置の計算 |
+| **`CameraFollowVelocityTracker`** | View | 追従対象の速度計算（struct） |
+| **`CameraFreeLookRotationCalculator`** | View | 非ロックオン時のフリールック回転計算 |
+| **`CameraLockOnRotationCalculator`** | View | ロックオン時のボーン回転計算 |
+| **`CameraLookAtRotationCalculator`** | View | カメラ自体の注視点回転計算 |
+| **`CameraSystemInitializer`** | Composition (InGame) | Calculatorクラス群の生成、`PlayerInputView`・Targetモジュールとの結線 |
+| **`CameraInitializer`** | Composition (Persistent) | `ICameraTransform`を実装し、常駐カメラを初期化 |
+| **`ICameraTransform`** | Composition (Persistent) | カメラの座標/向きを他モジュールへ公開する抽象 |
+
+> 旧設計にあった Domain/Application/Adaptor 各層のカメラ専用クラス（`CameraSystemApplication`、`CameraFollowApplication`、`ILockOnTarget`、`TargetSelector`、`CameraSystemController`、`CameraSystemPresenter`等）は、リファクタリングにより計算ロジックがView層へ統合され、ロックオン対象選択が「Target」モジュールへ分離されたことで、現在は存在しません。
+
+### 🧩 Composition初期化情報
+
+| 項目 | 内容 |
+| --- | --- |
+| **Initializerクラス** | `CameraSystemInitializer`（InGame）／`CameraInitializer`（Persistent） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `CameraInitializer`が`ICameraTransform`として登録される |
 
 ---
 
@@ -39,50 +46,37 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph CameraModule [Camera モジュール]
-        Domain[Domain<br>ICameraTransform<br>ILockOnTarget]
-        Adaptor[Adaptor<br>TargetSelectorController]
+        View["View<br>CameraSystemView, CameraConfig"]
+        Composition["Composition<br>CameraSystemInitializer, CameraInitializer"]
     end
-    
-    subgraph PersistentModule [Persistent モジュール]
-        PlayerInputView[PlayerInputView]
+
+    subgraph PersistentInputModule [Persistent モジュール]
+        InputView["View<br>PlayerInputView"]
     end
-    
-    subgraph PlayerModule [Player モジュール]
-        PlayerInitializer[PlayerInitializer]
-    end
-    
-    subgraph EnemyModule [Enemy モジュール]
-        EnemyLifeCycle[EnemyLifeCycle]
+
+    subgraph TargetModule [Target モジュール]
+        TargetAdaptor["Adaptor<br>ITargetSystemViewModel"]
     end
 
     %% 依存関係
-    PlayerInputView -->|インプット提供| Adaptor
-    PlayerInitializer -->|追従対象Transform| Adaptor
-    PlayerInitializer -->|カメラ方向の取得| Domain
-    EnemyLifeCycle -->|ILockOnTargetの実装| Domain
-    Adaptor -->|ロックオン対象取得| Domain
+    InputView -->|視点・攻撃・ロックオン入力| View
+    View -->|現在ターゲット位置の取得| TargetAdaptor
+    Composition --> View
 ```
 
 ### 📥 依存しているもの
 
 * **`Persistent`**
   * *依存箇所*: `PlayerInputView`
-  * *詳細*: カメラの視点移動操作（右スティック/マウス）のために、常駐シーンのインプットビューからインプット情報を受け取ります。
-* **`InGame/Player`**
-  * *依存箇所*: `PlayerInitializer`
-  * *詳細*: 追従対象としてプレイヤーの `transform` を必要とします。
-* **`InGame/Enemy`**
-  * *依存箇所*: `ITarget` / `ILockOnTarget`
-  * *詳細*: ロックオン対象となる敵を取得します。Domain層に用意した抽象インターフェース `ILockOnTarget` を通じて弱結合で参照しています。
+  * *詳細*: 視点移動・ロックオン・攻撃などの入力イベントを購読します。
+* **`InGame/Target`**
+  * *依存箇所*: `TargetSystemModuleContainer`, `ITargetSystemViewModel`
+  * *詳細*: ロックオン対象の選択・現在ターゲット位置の取得をTargetモジュールへ委譲します。ロックオン対象の具体的な管理（登録・選択ロジック）はCameraモジュールの外にあります。
 
 ### 📤 依存されているもの
 
-* **`InGame/Player`**
-  * *参照箇所*: `ICameraTransform`, `TargetSelectorController`
-  * *詳細*: プレイヤーはカメラの正面方向を基準に移動方向を決定するため、カメラの Transform 情報に依存します。また、スキル発動時の自動ターゲット選択のために `TargetSelectorController` を参照します。
-* **`InGame/Enemy`**
-  * *参照箇所*: `ILockOnTarget`
-  * *詳細*: 敵キャラクターはカメラからロックオンされ得る対象として `ILockOnTarget` インターフェースを実装します。
+* なし
+  * *詳細*: `CameraSystemView`はプレイヤー入力を購読して自律的に動作するため、他モジュールから直接参照されることはありません。`ICameraTransform`のみ、Persistent Composition層の抽象として他モジュールから参照される可能性があります。
 
 ---
 
@@ -91,92 +85,69 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-> カメラシステムの根幹となる、ロックオン対象（`ILockOnTarget`）や、常駐のカメラ位置・向きを他から参照するための抽象インターフェース（`ICameraTransform`）などを定義します。
-
+当モジュールでは使用していません。
 ### ② Application
-> プレイヤーへの追従（速度に応じた動的ズームを含む）、フリー視点・ロックオン視点のボーン回転処理、および画面中心から最適な敵を選択するターゲット選定（`TargetSelector`）といったコアユースケースを実行します。
-
+当モジュールでは使用していません。
 ### ③ Adaptor
-> プレイヤーの入力イベント受付、他モジュールとのデータ中継、および現在ターゲット情報を外部公開する `TargetSelectorController` などのアダプター層を提供します。
-
+当モジュールでは使用していません。
 ### ④ View
-> Unityの Cinemachine 仮想カメラや実際のカメラコンポーネントへの実反映、およびRaw入力のハンドリングを担当します。
-
+`CameraConfig`によるパラメータ管理、`CameraSystemView`による入力購読とTransform反映、および追従・回転計算を担当する`CameraFollowCalculator`等のCalculatorクラス群を持ちます。旧Application/Adaptor層の計算・伝達ロジックがすべてこのレイヤーに統合されています。
 ### ⑤ Infrastructure
-> 当モジュールでは使用していません。
-
+当モジュールでは使用していません。
 ### ⑥ Composition
-> `CameraSystemInitializer` を通じて、カメラを構成する各オブジェクトやコントローラーの依存関係（DI）を解決し初期化します。
+InGameシーンの`CameraSystemInitializer`がCalculatorクラス群の生成とTarget/Inputモジュールとの結線を行い、Persistentシーンの`CameraInitializer`が`ICameraTransform`として常駐カメラを公開します。
+
+## 🔌 拡張ポイント
+
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しいカメラ挙動（例: 新しい視点モード）を追加する場合は、`CameraSystemView.Tick()`内の分岐、または新しいCalculatorクラスの追加という形になります。
 
 ## 🔄処理フロー
 
 主要な処理フローごとに分けて記述します。
 
-### ① カメラの通常追従フロー（毎フレーム）
-プレイヤーの移動に追従し、プレイヤーの移動速度に基づいて動的にズーム距離を計算・反映します。
+### ① 通常追従・回転フロー（毎フレーム）
+プレイヤーの移動に追従し、ロックオン状態に応じて注視点・ボーン回転を計算し、カメラのTransformへ反映します。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant CSApp as CameraSystemApplication
-    participant CFA as CameraFollowApplication
-    participant CFVA as CameraFollowVelocityApplication
-    participant CSPres as CameraSystemPresenter
     participant CSView as CameraSystemView
+    participant FollowCalc as CameraFollowCalculator
+    participant LookAtCalc as CameraLookAtRotationCalculator
+    participant BoneCalc as CameraLockOnRotationCalculator / CameraFreeLookRotationCalculator
 
-    Note over CSApp: 毎フレーム of Update / LateUpdateループ
-    CSApp ->> CFA: 追従座標計算依頼 (プレイヤー位置を渡す)
-    CFA -->> CSApp: 基本追従座標を返却
-    CSApp ->> CFVA: ズーム・ラグ計算依頼 (プレイヤー速度を渡す)
-    CFVA -->> CSApp: 動的ズーム反映後の座標を返却
-    CSApp ->> CSPres: 最新のカメラ座標データを伝達
-    CSPres ->> CSView: シネマシーンの仮想カメラ等に反映
+    Note over CSView: Update / FixedUpdate / LateUpdate（UpdateModeで切替）
+    CSView ->> CSView: BuildFrame（1フレーム分の入力・状態を構築）
+    CSView ->> FollowCalc: 追従位置の計算要求
+    FollowCalc -->> CSView: 追従位置を返却
+    CSView ->> LookAtCalc: 注視点回転の計算要求
+    LookAtCalc -->> CSView: 回転を返却
+    CSView ->> BoneCalc: ロックオン状態に応じたボーン回転計算要求
+    BoneCalc -->> CSView: ボーン回転を返却
+    CSView ->> CSView: 障害物衝突を考慮した距離を解決しTransformへ反映
 ```
 
-### ② ターゲットロックオン & 切り替えフロー（入力イベント時）
-プレイヤーがロックオンボタンを押すか、スティック操作等によってロックオン対象を切り替える際の処理フローです。
+### ② ロックオン切り替えフロー（入力イベント時）
+プレイヤーの攻撃入力またはロックオン入力を受け、Targetモジュールへ問い合わせてロックオン状態を切り替えます。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Player as プレイヤー入力
+    actor Player as プレイヤー
     participant CSView as CameraSystemView
-    participant CSCont as CameraSystemController
-    participant CSApp as CameraSystemApplication
-    participant TS as TargetSelector
-    participant LOTG as LockOnTargetGateway
+    participant TargetVM as ITargetSystemViewModel (Targetモジュール)
 
-    Player ->> CSView: ロックオンボタン押下 / ターゲット切り替え入力
-    CSView ->> CSCont: ロックオン状態切り替え要求 (ToggleLockOnState)
-    CSCont ->> CSApp: ロックオン状態トグル要求 (ToggleLockOnState)
-    CSApp ->> TS: ターゲット切り替え要求 (ChangeTarget)
-    TS ->> LOTG: ロックオン候補（ILockOnTarget）の一覧を取得
-    LOTG -->> TS: リスト返却
-    TS ->> TS: 画面中央に最も近いターゲットを選定・更新
-    CSApp ->> CSApp: カメラ状態を「ロックオンモード（LockOnManual）」へ遷移
+    Player ->> CSView: 攻撃入力 / ロックオン入力
+    CSView ->> CSView: TryActiveAutoLockOn / ToggleLockOnState
+    CSView ->> TargetVM: 現在ターゲット位置の取得要求
+    TargetVM -->> CSView: ターゲット位置を返却（取得失敗時はロックオン解除）
+    CSView ->> CSView: CameraLockOnState を更新
 ```
 
-### ③ ロックオン中の注視回転 & UI表示フロー（毎フレーム）
-ロックオンモード中にターゲットを自動的に画面中央付近に捉え続け、ターゲットUIを描画するための情報を他モジュールへ連携する処理フローです。
+## 📝 アーキテクチャ上の特徴・既知の課題
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant CSApp as CameraSystemApplication
-    participant CBLR as CameraBoneLockOnRotationApplication
-    participant CSPres as CameraSystemPresenter
-    participant CSView as CameraSystemView
-    participant TSC as TargetSelectorController
-    participant OtherUI as ロックオンUI (他モジュール)
+### ✅ 設計上の見どころ
+* **ロックオン機能のモジュール分離**: かつてCamera自身が持っていた`ILockOnTarget`/`TargetSelector`によるロックオン対象選択は、独立した「Target」モジュールへ切り出されました。Cameraは`ITargetSystemViewModel`を介してTargetモジュールに問い合わせるだけの立場になっており、Target module は Camera 以外にも Player（攻撃対象解決）、Enemy（ターゲット対象としての登録）、UI（体力表示）、Skill（ターゲット解決）から広く利用されるハブ的モジュールです。
 
-    Note over CSApp: 毎フレーム of Update / LateUpdateループ (ロックオン時)
-    CSApp ->> CBLR: ロックオン回転角計算要求 (ターゲット座標・自機座標)
-    CBLR -->> CSApp: 計算された回転値（Yaw/Pitch）を返却
-    CSApp ->> CSPres: 最新のカメラ位置・回転データを伝達
-    CSPres ->> CSView: カメラ用ボーン/Transformに回転を反映
-
-    Note over OtherUI: 毎フレーム of 描画更新ループ
-    OtherUI ->> TSC: 現在のロックオン対象情報（座標等）を取得
-    TSC -->> OtherUI: ターゲット情報返却
-    OtherUI ->> OtherUI: 画面上にロックオンマークをレンダリング
-```
+### ⚠️ 既知の課題・改善ポイント
+* **View層への計算集約**: かつてApplication/Adaptor層に分かれていた追従・回転計算が、View層のCalculatorクラス群（`CameraFollowCalculator`等）へ統合されています。`MonoBehaviour`である`CameraSystemView`から直接計算ロジックを呼び出す構成のため、Unityに依存しないピュアな単体テストは行いにくくなっています。

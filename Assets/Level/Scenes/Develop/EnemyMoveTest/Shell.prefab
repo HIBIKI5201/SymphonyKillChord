@@ -63,8 +63,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ShellLifeCycle
   _view: {fileID: 1460797723794679686}
-  _attackDataKey: Assets/Level/Data/Master/InGame/Enemy/ShellAttackData.asset
-  _musicDataKey: Assets/Level/Data/Master/InGame/Enemy/ShellMusicData.asset
+  _attackDataKey: ShellAttackData
+  _musicDataKey: ShellMusicData
 --- !u!1 &4707150392836928980
 GameObject:
   m_ObjectHideFlags: 0

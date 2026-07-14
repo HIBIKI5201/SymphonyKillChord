@@ -70,10 +70,14 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// <returns> すべてロードできた場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            try
+            {
             _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
             _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
             _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
             _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
+            }
+            catch (Exception ex) { Debug.LogException(ex, this); }
             return _loadedBackgroundCatalog != null
                 && _loadedAnimationCatalog != null
                 && _loadedPortraitCatalog != null

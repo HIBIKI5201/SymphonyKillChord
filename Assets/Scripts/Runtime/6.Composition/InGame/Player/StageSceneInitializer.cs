@@ -26,12 +26,4 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.UnregisterInstance<IStageSceneInstance>(this);
         }
     }
-
-    /// <summary>
-    ///     ステージシーン参照の公開インターフェース。
-    /// </summary>
-    public interface IStageSceneInstance
-    {
-        Transform PlayerSpawnPointTransform { get; }
-    }
 }

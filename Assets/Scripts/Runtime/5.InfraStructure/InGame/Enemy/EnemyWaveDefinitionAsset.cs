@@ -1,5 +1,9 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Stage;
+using KillChord.Runtime.InfraStructure.InGame.Stage;
+using SymphonyFrameWork.Attribute;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -27,7 +31,23 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                     EnemyWaveDetail detail = new EnemyWaveDetail(sourceDetails[j].EnemyType, sourceDetails[j].EnemyAmount);
                     details[j] = detail;
                 }
-                EnemyWaveDefinition wave = new EnemyWaveDefinition(details, sourceWaves[i].WaveDuration);
+                List<IStageEffectDefinition> stageEffects = new();
+                if (sourceWaves[i].StageEffects != null)
+                {
+                    for (int j = 0; j < sourceWaves[i].StageEffects.Count; j++)
+                    {
+                        StageEffectAssetBase stageEffect = sourceWaves[i].StageEffects[j];
+                        if (stageEffect != null)
+                        {
+                            stageEffects.Add(stageEffect.Create());
+                        }
+                    }
+                }
+
+                EnemyWaveDefinition wave = new EnemyWaveDefinition(
+                    details,
+                    sourceWaves[i].WaveDuration,
+                    stageEffects);
                 waves[i] = wave;
             }
             EnemyWaves ret = new EnemyWaves(waves, _loop, _loopStart);
@@ -57,6 +77,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
             [Tooltip("Waveの継続時間(秒)"), Range(0, 1800)] public float WaveDuration;
+            /// <summary> Wave開始時に予約するステージ演出です。 </summary>
+            [SerializeReference, SubclassSelector, Tooltip("Wave開始時に音楽同期で実行するステージ演出です。")]
+            public List<StageEffectAssetBase> StageEffects = new();
         }
     }
 }
