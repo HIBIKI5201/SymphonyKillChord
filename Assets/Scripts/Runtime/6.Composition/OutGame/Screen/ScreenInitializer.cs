@@ -33,7 +33,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            try
+            {
+                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            }
+            catch (Exception ex) { Debug.LogException(ex, this); }
             return _loadedScreenRuleData != null;
         }
 
