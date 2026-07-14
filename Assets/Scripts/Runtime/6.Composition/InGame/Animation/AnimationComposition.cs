@@ -51,6 +51,13 @@ namespace KillChord.Runtime.Composition
                     CharacterAnimationCatalogEntry entry = config.Entries[i];
                     if (entry.Clip == null)
                     {
+                        if (!string.IsNullOrWhiteSpace(entry.Key))
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AnimationComposition)}] ワンショットアニメーションのクリップが設定されていません。Key: {entry.Key}",
+                                view);
+                        }
+
                         continue;
                     }
 

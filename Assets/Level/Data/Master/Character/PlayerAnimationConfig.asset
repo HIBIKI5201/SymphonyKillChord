@@ -35,7 +35,7 @@ MonoBehaviour:
     ExitBlendFrameCount: 0
   - ClipType: 3
     Key: Skill_1
-    Clip: {fileID: 5457690334268165388, guid: 781420ab7102ec1458ee7813f85c0185, type: 3}
+    Clip: {fileID: 7400000, guid: 86b2b55191be51a49912d81a6b0cff35, type: 3}
     EnterBlendFrameCount: 0
     ExitBlendFrameCount: 12
   _enterBlendFrameCount: 4
