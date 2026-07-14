@@ -355,12 +355,18 @@ namespace KillChord.Editor.AutoBuilder
             await Awaitable.NextFrameAsync();
         }
 
+        /// <summary>
+        ///     ビルドターゲットと現在のビルド設定に対応する拡張子を取得します。
+        /// </summary>
+        /// <param name="target"> ビルドターゲットです。 </param>
+        /// <returns> 出力ファイルの拡張子です。 </returns>
         public static string GetExtension(BuildTarget target)
         {
             return target switch
             {
                 BuildTarget.StandaloneWindows => ".exe",
                 BuildTarget.StandaloneWindows64 => ".exe",
+                BuildTarget.Android when EditorUserBuildSettings.buildAppBundle => ".aab",
                 BuildTarget.Android => ".apk",
                 BuildTarget.StandaloneOSX => ".app",
                 _ => string.Empty

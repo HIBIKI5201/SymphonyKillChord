@@ -15,6 +15,31 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: c521adcb33534f544ad957856080f76a
   m_SerializeEntries:
+  - m_GUID: 02ac4acd11c13e94f951e778560963f3
+    m_Address: PlayerConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 03ab59b5cc1893e4eaf97352ba51df87
+    m_Address: BackgroundCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
+    m_Address: SkillInputProgressViewConfigAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 114f8ed06b070604fbf83641b90742c9
+    m_Address: TestSkillData1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 134672bf4f515f4439a46323fff09e2a
+    m_Address: OwnedSkillRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c411bf35748d284584af4d0f16a0ccc
     m_Address: TitleScreenRuleData
     m_ReadOnly: 0
@@ -25,18 +50,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ed3d6973f36d66844852d3391a8a18df
-    m_Address: OutGameScreenRuleData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 57ad1f17f7de2804a9744cf5cc3c4316
-    m_Address: SkillNodeDataRepo
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8bb92b8655a6f724b864e7dac88d6e70
-    m_Address: SkillNodeBindRepo
+  - m_GUID: 2d1972e01a7a86243aac0caff66ff428
+    m_Address: ExampleBattleMusicData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,118 +60,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fa8820e093edab1489d8bbed0db664af
-    m_Address: SkillTreeTestInputData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 134672bf4f515f4439a46323fff09e2a
-    m_Address: OwnedSkillRepository
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d2b760f47d977174fb177b0d0f9d2480
-    m_Address: SkillBuildRepository
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8f9f05cd27f2f3a4087a15acbe76d7c3
-    m_Address: OwnedSkillRepositoryDebug
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
-    m_Address: SkillBuildRepositoryDebug
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 03ab59b5cc1893e4eaf97352ba51df87
-    m_Address: BackgroundCatalogAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9c44a325b8ad84f498216394b6a9d584
-    m_Address: AnimationCatalogAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
-    m_Address: PortraitCatalogAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 888c47664981fed459937f475b632964
-    m_Address: ScenarioSettingsAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
-    m_Address: RhythmJudgmentDefinitionAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e769e9900eed0c94eaa8d71f564c1966
-    m_Address: EnemyWaveDefinitionAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 02ac4acd11c13e94f951e778560963f3
-    m_Address: PlayerConfig
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8f8d7fb175cdb054bb9439f0d1bb8dda
-    m_Address: OutGameSkillRepository
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
-    m_Address: SkillInputProgressViewConfigAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 358a8447b7fd7f54690a994853695aa1
     m_Address: Player
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 114f8ed06b070604fbf83641b90742c9
-    m_Address: TestSkillData1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8836b3eb044a4af4fbfcb41d68328252
-    m_Address: TestSkillData2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c9264ef7716ed4f47bc258f02a4823b9
-    m_Address: BossAttackEntryRepo
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
-    m_Address: ShellAttackData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 93524034675db3e489e93312c0366c23
-    m_Address: Enemy
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 71243b714fe682a479522c36402275ac
-    m_Address: ExampleEnemyMoveData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bad017c822c5b8c4da79df297d30324c
-    m_Address: ExampleEncountMusicData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2d1972e01a7a86243aac0caff66ff428
-    m_Address: ExampleBattleMusicData
+  - m_GUID: 57ad1f17f7de2804a9744cf5cc3c4316
+    m_Address: SkillNodeDataRepo
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -165,13 +75,103 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d96aa53a8bf8e3e49ac87fa3cd9fbb2b
-    m_Address: BossCharacterData
+  - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
+    m_Address: RhythmJudgmentDefinitionAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71243b714fe682a479522c36402275ac
+    m_Address: ExampleEnemyMoveData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
+    m_Address: ShellAttackData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8836b3eb044a4af4fbfcb41d68328252
+    m_Address: TestSkillData2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 888c47664981fed459937f475b632964
+    m_Address: ScenarioSettingsAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bb92b8655a6f724b864e7dac88d6e70
+    m_Address: SkillNodeBindRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f8d7fb175cdb054bb9439f0d1bb8dda
+    m_Address: OutGameSkillRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f9f05cd27f2f3a4087a15acbe76d7c3
+    m_Address: OwnedSkillRepositoryDebug
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93524034675db3e489e93312c0366c23
+    m_Address: Enemy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c44a325b8ad84f498216394b6a9d584
+    m_Address: AnimationCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bad017c822c5b8c4da79df297d30324c
+    m_Address: ExampleEncountMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9264ef7716ed4f47bc258f02a4823b9
+    m_Address: BossAttackEntryRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2b760f47d977174fb177b0d0f9d2480
+    m_Address: SkillBuildRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d69421e5dc9278446a38b4415677e2aa
     m_Address: ShellMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d96aa53a8bf8e3e49ac87fa3cd9fbb2b
+    m_Address: BossCharacterData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e769e9900eed0c94eaa8d71f564c1966
+    m_Address: EnemyWaveDefinitionAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
+    m_Address: SkillBuildRepositoryDebug
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed3d6973f36d66844852d3391a8a18df
+    m_Address: ScreenRuleData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
+    m_Address: PortraitCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa8820e093edab1489d8bbed0db664af
+    m_Address: SkillTreeTestInputData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
