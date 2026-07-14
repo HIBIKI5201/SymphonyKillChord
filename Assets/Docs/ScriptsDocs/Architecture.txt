@@ -132,6 +132,10 @@ public class Entity
 }
 ```
 
+公開プロパティは読み取り専用（`=> _field`）にし、外部からの直接代入（オートプロパティの`public set`等）は行わない。
+
+状態変更は必ず `SetXxx()` / `RecordXxx()` / `Complete()` など意図が伝わる名前のメソッドを介して行う。
+
 ### ValueObject（VO）
 
 Domain層にある値が不変な値型オブジェクト。
@@ -224,6 +228,11 @@ InfraStructure層にある、データを入力するScriptableObjectクラス�
 
 Domain層などに対となるクラスが存在し、それのパラメータを導入できるようにする。
 
+種類が増えていくもの（判定条件・演出など）を扱う場合は、抽象基底クラス（`XxxAssetBase`）を用意し、
+`[SerializeReference, SubclassSelector]` を付けたフィールド（配列/List）でインスペクタから多態的に選択できるようにする。
+基底クラスは `abstract Create()` を持ち、対応するDomain層のインターフェース/値オブジェクトへ変換する。
+この形にすることで、新しい種類を追加する際にInspectorの選択肢が自動的に増え、他コードの変更が不要になる。
+
 ### Repository
 
 InfraStructure層に実装があり、Application層に抽象がある。
@@ -236,6 +245,16 @@ DBの取得処理やScriptableObjectなど。
 
 Composition層にある初期化やDIを実行するクラス。
 
+`InGameInitializationModuleBase` / `OutGameInitializationModuleBase` / `PersistentInitializationModuleBase` のいずれかを継承し、
+`Init()` → `ResourceLoadAsync(CancellationToken)` → `Build()` → `Ready()` の順で呼ばれるライフサイクルを実装する。
+シーン内に存在する各Initializerは `ModuleName` と `Order`（実行順）を持ち、`InitializationCoordinator<TModule>` が
+`Order` の昇順で全モジュールをフェーズごとに一括実行する。いずれかのフェーズで失敗（false）を返すと以降のフェーズは実行されない。
+シーン終了時は `Shutdown()` を登録順の逆順で呼び出す。
+
+他モジュールへ公開する実行時オブジェクトは、`ExampleModuleContainer` のような専用クラスへまとめ、
+`ServiceLocator.RegisterInstance` で登録する。他モジュールは `ServiceLocator.TryGetInstance<ExampleModuleContainer>()` で取得する。
+コンストラクタDIではなくこのServiceLocator経由の公開が、モジュール間連携の実質的な標準手段になっている。
+
 ### Debugger
 
 Composition層にあるエディタ向け機能のクラス。
@@ -243,6 +262,14 @@ Composition層にあるエディタ向け機能のクラス。
 # 設計パターン
 
 Application層からView層の多態な処理を実行する方法
+
+## 非同期処理の型使い分け
+
+Composition層のモジュールライフサイクル（`ResourceLoadAsync` 等）はUnityネイティブの `Awaitable` / `Awaitable<T>` を返す。
+
+Application層・Adaptor層のユースケースやシーン遷移などのAPIは `Task<T>` / `ValueTask<T>` を返す。
+
+両者の橋渡しが必要な箇所（Composition側の完了待機をApplication層から呼び出す等）でのみ、Application層でも `Awaitable` を使用してよい。
 
 # 参考資料
 

@@ -84,6 +84,18 @@ sequenceDiagram
 | **公開する ModuleContainer / ServiceLocator登録型** | `ExampleModuleContainer`（`IExampleTransform` 等を保持） |
 ```
 
+### 7. 拡張ポイントとその手順を明記する
+モジュールに「安全に追加・変更できる場所」がある場合（例: `[SerializeReference, SubclassSelector]` によるポリモーフィックな種類追加、`TypeCache` による自動検出など）、見つけた人が迷わず追加できるよう具体的な手順をテーブルで明記してください。拡張ポイントが無いモジュールの場合はこのセクションごと省略して構いません。
+*   **自動検出か手動登録かを必ず区別する**: Inspectorに勝手に出現する／`TypeCache`で自動的に拾われる拡張なのか、Enumやswitch文・固定リストへの追記が必要な拡張なのかを明記してください。
+*   **登録漏れ時の挙動も書く**: 手動登録が必要な場合、登録を忘れると何が起きるか（起動時エラー、Inspectorに出現しない、サイレントに無視される 等）を添えると事故防止になります。
+
+```markdown
+| 拡張したいこと | 実装する場所 | 追加登録の要否 |
+| --- | --- | --- |
+| 新しい〇〇条件を追加したい | `IExampleCondition`（Domain）を実装し、`ExampleConditionAssetBase`（Infrastructure）を継承したAssetクラスを作成する | 不要（`[SerializeReference, SubclassSelector]` によりInspectorへ自動的に出現） |
+| 新しい〇〇種別を追加したい | `ExampleKind` Enumに値を追加し、対応する処理を `switch` 文に追記する | 必要（追記漏れの場合、既定値として無視される） |
+```
+
 ---
 
 ## 📄 設計書テンプレート
@@ -177,6 +189,15 @@ graph TD
 インフラストラクチャ層の概要をここに記述します。
 ### ⑥ Composition
 コンポジション層の概要をここに記述します。
+
+## 🔌 拡張ポイント
+
+> 拡張ポイントが無いモジュールの場合は、このセクションごと省略してください。
+
+| 拡張したいこと | 実装する場所 | 追加登録の要否 |
+| --- | --- | --- |
+| 新しい〇〇条件を追加したい | `IExampleCondition`（Domain）を実装し、`ExampleConditionAssetBase`（Infrastructure）を継承したAssetクラスを作成する | 不要（`[SerializeReference, SubclassSelector]` によりInspectorへ自動的に出現） |
+| 新しい〇〇種別を追加したい | `ExampleKind` Enumに値を追加し、対応する処理を `switch` 文に追記する | 必要（追記漏れの場合、既定値として無視される） |
 
 ## 🔄処理フロー
 

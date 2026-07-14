@@ -1,0 +1,112 @@
+# コーディング規約（実装から抽出）
+
+このドキュメントは `Architecture.txt`（設計思想）を補うものです。
+
+`Architecture.txt` が「レイヤー構成・責務・DIの方針」を扱うのに対し、こちらは実際のコードを解析して見つかった、
+文書化されていなかったが広く一貫して守られている命名・記述レベルの規約をまとめています。
+
+新しくコードを書く際は、明文化されていない部分もここに書かれた既存の傾向に合わせてください。
+
+---
+
+## 命名規則
+
+### 定数
+
+`private const` / `static readonly` の定数はすべて `ALL_CAPS_WITH_UNDERSCORES`（スクリーミングスネークケース）で記述する。
+
+```csharp
+private const int MAX_STAGE_READY_WAIT_FRAME = 120;
+private static readonly int[] INITIAL_UNLOCKED_SKILL_IDS = { 0, 13 };
+```
+
+### インターフェース
+
+インターフェースは必ず `I` プレフィックスを付ける（`IExampleRepository` 等）。例外なし。
+
+### ファイル・型
+
+1ファイルにつき1つの公開型（class/struct/interface/enum）のみを定義し、ファイル名は型名と一致させる。
+
+同一ファイル内に複数の型が必要な場合は、片方をもう一方の**プライベートなネスト型**にする（例: `EnemyWaveDefinitionAsset` 内の `SingleWaveDefinition`）。
+トップレベルに2つ以上の公開型を並べて書かない。
+
+### 名前空間
+
+名前空間はフォルダ構成をそのまま反映する（レイヤーフォルダの先頭の数字のみ取り除く）。
+
+```
+Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillDefinition.cs
+  → namespace KillChord.Runtime.Domain.InGame.Skill
+
+Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs
+  → namespace KillChord.Runtime.Composition.InGame.Player
+```
+
+---
+
+## コメント規約
+
+### XML docコメント
+
+public/privateを問わず、クラス・プロパティ・メソッドには日本語の `<summary>` を付ける。
+
+```csharp
+/// <summary>
+///     プレイヤーの移動速度を管理するプロパティです。
+/// </summary>
+public MoveSpeed Speed => _speed;
+```
+
+### Tooltip
+
+`[SerializeField]` を付けたフィールドには、可能な限り日本語の `[Tooltip("...")]` を併記する。
+
+```csharp
+[SerializeField, Tooltip("研究ポイント")]
+private int _researchPoint;
+```
+
+---
+
+## ログ出力規約
+
+`Debug.LogError` / `Debug.LogWarning` は、どのクラスで発生したログか一目でわかるよう、
+`[{nameof(ClassName)}] メッセージ` の形式で書く。MonoBehaviourの場合は第2引数に `this` を渡す。
+
+```csharp
+Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
+```
+
+> 現状、この形式に従っていない古いログ出力も残っています（特に `5.InfraStructure` や `4.View` の一部）。
+> 見つけた場合は修正が必須というわけではありませんが、**新規に書くログは必ずこの形式に統一してください**。
+
+---
+
+## 状態変更（ミューテーション）の書き方
+
+Domain層・Adaptor層のクラスにおいて、外部へ公開するプロパティは読み取り専用にする。
+
+```csharp
+public bool IsTutorialCompleted => _isTutorialCompleted;
+```
+
+状態変更はオートプロパティの `public set` ではなく、意図が伝わる名前のメソッドを介して行う。
+
+```csharp
+public bool Complete()
+{
+    if (_isTutorialCompleted) return false;
+    _isTutorialCompleted = true;
+    return true;
+}
+```
+
+（例: `SetDamage`, `SetInvincible`, `RecordDamageTaken`, `RecordCombo`, `RecordKill` など）
+
+---
+
+## 関連ドキュメント
+
+* `Architecture.txt`: レイヤー構成・責務・DIの方針、Composition層のモジュールライフサイクル契約、`ServiceLocator` / `*ModuleContainer` によるモジュール間公開パターン、`[SerializeReference, SubclassSelector]` によるポリモーフィック拡張パターンなど。
+* `ArchitectureValidationReport.txt`: 設計思想と実装のズレを検証した過去のレポート。
