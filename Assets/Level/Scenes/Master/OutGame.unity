@@ -807,7 +807,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 2119823347}
-  _stageTreeAssetKey: Assets/Level/Data/Master/OutGame/StageSelect/StageTreeAsset.asset
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,7 +821,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
-  _screenRuleDataKey: Assets/Level/Data/Master/OutGame/Screen/OutGameScreenRuleData.asset
+  _screenRuleDataKey: OutGameScreenRuleData
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -862,9 +862,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 2119823347}
-  _skillNodeDataRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeDataRepo.asset
-  _skillNodeBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/SkillNodeBindRepo.asset
-  _skillNodePhaseBindRepoKey: Assets/Level/Data/Master/OutGame/SkillTree/SkillNodePhaseBindData/SkillNodePhaseBindDataRepo.asset
+  _skillNodeDataRepoKey: SkillNodeDataRepo
+  _skillNodeBindRepoKey: SkillNodeBindRepo
+  _skillNodePhaseBindRepoKey: SkillNodePhaseBindDataRepo
   _videoPlayer: {fileID: 1876322594}
 --- !u!114 &510963399
 MonoBehaviour:
@@ -879,8 +879,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillBuild.SkillBuildInitializer
   _uiDocument: {fileID: 2119823347}
-  _ownedSkillRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/OwnedSkillRepository.asset
-  _skillBuildRepositoryKey: Assets/Level/Data/Master/OutGame/SkillBuild/SkillBuildRepository.asset
+  _ownedSkillRepositoryKey: OwnedSkillRepository
+  _skillBuildRepositoryKey: SkillBuildRepository
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
 --- !u!1 &959266667
 GameObject:

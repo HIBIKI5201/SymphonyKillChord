@@ -21,7 +21,7 @@ MonoBehaviour:
   _flavorText: "\u30DC\u30B9"
   _targetSceneName: InGame
   _battleSceneName: Stage_02
-  _enemyWaveDefinitionAssetKey: Assets/Level/Data/Master/InGame/Enemy/EnemyWaveDefinitionAsset.asset
+  _enemyWaveDefinitionAssetKey: EnemyWaveDefinitionAsset
   _scenarioId: 
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
