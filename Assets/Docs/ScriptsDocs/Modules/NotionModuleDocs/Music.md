@@ -198,3 +198,12 @@ sequenceDiagram
         Scheduler -->> Caller: 登録済みコールバックを発火
     end
 ```
+
+## 📝 アーキテクチャ上の特徴・既知の課題
+
+### ✅ 設計上の見どころ
+* **中核APIは`IMusicSyncService`/`IMusicActionScheduler`**: `MusicSyncState`/`RhythmJustService`は状態保持・ジャスト判定という一部の役割に過ぎず、他モジュールが実際に利用する主要な窓口は`IMusicSyncService.RegisterAction`（任意のビートタイミングでコールバックを予約する汎用API）と、それを敵専用にラップした`IMusicActionScheduler`/`MusicSchedulerAdaptor`です。
+* **高性能・低遅延の入力評価 (`RhythmJustService`)**: 入力時の絶対時間をキャッシュし、AudioSourceの正確な再生サンプル数から逆算してタイミング誤差をミリ秒単位で割り出す純粋演算サービスであり、Unityエンジンのオーディオ遅延に左右されにくい安定したジャスト判定を実現しています。
+
+### ⚠️ 既知の課題・改善ポイント
+* **「完全独立モジュール」ではない**: `IMusicSyncService`が`BattleActionType`（Battleモジュール）を、`IMusicActionScheduler`が`EnemyMusicSpec`（Enemyモジュール）を直接引数・戻り値に持つため、厳密には他モジュールのDomain型に依存しています。ドキュメント上「他モジュールに一切依存しない」と誤って記載されていた時期がありました。

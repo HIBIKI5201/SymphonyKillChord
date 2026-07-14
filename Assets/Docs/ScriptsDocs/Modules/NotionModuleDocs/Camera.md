@@ -143,3 +143,11 @@ sequenceDiagram
     TargetVM -->> CSView: ターゲット位置を返却（取得失敗時はロックオン解除）
     CSView ->> CSView: CameraLockOnState を更新
 ```
+
+## 📝 アーキテクチャ上の特徴・既知の課題
+
+### ✅ 設計上の見どころ
+* **ロックオン機能のモジュール分離**: かつてCamera自身が持っていた`ILockOnTarget`/`TargetSelector`によるロックオン対象選択は、独立した「Target」モジュールへ切り出されました。Cameraは`ITargetSystemViewModel`を介してTargetモジュールに問い合わせるだけの立場になっており、Target module は Camera 以外にも Player（攻撃対象解決）、Enemy（ターゲット対象としての登録）、UI（体力表示）、Skill（ターゲット解決）から広く利用されるハブ的モジュールです。
+
+### ⚠️ 既知の課題・改善ポイント
+* **View層への計算集約**: かつてApplication/Adaptor層に分かれていた追従・回転計算が、View層のCalculatorクラス群（`CameraFollowCalculator`等）へ統合されています。`MonoBehaviour`である`CameraSystemView`から直接計算ロジックを呼び出す構成のため、Unityに依存しないピュアな単体テストは行いにくくなっています。
