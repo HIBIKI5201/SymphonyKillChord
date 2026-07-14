@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Enemy |
 | **カテゴリ** | InGame / Character |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
 | **ステータス** | 実装済み（`BossInitializer`はテスト専用ドライバとして残存、本実装への統合は未完了） |
 | **最終更新日** | 2026-07-15 |
 

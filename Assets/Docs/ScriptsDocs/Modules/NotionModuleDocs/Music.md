@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Music |
 | **カテゴリ** | InGame + Persistent / Core System |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
 | **ステータス** | 実装済み |
 | **最終更新日** | 2026-07-15 |
 

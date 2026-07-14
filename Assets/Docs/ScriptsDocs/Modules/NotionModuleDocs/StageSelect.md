@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | StageSelect |
 | **カテゴリ** | OutGame |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Infrastructure, Composition) |
 | **ステータス** | 実装済み（一部TODO残存、既知の課題を参照） |
 | **最終更新日** | 2026-07-15 |
 

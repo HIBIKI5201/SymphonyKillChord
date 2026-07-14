@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Sequence |
 | **カテゴリ** | InGame |
-| **アーキテクチャ** | View・Compositionのみで構成（Domain/Application/Adaptor/Infrastructureは無し） |
 | **ステータス** | 実装済み |
 | **最終更新日** | 2026-07-15 |
 

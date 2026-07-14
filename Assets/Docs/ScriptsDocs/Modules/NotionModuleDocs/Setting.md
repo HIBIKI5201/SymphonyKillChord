@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Setting |
 | **カテゴリ** | OutGame |
-| **アーキテクチャ** | View・Compositionのみで構成（Domain/Application/Adaptor/Infrastructureは無し） |
 | **ステータス** | 実装済み（画面設定タブは未完成、既知の課題を参照） |
 | **最終更新日** | 2026-07-15 |
 

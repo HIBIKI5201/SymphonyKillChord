@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Result |
 | **カテゴリ** | InGame |
-| **アーキテクチャ** | Adaptor・View・Compositionのみで構成（Domain/Application/Infrastructureは無し） |
 | **ステータス** | 実装済み（既知の課題を参照） |
 | **最終更新日** | 2026-07-15 |
 

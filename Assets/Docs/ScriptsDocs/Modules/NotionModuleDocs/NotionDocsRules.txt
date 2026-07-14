@@ -125,7 +125,6 @@ sequenceDiagram
 | --- | --- |
 | **モジュール名** | Camera |
 | **カテゴリ** | InGame |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Composition) |
 | **ステータス** | 実装済み / 設計中 / 廃止予定 のいずれかを記載 |
 | **最終更新日** | YYYY-MM-DD |
 

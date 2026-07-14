@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Camera |
 | **カテゴリ** | InGame / Persistent |
-| **アーキテクチャ** | クリーンアーキテクチャ（現状はView・Composition層のみで構成） |
 | **ステータス** | 実装済み |
 | **最終更新日** | 2026-07-15 |
 
@@ -28,8 +27,6 @@
 | **`CameraSystemInitializer`** | Composition (InGame) | Calculatorクラス群の生成、`PlayerInputView`・Targetモジュールとの結線 |
 | **`CameraInitializer`** | Composition (Persistent) | `ICameraTransform`を実装し、常駐カメラを初期化 |
 | **`ICameraTransform`** | Composition (Persistent) | カメラの座標/向きを他モジュールへ公開する抽象 |
-
-> 旧設計にあった Domain/Application/Adaptor 各層のカメラ専用クラス（`CameraSystemApplication`、`CameraFollowApplication`、`ILockOnTarget`、`TargetSelector`、`CameraSystemController`、`CameraSystemPresenter`等）は、リファクタリングにより計算ロジックがView層へ統合され、ロックオン対象選択が「Target」モジュールへ分離されたことで、現在は存在しません。
 
 ### 🧩 Composition初期化情報
 
@@ -91,7 +88,7 @@ graph TD
 ### ③ Adaptor
 当モジュールでは使用していません。
 ### ④ View
-`CameraConfig`によるパラメータ管理、`CameraSystemView`による入力購読とTransform反映、および追従・回転計算を担当する`CameraFollowCalculator`等のCalculatorクラス群を持ちます。旧Application/Adaptor層の計算・伝達ロジックがすべてこのレイヤーに統合されています。
+`CameraConfig`によるパラメータ管理、`CameraSystemView`による入力購読とTransform反映、および追従・回転計算を担当する`CameraFollowCalculator`等のCalculatorクラス群を持ちます。
 ### ⑤ Infrastructure
 当モジュールでは使用していません。
 ### ⑥ Composition

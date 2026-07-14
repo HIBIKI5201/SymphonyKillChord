@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Character & Battle |
 | **カテゴリ** | InGame / Core |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View) |
 | **ステータス** | 実装済み |
 | **最終更新日** | 2026-07-15 |
 
@@ -209,12 +208,3 @@ sequenceDiagram
     BuffSys ->> DABuff: ライフスティール等の後処理バフを実行
     DABuff -->> PAC: 最終 BuffContext (AttackResult) を返却
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **パイプラインとバフの分離**: ダメージ計算は`IAttackPipeline`（`IAttackStep`実装である`CriticalStep`等を順次実行）が、バフは`IBuff`実装（`DamageDownBuff`/`LifeStealBuff`）を`BuffSystem`が`BuffExecuteTiming`のタイミングで実行するという、別々の仕組みになっています。新しいバフや特殊なダメージ処理をそれぞれ独立して追加できます。
-* **演算の純粋性 (Pure Logic)**: `AttackCalculator`や`CriticalStep`などのクラスは、Unityのライフサイクルや`MonoBehaviour`を全く介さないpure C#クラスであり、副作用のない純粋関数として実装されています。パラメータのみを与えて期待通りのダメージが算出できるかを確認する単体テストを瞬時に実行可能です。
-
-### ⚠️ 既知の課題・改善ポイント
-* **バフはパイプラインのステップではない**: `PlayerAttackController`がパイプライン実行とバフ実行を個別に呼び出す構成のため、両者の実行順序・関係性はコードを読まないと把握しづらくなっています。ドキュメント上でも誤解しやすいため注意してください。
