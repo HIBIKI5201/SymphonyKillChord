@@ -1,4 +1,3 @@
-using UnityEngine;
 using KillChord.Editor.Utility;
 
 namespace KillChord.Editor.TicketSystem

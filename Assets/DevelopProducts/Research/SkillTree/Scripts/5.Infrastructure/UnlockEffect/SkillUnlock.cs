@@ -10,6 +10,6 @@ namespace DevelopProducts.SkillTree
         {
             return _skillData.Id;
         }
-        [SerializeField, Tooltip("スキルのデータ")] private SkillDataAsset _skillData;
+        [SerializeField, Tooltip("スキルのデータ")] private SkillTemplateAsset _skillData;
     }
 }

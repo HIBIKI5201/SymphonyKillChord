@@ -10,30 +10,39 @@ namespace KillChord.Runtime.View.InGame.Skill
     public class SkillInputProgressStepView : MonoBehaviour
     {
         /// <summary>
-        ///     表示データを反映する。
+        ///     初期化処理。
         /// </summary>
-        public void Apply(in SkillInputProgressStepData data)
+        /// <param name="data"></param>
+        public void Initialize(in SkillBeatVisualSetting data)
+        {
+            if(_iconImage != null)
+            {
+                _iconImage.sprite = data.Icon;
+            }
+            _onColor = data.ActiveColor;
+            _offColor = data.NormalColor;
+            SetStepOff();
+        }
+
+        /// <summary>
+        ///     入力済みにする。
+        /// </summary>
+        public void SetStepOn()
         {
             if (_backgroundImage != null)
             {
-                _backgroundImage.color = data.Color;
+                _backgroundImage.color = _onColor;
             }
+        }
 
-            if (_iconImage != null)
+        /// <summary>
+        ///     未入力にする。
+        /// </summary>
+        public void SetStepOff()
+        {
+            if (_backgroundImage != null)
             {
-                _iconImage.sprite = data.Icon;
-                _iconImage.enabled = data.Icon != null;
-            }
-
-            if (_beatText != null)
-            {
-                _beatText.text = data.BeatType.ToString();
-                _beatText.enabled = data.Icon == null;
-            }
-
-            if (_activeEffect != null)
-            {
-                _activeEffect.SetActive(data.IsActive);
+                _backgroundImage.color = _offColor;
             }
         }
 
@@ -49,5 +58,8 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         [SerializeField, Tooltip(" 入力済み時に表示する発光用オブジェクト。 ")]
         private GameObject _activeEffect;
+
+        private Color _onColor; // 入力済み時の色
+        private Color _offColor; // 未入力時の色
     }
 }

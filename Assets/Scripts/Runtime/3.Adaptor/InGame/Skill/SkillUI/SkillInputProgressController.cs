@@ -1,8 +1,5 @@
-using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Skill;
 using System;
-using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
@@ -12,17 +9,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     public class SkillInputProgressController
     {
         /// <summary>
-        ///     スキル入力の進捗を管理するコントローラクラスを生成する。
+        ///     コントローラーを初期化します。
         /// </summary>
-        /// <param name="usecase"> スキル入力進捗の計算を行うユースケース。 </param>
-        /// <param name="state"> スキル入力進捗の状態を管理するオブジェクト。 </param>
-        /// <param name="presenter"> スキル入力進捗の表示を担当するプレゼンター。 </param>
+        /// <param name="state"> 入力進捗状態です。 </param>
+        /// <param name="presenter"> 入力進捗Presenterです。 </param>
         public SkillInputProgressController(
-            SkillInputProgressUsecase usecase,
             SkillInputProgressState state,
             SkillInputProgressPresenter presenter)
         {
-            _usecase = usecase ?? throw new ArgumentNullException(nameof(usecase));
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
         }
@@ -30,58 +24,37 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary>
         ///     入力されたビートに基づいて、スキルの入力進捗を更新する。
         /// </summary>
-        /// <param name="skills"> 更新対象のスキル定義のリスト。 </param>
-        /// <param name="inputBeatType"> 入力されたビートの種類。 </param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void UpdateProgress(IReadOnlyList<SkillDefinition> skills, BeatType inputBeatType)
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
+        /// <param name="inputBeatType"> 入力ビートです。 </param>
+        public void UpdateProgress(float now, float skillReadyTimestamp, BeatType inputBeatType)
         {
-            if (skills == null)
-            {
-                throw new ArgumentNullException(nameof(skills));
-            }
-
-            _presenter.BeginPresent();
-
-            try
-            {
-                for (int i = 0; i < skills.Count; i++)
-                {
-                    SkillDefinition skill = skills[i];
-
-                    if (skill == null)
-                    {
-                        continue;
-                    }
-
-                    int skillId = skill.Id.Value;
-                    int currentMatchedCount = _state.GetMatchedCount(skillId);
-
-                    // スキルごとに、今回の入力でどれだけパターンがマッチしたかを計算する。
-                    int nextMatchedCount = _usecase.CalculateNextMatchedCount(
-                        skill.SkillPattern.Signatures,
-                        currentMatchedCount,
-                        inputBeatType);
-
-                    _state.SetMatchedCount(skillId, nextMatchedCount);
-                    _presenter.Push(skill, nextMatchedCount);
-                }
-            }
-            finally
-            {
-                _presenter.EndPresent();
-            }
+            _state.CheckInputBeatType(inputBeatType);
+            _presenter.UpdateRow(new SkillInputProgressUpdateDTO(_state.CurrentMachedCount, now, skillReadyTimestamp, false));
         }
 
         /// <summary>
-        ///     指定したスキルの入力進捗をリセットする。
+        ///     スキルを発動した場合の更新処理。
         /// </summary>
-        /// <param name="skillId"> リセット対象のスキルID。 </param>
-        public void ResetSkill(int skillId)
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
+        public void SkillTriggered(float now, float skillReadyTimestamp)
         {
-            _state.Reset(skillId);
+            _state.ResetProgress();
+            _presenter.UpdateRow(new SkillInputProgressUpdateDTO(_state.CurrentMachedCount, now, skillReadyTimestamp, true));
         }
 
-        private readonly SkillInputProgressUsecase _usecase;
+        /// <summary>
+        ///     入力進捗をリセットします。
+        /// </summary>
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
+        public void ResetProgress(float now, float skillReadyTimestamp)
+        {
+            _state.ResetProgress();
+            _presenter.UpdateRow(new SkillInputProgressUpdateDTO(_state.CurrentMachedCount, now, skillReadyTimestamp, false));
+        }
+
         private readonly SkillInputProgressState _state;
         private readonly SkillInputProgressPresenter _presenter;
     }

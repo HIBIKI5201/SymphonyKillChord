@@ -1,8 +1,11 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Persistent;
 using System;
@@ -22,29 +25,39 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="presenter"></param>
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
-        /// <param name="targetSelectorController"></param>
+        /// <param name="targetingSystem"></param>
         /// <param name="musicSyncService"></param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
             SkillController skillController,
-            TargetSelectorController targetSelectorController,
+            TargetSystemController targetingSystem,
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
-            float attackRotationSpeed
+            MusicSyncState musicSyncState,
+            float attackRotationSpeed,
+            float attackCooldown,
+            int baseDamage
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
             _presenter = presenter;
             _battleState = battleState;
             _skillController = skillController;
-            _targetSelectorController = targetSelectorController;
+            _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
             AttackRotationSpeed = attackRotationSpeed;
+            _baseDamage = baseDamage;
+
+            _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
+            _attackCooldownRemainig = 0d;
         }
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
+
+        /// <summary> 攻撃クールダウン中かどうかを表すプロパティ。 </summary>
+        public bool IsAttackCooldown => _attackCooldownRemainig > 0f;
 
         /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
         public bool HasCurrentLockOnTarget { get; private set; }
@@ -63,22 +76,108 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public bool ExecuteAttack(out int resultBeatType) //TODO : outでBeatTypeを返す構造を修正する
         {
             resultBeatType = 0;
-            if (_targetSelectorController == null)
+            if (_targetingSystem == null)
             {
-                Debug.LogError("TargetSelectorControllerが設定されていません。");
+                Debug.LogError("TargetingSystemが設定されていません。");
                 return false;
             }
 
-            if (!_targetSelectorController.TryGetCurrentTargetEntity(out var targetEntity))
+            bool hasTarget = TryUpdateCurrentTarget();
+
+            float now = Time.unscaledTime;
+            BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
+
+            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+
+            AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
+
+            if (attackDefinition == null) return false;
+
+            StartAttackInterval();
+            StartAttackCooldown();
+
+            if (!hasTarget)
             {
-                Debug.Log("攻撃対象が選択されていません。");
+                resultBeatType = (int)beatType;
+                return true;
+            }
+
+            CharacterEntity targetEntity = _battleState.Target as CharacterEntity;
+            if (targetEntity == null)
+            {
+                resultBeatType = (int)beatType;
+                return true;
+            }
+
+            BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
+            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
+            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
+            AttackResult result = AttackExecutor.Execute(attackDefinition,
+                _battleState.Attacker,
+                _battleState.Target,
+                false,
+                _battleState.Attacker.BaseDamage
+            );
+
+            BuffContext buffContextPost = new BuffContext(_battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, result), BuffExecuteTiming.Attack_Logic_After));
+
+
+            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
+            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
+            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(buffContextPost.AttackResult.FinalDamage.Value, buffContextPost.AttackResult.IsCritical,
+                targetEntity.Id));
+
+            buffContext.Attacker.SetDamage(buffContextPost.AttackResult.FinalDamage);
+            _presenter.Push(buffContextPost.AttackResult);
+
+            resultBeatType = (int)beatType;
+            return true;
+        }
+
+        /// <summary>
+        ///     攻撃インターバルを開始する。
+        /// </summary>
+        public void StartAttackInterval()
+        {
+            _attackIntervalEvaluator.EvaluateInterval();
+        }
+
+        /// <summary> 攻撃クールダウンを開始する。 </summary>
+        public void StartAttackCooldown()
+        {
+            _attackCooldownRemainig = _attackCooldown;
+        }
+
+        /// <summary> 毎フレームクールダウンを減算する。 </summary>
+        public void UpdateAttackCooldown(double deltaTime)
+        {
+            if (_attackCooldownRemainig > 0f)
+            {
+                _attackCooldownRemainig -= deltaTime;
+                if (_attackCooldownRemainig < 0f)
+                {
+                    _attackCooldownRemainig = 0f;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     現在のターゲット状態を更新します。
+        /// </summary>
+        /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
+        private bool TryUpdateCurrentTarget()
+        {
+            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity))
+            {
+                _battleState.ClearTarget();
+                HasCurrentLockOnTarget = false;
+                CurrentLockOnTargetPosition = Vector3.zero;
                 return false;
             }
 
             _battleState.ChangeTarget(targetEntity);
 
-            // 現在の ILockOnTarget を取得して保持（View 側が参照する）
-            if (_targetSelectorController.TryGetCurrentTarget(out var lockOnTarget))
+            if (_targetingSystem.TryGetCurrentTarget(out ITargetableViewModel lockOnTarget))
             {
                 HasCurrentLockOnTarget = true;
                 CurrentLockOnTargetPosition = lockOnTarget.Position;
@@ -89,46 +188,30 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 CurrentLockOnTargetPosition = Vector3.zero;
             }
 
-            float now = Time.unscaledTime;
-            BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
+            return true;
+        }
 
-            _skillController.CheckSkill(BattleActionType.Attack, beatType, now);
-
-            AttackDefinition attackDefinition;
+        private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
+        {
             try
             {
-                attackDefinition = _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
+                return _battleState.Attacker.CombatSpec.GetAttackDefinitionByBeatType(beatType);
             }
             catch (InvalidOperationException ex)
             {
                 Debug.LogWarning(ex.Message);
-                return false;
+                return null;
             }
-
-            _attackIntervalEvaluator.EvaluateInterval();
-
-            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
-            AttackResult result = AttackExecutor.Execute(attackDefinition,
-                _battleState.Attacker,
-                _battleState.Target
-            );
-
-            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
-            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
-            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical,
-                targetEntity.Id));
-
-            _presenter.Push(result);
-
-            resultBeatType = (int)beatType;
-            return true;
         }
 
         private readonly AttackResultPresenter _presenter;
         private readonly PlayerBattleState _battleState;
         private readonly SkillController _skillController;
-        private readonly TargetSelectorController _targetSelectorController;
+        private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
+        private readonly int _baseDamage;
+        private double _attackCooldownRemainig;
+        private double _attackCooldown;
     }
 }

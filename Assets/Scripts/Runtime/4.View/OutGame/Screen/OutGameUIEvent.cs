@@ -1,17 +1,28 @@
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
-using UnityEngine;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.View.OutGame.Screen
 {
     /// <summary>
-    ///     アウトゲーム UI のイベントを管理するクラス。
-    ///     イベント管理クラスのため、他のクラスよりも早く初期化されるように
-    ///     DefaultExecutionOrder を -200 に設定しています。
+    ///     アウトゲーム UI のイベントを管理する Signal です。
     /// </summary>
-    [DefaultExecutionOrder(-200)]
-    public class OutGameUIEvent : MonoBehaviour
+    public sealed class OutGameUIEvent
     {
+        /// <summary> タイトル画面を表示するイベント。 </summary>
+        public Action OnShowTitleScreen;
+
+        /// <summary> メニュー画面を表示するイベント。 </summary>
+        public Action OnShowMenuScreen;
+
+        /// <summary> オプション画面を表示するイベント。 </summary>
+        public Action OnShowOptionsScreen;
+
+        /// <summary> クレジット画面を表示するイベント。 </summary>
+        public Action OnShowCreditScreen;
+
+        /// <summary> データリセットボタンが押されたときのイベント。 </summary>
+        public Action OnDataResetButtonClicked;
+
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
@@ -27,9 +38,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
 
-        /// <summary> 
-        ///     戦闘準備画面を表示するイベント。
-        ///     引数は遷移先のシーン名。
+        /// <summary>
+        ///     戦闘準備画面を表示するイベントです。
+        ///     引数は遷移先のシーン名です。
         /// </summary>
         public Action<string> OnShownBattlePreparationScreen;
 
@@ -39,7 +50,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
 
-        /// <summary> ステージノードが選択されたときのイベント。選択されたステージのIDを整数で通知します。 </summary>
+        /// <summary> ステージノードが選択されたときのイベントです。 </summary>
         public Action<int> OnStageNodeSelected;
 
         /// <summary> ステージ詳細画面を閉じるイベント。 </summary>
@@ -48,8 +59,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルノードが選択された時のイベント。 </summary>
         public Action<string> OnSkillNodeSelected;
 
-        /// <summary> スキルノードが選択された時のイベント。 </summary>
+        /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
+
+        /// <summary> 入手済みスキル一覧が更新された時のイベント。 </summary>
+        public Action OnOwnedSkillChanged;
 
         /// <summary> スキル詳細画面を閉じるイベント。 </summary>
         public Action<int> OnSkillDetailClosed;
@@ -60,7 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルプレビュー動画の閉じるボタンをクリックした時のイベント。 </summary>
         public Action OnSkillPreviewCloseButtonClicked;
 
-        /// <summary> ステージクリアを通知するイベント。クリアしたステージのIDを整数で通知します。 </summary>
+        /// <summary> ステージクリアを通知するイベント。 </summary>
         public Action<int> OnStageCleared;
 
         /// <summary> 出撃ボタンが押されたことを通知するイベント。 </summary>
@@ -69,49 +83,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
-        /// <summary> 
-        ///     インゲームへ遷移するイベント。
-        ///     引数は遷移先のシーン名。
+        /// <summary> スキル編成が保存されたときのイベント。 </summary>
+        public Func<Task<bool>> OnSkillBuildSaved;
+
+        /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
+        public Action OnSkillLevelUp;
+
+        /// <summary>
+        ///     インゲームへ遷移するイベントです。
+        ///     引数は遷移先のシーン名です。
         /// </summary>
         public Action<string> OnStartGame;
-
-        /// <summary>
-        ///     アウトゲームのUIイベントを ServiceLocator に登録します。
-        /// </summary>
-        public void RegisterOutGameUIEvent()
-        {
-            if (_isRegistered) { return; }
-            ServiceLocator.RegisterInstance(this);
-            _isRegistered = true;
-        }
-
-        /// <summary>
-        ///     アウトゲームのUIイベントを ServiceLocator から登録解除します。
-        /// </summary>
-        public void UnregisterOutGameUIEvent()
-        {
-            if (!_isRegistered) { return; }
-            ServiceLocator.UnregisterInstance(this);
-            _isRegistered = false;
-        }
-
-        /// <summary>
-        ///     ServiceLocator にインスタンスを登録する。
-        /// </summary>
-        private void Awake()
-        {
-            RegisterOutGameUIEvent();
-        }
-
-        /// <summary>
-        ///     ServiceLocator からインスタンスを登録解除する。
-        ///     自身で登録解除を呼び出すとエラーが起きるため、コメントアウトしています。
-        /// </summary>
-        private void OnDestroy()
-        {
-            //UnregisterOutGameUIEvent();
-        }
-
-        private bool _isRegistered;
     }
 }

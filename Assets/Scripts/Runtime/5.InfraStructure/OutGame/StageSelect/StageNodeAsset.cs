@@ -74,11 +74,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         [Header("シーン遷移")]
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名。")]
-        private string _targetSceneName;
+        private string _targetSceneName = "InGame";
 
         [Header("バトルパート情報（バトルパートの場合のみ）")]
         [SerializeField, SceneNameSelector, Tooltip("バトルパートで遷移するステージシーン名。シナリオパートは空欄にすること。")]
-        private string _battleSceneName;
+        private string _battleSceneName = "Stage_1";
 
         [Header("シナリオパート情報（シナリオパートの場合のみ）")]
         [SerializeField, Tooltip("シナリオパートで再生するシナリオId")]

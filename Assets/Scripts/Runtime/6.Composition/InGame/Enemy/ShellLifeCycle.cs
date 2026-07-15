@@ -1,16 +1,20 @@
-using KillChord.Runtime.Adaptor.InGame.Enemy;
+﻿using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -19,6 +23,28 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class ShellLifeCycle : MonoBehaviour, IShellLifeCycle
     {
+        /// <summary>
+        ///     砲弾用 Addressables アセットをロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
+        {
+            _loadedAttackData = await _attackDataKey.LoadAssetAsync<ShellAttackSpecAsset>(this, cancellationToken);
+            _loadedMusicData = await _musicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            return _loadedAttackData != null && _loadedMusicData != null;
+        }
+
+        /// <summary>
+        ///     ロード済みアセット参照を別インスタンスへコピーします。
+        /// </summary>
+        /// <param name="source"> コピー元です。 </param>
+        public void CopyLoadedAssetsFrom(ShellLifeCycle source)
+        {
+            _loadedAttackData = source._loadedAttackData;
+            _loadedMusicData = source._loadedMusicData;
+        }
+
         /// <summary>
         ///     砲弾の依存関係を構築する。
         /// </summary>
@@ -34,10 +60,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 throw new ArgumentNullException("MusicSyncStateが見つかりません。");
             }
-            if (!_playerInitializer) _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            if (_playerModuleContainer == null)
+            {
+                _playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            }
+
+            if (_playerModuleContainer == null || _playerModuleContainer.PlayerView == null)
+            {
+                throw new ArgumentNullException(nameof(_playerModuleContainer), "PlayerModuleContainerが見つかりません。");
+            }
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(_musicSyncView.MusicSyncState, _musicSyncInitializer.MusicSyncService);
-            ShellAttackSpec attackSpec = ShellFactory.CreateAttackSpec(_attackData);
-            EnemyMusicSpec musicSpec = ShellFactory.CreateMusicSpec(_musicData);
+            ShellAttackSpec attackSpec = ShellFactory.CreateAttackSpec(_loadedAttackData);
+            EnemyMusicSpec musicSpec = ShellFactory.CreateMusicSpec(_loadedMusicData);
 
             ShellEntity entity = new ShellEntity(attackSpec, musicSpec, null);
 
@@ -54,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 attackUsecase);
             _controller = controller;
 
-            _view.Initialize(_playerInitializer.transform, shellSpecPresenter, Deactivate);
+            _view.Initialize(_playerModuleContainer.PlayerView.transform, shellSpecPresenter, Deactivate);
             _releaseCallback = releaseCallback;
         }
 
@@ -81,13 +115,27 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         [SerializeField] private ShellView _view;
-        [SerializeField] private ShellAttackData _attackData;
-        [SerializeField] private EnemyMusicData _musicData;
+        [SerializeField, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
+        [SerializeField, Tooltip("砲弾音楽仕様の Addressables キーです。")] private string _musicDataKey;
 
-        private PlayerInitializer _playerInitializer;
+        private PlayerModuleContainer _playerModuleContainer;
         private MusicSyncInitializer _musicSyncInitializer;
         private MusicSyncView _musicSyncView;
         private Action<ShellLifeCycle> _releaseCallback;
         private ShellController _controller;
+        private ShellAttackSpecAsset _loadedAttackData;
+        private EnemyMusicSpecAsset _loadedMusicData;
+
+        /// <summary>
+        ///     ロード済みアセットを解放します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _attackDataKey.ReleaseLoadedAsset(this);
+            _musicDataKey.ReleaseLoadedAsset(this);
+            _loadedAttackData = null;
+            _loadedMusicData = null;
+        }
     }
 }
+

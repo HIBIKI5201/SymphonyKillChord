@@ -1,6 +1,9 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
@@ -8,20 +11,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     歩兵のスポナークラス。
     /// </summary>
-    public class EnemyInfantrySpawner : MonoBehaviour, IGameplayControllable
+    public class EnemyInfantrySpawner : MonoBehaviour, IGameplayControllable, IEnemySpawner
     {
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize(in Transform[] assignedPositions)
+        public void Initialize()
         {
-            _assignedPositions = assignedPositions;
-            _spawnPositions = new Vector3[_spawnBatchCount];
-            _spawnCount = 0;
             _initialized = true;
-            _timer = 0f;
             _isPlaying = false;
-            _spawnedAssignedEnemies = false;
             _activeEnemies.Clear();
         }
         /// <summary>
@@ -32,12 +30,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (!_initialized)
             {
                 return;
-            }
-
-            if (!_spawnedAssignedEnemies && _assignedPositions != null)
-            {
-                SpawnAssignedEnemy(_assignedPositions);
-                _spawnedAssignedEnemies = true;
             }
 
             // 非アクティブな敵をリストから削除し、残りの敵のゲームプレイを開始する。
@@ -72,78 +64,38 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void HandleInfantryDeactivated()
         {
-            if (_spawnCount > 0) _spawnCount--;
-
             ReMoveInactiveEnemies();
         }
 
         [SerializeField] private EnemyPools _enemyPools;
-        [SerializeField, Tooltip("生成位置")] private Transform _spawnPoint;
-        [SerializeField, Tooltip("生成距離")] private float _spawnDistance;
-        [SerializeField, Tooltip("生成間隔")] private float _spawnInterval;
-        [SerializeField, Tooltip("一度の生成数")] private int _spawnBatchCount = 4;
-        [SerializeField, Tooltip("敵の最大数。-1は無限")] private int _maxSpawnCount;
         [SerializeField, Tooltip("敵の生成位置を探索するコンポーネント")]
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 
         private readonly List<EnemyLifeCycle> _activeEnemies = new();
-        private bool _spawnedAssignedEnemies;
-        private float _timer;
-        private int _spawnCount;
-        private Vector3[] _spawnPositions;
         private bool _initialized = false;
-        private Transform[] _assignedPositions;
         private bool _isPlaying = false;
-
-        private void Update()
-        {
-            if (!_initialized || !_isPlaying) return;
-            if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) return;
-
-            _timer += Time.deltaTime;
-
-            if (_timer >= _spawnInterval)
-            {
-                _timer = 0f;
-                SpawnEnemy();
-            }
-        }
 
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        private void SpawnEnemy()
+        public async void SpawnEnemy(int amount, Action callback)
         {
-            _spawnPositionSearcher.FindSpawnPositions(_spawnDistance, _spawnPositions);
-            for (int i = 0; i < _spawnPositions.Length; i++)
+            for (int i = 0; i < amount; i++)
             {
-                if (_spawnCount >= _maxSpawnCount && _maxSpawnCount != -1) break;
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
-                lifeCycle.Activate(_spawnPositions[i], HandleInfantryDeactivated);
-                lifeCycle.StartGameplay();
-                _activeEnemies.Add(lifeCycle);
-                _spawnCount++;
-            }
-        }
-
-        /// <summary>
-        ///     事前配置の位置で敵を生成する。
-        /// </summary>
-        /// <param name="assignedPositions"></param>
-        private void SpawnAssignedEnemy(in Transform[] assignedPositions)
-        {
-            for (int i = 0; i < assignedPositions.Length; i++)
-            {
-                if (assignedPositions[i] == null)
+                try
                 {
-                    Debug.LogError("[EnemyInfantrySpawner] 事前配置の位置情報がNULL。");
-                    continue;
+                    SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
+                    EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
+                    SpawnEnemyAsync(lifeCycle, positionPair, callback);
                 }
-                EnemyLifeCycle lifeCycle = _enemyPools.GetInfantry();
-                lifeCycle.Activate(assignedPositions[i].position, HandleInfantryDeactivated);
-                lifeCycle.StartGameplay();
-                _activeEnemies.Add(lifeCycle);
-                _spawnCount++;
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, this);
+                }
             }
         }
 
@@ -159,6 +111,75 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     _activeEnemies.RemoveAt(i);
                 }
             }
+        }
+
+        /// <summary>
+        ///     マップ外側から生成地点まで歩かせてから、敵を戦闘状態にする。
+        /// </summary>
+        /// <param name="lifeCycle">生成する敵のライフサイクル。</param>
+        /// <param name="positionPair">選定された生成位置。</param>
+        private async void SpawnEnemyAsync(EnemyLifeCycle lifeCycle, SpawnPositionPair positionPair, Action callback)
+        {
+            CancellationToken cancellationToken = destroyCancellationToken;
+            positionPair.SetInUse(true);
+            try
+            {
+                bool activateSuccess =
+                    await lifeCycle.EnterFromOutsideAsync(
+                    	positionPair,
+                        HandleInfantryDeactivated,
+                        cancellationToken);
+
+                if (!activateSuccess)
+                {
+                    positionPair.SetInUse(false);
+                    return;
+                }
+                else
+                {
+                    callback.Invoke();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // シーン破棄に伴うキャンセルは正常終了として扱う。
+                return;
+            }
+            catch (Exception exception)
+            {
+                if (this != null)
+                {
+                    Debug.LogException(exception, this);
+                }
+                return;
+            }
+            finally
+            {
+                positionPair.SetInUse(false);
+            }
+            if (cancellationToken.IsCancellationRequested
+                || this == null
+                || lifeCycle == null)
+            {
+                return;
+            }
+            _activeEnemies.Add(lifeCycle);
+            StartOrStopSpawnedEnemy(lifeCycle);
+        }
+
+        /// <summary>
+        ///     スポナーの再生状態に合わせて、生成完了した敵の処理を切り替える。
+        /// </summary>
+        /// <param name="lifeCycle">生成完了した敵。</param>
+        private void StartOrStopSpawnedEnemy(EnemyLifeCycle lifeCycle)
+        {
+            if (_isPlaying)
+            {
+                lifeCycle.StartGameplay();
+                return;
+            }
+
+            lifeCycle.StopGameplay();
         }
     }
 }

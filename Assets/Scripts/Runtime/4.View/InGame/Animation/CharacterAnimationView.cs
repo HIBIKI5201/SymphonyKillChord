@@ -1,33 +1,50 @@
-using KillChord.Runtime.Adaptor;
+using System;
+using KillChord.Runtime.Adaptor.InGame.Animation;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
     /// <summary>
-    ///     PlayableAnimationControllerを所有してライフサイクルを管理するViewクラス。
-    ///     AdaptorからDTOを受け取りViewModelを介してPlayableに反映する。
-    ///     ICharacterAnimationControllerを介するため、プレイヤー・敵どちらにも適用可能。
+    ///     キャラクターアニメーションの再生と計算をView層で完結させる。
     /// </summary>
-    [RequireComponent(typeof(Animator))]
     public sealed class CharacterAnimationView : MonoBehaviour
     {
         /// <summary>
         ///     依存コンポーネントを注入してPlayableAnimationControllerを構築する。
         /// </summary>
-        /// <param name="controller"> アニメーション操作を委譲するAdaptor。 </param>
-        /// <param name="repository"> クリップをStateで取得するリポジトリ。 </param>
-        public void Initialize(ICharacterAnimationController controller, AnimationClip[] clips)
+        /// <param name="context"> アニメーションのView側依存。 </param>
+        /// <param name="clips"> 再生対象のアニメーションクリップ一覧。 </param>
+        /// <param name="musicSyncState"> BPM参照元。 </param>
+        public void Initialize(
+            CharacterAnimationViewContext context,
+            AnimationClip[] clips,
+            MusicSyncState musicSyncState)
         {
-            _controller = controller;
-            _viewModel = new CharacterAnimationViewModel();
+            _context = context;
+            _musicSyncState = musicSyncState;
+            _locomotionCalculator = new CharacterAnimationLocomotionCalculator();
+            _oneShotTimingCalculator = new CharacterAnimationOneShotTimingCalculator();
+            _weights = clips != null
+                ? new float[clips.Length]
+                : System.Array.Empty<float>();
 
-            Animator animator = GetComponent<Animator>();
-            _playableController = new PlayableAnimationController(animator, clips);
+            if (_animator == null)
+            {
+                _animator = GetComponent<Animator>();
+            }
+
+            _playableController = new PlayableAnimationController(_animator, clips);
+            if (_context?.Signal is CharacterAnimationSignal signal)
+            {
+                signal.OnRequested += HandleRequestedHandler;
+            }
             _isInitialized = true;
-            _controller.OnOneShotRequested += HandleOneShotRequested;
         }
 
-        /// <summary> 毎フレームDTOを取得してViewModelを更新しPlayableに反映する。 </summary>
+        /// <summary>
+        ///     毎フレーム、計算結果をPlayableへ反映する。
+        /// </summary>
         private void Update()
         {
             if (!_isInitialized)
@@ -35,88 +52,158 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            // AdaptorからDTOを取得してViewModelへ反映する。
-            CharacterAnimationDTO dto = _controller.GetDTO();
-            _viewModel.Apply(in dto);
-
-            // 攻撃オーバーレイ処理（ランプアップ → フェードアウト）。
-            if (_attackOverlayRemaining > 0f && _viewModel.Weights != null)
+            if (_context == null)
             {
-                float elapsed = _attackOverlayDuration - _attackOverlayRemaining;
-                float rampUp = Mathf.Max(0.001f, _attackOverlayDuration * _attackRampUpRatio);
-                float weight;
-                if (elapsed < rampUp)
-                {
-                    // ランプアップ（0 -> 1）。
-                    weight = Mathf.InverseLerp(0f, rampUp, elapsed);
-                }
-                else
-                {
-                    // ランプダウン（1 -> 0）。
-                    float downElapsed = elapsed - rampUp;
-                    float downDuration = Mathf.Max(0.0001f, _attackOverlayDuration - rampUp);
-                    weight = Mathf.Lerp(1f, 0f, downElapsed / downDuration);
-                }
-
-                // 現在のウェイトと今回計算したウェイトを比較して高い方を採用する（重ね掛け防止）。
-                _viewModel.Weights[_overlayIndex] = Mathf.Max(_viewModel.Weights[_overlayIndex], weight);
-
-                float otherScale = 1f - weight;
-                for (int i = 0; i < _viewModel.Weights.Length; i++)
-                {
-                    if (i == _overlayIndex) continue;
-                    _viewModel.Weights[i] *= otherScale;
-                }
-
-                _attackOverlayRemaining -= Time.deltaTime;
+                return;
             }
 
-            // ViewModelの値をPlayableに反映する
-            _playableController.SetAnimationSpeed(_viewModel.AnimationSpeed);
+            _locomotionCalculator.SetBpm(_musicSyncState != null ? (float)_musicSyncState.Bpm : 60f);
+            _locomotionCalculator.SetVelocity(_context.ViewModel.Velocity);
+            Array.Clear(_weights, 0, _weights.Length);
+            _locomotionCalculator.ApplyBaseWeights(_weights);
+            ApplyOverlayWeight();
 
-            // ウェイトをインデックス順に反映する
-            for (int i = 0; i < _viewModel.Weights.Length; i++)
+            _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed);
+            for (int i = 0; i < _weights.Length; i++)
             {
-                _playableController.SetWeight(i, _viewModel.Weights[i]);
+                _playableController.SetWeight(i, _weights[i]);
             }
         }
 
-        /// <summary> ワンショット再生要求イベントを処理する。 </summary>
-        private void HandleOneShotRequested(int index)
-        {
-            //再生。
-            _playableController.PlayOneShot(index);
-
-            // クリップ長を取り、現在のアニメ速度で割る → 実再生時間にする。
-            float clipLen = _playableController.GetClipLength(index);
-            float speed = Mathf.Max(0.0001f, _viewModel.AnimationSpeed);
-            _attackOverlayDuration = clipLen / speed;
-            _attackOverlayRemaining = _attackOverlayDuration;
-            _overlayIndex = index;
-        }
-
-        /// <summary> PlayableGraphを破棄する。 </summary>
+        /// <summary>
+        ///     PlayableGraphを破棄する。
+        /// </summary>
         private void OnDestroy()
         {
-            _playableController?.Dispose();
-            if (_controller != null)
+            if (_context?.Signal is CharacterAnimationSignal signal)
             {
-                _controller.OnOneShotRequested -= HandleOneShotRequested;
+                signal.OnRequested -= HandleRequestedHandler;
+            }
+
+            _playableController?.Dispose();
+        }
+
+        /// <summary>
+        ///     ワンショット再生を開始し、オーバーレイ状態を初期化する。
+        /// </summary>
+        /// <param name="request"> 再生要求です。 </param>
+        private void HandleRequestedHandler(CharacterAnimationRequest request)
+        {
+            if (_playableController == null)
+            {
+                return;
+            }
+
+            int index = request.Index;
+            _playableController.PlayOneShot(index);
+            _overlayIndex = index;
+            _overlayBaseDuration = request.BaseDurationSeconds;
+            _overlayEnterBlendDuration = request.EnterBlendDurationSeconds;
+            _overlayExitBlendDuration = request.ExitBlendDurationSeconds;
+            _overlayElapsedBaseTime = 0f;
+            _shouldNotifyDodgeEnded = request.ShouldNotifyDodgeEnded;
+            _hasNotifiedOneShotEnded = false;
+        }
+
+        /// <summary>
+        ///     ワンショットのオーバーレイウェイトを反映する。
+        /// </summary>
+        private void ApplyOverlayWeight()
+        {
+            if (!HasActiveOverlay())
+            {
+                return;
+            }
+
+            float weight = CalculateOverlayWeight();
+
+            _weights[_overlayIndex] = Mathf.Max(_weights[_overlayIndex], weight);
+
+            float otherScale = 1f - weight;
+            for (int i = 0; i < _weights.Length; i++)
+            {
+                if (i == _overlayIndex)
+                {
+                    continue;
+                }
+
+                _weights[i] *= otherScale;
+            }
+
+            _overlayElapsedBaseTime += _oneShotTimingCalculator.GetBaseProgressDelta(
+                Time.deltaTime,
+                _locomotionCalculator.AnimationSpeed);
+
+            if (_overlayElapsedBaseTime >= _overlayBaseDuration && !_hasNotifiedOneShotEnded)
+            {
+                _hasNotifiedOneShotEnded = true;
+                if (_shouldNotifyDodgeEnded
+                    && _context.Signal is CharacterAnimationSignal signal)
+                {
+                    signal.NotifyDodgeEnded();
+                }
+
+                _overlayIndex = -1;
             }
         }
 
-        // 立ち上げ比率（総時間に対する）。
-        [SerializeField] private float _attackRampUpRatio = 0.25f;
+        [SerializeField, Tooltip("Playableを駆動するAnimatorです。")]
+        private Animator _animator;
 
         private PlayableAnimationController _playableController;
-        private CharacterAnimationViewModel _viewModel;
-        private ICharacterAnimationController _controller;
+        private CharacterAnimationLocomotionCalculator _locomotionCalculator;
+        private CharacterAnimationOneShotTimingCalculator _oneShotTimingCalculator;
+        private ICharacterAnimationViewContext _context;
+        private MusicSyncState _musicSyncState;
+        private float[] _weights;
         private bool _isInitialized;
+        private float _overlayBaseDuration;
+        private float _overlayEnterBlendDuration;
+        private float _overlayExitBlendDuration;
+        private float _overlayElapsedBaseTime;
+        private int _overlayIndex = -1;
+        private bool _shouldNotifyDodgeEnded;
+        private bool _hasNotifiedOneShotEnded;
 
-        // 攻撃オーバーレイ時間（実行時に clip.length / animationSpeed で設定される）
-        private float _attackOverlayDuration;
-        private float _attackOverlayRemaining;
+        /// <summary>
+        ///     ワンショットオーバーレイが有効か判定する。
+        /// </summary>
+        /// <returns> 有効な場合はtrue。 </returns>
+        private bool HasActiveOverlay()
+        {
+            return _overlayBaseDuration > 0f
+                && _overlayElapsedBaseTime < _overlayBaseDuration
+                && _weights != null
+                && _overlayIndex >= 0
+                && _overlayIndex < _weights.Length;
+        }
 
-        private int _overlayIndex;
+        /// <summary>
+        ///     現在のオーバーレイウェイトを計算する。
+        /// </summary>
+        /// <returns> オーバーレイウェイトです。 </returns>
+        private float CalculateOverlayWeight()
+        {
+            if (_overlayBaseDuration <= 0f)
+            {
+                return 1f;
+            }
+
+            float enterBlendDuration = Mathf.Clamp(_overlayEnterBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendStart = Mathf.Max(0f, _overlayBaseDuration - exitBlendDuration);
+
+            if (enterBlendDuration > 0f && _overlayElapsedBaseTime < enterBlendDuration)
+            {
+                return Mathf.InverseLerp(0f, enterBlendDuration, _overlayElapsedBaseTime);
+            }
+
+            if (exitBlendDuration > 0f && _overlayElapsedBaseTime >= exitBlendStart)
+            {
+                return 1f - Mathf.InverseLerp(exitBlendStart, _overlayBaseDuration, _overlayElapsedBaseTime);
+            }
+
+            return 1f;
+        }
     }
 }

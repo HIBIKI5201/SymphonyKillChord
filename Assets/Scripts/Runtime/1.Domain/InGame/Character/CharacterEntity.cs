@@ -1,4 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Skill;
+
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Character
@@ -18,7 +21,9 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public CharacterEntity(CharacterName name,
             HealthEntity health,
             CharacterCombatSpec combatSpec,
-            AttackInterval attackInterval
+            AttackInterval attackInterval,
+            Damage baseDamage,
+            IBuffSystem buffSystem
         )
         {
             if (health is null)
@@ -30,6 +35,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _health = health;
             _combatSpec = combatSpec;
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
+            _baseDamage = baseDamage;
+            _buffSystem = buffSystem;
         }
 
         /// <summary>
@@ -40,6 +47,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
+        /// <summary> キャラクターが対象にダメージを与えた時に発火するイベント。 </summary>
+        public event Action<Damage> OnSetDamage;
+
+        /// <summary> 回避成功時に発火するイベント。 </summary>
+        public event Action<Damage> OnDamageAvoided;
 
         /// <summary> キャラクター名を取得する。 </summary>
         public CharacterName Name => _name;
@@ -64,7 +76,18 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> 攻撃の硬直状態を管理するエンティティを取得する。 </summary>
         public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
+        /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
+        public Damage BaseDamage => _baseDamage;
+        public IBuffSystem BuffSystem => _buffSystem;
 
+        public void ChangeBaseDamage(Damage newDamage)
+        {
+            _baseDamage = newDamage;
+        }
+        public void SetDamage(Damage damage)
+        {
+            OnSetDamage?.Invoke(damage);
+        }
         /// <summary>
         ///     ダメージを受ける処理。
         ///     HealthEntityのChangeHealthを呼び出す。
@@ -79,6 +102,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
             if (_isInvincible)
             {
+                OnDamageAvoided?.Invoke(damage);
                 return;
             }
 
@@ -127,12 +151,13 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _isDeadNotified = false;
             _isInvincible = false;
         }
-
+        private IBuffSystem _buffSystem;
         private CharacterName _name;
         private HealthEntity _health;
         private CharacterCombatSpec _combatSpec;
         private AttackIntervalEntity _attackIntervalEntity;
         private bool _isDeadNotified;
         private bool _isInvincible;
+        private Damage _baseDamage;
     }
 }

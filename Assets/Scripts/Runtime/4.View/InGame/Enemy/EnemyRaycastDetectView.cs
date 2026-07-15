@@ -1,12 +1,13 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     /// 敵の攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
-    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel
+    public partial class EnemyRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 
         /// <summary>
@@ -17,12 +18,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform;
             _attackRange = attackRange;
-
-            if (!TryGetComponent(out _lineRenderer))
-            {
-                Debug.LogError("[EnemyRaycastDetectView] Failed to find LineRenderer.");
-                return;
-            }
 
             if (targetTransform == null)
             {
@@ -36,9 +31,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            _lineRenderer.enabled = false;
-            _lineRenderer.positionCount = 2;
-            _lineRenderer.useWorldSpace = true;
+            InitializeWarningDecal();
             HideWarningInternal();
 
 #if UNITY_EDITOR
@@ -102,7 +95,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-         private LineRenderer _lineRenderer;
+        [SerializeField]
+        private DecalProjector _attackWarningDecal;
+        private Material _decalMaterial;
 
         private RaycastHit[] _hitResults;
         private Collider _targetCollider;
@@ -131,7 +126,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!IsReadyForRaycast())
             {
-                Debug.LogError("[EnemyRaycastDetectView] Raycast is not initialized.");
                 return false;
             }
 
@@ -195,6 +189,40 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             UpdateWarningLine();
         }
+        private void OnDestroy()
+        {
+            if (_decalMaterial != null)
+            {
+                Destroy(_decalMaterial);
+                _decalMaterial = null;
+            }
+        }
+
+        /// <summary>
+        ///     警告デカールがあれば専用マテリアルを初期化します。
+        /// </summary>
+        private void InitializeWarningDecal()
+        {
+            if (_attackWarningDecal == null)
+            {
+                Debug.LogWarning("[EnemyRaycastDetectView] Attack warning decal is not assigned. Warning display is disabled.", this);
+                return;
+            }
+
+            if (_attackWarningDecal.material == null)
+            {
+                Debug.LogWarning("[EnemyRaycastDetectView] Attack warning decal material is not assigned. Warning display is disabled.", this);
+                _attackWarningDecal.enabled = false;
+                return;
+            }
+
+            _decalMaterial = new Material(_attackWarningDecal.material);
+            _attackWarningDecal.material = _decalMaterial;
+            ApplyWarningDecalColor(Color.clear);
+            _attackWarningDecal.fadeFactor = 1f;
+            _attackWarningDecal.enabled = false;
+            _attackWarningDecal.gameObject.SetActive(true);
+        }
 
         /// <summary>
         /// 現在のレイ情報をもとに警告ラインの位置と色を更新します。
@@ -204,14 +232,19 @@ namespace KillChord.Runtime.View.InGame.Enemy
             Ray ray = CreateRay(transform.position);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
             {
-                _lineRenderer.enabled = false;
+                _attackWarningDecal.enabled = false;
                 return;
             }
 
-            _lineRenderer.enabled = true;
-            _lineRenderer.material.SetColor("_EmissionColor", _currentLineColor);
-            _lineRenderer.SetPosition(0, ray.origin);
-            _lineRenderer.SetPosition(1, ray.origin + ray.direction * _attackRange);
+            _attackWarningDecal.gameObject.SetActive(true);
+            _attackWarningDecal.enabled = true;
+            _attackWarningDecal.fadeFactor = 1f;
+            ApplyWarningDecalColor(_currentLineColor);
+            Vector3 size = _attackWarningDecal.size;
+            size.y = _attackRange;
+            _attackWarningDecal.transform.rotation = Quaternion.Euler(90, Quaternion.LookRotation(ray.direction, Vector3.up).eulerAngles.y, 0);
+            _attackWarningDecal.size = size;
+            _attackWarningDecal.pivot = new Vector3(0, _attackRange * 0.5f, 0);
         }
 
         /// <summary>
@@ -269,8 +302,38 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _warningDisplayState = WarningDisplayState.Hidden;
             _lockedRayDirection = Vector3.zero;
 
-            if (_lineRenderer == null) return;
-            _lineRenderer.enabled = false;
+            if (_attackWarningDecal != null)
+            {
+                _attackWarningDecal.enabled = false;
+            }
+        }
+
+        /// <summary>
+        ///     警告デカールの色をシェーダープロパティへ適用します。
+        /// </summary>
+        /// <param name="color"> 適用色です。 </param>
+        private void ApplyWarningDecalColor(Color color)
+        {
+            if (_decalMaterial == null)
+            {
+                return;
+            }
+
+            Color appliedColor = color;
+            if (appliedColor.a <= 0f && color != Color.clear)
+            {
+                appliedColor.a = 1f;
+            }
+
+            if (_decalMaterial.HasProperty("_BaseColor"))
+            {
+                _decalMaterial.SetColor("_BaseColor", appliedColor);
+            }
+
+            if (_decalMaterial.HasProperty("_Color"))
+            {
+                _decalMaterial.SetColor("_Color", appliedColor);
+            }
         }
 
         /// <summary>
@@ -294,7 +357,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool IsReadyForLineUpdate()
         {
-            return IsReadyForRaycast() && _lineRenderer != null ;
+            return IsReadyForRaycast() && _attackWarningDecal != null;
         }
 
         /// <summary>

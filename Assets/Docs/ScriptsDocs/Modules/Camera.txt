@@ -1,0 +1,56 @@
+# Camera モジュール依存定義書
+
+## 1. 概要
+インゲーム中のカメラシステム（プレイヤーの追従、フリーカメラ操作、および敵のロックオン・ターゲット選択システム）を司るモジュールです。
+
+## 2. レイヤー構成（レイヤー別のクラス定義）
+*   **Domain**:
+    *   `ICameraTransform` (カメラの座標/向きの抽象)
+    *   `CameraSystemParameter` (カメラ動作の設定用SOなどに対となるピュアデータ)
+    *   `ILockOnTarget` (ロックオン対象が実装すべきインターフェース)
+*   **Application**:
+    *   `CameraSystemApplication` (カメラシステム全体を束ねるロジック)
+    *   `CameraFollowApplication` (プレイヤーへの追従制御)
+    *   `CameraFollowVelocityApplication` (速度に基づく動的追従ズーム等)
+    *   `CameraRotationApplication` (カメラの向き回転)
+    *   `CameraBoneFreeLookRotationApplication` (フリー視点時のボーン回転制御)
+    *   `CameraBoneLockOnRotationApplication` (ロックオン時のボーン追従回転制御)
+*   **Adaptor**:
+    *   `CameraSystemController` (入力やステートに応じた操作伝達)
+    *   `CameraSystemPresenter` (ビュー側への表示パラメータ伝達)
+    *   `TargetSelectorController` (ターゲット切り替え・ロックオン制御)
+    *   `LockOnTargetGateway` (ターゲット選択の実装仲介)
+*   **View**:
+    *   `CameraSystemView` (実際のUnityシネマシーンやカメラコンポーネント)
+    *   `TargetSelectorView` (ロックオンマークの描画やUI)
+*   **Composition**:
+    *   `CameraSystemInitializer` (インプットとカメラコンポーネントのDI)
+
+---
+
+## 3. モジュール間依存関係
+Camera モジュールが他モジュールとどのように関わっているかを定義します。
+
+### [依存しているモジュール]
+*   **InGame/Player**:
+    *   *依存箇所*: `PlayerInputView`, `PlayerInitializer`
+    *   *詳細*: カメラの視点移動操作（右スティック/マウス）のためにプレイヤーのインプット情報を受け取ります。また、追従対象としてプレイヤーの `transform` を必要とします。
+*   **InGame/Enemy**:
+    *   *依存箇所*: `ITarget` / `ILockOnTarget`
+    *   *詳細*: ロックオン対象となる敵を取得します。ただし、敵の具象クラス（`EnemyLifeCycle` など）を直接 using するのではなく、Domain層に用意した抽象インターフェース `ILockOnTarget` を通じて弱結合で参照しています。
+
+### [依存されているモジュール]
+*   **InGame/Player**:
+    *   *参照箇所*: `ICameraTransform`, `TargetSelectorController`
+    *   *詳細*: プレイヤーはカメラの正面方向を基準に移動方向を決定するため、カメラの Transform 情報に依存します。また、スキル発動時の自動ターゲット選択のために `TargetSelectorController` を参照します。
+*   **InGame/Enemy**:
+    *   *参照箇所*: `ILockOnTarget`
+    *   *詳細*: 敵キャラクターはカメラからロックオンされ得る対象として `ILockOnTarget` インターフェースを実装します。
+
+---
+
+## 4. アーキテクチャ上の特徴と評価
+*   **優れた疎結合性 (DIP準拠)**:
+    敵をロックオンする際、敵モジュールの具象クラスに一切依存せず、Domain層の `ILockOnTarget` という抽象化されたインターフェースを経由して結合されています。これにより、敵の内部ロジックやAIの実装が変更されてもカメラシステムには一切影響しません。
+*   **追従ロジックのピュアクラス化**:
+    カメラ追従のアルゴリズム（`CameraFollowApplication` など）が `MonoBehaviour` から切り離され、ピュアなC#クラス内に記述されています。テストや異なる補間ロジックの差し替えが容易な構成です。

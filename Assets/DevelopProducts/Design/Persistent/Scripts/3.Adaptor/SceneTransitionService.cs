@@ -27,7 +27,7 @@ namespace DevelopProducts.Persistent.Adaptor
                 bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
                     null,
                     LoadSceneMode.Additive,
-                    cancellationToken);
+                    token: cancellationToken);
                 if (!loadSuccess)
                 {
                     Debug.LogError($"シーンのロードに失敗 : {toSceneName}");

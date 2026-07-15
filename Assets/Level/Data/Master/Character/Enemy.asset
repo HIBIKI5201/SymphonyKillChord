@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Enemy
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterData
   _characterName: Enemy
-  _maxHealth: 20
-  _moveSpeed: 3
-  _attackPower: 3
+  _attackInterval: 0.5
+  _maxHealth: 100
   _attackDifinitions:
   - {fileID: 11400000, guid: 1119c366324871145b5c08ecd5b9ebaa, type: 2}
+  _baseDamage: 0

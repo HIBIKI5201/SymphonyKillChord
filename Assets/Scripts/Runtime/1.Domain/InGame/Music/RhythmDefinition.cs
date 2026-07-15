@@ -12,14 +12,12 @@ namespace KillChord.Runtime.Domain.InGame.Music
         ///     BPMを指定してリズム定義を生成する。
         /// </summary>
         /// <param name="bpm"> BPM。 </param>
-        /// <param name="justTimingThreshold"> ジャスト判定の閾値。 </param>
-        public RhythmDefinition(double bpm, float justTimingThreshold = 0.1f)
+        public RhythmDefinition(double bpm)
         {
             if (bpm <= 0) throw new ArgumentOutOfRangeException(nameof(bpm));
             _bpm = bpm;
             _beatLength = MusicConstants.SECONDS_PER_MINUTE / _bpm;
             _barLength = _beatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
-            _justTimingThreshold = justTimingThreshold;
         }
 
         /// <summary> BPM。 </summary>
@@ -42,52 +40,33 @@ namespace KillChord.Runtime.Domain.InGame.Music
         }
 
         /// <summary>
-        ///     1〜8拍子の中で、指定された秒数に最も近い拍子を算出する。
+        ///     経過時間を小節長で正規化した進捗を計算する。
         /// </summary>
         /// <param name="durationSeconds"> 前回のアクションからの経過秒数。 </param>
-        /// <returns> 拍の種類。 </returns>
-        public BeatType CalculateBeatType(double durationSeconds, Action action = null)
+        /// <returns> 0〜1に正規化された小節進捗。 </returns>
+        public float CalculateNormalizedBarProgress(double durationSeconds)
         {
             if (Bpm <= 0)
             {
-                return BeatType.Four;
+                return 0f;
             }
 
-            BeatType nearestBeatType = BeatType.Four;
-            double minDiff = double.MaxValue;
-
-            foreach (BeatType beatType in SupportedBeatTypes)
+            double elapsedBarCount = CalculateElapsedBarCount(durationSeconds);
+            if (elapsedBarCount <= 0d)
             {
-                int signature = (int)beatType;
-                double targetSeconds = _barLength / signature;
-                double diff = Math.Abs(durationSeconds - targetSeconds);
+                return 0f;
+            }
 
-                if (diff < minDiff)
-                {
-                    minDiff = diff;
-                    nearestBeatType = beatType;
-                }
-            }
-            if(minDiff <= _justTimingThreshold) // ジャスト判定の閾値以内ならジャスト判定をする。
+            if (elapsedBarCount >= 1d)
             {
-                action?.Invoke();
+                return 1f;
             }
-            return nearestBeatType;
+
+            return (float)elapsedBarCount;
         }
-
-        private static readonly BeatType[] SupportedBeatTypes =
-        {
-            BeatType.One,
-            BeatType.Two,
-            BeatType.Three,
-            BeatType.Four,
-            BeatType.Six,
-            BeatType.Eight
-        };
 
         private readonly double _bpm;
         private readonly double _beatLength;
         private readonly double _barLength;
-        private readonly double _justTimingThreshold ; // ジャスト判定の閾値（秒）
     }
 }

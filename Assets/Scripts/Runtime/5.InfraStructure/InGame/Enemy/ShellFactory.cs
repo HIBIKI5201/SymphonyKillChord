@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Enemy;
+﻿using KillChord.Runtime.Domain.InGame.Enemy;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
@@ -12,7 +12,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// </summary>
         /// <param name="attackData"></param>
         /// <returns></returns>
-        public static ShellAttackSpec CreateAttackSpec(ShellAttackData attackData)
+        public static ShellAttackSpec CreateAttackSpec(ShellAttackSpecAsset attackData)
         {
             return new ShellAttackSpec(attackData.ExplosionRadius);
         }
@@ -21,9 +21,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// </summary>
         /// <param name="musicData"></param>
         /// <returns></returns>
-        public static EnemyMusicSpec CreateMusicSpec(EnemyMusicData musicData)
+        public static EnemyMusicSpec CreateMusicSpec(EnemyMusicSpecAsset musicData)
         {
             return new EnemyMusicSpec(musicData.BarFlag, musicData.TimeSignature, musicData.TargetBeat);
         }
     }
 }
+

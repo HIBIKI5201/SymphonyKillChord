@@ -10,6 +10,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
         /// <summary>
         ///     指定したIDのスキルを実行する（Effect + Visual）。
         /// </summary>
-        void Execute(int skillId);
+        void Execute(int skillId, string animationKey = null);
     }
 }

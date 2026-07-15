@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,17 +14,45 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         ///     依存先を初期化する。
         /// </summary>
-        public void Initialize(InputController inputController)
+        /// <param name="inputController"> シナリオ入力コントローラーです。 </param>
+        /// <param name="playerInputView"> プレイヤー入力Viewです。 </param>
+        public void Initialize(
+            ScenarioInputController inputController,
+            PlayerInputView playerInputView)
         {
             _inputController = inputController;
+            _playerInputView = playerInputView;
 
-            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
-                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が取得できませんでした。", this);
+                Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
+                enabled = false;
+                return;
+            }
+
+            if (_playerInputView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が未設定です。", this);
+                enabled = false;
                 return;
             }
 
             Subscribe();
+        }
+
+        private void LateUpdate()
+        {
+            if (_requestShowUI)
+            {
+                _requestShowUI = false;
+                _scenarioUIHideView?.ShowUI();
+            }
+
+            if (_requestHideUI)
+            {
+                _requestHideUI = false;
+                _scenarioUIHideView?.HideUI();
+            }
         }
 
         private void OnDisable()
@@ -49,6 +76,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioFastForwardInput += HandleFastForwardInput;
             _playerInputView.OnScenarioPauseInput += HandlePauseInput;
             _playerInputView.OnScenarioSkipInput += HandleSkipInput;
+            _playerInputView.OnScenarioAutoInput += HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput += HandleHideUIInput;
 
             _isSubscribed = true;
         }
@@ -64,6 +93,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioFastForwardInput -= HandleFastForwardInput;
             _playerInputView.OnScenarioPauseInput -= HandlePauseInput;
             _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
+            _playerInputView.OnScenarioAutoInput -= HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput -= HandleHideUIInput;
 
             _isSubscribed = false;
         }
@@ -72,6 +103,17 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             if (context.Phase != InputActionPhase.Performed)
             {
+                return;
+            }
+
+            if (_scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
+            {
+                return;
+            }
+
+            if (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden)
+            {
+                _requestShowUI = true;
                 return;
             }
 
@@ -113,8 +155,35 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.Skip();
         }
 
-        private InputController _inputController;
+        private void HandleAutoAdvanceInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+            _inputController?.ToggleAutoAdvance();
+        }
+
+        private void HandleHideUIInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _requestHideUI = true;
+        }
+
+        [SerializeField]
+        private ScenarioUIRaycastView _scenarioUIRaycastView;
+
+        [SerializeField]
+        private ScenarioUIHideView _scenarioUIHideView;
+
+        private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
         private bool _isSubscribed;
+        private bool _requestHideUI;
+        private bool _requestShowUI;
     }
 }

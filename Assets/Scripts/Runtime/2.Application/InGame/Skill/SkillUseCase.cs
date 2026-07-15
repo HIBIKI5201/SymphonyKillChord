@@ -1,58 +1,61 @@
-using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Application.InGame.Skill;
-using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using System.Collections.Generic;
+using KillChord.Runtime.Domain.Player;
+using System;
 
 namespace KillChord.Runtime.Application.InGame.Skill
 {
     /// <summary>
-    /// スキル発動の判定と実行を扱うユースケースクラス。
+    ///     スキル発動の判定と実行を扱うユースケースクラス。
     /// </summary>
     public class SkillUsecase
     {
         /// <summary>
-        /// コンストラクタ。必要なサービスを注入する。
+        ///     コンストラクタ。必要なサービスを注入する。
         /// </summary>
         public SkillUsecase(
-            IMusicSyncService musicSyncService,
-            SkillCheckService skillCheckService,
-            IViewAction viewAction)
+            ISkillTargetResolver targetResolver,
+            ISkillEffectExecutorResolver effectExecutorResolver,
+            CharacterEntity playerEntity)
         {
-            _musicSyncService = musicSyncService;
-            _skillCheckService = skillCheckService;
-            _viewAction = viewAction;
+            _targetResolver = targetResolver;
+            _effectExecutorResolver = effectExecutorResolver;
+            _playerEntity = playerEntity;
         }
 
         /// <summary>
-        /// 入力と行動を記録し、発動可能なスキルがあれば効果の実行と演出の要求を行う。
+        ///     スキルが発動可能な場合、発動する。
         /// </summary>
-        public bool TryExecuteSkill(
-            IReadOnlyList<SkillDefinition> equipmentSkills,
-            BattleActionType actionType,
-            BeatType beatType,
-            float unscaledTime,
-            out SkillDefinition executedSkill)
+        /// <param name="skillDefinition"> 対象スキルです。 </param>
+        /// <param name="beatType"> 入力の拍子種類です。 </param>
+        /// <returns> 発動できた場合はtrue。 </returns>
+        public bool TryExecuteSkill(SkillDefinition skillDefinition, BeatType beatType)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
-
-            if (_skillCheckService.TryCheckSkills(
-                    equipmentSkills,
-                    _musicSyncService.GetBeatTypeHistory(),
-                    out var index, out _))
+            if (!_targetResolver.TryResolveTargets(skillDefinition.EffectSpec.TargetingType, out SkillTargetResolveResult targetResult))
             {
-                executedSkill = equipmentSkills[index];
-                executedSkill.Effect.Execute();
-                return true;
+                return false;
             }
 
-            executedSkill = null;
-            return false;
+            if (!_effectExecutorResolver.TryResolve(skillDefinition.EffectSpec.EffectType, out ISkillEffectExecutor executor))
+            {
+                throw new InvalidOperationException(
+                    $"対応するスキル実行器が見つかりません。EffectType: {skillDefinition.EffectSpec.EffectType}");
+            }
+
+            SkillEffectContext context = new SkillEffectContext(
+                targetResult.PrimaryTargetEntity,
+                _playerEntity,
+                beatType,
+                targetResult.TargetEntities);
+            executor.Execute(context);
+            _playerEntity.BuffSystem.Execute(new BuffContext(_playerEntity, targetResult.PrimaryTargetEntity), BuffExecuteTiming.Skill);
+            return true;
         }
 
-        private readonly IMusicSyncService _musicSyncService;
-        private readonly SkillCheckService _skillCheckService;
-        private readonly IViewAction _viewAction;
+        private readonly ISkillTargetResolver _targetResolver;
+        private readonly ISkillEffectExecutorResolver _effectExecutorResolver;
+        private readonly CharacterEntity _playerEntity;
     }
 }

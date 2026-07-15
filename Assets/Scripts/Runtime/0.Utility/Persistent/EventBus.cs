@@ -10,6 +10,15 @@ namespace KillChord.Runtime.Utility.Persistent
     public static class EventBus<T> where T : struct, IEvent
     {
         /// <summary>
+        ///     サブシステム初期化時に静的リスナーをクリアする。
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Reset()
+        {
+            _onEvent = null;
+        }
+
+        /// <summary>
         ///     イベントを登録する。
         /// </summary>
         /// <param name="listener"></param>
@@ -25,6 +34,14 @@ namespace KillChord.Runtime.Utility.Persistent
         public static void Unregister(Action<T> listener)
         {
             _onEvent -= listener;
+        }
+
+        /// <summary>
+        ///     登録済みイベントをすべて解除する。
+        /// </summary>
+        public static void Clear()
+        {
+            _onEvent = null;
         }
 
         /// <summary>

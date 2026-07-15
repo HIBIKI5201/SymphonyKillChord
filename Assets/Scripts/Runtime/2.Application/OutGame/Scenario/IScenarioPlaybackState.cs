@@ -7,6 +7,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     {
         /// <summary> シナリオ再生が早送り中かを示す。 </summary>
         bool IsFastForward { get; }
+        /// <summary> シナリオ再生が自動進行中かを示す。 </summary>
+        bool IsAutoAdvance { get; }
         /// <summary> シナリオ再生が一時停止中かを示す。 </summary>
         bool IsPaused { get; }
     }

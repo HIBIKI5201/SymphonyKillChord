@@ -1,0 +1,188 @@
+# 📓 Notion用設計書 記述ルール ＆ テンプレート
+
+このドキュメントは、Unityプロジェクトの各モジュール設計書をNotionへ移行・貼り付けした際に、自動的に綺麗な「Notionブロック」としてパース・変換されるようにするための記述ルールとテンプレートです。
+
+---
+
+## 📋 貼り付け時の3大鉄則
+
+Notionへコピー＆ペーストする際は、以下のいずれかの手順を踏むことで、見出しやテーブルが壊れず完全にブロック化されます。
+
+1. **Markdown プレビューからコピーする（最も推奨）**
+   * VS Code等のエディタで `.md` ファイルを開き、`Ctrl + Shift + V`（Macは `Cmd + Shift + V`）で「Markdownプレビュー」を表示します。
+   * プレビュー画面上で `Ctrl + A`ですべて選択してコピー（`Ctrl + C`）し、Notionにペーストします。
+   * NotionがHTMLベースのリッチコンテンツとして解釈するため、100%完璧にブロック分割されます。
+2. **Notionのインポート機能を使用する**
+   * 作成した `.md` ファイルを、Notionのメニューから「インポート (Markdown & CSV)」を使って直接読み込みます。
+3. **拡張子を `.md` にしてエディタから直接コピーする**
+   * ファイル名が `.txt` だと、エディタからコピーした際にプレーンテキストとして貼り付けられてしまいます。必ず `.md` ファイルからコピーを行ってください。
+
+---
+
+## ✍️ 記述ルール（構文ガイド）
+
+### 1. 要素の前後には「必ず空行」を入れる
+見出し（`##`）、リスト（`-`）、テーブル（`|`）、コードブロック（` ``` `）の前後には、**必ず1行の空行**を入れてください。空行がない場合、Notionが直前のテキストと同一のブロックに結合してしまいます。
+
+### 2. クラス一覧は「テーブル（表）形式」で記述する
+箇条書きリストよりも、一覧性の高いテーブル形式を使用します。
+* クラス名は太字のインラインコード `` **`ClassName`** `` で装飾します。
+* 表の前後には空行を挟みます。
+
+```markdown
+| クラス名 | レイヤー | 役割・機能 |
+| --- | --- | --- |
+| **`ExampleController`** | Adaptor | 入力を検知してロジックへ仲介する |
+```
+
+### 3. コールアウト表現
+Notionのコールアウトブロックに変換させるため、引用記法と絵文字を組み合わせます。
+```markdown
+> 💡 **モジュール概要**
+> このモジュールは〜〜を処理します。
+```
+
+### 4. 依存関係の視覚化（Mermaid）
+NotionはMermaidによる図解をネイティブサポートしています。そのまま貼り付けた後、Notion側で「Mermaidブロック」として表示が可能です。
+*   **必須ルール**: モジュールの境界を明確にするため、依存先・依存元を含め、**モジュールごとに必ず `subgraph` を使用してグループ化**してください。単一のクラスしか含まれない場合でも、モジュール単位で `subgraph` で囲む必要があります。
+*   **レイヤーの省略ルール**: モジュール依存関係図において、**外部との接続（矢印）を持たないモジュール内部のレイヤー（例: 外部から直接参照も接続もされない Application や View など）は、図の可読性を上げるために記載を省略**してください。
+
+```markdown
+```mermaid
+graph TD
+    %% 外部との矢印があるレイヤーのみ記述
+    subgraph ModuleA [モジュールA]
+        DomainA[Domain]
+        AdaptorA[Adaptor]
+    end
+    subgraph ModuleB [モジュールB]
+        DomainB[Domain]
+    end
+    AdaptorA --> DomainB
+```
+```
+
+### 5. 重要な処理のシークエンス図（Mermaid）
+モジュールの核となる動的な制御フローについては、Mermaid の `sequenceDiagram` を用いて図解してください。
+*   **必須ルール（分割化）**: 可読性を高めるため、ひとつの大きな統合フローにするのではなく、**処理（動き）ごとに図を分けて複数記載**してください（例: ①通常時の処理、②イベント時の処理、③特定モード時の処理、など）。
+
+```markdown
+```mermaid
+sequenceDiagram
+    autonumber
+    ParticipantA ->> ParticipantB: メッセージ
+    ParticipantB -->> ParticipantA: レスポンス
+```
+```
+
+---
+
+## 📄 設計書テンプレート
+
+---
+
+# 概要
+> モジュールの簡潔な概要（1〜2行）をここに記述します。
+
+| 項目 | 内容 |
+| --- | --- |
+| **モジュール名** | Camera |
+| **カテゴリ** | InGame |
+
+---
+
+## 🏗️ クラス
+
+| クラス名 | レイヤー | 役割・機能 |
+| --- | --- | --- |
+| **`IExampleTransform`** | Domain | 役割・機能を記述 |
+| **`ExampleParameter`** | Domain | 役割・機能を記述 |
+| **`ExampleApplication`** | Application | 役割・機能を記述 |
+| **`ExampleController`** | Adaptor | 役割・機能を記述 |
+| **`ExampleView`** | View | 役割・機能を記述 |
+| **`ExampleInitializer`** | Composition | 役割・機能を記述 |
+
+## 🔗 モジュール結合
+
+```mermaid
+graph TD
+    %% 定義 (接続のないレイヤーは省略)
+    subgraph TargetModule [当モジュール]
+        Domain[Domain]
+        Adaptor[Adaptor]
+    end
+    
+    subgraph OtherDepModule [依存先モジュール]
+        OtherDep[ExampleInitializer]
+    end
+    
+    subgraph OtherDependentModule [依存元モジュール]
+        OtherDependent[ExampleView]
+    end
+
+    %% 依存関係
+    OtherDep -->|インプット等を提供| Adaptor
+    Adaptor --> Domain
+    OtherDependent -->|データを取得| Domain
+```
+
+### 📥 依存しているもの
+  * *依存箇所*: `[クラス名]`
+  * *詳細*: 何のために依存しているか、どのようなデータを参照しているかを記述します。
+
+### 📤 依存されているもの
+  * *参照箇所*: `[クラス名]`
+  * *詳細*: 外部からどのようにこのモジュールが利用・参照されているかを記述します。
+
+# 詳細
+
+## 🧅レイヤー情報
+
+### ① Domain
+ドメイン層の概要をここに記述します。
+### ② Application
+アプリケーション層の概要をここに記述します。
+### ③ Adaptor
+アダプター層の概要をここに記述します。
+### ④ View
+ビュー層の概要をここに記述します。
+### ⑤ Infrastructure
+インフラストラクチャ層の概要をここに記述します。
+### ⑥ Composition
+コンポジション層の概要をここに記述します。
+
+## 🔄処理フロー
+
+主要な処理フローごとに分けて記述します。
+
+### ① [具体的なフロー名1 (例: 通常時の追従フロー)]
+概要説明をここに記載。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Player as プレイヤー
+    participant Controller as ExampleController
+    participant App as ExampleApplication
+
+    Player ->> Controller: 操作入力
+    Controller ->> App: 処理実行要求
+    App -->> Controller: 結果返却
+```
+
+### ② [具体的なフロー名2 (例: ロックオン切替フロー)]
+概要説明をここに記載。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Player as プレイヤー
+    participant Controller as ExampleController
+    participant Gateway as ExampleGateway
+
+    Player ->> Controller: 対象切り替え入力
+    Controller ->> Gateway: 対象リスト取得要求
+    Gateway -->> Controller: 候補返却
+```
+
+---

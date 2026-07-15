@@ -1,10 +1,7 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
-using KillChord.Runtime.Adaptor.InGame.Camera;
-using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Application.InGame.Camera;
-using KillChord.Runtime.Domain.InGame.Camera;
-using KillChord.Runtime.InfraStructure.InGame.Camera;
+using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
@@ -20,14 +17,53 @@ namespace KillChord.Runtime.Composition.InGame.Camera
     ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
-    public sealed class CameraSystemInitializer : MonoBehaviour
+    public sealed class CameraSystemInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(CameraSystemInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 600;
+
+        /// <summary>
+        ///     他モジュールへ結合してカメラシステムを初期化する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            if (_config == null || _cameraSystem == null)
+            {
+                Debug.LogError($"[{nameof(CameraSystemInitializer)}] カメラ初期化参照が不足しています。", this);
+                return false;
+            }
+
+            TargetSystemModuleContainer targetContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            if (targetContainer == null)
+            {
+                Debug.LogError($"[{nameof(CameraSystemInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);
+                return false;
+            }
+
+            Initialize(targetContainer.TargetSystemViewModel);
+
+#if UNITY_ANDROID
+            MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
+            PlayerInputView playerInputView = ServiceLocator.GetInstance<PlayerInputView>();
+            if (mobileInput != null && playerInputView != null)
+            {
+                mobileInput.Initialize(playerInputView);
+            }
+#else
+            Cursor.lockState = CursorLockMode.Locked;
+#endif
+            return true;
+        }
+
         /// <summary>
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
-        /// <param name="targetManager"> ロックオン対象の一覧を管理するマネージャー。</param>
-        /// <param name="targetEntityRegistry"> ロックオン対象とキャラクターエンティティの対応を管理するレジストリ。</param>
-        public void Initialize(TargetManager targetManager, TargetEntityRegistry targetEntityRegistry)
+        /// <param name="targetingSystem"> カメラが参照するターゲット選択機能。</param>
+        public void Initialize(ITargetSystemViewModel targetingSystem)
         {
             if (_config == null)
             {
@@ -41,45 +77,35 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return;
             }
 
-            CameraSystemParameter parameter = _config.ToDomain();
+            CameraLockOnRotationCalculator lockOnRotationCalculator = new(_config);
+            CameraFreeLookRotationCalculator freeLookRotationCalculator = new(_config);
+            CameraLookAtRotationCalculator lookAtRotationCalculator = new(_config);
+            CameraFollowCalculator followCalculator = new(_config);
 
-            CameraBoneLockOnRotationApplication boneRotationSystem = new(parameter);
-            CameraBoneFreeLookRotationApplication freeLookRotationSystem = new(parameter);
-            CameraRotationApplication rotationSystem = new(parameter);
-            CameraFollowApplication followSystem = new(parameter);
-
-            TargetSelector targetSelector = new(targetManager);
-            TargetEntityRegistryController targetEntityRegistryController = new(targetEntityRegistry);
-            TargetSelectorController targetSelectorController = new(targetSelector, targetEntityRegistryController);
-            ServiceLocator.RegisterInstance(targetSelectorController);
-
-            CameraSystemApplication application = new(parameter, followSystem, boneRotationSystem,
-                freeLookRotationSystem, rotationSystem, targetSelector);
-
-            CameraSystemController controller = new(application);
-            CameraSystemPresenter presenter = new(application);
-
-            var stageSceneObj = ServiceLocator.GetInstance<IStageSceneInstance>();
-            if (stageSceneObj == null)
+            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            if (playerModuleContainer == null || playerModuleContainer.PlayerView == null)
             {
-                Debug.LogError($"{nameof(IStageSceneInstance)} が見つかりません。");
+                Debug.LogError($"{nameof(PlayerModuleContainer)} が見つかりません。");
                 return;
             }
 
-            _cameraSystem.Initialize(controller, presenter, stageSceneObj.PlayerTransform,
+            _cameraSystem.Initialize(
+                (playerPosition, direction) => targetingSystem.ChangeTarget(playerPosition, direction),
+                () => targetingSystem.ClearTarget(),
+                () =>
+                {
+                    bool hasTarget = targetingSystem.TryGetCurrentTargetPosition(out Vector3 targetPosition);
+                    return (hasTarget, targetPosition);
+                },
+                followCalculator, lockOnRotationCalculator,
+                freeLookRotationCalculator, lookAtRotationCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
-
-#if UNITY_EDITOR
-            _cameraSystem.gameObject
-                .AddComponent<CameraSystemParameterDebug>()
-                .SetCameraParameter(parameter);
-#endif
         }
 
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
         private CameraSystemView _cameraSystem;
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
-        private CameraSystemConfig _config;
+        private CameraConfig _config;
     }
 }

@@ -572,6 +572,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1897386736}
+  - component: {fileID: 1897386737}
   - component: {fileID: 1897386735}
   m_Layer: 0
   m_Name: ScenarioCom
@@ -590,14 +591,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33dfe856e84a6bd4c89dc81919d831ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ScenarioCom
+  m_Name:
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Scenario.ScenarioCom
   _chatText: {fileID: 5606888421214580279, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
   _inputView: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
-  _backgroundCatalog: {fileID: 11400000, guid: 03ab59b5cc1893e4eaf97352ba51df87, type: 2}
-  _animationCatalog: {fileID: 11400000, guid: 9c44a325b8ad84f498216394b6a9d584, type: 2}
-  _portraitCatalog: {fileID: 11400000, guid: f14fa8fb60db62e4cb2b1be4f9ed86f7, type: 2}
-  _scenarioSettings: {fileID: 11400000, guid: 888c47664981fed459937f475b632964, type: 2}
+  _backgroundCatalogKey: Assets/Level/Data/Master/Scenario/BackgroundCatalogAsset.asset
+  _animationCatalogKey: Assets/Level/Data/Master/Scenario/AnimationCatalogAsset.asset
+  _portraitCatalogKey: Assets/Level/Data/Master/Scenario/PortraitCatalogAsset.asset
+  _scenarioSettingsKey: Assets/Level/Data/Master/Scenario/ScenarioSettingsAsset.asset
+--- !u!114 &1897386737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1897386734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7bb2f1a0d34c4b9db6c7d8474b2e91, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Scenario.OutGameScenarioSceneInitializer
 --- !u!4 &1897386736
 Transform:
   m_ObjectHideFlags: 0

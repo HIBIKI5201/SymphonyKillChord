@@ -4,7 +4,9 @@ using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.OutGame.StageSelect;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
@@ -21,8 +23,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
     ///     ステージ選択画面の依存を解決するクラス。
     ///     UIBuilder で配置されたノード要素・接続線要素を収集して StageTree と紐付けます。
     /// </summary>
-    public sealed class StageSelectInitializer : MonoBehaviour
+    public sealed class StageSelectInitializer : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(StageSelectInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 110;
+
         /// <summary> ノード要素のUSSクラス名。 </summary>
         private const string NODE_USS_CLASS = "stage-node";
         /// <summary> 接続線要素のUSSクラス名。 </summary>
@@ -35,8 +43,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("ステージツリーの定義アセットです。")]
-        private StageTreeAsset _stageTreeAsset;
+        [SerializeField, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        private string _stageTreeAssetKey;
 
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
@@ -54,34 +62,48 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private StageSelectOpenUseCase _openUseCase;
         private SelectedScenarioState _selectedScenarioState;
         private SelectedBattleStageState _selectedBattleStageState;
-        private bool _registeredSelectedBattleStageState;
+        private SelectedMissionState _selectedMissionState;
+        private StageTreeAsset _loadedStageTreeAsset;
+        private bool _isSubscribed;
 
         /// <summary>
-        ///     初期化を行います。
+        ///     単体で実行できる初期化を行います。
         /// </summary>
-        private void Awake()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Init()
         {
-            _currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Initialize();
+            _currentSceneName = gameObject.scene.name;
+            return true;
         }
 
         /// <summary>
-        ///     イベントを購読します。
+        ///     ステージツリー定義をロードします。
         /// </summary>
-        private void OnEnable()
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, destroyCancellationToken);
+            return _loadedStageTreeAsset != null;
+        }
+
+        /// <summary>
+        ///     システムを構築します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
+        {
+            return Initialize();
+        }
+
+        /// <summary>
+        ///     他モジュールとの結合を行います。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
         {
             Subscribe();
-        }
-
-        /// <summary>
-        ///     イベント購読を解除します。
-        /// </summary>
-        private void OnDisable()
-        {
-            Unsubscribe();
-            _cts?.Cancel();
-            DisposeNodeComponents();
-            _cts?.Dispose();
+            return _isInitialized;
         }
 
         /// <summary>
@@ -123,19 +145,46 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleSortieRequested()
         {
-            if (!_stageSelectController.TryGetSortieInfo(out var stageType, out var targetSceneName,out var battleStageScene, out var scenarioId, out var missionDefinition))
-            {   
+            if (!_stageSelectController.TryGetSortieInfo(out StageDefinition stageDefinition))
+            {
                 return;
             }
 
-            if(stageType == StageType.Battle)
+            if (stageDefinition.StageType == StageType.Battle)
             {
-                _selectedBattleStageState.SelectBattleStage(battleStageScene);
-            }
+                if (stageDefinition.MissionDefinition == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"{nameof(StageSelectInitializer)}" +
+                        "バトルステージにMissionDefinitionが設定されていません。",
+                        this);
+#endif
+                    return;
+                }
 
-            if(stageType == StageType.Scenario)
+                if (string.IsNullOrWhiteSpace(
+                    stageDefinition.BattleSceneName))
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"[{nameof(StageSelectInitializer)}] " +
+                        "バトルシーン名が設定されていません。",
+                        this);
+#endif
+                    return;
+                }
+
+                _selectedBattleStageState.SelectBattleStage(stageDefinition, _currentSceneName);
+
+                _missionSelectController.Select(stageDefinition.MissionDefinition);
+            }
+            else if (stageDefinition.StageType == StageType.Scenario)
             {
-                if (string.IsNullOrWhiteSpace(scenarioId))
+                _selectedBattleStageState.Clear();
+                _selectedMissionState.Clear();
+
+                if (string.IsNullOrWhiteSpace(stageDefinition.ScenarioId))
                 {
 #if UNITY_EDITOR
                     Debug.LogError($"[{nameof(StageSelectInitializer)}] シナリオIDが設定されていません。", this);
@@ -143,15 +192,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return;
                 }
 
-                _selectedScenarioState.SelectScenario(scenarioId);
+                _selectedScenarioState.SelectScenario(stageDefinition.ScenarioId);
             }
 
-            if (_stageSelectController.TryGetBattleMissionDefinition(out var battleMissionDefinition))
-            {
-                _missionSelectController.Select(battleMissionDefinition.MissionId.Value);
-            }
-
-            await _outGameSortieController.RequestSortieAsync(stageType, _currentSceneName, targetSceneName, _cts.Token);
+            await _outGameSortieController.RequestSortieAsync(
+                stageDefinition.StageType,
+                _currentSceneName,
+                stageDefinition.TargetSceneName,
+                _cts.Token);
         }
 
         /// <summary>
@@ -166,24 +214,29 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     システムを構築します。
         /// </summary>
-        private void Initialize()
+        private bool Initialize()
         {
             if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
             {
                 _selectedBattleStageState = new SelectedBattleStageState();
 
                 ServiceLocator.RegisterInstance(_selectedBattleStageState);
-
-                _registeredSelectedBattleStageState = true;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _selectedMissionState))
+            {
+                _selectedMissionState = new SelectedMissionState();
+
+                ServiceLocator.RegisterInstance(_selectedMissionState);
+            }
+            _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
 #endif
-                return;
+                return false;
             }
 
             if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
@@ -191,24 +244,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this);
 #endif
-                return;
+                return false;
             }
-
-            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedMissionState が取得できませんでした。", this);
-#endif
-                return;
-            }
-            _missionSelectController = new OutGameMissionSelectController(selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedScenarioState が取得できませんでした。", this);
 #endif
-                return;
+                return false;
             }
 
             if (_uiDocument == null)
@@ -216,15 +260,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] UIDocument が設定されていません。", this);
 #endif
-                return;
+                return false;
             }
 
-            if (_stageTreeAsset == null)
+            if (_loadedStageTreeAsset == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] StageTreeAsset が設定されていません。", this);
 #endif
-                return;
+                return false;
             }
 
             VisualElement root = _uiDocument.rootVisualElement;
@@ -236,11 +280,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] {DETAIL_SCREEN_NAME} が見つかりませんでした。", this);
 #endif
-                return;
+                return false;
             }
 
             // --- Domain 層 ---
-            _stageTree = _stageTreeAsset.Create();
+            _stageTree = _loadedStageTreeAsset.Create();
 
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);
@@ -265,6 +309,23 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             _cts = new CancellationTokenSource();
             _isInitialized = true;
+            return true;
+        }
+
+        /// <summary>
+        ///     登録済みサービスやイベント購読を解除します。
+        /// </summary>
+        public override void Shutdown()
+        {
+            Unsubscribe();
+            _isSubscribed = false;
+            _cts?.Cancel();
+            DisposeNodeComponents();
+            _cts?.Dispose();
+            _cts = null;
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _loadedStageTreeAsset = null;
+            _isInitialized = false;
         }
 
         /// <summary>
@@ -272,13 +333,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void Subscribe()
         {
-            if (!_isInitialized) { return; }
+            if (!_isInitialized || _outGameUIEvent == null || _isSubscribed) { return; }
             _outGameUIEvent.OnStageNodeSelected += HandleStageNodeSelected;
             _outGameUIEvent.OnStageDetailClosed += HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
             _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted += HandleStageSelectScreenCompleted;
+            _isSubscribed = true;
         }
 
         /// <summary>
@@ -286,13 +348,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void Unsubscribe()
         {
-            if (!_isInitialized) { return; }
+            if (!_isInitialized || _outGameUIEvent == null || !_isSubscribed) { return; }
             _outGameUIEvent.OnStageNodeSelected -= HandleStageNodeSelected;
             _outGameUIEvent.OnStageDetailClosed -= HandleStageDetailClosed;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
             _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted -= HandleStageSelectScreenCompleted;
+            _isSubscribed = false;
         }
 
         /// <summary>

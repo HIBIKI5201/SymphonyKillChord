@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.System.SceneLoad;
 using UnityEngine;
 
@@ -16,7 +17,9 @@ namespace KillChord.Runtime.View.InGame.Scene
         public ValueTask<bool> LoadScene(string sceneName)
         {
             _loadedScenes.Add(sceneName);
-            return SceneLoader.LoadScene(sceneName);
+            return SceneLoader.LoadScene(
+                sceneName,
+                priority: ScenePriorityResolver.Resolve(sceneName));
         }
 
         public ValueTask<bool> UnloadScene(string sceneName)

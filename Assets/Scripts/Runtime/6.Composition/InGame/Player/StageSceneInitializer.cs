@@ -1,6 +1,6 @@
-using KillChord.Runtime.Composition.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
+using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Player
 {
@@ -9,22 +9,21 @@ namespace KillChord.Runtime.Composition.InGame.Player
     /// </summary>
     public class StageSceneObjects : MonoBehaviour, IStageSceneInstance
     {
-        [SerializeField, Tooltip("プレイヤーのTransform。")]
-        private Transform _playerTransform;
+        [SerializeField, Tooltip("プレイヤーの生成位置です。")]
+        private PlayerSpawnPoint _playerSpawnPoint;
 
-        [SerializeField, Tooltip("スキル初期化コンポーネント。")]
-        private SkillInitializer _skillInitializer;
-
-        /// <summary> プレイヤーのTransform。 </summary>
-        public Transform PlayerTransform => _playerTransform;
-
-        /// <summary> スキル初期化コンポーネント。 </summary>
-        public SkillInitializer SkillInitializer => _skillInitializer;
+        /// <summary> プレイヤーの生成位置です。 </summary>
+        public Transform PlayerSpawnPointTransform => _playerSpawnPoint != null ? _playerSpawnPoint.transform : null;
 
         /// <summary> サービスロケーターへシーン参照を登録する。 </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<IStageSceneInstance>(this);
+            ServiceLocator.RegisterInstance<IStageSceneInstance>(this, LocateType.Locator);
+        }
+
+        private void OnDestroy()
+        {
+            ServiceLocator.UnregisterInstance<IStageSceneInstance>(this);
         }
     }
 
@@ -33,7 +32,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
     /// </summary>
     public interface IStageSceneInstance
     {
-        Transform PlayerTransform { get; }
-        SkillInitializer SkillInitializer { get; }
+        Transform PlayerSpawnPointTransform { get; }
     }
 }

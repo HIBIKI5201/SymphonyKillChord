@@ -6,6 +6,7 @@ TagManager:
   tags:
   - GameSystem
   - TouchArea
+  - ScenarioIgnore
   layers:
   - Default
   - TransparentFX

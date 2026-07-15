@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     {
         TimeSpan NormalTextCharInterval { get; }
         TimeSpan FastForwardTextCharInterval { get; }
+        TimeSpan AutoAdvanceDelay { get; }
         TimeSpan PausePollInterval { get; }
         TimeSpan CloseDelayAfterComplete { get; }
         bool SkipClosesImmediately { get; }
