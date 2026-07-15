@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13035cc144f4b9044b312988167fe8bb, type: 3}
   m_Name: EnemyMissionKeyAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.EnemyMissionKeyAsset
-  _id: Red
+  _id:
+    _id: enemy_red
+    _hashId: 1401557065
   _displayName: "\u8D64\u3044\u5175\u58EB"

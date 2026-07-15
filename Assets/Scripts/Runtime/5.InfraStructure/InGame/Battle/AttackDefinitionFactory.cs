@@ -40,7 +40,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 new Damage(data.AttackSpecAsset.ConfirmedDamage)
             );
 
-            int? beatType = data.UseBeatType ? data.BeatType : null;
+            int? beatType = data.UseBeatType ? (int?)data.BeatType : null;
 
             BeatType? resolvedBeatType = null;
             if (beatType.HasValue)

@@ -29,7 +29,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             for (int i = 0; i < clearData.Count; i++)
             {
                 StageClearData stageClearData = clearData[i];
-                if (stageClearData == null || stageClearData.StageId <= 0)
+                if (stageClearData == null || stageClearData.StageId == 0)
                 {
                     continue;
                 }

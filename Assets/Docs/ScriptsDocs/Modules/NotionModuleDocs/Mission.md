@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Mission |
 | **カテゴリ** | InGame |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Infrastructure, Composition) |
 | **ステータス** | 実装済み |
 | **最終更新日** | 2026-07-15 |
 

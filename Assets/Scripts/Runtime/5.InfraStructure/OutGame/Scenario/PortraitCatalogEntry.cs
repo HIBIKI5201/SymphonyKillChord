@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -9,8 +10,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct PortraitCatalogEntry
     {
-        public string Id;
+        [DataCategory("ScenarioPortrait"), Tooltip("シナリオ立ち絵を一意に識別するIDです。")]
+        public DataID Id;
+
+        [Tooltip("立ち絵のAddressableキーです。")]
         public string AssetKey;
+
+        [Tooltip("表示する立ち絵です。")]
         public Sprite Asset;
     }
 }

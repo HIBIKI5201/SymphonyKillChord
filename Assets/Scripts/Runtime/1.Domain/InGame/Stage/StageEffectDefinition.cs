@@ -15,22 +15,22 @@ namespace KillChord.Runtime.Domain.InGame.Stage
         /// <param name="kind"> 演出種類です。 </param>
         /// <param name="musicSpec"> 音楽同期タイミングです。 </param>
         public StageEffectDefinition(
-            string effectId,
+            int effectId,
             StageEffectKind kind,
             EnemyMusicSpec musicSpec)
         {
-            if (string.IsNullOrWhiteSpace(effectId))
+            if (effectId == 0)
             {
-                throw new ArgumentException("演出IDが未設定です。", nameof(effectId));
+                throw new ArgumentOutOfRangeException(nameof(effectId), "演出IDに0は使用できません。");
             }
 
-            EffectId = effectId.Trim();
+            EffectId = effectId;
             Kind = kind;
             MusicSpec = musicSpec;
         }
 
         /// <summary> 演出を識別するIDです。 </summary>
-        public string EffectId { get; }
+        public int EffectId { get; }
 
         /// <summary> 演出の種類です。 </summary>
         public StageEffectKind Kind { get; }

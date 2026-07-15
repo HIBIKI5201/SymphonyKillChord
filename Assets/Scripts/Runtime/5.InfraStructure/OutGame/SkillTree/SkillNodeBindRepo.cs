@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -15,7 +16,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public SkillNodeBindData FindById(int id)
+        public SkillNodeBindData FindById(SkillNodeId id)
         {
             if(SkillNodeBinds == null || SkillNodeBinds.Length <= 0)
             {

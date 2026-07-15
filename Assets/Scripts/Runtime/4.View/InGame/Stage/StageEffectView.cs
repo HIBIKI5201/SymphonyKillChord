@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Stage;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Character;
 using SymphonyFrameWork.Attribute;
 using System;
@@ -56,7 +57,7 @@ namespace KillChord.Runtime.View.InGame.Stage
         /// <param name="effectId"> 演出IDです。 </param>
         /// <param name="kind"> 演出種類です。 </param>
         private void HandleEffectRequested(
-            string effectId,
+            int effectId,
             StageEffectViewKind kind)
         {
             StageEffectBinding[] bindings = _bindings ?? Array.Empty<StageEffectBinding>();
@@ -65,7 +66,7 @@ namespace KillChord.Runtime.View.InGame.Stage
                 StageEffectBinding binding = bindings[i];
                 if (binding != null && binding.Matches(effectId, kind))
                 {
-                    binding.Play(effectId);
+                    binding.Play();
                 }
             }
         }
@@ -82,31 +83,33 @@ namespace KillChord.Runtime.View.InGame.Stage
             /// <param name="effectId"> 演出IDです。 </param>
             /// <param name="kind"> 演出種類です。 </param>
             /// <returns> 一致する場合はtrueです。 </returns>
-            public bool Matches(string effectId, StageEffectViewKind kind)
+            public bool Matches(int effectId, StageEffectViewKind kind)
             {
-                return string.Equals(_effectId, effectId, StringComparison.Ordinal)
+                return _effectId.Id == effectId
                     && _kind == kind;
             }
 
             /// <summary>
             ///     登録された演出を再生します。
             /// </summary>
-            /// <param name="effectId"> CueNameとして渡す演出IDです。 </param>
-            public void Play(string effectId)
+            public void Play()
             {
                 IOneShotVisualEffect[] effects =
                     _effects ?? Array.Empty<IOneShotVisualEffect>();
                 for (int i = 0; i < effects.Length; i++)
                 {
-                    effects[i]?.Play(effectId);
+                    effects[i]?.Play(_cueName);
                 }
             }
 
-            [SerializeField, Tooltip("StageEffectAsset側と対応する演出IDです。")]
-            private string _effectId;
+            [SerializeField, DataCategory("StageEffect"), Tooltip("StageEffectAsset側と対応する演出IDです。")]
+            private DataID _effectId;
 
             [SerializeField, Tooltip("このBindingが処理する演出種類です。")]
             private StageEffectViewKind _kind;
+
+            [SerializeField, Tooltip("音声演出へ渡すCRI Cue名です。音声を使用しない場合は空にします。")]
+            private string _cueName;
 
             [SerializeReference, SubclassSelector, Tooltip("演出要求時に再生するワンショット演出です。")]
             private IOneShotVisualEffect[] _effects = Array.Empty<IOneShotVisualEffect>();

@@ -10,15 +10,13 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary>
         /// アニメーションイベントを初期化する。
         /// </summary>
-        public AnimationEvent(string animationId)
+        public AnimationEvent(AnimationId animationId)
         {
-            AnimationId = string.IsNullOrWhiteSpace(animationId)
-                ? throw new ArgumentException("animationId is empty.", nameof(animationId))
-                : animationId;
+            AnimationId = animationId;
         }
 
         /// <summary> AnimationId を取得する。 </summary>
-        public string AnimationId { get; }
+        public AnimationId AnimationId { get; }
         /// <summary> RequirePlayerAdvance を取得する。 </summary>
         public bool RequirePlayerAdvance => false;
     }

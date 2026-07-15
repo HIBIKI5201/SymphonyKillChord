@@ -370,7 +370,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         {
             return progress == null
                 ? null
-                : progress.Report;
+                : new Action<float>(progress.Report);
         }
     }
 }

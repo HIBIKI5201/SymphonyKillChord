@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             PlayerStatusPresenter playerStatusPresenter,
             IPreviewVideoScreenViewModel previewVideoScreenViewModel,
             IPreviewVideoScreenViewShowable previewVideoScreenViewShowable,
-            Dictionary<int, SkillNodeEntity> skillNodeEntities,
+            Dictionary<SkillNodeId, SkillNodeEntity> skillNodeEntities,
             Dictionary<int, ISkillNodeViewModel> skillNodeViews,
             Dictionary<int, string[]> skillNodeConnBinds,
             Dictionary<string, ISkillNodeConnViewModel> nodeConns,
@@ -63,11 +64,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 _skillNodeViews[_selectedNodeId].SetUnSelected();
             }
             _selectedNodeId = nodeId;
-            SkillNodeEntity entity = _skillNodeEntities[nodeId];
+            SkillNodeId selectedNodeId = new SkillNodeId(nodeId);
+            SkillNodeEntity entity = _skillNodeEntities[selectedNodeId];
             ISkillNodeViewModel view = _skillNodeViews[nodeId];
             int currentPoints = _skillTreeStatusEntity.CurrentPoints;
             _nodesOnPath.Clear();
-            _costToUnlock = _skillTreeService.TryGetTotalCost(nodeId, _nodesOnPath);
+            _costToUnlock = _skillTreeService.TryGetTotalCost(selectedNodeId, _nodesOnPath);
 
             bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && !entity.IsUnlocked;
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
@@ -102,16 +104,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 int nodeId = entity.SkillNodeIdVO.Id;
                 // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
                 entity.Unlock();
-                if (!_skillTreeStatusEntity.UnlockedNodes.Contains(nodeId))
+                if (!_skillTreeStatusEntity.UnlockedNodes.Contains(entity.SkillNodeIdVO))
                 {
-                    _skillTreeStatusEntity.UnlockedNodes.Add(nodeId);
+                    _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
                 }
-                int[] unlockSkillIds = new int[entity.UnlockSkillIds.Length];
-                for (int i = 0; i < entity.UnlockSkillIds.Length; i++)
-                {
-                    unlockSkillIds[i] = entity.UnlockSkillIds[i].Value;
-                }
-                _skillTreeStatusEntity.AddUnlockedSkillIds(unlockSkillIds);
+                _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
 
                 _skillNodeViews[entity.SkillNodeIdVO.Id].SetUnlocked();
                 UpdateConns(nodeId);
@@ -125,7 +122,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                     t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
                     TaskContinuationOptions.OnlyOnFaulted);
 
-            SkillNodeEntity selectedNode = _skillNodeEntities[_selectedNodeId];
+            SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
             _skillDetailPresenter.Push(dto);
@@ -155,7 +152,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
 
-        private Dictionary<int, SkillNodeEntity> _skillNodeEntities;
+        private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private HashSet<SkillNodeEntity> _nodesOnPath;
         private Dictionary<int, VisualElement> _unlockPhases;

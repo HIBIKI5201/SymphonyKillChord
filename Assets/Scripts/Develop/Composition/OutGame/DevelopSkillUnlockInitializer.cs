@@ -19,7 +19,16 @@ namespace KillChord.Develop.Composition.OutGame
         /// <summary> 実行順です。 </summary>
         public override int Order => 110;
 
-        private static readonly int[] DEVELOP_UNLOCKED_SKILL_IDS = { 1, 2, 3 };
+        private const int SKILL_01_ID = -1127918619;
+        private const int SKILL_02_ID = 634126943;
+        private const int SKILL_03_ID = 1389048521;
+
+        private static readonly int[] DEVELOP_UNLOCKED_SKILL_IDS =
+        {
+            SKILL_01_ID,
+            SKILL_02_ID,
+            SKILL_03_ID
+        };
 
         /// <summary>
         ///     開発用の追加解放スキルをセーブデータへ補完します。

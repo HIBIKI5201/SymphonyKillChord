@@ -6,7 +6,6 @@
 | --- | --- |
 | **モジュール名** | Scenario |
 | **カテゴリ** | OutGame |
-| **アーキテクチャ** | クリーンアーキテクチャ (Domain, Application, Adaptor, View, Infrastructure, Composition) |
 | **ステータス** | 実装済み（パフォーマンス上の既知の課題あり） |
 | **最終更新日** | 2026-07-15 |
 

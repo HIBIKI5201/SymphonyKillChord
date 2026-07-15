@@ -7,6 +7,6 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IPortraitRepository
     {
-        bool TryFindById(string id, out PortraitDefinition portrait);
+        bool TryFindById(PortraitId id, out PortraitDefinition portrait);
     }
 }

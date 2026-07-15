@@ -40,13 +40,26 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
                 _viewModel.Update(new HUDEnemyHealthDTO(
                     entity.CurrentHealth.Value,
                     entity.MaxHealth.Value,
-                    true,
+                    LockOnDisplayState.LockedOn,
                     result));
+            }
+            else if (_targetingSystem.TryGetCurrentCandidateEntity(out _)
+                && _targetingSystem.TryGetCurrentCandidatePosition(out Vector3 candidatePosition))
+            {
+                _viewModel.Update(new HUDEnemyHealthDTO(
+                    0f,
+                    1f,
+                    LockOnDisplayState.Candidate,
+                    candidatePosition));
             }
             else
             {
                 // 対象なし。ゼロ除算を避けるため MaxHealth には 1 を渡す
-                _viewModel.Update(new HUDEnemyHealthDTO(0f, 1f, false, Vector3.zero));
+                _viewModel.Update(new HUDEnemyHealthDTO(
+                    0f,
+                    1f,
+                    LockOnDisplayState.Hidden,
+                    Vector3.zero));
             }
         }
 

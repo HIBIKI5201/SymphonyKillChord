@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: BgmSelectorLabelTable
   m_EditorClassIdentifier: DevelopProducts-EquipmentBGM::DevelopProducts.EquipmentBGM.BgmSelectorLabelTable
   _entries:
-  - _skillId: 0
+  - _skillId:
+      _id: skill_00
+      _hashId: -876453005
     _selectorLabel: SelectorLabel_S00
-  - _skillId: 1
+  - _skillId:
+      _id: skill_01
+      _hashId: -1127918619
     _selectorLabel: SelectorLabel_S01
-  - _skillId: 2
+  - _skillId:
+      _id: skill_02
+      _hashId: 634126943
     _selectorLabel: SelectorLabel_S03

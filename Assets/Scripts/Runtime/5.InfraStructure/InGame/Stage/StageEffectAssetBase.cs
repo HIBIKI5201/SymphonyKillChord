@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
+using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
@@ -50,7 +51,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
                 _barFlag,
                 _timeSignature,
                 _targetBeat);
-            return new StageEffectDefinition(_effectId, kind, musicSpec);
+            return new StageEffectDefinition(_effectId.Id, kind, musicSpec);
         }
 
         /// <summary>
@@ -60,10 +61,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
         protected abstract string BuildSummary();
 
         /// <summary> 演出IDです。 </summary>
-        protected string EffectId => _effectId;
+        protected int EffectId => _effectId.Id;
 
-        [SerializeField, Tooltip("StageEffectView側の演出と対応するIDです。")]
-        private string _effectId;
+        [SerializeField, DataCategory("StageEffect"), Tooltip("StageEffectView側の演出と対応するIDです。")]
+        private DataID _effectId;
 
         [SerializeField, Range(0, 1), Tooltip("0は現在小節、1は次小節で実行します。")]
         private byte _barFlag;

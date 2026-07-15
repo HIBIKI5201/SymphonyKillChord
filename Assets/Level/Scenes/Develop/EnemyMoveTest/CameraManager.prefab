@@ -88,10 +88,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f067364449e6d8e42a16423cc7702ae0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.TestCameraSystem
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Camera.CameraSystemView
   _cameraT: {fileID: 6603128112584395780}
   _updateMode: 2
-  _cameraSensitivity: 5
+  _mouseLookSensitivity: 5
+  _gamepadLookSensitivity: 20
+  _mobileLookSensitivity: 10
 --- !u!114 &2786661489550224862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,6 +105,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f975f23e67a3ea544a3bff6e3c90e7e0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.TestCameraInitializer
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Camera.CameraSystemInitializer
   _cameraSystem: {fileID: 176797402388610346}
   _config: {fileID: 11400000, guid: bd2baf74c95bbc545ac18bea3a467152, type: 2}

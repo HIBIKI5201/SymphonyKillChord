@@ -7,6 +7,6 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IBackgroundRepository
     {
-        bool TryFindById(string id, out BackgroundDefinition background);
+        bool TryFindById(BackgroundId id, out BackgroundDefinition background);
     }
 }

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.OutGame.Savedata;
@@ -19,7 +20,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="skillNodeEntityDict"> ノード一覧です。 </param>
         /// <param name="savedataSystem"> セーブデータシステムです。 </param>
         public SkillTreeService(
-            Dictionary<int, SkillNodeEntity> skillNodeEntityDict,
+            Dictionary<SkillNodeId, SkillNodeEntity> skillNodeEntityDict,
             SavedataSystem savedataSystem)
         {
             _skillNodeEntityDict = skillNodeEntityDict ?? throw new ArgumentNullException(nameof(skillNodeEntityDict));
@@ -35,7 +36,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="nodesOnPath"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public int TryGetTotalCost(int nodeId, HashSet<SkillNodeEntity> nodesOnPath)
+        public int TryGetTotalCost(SkillNodeId nodeId, HashSet<SkillNodeEntity> nodesOnPath)
         {
             if (nodesOnPath == null)
             {
@@ -82,11 +83,26 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="unlockedNodes"></param>
         /// <param name="unlockedSkillIds"></param>
         /// <param name="currentPoints"></param>
-        public async Task SaveSkillUnlockData(List<int> unlockedNodes, List<int> unlockedSkillIds, int currentPoints)
+        public async Task SaveSkillUnlockData(
+            IReadOnlyList<SkillNodeId> unlockedNodes,
+            IReadOnlyList<SkillId> unlockedSkillIds,
+            int currentPoints)
         {
             SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
-            saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodes.ToArray());
-            saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillIds.ToArray());
+            int[] unlockedNodeValues = new int[unlockedNodes.Count];
+            for (int i = 0; i < unlockedNodes.Count; i++)
+            {
+                unlockedNodeValues[i] = unlockedNodes[i].Id;
+            }
+
+            int[] unlockedSkillValues = new int[unlockedSkillIds.Count];
+            for (int i = 0; i < unlockedSkillIds.Count; i++)
+            {
+                unlockedSkillValues[i] = unlockedSkillIds[i].Value;
+            }
+
+            saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodeValues);
+            saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillValues);
             saveData.SkillUnlock.SetResearchPoint(currentPoints);
             await _savedataSystem.SaveAsync(saveData);
         }
@@ -113,7 +129,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
         }
 
-        private readonly Dictionary<int, SkillNodeEntity> _skillNodeEntityDict;
+        private readonly Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntityDict;
         private readonly HashSet<SkillNodeEntity> _visitedNodes;
         private readonly SavedataSystem _savedataSystem;
     }

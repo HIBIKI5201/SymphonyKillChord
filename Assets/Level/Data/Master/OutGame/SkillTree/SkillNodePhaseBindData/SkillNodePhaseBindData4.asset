@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.SkillNodePhaseBindData
   PhaseIndex: 4
   PhaseName: Phase4Container
-  RequiredSkillNodeId: 11
+  _requiredSkillNodeId:
+    _id: node_n11
+    _hashId: -671561957

@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
   m_Name: TestSkillData4
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
-  _id: 3
+  _id:
+    _id: skill_03
+    _hashId: 1389048521
   _pattern: 020000000400000001000000
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
   _skillEffectType: 3
   _skillTargetingType: 4
-  _animationKey: Skill_1
+  _animationKey: Skill_Right

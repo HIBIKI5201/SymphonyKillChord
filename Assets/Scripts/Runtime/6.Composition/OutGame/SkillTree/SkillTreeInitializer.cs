@@ -2,12 +2,14 @@ using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.Utility.OutGame.Savedata;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -42,7 +44,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Tooltip("スキルツリー画面のUIDocumentです。")]
         private UIDocument _uiDocument;
 
-        [SerializeField]
+        [SerializeField, RepositoryAddressSelector]
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
         private string _skillNodeDataRepoKey;
 
@@ -74,7 +76,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
         private RenderTexture _renderTexture;
-        private Dictionary<int, SkillNodeEntity> _skillNodeEntities;
+        private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
@@ -172,6 +174,38 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     永続化された数値IDをスキルノードIDへ変換します。
+        /// </summary>
+        /// <param name="values"> 永続化された数値ID。 </param>
+        /// <returns> スキルノードID配列。 </returns>
+        private static SkillNodeId[] CreateSkillNodeIds(IReadOnlyList<int> values)
+        {
+            SkillNodeId[] ids = new SkillNodeId[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                ids[i] = new SkillNodeId(values[i]);
+            }
+
+            return ids;
+        }
+
+        /// <summary>
+        ///     永続化された数値IDをスキルIDへ変換します。
+        /// </summary>
+        /// <param name="values"> 永続化された数値ID。 </param>
+        /// <returns> スキルID配列。 </returns>
+        private static SkillId[] CreateSkillIds(IReadOnlyList<int> values)
+        {
+            SkillId[] ids = new SkillId[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                ids[i] = new SkillId(values[i]);
+            }
+
+            return ids;
+        }
+
+        /// <summary>
         ///     スキルツリーを構築します。
         /// </summary>
         /// <returns> 初期化に成功した場合はtrue。 </returns>
@@ -232,8 +266,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,
-                _skillUnlockData.UnlockedSkillNodeIds,
-                _skillUnlockData.UnlockedSkillIds);
+                CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
+                CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
@@ -267,7 +301,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeConnBinds = new();
             foreach (SkillNodeBindData bind in _loadedSkillNodeBindRepo.SkillNodeBinds)
             {
-                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId, bind.FromConnNames);
+                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId.Id, bind.FromConnNames);
             }
         }
 
@@ -290,23 +324,24 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 }
 
                 SkillNodeEntity nodeEntity = nodeData.ToDomain();
-                SkillNodeView nodeView = new SkillNodeView(nodes[i], nodeData.NodeId, _outGameUIEvent);
+                SkillNodeView nodeView = new SkillNodeView(nodes[i], nodeData.NodeId.Id, _outGameUIEvent);
                 SetNodeUnlockState(nodeView, nodeEntity);
 
                 _skillNodeEntities.Add(nodeData.NodeId, nodeEntity);
-                _skillNodeViews.Add(nodeData.NodeId, nodeView);
+                _skillNodeViews.Add(nodeData.NodeId.Id, nodeView);
             }
 
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
             {
-                SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO.Id);
-                SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeIds.Length];
-                for (int i = 0; i < data.ParentNodeIds.Length; i++)
+                SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO);
+                SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeCount];
+                for (int i = 0; i < data.ParentNodeCount; i++)
                 {
-                    if (!_skillNodeEntities.TryGetValue(data.ParentNodeIds[i], out SkillNodeEntity parent))
+                    SkillNodeId parentNodeId = data.GetParentNodeId(i);
+                    if (!_skillNodeEntities.TryGetValue(parentNodeId, out SkillNodeEntity parent))
                     {
                         throw new KeyNotFoundException(
-                            $"親ノードID {data.ParentNodeIds[i]} が UI/Bind 構築結果に存在しません。子ノードID: {entity.SkillNodeIdVO.Id}");
+                            $"親ノードID {parentNodeId.Id} が UI/Bind 構築結果に存在しません。子ノードID: {entity.SkillNodeIdVO.Id}");
                     }
 
                     parents[i] = parent;
@@ -356,7 +391,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 SkillNodePhaseBindData phaseBindData = _loadedSkillNodePhaseBindRepo.PhaseBindData[i];
                 string phaseName = phaseBindData.PhaseName;
                 VisualElement phaseRoot = _rootElement.Q(phaseName);
-                _unlockPhases.Add(phaseBindData.RequiredSkillNodeId, phaseRoot);
+                _unlockPhases.Add(phaseBindData.RequiredSkillNodeId.Id, phaseRoot);
                 phaseRoot.visible = false;
             }
 
@@ -372,7 +407,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="nodeId"> 解放済みノードIDです。 </param>
         private void SetUnlockPhaseState(int nodeId)
         {
-            if (_loadedSkillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out string phaseName))
+            if (_loadedSkillNodePhaseBindRepo.TryGetUnlockPhaseName(new SkillNodeId(nodeId), out string phaseName))
             {
                 _rootElement.Q(phaseName).visible = true;
             }
@@ -388,7 +423,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             {
                 if (node.PreviewVideoClip != null)
                 {
-                    _skillPreviewVideos.Add(node.NodeId, node.PreviewVideoClip);
+                    _skillPreviewVideos.Add(node.NodeId.Id, node.PreviewVideoClip);
                 }
             }
         }
@@ -479,7 +514,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillNodeSelected(string nodeName)
         {
             SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId, _cts.Token);
+            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id, _cts.Token);
         }
 
         /// <summary>
