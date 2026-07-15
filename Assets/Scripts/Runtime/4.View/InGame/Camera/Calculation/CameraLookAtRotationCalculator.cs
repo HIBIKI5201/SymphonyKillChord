@@ -29,13 +29,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="cameraPosition"> 現在のカメラ位置。</param>
         /// <param name="context"> 今フレームの更新コンテキスト。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
+        /// <param name="lockOnOffset"> 対象方向へ加算する相対角度。</param>
         public void Update(
             bool isLockOn,
             ref Quaternion rotation,
             in Quaternion boneTargetRotation,
             in Vector3 cameraPosition,
             in CameraUpdateContext context,
-            in Vector3 targetPosition
+            in Vector3 targetPosition,
+            in Vector2 lockOnOffset
         )
         {
             // ロックオンの有無に応じて ratio を 0〜1 でスムーズに変化させる
@@ -53,7 +55,8 @@ namespace KillChord.Runtime.View.InGame.Camera
                 if (dir.sqrMagnitude > float.Epsilon)
                 {
                     // bone の目標回転の Inverse を使うことで、bone 収束中に target が変動しない
-                    target = Quaternion.Inverse(boneTargetRotation) * Quaternion.LookRotation(dir);
+                    Quaternion offsetRotation = Quaternion.Euler(lockOnOffset.y, lockOnOffset.x, 0f);
+                    target = Quaternion.Inverse(boneTargetRotation) * Quaternion.LookRotation(dir) * offsetRotation;
                 }
             }
 

@@ -90,6 +90,32 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         }
 
         /// <summary>
+        ///     現在の候補ターゲットEntityの取得を試みる。
+        /// </summary>
+        /// <param name="entity"> 取得したEntity。取得失敗時はnull。 </param>
+        /// <returns> 取得に成功した場合はtrue。 </returns>
+        public bool TryGetCurrentCandidateEntity(out CharacterEntity entity)
+        {
+            entity = null;
+            if (!_targetSystemViewModel.TryGetCurrentCandidateId(out Guid targetId))
+            {
+                return false;
+            }
+
+            return _targetEntityRegistry.TryGetEntity(targetId, out entity);
+        }
+
+        /// <summary>
+        ///     現在の候補ターゲット位置の取得を試みる。
+        /// </summary>
+        /// <param name="position"> 取得した位置。 </param>
+        /// <returns> 取得に成功した場合はtrue。 </returns>
+        public bool TryGetCurrentCandidatePosition(out Vector3 position)
+        {
+            return _targetSystemViewModel.TryGetCurrentCandidatePosition(out position);
+        }
+
+        /// <summary>
         ///     現在のターゲットを切り替える。
         /// </summary>
         /// <param name="playerPosition"> プレイヤー位置。 </param>
@@ -97,6 +123,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
             _targetSystemViewModel.ChangeTarget(playerPosition, direction);
+        }
+
+        /// <summary>
+        ///     プレイヤー位置と方向をもとに候補ターゲットを更新する。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤー位置。 </param>
+        /// <param name="direction"> 基準方向。 </param>
+        public void UpdateCandidate(in Vector3 playerPosition, in Vector3 direction)
+        {
+            _targetSystemViewModel.UpdateCandidate(playerPosition, direction);
+        }
+
+        /// <summary>
+        ///     指定方向で評価した別ターゲットへの切り替えを試みる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤー位置。 </param>
+        /// <param name="direction"> 基準方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        public bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction)
+        {
+            return _targetSystemViewModel.TrySwitchTarget(playerPosition, direction);
         }
 
         /// <summary>
