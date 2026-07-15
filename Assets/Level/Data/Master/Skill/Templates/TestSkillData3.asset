@@ -20,4 +20,4 @@ MonoBehaviour:
   _cooldownDenomimator: 1
   _skillEffectType: 2
   _skillTargetingType: 3
-  _animationKey: Skill_1
+  _animationKey: Skill_Left
