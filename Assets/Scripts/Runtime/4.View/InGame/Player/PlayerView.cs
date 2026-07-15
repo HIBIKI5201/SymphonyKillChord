@@ -64,8 +64,6 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Min(0.01f), Tooltip("音楽同期が使えない場合の足音SE再生間隔です。")]
         private float _footstepInterval = 0.35f;
 
-        private const string ATTACK_BEAT_1_KEY = "Attack_Beat1";
-        private const string ATTACK_BEAT_2_KEY = "Attack_Beat2";
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private bool _isInitialized;
         private bool _isPlaying;
@@ -283,14 +281,14 @@ namespace KillChord.Runtime.View.InGame.Player
                 string animationKey = _pendingSkillAnimationKey;
                 _pendingSkillAnimationKey = null;
 
-                if (string.IsNullOrWhiteSpace(animationKey))
+                float attackAnimationLength = 0f;
+                if (_characterAnimationSignal != null)
                 {
-                    animationKey = GetAttackAnimationKey(resultBeatType);
+                    attackAnimationLength = string.IsNullOrWhiteSpace(animationKey)
+                        ? _characterAnimationSignal.RequestAttack(resultBeatType)
+                        : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
-                float attackAnimationLength = _characterAnimationSignal != null
-                    ? _characterAnimationSignal.RequestAttack(animationKey)
-                    : 0f;
                 _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
@@ -558,17 +556,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private int GetCurrentFootstepEighthIndex()
         {
             return Mathf.FloorToInt((float)(_musicSyncState.AccurateBeat * 2d));
-        }
-
-        //TODO:今はint直置きだから後で調整しやすいようにしとく。
-        private string GetAttackAnimationKey(int beatType)
-        {
-            return beatType switch
-            {
-                1 or 2 or 3 => ATTACK_BEAT_1_KEY,
-                4 or 6 or 8 => ATTACK_BEAT_2_KEY,
-                _ => string.Empty
-            };
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>

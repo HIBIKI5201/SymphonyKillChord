@@ -7,7 +7,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// <summary>
     /// Animation の参照情報を取得するリポジトリ。
     /// </summary>
-    public class AnimationRepository : CatalogRepositoryBase<AnimationDefinition, AnimationCatalogEntry>, IAnimationRepository
+    public class AnimationRepository : CatalogRepositoryBase<AnimationId, AnimationDefinition, AnimationCatalogEntry>, IAnimationRepository
     {
         /// <summary>
         /// アニメーションカタログから参照情報を構築する。
@@ -20,17 +20,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// カタログエントリから検索用の定義情報を生成する。
         /// </summary>
-        protected override bool TryBuild(AnimationCatalogEntry entry, out string id, out AnimationDefinition definition)
+        protected override bool TryBuild(AnimationCatalogEntry entry, out AnimationId id, out AnimationDefinition definition)
         {
-            id = entry.Id;
-            if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)
+            if (entry.Id.Id == 0 || entry.Asset == null)
             {
+                id = default;
                 definition = default;
                 return false;
             }
 
+            id = new AnimationId(entry.Id.Id);
             string assetKey = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
-            definition = new AnimationDefinition(entry.Id, assetKey);
+            definition = new AnimationDefinition(id, assetKey);
             return true;
         }
     }

@@ -1,9 +1,11 @@
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using System;
 using System.Collections.Generic;
 using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
@@ -36,18 +38,18 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// </summary>
         private async void Start()
         {
-            _modules = CollectModules();
-            if (_modules == null || _modules.Count == 0)
-            {
-                return;
-            }
+            bool isSuccess = false;
 
             try
             {
-                bool isSuccess = await _initializationCoordinator.InitializeAsync(
-                    _modules,
-                    null,
-                    destroyCancellationToken);
+                _modules = CollectModules();
+                isSuccess = _modules == null
+                    || _modules.Count == 0
+                    || await _initializationCoordinator.InitializeAsync(
+                        _modules,
+                        null,
+                        destroyCancellationToken);
+
                 if (!isSuccess)
                 {
                     Debug.LogError($"[{nameof(OutGameScenarioSceneInitializer)}] シナリオシーン初期化に失敗しました。", this);
@@ -59,6 +61,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
+            }
+            finally
+            {
+                CompleteSceneInitialization(isSuccess);
             }
         }
 
@@ -117,6 +123,24 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             IOutGameInitializationModule right)
         {
             return left.Order.CompareTo(right.Order);
+        }
+
+        /// <summary>
+        ///     現在のシーンの初期化結果を通知します。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
+        private void CompleteSceneInitialization(bool isSuccess)
+        {
+            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            {
+                Debug.LogError(
+                    $"[{nameof(OutGameScenarioSceneInitializer)}] " +
+                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
+                    this);
+                return;
+            }
+
+            readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
         private readonly OutGameInitializationCoordinator _initializationCoordinator = new();

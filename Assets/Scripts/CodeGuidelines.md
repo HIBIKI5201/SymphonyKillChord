@@ -56,15 +56,21 @@
 - メソッドは動詞で始める
 - bool型のプロパティは `Is` または `Has` で始める
 - uxml, ussの命名はロウワーチェーンケース
+- 名前空間はレイヤーフォルダの番号を除いたフォルダ構成をそのまま反映する（例: `1.Domain/InGame/Skill` → `KillChord.Runtime.Domain.InGame.Skill`）
 
 ## その他
 
 - `using` ディレクティブはファイルの先頭にまとめて記述する
-- フィールド変数を公開する際はプロパティを使用する
+- フィールド変数を公開する際はプロパティを使用する。変更を伴う場合は`public set`ではなく、`SetXxx`/`RecordXxx`のような意図が伝わるメソッドを介する
 - アクセス修飾子は必ず明示的に記述する
 - マジックナンバーは排除し、代わりに定数で定義する
 - 一行のブロックの場合でも以下のように、波カッコを使用する
 { Console.WriteLine(”message”); }
+- 1ファイルには1つの公開型（class/struct/interface/enum）のみを定義し、ファイル名を型名と一致させる。ネストしたprivate型は例外とする
+
+## ログ出力
+
+- `Debug.LogError`/`Debug.LogWarning`は `[{nameof(ClassName)}] メッセージ` の形式で書き、MonoBehaviourの場合は第2引数に`this`を渡す
 
 ## UnityAPI
 

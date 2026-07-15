@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using System;
@@ -17,6 +18,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// </summary>
         /// <param name="stageSequenceView"> ステージのシーケンスを表示するビュー。 </param>
         /// <param name="stageSequenceMessageView"> ステージの結果を表示するビュー。 </param>
+        /// <param name="resultView"> ステージリザルトを表示するビュー。 </param>
+        /// <param name="resultPresenter"> ステージリザルトのPresenter。 </param>
         /// <param name="gameplayControllable"> ゲームプレイの開始と終了を制御するオブジェクト。 </param>
         public InGameSequenceDirector(
             StageSequenceView stageSequenceView,
@@ -57,9 +60,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <summary>
         ///     ゲームプレイのクリア演出を開始する。
         /// </summary>
+        /// <param name="evaluationResult"> 確定済みのミッション評価結果です。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns> 非同期操作の完了を表すAwaitable。 </returns>
-        public async Awaitable ClearAsync(CancellationToken cancellationToken)
+        public async Awaitable ClearAsync(
+            MissionEvaluationResult evaluationResult,
+            CancellationToken cancellationToken)
         {
             _gameplayControllable.StopGameplay();
             _stageSequenceMessageView?.ShowClear();
@@ -70,7 +76,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
 
             _stageSequenceMessageView?.Hide();
-            _stageResultPresenter.PresentVictory();
+            _stageResultPresenter.PresentVictory(evaluationResult);
             _stageResultView?.Show();
         }
         /// <summary>

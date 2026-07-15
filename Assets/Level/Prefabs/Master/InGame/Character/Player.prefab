@@ -826,7 +826,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillView
-  _id: 0
+  _id:
+    _id: skill_00
+    _hashId: -876453005
   _source: {fileID: 1111706688092235554}
   _cueName: Slash
 --- !u!114 &-4916133229582652887
@@ -841,7 +843,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
-  _id: 1
+  _id:
+    _id: skill_01
+    _hashId: -1127918619
   _source: {fileID: 1111706688092235554}
   _cueName: Slash
 --- !u!114 &1192430313035069498
@@ -856,7 +860,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
-  _id: 2
+  _id:
+    _id: skill_02
+    _hashId: 634126943
   _source: {fileID: 1111706688092235554}
   _cueName: Slash
 --- !u!114 &7852414029176531134
@@ -871,7 +877,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf1d97da1c03964d8f7821958193740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillView
-  _id: 3
+  _id:
+    _id: skill_03
+    _hashId: 1389048521
   _source: {fileID: 1111706688092235554}
   _cueName: Slash
 --- !u!1 &4013961017132544157

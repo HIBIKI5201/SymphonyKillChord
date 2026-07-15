@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: PortraitCatalogAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.PortraitCatalogAsset
   _entries:
-  - Id: hello
+  - Id:
+      _id: hello
+      _hashId: -389343696
     AssetKey: 
     Asset: {fileID: 9140383256632175445, guid: a443f1123728b064bafea62b78616430, type: 3}
-  - Id: good
+  - Id:
+      _id: good
+      _hashId: 212483455
     AssetKey: 
     Asset: {fileID: 6641412011175210450, guid: baee454b10f31c34191a253e6e84e8e5, type: 3}

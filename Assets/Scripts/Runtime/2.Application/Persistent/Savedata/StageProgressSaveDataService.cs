@@ -13,6 +13,10 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
     /// </summary>
     public class StageProgressSaveDataService
     {
+        /// <summary>
+        ///     ステージ進行保存サービスを生成します。
+        /// </summary>
+        /// <param name="savedataSystem"> 使用するセーブシステムです。 </param>
         public StageProgressSaveDataService(SavedataSystem savedataSystem)
         {
             _savedataSystem = savedataSystem ?? throw new ArgumentNullException(nameof(savedataSystem));
@@ -23,20 +27,29 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// </summary>
         /// <param name="stageId"> クリアしたステージId。 </param>
         /// <param name="result"> 今回のサブミッション評価結果。 </param>
+        /// <param name="isTutorial"> チュートリアルステージの場合はtrueです。 </param>
         /// <returns> セーブ内容が変化した場合はtrue。 </returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async ValueTask<bool> SaveClearAsync(StageId stageId, MissionEvaluationResult result)
+        public async ValueTask<bool> SaveClearAsync(
+            StageId stageId,
+            MissionEvaluationResult result,
+            bool isTutorial)
         {
             if (result == null)
             {
                 throw new ArgumentNullException(nameof(result));
             }
 
-            List<string> achivedEvaluationIds = BuildAchievedEvaluationIds(result);
+            List<string> achievedEvaluationIds = BuildAchievedEvaluationIds(result);
             SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
-            bool isChanged = saveData.StageProgress.RecordClear(stageId.Value, achivedEvaluationIds);
+            bool stageProgressChanged =
+                saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
+            bool tutorialChanged = isTutorial && saveData.Tutorial.Complete();
 
-            if (!isChanged) return false;
+            if (!stageProgressChanged && !tutorialChanged)
+            {
+                return false;
+            }
 
             await _savedataSystem.SaveAsync(saveData);
             return true;

@@ -1,0 +1,127 @@
+# 概要
+> 💡 **モジュール概要**
+> アウトゲームの設定画面（音声・画面・キー設定タブ）を構築するモジュールです。ドメインロジックを持たない薄いUI構築層で、既存の音量管理クラス（Music/Persistentモジュール）へ直接バインドします。Titleシーンにも独立した音量設定UI（`VolumeSettingsTabView`）が別途存在し、本モジュールとは重複した実装になっています。
+
+| 項目 | 内容 |
+| --- | --- |
+| **モジュール名** | Setting |
+| **カテゴリ** | OutGame |
+| **ステータス** | 実装済み（画面設定タブは未完成、既知の課題を参照） |
+| **最終更新日** | 2026-07-15 |
+
+---
+
+## 🏗️ クラス
+
+| クラス名 | レイヤー | 役割・機能 |
+| --- | --- | --- |
+| **`Category`** | View | 設定タブ種別を表すenum（`Audio`/`Screen`/`Key`。Keyタブは値のみで未実装） |
+| **`SettingBase`** | View | タブ切り替え・コンテナ解決・プレハブ生成を行う抽象基底MonoBehaviour |
+| **`SettingSlider` / `SettingToggle` / `SettingDropDown`** | View | `SettingBase`を継承した汎用バインド可能UIコントロール（`Bind(getter, setter)`） |
+| **`AudioSettingData`** | View | Master/BGM/SE/Voiceの4音量値と、それぞれの変更通知イベントを保持するプレーンモデル |
+| **`AudioConfig`** | View | 音声設定タブのUI一式（スライダー群）を構築するScriptableObject |
+| **`ScreenSettingData`** | View | 解像度インデックス・画面モード・VSync有無を保持する構造体（既知の課題を参照） |
+| **`ScreenConfig`** | View | 画面設定タブのUI一式（解像度/画面モードドロップダウン・VSyncトグル）を構築するScriptableObject |
+| **`SettingComposition`** | Composition | `ServiceLocator`から音量管理クラスを取得し、`AudioConfig`/`ScreenConfig`を構築する唯一のComposition層クラス |
+
+### 🧩 Composition初期化情報
+
+| 項目 | 内容 |
+| --- | --- |
+| **Initializerクラス** | `SettingComposition` |
+| **Order** | 140（OutGame初期化ライフサイクルの最後） |
+| **公開する ModuleContainer / ServiceLocator登録型** | 無し。`Build()`のみを実装し、他モジュールへの公開は行わない |
+
+---
+
+## 🔗 モジュール結合
+
+```mermaid
+graph TD
+    %% 定義 (接続のないレイヤーは省略)
+    subgraph SettingModule [Setting モジュール]
+        SET_View["View<br>AudioConfig, ScreenConfig"]
+        SET_Composition["Composition<br>SettingComposition"]
+        SET_View --> SET_Composition
+    end
+
+    subgraph MusicModule [Music/Persistent モジュール]
+        M_View["View<br>MusicPlayer, SoundEffectVolumeManager, VoiceVolumeManager"]
+    end
+
+    subgraph ScreenModule [Screen モジュール]
+        SCR_View["View<br>OutGameUIEvent"]
+    end
+
+    %% 依存関係
+    SET_Composition -->|"音量の取得/設定を直接呼び出す"| M_View
+    SET_Composition -->|"SettingContainerへ構築"| SCR_View
+```
+
+### 📥 依存しているもの
+
+* **`Music` / `Persistent`**
+  * *依存箇所*: `MusicPlayer`, `SoundEffectVolumeManager`, `VoiceVolumeManager`（いずれも具象クラス）
+  * *詳細*: `SettingComposition.Build()`がこれらを`ServiceLocator`から取得し、現在の音量を`AudioSettingData`の初期値として読み込み、変更イベントを各Managerの`SetVolume`へ直結します。
+* **`Screen`**
+  * *依存箇所*: `OutGameUIEvent`, `ScreenInitializer`が構築する`SettingContainer`
+  * *詳細*: Screenモジュールが用意したコンテナへ設定UIを構築します（Order 140、Screenの100より後）。
+
+### 📤 依存されているもの
+
+* なし
+
+---
+
+# 詳細
+
+## 🧅レイヤー情報
+
+### ① Domain
+当モジュールでは使用していません。
+### ② Application
+当モジュールでは使用していません。
+### ③ Adaptor
+当モジュールでは使用していません。
+### ④ View
+`SettingBase`派生の汎用バインド可能コントロール（Slider/Toggle/DropDown）と、それらを組み立てる`AudioConfig`/`ScreenConfig`というScriptableObjectビルダーを実装します。
+### ⑤ Infrastructure
+当モジュールでは使用していません。
+### ⑥ Composition
+`SettingComposition`（Order 140）が音量管理クラス群を`ServiceLocator`から取得し、`AudioConfig`/`ScreenConfig`のUI構築を呼び出します。
+
+## 🔌 拡張ポイント
+
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しい設定タブを追加する場合は`Category` Enumへ値を追加し、対応する`Config`クラス（`SettingBase`派生）を実装、`SettingComposition`から呼び出す形になります。
+
+## 🔄処理フロー
+
+主要な処理フローごとに分けて記述します。
+
+### ① 音量設定変更フロー
+設定画面のスライダー操作が、直接音量管理クラスへ反映されます。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Player as プレイヤー
+    participant Slider as SettingSlider (Master/BGM/SE/Voice)
+    participant Data as AudioSettingData
+    participant MusicPlayer as MusicPlayer / SoundEffectVolumeManager / VoiceVolumeManager
+
+    Player ->> Slider: スライダー操作
+    Slider ->> Data: 対応する音量値を更新
+    Data -->> MusicPlayer: 変更イベント発火（SettingComposition.Build()で直結済み）
+    MusicPlayer ->> MusicPlayer: SetVolume(value)
+```
+
+## 📝 アーキテクチャ上の特徴・既知の課題
+
+### ✅ 設計上の見どころ
+* **バインド可能な汎用コントロール**: `SettingSlider`/`SettingToggle`/`SettingDropDown`が`Bind(getter, setter)`という統一的な形式を持つため、新しい設定項目の追加が比較的容易です。
+
+### ⚠️ 既知の課題・改善ポイント
+* **Titleモジュールとの重複実装**: 音量設定UIが本モジュールの`AudioConfig`と、Titleモジュールの`VolumeSettingsTabView`という**2つの独立した実装**として存在しています。`VolumeSettingsTabView`はVoice音量に対応していない点でも差異があり、将来的な統合が望まれます。
+* **画面設定タブが未完成**: `ScreenConfig`が構築する`ScreenSettingData`は初期化されないデフォルト構造体のままで、実際の`Screen.currentResolution`や`QualitySettings.vSyncCount`等を読み取っていません。UIは存在しますが、実際の画面設定への反映は実装されていない可能性が高いです。
+* **キー設定タブが未実装**: `Category.Key`という値は定義されていますが、対応する設定クラスは存在しません。
+* **ドメインロジックの不在**: 音量値の妥当性検証や永続化ロジックを持たず、既存Managerクラスへの単純な委譲のみです。これは意図的な薄さと考えられますが、設定値の保存タイミング等はMusic/Persistentモジュール側の責務であることに注意してください。

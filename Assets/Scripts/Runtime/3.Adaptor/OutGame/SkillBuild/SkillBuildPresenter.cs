@@ -48,14 +48,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     continue;
                 }
 
-                int skillId = equippedSkill.SkillTemplate.Id;
+                int skillId = equippedSkill.SkillTemplate.Id.Value;
                 slots[i] = new SkillBuildSlotDTO(i, skillId, ConvertSkillLabel(skillId));
             }
 
             (int skillId, string skillLabel)[] skills = new (int, string)[ownedSkills.Count];
             for (int i = 0; i < ownedSkills.Count; i++)
             {
-                int skillId = ownedSkills[i].Id;
+                int skillId = ownedSkills[i].Id.Value;
                 skills[i] = (skillId, ConvertSkillLabel(skillId));
             }
 

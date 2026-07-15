@@ -16,9 +16,11 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         /// </summary>
         /// <param name="sceneTransitionService"> シーン遷移サービス。 </param>
         /// <param name="loadingOperationExecutor"> ロード画面付き処理の実行機能。 </param>
+        /// <param name="sceneInitializationReadiness"> シーン初期化の完了待機機能。 </param>
         public SceneTransitionUsecase
             (ISceneTransitionService sceneTransitionService,
-            ILoadingOperationExecutor loadingOperationExecutor)
+            ILoadingOperationExecutor loadingOperationExecutor,
+            ISceneInitializationReadiness sceneInitializationReadiness)
         {
             _service = sceneTransitionService
                 ?? throw new ArgumentNullException(
@@ -27,6 +29,10 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             _executor = loadingOperationExecutor
                 ?? throw new ArgumentNullException(
                     nameof(loadingOperationExecutor));
+
+            _sceneInitializationReadiness = sceneInitializationReadiness
+                ?? throw new ArgumentNullException(
+                    nameof(sceneInitializationReadiness));
         }
 
         /// <summary>
@@ -42,10 +48,14 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress => _service.ChangeSceneAsync(
-                    fromSceneName,
+                progress => LoadSceneAndWaitForReadyAsync(
                     toSceneName,
-                    progress,
+                    () => _service.ChangeSceneAsync(
+                        fromSceneName,
+                        toSceneName,
+                        progress,
+                        ct),
+                    fromSceneName,
                     ct),
                 ct);
         }
@@ -68,10 +78,14 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                     LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS);
 
             return _executor.ExecuteAsync(
-                progress => _service.ChangeSceneAsync(
-                    fromSceneName,
+                progress => LoadSceneAndWaitForReadyAsync(
                     toSceneName,
-                    progress,
+                    () => _service.ChangeSceneAsync(
+                        fromSceneName,
+                        toSceneName,
+                        progress,
+                        ct),
+                    fromSceneName,
                     ct),
                 options,
                 ct);
@@ -80,17 +94,21 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         /// <summary>
         ///   Additiveシーンを読み込む。
         /// </summary>
-        /// <param name="scenrName"> 読み込むAdditiveシーン名。 </param>
+        /// <param name="sceneName"> 読み込むAdditiveシーン名。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
         /// <returns> シーン読み込みの成否を示すタスク。 </returns>
         public Task<bool> LoadAdditiveAsync(
-            string scenrName,
+            string sceneName,
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress => _service.LoadAdditiveAsync(
-                    scenrName,
-                    progress,
+                progress => LoadSceneAndWaitForReadyAsync(
+                    sceneName,
+                    () => _service.LoadAdditiveAsync(
+                        sceneName,
+                        progress,
+                        ct),
+                    null,
                     ct),
                 ct);
         }
@@ -106,10 +124,20 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress => _service.UnloadAsync(
-                    sceneName,
-                    progress,
-                    ct),
+                async progress =>
+                {
+                    bool isSuccess = await _service.UnloadAsync(
+                        sceneName,
+                        progress,
+                        ct);
+
+                    if (isSuccess)
+                    {
+                        _sceneInitializationReadiness.Clear(sceneName);
+                    }
+
+                    return isSuccess;
+                },
                 ct);
         }
 
@@ -126,12 +154,27 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             CancellationToken ct)
         {
             return _executor.ExecuteAsync(
-                progress => _service.UnloadAndSetActiveAsync(
+                async progress =>
+                {
+                    bool isSuccess = await _service.UnloadAndSetActiveAsync(
                         unloadSceneName,
                         activeSceneName,
                         progress,
-                        ct),
-                    ct);
+                        ct);
+
+                    if (isSuccess
+                        && !string.IsNullOrWhiteSpace(unloadSceneName)
+                        && !string.Equals(
+                            unloadSceneName,
+                            activeSceneName,
+                            StringComparison.Ordinal))
+                    {
+                        _sceneInitializationReadiness.Clear(unloadSceneName);
+                    }
+
+                    return isSuccess;
+                },
+                ct);
         }
 
         /// <summary>
@@ -170,6 +213,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         return false;
                     }
 
+                    _sceneInitializationReadiness.Clear(additiveSceneName);
+
                     IProgress<float> changeSceneProgress =
                         new LoadingProgressRange(
                             progress,
@@ -177,10 +222,14 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                                 .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS,
                             1f);
 
-                    return await _service.ChangeSceneAsync(
-                        fromSceneName,
+                    return await LoadSceneAndWaitForReadyAsync(
                         toSceneName,
-                        changeSceneProgress,
+                        () => _service.ChangeSceneAsync(
+                            fromSceneName,
+                            toSceneName,
+                            changeSceneProgress,
+                            cancellationToken),
+                        fromSceneName,
                         cancellationToken);
                 },
                 cancellationToken);
@@ -226,6 +275,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         return false;
                     }
 
+                    _sceneInitializationReadiness.Clear(additiveSceneName);
+                    _sceneInitializationReadiness.Clear(reloadSceneName);
+
                     IProgress<float> reloadProgress =
                         new LoadingProgressRange(
                             progress,
@@ -233,16 +285,73 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                                 .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS,
                             1f);
 
-                    return await _service.ReloadSceneAsync(
+                    return await LoadSceneAndWaitForReadyAsync(
                         reloadSceneName,
-                        reloadProgress,
+                        () => _service.ReloadSceneAsync(
+                            reloadSceneName,
+                            reloadProgress,
+                            cancellationToken),
+                        null,
                         cancellationToken);
                 },
                 options,
                 cancellationToken);
         }
 
+        /// <summary>
+        ///     シーンをロードし、ルート初期化の完了まで待機します。
+        /// </summary>
+        /// <param name="sceneName"> ロードするシーン名です。 </param>
+        /// <param name="loadOperation"> シーンロード処理です。 </param>
+        /// <param name="unloadedSceneName"> ロード成功時に追跡解除するシーン名です。 </param>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> ロードと初期化の両方に成功した場合はtrueです。 </returns>
+        private async Task<bool> LoadSceneAndWaitForReadyAsync(
+            string sceneName,
+            Func<Task<bool>> loadOperation,
+            string unloadedSceneName,
+            CancellationToken cancellationToken)
+        {
+            if (loadOperation == null)
+            {
+                throw new ArgumentNullException(nameof(loadOperation));
+            }
+
+            _sceneInitializationReadiness.BeginTracking(sceneName);
+
+            bool loadSuccess;
+            try
+            {
+                loadSuccess = await loadOperation();
+            }
+            catch
+            {
+                _sceneInitializationReadiness.Clear(sceneName);
+                throw;
+            }
+
+            if (!loadSuccess)
+            {
+                _sceneInitializationReadiness.Complete(sceneName, false);
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(unloadedSceneName)
+                && !string.Equals(
+                    unloadedSceneName,
+                    sceneName,
+                    StringComparison.Ordinal))
+            {
+                _sceneInitializationReadiness.Clear(unloadedSceneName);
+            }
+
+            return await _sceneInitializationReadiness.WaitForReadyAsync(
+                sceneName,
+                cancellationToken);
+        }
+
         private readonly ISceneTransitionService _service;
         private readonly ILoadingOperationExecutor _executor;
+        private readonly ISceneInitializationReadiness _sceneInitializationReadiness;
     }
 }

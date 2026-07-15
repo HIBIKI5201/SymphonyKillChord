@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Player;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,37 +17,47 @@ namespace KillChord.Runtime.Composition
         ///     キャラクターアニメーションを初期化して返す。
         /// </summary>
         /// <param name="view"> アニメーション再生View。 </param>
-        /// <param name="asset"> クリップ定義アセット。 </param>
+        /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
         /// <returns> 初期化済みのView側依存群。 </returns>
         public ICharacterAnimationViewContext Init(
             CharacterAnimationView view,
-            CharacterAnimationCatalogAsset asset,
-            MusicSyncState musicSyncState)
+            CharacterAnimationCatalogConfig config,
+            MusicSyncState musicSyncState,
+            PlayerAttackAnimationConfig playerAttackConfig = null)
         {
             var baseClipTypes = (CharacterAnimationClipType[])Enum.GetValues(typeof(CharacterAnimationClipType));
             var baseClips = new AnimationClip[baseClipTypes.Length];
             var baseEnterBlendFrameCounts = new int[baseClipTypes.Length];
             var baseExitBlendFrameCounts = new int[baseClipTypes.Length];
             var oneShotIndices = new Dictionary<string, int>();
+            var attackIndices = new Dictionary<int, int>();
             var combinedClips = new List<AnimationClip>(baseClips.Length);
             var combinedEnterBlendFrameCounts = new List<int>(baseClips.Length);
             var combinedExitBlendFrameCounts = new List<int>(baseClips.Length);
 
-            int defaultEnterBlendFrameCount = asset != null
-                ? asset.EnterBlendFrameCount
+            int defaultEnterBlendFrameCount = config != null
+                ? config.EnterBlendFrameCount
                 : 0;
-            int defaultExitBlendFrameCount = asset != null
-                ? asset.ExitBlendFrameCount
+            int defaultExitBlendFrameCount = config != null
+                ? config.ExitBlendFrameCount
                 : 0;
 
-            if (asset != null && asset.Entries != null)
+            if (config != null && config.Entries != null)
             {
-                for (int i = 0; i < asset.Entries.Count; i++)
+                for (int i = 0; i < config.Entries.Count; i++)
                 {
-                    CharacterAnimationCatalogEntry entry = asset.Entries[i];
+                    CharacterAnimationCatalogEntry entry = config.Entries[i];
                     if (entry.Clip == null)
                     {
+                        if (!string.IsNullOrWhiteSpace(entry.Key))
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AnimationComposition)}] ワンショットアニメーションのクリップが設定されていません。Key: {entry.Key}",
+                                view);
+                        }
+
                         continue;
                     }
 
@@ -72,11 +82,32 @@ namespace KillChord.Runtime.Composition
                 combinedExitBlendFrameCounts.Add(baseExitBlendFrameCounts[i]);
             }
 
-            if (asset != null && asset.Entries != null)
+            if (playerAttackConfig != null && playerAttackConfig.Entries != null)
             {
-                for (int i = 0; i < asset.Entries.Count; i++)
+                for (int i = 0; i < playerAttackConfig.Entries.Count; i++)
                 {
-                    CharacterAnimationCatalogEntry entry = asset.Entries[i];
+                    PlayerAttackAnimationEntry entry = playerAttackConfig.Entries[i];
+                    if (entry.Clip == null)
+                    {
+                        continue;
+                    }
+
+                    attackIndices[entry.BeatType] = combinedClips.Count;
+                    combinedClips.Add(entry.Clip);
+                    combinedEnterBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.EnterBlendFrameCount,
+                        defaultEnterBlendFrameCount));
+                    combinedExitBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.ExitBlendFrameCount,
+                        defaultExitBlendFrameCount));
+                }
+            }
+
+            if (config != null && config.Entries != null)
+            {
+                for (int i = 0; i < config.Entries.Count; i++)
+                {
+                    CharacterAnimationCatalogEntry entry = config.Entries[i];
                     if (entry.Clip == null || string.IsNullOrWhiteSpace(entry.Key))
                     {
                         continue;
@@ -109,7 +140,8 @@ namespace KillChord.Runtime.Composition
                 enterBlendFrameCounts: combinedEnterBlendFrameCounts.ToArray(),
                 exitBlendFrameCounts: combinedExitBlendFrameCounts.ToArray(),
                 damage: -1,
-                oneShotIndices: oneShotIndices);
+                oneShotIndices: oneShotIndices,
+                attackIndices: attackIndices);
             CharacterAnimationOneShotTimingCalculator timingCalculator = new CharacterAnimationOneShotTimingCalculator();
             CharacterAnimationSignal signal = new CharacterAnimationSignal(
                 playbackMap,

@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
@@ -30,8 +30,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <returns> 成功した場合はtrue。 </returns>
         public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
         {
-            _loadedAttackData = await _attackDataKey.LoadAssetAsync<ShellAttackSpecAsset>(this, cancellationToken);
-            _loadedMusicData = await _musicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            try
+            {
+                _loadedAttackData = await _attackDataKey.LoadAssetAsync<ShellAttackSpecAsset>(this, cancellationToken);
+                _loadedMusicData = await _musicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
+            }
+            catch (Exception ex) { Debug.LogException(ex, this); }
+
             return _loadedAttackData != null && _loadedMusicData != null;
         }
 

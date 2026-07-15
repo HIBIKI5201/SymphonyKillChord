@@ -11,18 +11,18 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         ///     EnemyMissionKey 構造体の新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="value">キーの値。</param>
-        public EnemyMissionKey(string value)
+        public EnemyMissionKey(int value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if (value == 0)
             {
-                throw new ArgumentException("EnemyMissionKeyが空文字列またはnullです。", nameof(value));
+                throw new ArgumentOutOfRangeException(nameof(value), "EnemyMissionKeyに0は使用できません。");
             }
 
             _value = value;
         }
 
         /// <summary> キーの値を取得します。 </summary>
-        public string Value => _value;
+        public int Value => _value;
 
         /// <summary>
         ///     他のオブジェクトと等しいかどうかを判定します。
@@ -40,14 +40,14 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         ///     ハッシュコードを取得します。
         /// </summary>
         /// <returns>ハッシュコード。</returns>
-        public override int GetHashCode() => _value != null ? _value.GetHashCode() : 0;
+        public override int GetHashCode() => _value;
         /// <summary>
         ///     文字列形式を取得します。
         /// </summary>
         /// <returns>文字列形式。</returns>
-        public override string ToString() => _value;
+        public override string ToString() => _value.ToString();
 
         /// <summary> キーの値。 </summary>
-        private readonly string _value;
+        private readonly int _value;
     }
 }

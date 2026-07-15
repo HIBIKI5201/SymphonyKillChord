@@ -25,36 +25,53 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <exception cref="Exception"></exception>
         public void SpawnNextWave()
         {
-            EnemyWaveDefinition waveDefinition = _waves.GetNextWave();
-            if(waveDefinition == null)
+            if (_isSpawningWave || _lastSpawnFrame == Time.frameCount)
             {
-                Debug.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
-                _waveTimer.StopTimer();
                 return;
             }
-            // これ以上Wave定義がない時、stateクラスの最終Waveフラグを設定する
-            if (_waves.IsLastWave)
+
+            _isSpawningWave = true;
+            _lastSpawnFrame = Time.frameCount;
+
+            try
             {
-                _state.SetLastWave();
-            }
-            int enemyCount = 0;
-            for (int i = 0; i < waveDefinition.Details.Length; i++)
-            {
-                switch (waveDefinition.Details[i].EnemyType)
+                if (!_waves.TryGetNextWave(out int waveIndex, out EnemyWaveDefinition waveDefinition))
                 {
-                    case EnemyType.Infantry:
-                        SpawnEnemies(_infantrySpawner, waveDefinition.Details[i].EnemyAmount);
-                        break;
-                    case EnemyType.Artillery:
-                        SpawnEnemies(_artillerySpawner, waveDefinition.Details[i].EnemyAmount);
-                        break;
-                    default:
-                        throw new Exception("[EnemyWaveSpawnerController] 敵種類が不正です。");
+                    Debug.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
+                    _waveTimer.StopTimer();
+                    return;
                 }
-                enemyCount += waveDefinition.Details[i].EnemyAmount;
+
+                // これ以上Wave定義がない時、stateクラスの最終Waveフラグを設定する
+                if (_waves.IsLastWave)
+                {
+                    _state.SetLastWave();
+                }
+
+                _state.NotifyWaveStarted(waveIndex, waveDefinition);
+
+                for (int i = 0; i < waveDefinition.Details.Length; i++)
+                {
+                    switch (waveDefinition.Details[i].EnemyType)
+                    {
+                        case EnemyType.Infantry:
+                            SpawnEnemies(_infantrySpawner, waveDefinition.Details[i].EnemyAmount);
+                            break;
+                        case EnemyType.Artillery:
+                            SpawnEnemies(_artillerySpawner, waveDefinition.Details[i].EnemyAmount);
+                            break;
+                        default:
+                            throw new Exception("[EnemyWaveSpawnerController] 敵種類が不正です。");
+                    }
+                }
+
+                // Waveのタイマーを設定する
+                _waveTimer.SetTimer(waveDefinition.WaveDuration);
             }
-            // Waveのタイマーを設定する
-            _waveTimer.SetTimer(waveDefinition.WaveDuration);
+            finally
+            {
+                _isSpawningWave = false;
+            }
         }
 
         public void Dispose()
@@ -67,6 +84,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private IEnemySpawner _infantrySpawner;
         private IEnemySpawner _artillerySpawner;
         private IEnemyWaveTimerView _waveTimer;
+        private bool _isSpawningWave;
+        private int _lastSpawnFrame = -1;
 
         /// <summary>
         ///     spawnerと数を指定して、敵生成処理を呼び出す。

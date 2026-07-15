@@ -22,6 +22,11 @@ MonoBehaviour:
   _followRotationSpeed: 1.5
   _lockOnLookAtRatio: 1
   _lockOnRotationSpeed: 20
+  _lockOnViewportMargin: 0.05
+  _lockOnOffsetSensitivity: 1
+  _lockOnOffsetClamp: {x: 35, y: 20}
+  _lockOnOffsetRecenterDelay: 2
+  _lockOnOffsetRecenterSpeed: 3
   _collisionRadius: 0.2
   _collisionMask:
     serializedVersion: 2

@@ -24,9 +24,14 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="cameraBoneRotation"> 更新対象のカメラボーン回転。参照渡しで更新される。</param>
         /// <param name="context"> 今フレームの更新コンテキスト。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
-        public void Update(ref Quaternion cameraBoneRotation, in CameraUpdateContext context, in Vector3 targetPosition)
+        /// <param name="lockOnOffset"> 対象方向へ加算する相対角度。</param>
+        public void Update(
+            ref Quaternion cameraBoneRotation,
+            in CameraUpdateContext context,
+            in Vector3 targetPosition,
+            in Vector2 lockOnOffset)
         {
-            if (!TryCalcTargetRotation(context.FollowPosition, targetPosition, cameraBoneRotation, out Quaternion target))
+            if (!TryCalcTargetRotation(context.FollowPosition, targetPosition, cameraBoneRotation, lockOnOffset, out Quaternion target))
             {
                 return;
             }
@@ -42,11 +47,17 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="followPosition"> 追従対象のワールド座標。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
         /// <param name="currentBoneRotation"> 現在のカメラボーン回転。</param>
+        /// <param name="lockOnOffset"> 対象方向へ加算する相対角度。</param>
         /// <param name="targetRotation"> 計算した目標回転。計算不能な場合は <paramref name="currentBoneRotation"/> をそのまま返す。</param>
         /// <returns> 目標回転を計算できた場合は true、計算不能な場合は false。</returns>
-        public bool TryGetTargetRotation(in Vector3 followPosition, in Vector3 targetPosition, in Quaternion currentBoneRotation, out Quaternion targetRotation)
+        public bool TryGetTargetRotation(
+            in Vector3 followPosition,
+            in Vector3 targetPosition,
+            in Quaternion currentBoneRotation,
+            in Vector2 lockOnOffset,
+            out Quaternion targetRotation)
         {
-            return TryCalcTargetRotation(followPosition, targetPosition, currentBoneRotation, out targetRotation);
+            return TryCalcTargetRotation(followPosition, targetPosition, currentBoneRotation, lockOnOffset, out targetRotation);
         }
 
         private readonly CameraConfig _parameter;
@@ -59,9 +70,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="followPosition"> 追従対象のワールド座標。</param>
         /// <param name="targetPosition"> ロックオン対象のワールド座標。</param>
         /// <param name="currentBoneRotation"> 現在のカメラボーン回転。</param>
+        /// <param name="lockOnOffset"> 対象方向へ加算する相対角度。</param>
         /// <param name="targetRotation"> 計算した目標回転。計算不能な場合は <paramref name="currentBoneRotation"/> をそのまま返す。</param>
         /// <returns> 目標回転を計算できた場合は true、計算不能な場合は false。</returns>
-        private bool TryCalcTargetRotation(in Vector3 followPosition, in Vector3 targetPosition, in Quaternion currentBoneRotation, out Quaternion targetRotation)
+        private bool TryCalcTargetRotation(
+            in Vector3 followPosition,
+            in Vector3 targetPosition,
+            in Quaternion currentBoneRotation,
+            in Vector2 lockOnOffset,
+            out Quaternion targetRotation)
         {
             targetRotation = currentBoneRotation;
 
@@ -81,20 +98,32 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             float angle = Vector3.Angle(followDir, cameraDir);
             float lockOnAngleMargin = _parameter.LockOnAngleMargin;
-            if(angle <= lockOnAngleMargin)
+            if (angle <= lockOnAngleMargin)
             {
                 // すでにマージン内にいる場合は、マージンオフセットなしの回転を返す
-                targetRotation = Quaternion.LookRotation(followDir, Vector3.up);
+                targetRotation = ApplyOffset(Quaternion.LookRotation(followDir, Vector3.up), lockOnOffset);
                 return true;
             }
 
             float crossY = Vector3.Cross(followDir, cameraDir).y;
 
             // 外積の Y 成分でカメラが対象の左右どちらにいるかを判定し、マージンオフセットの方向を決定する。
-            targetRotation = Quaternion.LookRotation(followDir, Vector3.up)
-                * Quaternion.Euler(0, (crossY <= 0) ? -lockOnAngleMargin : lockOnAngleMargin, 0);
+            Quaternion baseRotation = Quaternion.LookRotation(followDir, Vector3.up)
+                * Quaternion.Euler(0f, crossY <= 0 ? -lockOnAngleMargin : lockOnAngleMargin, 0f);
+            targetRotation = ApplyOffset(baseRotation, lockOnOffset);
 
             return true;
+        }
+
+        /// <summary>
+        ///     対象方向の回転へ相対ヨー・ピッチ角を加算します。
+        /// </summary>
+        /// <param name="baseRotation"> 対象方向を向く基準回転。 </param>
+        /// <param name="lockOnOffset"> Xがヨー、Yがピッチの相対角度。 </param>
+        /// <returns> 相対角度を加算した回転。 </returns>
+        private static Quaternion ApplyOffset(in Quaternion baseRotation, in Vector2 lockOnOffset)
+        {
+            return baseRotation * Quaternion.Euler(lockOnOffset.y, lockOnOffset.x, 0f);
         }
     }
 }

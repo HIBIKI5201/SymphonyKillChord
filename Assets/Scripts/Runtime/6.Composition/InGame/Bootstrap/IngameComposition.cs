@@ -26,31 +26,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private async void Start()
         {
-            RegisterCurrentScenePriority();
-
-            if (!TryResolveBootDependencies(
-                out SelectedBattleStageState selectedBattleStageState,
-                out ILoadingOperationExecutor operationExecutor,
-                out ISceneTransitionService sceneTransitionService))
-            {
-                FailActiveLoadingSession();
-                return;
-            }
-
-            if (!selectedBattleStageState.HasSelectedBattleStage)
-            {
-                Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
-                FailActiveLoadingSession();
-                return;
-            }
-
-            LoadingExecutionOptions options = LoadingExecutionOptions.ContinueAndComplete(
-                LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
-                1f);
+            bool isSuccess = false;
 
             try
             {
-                bool success = await operationExecutor.ExecuteAsync(
+                RegisterCurrentScenePriority();
+
+                if (!TryResolveBootDependencies(
+                    out SelectedBattleStageState selectedBattleStageState,
+                    out ILoadingOperationExecutor operationExecutor,
+                    out ISceneTransitionService sceneTransitionService))
+                {
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                if (!selectedBattleStageState.HasSelectedBattleStage)
+                {
+                    Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                LoadingExecutionOptions options = LoadingExecutionOptions.ContinueAndComplete(
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
+                    1f);
+
+                isSuccess = await operationExecutor.ExecuteAsync(
                     async totalProgress =>
                     {
                         LoadingProgressRange stageLoadProgress = new(
@@ -96,7 +98,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     options,
                     destroyCancellationToken);
 
-                if (!success)
+                if (!isSuccess)
                 {
                     FailActiveLoadingSession();
                 }
@@ -108,6 +110,10 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             {
                 FailActiveLoadingSession();
                 Debug.LogException(exception, this);
+            }
+            finally
+            {
+                CompleteSceneInitialization(isSuccess);
             }
         }
 
@@ -204,6 +210,24 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
 
             loadingScreenController.FailActiveSession();
+        }
+
+        /// <summary>
+        ///     インゲームシーンの初期化結果を通知します。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
+        private void CompleteSceneInitialization(bool isSuccess)
+        {
+            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            {
+                Debug.LogError(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
+                    this);
+                return;
+            }
+
+            readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
         /// <summary>

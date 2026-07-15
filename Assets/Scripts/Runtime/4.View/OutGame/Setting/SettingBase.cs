@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,7 +11,7 @@ namespace KillChord.Runtime.View
         protected string _categoryName;
         protected VisualElement _baseInstance;
         protected UIDocument _uiRoot;
-        public void Create(UIDocument uiDocument, Category category,string title)
+        public void Create(UIDocument uiDocument, Category category, string title)
         {
             Initialize(category);
             _uiRoot = uiDocument;

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
 using UnityEngine;
 
@@ -19,6 +20,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         /// <summary> これ以上敵が生成されない、かつ敵がいなくなった時のイベント </summary>
         public event Action OnWaveAllCleared;
+
+        /// <summary> Waveが開始されたときにWave番号と定義を通知します。 </summary>
+        public event Action<int, EnemyWaveDefinition> OnWaveStarted;
 
         /// <summary>
         ///     敵数を加算する。
@@ -61,6 +65,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public void SetLastWave()
         {
             _isLastWave = true;
+        }
+
+        /// <summary>
+        ///     Wave開始を通知します。
+        /// </summary>
+        /// <param name="waveIndex"> 開始したWaveインデックスです。 </param>
+        /// <param name="definition"> 開始したWave定義です。 </param>
+        public void NotifyWaveStarted(
+            int waveIndex,
+            EnemyWaveDefinition definition)
+        {
+            OnWaveStarted?.Invoke(waveIndex, definition);
         }
 
         private int _enemyCount;

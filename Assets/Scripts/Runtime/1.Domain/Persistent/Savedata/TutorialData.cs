@@ -13,10 +13,21 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary>
         ///     プレイヤーがチュートリアルを完了したかどうかを示すプロパティ。
         /// </summary>
-        public bool IsTutorialCompleted
+        public bool IsTutorialCompleted => _isTutorialCompleted;
+
+        /// <summary>
+        ///     チュートリアルを完了済みにします。
+        /// </summary>
+        /// <returns> 状態が変化した場合はtrueです。 </returns>
+        public bool Complete()
         {
-            get => _isTutorialCompleted;
-            set => _isTutorialCompleted = value;
+            if (_isTutorialCompleted)
+            {
+                return false;
+            }
+
+            _isTutorialCompleted = true;
+            return true;
         }
 
         [SerializeField, Tooltip("プレイヤーがチュートリアルを完了したかどうか")]

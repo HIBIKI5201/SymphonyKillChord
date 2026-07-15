@@ -38,6 +38,21 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> ロックオン時のカメラ回転速度。 </summary>
         public float LockOnRotationSpeed => _lockOnRotationSpeed;
 
+        /// <summary> 自動ロックオンを維持するビューポート内側マージン。 </summary>
+        public float LockOnViewportMargin => _lockOnViewportMargin;
+
+        /// <summary> ロックオン中の相対視点入力感度。 </summary>
+        public float LockOnOffsetSensitivity => _lockOnOffsetSensitivity;
+
+        /// <summary> ロックオン中の相対視点角度制限。 </summary>
+        public Vector2 LockOnOffsetClamp => _lockOnOffsetClamp;
+
+        /// <summary> ロックオン相対視点の再センタリング開始待機時間。 </summary>
+        public float LockOnOffsetRecenterDelay => _lockOnOffsetRecenterDelay;
+
+        /// <summary> ロックオン相対視点の再センタリング速度。 </summary>
+        public float LockOnOffsetRecenterSpeed => _lockOnOffsetRecenterSpeed;
+
         /// <summary> 衝突判定半径。 </summary>
         public float CollisionRadius => _collisionRadius;
 
@@ -81,6 +96,26 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField] private float _lockOnLookAtRatio = 0.5f;
         [Tooltip("ロックオン時のカメラの回転速度")]
         [SerializeField] private float _lockOnRotationSpeed = 2.0f;
+
+        [Header("Lock On View")]
+        [Range(0f, 0.5f)]
+        [SerializeField, Tooltip("自動ロックオンを維持するビューポート内側マージン。")]
+        private float _lockOnViewportMargin = 0.05f;
+
+        [Min(0f)]
+        [SerializeField, Tooltip("ロックオン中の相対視点入力感度。")]
+        private float _lockOnOffsetSensitivity = 1f;
+
+        [SerializeField, Tooltip("ロックオン中の相対視点角度制限。Xはヨー、Yはピッチ。")]
+        private Vector2 _lockOnOffsetClamp = new Vector2(35f, 20f);
+
+        [Min(0f)]
+        [SerializeField, Tooltip("無操作になってから相対視点を戻し始めるまでの秒数。")]
+        private float _lockOnOffsetRecenterDelay = 2f;
+
+        [Min(0f)]
+        [SerializeField, Tooltip("ロックオン相対視点を中央へ戻す補間速度。")]
+        private float _lockOnOffsetRecenterSpeed = 3f;
 
         [Header("Collision")]
         [Tooltip("カメラの衝突判定に使用する球の半径")]

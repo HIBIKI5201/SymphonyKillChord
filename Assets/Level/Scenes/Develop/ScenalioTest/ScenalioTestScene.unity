@@ -595,10 +595,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Scenario.ScenarioCom
   _chatText: {fileID: 5606888421214580279, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
   _inputView: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
-  _backgroundCatalogKey: Assets/Level/Data/Master/Scenario/BackgroundCatalogAsset.asset
-  _animationCatalogKey: Assets/Level/Data/Master/Scenario/AnimationCatalogAsset.asset
-  _portraitCatalogKey: Assets/Level/Data/Master/Scenario/PortraitCatalogAsset.asset
-  _scenarioSettingsKey: Assets/Level/Data/Master/Scenario/ScenarioSettingsAsset.asset
+  _backgroundCatalogKey: BackgroundCatalogAsset
+  _animationCatalogKey: AnimationCatalogAsset
+  _portraitCatalogKey: PortraitCatalogAsset
+  _scenarioSettingsKey: ScenarioSettingsAsset
 --- !u!114 &1897386737
 MonoBehaviour:
   m_ObjectHideFlags: 0

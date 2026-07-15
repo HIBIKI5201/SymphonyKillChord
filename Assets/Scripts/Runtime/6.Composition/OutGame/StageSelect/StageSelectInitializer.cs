@@ -6,10 +6,13 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Threading;
@@ -37,13 +40,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string CONNECTION_USS_CLASS = "stage-connection";
         /// <summary> 接続線要素のname形式。 </summary>
         private const string CONNECTION_NAME_FORMAT = "{fromId}-{toId}";
+        /// <summary> ステージIDのSourceDataProviderカテゴリ。 </summary>
+        private const string STAGE_ID_CATEGORY = "Stage";
         /// <summary> ステージ詳細画面のルート要素名。 </summary>
         private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
 
         [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        [SerializeField, RepositoryAddressSelector, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
         private string _stageTreeAssetKey;
 
         private OutGameUIEvent _outGameUIEvent;
@@ -64,6 +69,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SelectedBattleStageState _selectedBattleStageState;
         private SelectedMissionState _selectedMissionState;
         private StageTreeAsset _loadedStageTreeAsset;
+        private SaveData _loadedSaveData;
         private bool _isSubscribed;
 
         /// <summary>
@@ -83,8 +89,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, destroyCancellationToken);
-            return _loadedStageTreeAsset != null;
+            _loadedStageTreeAsset =
+                await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            if (_loadedStageTreeAsset == null
+                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                return false;
+            }
+
+            _loadedSaveData = await savedataSystem.LoadAsync<SaveData>();
+            return _loadedSaveData != null;
         }
 
         /// <summary>
@@ -103,6 +117,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
+            TryStartTutorialSortie();
             return _isInitialized;
         }
 
@@ -135,7 +150,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(int stageIdValue)
         {
-            // TODO: セーブデータにクリアしたステージのIDを保存する処理を実装する
             await CompleteAndAnimateAsync(new StageId(stageIdValue));
         }
 
@@ -152,32 +166,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             if (stageDefinition.StageType == StageType.Battle)
             {
-                if (stageDefinition.MissionDefinition == null)
+                if (!TryPrepareBattleSortie(stageDefinition))
                 {
-#if UNITY_EDITOR
-                    Debug.LogError(
-                        $"{nameof(StageSelectInitializer)}" +
-                        "バトルステージにMissionDefinitionが設定されていません。",
-                        this);
-#endif
                     return;
                 }
-
-                if (string.IsNullOrWhiteSpace(
-                    stageDefinition.BattleSceneName))
-                {
-#if UNITY_EDITOR
-                    Debug.LogError(
-                        $"[{nameof(StageSelectInitializer)}] " +
-                        "バトルシーン名が設定されていません。",
-                        this);
-#endif
-                    return;
-                }
-
-                _selectedBattleStageState.SelectBattleStage(stageDefinition, _currentSceneName);
-
-                _missionSelectController.Select(stageDefinition.MissionDefinition);
             }
             else if (stageDefinition.StageType == StageType.Scenario)
             {
@@ -200,6 +192,62 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _currentSceneName,
                 stageDefinition.TargetSceneName,
                 _cts.Token);
+        }
+
+        /// <summary>
+        ///     初回チュートリアル要求がある場合に通常の選択状態を構築して自動出撃します。
+        /// </summary>
+        private void TryStartTutorialSortie()
+        {
+            if (!_isInitialized
+                || !ServiceLocator.TryGetInstance(out TutorialSortieRequestState requestState)
+                || !requestState.IsRequested)
+            {
+                return;
+            }
+
+            if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                || !TryPrepareBattleSortie(tutorialNode.Definition))
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] チュートリアルステージの出撃準備に失敗しました。",
+                    this);
+                return;
+            }
+
+            if (!_outGameSortieController.RequestImmediateBattleSortie(
+                    tutorialNode.Definition.TargetSceneName)
+                || !requestState.TryConsume())
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] チュートリアル自動出撃に失敗しました。",
+                    this);
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<TutorialSortieRequestState>();
+        }
+
+        /// <summary>
+        ///     バトルステージとミッションの選択状態を構築します。
+        /// </summary>
+        /// <param name="stageDefinition"> 出撃するステージ定義です。 </param>
+        /// <returns> 出撃準備に成功した場合はtrueです。 </returns>
+        private bool TryPrepareBattleSortie(StageDefinition stageDefinition)
+        {
+            if (stageDefinition == null
+                || stageDefinition.StageType != StageType.Battle
+                || stageDefinition.MissionDefinition == null
+                || string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName))
+            {
+                return false;
+            }
+
+            _selectedBattleStageState.SelectBattleStage(
+                stageDefinition,
+                _currentSceneName);
+            _missionSelectController.Select(stageDefinition.MissionDefinition);
+            return true;
         }
 
         /// <summary>
@@ -290,7 +338,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _progressService = new StageProgressService(_stageTree);
 
             // セーブデータ連携
-            IStageClearRepository clearRepository = new SaveDataClearStageRepository();
+            IStageClearRepository clearRepository =
+                new SaveDataClearStageRepository(_loadedSaveData.StageProgress);
             _openUseCase = new StageSelectOpenUseCase(_stageTree, _progressService, clearRepository);
 
             // Presenter 生成前に既知のクリアステージをツリーへ反映する。
@@ -325,6 +374,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _cts = null;
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedStageTreeAsset = null;
+            _loadedSaveData = null;
             _isInitialized = false;
         }
 
@@ -366,7 +416,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private Dictionary<StageId, StageNodeConnectionView> BuildConnectionViewMap(VisualElement root)
         {
             // 接続線要素の name は "{fromId}-{toId}" 形式で設定しておくこと
-            // 例）1-2
+            // 例）stage_tutorial-stage_02
             var connectionElements = root.Query<VisualElement>(className: CONNECTION_USS_CLASS).ToList();
             var connectionViewMap = new Dictionary<StageId, StageNodeConnectionView>(connectionElements.Count);
 
@@ -384,17 +434,17 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     continue;
                 }
 
-                // ToStageId をキーにして接続線 View を管理する
-                if (!int.TryParse(parts[1], out var toStageIdInt))
+                int toStageIdValue = DataIDHasher.Compute(STAGE_ID_CATEGORY, parts[1]);
+                if (toStageIdValue == 0)
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の ToStageId を int に変換できませんでした。", this);
+                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の ToStageId が未設定です。", this);
 #endif
                     continue;
                 }
 
-                var toStageId = new StageId(toStageIdInt);
+                var toStageId = new StageId(toStageIdValue);
                 connectionViewMap.Add(toStageId, new StageNodeConnectionView(element));
             }
 
@@ -421,8 +471,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 var nodeElement = nodeElements[i];
                 var stageIdValue = nodeElement.name;
 
-                // ステージノードの VisualElement の name には
-                // 対応する StageId を int 形式で設定しておくことを前提とする。
+                // ステージノードの VisualElement の name には可読IDを設定する。
                 if (string.IsNullOrEmpty(stageIdValue))
                 {
 #if UNITY_EDITOR
@@ -432,26 +481,27 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     continue;
                 }
 
-                if (!int.TryParse(stageIdValue, out var stageIdInt))
+                int stageIdHash = DataIDHasher.Compute(STAGE_ID_CATEGORY, stageIdValue);
+                if (stageIdHash == 0)
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] ノード要素 '{stageIdValue}' の name を int に変換できませんでした。", this);
+                        $"[{nameof(StageSelectInitializer)}] ノード要素 '{stageIdValue}' の可読IDが未設定です。", this);
 #endif
                     continue;
                 }
 
-                var stageId = new StageId(stageIdInt);
+                var stageId = new StageId(stageIdHash);
                 if (!_stageTree.TryGetNode(stageId, out var node))
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdInt}' に対応するノードが StageTree に存在しません。", this);
+                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdValue}' に対応するノードが StageTree に存在しません。", this);
 #endif
                     continue;
                 }
 
-                var nodeView = new StageNodeView(nodeElement, stageIdInt, _outGameUIEvent);
+                var nodeView = new StageNodeView(nodeElement, stageIdHash, _outGameUIEvent);
 
                 // このノードへの接続線Viewを取得する（存在しない場合は null）
                 connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);

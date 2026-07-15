@@ -1,4 +1,4 @@
-using System.Linq;
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -17,7 +17,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <param name="unlockedNodeId"></param>
         /// <param name="phaseName"></param>
         /// <returns></returns>
-        public bool TryGetUnlockPhaseName(int unlockedNodeId, out string phaseName)
+        public bool TryGetUnlockPhaseName(SkillNodeId unlockedNodeId, out string phaseName)
         {
             if (PhaseBindData == null || PhaseBindData.Length == 0)
             {

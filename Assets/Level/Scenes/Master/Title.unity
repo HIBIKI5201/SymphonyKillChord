@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Title.TitleSceneInitializer
   _uiDocument: {fileID: 2119823347}
-  _ruleDataKey: Assets/Level/Data/Master/OutGame/Screen/TitleScreenRuleData.asset
+  _ruleDataKey: TitleScreenRuleData
   _currentSceneName: Title
   _targetSceneName: OutGame
   _firstLaunchTargetSceneName: OutGame

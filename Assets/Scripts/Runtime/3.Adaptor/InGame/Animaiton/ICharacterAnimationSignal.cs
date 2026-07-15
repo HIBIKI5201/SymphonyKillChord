@@ -24,6 +24,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Animation
         public float RequestAttack(string animationKey = null);
 
         /// <summary>
+        ///     攻撃BeatTypeに対応するアニメーションの再生を要求します。
+        /// </summary>
+        /// <param name="attackType"> 攻撃結果のBeatTypeです。 </param>
+        /// <returns> 再生時間です。 </returns>
+        public float RequestAttack(int attackType);
+
+        /// <summary>
         ///     任意キーのワンショットアニメーション再生を要求する。
         /// </summary>
         /// <param name="animationKey"> 再生したいアニメーションキー。 </param>

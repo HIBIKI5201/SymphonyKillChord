@@ -33,6 +33,9 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnLockOnInput;
         public event Action<InputContext<Vector2>> OnMobileLookInput;
 
+        /// <summary> モバイルの視点フリック方向を通知するイベント。 </summary>
+        public event Action<Vector2> OnMobileLookFlickInput;
+
         public event Action<InputContext<float>> OnScenarioAdvanceInput;
         public event Action<InputContext<float>> OnScenarioFastForwardInput;
         public event Action<InputContext<float>> OnScenarioPauseInput;
@@ -199,6 +202,15 @@ namespace KillChord.Runtime.View.Persistent.Input
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, value, phase, time);
             OnMobileLookInput?.Invoke(inputContext);
+        }
+
+        /// <summary>
+        ///     モバイルの視点フリック方向を通知する。
+        /// </summary>
+        /// <param name="direction"> 正規化されたスクリーン上のフリック方向。 </param>
+        public void OnMobileLookFlick(Vector2 direction)
+        {
+            OnMobileLookFlickInput?.Invoke(direction);
         }
 
         private const string OPTION_ACTION_NAME = "Option";

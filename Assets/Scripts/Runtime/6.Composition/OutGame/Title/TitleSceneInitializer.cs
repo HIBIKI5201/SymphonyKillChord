@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
@@ -57,9 +58,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private ScreenController _screenController;
         private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
+        private SaveData _loadedSaveData;
 
-        // チュートリアルが完了しているかどうかのフラグ
-        private bool _isTutorialCompleted;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -70,8 +70,17 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
-            _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
-            return _loadedRuleData != null;
+            if (!ServiceLocator.TryGetInstance(out _savedataSystem))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] {nameof(SavedataSystem)}を取得できませんでした。",
+                    this);
+                return false;
+            }
+
+            _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
+            _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
+            return _loadedRuleData != null && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -187,14 +196,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            bool isFirstLaunch = !_savedataSystem.Exists<SaveData>();
+            bool isTutorialCompleted = _loadedSaveData.Tutorial.IsTutorialCompleted;
 
-            if (isFirstLaunch)
+            if (!isTutorialCompleted)
             {
 #if UNITY_EDITOR
                 Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{_firstLaunchTargetSceneName}");
 #endif
                 _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+                RequestTutorialSortie();
             }
             else
             {
@@ -236,6 +246,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _ruleDataKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
+            _loadedSaveData = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _screenController = null;
@@ -251,7 +262,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="sceneTransitionController"></param>
         /// <param name="musicPlayer"></param>
         /// <param name="sePlayer"></param>
-        /// <param name="root"></param>
+        /// <param name="savedataSystem"> セーブシステム。 </param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
@@ -381,13 +392,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
-            // セーブデータをリセットする前に、現在のセーブデータをロードして、チュートリアル完了フラグを保持する。
-            var currentSaveData = await LoadSaveData();
-            if (currentSaveData != null)
-            {
-                _isTutorialCompleted = currentSaveData.Tutorial.IsTutorialCompleted;
-            }
-
             try
             {
                 await _savedataSystem.DeleteSaveDataAsync<SaveData>();
@@ -400,10 +404,25 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             // セーブデータをロードして、初期状態に戻す。
-            var newSaveData = await LoadSaveData();
+            _loadedSaveData = await LoadSaveData();
 
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する。
             _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+            RequestTutorialSortie();
+        }
+
+        /// <summary>
+        ///     OutGameシーンで処理するチュートリアル自動出撃を要求します。
+        /// </summary>
+        private static void RequestTutorialSortie()
+        {
+            if (!ServiceLocator.TryGetInstance(out TutorialSortieRequestState requestState))
+            {
+                requestState = new TutorialSortieRequestState();
+                ServiceLocator.RegisterInstance(requestState);
+            }
+
+            requestState.Request();
         }
 
         /// <summary>
