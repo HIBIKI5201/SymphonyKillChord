@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 798a2583624225c4fa38a13aba398a0e, type: 3}
   m_Name: SceneManagerConfig
   m_EditorClassIdentifier: SymphonyFrameWork::SymphonyFrameWork.Config.SceneManagerConfig
-  _isActiveLoadScene: 0
-  _loadScene: 
+  _isResetAndLoadOnPlay: 0
   _initializeSceneList: []
+  _resetIgnoreSceneList: []
