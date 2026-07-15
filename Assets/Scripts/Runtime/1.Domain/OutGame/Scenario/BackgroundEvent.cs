@@ -10,15 +10,13 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary>
         /// 背景イベントを初期化する。
         /// </summary>
-        public BackgroundEvent(string backgroundId)
+        public BackgroundEvent(BackgroundId backgroundId)
         {
-            BackgroundId = string.IsNullOrWhiteSpace(backgroundId)
-                ? throw new ArgumentException("backgroundId is empty.", nameof(backgroundId))
-                : backgroundId;
+            BackgroundId = backgroundId;
         }
 
         /// <summary> BackgroundId を取得する。 </summary>
-        public string BackgroundId { get; }
+        public BackgroundId BackgroundId { get; }
         /// <summary> RequirePlayerAdvance を取得する。 </summary>
         public bool RequirePlayerAdvance => false;
     }

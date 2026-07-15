@@ -121,7 +121,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 : skillData.AnimationKey;
             string effectTypeName = skillData.EffectSpec.EffectType.ToString();
 
-            _slotDebugDataArray[slotIndex].Apply(slotIndex, skillData.Id, animationKey, effectTypeName);
+            _slotDebugDataArray[slotIndex].Apply(slotIndex, skillData.Id.Value, animationKey, effectTypeName);
         }
 
         /// <summary>

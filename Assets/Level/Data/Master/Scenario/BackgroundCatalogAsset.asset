@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: BackgroundCatalogAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.BackgroundCatalogAsset
   _entries:
-  - Id: genki_pose
+  - Id:
+      _id: genki_pose
+      _hashId: -433192136
     AssetKey: 
     Asset: {fileID: 21300000, guid: 16fbe600d89dab043a8409bfae78a0fa, type: 3}
-  - Id: background
+  - Id:
+      _id: background
+      _hashId: 1410677633
     AssetKey: 
     Asset: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}

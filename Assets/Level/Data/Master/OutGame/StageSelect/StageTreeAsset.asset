@@ -20,11 +20,27 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   - {fileID: 11400000, guid: 04123e05c10c54f40b481e84e40d29eb, type: 2}
   _connections:
-  - _fromStageId: 1
-    _toStageId: 2
-  - _fromStageId: 2
-    _toStageId: 3
-  - _fromStageId: 3
-    _toStageId: 4
-  - _fromStageId: 4
-    _toStageId: 5
+  - _fromStageId:
+      _id: stage_tutorial
+      _hashId: 1217260097
+    _toStageId:
+      _id: stage_02
+      _hashId: 413055761
+  - _fromStageId:
+      _id: stage_02
+      _hashId: 413055761
+    _toStageId:
+      _id: stage_03
+      _hashId: 1872333703
+  - _fromStageId:
+      _id: stage_03
+      _hashId: 1872333703
+    _toStageId:
+      _id: stage_04
+      _hashId: -235069916
+  - _fromStageId:
+      _id: stage_04
+      _hashId: -235069916
+    _toStageId:
+      _id: stage_05
+      _hashId: -2030424398

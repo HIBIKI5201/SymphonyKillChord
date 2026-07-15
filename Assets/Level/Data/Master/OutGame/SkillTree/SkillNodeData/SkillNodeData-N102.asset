@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ee99fd40337244b7963aeef8c21a2, type: 3}
   m_Name: SkillNodeData-N102
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
-  NodeId: 102
-  ParentNodeIds: 65000000
+  _nodeId:
+    _id: node_n102
+    _hashId: -1988313497
+  _parentNodeIds:
+  - _id: node_n101
+    _hashId: 276164573
   UnlockCost: 5
   SkillDetail: 
   PreviewVideoClip: {fileID: 0}

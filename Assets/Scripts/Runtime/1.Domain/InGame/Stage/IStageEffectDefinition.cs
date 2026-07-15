@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Domain.InGame.Stage
     public interface IStageEffectDefinition
     {
         /// <summary> 演出を識別するIDです。 </summary>
-        string EffectId { get; }
+        int EffectId { get; }
 
         /// <summary> 演出の種類です。 </summary>
         StageEffectKind Kind { get; }

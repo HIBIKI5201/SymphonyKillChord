@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
@@ -109,7 +110,7 @@ namespace KillChord.Runtime.InfraStructure
                 int skillId = skillIds[i];
                 if (!loadedSkillIds.Add(skillId)) { continue; }
 
-                if (!_skillRepository.TryGetSkill(skillId, out var skillData))
+                if (!_skillRepository.TryGetSkill(new SkillId(skillId), out var skillData))
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning($"SkillRepository からスキル ID {skillId} の SkillTemplate を取得できませんでした。");

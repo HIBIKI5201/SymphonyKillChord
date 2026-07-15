@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
     public class StageNodeAsset : ScriptableObject
     {
         /// <summary> ステージIDの入力値です。 </summary>
-        public int StageIdValue => _stageId;
+        public int StageIdValue => _stageId.Id;
 
         /// <summary> チュートリアルステージとして設定されている場合はtrueです。 </summary>
         public bool IsTutorial => _isTutorial;
@@ -26,10 +27,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <returns> 生成されたステージノード。</returns>
         public StageNode Create()
         {
-            if (_stageId <= 0)
+            if (_stageId.Id == 0)
             {
 # if UNITY_EDITOR
-                Debug.LogError($"[{nameof(StageNodeAsset)}] _stageId は1以上で設定してください。", this);
+                Debug.LogError($"[{nameof(StageNodeAsset)}] _stageId が未設定です。", this);
 #endif
                 return null;
             }
@@ -38,7 +39,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 && string.IsNullOrWhiteSpace(_enemyWaveDefinitionAssetKey))
             {
                 throw new System.InvalidOperationException(
-                    $"バトルステージの敵Wave定義キーが未設定です。StageId: {_stageId}");
+                    $"バトルステージの敵Wave定義キーが未設定です。StageId: {_stageId.Id}");
             }
 
             var missionDefinition = _stageType == StageType.Battle && _missionDefinitionAsset != null
@@ -46,7 +47,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 : null;
 
             var definition = new StageDefinition(
-                new StageId(_stageId),
+                new StageId(_stageId.Id),
                 _stageType,
                 _stageName,
                 _flavorText,
@@ -72,7 +73,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         [Header("基礎情報")]
         [SerializeField, Tooltip("ステージを一意に識別するID。他のノードと重複しないようにすること。")]
-        private int _stageId;
+        [DataCategory("Stage")]
+        private DataID _stageId;
 
         [SerializeField, Tooltip("ステージの種類。")]
         private StageType _stageType;

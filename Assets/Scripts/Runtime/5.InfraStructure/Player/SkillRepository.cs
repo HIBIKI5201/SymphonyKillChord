@@ -19,13 +19,13 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <param name="id"></param>
         /// <param name="skillData"></param>
         /// <returns></returns>
-        public bool TryGetSkill(int id, out SkillTemplate skillData)
+        public bool TryGetSkill(SkillId id, out SkillTemplate skillData)
         {
             EnsureSkillTemplateAssetMap();
             return _skillTemplateMap.TryGetValue(id, out skillData);
         }
 
-        public SkillDefinition GetSkill(int id, double bpm)
+        public SkillDefinition GetSkill(SkillId id, double bpm)
         {
             EnsureSkillTemplateAssetMap();
             if (!_skillTemplateMap.TryGetValue(id, out SkillTemplate skillData))
@@ -37,7 +37,7 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField] private SkillTemplateAsset[] _skillDataAssets;
 
-        private Dictionary<int, SkillTemplate> _skillTemplateMap;
+        private Dictionary<SkillId, SkillTemplate> _skillTemplateMap;
 
         /// <summary>
         ///     Inspector 上の設定が変わった際に検索用辞書を破棄する。
@@ -54,7 +54,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             if (_skillTemplateMap != null) { return; }
 
-            _skillTemplateMap = new Dictionary<int, SkillTemplate>();
+            _skillTemplateMap = new Dictionary<SkillId, SkillTemplate>();
 
             if (_skillDataAssets == null) { return; }
 

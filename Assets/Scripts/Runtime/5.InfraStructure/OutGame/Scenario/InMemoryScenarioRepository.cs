@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Utility.Identity;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
@@ -24,9 +25,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 throw new KeyNotFoundException($"Scenario not found: {id}");
             }
 
-            var backgroundRoom = new BackgroundEvent("bg_room");
-            var backgroundStreet = new BackgroundEvent("genki_pose");
-            var heroIdle = new AnimationEvent("anim_hero_idle");
+            var backgroundRoom = new BackgroundEvent(new BackgroundId(
+                DataIDHasher.Compute("ScenarioBackground", "bg_room")));
+            var backgroundStreet = new BackgroundEvent(new BackgroundId(
+                DataIDHasher.Compute("ScenarioBackground", "genki_pose")));
+            var heroIdle = new AnimationEvent(new AnimationId(
+                DataIDHasher.Compute("ScenarioAnimation", "anim_hero_idle")));
 
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {

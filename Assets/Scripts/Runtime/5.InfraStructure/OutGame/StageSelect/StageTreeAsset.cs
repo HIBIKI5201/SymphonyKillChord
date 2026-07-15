@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Identity;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,8 +40,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             var connections = new List<StageNodeConnection>(_connections.Count);
             for (var i = 0; i < _connections.Count; i++)
             {
-                if (_connections[i].FromStageId <= 0 ||
-                    _connections[i].ToStageId <= 0)
+                if (_connections[i].FromStageId == 0 ||
+                    _connections[i].ToStageId == 0)
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning(
@@ -81,10 +82,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     continue;
                 }
 
-                if (nodeAsset.StageIdValue <= 0)
+                if (nodeAsset.StageIdValue == 0)
                 {
                     Debug.LogError(
-                        $"[{nameof(StageTreeAsset)}] StageIdは1以上で設定してください。Index: {i}",
+                        $"[{nameof(StageTreeAsset)}] StageIdが未設定です。Index: {i}",
                         this);
                     continue;
                 }
@@ -119,16 +120,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [System.Serializable]
         private class StageNodeConnectionData
         {
-            public int FromStageId => _fromStageId;
-            public int ToStageId => _toStageId;
+            public int FromStageId => _fromStageId.Id;
+            public int ToStageId => _toStageId.Id;
 
             [Tooltip("接続元のステージID。")]
-            [SerializeField]
-            private int _fromStageId;
+            [SerializeField, DataCategory("Stage")]
+            private DataID _fromStageId;
 
             [Tooltip("接続先のステージID。")]
-            [SerializeField]
-            private int _toStageId;
+            [SerializeField, DataCategory("Stage")]
+            private DataID _toStageId;
         }
     }
 }

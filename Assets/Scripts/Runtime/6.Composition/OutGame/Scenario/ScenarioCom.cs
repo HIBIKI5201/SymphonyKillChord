@@ -6,6 +6,7 @@ using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Scenario;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
@@ -36,11 +37,11 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioView _chatText;
         [SerializeField]
         private ScenarioInputView _inputView;
-        [SerializeField, Tooltip("背景カタログの Addressables キーです。")]
+        [SerializeField, RepositoryAddressSelector, Tooltip("背景カタログの Addressables キーです。")]
         private string _backgroundCatalogKey;
-        [SerializeField, Tooltip("アニメーションカタログの Addressables キーです。")]
+        [SerializeField, RepositoryAddressSelector, Tooltip("アニメーションカタログの Addressables キーです。")]
         private string _animationCatalogKey;
-        [SerializeField, Tooltip("立ち絵カタログの Addressables キーです。")]
+        [SerializeField, RepositoryAddressSelector, Tooltip("立ち絵カタログの Addressables キーです。")]
         private string _portraitCatalogKey;
         [SerializeField, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey;
@@ -271,7 +272,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             for (int i = 0; i < catalog.Entries.Count; i++)
             {
                 var entry = catalog.Entries[i];
-                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                if (entry.Id.Id == 0 || entry.Asset == null) continue;
                 string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
                 map[key] = entry.Asset;
             }
@@ -290,7 +291,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             for (int i = 0; i < catalog.Entries.Count; i++)
             {
                 var entry = catalog.Entries[i];
-                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                if (entry.Id.Id == 0 || entry.Asset == null) continue;
                 string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
                 map[key] = entry.Asset;
             }
@@ -309,7 +310,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             for (int i = 0; i < catalog.Entries.Count; i++)
             {
                 var entry = catalog.Entries[i];
-                if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null) continue;
+                if (entry.Id.Id == 0 || entry.Asset == null) continue;
                 string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
                 map[key] = entry.Asset;
             }

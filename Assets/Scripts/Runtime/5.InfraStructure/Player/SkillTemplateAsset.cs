@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.Player
@@ -12,7 +13,7 @@ namespace KillChord.Runtime.InfraStructure.Player
     public class SkillTemplateAsset : ScriptableObject
     {
         /// <summary> スキルIDです。 </summary>
-        public int Id => _id;
+        public SkillId Id => new SkillId(_id.Id);
 
         /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern => _pattern;
@@ -35,11 +36,12 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <returns> Domain層のテンプレートです。 </returns>
         public SkillTemplate ToDomain()
         {
-            return new SkillTemplate(_id, _pattern, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey);
+            return new SkillTemplate(Id, _pattern, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey);
         }
 
         [SerializeField, Tooltip("スキルIDです。")]
-        private int _id;
+        [DataCategory("Skill")]
+        private DataID _id;
         [SerializeField, Tooltip("入力パターンです。")]
         private BeatType[] _pattern;
         [SerializeField, Min(0), Tooltip("小節単位で表すクールダウン時間の分子です。")]

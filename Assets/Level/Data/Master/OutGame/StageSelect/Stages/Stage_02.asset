@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Stage_02
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
   _plannerMemo: 
-  _stageId: 2
+  _stageId:
+    _id: stage_02
+    _hashId: 413055761
   _stageType: 1
   _isInitiallyUnlocked: 1
   _isTutorial: 0
