@@ -222,13 +222,3 @@ sequenceDiagram
         EWCont ->> EWTimerView: タイマー停止 (StopTimer)
     end
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **非同期型リズム攻撃システム (`EnemyAttackReservationUsecase`)**: 敵の攻撃は「2拍前」「1拍前」といったビートを基準に非同期で事前予約され、ジャストなビートで判定が出される設計になっており、リズムゲームと戦闘アクションの同期を担保しています。
-* **Wave開始通知によるモジュール分離 (`OnWaveStarted`)**: Wave開始時に発生する演出（爆発・障害物等）は、Enemyモジュール自身が直接処理するのではなく、`EnemyWaveSpawnerState.OnWaveStarted`イベントを介してStageモジュールへ通知し、Stage側が独立して反応する構成になっています。敵生成・演出・音楽同期をひとつのクラスに集約しない、疎結合な設計です。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`EnemyInitializer`/`BossInitializer`のモジュール直接結合**: 双方が他モジュールのComposition層である`PlayerModuleContainer`を`ServiceLocator`経由で直接取得してプレイヤー情報を得ています。`Player`モジュールの具象を隠蔽し、ドメイン層の抽象インターフェースか、上位のBootstrap（`IngameComposition`）が仲介してパラメータを渡す形へのリファクタリングが望まれます。
-* **`BossInitializer`の位置づけ**: コメント上「テスト専用」と明記されており、通常敵と同じスポナー/ブートストラップ経路への統合は未完了です。本番導線として扱う前に統合状況を確認する必要があります。
