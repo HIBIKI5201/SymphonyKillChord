@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -62,7 +63,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            _transitionTask = _screenController.ShowHome(_ctsShow.Token);
+            // チュートリアル未完了で自動出撃が予約されている場合は、
+            // ホーム画面を表示せずそのままチュートリアル出撃（StageSelectInitializer側）へ進む。
+            if (!ServiceLocator.TryGetInstance(out TutorialSortieRequestState tutorialSortieRequestState)
+                || !tutorialSortieRequestState.IsRequested)
+            {
+                _transitionTask = _screenController.ShowHome(_ctsShow.Token);
+            }
+
             return true;
         }
 
