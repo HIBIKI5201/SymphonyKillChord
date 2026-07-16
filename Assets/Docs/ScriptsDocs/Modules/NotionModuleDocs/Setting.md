@@ -114,14 +114,3 @@ sequenceDiagram
     Data -->> MusicPlayer: 変更イベント発火（SettingComposition.Build()で直結済み）
     MusicPlayer ->> MusicPlayer: SetVolume(value)
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **バインド可能な汎用コントロール**: `SettingSlider`/`SettingToggle`/`SettingDropDown`が`Bind(getter, setter)`という統一的な形式を持つため、新しい設定項目の追加が比較的容易です。
-
-### ⚠️ 既知の課題・改善ポイント
-* **Titleモジュールとの重複実装**: 音量設定UIが本モジュールの`AudioConfig`と、Titleモジュールの`VolumeSettingsTabView`という**2つの独立した実装**として存在しています。`VolumeSettingsTabView`はVoice音量に対応していない点でも差異があり、将来的な統合が望まれます。
-* **画面設定タブが未完成**: `ScreenConfig`が構築する`ScreenSettingData`は初期化されないデフォルト構造体のままで、実際の`Screen.currentResolution`や`QualitySettings.vSyncCount`等を読み取っていません。UIは存在しますが、実際の画面設定への反映は実装されていない可能性が高いです。
-* **キー設定タブが未実装**: `Category.Key`という値は定義されていますが、対応する設定クラスは存在しません。
-* **ドメインロジックの不在**: 音量値の妥当性検証や永続化ロジックを持たず、既存Managerクラスへの単純な委譲のみです。これは意図的な薄さと考えられますが、設定値の保存タイミング等はMusic/Persistentモジュール側の責務であることに注意してください。

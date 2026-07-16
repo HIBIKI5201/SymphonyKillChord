@@ -22,6 +22,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 {
     /// <summary>
     ///     敵インスタンスを初期化するクラス。
+    ///     Buildフェーズで公開するEnemyModuleContainerはStageEffectInitializerから参照されるため、
+    ///     StageEffectInitializerより先に実行される必要があります。
     /// </summary>
     public class EnemyInitializer : InGameInitializationModuleBase
     {
@@ -139,6 +141,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
+            _moduleContainer.StageEffectCatalog =
+                _loadedEnemyWaveDefinitionAsset.CreateStageEffectCatalog();
             EnemyWaves enemyWaves = _loadedEnemyWaveDefinitionAsset.ToDefinition();
             _moduleContainer.EnemyWaveSpawnerController = new EnemyWaveSpawnerController(
                 enemyWaves,

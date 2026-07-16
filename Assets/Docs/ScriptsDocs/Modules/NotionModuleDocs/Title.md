@@ -164,13 +164,3 @@ sequenceDiagram
     Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
     Init ->> Init: RequestTutorialSortie()（再アーム）
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **一発フラグによる疎結合なシーン間ハンドオフ**: Title→StageSelectという直接参照のないシーン間で、`TutorialSortieRequestState`という自己消費型（一度読まれたら`ServiceLocator`から登録解除される）の状態オブジェクトのみで意図を伝達しています。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`VolumeSettingsTabView`とOutGame `Setting`モジュールの重複実装**: 音量設定UIが本モジュールの`VolumeSettingsTabView`と、別モジュール「Setting」の`AudioConfig`/`SettingSlider`という**2つの独立した実装**で存在しています。しかも`VolumeSettingsTabView`はVoice音量に対応していません。将来的な統合を検討すべきです。
-* **`IVolumeManager`抽象の不使用**: `IVolumeManager`という既存の抽象があるにもかかわらず、`VolumeSettingsTabView`は`MusicPlayer`/`SoundEffectVolumeManager`の具象型をコンストラクタで直接受け取っています。
-* **データリセット失敗時のフィードバック不足**: `HandleDataResetButtonClicked`は`DeleteSaveDataAsync`の例外をtry/catchでログ出力するのみで、失敗してもリセット処理を続行し、ユーザーへの失敗通知がありません。

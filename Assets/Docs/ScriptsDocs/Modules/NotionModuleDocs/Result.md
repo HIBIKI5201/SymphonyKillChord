@@ -161,13 +161,3 @@ sequenceDiagram
     Controller ->> SceneUC: UnloadThenReloadSceneAsync(battleScene, inGameScene)
     Note over Controller: SelectedBattleStageState/SelectedMissionStateはクリアしない（同じステージを再挑戦）
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **クリア/リトライで選択状態の扱いを明確に分離**: `CompleteAsync`は選択状態をクリアしてOutGameへ戻り、`RetryAsync`は意図的にクリアせず同じステージへ再挑戦できるようにしています。
-
-### ⚠️ 既知の課題・改善ポイント
-* **リザルト画面は「今回のプレイ」のみを表示し、過去の達成状況を反映しない**: `StageResultPresenter.PresentVictory`が構築するサブミッション一覧は、直前のプレイの`MissionEvaluationResult`のみに基づきます。一方でセーブ側（`StageProgressData.RecordClear`）は達成済みサブミッションIDを複数プレイ分累積（和集合）で保持しています。そのため、過去のプレイで一度達成したサブミッションでも、今回未達成であればリザルト画面上は「未達成」と表示されます。`StageSelect`モジュールのステージ詳細画面にも同様の未実装（TODO）があり、セーブデータ側の累積達成状況をUIへ反映する仕組みはまだ存在しません。
-* **保存とリザルト表示の非同期性**: 評価結果の保存（Sequenceモジュールが実行）はリザルト表示の**前**に行われますが、両者は同じ`MissionEvaluationResult`インスタンスを共有しているだけで、保存の成否をリザルト表示側は確認していません。
-* **ゲームオーバー時は永続化されない**: 敗北時の`MaxComboText`/`BattleTimeText`は`MissionProgress`から取得した値をその場で表示するのみで、セーブされません。

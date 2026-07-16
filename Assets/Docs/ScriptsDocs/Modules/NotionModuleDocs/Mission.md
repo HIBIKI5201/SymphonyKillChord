@@ -218,14 +218,3 @@ sequenceDiagram
     Runtime -->> Presenter: MissionEvaluationResult
     Presenter ->> HudVM: MissionHudDTO を反映
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **Application層のServiceLocator非依存**: `MissionRuntimeService`をはじめとするApplication層のクラスはすべてコンストラクタ注入のみで構成されており、`ServiceLocator`を一切使用しません。DIP違反はComposition/Adaptor層の境界（Enemy側の直接取得）に閉じています。
-* **クリア/失敗/評価の3種の条件がすべて同一の拡張パターン**: `[SerializeReference, SubclassSelector]` + `XxxConditionAssetBase` + `Create()`という統一された拡張方法で、`And`/`Or`複合条件を含めてデータ側から組み合わせ自由に定義できます。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`MissionRuntimeService`/`MissionEventController`の二重登録**: `InGameMissionInitializer.Build()`がこれらを生の型として`ServiceLocator`へ直接登録すると同時に、`MissionModuleContainer`経由でも公開しています。アクセス経路が2つ存在し、`Shutdown()`と`OnDestroy()`の両方で個別に登録解除する必要があるなど保守上のリスクです。
-* **Enemy→Missionの直接結合**: `EnemyLifeCycle`/`BossLifeCycle`が`ServiceLocator.GetInstance<MissionEventController>()`を直接呼んでおり、`MissionModuleContainer`を経由していません。Missionの初期化順（Order 600）がEnemyより先である必要があるという暗黙の前提も、コード上に明記されていません。
-* **ランクは保存されない派生値**: `StageRank`はリザルト表示時に`StageResultPresenter`が`AchievedCount`から都度算出するものであり、`MissionEvaluationResult`自体には含まれず永続化もされません。セーブデータにランクが記録されていると誤解しないよう注意してください。

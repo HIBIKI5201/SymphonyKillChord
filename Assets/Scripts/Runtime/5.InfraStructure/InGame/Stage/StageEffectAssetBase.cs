@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
@@ -13,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
     [Serializable]
     public abstract class StageEffectAssetBase : ISerializationCallbackReceiver
     {
+        /// <summary> 演出IDです。 </summary>
+        public int EffectId => _effectId.Id;
+
         /// <summary>
         ///     ステージ演出定義を生成します。
         /// </summary>
@@ -47,7 +50,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
                     $"ステージ演出の音楽同期値が不正です。EffectId: {_effectId}");
             }
 
-            EnemyMusicSpec musicSpec = new(
+            MusicSyncSpec musicSpec = new(
                 _barFlag,
                 _timeSignature,
                 _targetBeat);
@@ -59,9 +62,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
         /// </summary>
         /// <returns> サマリーです。 </returns>
         protected abstract string BuildSummary();
-
-        /// <summary> 演出IDです。 </summary>
-        protected int EffectId => _effectId.Id;
 
         [SerializeField, DataCategory("StageEffect"), Tooltip("StageEffectView側の演出と対応するIDです。")]
         private DataID _effectId;

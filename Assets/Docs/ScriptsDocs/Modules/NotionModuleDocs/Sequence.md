@@ -162,14 +162,3 @@ sequenceDiagram
     SeqDirector ->> ResultView: Show()
     Note over SeqDirector: ゲームプレイは再開されず、以降の操作はResultモジュールへ移る
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **単一の停止/再開ポイント**: `InGamePlayDirector`という単一のファンアウト役を経由することで、Enemy・Player・Music・Input・Missionループなど多数のシステムを、演出中は確実に一斉停止できます。個別のシステムがそれぞれ演出状態を意識する必要がありません。
-* **状態を持たないオーケストレーター**: `InGameSequenceDirector`自身はドメインデータを一切持たず、Mission・Resultという他モジュールへ処理を委譲するだけの薄い調整役に徹しています。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`IGameplayControllable`登録はInspector手動配線**: `InGamePlayDirector`は`ServiceLocator`やリフレクションで対象を自動収集せず、Inspectorに手動ドラッグされた`MonoBehaviour[]`のみを対象にします。新しいシステムを追加した際に登録を忘れても警告ログのみで、起動失敗にはなりません。
-* **`SequenceModuleContainer`の利用者が現状皆無**: `*ModuleContainer`公開パターンに沿って作られていますが、参照している他モジュールはコード上見つかりませんでした。将来の拡張に備えた予約、または不要なボイラープレートの可能性があります。
-* **保存失敗が握りつぶされる**: `SaveClearResultAsync`は例外を`Debug.LogException`のみで処理し、再スローしません。セーブに失敗してもクリア演出・リザルト表示はそのまま進行します。

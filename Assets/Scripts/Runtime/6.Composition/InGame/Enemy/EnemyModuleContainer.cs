@@ -1,4 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Stage;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -21,6 +23,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         /// <summary> 敵ウェーブ制御です。 </summary>
         public EnemyWaveSpawnerController EnemyWaveSpawnerController { get; set; }
+
+        /// <summary> 互換用のステージ演出定義カタログです。 </summary>
+        public IReadOnlyDictionary<int, IStageEffectDefinition> StageEffectCatalog { get; set; }
 
         /// <summary> ボス初期化クラスです。 </summary>
         public BossInitializer BossInitializer { get; set; }

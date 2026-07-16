@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Stage;
 using System;
 using System.Collections.Generic;
 
@@ -14,25 +13,25 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         /// </summary>
         /// <param name="details"> 出現する敵の定義です。 </param>
         /// <param name="waveDuration"> Waveの継続時間です。 </param>
-        /// <param name="stageEffects"> Wave開始時のステージ演出です。 </param>
+        /// <param name="stageEffectIds"> Wave開始時のステージ演出IDです。 </param>
         public EnemyWaveDefinition(
             EnemyWaveDetail[] details,
             float waveDuration,
-            IReadOnlyList<IStageEffectDefinition> stageEffects = null)
+            IReadOnlyList<int> stageEffectIds = null)
         {
             _details = details ?? Array.Empty<EnemyWaveDetail>();
             _waveDuration = waveDuration;
-            _stageEffects = stageEffects ?? Array.Empty<IStageEffectDefinition>();
+            _stageEffectIds = stageEffectIds ?? Array.Empty<int>();
         }
         /// <summary> 1Wave分の中身 </summary>
         public EnemyWaveDetail[] Details => _details;
         /// <summary> 1Waveの継続時間 </summary>
         public float WaveDuration => _waveDuration;
         /// <summary> Wave開始時に予約するステージ演出です。 </summary>
-        public IReadOnlyList<IStageEffectDefinition> StageEffects => _stageEffects;
+        public IReadOnlyList<int> StageEffectIds => _stageEffectIds;
 
         private readonly EnemyWaveDetail[] _details;
         private readonly float _waveDuration;
-        private readonly IReadOnlyList<IStageEffectDefinition> _stageEffects;
+        private readonly IReadOnlyList<int> _stageEffectIds;
     }
 }

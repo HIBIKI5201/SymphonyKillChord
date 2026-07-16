@@ -822,7 +822,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
-  _screenRuleDataKey: ScreenRuleData
+  _screenRuleDataKey: OutGameScreenRuleData
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
