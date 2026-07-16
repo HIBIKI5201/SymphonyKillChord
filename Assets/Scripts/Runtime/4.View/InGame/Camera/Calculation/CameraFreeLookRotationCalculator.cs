@@ -30,8 +30,23 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 euler.x -= EULER_ANGLE_FULL;
             }
-            float yaw = euler.y + context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
+            float yaw = euler.y;
             float pitch = euler.x - context.Input.y * _parameter.FollowRotationSpeed * context.DeltaTime;
+
+            if (context.Input.sqrMagnitude >= _parameter.MoveFollowIdleLookThreshold * _parameter.MoveFollowIdleLookThreshold)
+            {
+                yaw += context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
+            }
+            else if (context.MoveInput.sqrMagnitude > float.Epsilon)
+            {
+                Vector3 playerForward = context.PlayerForward;
+                playerForward.y = 0f;
+                if (playerForward.sqrMagnitude > float.Epsilon)
+                {
+                    float targetYaw = Quaternion.LookRotation(playerForward.normalized, Vector3.up).eulerAngles.y;
+                    yaw = Mathf.MoveTowardsAngle(yaw, targetYaw, _parameter.MoveFollowRotationSpeed * context.DeltaTime);
+                }
+            }
 
             // ピッチ角の制限
             pitch = Mathf.Clamp(pitch, _parameter.PitchRange.x, _parameter.PitchRange.y);

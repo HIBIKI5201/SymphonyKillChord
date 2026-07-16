@@ -147,6 +147,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         }
 
         /// <summary>
+        ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
+        /// </summary>
+        /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <returns> 設定に成功した場合は true。 </returns>
+        public bool TrySetCurrentTarget(Guid targetId)
+        {
+            return _targetSystemViewModel.TrySetCurrentTarget(targetId);
+        }
+
+        /// <summary>
         ///     現在のターゲット選択を解除する。
         /// </summary>
         public void ClearTarget()

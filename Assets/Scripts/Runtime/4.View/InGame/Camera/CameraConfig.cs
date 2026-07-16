@@ -26,11 +26,23 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> ロックオン時のボーン回転速度。 </summary>
         public float BoneRotateSpeed => _boneRotateSpeed;
 
+        /// <summary> ロックオン時のボーン回転の最小速度。 </summary>
+        public float LockOnRotationMinSpeed => _lockOnRotationMinSpeed;
+
+        /// <summary> ロックオン時の最大回転速度へ到達する角度差。 </summary>
+        public float LockOnRotationSpeedAngleRange => _lockOnRotationSpeedAngleRange;
+
         /// <summary> ロックオン時の角度許容範囲。 </summary>
         public float LockOnAngleMargin => _lockOnAngleMargin;
 
         /// <summary> フリールック時の回転速度。 </summary>
         public float FollowRotationSpeed => _followRotationSpeed;
+
+        /// <summary> 非ロックオン時の移動方向追従速度。 </summary>
+        public float MoveFollowRotationSpeed => _moveFollowRotationSpeed;
+
+        /// <summary> 移動方向追従を抑制する視点入力しきい値。 </summary>
+        public float MoveFollowIdleLookThreshold => _moveFollowIdleLookThreshold;
 
         /// <summary> ロックオン注視点の補間比率。 </summary>
         public float LockOnLookAtRatio => _lockOnLookAtRatio;
@@ -41,17 +53,14 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 自動ロックオンを維持するビューポート内側マージン。 </summary>
         public float LockOnViewportMargin => _lockOnViewportMargin;
 
-        /// <summary> ロックオン中の相対視点入力感度。 </summary>
-        public float LockOnOffsetSensitivity => _lockOnOffsetSensitivity;
+        /// <summary> 強い視点操作でオートロックオンを解除する判定時間幅。 </summary>
+        public float LockOnBreakWindow => _lockOnBreakWindow;
 
-        /// <summary> ロックオン中の相対視点角度制限。 </summary>
-        public Vector2 LockOnOffsetClamp => _lockOnOffsetClamp;
+        /// <summary> 強い視点操作でオートロックオンを解除するしきい値。 </summary>
+        public float LockOnBreakThreshold => _lockOnBreakThreshold;
 
-        /// <summary> ロックオン相対視点の再センタリング開始待機時間。 </summary>
-        public float LockOnOffsetRecenterDelay => _lockOnOffsetRecenterDelay;
-
-        /// <summary> ロックオン相対視点の再センタリング速度。 </summary>
-        public float LockOnOffsetRecenterSpeed => _lockOnOffsetRecenterSpeed;
+        /// <summary> オートロックオン解除までの非命中猶予時間。 </summary>
+        public float AutoLockOnReleaseDelay => _autoLockOnReleaseDelay;
 
         /// <summary> 衝突判定半径。 </summary>
         public float CollisionRadius => _collisionRadius;
@@ -85,10 +94,18 @@ namespace KillChord.Runtime.View.InGame.Camera
         [Header("Bone Rotation")]
         [Tooltip("ロックオン時のカメラボーンの回転速度")]
         [SerializeField] private float _boneRotateSpeed = 1.2f;
+        [Tooltip("ロックオン時のカメラボーンの最小回転速度")]
+        [SerializeField] private float _lockOnRotationMinSpeed = 0.35f;
+        [Tooltip("ロックオン時の最大回転速度へ到達する角度差")]
+        [SerializeField] private float _lockOnRotationSpeedAngleRange = 60f;
         [Tooltip("ロックオン状態でのカメラとターゲットの角度差の許容範囲")]
         [SerializeField] private float _lockOnAngleMargin = 10f;
         [Tooltip("非ロックオン時のカメラボーンの回転速度")]
         [SerializeField] private float _followRotationSpeed = 1.5f;
+        [Tooltip("非ロックオン時に移動方向へ追従する回転速度")]
+        [SerializeField] private float _moveFollowRotationSpeed = 90f;
+        [Tooltip("この値以上の視点入力がある間は移動方向追従を無効にするしきい値")]
+        [SerializeField] private float _moveFollowIdleLookThreshold = 0.01f;
 
         [Header("Camera Rotation")]
         [Tooltip("ロックオン時のカメラが向けるプレイヤー位置とターゲット位置の補間比率")]
@@ -103,19 +120,16 @@ namespace KillChord.Runtime.View.InGame.Camera
         private float _lockOnViewportMargin = 0.05f;
 
         [Min(0f)]
-        [SerializeField, Tooltip("ロックオン中の相対視点入力感度。")]
-        private float _lockOnOffsetSensitivity = 1f;
-
-        [SerializeField, Tooltip("ロックオン中の相対視点角度制限。Xはヨー、Yはピッチ。")]
-        private Vector2 _lockOnOffsetClamp = new Vector2(35f, 20f);
+        [SerializeField, Tooltip("強い視点操作でオートロックオンを解除する判定時間幅。")]
+        private float _lockOnBreakWindow = 0.15f;
 
         [Min(0f)]
-        [SerializeField, Tooltip("無操作になってから相対視点を戻し始めるまでの秒数。")]
-        private float _lockOnOffsetRecenterDelay = 2f;
+        [SerializeField, Tooltip("強い視点操作でオートロックオンを解除するしきい値。")]
+        private float _lockOnBreakThreshold = 25f;
 
         [Min(0f)]
-        [SerializeField, Tooltip("ロックオン相対視点を中央へ戻す補間速度。")]
-        private float _lockOnOffsetRecenterSpeed = 3f;
+        [SerializeField, Tooltip("最後に対象へ命中してからオートロックオンを解除するまでの秒数。")]
+        private float _autoLockOnReleaseDelay = 3f;
 
         [Header("Collision")]
         [Tooltip("カメラの衝突判定に使用する球の半径")]
