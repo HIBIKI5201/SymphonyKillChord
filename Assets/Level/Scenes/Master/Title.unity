@@ -152,7 +152,7 @@ MonoBehaviour:
   _ruleDataKey: TitleScreenRuleData
   _currentSceneName: Title
   _targetSceneName: OutGame
-  _firstLaunchTargetSceneName: OutGame
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!4 &79626151
 Transform:
   m_ObjectHideFlags: 0

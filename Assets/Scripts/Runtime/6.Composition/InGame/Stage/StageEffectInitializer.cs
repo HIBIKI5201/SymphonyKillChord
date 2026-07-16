@@ -13,6 +13,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Cysharp.Text;
 
 namespace KillChord.Runtime.Composition.InGame.Stage
 {
@@ -128,7 +129,12 @@ namespace KillChord.Runtime.Composition.InGame.Stage
                 if (!_effectCatalog.TryGetValue(effectId, out IStageEffectDefinition scheduledEffect))
                 {
                     Debug.LogWarning(
-                        $"[{nameof(StageEffectInitializer)}] StageEffect ID {effectId} に対応する定義が見つかりません。",
+                        ZString.Concat(
+                            "[",
+                            nameof(StageEffectInitializer),
+                            "] StageEffect ID ",
+                            effectId,
+                            " に対応する定義が見つかりません。"),
                         this);
                     continue;
                 }
@@ -167,7 +173,12 @@ namespace KillChord.Runtime.Composition.InGame.Stage
                 if (catalog.ContainsKey(asset.EffectId))
                 {
                     Debug.LogWarning(
-                        $"[{nameof(StageEffectInitializer)}] StageEffect ID {asset.EffectId} が重複しています。",
+                        ZString.Concat(
+                            "[",
+                            nameof(StageEffectInitializer),
+                            "] StageEffect ID ",
+                            asset.EffectId,
+                            " が重複しています。"),
                         this);
                     continue;
                 }

@@ -14,6 +14,9 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
+        /// <summary> 初回カメラ更新が完了している場合はtrueです。 </summary>
+        public bool HasCompletedInitialUpdate => _hasCompletedInitialUpdate;
+
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
@@ -65,6 +68,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 ? _cameraT.GetComponent<UnityEngine.Camera>() ?? UnityEngine.Camera.main
                 : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
+            _hasCompletedInitialUpdate = false;
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
@@ -122,6 +126,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
         private Func<Vector3, Vector3, bool> _trySwitchTargetFunc;
         private CameraLockOnState _lockOnState;
+        private bool _hasCompletedInitialUpdate;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -317,6 +322,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
             _cameraT.SetPositionAndRotation(position, rotation);
+            _hasCompletedInitialUpdate = true;
         }
 
         /// <summary>
