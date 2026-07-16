@@ -135,6 +135,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLockOnState _lockOnState;
         private bool _hasCompletedInitialUpdate;
         private float _autoLockOnIdleTimer;
+        private float _autoLockOnViewportGraceTimer;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -290,6 +291,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lockOnState = CameraLockOnState.LockOnAuto;
             _lockOnBreakTracker.Reset();
             _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
         }
 
         /// <summary>
@@ -373,6 +375,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lockOnState = CameraLockOnState.LockOnAuto;
             _lockOnBreakTracker.Reset();
             _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = 0f;
             _changeTargetAction.Invoke(currentPosition, direction);
         }
 
@@ -388,6 +391,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 _lockOnState = CameraLockOnState.LockOnManual;
                 _lockOnBreakTracker.Reset();
                 _autoLockOnIdleTimer = 0f;
+                _autoLockOnViewportGraceTimer = 0f;
                 _changeTargetAction.Invoke(currentPosition, direction);
                 return;
             }
@@ -455,6 +459,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                     if (_lockOnState == CameraLockOnState.LockOnAuto)
                     {
                         _autoLockOnIdleTimer += deltaTime;
+                        _autoLockOnViewportGraceTimer = Mathf.Max(0f, _autoLockOnViewportGraceTimer - deltaTime);
                         if (ShouldClearAutoLockOn(context, targetPosition))
                         {
                             ClearLockOn();
@@ -480,6 +485,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lockOnState = CameraLockOnState.Free;
             _lockOnBreakTracker.Reset();
             _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = 0f;
             _clearTargetAction.Invoke();
         }
 
@@ -525,7 +531,9 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return true;
             }
 
-            if (_camera != null && !_lockOnRangeChecker.IsWithinRange(_camera, targetPosition))
+            if (_autoLockOnViewportGraceTimer <= 0f
+                && _camera != null
+                && !_lockOnRangeChecker.IsWithinRange(_camera, targetPosition))
             {
                 return true;
             }

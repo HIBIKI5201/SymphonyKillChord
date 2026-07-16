@@ -62,6 +62,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> オートロックオン解除までの非命中猶予時間。 </summary>
         public float AutoLockOnReleaseDelay => _autoLockOnReleaseDelay;
 
+        /// <summary> 画面外の敵へ自動ロックオンした直後に視野外解除を猶予する秒数。 </summary>
+        public float AutoLockOnViewportGraceDuration => _autoLockOnViewportGraceDuration;
+
         /// <summary> 衝突判定半径。 </summary>
         public float CollisionRadius => _collisionRadius;
 
@@ -130,6 +133,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         [Min(0f)]
         [SerializeField, Tooltip("最後に対象へ命中してからオートロックオンを解除するまでの秒数。")]
         private float _autoLockOnReleaseDelay = 3f;
+
+        [Min(0f)]
+        [SerializeField, Tooltip("画面外の敵へ自動ロックオンした直後に視野外解除を猶予する秒数。")]
+        private float _autoLockOnViewportGraceDuration = 0.35f;
 
         [Header("Collision")]
         [Tooltip("カメラの衝突判定に使用する球の半径")]
