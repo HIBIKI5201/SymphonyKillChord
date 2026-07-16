@@ -1,4 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.OutGame.Sortie;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -58,6 +60,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private SelectedScenarioState _selectedScenarioState;
         private SceneTransitionController _sceneTransitionController;
         private OutGameUIEvent _outGameUIEvent;
+        private OutGameSortieController _outGameSortieController;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
         private BackgroundCatalogAsset _loadedBackgroundCatalog;
         private AnimationCatalogAsset _loadedAnimationCatalog;
         private PortraitCatalogAsset _loadedPortraitCatalog;
@@ -190,6 +194,18 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            {
+                Debug.LogError($"[{nameof(ScenarioCom)}] OutGameSortieController が取得できませんでした。", this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
+            {
+                _pendingNodeTransitionState = new PendingNodeTransitionState();
+                ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
+            }
+
             _scenarioInputView.Initialize(_inputController, _inputComposition.GetInputView);
             _ = RunScenarioAsync();
             return true;
@@ -224,6 +240,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             _selectedScenarioState = null;
             _sceneTransitionController = null;
             _outGameUIEvent = null;
+            _outGameSortieController = null;
+            _pendingNodeTransitionState = null;
             _isInitialized = false;
         }
 
@@ -235,6 +253,13 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             try
             {
                 await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
+
+                if (TryExecutePendingNodeTransition())
+                {
+                    _selectedScenarioState.Clear();
+                    _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+                    return;
+                }
 
                 bool transitioned = await _sceneTransitionController.UnloadAndSetActiveAsync(
                     SceneManager.GetActiveScene().name,
@@ -259,6 +284,25 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             {
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     予約済みのノード連結を実行します。
+        /// </summary>
+        /// <returns> 実行に成功した場合はtrueです。 </returns>
+        private bool TryExecutePendingNodeTransition()
+        {
+            if (_pendingNodeTransitionState == null
+                || _outGameSortieController == null
+                || !_pendingNodeTransitionState.TryConsume(out PendingNodeTransition pendingNodeTransition))
+            {
+                return false;
+            }
+
+            NodeTransitionExecutor executor = new(
+                new BattleSortieSelectionService(),
+                _outGameSortieController);
+            return executor.TryExecute(pendingNodeTransition);
         }
 
         /// <summary>
