@@ -42,7 +42,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, Tooltip("UI Document")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _ruleDataKey;
 
         [Header("シーン遷移設定")]
@@ -52,7 +52,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
-        [SerializeField, RepositoryAddressSelector, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
         private string _stageTreeAssetKey = "StageTreeAsset";
 
         private OutGameUIEvent _outGameUIEvent;

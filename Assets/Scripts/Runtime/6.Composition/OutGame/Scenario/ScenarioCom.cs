@@ -45,7 +45,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private string _animationCatalogKey;
         [SerializeField, SourceDataAddress, Tooltip("立ち絵カタログの Addressables キーです。")]
         private string _portraitCatalogKey;
-        [SerializeField, Tooltip("シナリオ設定の Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey;
         [SerializeField, SceneNameSelector, Tooltip("シナリオ終了後に戻るシーン名。")]
         private string _returnSceneName;
