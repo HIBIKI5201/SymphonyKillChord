@@ -7,7 +7,7 @@
 | **モジュール名** | Enemy |
 | **カテゴリ** | InGame / Character |
 | **ステータス** | 実装済み（`BossInitializer`はテスト専用ドライバとして残存、本実装への統合は未完了） |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-07-16 |
 
 ---
 
@@ -16,7 +16,7 @@
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
 | **`EnemyType`** | Domain | 敵のクラス分け（歩兵・砲兵等）。ファイル名は`EnemyTypeEnum.cs`だが型名は`EnemyType` |
-| **`EnemyWaveDefinition`** | Domain | 1ウェーブ分のデータ構成（敵種類・数・継続時間・`StageEffects`） |
+| **`EnemyWaveDefinition`** | Domain | 1ウェーブ分のデータ構成（敵種類・数・継続時間・`StageEffectIds`）。Stageモジュールの型は持たず、演出IDのみを保持する |
 | **`EnemyWaves`** | Domain | `EnemyWaveDefinition[]`をラップし、ループ設定・次ウェーブ取得・最終ウェーブ判定を提供 |
 | **`EnemyMoveDecision`** | Domain | 移動AIが次フレームに取るべき行動を保持するreadonly struct |
 | **`EnemyMoveUsecase`** | Application | 移動方向の算出やレイキャストによる衝突回避ロジック |
@@ -43,7 +43,7 @@
 | --- | --- |
 | **Initializerクラス** | `EnemyInitializer` |
 | **Order** | 700 |
-| **公開する ModuleContainer / ServiceLocator登録型** | `EnemyModuleContainer`（`EnemyWaveSpawnerState`等を保持。`StageEffectInitializer`(Order 800)が参照する） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `EnemyModuleContainer`（`EnemyWaveSpawnerState`・`StageEffectCatalog`等を保持。`StageEffectInitializer`(Order 800)が参照する） |
 
 ---
 
@@ -77,7 +77,7 @@ graph TD
     end
 
     subgraph MissionModule [Mission モジュール]
-        MS_Adaptor["Adaptor<br>MissionEventController"]
+        MS_Composition["Composition<br>MissionModuleContainer"]
     end
 
     subgraph StageModule [Stage モジュール]
@@ -89,8 +89,8 @@ graph TD
     E_App -->|"リズム攻撃予約トリガー"| M_App
     E_Adaptor -->|"ロックオン対象として登録"| T_View
     SS_Adaptor -->|"ステージ固有Wave定義キー"| E_Composition
-    E_Adaptor -->|"敵撃破通知"| MS_Adaptor
-    E_Adaptor -->|"OnWaveStarted"| ST_Composition
+    E_Composition -->|"敵撃破通知（MissionModuleContainer経由）"| MS_Composition
+    E_Adaptor -->|"OnWaveStarted（演出IDのみ）"| ST_Composition
 ```
 
 ### 📥 依存しているもの
@@ -111,11 +111,11 @@ graph TD
 ### 📤 依存されているもの
 
 * **`Mission`**
-  * *参照箇所*: `MissionEventController` (Adaptor)
-  * *詳細*: 敵が撃破された際のイベントをミッションモジュールに通知し、ステージクリアの条件判定等に利用されます。
+  * *参照箇所*: `MissionModuleContainer.MissionEventController`（`EnemyLifeCycle`/`BossLifeCycle`がServiceLocatorから`MissionModuleContainer`を取得して参照）
+  * *詳細*: 敵が撃破された際のイベントをミッションモジュールに通知し、ステージクリアの条件判定等に利用されます。以前は`ServiceLocator.GetInstance<MissionEventController>()`による直接取得でしたが、`MissionModuleContainer`経由に統一されました。
 * **`Stage`**
   * *参照箇所*: `EnemyWaveSpawnerState.OnWaveStarted`（`EnemyModuleContainer`経由）
-  * *詳細*: `StageEffectInitializer`がWave開始イベントを購読し、`EnemyWaveDefinition.StageEffects`に基づく演出をBGM同期で再生します。
+  * *詳細*: `StageEffectInitializer`がWave開始イベントを購読し、`EnemyWaveDefinition.StageEffectIds`（演出IDのリスト）を受け取ります。以前は`IStageEffectDefinition`（Stage側のDomain型）をEnemyのDomain層が直接保持していましたが、2026-07-16の疎結合化でIDのみのやり取りに変更され、EnemyのDomain層からStageのDomain型への参照は無くなりました（詳細は`Assets/Docs/Enemy-Stageモジュール結合改善計画書.md`参照）。ただし`EnemyModuleContainer.StageEffectCatalog`（`EnemyWaveDefinitionAsset.CreateStageEffectCatalog()`が生成）が、`StageEffectInitializer`側で独自のカタログ（`_stageEffectCatalogAssets`）が未設定の場合の互換フォールバックとして残っており、この経路ではEnemyのInfrastructure層が`IStageEffectDefinition`を引き続き参照しています。現状は全シーンでこのフォールバックが使われている状態です。
 
 ---
 
@@ -132,7 +132,7 @@ AIの主要な状態管理とユースケースの連携を担う`EnemyAIControl
 ### ④ View
 ウェーブの制限時間を画面上に描画・表示制御する`EnemyWaveTimerView`などを担当します。
 ### ⑤ Infrastructure
-`EnemyWaveDefinitionAsset`が敵Wave構成・`StageEffects`をScriptableObjectとして保持し、Addressables経由でステージごとにロードされます。
+`EnemyWaveDefinitionAsset`が敵Wave構成・Wave毎の`StageEffectAssetBase`一覧をScriptableObjectとして保持し、Addressables経由でステージごとにロードされます。Domain変換（`ToDefinition()`）では各`StageEffectAssetBase`の`EffectId`のみを抽出して`EnemyWaveDefinition.StageEffectIds`に渡し、Stage側のDomain型は生成しません。別途`CreateStageEffectCatalog()`が、Stage側の独自カタログが未設定の場合の互換フォールバック用に`IStageEffectDefinition`のカタログを生成します（📤依存されているもの→Stage参照）。
 ### ⑥ Composition
 一般敵の`EnemyInitializer`、ボスの`BossInitializer`（テスト専用）、オブジェクトプールにより大量の敵歩兵を動的に管理する`EnemyInfantrySpawner`などの生成・依存注入、ライフサイクル管理を担当します。`EnemyModuleContainer`が他モジュールへの公開窓口です。
 
@@ -140,7 +140,7 @@ AIの主要な状態管理とユースケースの連携を担う`EnemyAIControl
 
 | 拡張したいこと | 実装する場所 | 追加登録の要否 |
 | --- | --- | --- |
-| Wave開始時の新しい演出を追加したい | `IStageEffectDefinition`（Domain, Stageモジュール）を実装し、`StageEffectAssetBase`（Infrastructure, Stageモジュール）を継承したAssetクラスを作成し、`EnemyWaveDefinitionAsset`の`StageEffects`に設定する | 不要（`[SerializeReference, SubclassSelector]`によりInspectorへ自動的に出現） |
+| Wave開始時の新しい演出を追加したい | `IStageEffectDefinition`（Domain, Stageモジュール）を実装し、`StageEffectAssetBase`（Infrastructure, Stageモジュール）を継承したAssetクラスを作成し、`EnemyWaveDefinitionAsset`の該当Waveへ追加する。あわせて`StageEffectInitializer`側の`_stageEffectCatalogAssets`にも同じAssetを追加すると、Enemy側の互換フォールバックに頼らずStage単独でカタログを解決できる | 不要（`[SerializeReference, SubclassSelector]`によりInspectorへ自動的に出現）。ただし`StageEffectInitializer`側への追加を忘れると、Enemy側の互換カタログのみに依存した状態が続く |
 | 新しい敵種別を追加したい | `EnemyType` Enumに値を追加し、対応するスポナー・AI分岐に追記する | 必要（追記漏れの場合、既定値または未対応として無視される） |
 
 ## 🔄処理フロー
@@ -216,8 +216,8 @@ sequenceDiagram
         EWCont ->> Spawner: 歩兵/砲兵の生成指示
         EWCont ->> EWTimerView: ウェーブタイマー設定 (SetTimer: waveDuration)
         EWCont ->> EWState: NotifyWaveStarted(waveIndex, definition)
-        EWState -->> StageEffect: OnWaveStarted イベント発火
-        StageEffect ->> StageEffect: StageEffects をBGM同期で再生
+        EWState -->> StageEffect: OnWaveStarted イベント発火（StageEffectIdsを含む）
+        StageEffect ->> StageEffect: IDから自身のカタログを検索し、該当演出をBGM同期で再生
     else 全ウェーブクリア
         EWCont ->> EWTimerView: タイマー停止 (StopTimer)
     end

@@ -4,6 +4,7 @@ using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
+using Cysharp.Text;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Stage
 {
@@ -47,7 +48,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
             if (_barFlag > 1 || _timeSignature <= 0d || _targetBeat <= 0d)
             {
                 throw new InvalidOperationException(
-                    $"ステージ演出の音楽同期値が不正です。EffectId: {_effectId}");
+                    ZString.Concat(
+                        "ステージ演出の音楽同期値が不正です。EffectId: ",
+                        _effectId));
             }
 
             MusicSyncSpec musicSpec = new(

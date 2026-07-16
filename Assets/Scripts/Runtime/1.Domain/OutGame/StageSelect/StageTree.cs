@@ -75,6 +75,25 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             => _nodes.TryGetValue(stageId, out node);
 
         /// <summary>
+        ///     指定IDのステージ定義を取得します。
+        /// </summary>
+        /// <param name="stageId"> 取得するステージIDです。 </param>
+        /// <param name="stageDefinition"> 取得したステージ定義です。 </param>
+        /// <returns> 見つかった場合はtrueです。 </returns>
+        public bool TryGetDefinition(StageId stageId, out StageDefinition stageDefinition)
+        {
+            if (_nodes.TryGetValue(stageId, out StageNode node)
+                && node?.Definition != null)
+            {
+                stageDefinition = node.Definition;
+                return true;
+            }
+
+            stageDefinition = null;
+            return false;
+        }
+
+        /// <summary>
         ///     チュートリアルとして定義されたステージを取得します。
         /// </summary>
         /// <param name="node"> チュートリアルステージです。 </param>
