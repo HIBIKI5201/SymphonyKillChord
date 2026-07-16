@@ -161,7 +161,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed3d6973f36d66844852d3391a8a18df
-    m_Address: ScreenRuleData
+    m_Address: OutGameScreenRuleData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

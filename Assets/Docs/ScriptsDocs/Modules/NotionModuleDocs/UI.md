@@ -155,15 +155,3 @@ sequenceDiagram
     end
     VM ->> HudView: 比率・画面座標を反映
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **HPバー表示の共通化**: プレイヤー・敵で同じ`HealthHudDTO`/`IHealthHudViewModel`/`HealthHudView`を使い回しており、表示ロジックの重複がありません。
-
-### ⚠️ 既知の課題・改善ポイント
-* **死んだコードの疑い（`IngameHudDTO`/`IIngameHudViewModel`）**: `IngameHudView`/`IngameHudViewModel`とあわせて、これらを参照する初期化コードがコード全体で見つかりませんでした。`HealthHudDTO`/`IHealthHudViewModel`という、より高機能な実装（二層アニメーション付き）に置き換えられた初期実装の残骸と見られます。削除候補として確認してください。
-* **`SkillInputProgressUIInitializer`のフォルダ/namespace不一致**: ファイルは`6.Composition/InGame/UI/`に置かれていますが、namespaceは`KillChord.Runtime.Composition.InGame.Skill`です。実質的にSkillモジュールに属するクラスがUIモジュールのフォルダに配置されています。
-* **紛らわしい命名**: 敵1体ごとの頭上HPバー（`EnemyHealthHudPresenter`/`EnemyHealthView`、Enemyモジュール側）と、ロックオン中の敵のみを表示する単一ウィジェット（`HUDEnemyHealthPresenter`/`HUDEnemyHealthView`、本モジュール）が非常に似た名前で存在します。混同しないよう注意してください。
-* **ロックオン状態のポーリング方式**: `HUDEnemyHealthPresenter`はロックオン変更イベントを購読するのではなく毎フレームポーリングしています（コード内コメントで明記された既知の制約）。
-* **`InGameHudInitializer`/`SkillInputProgressUIInitializer`はライフサイクル外**: `InGameInitializationModuleBase`を継承しないため、`InitializationCoordinator`のInit→ResourceLoadAsync→Build→Ready→Shutdownという管理下に無く、Unityの`Awake()`順序にのみ依存しています。他モジュールがこれらを`ServiceLocator.GetInstance`で取得するタイミングによっては、初期化順序の前提が暗黙的になりがちです。

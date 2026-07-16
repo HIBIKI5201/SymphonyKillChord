@@ -157,13 +157,3 @@ sequenceDiagram
     end
     Controller -->> View: LoadingCompleted イベント（成功/失敗いずれも非表示）
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **モジュール初期化完了を待つロード画面**: 単なるシーンオブジェクトグラフの読み込み完了ではなく、遷移先シーンのComposition初期化（`Init→ResourceLoadAsync→Build→Ready`）が完了するまでロード画面を表示し続けるため、初期化未完了の画面がプレイヤーに見えてしまう問題を防いでいます。この仕組みはInGameの`IngameComposition`で先行して実装されていたパターンを、`SceneInitializationReadinessRegistry`として全シーン共通の仕組みへ一般化したものです。
-* **既存登録の再利用**: `SceneTransitionInitializer`は既に`SceneTransitionController`等が登録済みであればそれを再利用し、二重生成を避けます。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`PersistentEntryPoint.LoadFirstSceneAsync`の経路**: 初回シーンロードは`SceneTransitionController`を経由しますが、これは内部的に`SceneTransitionUsecase`への薄いパススルーであるため、実際には他の遷移経路と同様にモジュール初期化完了待機の恩恵を受けています。ただし経路が独立して見えるため、変更時は注意してください。
-* **タイムアウト値の妥当性**: `SceneInitializationReadinessRegistry`の最大待機フレーム数は固定値です。アセット量が多く初期化に時間がかかるシーンでは、タイムアウトを誤検知しないよう値の調整が必要になる場合があります。
