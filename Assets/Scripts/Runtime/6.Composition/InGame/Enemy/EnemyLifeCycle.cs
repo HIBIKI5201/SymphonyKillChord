@@ -7,6 +7,7 @@ using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
@@ -108,7 +109,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
 
-            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
+            _missionEventController = missionModuleContainer?.MissionEventController;
             _attackControllerGenerator = attackControllerGenerator;
             _releaseCallback = releaseCallback;
 

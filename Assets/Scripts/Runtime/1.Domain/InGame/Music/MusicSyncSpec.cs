@@ -1,11 +1,14 @@
-namespace KillChord.Runtime.Domain.InGame.Enemy
+using UnityEngine.Scripting.APIUpdating;
+
+namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
-    ///     敵の音楽同期予約に使うタイミング情報をまとめた構造体。
+    ///     音楽同期予約に使うタイミング情報をまとめた構造体。
     /// </summary>
-    public readonly struct EnemyMusicSpec
+    [MovedFrom(true, "KillChord.Runtime.Domain.InGame.Enemy", null, "EnemyMusicSpec")]
+    public readonly struct MusicSyncSpec
     {
-        public EnemyMusicSpec(byte barFlag, double timeSignature, double targetBeat)
+        public MusicSyncSpec(byte barFlag, double timeSignature, double targetBeat)
         {
             BarFlag = barFlag;
             TimeSignature = timeSignature;

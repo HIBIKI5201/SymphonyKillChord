@@ -7,8 +7,10 @@ using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
+using KillChord.Runtime.InfraStructure.InGame.Stage;
 using KillChord.Runtime.View.InGame.Stage;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +18,8 @@ namespace KillChord.Runtime.Composition.InGame.Stage
 {
     /// <summary>
     ///     Wave開始通知を音楽同期したステージ演出へ接続します。
+    ///     EnemyModuleContainerがEnemyInitializerのBuildフェーズで登録されるため、
+    ///     OrderはEnemyInitializerより大きい値である必要があります。
     /// </summary>
     public sealed class StageEffectInitializer : InGameInitializationModuleBase
     {
@@ -64,6 +68,7 @@ namespace KillChord.Runtime.Composition.InGame.Stage
             }
 
             _waveSpawnerState = enemyContainer.EnemyWaveSpawnerState;
+            _effectCatalog = BuildEffectCatalog(enemyContainer);
             _musicScheduler = new MusicSchedulerAdaptor(
                 musicContainer.MusicSyncState,
                 musicContainer.MusicSyncService);
@@ -92,6 +97,7 @@ namespace KillChord.Runtime.Composition.InGame.Stage
 
             _views = null;
             _musicScheduler = null;
+            _effectCatalog = null;
             _presenter = null;
             _viewModel = null;
         }
@@ -101,6 +107,10 @@ namespace KillChord.Runtime.Composition.InGame.Stage
         private StageEffectView[] _views;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private IMusicActionScheduler _musicScheduler;
+        private IReadOnlyDictionary<int, IStageEffectDefinition> _effectCatalog;
+
+        [SerializeReference, Tooltip("Stageモジュール側で管理する演出定義カタログです。")]
+        private StageEffectAssetBase[] _stageEffectCatalogAssets = Array.Empty<StageEffectAssetBase>();
 
         /// <summary>
         ///     Wave定義に登録されたステージ演出を音楽同期で予約します。
@@ -111,22 +121,61 @@ namespace KillChord.Runtime.Composition.InGame.Stage
             int waveIndex,
             EnemyWaveDefinition waveDefinition)
         {
-            IReadOnlyList<IStageEffectDefinition> stageEffects =
-                waveDefinition.StageEffects;
-            for (int i = 0; i < stageEffects.Count; i++)
+            IReadOnlyList<int> stageEffectIds = waveDefinition.StageEffectIds;
+            for (int i = 0; i < stageEffectIds.Count; i++)
             {
-                IStageEffectDefinition stageEffect = stageEffects[i];
-                if (stageEffect == null)
+                int effectId = stageEffectIds[i];
+                if (!_effectCatalog.TryGetValue(effectId, out IStageEffectDefinition scheduledEffect))
                 {
+                    Debug.LogWarning(
+                        $"[{nameof(StageEffectInitializer)}] StageEffect ID {effectId} に対応する定義が見つかりません。",
+                        this);
                     continue;
                 }
 
-                IStageEffectDefinition scheduledEffect = stageEffect;
                 _musicScheduler.Schedule(
                     scheduledEffect.MusicSpec,
                     () => _presenter.Present(scheduledEffect),
                     destroyCancellationToken);
             }
+        }
+
+        /// <summary>
+        ///     Stage側で保持する演出カタログを構築します。
+        /// </summary>
+        /// <returns> 演出IDをキーにしたカタログです。 </returns>
+        private IReadOnlyDictionary<int, IStageEffectDefinition> BuildEffectCatalog(
+            EnemyModuleContainer enemyContainer)
+        {
+            StageEffectAssetBase[] catalogAssets =
+                _stageEffectCatalogAssets ?? Array.Empty<StageEffectAssetBase>();
+            if (catalogAssets.Length == 0)
+            {
+                return enemyContainer?.StageEffectCatalog
+                    ?? new Dictionary<int, IStageEffectDefinition>();
+            }
+
+            Dictionary<int, IStageEffectDefinition> catalog = new();
+            for (int i = 0; i < catalogAssets.Length; i++)
+            {
+                StageEffectAssetBase asset = catalogAssets[i];
+                if (asset == null)
+                {
+                    continue;
+                }
+
+                if (catalog.ContainsKey(asset.EffectId))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(StageEffectInitializer)}] StageEffect ID {asset.EffectId} が重複しています。",
+                        this);
+                    continue;
+                }
+
+                catalog.Add(asset.EffectId, asset.Create());
+            }
+
+            return catalog;
         }
     }
 }

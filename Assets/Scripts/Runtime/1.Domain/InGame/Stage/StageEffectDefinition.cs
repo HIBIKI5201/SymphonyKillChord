@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Stage
@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Domain.InGame.Stage
         public StageEffectDefinition(
             int effectId,
             StageEffectKind kind,
-            EnemyMusicSpec musicSpec)
+            MusicSyncSpec musicSpec)
         {
             if (effectId == 0)
             {
@@ -36,6 +36,6 @@ namespace KillChord.Runtime.Domain.InGame.Stage
         public StageEffectKind Kind { get; }
 
         /// <summary> 音楽同期タイミングです。 </summary>
-        public EnemyMusicSpec MusicSpec { get; }
+        public MusicSyncSpec MusicSpec { get; }
     }
 }

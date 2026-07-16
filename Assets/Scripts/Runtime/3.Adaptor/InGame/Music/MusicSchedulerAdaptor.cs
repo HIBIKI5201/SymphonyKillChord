@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Persistent.Music;
 using System;
@@ -27,10 +26,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary>
         ///     アクションをスケジュールする。
         /// </summary>
-        /// <param name="musicSpec"> 敵の音楽スペック。 </param>
+        /// <param name="musicSpec"> 音楽同期スペック。 </param>
         /// <param name="action"> 実行するアクション。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        public void Schedule(in EnemyMusicSpec musicSpec,
+        public void Schedule(in MusicSyncSpec musicSpec,
             Action action,
             CancellationToken cancellationToken)
         {
@@ -49,11 +48,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private readonly IMusicSyncService _musicSyncService;
 
         /// <summary>
-        ///     EnemyMusicSpecをExecuteRequestTimingに変換する。
+        ///     MusicSyncSpecをExecuteRequestTimingに変換する。
         /// </summary>
         /// <param name="musicSpec"> 変換元のスペック。 </param>
         /// <returns> 変換後のタイミング情報。 </returns>
-        private ExecuteRequestTiming Convert(in EnemyMusicSpec musicSpec)
+        private ExecuteRequestTiming Convert(in MusicSyncSpec musicSpec)
         {
             Beat beat = new Beat(musicSpec.TimeSignature, musicSpec.TargetBeat);
             return new ExecuteRequestTiming((byte)musicSpec.BarFlag, beat);
