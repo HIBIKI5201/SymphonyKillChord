@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario

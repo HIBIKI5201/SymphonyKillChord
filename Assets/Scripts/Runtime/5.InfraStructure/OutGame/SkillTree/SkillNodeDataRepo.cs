@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree

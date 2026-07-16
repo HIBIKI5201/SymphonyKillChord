@@ -949,7 +949,7 @@ MonoBehaviour:
   _ruleData: {fileID: 11400000, guid: 1c411bf35748d284584af4d0f16a0ccc, type: 2}
   _currentSceneName: Persistent
   _targetSceneName: OutGame
-  _firstLaunchTargetSceneName: OutGame
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!4 &864974015
 Transform:
   m_ObjectHideFlags: 0

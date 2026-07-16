@@ -7,13 +7,13 @@ using UnityEngine;
 namespace KillChord.Editor.SourceDataProvider
 {
     /// <summary>
-    ///     SourceDataProviderへ登録されたリポジトリキーの選択UIを描画します。
+    ///     SourceDataProviderへ登録されたAddressable ScriptableObjectキーの選択UIを描画します。
     /// </summary>
-    [CustomPropertyDrawer(typeof(RepositoryAddressSelectorAttribute))]
-    internal sealed class RepositoryAddressSelectorDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(SourceDataAddressAttribute))]
+    internal sealed class SourceDataAddressSelectorDrawer : PropertyDrawer
     {
         /// <summary>
-        ///     リポジトリキー選択UIを描画します。
+        ///     Addressable ScriptableObjectキー選択UIを描画します。
         /// </summary>
         /// <param name="position"> 描画領域です。 </param>
         /// <param name="property"> 描画対象プロパティです。 </param>
@@ -22,19 +22,19 @@ namespace KillChord.Editor.SourceDataProvider
         {
             if (property.propertyType != SerializedPropertyType.String)
             {
-                EditorGUI.HelpBox(position, "RepositoryAddressSelectorはstringフィールド専用です。", MessageType.Error);
+                EditorGUI.HelpBox(position, "SourceDataAddressはstringフィールド専用です。", MessageType.Error);
                 return;
             }
 
-            IReadOnlyList<SourceDataProviderSettings.RepositoryMapping> mappings =
-                SourceDataProviderSettings.instance.RepositoryMappings;
+            IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings =
+                SourceDataProviderSettings.instance.SourceAssetMappings;
             string[] labels = new string[mappings.Count + 1];
             labels[0] = UNASSIGNED_LABEL;
             int selectedIndex = 0;
 
             for (int i = 0; i < mappings.Count; i++)
             {
-                SourceDataProviderSettings.RepositoryMapping mapping = mappings[i];
+                SourceDataProviderSettings.SourceAssetMapping mapping = mappings[i];
                 labels[i + 1] = BuildLabel(mapping);
                 if (string.Equals(mapping.AddressableKey, property.stringValue, StringComparison.Ordinal))
                 {
@@ -62,31 +62,31 @@ namespace KillChord.Editor.SourceDataProvider
             using (new EditorGUI.DisabledScope(nextIndex <= 0))
             {
                 if (GUI.Button(pingRect, PING_LABEL)
-                    && SourceDataProviderRepositoryResolver.TryResolveRepository(
+                    && SourceDataProviderRepositoryResolver.TryResolveAsset(
                         property.stringValue,
-                        out UnityEngine.Object repository))
+                        out ScriptableObject sourceAsset))
                 {
-                    EditorGUIUtility.PingObject(repository);
+                    EditorGUIUtility.PingObject(sourceAsset);
                 }
             }
             EditorGUI.EndProperty();
         }
 
         /// <summary>
-        ///     リポジトリ設定の表示名を生成します。
+        ///     SourceAsset設定の表示名を生成します。
         /// </summary>
         /// <param name="mapping"> 対象のリポジトリ設定です。 </param>
         /// <returns> セレクターへ表示する名前です。 </returns>
-        private static string BuildLabel(SourceDataProviderSettings.RepositoryMapping mapping)
+        private static string BuildLabel(SourceDataProviderSettings.SourceAssetMapping mapping)
         {
-            if (SourceDataProviderRepositoryResolver.TryResolveRepository(
+            if (SourceDataProviderRepositoryResolver.TryResolveAsset(
                 mapping.AddressableKey,
-                out UnityEngine.Object repository))
+                out ScriptableObject sourceAsset))
             {
-                return $"{repository.GetType().Name} ({mapping.Category})";
+                return $"{sourceAsset.GetType().Name} ({mapping.AddressableKey})";
             }
 
-            return $"{mapping.AddressableKey} ({mapping.Category})";
+            return $"{mapping.AddressableKey}";
         }
 
         private const float PING_BUTTON_WIDTH = 48f;

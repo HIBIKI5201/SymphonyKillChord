@@ -44,15 +44,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Tooltip("スキルツリー画面のUIDocumentです。")]
         private UIDocument _uiDocument;
 
-        [SerializeField, RepositoryAddressSelector]
+        [SerializeField, SourceDataAddress]
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
         private string _skillNodeDataRepoKey;
 
-        [SerializeField]
+        [SerializeField, SourceDataAddress]
         [Tooltip("スキルノード接続定義リポジトリの Addressables キーです。")]
         private string _skillNodeBindRepoKey;
 
-        [SerializeField]
+        [SerializeField, SourceDataAddress]
         [Tooltip("スキルツリー段階定義リポジトリの Addressables キーです。")]
         private string _skillNodePhaseBindRepoKey;
 
