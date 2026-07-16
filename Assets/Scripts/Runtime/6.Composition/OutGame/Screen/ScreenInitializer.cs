@@ -63,14 +63,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            // チュートリアル未完了で自動出撃が予約されている場合は、
-            // ホーム画面を表示せずそのままチュートリアル出撃（StageSelectInitializer側）へ進む。
-            if (!ServiceLocator.TryGetInstance(out TutorialSortieRequestState tutorialSortieRequestState)
-                || !tutorialSortieRequestState.IsRequested)
-            {
-                _transitionTask = _screenController.ShowHome(_ctsShow.Token);
-            }
-
+            _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             return true;
         }
 

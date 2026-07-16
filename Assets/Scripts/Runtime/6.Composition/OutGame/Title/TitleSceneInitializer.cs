@@ -4,9 +4,12 @@ using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
@@ -49,15 +52,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
-        [SerializeField, SceneNameSelector, Tooltip("初回起動時の遷移先のシーン名")]
-        private string _firstLaunchTargetSceneName;
+        [SerializeField, RepositoryAddressSelector, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        private string _stageTreeAssetKey = "StageTreeAsset";
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
+        private TitleStartController _titleStartController;
         private ScreenController _screenController;
+        private BattleSortieSelectionService _battleSortieSelectionService;
         private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
+        private StageTreeAsset _loadedStageTreeAsset;
         private SaveData _loadedSaveData;
 
         private bool _isInitialized;
@@ -79,8 +85,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
+            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
             _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
-            return _loadedRuleData != null && _loadedSaveData != null;
+            return _loadedRuleData != null && _loadedStageTreeAsset != null && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -125,7 +132,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            TitleStartController titleStartController = new(sceneTransitionController);
+            _titleStartController = new(sceneTransitionController);
+            _battleSortieSelectionService = new BattleSortieSelectionService();
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
             var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
@@ -163,7 +171,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            _titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
+            _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
@@ -198,19 +206,21 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             bool isTutorialCompleted = _loadedSaveData.Tutorial.IsTutorialCompleted;
 
-            if (!isTutorialCompleted)
+            if (!isTutorialCompleted
+                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
             {
 #if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{_firstLaunchTargetSceneName}");
+                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{tutorialTargetSceneName}");
 #endif
-                _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
-                RequestTutorialSortie();
+                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
+                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
             }
             else
             {
 #if UNITY_EDITOR
                 Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
 #endif
+                _titleStartController.ClearTutorialBattleTarget();
                 _titleSceneView.SetTargetSceneName(_targetSceneName);
             }
 
@@ -245,10 +255,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _ruleDataKey.ReleaseLoadedAsset(this);
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
+            _loadedStageTreeAsset = null;
             _loadedSaveData = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
+            _titleStartController = null;
+            _battleSortieSelectionService = null;
             _screenController = null;
             _savedataSystem = null;
             _outGameUIEvent = null;
@@ -406,23 +420,49 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             // セーブデータをロードして、初期状態に戻す。
             _loadedSaveData = await LoadSaveData();
 
-            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する。
-            _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
-            RequestTutorialSortie();
+            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
+            if (_loadedSaveData != null
+                && !_loadedSaveData.Tutorial.IsTutorialCompleted
+                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
+            {
+                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
+                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
+                return;
+            }
+
+            _titleStartController.ClearTutorialBattleTarget();
+            _titleSceneView.SetTargetSceneName(_targetSceneName);
         }
 
         /// <summary>
-        ///     OutGameシーンで処理するチュートリアル自動出撃を要求します。
+        ///     初回チュートリアル用の戦闘出撃準備を行います。
         /// </summary>
-        private static void RequestTutorialSortie()
+        /// <param name="tutorialTargetSceneName"> 遷移先シーン名です。 </param>
+        /// <returns> 準備に成功した場合はtrueです。 </returns>
+        private bool TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName)
         {
-            if (!ServiceLocator.TryGetInstance(out TutorialSortieRequestState requestState))
+            tutorialTargetSceneName = string.Empty;
+
+            if (_loadedStageTreeAsset == null || _battleSortieSelectionService == null)
             {
-                requestState = new TutorialSortieRequestState();
-                ServiceLocator.RegisterInstance(requestState);
+                return false;
             }
 
-            requestState.Request();
+            StageTree stageTree = _loadedStageTreeAsset.Create();
+            if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                || tutorialNode?.Definition == null)
+            {
+                return false;
+            }
+
+            StageDefinition tutorialStageDefinition = tutorialNode.Definition;
+            if (!_battleSortieSelectionService.TryPrepareBattleSortie(tutorialStageDefinition, _targetSceneName))
+            {
+                return false;
+            }
+
+            tutorialTargetSceneName = tutorialStageDefinition.TargetSceneName;
+            return true;
         }
 
         /// <summary>
