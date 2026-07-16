@@ -104,6 +104,9 @@ Runtime / Composition 側でも、Addressables キーの一部に `RepositoryAdd
 
 新しい管理画面は `SourceDataProvider` を置き換えるのではなく、**拡張した SourceDataProvider の上に乗る「プランナー向けフロントエンド」**として実装する。
 
+さらに、今後データ型が増えることを前提に、**新しいデータ型の追加時に SourceDataProvider 本体コードを毎回編集しない**ことを重要方針とする。
+加えて、**SourceAsset と collection を分離して管理する**ことを構造上の前提とする。
+
 ### 5.2 守ること
 
 - Editor 拡張は `Assets/Editor` 配下へ閉じ込める。
@@ -112,6 +115,23 @@ Runtime / Composition 側でも、Addressables キーの一部に `RepositoryAdd
 - 個別アセットの Inspector 運用と共存させる。
 - 巨大な 1 クラスではなく、系統ごとのページクラスへ分割する。
 - ScriptableObject の一般メタデータと、Repository 系の列挙メタデータを分ける。
+- 新規データ型の追加は、原則として `ProjectSettings` への登録と、必要なら Attribute 付与だけで成立させる。
+- SourceAsset 登録画面と collection 登録画面は分離し、非 collection アセットに不要な repository 枠を表示しない。
+
+### 5.3 拡張性要件
+
+将来の新規データ型追加時に必要な作業は、次のどちらかに収まる状態を目標にする。
+
+1. `SourceDataProviderSettings` の SourceAsset 一覧へ Addressable ScriptableObject 情報を追加する。
+2. collection を持つ場合のみ、collection 一覧へ設定を追加する、または対象型に最小限のメタデータを付与する。
+
+避けたい状態:
+
+- データ型を 1 つ増やすたびに Resolver の `switch` や `if` を増やす。
+- Planner Window の本体コードに型別分岐を追記する。
+- SourceDataProviderSettings のコード側デフォルト一覧へ毎回手書き追加する。
+
+例外として許容するのは、**そのデータ型を専用のビジュアルシミュレーションで表示したい場合の、ページクラスまたはプレビューパネルの追加**までとする。
 
 ## 6. 想定ユーザー体験
 
@@ -155,18 +175,26 @@ Runtime / Composition 側でも、Addressables キーの一部に `RepositoryAdd
 
 ### 7.3 Settings の見直し
 
-現状の `RepositoryMapping` は、概念としては狭すぎるため、将来的に以下のような汎化を行う。
+現状の `RepositoryMapping` は、SourceAsset と collection の情報が 1 行に混在しており、概念として狭すぎる。
+将来的には、以下のように **2段構成へ分離**する。
 
 - `SourceAssetMapping`
   - Addressable でロードする ScriptableObject 全体の登録情報
+- `SourceCollectionMapping`
+  - どの SourceAsset のどの配列 / List を collection として扱うか
+  - 必要ならカテゴリ名、表示名、個別要素型を持つ
 - `SourceCategoryMapping`
-  - `DataID` 用カテゴリと、参照元 ScriptableObject の対応情報
+  - `DataID` 用カテゴリと、参照元 collection の対応情報
+
+重要なのは、**SourceAsset の登録だけで完結する単体アセット**と、**collection として個別要素を列挙するアセット**を設定上で区別できることにある。
 
 初期段階では、既存 `RepositoryMapping` をすぐ全面置換せず、互換レイヤを挟んで段階移行する。
 
+このとき、設定モデルは「コードで型ごとの対応表を書く」のではなく、**Settings によるデータ駆動定義**を基本とする。
+
 ### 7.4 Attribute 設計
 
-Repository 系 ScriptableObject に対して、個別データ列挙のための Attribute を追加する。
+collection を持つ ScriptableObject に対して、個別データ列挙のための Attribute を追加する。
 
 候補:
 
@@ -177,10 +205,11 @@ Repository 系 ScriptableObject に対して、個別データ列挙のための
 
 この Attribute で宣言したい情報:
 
-- この ScriptableObject が個別データ列挙対象であること
+- この ScriptableObject が collection 候補を持つこと
 - 列挙対象の配列 / List のプロパティパス
-- 対応カテゴリ名
 - 必要なら表示ラベル
+
+重要なのは、この Attribute を **SourceDataProvider 本体の分岐を増やすためではなく、型自身が自分の列挙方法を宣言するため**に使うことである。
 
 例:
 
@@ -188,21 +217,44 @@ Repository 系 ScriptableObject に対して、個別データ列挙のための
 - `OutGameSkillRepository` は `_skillDataAssets` を列挙対象に持つ。
 - `BackgroundCatalogAsset` は `_entries` を列挙対象に持つ。
 
-### 7.5 Category の扱い
+### 7.5 SourceAsset と collection の分離方針
 
-Category は今後、次の 2 段階で扱う。
+今後は次のように分ける。
 
-1. `SourceDataProviderSettings` に、Addressable ScriptableObject としての登録情報を持つ。
-2. Repository 系クラスでは `SourceDataCollectionAttribute` でもカテゴリを宣言できる。
+#### SourceAsset
+
+- Addressables でロードする ScriptableObject 本体
+- すべての対象 ScriptableObject をここへ登録する
+- 単体設定アセットもここへ含む
+
+#### collection
+
+- SourceAsset 内の「個別データを列挙する配列 / List」
+- 0 件でもよい
+- 1 SourceAsset に複数あってよい
+
+この分離により、以下を解決できる。
+
+- 1 つの SourceAsset に複数の repository 相当 collection があるケースへ対応できる。
+- collection を持たない単体アセットに、不要な repository 用 UI を出さずに済む。
+- Planner 側で「SourceAsset 単位表示」と「collection 単位表示」を分けやすい。
+
+### 7.6 Category の扱い
+
+Category は今後、collection 単位で扱う。
+
+1. `SourceAssetMapping` は SourceAsset 自体の登録だけを持つ。
+2. `SourceCollectionMapping` が collection とカテゴリの対応を持つ。
+3. 必要なら `SourceDataCollectionAttribute` は collection 候補の宣言補助に使う。
 
 両者がある理由:
 
 - Settings はプロジェクト全体の登録台帳である。
-- Attribute は型側の意図を表現する。
+- Attribute は「この型に collection 候補がある」ことを型側から示す補助である。
 
-最終的には、カテゴリ名の正本は Settings に置きつつ、Attribute 側は「この型がどのカテゴリ群を提供するか」の宣言として使う。
+最終的には、カテゴリ名の正本は `SourceCollectionMapping` 側に置き、Attribute 側は「どのプロパティが collection 候補か」の補助情報として使う。
 
-### 7.6 Resolver の一般化
+### 7.7 Resolver の一般化
 
 `SourceDataProviderRepositoryResolver` は、名称と責務を一般化する。
 
@@ -214,18 +266,20 @@ Category は今後、次の 2 段階で扱う。
 役割:
 
 - Addressable キーから任意の ScriptableObject を解決する。
-- その型に `SourceDataCollectionAttribute` が付いていれば、列挙対象要素を取得する。
-- 付いていなければ単体 ScriptableObject として扱う。
-- `DataID` 候補収集も「repository 前提」ではなく「collection を持つ ScriptableObject 前提」へ改める。
+- SourceAsset として解決したあと、設定済み collection 一覧を引く。
+- collection 設定がなければ単体 ScriptableObject として扱う。
+- `DataID` 候補収集も「repository 前提」ではなく「collection 設定前提」へ改める。
 
-### 7.7 Header UI の一般化
+ここでは、型ごとのハードコード分岐を禁止し、**Reflection と Settings / Attribute の組み合わせで自己記述的に解決する**ことを原則とする。
+
+### 7.8 Header UI の一般化
 
 `SourceDataRegistrationHeader` も repository 固有 UI から一段一般化する。
 
 - 単体 ScriptableObject の場合
   - SourceDataProvider 登録状態を表示する。
   - 対応 Addressable キーや系統を確認できる。
-- Collection を持つ ScriptableObject の場合
+- collection を持つ ScriptableObject の場合
   - 個別アセットの登録 / 解除を表示する。
 
 これにより、単体設定アセットと collection 系アセットを同じ文脈で扱える。
@@ -247,8 +301,9 @@ Category は今後、次の 2 段階で扱う。
 
 - Addressables でロードする ScriptableObject の登録台帳
 - Addressable キーと ScriptableObject の対応保持
+- SourceAsset ごとの collection 定義保持
 - ScriptableObject 実体の解決
-- collection Attribute の解釈
+- collection 候補 Attribute の解釈
 - `DataID` 入力補助
 - collection 系 ScriptableObject からの候補列挙
 - 個別アセットの登録 / 解除
@@ -299,11 +354,13 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 ### 10.2 解決手順
 
 1. 系統定義が必要カテゴリ一覧を持つ。
-2. 各カテゴリについて `SourceDataProviderSettings.instance.TryGetMapping` で対応設定を引く。
+2. 各系統で必要な SourceAsset を `SourceAssetMapping` から引く。
 3. Resolver で Addressable 先の ScriptableObject を取る。
-4. 型に `SourceDataCollectionAttribute` が付いていれば、列挙対象配列を取得する。
-5. Attribute が無ければ単体アセットとして扱う。
+4. 必要なら `SourceCollectionMapping` から collection 一覧を引く。
+5. collection が無ければ単体アセットとして扱う。
 6. 編集対象は `SerializedObject` で描画する。
+
+この流れにより、新しいデータ型が追加されても、Resolver 側のコード変更は不要にする。
 
 ### 10.3 単体アセットと collection アセットの扱い
 
@@ -313,6 +370,8 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 - collection アセット
   - 例: `SkillNodeDataRepo`
   - 個別要素一覧、登録状況、ID 候補列挙を出す。
+
+同じ SourceAsset に複数 collection がある場合は、Planner 側では collection 単位でタブまたはサブセクションを分ける。
 
 ### 10.4 例外ケース
 
@@ -439,16 +498,17 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 - カテゴリ未登録
 - Addressable キー未解決
-- collection Attribute 未設定
+- collection 設定未登録
 - collection プロパティパス不正
 - null 要素混入
 
 ### 14.2 SourceDataProvider 拡張用
 
-- Settings 上のカテゴリ名と Attribute 上のカテゴリ名不一致
+- SourceAsset は登録されているが collection 設定が欠けている
 - collection Attribute が付いているのに配列 / List が存在しない
-- 単体アセットなのに collection 前提で登録されている
+- 単体アセットなのに collection 設定が付いている
 - `DataID` 候補収集対象が 0 件
+- 新規追加型が Settings 登録だけで解決できず、コード側分岐を要求していないか
 
 ### 14.3 SkillTree
 
@@ -493,18 +553,20 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 ### フェーズ0: SourceDataProvider の一般化
 
-- `RepositoryMapping` 中心設計から、ScriptableObject 全般を扱える設定モデルへ移行方針を作る。
-- Resolver を repository 前提から ScriptableObject 前提へ一般化する。
-- `SourceDataCollectionAttribute` を追加する。
+- `RepositoryMapping` 中心設計から、`SourceAssetMapping` と `SourceCollectionMapping` に分離する移行方針を作る。
+- Resolver を repository 前提から ScriptableObject + collection 前提へ一般化する。
+- `SourceDataCollectionAttribute` は collection 候補補助として導入する。
 - collection 系 ScriptableObject から個別データを列挙できるようにする。
 - 既存 `DataIDPropertyDrawer` の候補収集経路を新 Resolver へ寄せる。
 - 既存 `RepositoryAddressSelectorDrawer` の名称と表示文言を、必要なら汎化する。
+- 「新規データ型追加時にコード編集が不要であること」を受け入れ条件に含める。
 
 ### フェーズ1: 互換レイヤ整備
 
-- 既存 `RepositoryMapping` を読みつつ、新モデルへ橋渡しする互換層を作る。
+- 既存 `RepositoryMapping` を読みつつ、`SourceAssetMapping` / `SourceCollectionMapping` へ橋渡しする互換層を作る。
 - `SourceDataRegistrationHeader` を単体アセット / collection アセット両対応へ広げる。
 - 既存カテゴリ設定が壊れないことを確認する。
+- 代表的な新規型追加手順を、Settings 追加だけで再現できることを検証する。
 
 ### フェーズ2: Window の土台
 
@@ -532,7 +594,40 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 - `SourceDataProvider` Settings へのショートカット
 - ScriptableObject `Ping`、個別アセット選択、フィルタ
 
-## 17. リスクと対策
+## 17. 新規データ型追加フロー
+
+理想的な追加フローは以下とする。
+
+### 17.1 単体 ScriptableObject の場合
+
+1. Addressables に登録する。
+2. `SourceAssetMapping` に対象 ScriptableObject 情報を追加する。
+3. 必要なら Planner 側の既存系統へ紐付ける。
+
+この場合、SourceDataProvider 本体コードの編集は不要とする。
+
+### 17.2 collection 系 ScriptableObject の場合
+
+1. Addressables に登録する。
+2. `SourceAssetMapping` に対象 ScriptableObject 情報を追加する。
+3. `SourceCollectionMapping` に、どの配列 / List を collection とみなすかを追加する。
+4. 必要なら対象型へ `SourceDataCollectionAttribute` を付け、候補補助だけを行う。
+4. 必要なら Planner 側の既存系統へ紐付ける。
+
+この場合も、SourceDataProvider 本体コードの編集は不要とする。
+
+### 17.3 専用画面が必要な場合
+
+既存の汎用ページで十分なら追加コードは不要とする。
+
+専用の可視化やシミュレーションが必要な場合のみ、
+
+- 系統ページ
+- プレビューパネル
+
+の追加を許容する。
+
+## 18. リスクと対策
 
 ### リスク1
 
@@ -560,16 +655,26 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 ### リスク4
 
-Attribute と Settings の両方でカテゴリや列挙情報を持つため、不整合が起きる可能性がある。
+SourceAsset 設定と collection 設定が分かれることで、設定間の参照不整合が起きる可能性がある。
 
 対策:
 
 - Validation で差分検出を行う。
 - 正本を Settings、型宣言を Attribute と役割分担する。
 
-## 18. 最終提案
+### リスク5
 
-現状に合わせた最も自然な進め方は、**既存の `SourceDataProvider` を「Repository 専用ツール」から「Addressables でロードする全 ScriptableObject のメタデータ基盤」へ拡張し、その上にプランナー向け統合 EditorWindow を実装すること**である。
+「コード編集不要」を目指した結果、Settings 入力項目が増えすぎて運用が複雑になる可能性がある。
+
+対策:
+
+- Settings は SourceAsset 共通情報と collection 情報に分ける。
+- collection 固有情報は Settings を正本にし、Attribute は候補補助に留める。
+- Planner 側は汎用ページを先に作り、専用ページ追加を後回しにする。
+
+## 19. 最終提案
+
+現状に合わせた最も自然な進め方は、**既存の `SourceDataProvider` を「Repository 専用ツール」から「Addressables でロードする全 ScriptableObject のメタデータ基盤」へ拡張し、その内部を `SourceAsset` と `collection` の2層構造へ分離した上で、プランナー向け統合 EditorWindow を実装すること**である。
 
 この前提なら、既にある以下をそのまま再利用できる。
 
@@ -579,12 +684,16 @@ Attribute と Settings の両方でカテゴリや列挙情報を持つため、
 - `DataID` 入力補助
 - 個別アセットの登録 / 解除
 
-そのうえで今回新たに必要なのは、次の 4 点である。
+そのうえで今回新たに必要なのは、次の 5 点である。
 
 - SourceDataProvider の一般化
+- SourceAsset / collection 分離モデルの導入
 - Repository / collection 系向け Attribute 導入
+- データ駆動での型追加を前提にした Settings / Resolver 設計
 - 系統単位で切り替える上位 UI
 - 複数カテゴリを束ねる編集ページ
 - 構造を見せるプレビュー / Validation
+
+最終的なあるべき姿は、「新しいデータ型が増えても、単体アセットなら SourceAsset 登録だけ、collection 系でも SourceAsset 登録 + collection 設定追加だけで統合管理画面に載る」構造である。
 
 実装順としては、まず SourceDataProvider の一般化と互換レイヤを整備し、その後 `SkillTree` を最初の実運用系統として Planner Window に載せ、次に `StageSelect`、`Scenario` の順で広げるのが安全である。

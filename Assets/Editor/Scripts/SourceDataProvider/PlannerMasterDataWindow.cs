@@ -2,6 +2,7 @@ using KillChord.Editor.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace KillChord.Editor.SourceDataProvider
@@ -179,6 +180,11 @@ namespace KillChord.Editor.SourceDataProvider
                 "左の一覧からSourceAssetまたはcollectionを選ぶと、右側で編集とプレビューを行えます。"
                 + " 新しい型の追加は、SourceDataProvider設定とページ設定の更新だけで反映できます。",
                 MessageType.Info);
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.LabelField($"Source Assets: {page.SourceAssetAddressableKeys.Count}");
+            EditorGUILayout.LabelField($"Collections: {page.CollectionCategories.Count}");
+            EditorGUILayout.EndHorizontal();
         }
 
         /// <summary>
@@ -246,8 +252,9 @@ namespace KillChord.Editor.SourceDataProvider
             for (int i = 0; i < page.CollectionCategories.Count; i++)
             {
                 string collectionKey = page.CollectionCategories[i];
+                string label = BuildCollectionLabel(collectionKey);
                 bool isSelected = string.Equals(_selectedCollectionKey, collectionKey, StringComparison.Ordinal);
-                if (!GUILayout.Button(collectionKey, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
+                if (!GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
                 {
                     continue;
                 }
@@ -329,6 +336,7 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             DrawObjectHeader($"Collection [{collectionKey}]", mapping.SourceAssetAddressableKey, sourceAsset);
+            DrawCollectionMetadata(mapping, sourceAsset);
 
             SerializedObject serializedObject = new(sourceAsset);
             SerializedProperty property = string.IsNullOrWhiteSpace(mapping.PropertyPath)
@@ -416,24 +424,25 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
-            string[] configuredPaths =
-                SourceDataProviderRepositoryResolver.GetConfiguredCollectionPropertyPaths(addressableKey);
-            if (configuredPaths.Length == 0)
+            IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
+                SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey);
+            if (mappings.Count == 0)
             {
                 EditorGUILayout.HelpBox("このSourceAssetにはcollection設定がありません。", MessageType.None);
                 return;
             }
 
             SerializedObject serializedObject = new(sourceAsset);
-            for (int i = 0; i < configuredPaths.Length; i++)
+            for (int i = 0; i < mappings.Count; i++)
             {
-                SerializedProperty property = serializedObject.FindProperty(configuredPaths[i]);
+                SourceDataProviderSettings.SourceCollectionMapping mapping = mappings[i];
+                SerializedProperty property = serializedObject.FindProperty(mapping.PropertyPath);
                 if (property == null)
                 {
                     continue;
                 }
 
-                DrawCollectionPreview(configuredPaths[i], property);
+                DrawCollectionPreview(mapping.CollectionKey, property);
             }
         }
 
@@ -456,6 +465,23 @@ namespace KillChord.Editor.SourceDataProvider
             EditorGUILayout.HelpBox(
                 $"ノード数: {nodeAssetsProperty.arraySize} / 接続数: {connectionsProperty?.arraySize ?? 0}",
                 MessageType.None);
+
+            int tutorialCount = 0;
+            for (int i = 0; i < nodeAssetsProperty.arraySize; i++)
+            {
+                SerializedProperty element = nodeAssetsProperty.GetArrayElementAtIndex(i);
+                if (element.objectReferenceValue is ScriptableObject nodeAsset)
+                {
+                    SerializedObject serializedNodeAsset = new(nodeAsset);
+                    SerializedProperty isTutorialProperty = serializedNodeAsset.FindProperty(STAGE_NODE_IS_TUTORIAL_PROPERTY_NAME);
+                    if (isTutorialProperty != null && isTutorialProperty.boolValue)
+                    {
+                        tutorialCount++;
+                    }
+                }
+            }
+
+            EditorGUILayout.LabelField($"Tutorial Nodes: {tutorialCount}", EditorStyles.miniBoldLabel);
 
             EditorGUILayout.LabelField("Stage Nodes", EditorStyles.miniBoldLabel);
             for (int i = 0; i < Mathf.Min(nodeAssetsProperty.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
@@ -484,6 +510,21 @@ namespace KillChord.Editor.SourceDataProvider
                     $"残り {nodeAssetsProperty.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
                     MessageType.None);
             }
+
+            if (connectionsProperty != null && connectionsProperty.arraySize > 0)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Connections", EditorStyles.miniBoldLabel);
+                for (int i = 0; i < Mathf.Min(connectionsProperty.arraySize, PREVIEW_CONNECTION_LIMIT); i++)
+                {
+                    SerializedProperty connection = connectionsProperty.GetArrayElementAtIndex(i);
+                    SerializedProperty fromProperty = connection.FindPropertyRelative(STAGE_CONNECTION_FROM_PROPERTY_NAME);
+                    SerializedProperty toProperty = connection.FindPropertyRelative(STAGE_CONNECTION_TO_PROPERTY_NAME);
+                    string fromLabel = GetDataIdLabel(fromProperty);
+                    string toLabel = GetDataIdLabel(toProperty);
+                    EditorGUILayout.LabelField($"{fromLabel} -> {toLabel}");
+                }
+            }
         }
 
         /// <summary>
@@ -501,6 +542,18 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             EditorGUILayout.HelpBox($"要素数: {property.arraySize}", MessageType.None);
+
+            if (string.Equals(label, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
+            {
+                DrawWaveCollectionPreview(property);
+                return;
+            }
+
+            if (IsScenarioCatalogCollection(label))
+            {
+                DrawScenarioCatalogPreview(property);
+                return;
+            }
 
             for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
             {
@@ -548,6 +601,113 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             EditorGUILayout.PropertyField(element, INCLUDE_CHILDREN);
+        }
+
+        /// <summary>
+        ///     collection設定の補足情報を描画します。
+        /// </summary>
+        /// <param name="mapping"> 対象のcollection設定です。 </param>
+        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
+        private static void DrawCollectionMetadata(
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            ScriptableObject sourceAsset)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.TextField("Collection Key", mapping.CollectionKey);
+                EditorGUILayout.TextField("Property Path", mapping.PropertyPath);
+                EditorGUILayout.TextField("Source Asset Type", sourceAsset.GetType().Name);
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        /// <summary>
+        ///     Wave collection向けの専用プレビューを描画します。
+        /// </summary>
+        /// <param name="property"> Wave配列プロパティです。 </param>
+        private static void DrawWaveCollectionPreview(SerializedProperty property)
+        {
+            float totalDuration = 0f;
+            for (int i = 0; i < property.arraySize; i++)
+            {
+                SerializedProperty wave = property.GetArrayElementAtIndex(i);
+                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
+                if (durationProperty != null)
+                {
+                    totalDuration += durationProperty.floatValue;
+                }
+            }
+
+            EditorGUILayout.LabelField($"Total Duration: {totalDuration:0.##} sec", EditorStyles.miniBoldLabel);
+            for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
+            {
+                SerializedProperty wave = property.GetArrayElementAtIndex(i);
+                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
+                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
+                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(WAVE_STAGE_EFFECTS_PROPERTY_NAME);
+
+                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
+                int spawnCount = CountWaveEnemies(detailsProperty);
+                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
+                float duration = durationProperty?.floatValue ?? 0f;
+                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
+                EditorGUILayout.LabelField($"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
+                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
+                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+                EditorGUILayout.EndVertical();
+            }
+
+            if (property.arraySize > PREVIEW_ELEMENT_LIMIT)
+            {
+                EditorGUILayout.HelpBox(
+                    $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
+                    MessageType.None);
+            }
+        }
+
+        /// <summary>
+        ///     Scenario catalog向けの専用プレビューを描画します。
+        /// </summary>
+        /// <param name="property"> カタログ配列プロパティです。 </param>
+        private static void DrawScenarioCatalogPreview(SerializedProperty property)
+        {
+            for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
+            {
+                SerializedProperty element = property.GetArrayElementAtIndex(i);
+                SerializedProperty idProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME);
+                SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+                SerializedProperty assetKeyProperty = element.FindPropertyRelative(CATALOG_ASSET_KEY_PROPERTY_NAME);
+                SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
+
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                {
+                    Texture preview = AssetPreview.GetAssetPreview(assetProperty.objectReferenceValue)
+                        ?? AssetPreview.GetMiniThumbnail(assetProperty.objectReferenceValue);
+                    GUILayout.Label(preview, GUILayout.Width(64f), GUILayout.Height(64f));
+                }
+
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.LabelField($"ID: {idValueProperty?.stringValue ?? "<未設定>"}");
+                EditorGUILayout.LabelField($"Key: {assetKeyProperty?.stringValue ?? "<未設定>"}");
+                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                {
+                    EditorGUILayout.ObjectField("Asset", assetProperty.objectReferenceValue, typeof(UnityEngine.Object), false);
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (property.arraySize > PREVIEW_ELEMENT_LIMIT)
+            {
+                EditorGUILayout.HelpBox(
+                    $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
+                    MessageType.None);
+            }
         }
 
         /// <summary>
@@ -639,20 +799,109 @@ namespace KillChord.Editor.SourceDataProvider
         {
             if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
             {
-                return $"{sourceAsset.GetType().Name}\n{addressableKey}";
+                int collectionCount =
+                    SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey).Count;
+                return $"{sourceAsset.GetType().Name} [{collectionCount}]";
             }
 
             return addressableKey;
         }
 
+        /// <summary>
+        ///     CollectionKeyナビゲーション用ラベルを生成します。
+        /// </summary>
+        /// <param name="collectionKey"> CollectionKeyです。 </param>
+        /// <returns> 表示ラベルです。 </returns>
+        private static string BuildCollectionLabel(string collectionKey)
+        {
+            if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(
+                collectionKey,
+                out SourceDataProviderSettings.SourceCollectionMapping mapping)
+                || !SourceDataProviderRepositoryResolver.TryResolveAsset(
+                    mapping.SourceAssetAddressableKey,
+                    out ScriptableObject sourceAsset))
+            {
+                return collectionKey;
+            }
+
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty property = serializedObject.FindProperty(mapping.PropertyPath);
+            int count = property != null && property.isArray ? property.arraySize : 0;
+            return $"{collectionKey} ({count})";
+        }
+
+        /// <summary>
+        ///     DataIDの表示用ラベルを取得します。
+        /// </summary>
+        /// <param name="property"> DataIDプロパティです。 </param>
+        /// <returns> 表示用ラベルです。 </returns>
+        private static string GetDataIdLabel(SerializedProperty property)
+        {
+            SerializedProperty idProperty = property?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+            return string.IsNullOrWhiteSpace(idProperty?.stringValue)
+                ? "<未設定>"
+                : idProperty.stringValue;
+        }
+
+        /// <summary>
+        ///     Wave内の敵総数を集計します。
+        /// </summary>
+        /// <param name="detailsProperty"> Wave詳細配列です。 </param>
+        /// <returns> 敵総数です。 </returns>
+        private static int CountWaveEnemies(SerializedProperty detailsProperty)
+        {
+            if (detailsProperty == null || !detailsProperty.isArray)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < detailsProperty.arraySize; i++)
+            {
+                SerializedProperty detail = detailsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty amountProperty = detail.FindPropertyRelative(WAVE_ENEMY_AMOUNT_PROPERTY_NAME);
+                if (amountProperty != null)
+                {
+                    count += amountProperty.intValue;
+                }
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        ///     Scenario catalog系のCollectionKeyか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> CollectionKeyです。 </param>
+        /// <returns> Scenario catalog系の場合はtrueです。 </returns>
+        private static bool IsScenarioCatalogCollection(string collectionKey)
+        {
+            return string.Equals(collectionKey, SCENARIO_BACKGROUND_COLLECTION_KEY, StringComparison.Ordinal)
+                || string.Equals(collectionKey, SCENARIO_ANIMATION_COLLECTION_KEY, StringComparison.Ordinal)
+                || string.Equals(collectionKey, SCENARIO_PORTRAIT_COLLECTION_KEY, StringComparison.Ordinal);
+        }
+
         private const float PAGE_SIDEBAR_WIDTH = 180f;
         private const float NAVIGATION_COLUMN_WIDTH = 280f;
         private const int PREVIEW_ELEMENT_LIMIT = 8;
+        private const int PREVIEW_CONNECTION_LIMIT = 12;
         private const bool INCLUDE_CHILDREN = true;
         private const string STAGE_NODE_ASSETS_PROPERTY_NAME = "_nodeAssets";
         private const string STAGE_CONNECTIONS_PROPERTY_NAME = "_connections";
+        private const string STAGE_NODE_IS_TUTORIAL_PROPERTY_NAME = "_isTutorial";
+        private const string STAGE_CONNECTION_FROM_PROPERTY_NAME = "_fromStageId";
+        private const string STAGE_CONNECTION_TO_PROPERTY_NAME = "_toStageId";
         private const string COLLECTION_ASSET_PROPERTY_NAME = "Asset";
         private const string COLLECTION_ID_PROPERTY_NAME = "Id";
+        private const string CATALOG_ASSET_KEY_PROPERTY_NAME = "AssetKey";
         private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
+        private const string WAVE_COLLECTION_KEY = "Wave";
+        private const string SCENARIO_BACKGROUND_COLLECTION_KEY = "ScenarioBackground";
+        private const string SCENARIO_ANIMATION_COLLECTION_KEY = "ScenarioAnimation";
+        private const string SCENARIO_PORTRAIT_COLLECTION_KEY = "ScenarioPortrait";
+        private const string WAVE_DETAILS_PROPERTY_NAME = "Details";
+        private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
+        private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
+        private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
     }
 }
