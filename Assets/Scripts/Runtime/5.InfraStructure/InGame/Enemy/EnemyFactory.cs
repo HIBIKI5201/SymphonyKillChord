@@ -1,5 +1,6 @@
 ﻿using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
@@ -36,9 +37,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// </summary>
         /// <param name="enemyMusicData"></param>
         /// <returns></returns>
-        public static EnemyMusicSpec CreateEnemyMusicSpec(EnemyMusicSpecAsset enemyMusicData)
+        public static MusicSyncSpec CreateEnemyMusicSpec(EnemyMusicSpecAsset enemyMusicData)
         {
-            return new EnemyMusicSpec(
+            return new MusicSyncSpec(
                 enemyMusicData.BarFlag,
                 enemyMusicData.TimeSignature,
                 enemyMusicData.TargetBeat);

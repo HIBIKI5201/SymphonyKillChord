@@ -4,6 +4,7 @@ using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -76,7 +77,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(_musicSyncView.MusicSyncState, _musicSyncInitializer.MusicSyncService);
             ShellAttackSpec attackSpec = ShellFactory.CreateAttackSpec(_loadedAttackData);
-            EnemyMusicSpec musicSpec = ShellFactory.CreateMusicSpec(_loadedMusicData);
+            MusicSyncSpec musicSpec = ShellFactory.CreateMusicSpec(_loadedMusicData);
 
             ShellEntity entity = new ShellEntity(attackSpec, musicSpec, null);
 

@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -72,11 +73,11 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
                 _musicActionScheduler.Schedule(
-                new EnemyMusicSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 2),// 2拍前
+                new MusicSyncSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 2),// 2拍前
                 Handle2BeatBefore,
                 _cancellationTokenSource.Token);
                 _musicActionScheduler.Schedule(
-                new EnemyMusicSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 1),// 1拍前
+                new MusicSyncSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 1),// 1拍前
                 Handle1BeatBefore,
                 _cancellationTokenSource.Token);
         }
