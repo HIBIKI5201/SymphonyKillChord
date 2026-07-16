@@ -1,4 +1,4 @@
-> ⚠️ このメモは過去の時点でのコードレビューによる指摘一覧（スナップショット）です。項目によっては既に対応済み・クラス名が変更済みのものが混在しています（例: `RhythmDefinition`は既に存在しません。`CameraSystemParameter`は`CameraConfig`に置き換わりました。`BuffTest`は既にRuntimeアセンブリから削除されています）。個別の指摘を参照する際は、対象クラスが現在も同名で存在するかをコードで確認してください。
+> ⚠️ このメモは過去の時点でのコードレビューによる指摘一覧（スナップショット）です。2026-07-16に全項目をコードと照合し、実装済みの項目（ParticleController・カメラのApplication層UnityEngine依存・CameraLockOnState・MusicTimingCalculatorのコメント・RhythmDefinition・PlayerMoveParameter/EnemyMoveSpecの命名統一・CameraSystemParameter→CameraConfig・IBuffのファイル分割・EventBusの静的リスナークリア・PriorityQueueの自作理由明記）は削除しました。残っているのは未対応の項目のみです。個別の指摘を参照する際は、対象クラスが現在も同名で存在するかをコードで確認してください。
 
 ## シーン
 
@@ -13,76 +13,16 @@ NavMeshSurfaceのみがあり、NavMeshDataがミッシングのオブジェク�
 
 ## スクリプト
 
-### ParticleControllerの意義について
-
-これは仮で実装したパーティクルシステムなのか、本実装用のシングルトンクラスなのか
-
-本実装にしては雑なシングルトンだが、仮ならRuntime名前空間にあるのはおかしい
-
-### Cameraのレイヤー構造について
-
-カメラのApplication層でカメラの位置を計算しているが、この位置計算は本質的にはViewの役割なのではないか？
-
 ### Playerのモデル生成をスポナー経由でやるべきなのでは
 
 Playerのモデルをステージシーンに設置でやってるのはおかしい
 Playerのプレハブを生成するスポナーを作るべきなのでは？
 
-### CameraLockOnState
-
-これカメラモジュールでしか使ってないし、カメラモジュールのドメインにしてよいのでは
-
-### MusicTimingCalculator
-
-コメント・サマリーが何のこと言ってるか分からない
-
-```csharp
-/// <summary>
-///    現在の拍位置を基準に、指定した小節オフセットおよび拍位置に対応する絶対時刻を計算する。
-/// </summary>
-```
-
-### RhythmDefinition
-
-このクラスはドメインのデータであって、処理をするのはApplicationにした方がよい
-
-あとCalculateBeatTypeメソッドでイベント発火してるけど、ここでやるんじゃなくて戻り値でIsJustedを返してその結果から発火した方が良くない？
-イベント発火は計算と隔離すべきでは
+※2026-07-16時点: `PlayerInitializer`（Composition層）がランタイムで`PlayerView`プレハブを`Instantiate`する形にはなっており、シーンへの直接配置は解消済み。ただし専用の`PlayerSpawner`クラスへの分離はまだ行われていない。
 
 ### RhythmState
 
 実装内容はリズム系の入力バッファなので、RhytmCommandBufferクラスに改名していいのでは
-
-### PlayerMoveParameter・EnemyMoveSpec
-
-表記揺れおよびクラス・構造体の設計の違い
-
-そもそもパラメータはAdaptor層が永続化を行い、Applicationは引数で逐次受け取るだけにすべきなのでは
-
-### CameraSystemParameter
-
-直接シリアライズ可能な状態になっている
-インフラにAssetクラスを作るべき
-
-### IBuff
-
-実装と抽象化を1ファイルに書くな！！！！！！
-
-### BuffTestなどのテスト用コードがRuntimeアセンブリに混在している
-
-`BuffTest.cs` というテスト用のクラスが `KillChord.Runtime.Application.InGame.Buff` 名前空間（本番コード用ディレクトリ）に配置されている。また、テスト用アサーション拡張である `UnityEngine.Assertions.Must` の using もRuntimeコードに残ってしまっている。
-テスト用のクラスやモックは、EditorアセンブリやTestsアセンブリ（Assembly Definition等で本番用アセンブリから隔離された場所）に移動するか、不要であれば削除すべきである。
-
-### EventBusの静的イベント（static）によるライフサイクル・メモリリーク問題
-
-`EventBus<T>` が静的（`static`）クラスとして実装され、静的イベント `_onEvent` にリスナーが登録される設計になっている。
-Unityにおいては、シーンロードをまたぐ際やプレイモードを終了した際、明示的に `Unregister` が呼ばれなかったリスナー（ゲームオブジェクトやコンポーネント等）への参照が static イベントに残ったままになり、
-- メモリリーク（解放されるべきオブジェクトがGCされない）
-- すでに破壊されたオブジェクトに対するイベント送信による `MissingReferenceException` / 空参照エラー
-といった致命的な不具合を容易に引き起こす。
-**対策：**
-1. インスタンスベースのイベントマネージャーをDIでライフサイクル管理する。
-2. 静的クラスを維持する場合、シーン遷移時（初期化時または破棄時）にイベントリスナーを全クリアする `Clear()` または `Reset()` メソッドを提供し、適切にコールする。
 
 ### ServiceLocator（サービスロケーターパターン）への依存と依存関係のブラックボックス化
 
@@ -91,12 +31,7 @@ Unityにおいては、シーンロードをまたぐ際やプレイモードを
 **対策：**
 可能な限りコンストラクタインジェクションや、VContainerやZenjectなどの純粋なDIフレームワークを導入し、エントリポイント（Composition Root）で明示的に依存関係をバインド・注入する設計へ移行すべきである。
 
-### RhythmDefinition.CalculateBeatType におけるコールバック実行（副作用の混入）
-
-`RhythmDefinition`（Domain層の定義・計算用構造体）内の `CalculateBeatType` メソッドにおいて、引数で `Action action` を受け取り、判定の閾値内だった場合に `action?.Invoke()` を直接実行してイベントを発火させている。
-これは純粋であるべきドメインの計算ロジック内に、「何かしらの副作用をコールバックとして実行する」という処理が入り込んでおり、ドメインのテスト容易性を下げ、アーキテクチャの責務を曖昧にしている。
-**対策：**
-計算メソッドは純粋に関数として結果（例: `BeatType` や、ジャスト判定に合致したかどうかを示すフラグ `IsJusted` 等をまとめた構造体）を返し、その結果をもとに呼び出し元（Application層等）がアクションを呼び出す・イベントを発火させる、というように計算と副作用を明確に隔離すべきである。
+※2026-07-16時点: 137箇所・49ファイルで使用されており、その大半はComposition層の初期化クラスに集中している（Composition Rootでの利用に限定されている点は一貫している）。DIフレームワークへの移行は行われていないが、現状は意図的に許容されているパターンとして定着している可能性がある。対応するかどうかは方針判断が必要。
 
 ### RingBuffer<T>.AsReadonlySpan() における危険な stackalloc と予期せぬ副作用
 
@@ -109,6 +44,8 @@ Unityにおいては、シーンロードをまたぐ際やプレイモードを
 **対策：**
 配列全体を無理に1枚の `ReadOnlySpan` として返すのではなく、順番通りに走査するためのカスタムなイテレータ（`IEnumerable<T>` や `IEnumerator<T>`）を提供するか、バッファを崩さずに全要素を走査する `ForEach(Action<T> action)` 等を設計すべきである。
 
+※2026-07-16時点: `RingBuffer.cs`は依然として同じ実装で、`RhythmState.cs`から使われ続けている。未対応。
+
 ### HealthEntityとCharacterEntityの間の不変量管理・カプセル化の分散
 
 `CharacterEntity.cs` において、`TakeDamage` や `Heal` の際に「現在HPからダメージ値を差し引いて下限を0にする（`Math.Max(0, ...)`）」といった計算を行い、その結果を `HealthEntity.ChangeHealth(nextHealth)` に渡している。
@@ -116,6 +53,8 @@ Unityにおいては、シーンロードをまたぐ際やプレイモードを
 しかし、上限判定（MaxHP）は `HealthEntity.ChangeHealth` 側で行われ、下限判定（0下限）や「ダメージを与える」「回復する」といった計算そのものは `CharacterEntity` 側に分散してしまっている。
 **対策：**
 `HealthEntity` に `TakeDamage(Damage)` や `Heal(Health)` といった明確なドメインアクションメソッドを定義し、HPの境界条件判定（0以下やMaxHP超過など）の計算・不変量の維持を `HealthEntity` 内部に完全にカプセル化すべきである。
+
+※2026-07-16時点: 未対応。現状のままの分担。
 
 ### ScenarioCsvUtilityのゲーム中における文字列アロケーション（GC Alloc）の懸念
 
@@ -125,30 +64,13 @@ Unityにおいては、シーンロードをまたぐ際やプレイモードを
 1. ロード時間をアロケーションフリーにするために、`ReadOnlySpan<char>` を使って文字列アロケーションなしでCSVをトークナイズするパーサーへの変更。
 2. そもそも実行時にCSVをパースするのではなく、Unityのビルドインまたはインフラ層の機能で事前に `ScriptableObject` やシリアライズドバイナリデータ（MessagePackなど）に変換しておき、実行時はアロケーションなしで直接読み込めるように設計を移行すべき。
 
-### PriorityQueueの自作クラスと.NET標準の重複
-
-`PriorityQueue<TElement, TPriority>` という優先度付きキューが独自にフル実装されているが、.NET 6（または近代的な.NET Standard）以降の環境では、標準で `System.Collections.Generic.PriorityQueue` が提供されている。
-独自実装のコレクションはバグやパフォーマンス問題を生み出しやすいため、もしUnity環境が .NET 6 等の標準ライブラリをサポートしている場合は、これを取り除き、標準の優先度付きキューを使用するべき。古いバージョンへの互換性などの理由から意図して自作している場合は、その旨をサマリーコメント等で明示すべきである。
+※2026-07-16時点: 未対応。現状のまま。
 
 ## 設計理念（DesignPhilosophy.md）からの逸脱指摘
 
-`DesignPhilosophy.md` では、**Domain層**、**Application層**、**Adaptor層**はすべて**ピュアC#クラス（Pure C#）**として定義され、Unityフレームワークへの直接依存は避ける（またはインターフェースを介してComposition層でDIする）方針となっている。しかし、現状のコードベースでは、これらのレイヤーへ `UnityEngine` の依存が著しく漏れ出している。
+`DesignPhilosophy.md` では、**Domain層**、**Application層**、**Adaptor層**はすべて**ピュアC#クラス（Pure C#）**として定義され、Unityフレームワークへの直接依存は避ける（またはインターフェースを介してComposition層でDIする）方針となっている。しかし、次の箇所ではAdaptor層へ `UnityEngine` の依存が漏れ出したままになっている。
 
-### 1. Application層における3D座標・回転・Lerp計算（カメラシステム）
-
-* **対象ファイル:**
-  * `CameraSystemApplication.cs`
-  * `CameraFollowApplication.cs`
-  * `CameraRotationApplication.cs`
-* **問題点:**
-  * これらは `Application` 層に属しているピュアクラスであるべきだが、内部で `using UnityEngine;` を行い、`Vector3`, `Quaternion`, `Mathf.Lerp`, `Quaternion.Slerp` などの Unity 独自の3D数学ライブラリを多用している。
-  * さらに、**「カメラの追従位置のLerp計算」「障害物衝突時のカメラ位置の先行計算」「注視対象へのLookRotation計算」**といった、本来 `View` 層（表示・ゲームオブジェクト制御）が担当すべき「表示・物理制御ロジック」そのものが Application 層に実装されてしまっている。
-  * これにより、Application層単体でのPure C#ユニットテストが完全に不可能になり、クリーンアーキテクチャのメリット（テスト容易性・Unityへの非依存性）が失われている。
-* **対策:**
-  * カメラの位置・回転を直接算出する Lerp や Slerp、Raycast などのUnityに依存する数理処理は、すべて `View` 層（`CameraSystemView` 等）に移動する。
-  * Application層は「ターゲットロックオン状態の遷移判断」「どの対象を注視すべきかという抽象的な意思決定（ドメイン概念）」などの純粋なロジックのみを扱い、具体的な座標や回転の補間計算はView層に任せる設計へリファクタリングすべき。
-
-### 2. Adaptor層（Controller / Presenter）への UnityEngine 依存の流出
+### Adaptor層（Controller / Presenter）への UnityEngine 依存の流出
 
 * **対象ファイル:**
   * `PlayerController.cs`
@@ -160,16 +82,9 @@ Unityにおいては、シーンロードをまたぐ際やプレイモードを
 * **対策:**
   * ベクトルデータや回転データをそのまま渡すのではなく、必要最小限のピュアC#データ型（または自作のプリミティブな値型オブジェクト）に変換してやり取りするか、インターフェースを介してUnityフレームワークの型を隠蔽すべきである。
 
-### 3. Domain層における UnityEngine 依存（ValueObject / Entity の汚染）
+※2026-07-16時点: 両ファイルとも同じ場所・同じ内容のまま。未対応。
 
-* **対象ファイル:**
-  * `PlayerMoveParameter.cs`
-  * `CameraSystemParameter.cs`
-* **問題点:**
-  * 最もピュアであるべき `Domain` 層のクラスであるにもかかわらず、`PlayerMoveParameter.cs` は `using UnityEngine;` を含んでいる。
-  * `CameraSystemParameter.cs` は `UnityEngine.Vector3` や `UnityEngine.LayerMask` などを抱え、さらにUnityのインスペクターで編集できるようにするためか `[System.Serializable]` で直接装飾されている。
-* **対策:**
-  * `DesignPhilosophy.md` の記述「直接シリアライズ可能な状態になっている。インフラにAssetクラスを作るべき」に従い、シリアライズ（ScriptableObject等）やUnityのデータ型とのバインドは `InfraStructure` 層（ScriptableObjectとしての `Asset` クラス）に隔離し、Domain層はそれらを純粋なC#データ型として受け取るように完全に分離すべきである。
+（Application層のカメラ位置計算、Domain層の`PlayerMoveParameter`/`CameraSystemParameter`のUnityEngine依存は、カメラの`View`層への移設・`PlayerMoveSpec`へのリネーム・`CameraConfig`（ScriptableObject Asset）化によりそれぞれ解消済みのため削除しました。）
 
 # 用語
 

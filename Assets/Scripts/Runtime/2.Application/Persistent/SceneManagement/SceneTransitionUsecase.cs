@@ -62,6 +62,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
         /// <summary>
         ///    シーン遷移を行うが、ロード画面を閉じずに進捗を保持する。
+        ///    既にアクティブなロードセッションが存在する場合（例: シーン初期化中に続けて次のシーンへ
+        ///    遷移する場合）は、新規セッションを開始せずそのセッションを引き継いで完了させる。
         /// </summary>
         /// <param name="fromSceneName"> 遷移元のシーン名。 </param>
         /// <param name="toSceneName"> 遷移先のシーン名。 </param>
@@ -72,8 +74,11 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             string toSceneName,
             CancellationToken ct)
         {
-            LoadingExecutionOptions options =
-                LoadingExecutionOptions.KeepOpen(
+            LoadingExecutionOptions options = _executor.IsSessionActive
+                ? LoadingExecutionOptions.ContinueAndComplete(
+                    0f,
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS)
+                : LoadingExecutionOptions.KeepOpen(
                     0f,
                     LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS);
 

@@ -68,6 +68,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SelectedScenarioState _selectedScenarioState;
         private SelectedBattleStageState _selectedBattleStageState;
         private SelectedMissionState _selectedMissionState;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
+        private BattleSortieSelectionService _battleSortieSelectionService;
+        private NodeTransitionRuleResolver _nodeTransitionRuleResolver;
         private StageTreeAsset _loadedStageTreeAsset;
         private SaveData _loadedSaveData;
         private bool _isSubscribed;
@@ -117,7 +120,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
-            TryStartTutorialSortie();
             return _isInitialized;
         }
 
@@ -166,6 +168,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             if (stageDefinition.StageType == StageType.Battle)
             {
+                _pendingNodeTransitionState?.Clear();
                 if (!TryPrepareBattleSortie(stageDefinition))
                 {
                     return;
@@ -184,6 +187,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return;
                 }
 
+                TryReserveNodeTransition(stageDefinition);
                 _selectedScenarioState.SelectScenario(stageDefinition.ScenarioId);
             }
 
@@ -195,59 +199,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     初回チュートリアル要求がある場合に通常の選択状態を構築して自動出撃します。
-        /// </summary>
-        private void TryStartTutorialSortie()
-        {
-            if (!_isInitialized
-                || !ServiceLocator.TryGetInstance(out TutorialSortieRequestState requestState)
-                || !requestState.IsRequested)
-            {
-                return;
-            }
-
-            if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
-                || !TryPrepareBattleSortie(tutorialNode.Definition))
-            {
-                Debug.LogError(
-                    $"[{nameof(StageSelectInitializer)}] チュートリアルステージの出撃準備に失敗しました。",
-                    this);
-                return;
-            }
-
-            if (!_outGameSortieController.RequestImmediateBattleSortie(
-                    tutorialNode.Definition.TargetSceneName)
-                || !requestState.TryConsume())
-            {
-                Debug.LogError(
-                    $"[{nameof(StageSelectInitializer)}] チュートリアル自動出撃に失敗しました。",
-                    this);
-                return;
-            }
-
-            ServiceLocator.UnregisterInstance<TutorialSortieRequestState>();
-        }
-
-        /// <summary>
         ///     バトルステージとミッションの選択状態を構築します。
         /// </summary>
         /// <param name="stageDefinition"> 出撃するステージ定義です。 </param>
         /// <returns> 出撃準備に成功した場合はtrueです。 </returns>
         private bool TryPrepareBattleSortie(StageDefinition stageDefinition)
         {
-            if (stageDefinition == null
-                || stageDefinition.StageType != StageType.Battle
-                || stageDefinition.MissionDefinition == null
-                || string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName))
+            if (_battleSortieSelectionService == null)
             {
                 return false;
             }
 
-            _selectedBattleStageState.SelectBattleStage(
-                stageDefinition,
-                _currentSceneName);
-            _missionSelectController.Select(stageDefinition.MissionDefinition);
-            return true;
+            return _battleSortieSelectionService.TryPrepareBattleSortie(stageDefinition, _currentSceneName);
         }
 
         /// <summary>
@@ -277,6 +240,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
                 ServiceLocator.RegisterInstance(_selectedMissionState);
             }
+
+            if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
+            {
+                _pendingNodeTransitionState = new PendingNodeTransitionState();
+                ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
+            }
+
+            _battleSortieSelectionService = new BattleSortieSelectionService();
             _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
@@ -344,6 +315,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             // Presenter 生成前に既知のクリアステージをツリーへ反映する。
             _openUseCase.ApplySavedClearedStages();
+            _nodeTransitionRuleResolver = new NodeTransitionRuleResolver(_stageTree, BuildNodeTransitionRules());
 
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
@@ -375,6 +347,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedStageTreeAsset = null;
             _loadedSaveData = null;
+            _nodeTransitionRuleResolver = null;
+            _battleSortieSelectionService = null;
             _isInitialized = false;
         }
 
@@ -522,6 +496,77 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             var detailPresenter = new StageDetailPresenter(_detailScreenView);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
+        }
+
+        /// <summary>
+        ///     現在のステージに適用できる後続遷移を予約します。
+        /// </summary>
+        /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
+        private void TryReserveNodeTransition(StageDefinition stageDefinition)
+        {
+            if (_pendingNodeTransitionState == null)
+            {
+                return;
+            }
+
+            _pendingNodeTransitionState.Clear();
+            if (_nodeTransitionRuleResolver == null
+                || stageDefinition == null
+                || stageDefinition.StageType != StageType.Scenario)
+            {
+                return;
+            }
+
+            if (!_nodeTransitionRuleResolver.TryResolve(
+                    stageDefinition,
+                    _loadedSaveData.Tutorial.IsTutorialCompleted,
+                    out NodeTransitionRule resolvedRule,
+                    out StageDefinition targetStageDefinition))
+            {
+                return;
+            }
+
+            _pendingNodeTransitionState.Reserve(new PendingNodeTransition(
+                resolvedRule.ActionType,
+                targetStageDefinition,
+                _currentSceneName));
+        }
+
+        /// <summary>
+        ///     ノード連結ルール一覧を構築します。
+        /// </summary>
+        /// <returns> 構築したルール一覧です。 </returns>
+        private List<NodeTransitionRule> BuildNodeTransitionRules()
+        {
+            List<NodeTransitionRule> rules = new();
+
+            foreach (StageNode node in _stageTree.Nodes)
+            {
+                if (node?.Definition == null
+                    || node.Definition.StageType != StageType.Scenario)
+                {
+                    continue;
+                }
+
+                IReadOnlyList<StageId> nextIds = _stageTree.GetNextIds(node.Id);
+                for (int i = 0; i < nextIds.Count; i++)
+                {
+                    if (!_stageTree.TryGetDefinition(nextIds[i], out StageDefinition nextStageDefinition)
+                        || nextStageDefinition.StageType != StageType.Battle)
+                    {
+                        continue;
+                    }
+
+                    rules.Add(new NodeTransitionRule(
+                        node.Id,
+                        true,
+                        NodeTransitionActionType.StartBattle,
+                        nextStageDefinition.StageId,
+                        nextStageDefinition.IsTutorial ? 100 : 0));
+                }
+            }
+
+            return rules;
         }
 
         /// <summary>
