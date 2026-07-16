@@ -53,6 +53,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private string _targetSceneName;
 
         [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+
         private string _stageTreeAssetKey = "StageTreeAsset";
 
         private OutGameUIEvent _outGameUIEvent;
