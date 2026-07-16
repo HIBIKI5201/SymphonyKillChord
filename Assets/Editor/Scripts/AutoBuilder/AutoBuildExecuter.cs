@@ -78,6 +78,45 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
+        ///     再出力対象として記録された1件分のログです。
+        /// </summary>
+        [Serializable]
+        private struct CapturedLogEntry
+        {
+            /// <summary> ログ種別（<see cref="LogType"/>の文字列表現）です。 </summary>
+            public string Type;
+
+            /// <summary> ログメッセージです。 </summary>
+            public string Message;
+
+            /// <summary> スタックトレースです。 </summary>
+            public string StackTrace;
+        }
+
+        /// <summary>
+        ///     ドメインリロードでコンソールがクリアされた後に再出力するためのログ群です。
+        ///     BuildSessionとは別キーで保持し、FinishBuildSessionがセッションを消去した後も
+        ///     リロード後の再出力まで生き残るようにする。
+        /// </summary>
+        [Serializable]
+        private struct PendingLogReplay
+        {
+            /// <summary> ビルドが失敗した場合はtrueです。 </summary>
+            public bool HasFailure;
+
+            /// <summary> 記録されたログ一覧です。 </summary>
+            public CapturedLogEntry[] Entries;
+        }
+
+        /// <summary>
+        ///     再出力用ログを保持しすぎないための上限件数です。
+        /// </summary>
+        private const int MAX_CAPTURED_LOG_COUNT = 50;
+
+        /// <summary> 再出力用ログを保存するSessionStateキーです。 </summary>
+        private const string PENDING_LOG_KEY = "AUTO_BUILD_PENDING_LOG";
+
+        /// <summary>
         ///     指定したビルドプロファイルによる自動ビルドを開始します。
         /// </summary>
         /// <param name="path"> ビルド出力先です。 </param>
@@ -127,11 +166,142 @@ namespace KillChord.Editor.AutoBuilder
 
         /// <summary>
         ///     スクリプトリロード後に自動ビルドセッションを再開できるよう登録します。
+        ///     あわせて、ビルド中のエラーログを捕捉する購読と、直前のドメインリロードで
+        ///     コンソールから消えたログの再出力を行う。
         /// </summary>
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            Application.logMessageReceived += HandleLogMessage;
+            ReplayPendingLogIfAny();
+
             EditorApplication.delayCall += Resume;
+        }
+
+        /// <summary>
+        ///     自動ビルドセッション実行中に発生したエラー/例外/アサートログを捕捉し、
+        ///     ドメインリロードを跨いで再出力できるようSessionStateへ記録する。
+        /// </summary>
+        /// <param name="message"> ログメッセージです。 </param>
+        /// <param name="stackTrace"> スタックトレースです。 </param>
+        /// <param name="type"> ログ種別です。 </param>
+        private static void HandleLogMessage(string message, string stackTrace, LogType type)
+        {
+            if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
+            {
+                return;
+            }
+
+            if (!BuildSession.LoadSession().Running)
+            {
+                return;
+            }
+
+            AppendCapturedLog(type, message, stackTrace);
+        }
+
+        /// <summary>
+        ///     再出力用ログ1件をSessionStateへ追記する。
+        /// </summary>
+        /// <param name="type"> ログ種別です。 </param>
+        /// <param name="message"> ログメッセージです。 </param>
+        /// <param name="stackTrace"> スタックトレースです。 </param>
+        private static void AppendCapturedLog(LogType type, string message, string stackTrace)
+        {
+            PendingLogReplay replay = LoadPendingLogReplay();
+            CapturedLogEntry[] entries = replay.Entries ?? Array.Empty<CapturedLogEntry>();
+
+            if (entries.Length >= MAX_CAPTURED_LOG_COUNT)
+            {
+                return;
+            }
+
+            Array.Resize(ref entries, entries.Length + 1);
+            entries[entries.Length - 1] = new CapturedLogEntry
+            {
+                Type = type.ToString(),
+                Message = message,
+                StackTrace = stackTrace
+            };
+            replay.Entries = entries;
+
+            SavePendingLogReplay(replay);
+        }
+
+        /// <summary>
+        ///     自動ビルドの成否を、再出力用ログへ記録する。
+        ///     ログが1件も記録されていない場合は何もしない（再出力の必要がないため）。
+        /// </summary>
+        /// <param name="hasFailure"> いずれかのビルドが失敗した場合はtrueです。 </param>
+        private static void SetPendingLogFailure(bool hasFailure)
+        {
+            PendingLogReplay replay = LoadPendingLogReplay();
+            if (replay.Entries == null || replay.Entries.Length == 0)
+            {
+                return;
+            }
+
+            replay.HasFailure = hasFailure;
+            SavePendingLogReplay(replay);
+        }
+
+        /// <summary>
+        ///     直前のドメインリロードで消えた自動ビルドのログが記録されていれば、コンソールへ再出力する。
+        /// </summary>
+        private static void ReplayPendingLogIfAny()
+        {
+            string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
+            if (string.IsNullOrEmpty(json))
+            {
+                return;
+            }
+
+            SessionState.EraseString(PENDING_LOG_KEY);
+
+            PendingLogReplay replay = JsonUtility.FromJson<PendingLogReplay>(json);
+            if (replay.Entries == null || replay.Entries.Length == 0)
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                $"[{nameof(AutoBuildExecuter)}] ビルドプロファイル復元時のドメインリロードでコンソールがクリアされたため、" +
+                $"直前の自動ビルドで記録されたログを再出力します。({replay.Entries.Length}件)");
+
+            foreach (CapturedLogEntry entry in replay.Entries)
+            {
+                string formatted = string.IsNullOrEmpty(entry.StackTrace)
+                    ? entry.Message
+                    : $"{entry.Message}\n{entry.StackTrace}";
+
+                Debug.LogError(formatted);
+            }
+
+            string resultMessage = replay.HasFailure
+                ? "自動ビルドは失敗しました。上記の再出力ログを確認してください。"
+                : "自動ビルド中に上記のエラー/警告ログが記録されていました。";
+            Debug.LogError($"[{nameof(AutoBuildExecuter)}] {resultMessage}");
+        }
+
+        /// <summary>
+        ///     再出力用ログをSessionStateから読み込む。
+        /// </summary>
+        /// <returns> 保存されている再出力用ログです。未保存の場合は空です。 </returns>
+        private static PendingLogReplay LoadPendingLogReplay()
+        {
+            string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
+            return string.IsNullOrEmpty(json)
+                ? new PendingLogReplay { Entries = Array.Empty<CapturedLogEntry>() }
+                : JsonUtility.FromJson<PendingLogReplay>(json);
+        }
+
+        /// <summary>
+        ///     再出力用ログをSessionStateへ保存する。
+        /// </summary>
+        /// <param name="replay"> 保存する再出力用ログです。 </param>
+        private static void SavePendingLogReplay(PendingLogReplay replay)
+        {
+            SessionState.SetString(PENDING_LOG_KEY, JsonUtility.ToJson(replay));
         }
 
         /// <summary>
@@ -434,6 +604,10 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="session"> 終了する自動ビルドセッションです。 </param>
         private static void FinishBuildSession(BuildSession session)
         {
+            // ビルドプロファイル復元によるドメインリロードでコンソールが消える前に、
+            // 成否だけは再出力用ログへ記録しておく。
+            SetPendingLogFailure(session.HasFailure);
+
             BuildSession.ClearSession();
             EditorUtility.ClearProgressBar();
 
