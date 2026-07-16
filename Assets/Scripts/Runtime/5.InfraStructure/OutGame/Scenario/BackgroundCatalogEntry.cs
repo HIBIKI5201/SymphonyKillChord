@@ -10,7 +10,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct BackgroundCatalogEntry
     {
-        [DataCategory("ScenarioBackground"), Tooltip("シナリオ背景を一意に識別するIDです。")]
+        [SourceDataCollection("ScenarioBackground"), Tooltip("シナリオ背景を一意に識別するIDです。")]
         public DataID Id;
 
         [Tooltip("背景のAddressableキーです。")]

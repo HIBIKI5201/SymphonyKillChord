@@ -42,7 +42,7 @@ namespace DevelopProducts.EquipmentBGM
             /// <summary> CRIセレクターラベル名。 </summary>
             public string SelectorLabel => _selectorLabel;
 
-            [SerializeField, DataCategory("Skill"), Tooltip("SkillTemplate.Id と一致させるスキルID。")]
+            [SerializeField, SourceDataCollection("Skill"), Tooltip("SkillTemplate.Id と一致させるスキルID。")]
             private DataID _skillId;
             [SerializeField, Tooltip("CRIセレクターラベル名。例: SelectorLabel_S01")]
             private string _selectorLabel;

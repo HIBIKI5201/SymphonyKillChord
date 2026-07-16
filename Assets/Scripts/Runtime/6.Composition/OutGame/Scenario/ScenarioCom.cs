@@ -39,11 +39,11 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioView _chatText;
         [SerializeField]
         private ScenarioInputView _inputView;
-        [SerializeField, RepositoryAddressSelector, Tooltip("背景カタログの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("背景カタログの Addressables キーです。")]
         private string _backgroundCatalogKey;
-        [SerializeField, RepositoryAddressSelector, Tooltip("アニメーションカタログの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("アニメーションカタログの Addressables キーです。")]
         private string _animationCatalogKey;
-        [SerializeField, RepositoryAddressSelector, Tooltip("立ち絵カタログの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("立ち絵カタログの Addressables キーです。")]
         private string _portraitCatalogKey;
         [SerializeField, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey;

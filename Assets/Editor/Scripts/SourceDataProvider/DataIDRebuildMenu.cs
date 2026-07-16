@@ -179,12 +179,12 @@ namespace KillChord.Editor.SourceDataProvider
                     continue;
                 }
 
-                DataCategoryAttribute categoryAttribute =
-                    fieldInfo.GetCustomAttribute<DataCategoryAttribute>();
-                if (categoryAttribute == null)
+                SourceDataCollectionAttribute collectionAttribute =
+                    fieldInfo.GetCustomAttribute<SourceDataCollectionAttribute>();
+                if (collectionAttribute == null)
                 {
                     Debug.LogError(
-                        $"[{nameof(DataIDRebuildMenu)}] DataCategory属性がありません。"
+                        $"[{nameof(DataIDRebuildMenu)}] SourceDataCollection属性がありません。"
                         + $" Asset: {assetPath}, Property: {iterator.propertyPath}",
                         target);
                     continue;
@@ -201,10 +201,10 @@ namespace KillChord.Editor.SourceDataProvider
                 }
 
                 int expectedHash = DataIDHasher.Compute(
-                    categoryAttribute.Category,
+                    collectionAttribute.CollectionKey,
                     idProperty.stringValue);
                 context.Record(
-                    categoryAttribute.Category,
+                    collectionAttribute.CollectionKey,
                     idProperty.stringValue,
                     expectedHash,
                     assetPath,

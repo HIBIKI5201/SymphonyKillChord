@@ -102,7 +102,7 @@ namespace KillChord.Runtime.View.InGame.Stage
                 }
             }
 
-            [SerializeField, DataCategory("StageEffect"), Tooltip("StageEffectAsset側と対応する演出IDです。")]
+            [SerializeField, SourceDataCollection("StageEffect"), Tooltip("StageEffectAsset側と対応する演出IDです。")]
             private DataID _effectId;
 
             [SerializeField, Tooltip("このBindingが処理する演出種類です。")]

@@ -10,19 +10,19 @@ using UnityEngine;
 namespace KillChord.Editor.SourceDataProvider
 {
     /// <summary>
-    ///     SourceDataProvider設定からAddressableリポジトリと登録済みDataIDを解決します。
+    ///     SourceDataProvider設定からAddressable ScriptableObjectと登録済みDataIDを解決します。
     /// </summary>
     internal static class SourceDataProviderRepositoryResolver
     {
         /// <summary>
-        ///     Addressableキーからリポジトリアセットを取得します。
+        ///     AddressableキーからSourceAssetを取得します。
         /// </summary>
-        /// <param name="addressableKey"> リポジトリのAddressableキーです。 </param>
-        /// <param name="repository"> 解決したリポジトリアセットです。 </param>
-        /// <returns> リポジトリアセットを解決できた場合はtrueです。 </returns>
-        public static bool TryResolveRepository(string addressableKey, out UnityEngine.Object repository)
+        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <param name="sourceAsset"> 解決したSourceAssetです。 </param>
+        /// <returns> SourceAssetを解決できた場合はtrueです。 </returns>
+        public static bool TryResolveAsset(string addressableKey, out ScriptableObject sourceAsset)
         {
-            repository = null;
+            sourceAsset = null;
             if (string.IsNullOrWhiteSpace(addressableKey))
             {
                 return false;
@@ -49,8 +49,8 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
-                    repository = AssetDatabase.LoadMainAssetAtPath(entry.AssetPath);
-                    return repository != null;
+                    sourceAsset = AssetDatabase.LoadMainAssetAtPath(entry.AssetPath) as ScriptableObject;
+                    return sourceAsset != null;
                 }
             }
 
@@ -58,65 +58,127 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     リポジトリアセットが持つ配列プロパティのパス一覧を取得します。
+        ///     Addressableキーから互換用のオブジェクトを取得します。
         /// </summary>
-        /// <param name="repository"> 対象リポジトリアセットです。 </param>
+        /// <param name="addressableKey"> Addressableキーです。 </param>
+        /// <param name="repository"> 解決したオブジェクトです。 </param>
+        /// <returns> 解決できた場合はtrueです。 </returns>
+        public static bool TryResolveRepository(string addressableKey, out UnityEngine.Object repository)
+        {
+            repository = null;
+            if (!TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            {
+                return false;
+            }
+
+            repository = sourceAsset;
+            return true;
+        }
+
+        /// <summary>
+        ///     指定カテゴリがcollection設定に登録済みか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> 確認するCollectionKeyです。 </param>
+        /// <returns> 登録済みの場合はtrueです。 </returns>
+        public static bool ContainsCollectionKey(string collectionKey)
+        {
+            return SourceDataProviderSettings.instance.ContainsCollectionKey(collectionKey);
+        }
+
+        /// <summary>
+        ///     SourceAssetが持つ配列プロパティのパス一覧を取得します。
+        /// </summary>
+        /// <param name="repository"> 対象SourceAssetです。 </param>
         /// <returns> 配列プロパティのパス一覧です。 </returns>
         public static string[] GetArrayPropertyPaths(UnityEngine.Object repository)
         {
-            if (repository == null)
+            return GetCollectionPropertyPaths(repository);
+        }
+
+        /// <summary>
+        ///     SourceAssetが持つ配列プロパティのパス一覧を取得します。
+        /// </summary>
+        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
+        /// <returns> 配列プロパティのパス一覧です。 </returns>
+        public static string[] GetCollectionPropertyPaths(UnityEngine.Object sourceAsset)
+        {
+            if (sourceAsset == null)
             {
                 return Array.Empty<string>();
             }
 
             List<string> paths = new();
-            SerializedObject serializedObject = new(repository);
-            SerializedProperty iterator = serializedObject.GetIterator();
-            bool enterChildren = true;
-
-            while (iterator.NextVisible(enterChildren))
+            foreach (FieldInfo fieldInfo in GetSerializableFields(sourceAsset.GetType()))
             {
-                enterChildren = true;
-                if (iterator.isArray && iterator.propertyType != SerializedPropertyType.String)
+                if (IsCollectionField(fieldInfo.FieldType))
                 {
-                    paths.Add(iterator.propertyPath);
+                    paths.Add(fieldInfo.Name);
                 }
             }
 
+            paths.Sort(StringComparer.Ordinal);
             return paths.ToArray();
+        }
+
+        /// <summary>
+        ///     指定SourceAssetに紐づく有効なcollectionプロパティパス一覧を取得します。
+        /// </summary>
+        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <returns> 有効なcollectionプロパティパス一覧です。 </returns>
+        public static string[] GetConfiguredCollectionPropertyPaths(string addressableKey)
+        {
+            IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
+                SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey);
+            if (mappings.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            HashSet<string> paths = new(StringComparer.Ordinal);
+            for (int i = 0; i < mappings.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(mappings[i].PropertyPath))
+                {
+                    paths.Add(mappings[i].PropertyPath);
+                }
+            }
+
+            string[] results = new string[paths.Count];
+            paths.CopyTo(results);
+            Array.Sort(results, StringComparer.Ordinal);
+            return results;
         }
 
         /// <summary>
         ///     指定カテゴリへ登録済みのDataID一覧を取得します。
         /// </summary>
-        /// <param name="category"> 取得するカテゴリ名です。 </param>
+        /// <param name="collectionKey"> 取得するCollectionKeyです。 </param>
         /// <returns> 登録済みのDataID一覧です。 </returns>
-        public static IReadOnlyList<SourceDataIDOption> GetOptions(string category)
+        public static IReadOnlyList<SourceDataIDOption> GetOptions(string collectionKey)
         {
             List<SourceDataIDOption> options = new();
-            SourceDataProviderSettings settings = SourceDataProviderSettings.instance;
-            if (!settings.TryGetMapping(category, out SourceDataProviderSettings.RepositoryMapping mapping)
-                || !TryResolveRepository(mapping.AddressableKey, out UnityEngine.Object repository))
+            if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
+                || !TryResolveAsset(mapping.SourceAssetAddressableKey, out ScriptableObject sourceAsset))
             {
                 return options;
             }
 
             HashSet<int> visitedInstanceIds = new();
-            SerializedObject serializedObject = new(repository);
-            SerializedProperty rootProperty = string.IsNullOrWhiteSpace(mapping.ArrayPropertyPath)
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty rootProperty = string.IsNullOrWhiteSpace(mapping.PropertyPath)
                 ? null
-                : serializedObject.FindProperty(mapping.ArrayPropertyPath);
+                : serializedObject.FindProperty(mapping.PropertyPath);
 
             if (rootProperty == null)
             {
-                CollectFromObject(repository, category, options, visitedInstanceIds);
+                CollectFromObject(sourceAsset, collectionKey, options, visitedInstanceIds);
             }
             else
             {
                 CollectFromProperty(
                     serializedObject,
                     rootProperty,
-                    category,
+                    collectionKey,
                     options,
                     visitedInstanceIds);
             }
@@ -126,45 +188,44 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     対象DataIDがリポジトリへ登録される生成側フィールドか判定します。
+        ///     対象DataIDが生成側フィールドか判定します。
         /// </summary>
-        /// <param name="category"> DataIDのカテゴリ名です。 </param>
+        /// <param name="collectionKey"> DataIDのCollectionKeyです。 </param>
         /// <param name="target"> DataIDを保持するUnityオブジェクトです。 </param>
         /// <param name="propertyPath"> DataIDのプロパティパスです。 </param>
         /// <returns> 生成側フィールドの場合はtrueです。 </returns>
         public static bool IsAuthoringProperty(
-            string category,
+            string collectionKey,
             UnityEngine.Object target,
             string propertyPath)
         {
-            SourceDataProviderSettings settings = SourceDataProviderSettings.instance;
-            if (!settings.TryGetMapping(category, out SourceDataProviderSettings.RepositoryMapping mapping)
-                || !TryResolveRepository(mapping.AddressableKey, out UnityEngine.Object repository))
+            if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
+                || !TryResolveAsset(mapping.SourceAssetAddressableKey, out ScriptableObject sourceAsset))
             {
                 return true;
             }
 
-            if (target == repository)
+            if (target == sourceAsset)
             {
-                return string.IsNullOrWhiteSpace(mapping.ArrayPropertyPath)
-                    || propertyPath.StartsWith(mapping.ArrayPropertyPath, StringComparison.Ordinal);
+                return string.IsNullOrWhiteSpace(mapping.PropertyPath)
+                    || propertyPath.StartsWith(mapping.PropertyPath, StringComparison.Ordinal);
             }
 
-            if (string.IsNullOrWhiteSpace(mapping.ArrayPropertyPath))
+            if (string.IsNullOrWhiteSpace(mapping.PropertyPath))
             {
                 return false;
             }
 
-            SerializedObject serializedObject = new(repository);
-            SerializedProperty arrayProperty = serializedObject.FindProperty(mapping.ArrayPropertyPath);
-            if (arrayProperty == null || !arrayProperty.isArray)
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
+            if (collectionProperty == null || !collectionProperty.isArray)
             {
                 return false;
             }
 
-            for (int i = 0; i < arrayProperty.arraySize; i++)
+            for (int i = 0; i < collectionProperty.arraySize; i++)
             {
-                SerializedProperty element = arrayProperty.GetArrayElementAtIndex(i);
+                SerializedProperty element = collectionProperty.GetArrayElementAtIndex(i);
                 if (element.propertyType == SerializedPropertyType.ObjectReference
                     && element.objectReferenceValue == target)
                 {
@@ -179,12 +240,12 @@ namespace KillChord.Editor.SourceDataProvider
         ///     Unityオブジェクト内から指定カテゴリのDataIDを収集します。
         /// </summary>
         /// <param name="target"> 走査対象のUnityオブジェクトです。 </param>
-        /// <param name="category"> 収集するカテゴリ名です。 </param>
+        /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromObject(
             UnityEngine.Object target,
-            string category,
+            string collectionKey,
             List<SourceDataIDOption> options,
             HashSet<int> visitedInstanceIds)
         {
@@ -203,7 +264,7 @@ namespace KillChord.Editor.SourceDataProvider
                 CollectCurrentProperty(
                     serializedObject,
                     iterator,
-                    category,
+                    collectionKey,
                     options,
                     visitedInstanceIds);
             }
@@ -214,19 +275,19 @@ namespace KillChord.Editor.SourceDataProvider
         /// </summary>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="rootProperty"> 走査起点のプロパティです。 </param>
-        /// <param name="category"> 収集するカテゴリ名です。 </param>
+        /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromProperty(
             SerializedObject serializedObject,
             SerializedProperty rootProperty,
-            string category,
+            string collectionKey,
             List<SourceDataIDOption> options,
             HashSet<int> visitedInstanceIds)
         {
             SerializedProperty iterator = rootProperty.Copy();
             SerializedProperty endProperty = iterator.GetEndProperty();
-            CollectCurrentProperty(serializedObject, iterator, category, options, visitedInstanceIds);
+            CollectCurrentProperty(serializedObject, iterator, collectionKey, options, visitedInstanceIds);
             bool enterChildren = true;
 
             while (iterator.NextVisible(enterChildren)
@@ -236,7 +297,7 @@ namespace KillChord.Editor.SourceDataProvider
                 CollectCurrentProperty(
                     serializedObject,
                     iterator,
-                    category,
+                    collectionKey,
                     options,
                     visitedInstanceIds);
             }
@@ -247,13 +308,13 @@ namespace KillChord.Editor.SourceDataProvider
         /// </summary>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="property"> 走査対象のプロパティです。 </param>
-        /// <param name="category"> 収集するカテゴリ名です。 </param>
+        /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectCurrentProperty(
             SerializedObject serializedObject,
             SerializedProperty property,
-            string category,
+            string collectionKey,
             List<SourceDataIDOption> options,
             HashSet<int> visitedInstanceIds)
         {
@@ -261,7 +322,7 @@ namespace KillChord.Editor.SourceDataProvider
             {
                 if (property.objectReferenceValue is ScriptableObject scriptableObject)
                 {
-                    CollectFromObject(scriptableObject, category, options, visitedInstanceIds);
+                    CollectFromObject(scriptableObject, collectionKey, options, visitedInstanceIds);
                 }
                 return;
             }
@@ -275,9 +336,10 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
-            DataCategoryAttribute attribute = fieldInfo.GetCustomAttribute<DataCategoryAttribute>();
+            SourceDataCollectionAttribute attribute =
+                fieldInfo.GetCustomAttribute<SourceDataCollectionAttribute>();
             if (attribute == null
-                || !string.Equals(attribute.Category, category, StringComparison.Ordinal))
+                || !string.Equals(attribute.CollectionKey, collectionKey, StringComparison.Ordinal))
             {
                 return;
             }
@@ -295,6 +357,58 @@ namespace KillChord.Editor.SourceDataProvider
                 idProperty.stringValue,
                 hashProperty.intValue,
                 serializedObject.targetObject));
+        }
+
+        /// <summary>
+        ///     型に定義された直列化対象フィールド一覧を取得します。
+        /// </summary>
+        /// <param name="type"> 走査対象の型です。 </param>
+        /// <returns> 直列化対象フィールド一覧です。 </returns>
+        private static IEnumerable<FieldInfo> GetSerializableFields(Type type)
+        {
+            const BindingFlags BINDING_FLAGS =
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+            for (Type current = type; current != null && current != typeof(ScriptableObject); current = current.BaseType)
+            {
+                FieldInfo[] fields = current.GetFields(BINDING_FLAGS);
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    FieldInfo fieldInfo = fields[i];
+                    if (fieldInfo.IsStatic
+                        || Attribute.IsDefined(fieldInfo, typeof(NonSerializedAttribute))
+                        || Attribute.IsDefined(fieldInfo, typeof(HideInInspector)))
+                    {
+                        continue;
+                    }
+
+                    if (fieldInfo.IsPublic || Attribute.IsDefined(fieldInfo, typeof(SerializeField)))
+                    {
+                        yield return fieldInfo;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     フィールド型がcollection候補か判定します。
+        /// </summary>
+        /// <param name="fieldType"> 判定対象のフィールド型です。 </param>
+        /// <returns> collection候補の場合はtrueです。 </returns>
+        private static bool IsCollectionField(Type fieldType)
+        {
+            if (fieldType == typeof(string))
+            {
+                return false;
+            }
+
+            if (fieldType.IsArray)
+            {
+                return true;
+            }
+
+            return fieldType.IsGenericType
+                && fieldType.GetGenericTypeDefinition() == typeof(List<>);
         }
 
         internal const string ID_PROPERTY_NAME = "_id";
