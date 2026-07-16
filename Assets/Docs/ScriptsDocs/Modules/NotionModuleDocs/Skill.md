@@ -158,11 +158,3 @@ sequenceDiagram
         Service ->> Node: 解放状態に更新
     end
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **アウトゲーム/インゲームの情報の橋渡し**: セーブデータに保存されるスキルのID構成（ドメイン）が、`SkillBuildUseCase`を通じて管理されており、そのデータ構造がインゲームの`PlayerInitializer`で対応するスキル実体にスムーズにバインドされる構造になっています。
-
-### ⚠️ 既知の課題・改善ポイント
-* **`SkillBuildUseCase`のDIP違反（未解消）**: `SkillBuildUseCase`（Application層）のコンストラクタは`SavedataSystem`（Utility/具象）をそのまま受け取ります。`ISkillBuildRepository`という抽象・実装（`SkillBuildRepository`、Addressables経由でロード）は既に存在しますが、現状`SkillBuildInitializer`がView初期化用データの取得にのみ使っており、`SkillBuildUseCase`へは渡していません。コンストラクタ引数を`SavedataSystem`から`ISkillBuildRepository`（またはそれに準ずる抽象）へ差し替えることで、セーブ先の切り替えや単体テストが容易になります。

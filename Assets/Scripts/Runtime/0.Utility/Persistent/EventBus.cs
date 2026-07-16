@@ -10,9 +10,17 @@ namespace KillChord.Runtime.Utility.Persistent
     public static class EventBus<T> where T : struct, IEvent
     {
         /// <summary>
+        ///     ジェネリック型には[RuntimeInitializeOnLoadMethod]を付けられないため、
+        ///     静的コンストラクタでリセット処理をEventBusResetRegistryへ登録する。
+        /// </summary>
+        static EventBus()
+        {
+            EventBusResetRegistry.Register(Reset);
+        }
+
+        /// <summary>
         ///     サブシステム初期化時に静的リスナーをクリアする。
         /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
             _onEvent = null;

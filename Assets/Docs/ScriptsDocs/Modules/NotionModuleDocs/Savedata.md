@@ -168,13 +168,3 @@ sequenceDiagram
     System ->> System: 書き込みロック取得 → WriteAsync（一時ファイル経由でアトミックに置換）→ キャッシュ更新
 ```
 
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **型ごとのキャッシュ・排他制御・世代管理**: `SavedataSystem`は型ごとに読み込みタスクの重複排除（`Lazy<Task<SaveBase>>`）、書き込み排他（`SemaphoreSlim`）、削除時の世代番号インクリメントによる古い読み込み結果の無効化を実装しており、複数箇所から同時にロード・保存が要求されても安全です。
-* **アトミックな書き込み**: `SaveBase.WriteAsync`は一時ファイルへ書き込んでから置換する方式のため、保存途中でのクラッシュによるファイル破損リスクを抑えています。
-* **`null`許容な安全設計**: `SaveData.OnAfterDeserialize()`が各サブデータの`null`チェックと初期値補完を行うため、古いセーブデータ形式や欠損データでも例外なく動作します。
-
-### ⚠️ 既知の課題・改善ポイント
-* **Skillモジュールからの具象直接依存**: `SkillBuildInitializer`/`SkillTreeInitializer`が`SavedataSystem`を`ServiceLocator`から取得し、抽象を介さず`SkillBuildUseCase`/`SkillTreeService`のコンストラクタへ直接渡しています（Skillモジュールの既知の課題として重複記載）。
-* **保存先の固定化**: `SaveBase.FilePath`は`Application.persistentDataPath`固定で、クラウドセーブ等への切り替えは現状のコード構造では考慮されていません（`SaveBase`内のTODOコメントにも記載あり）。

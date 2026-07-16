@@ -201,15 +201,3 @@ sequenceDiagram
     Note over SortieCtrl: 戦闘準備画面を経由せず即時出撃
     Init ->> Flag: TryConsume() + ServiceLocatorから登録解除
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **重複ID検出の二段構え**: `StageTreeAsset.OnValidate()`によるエディタ編集時の警告と、`StageTree`コンストラクタでの実行時例外という2段階でデータ不整合を検出します。
-* **通常出撃とチュートリアル出撃の経路分離**: `RequestSortieAsync`（戦闘準備画面経由）と`RequestImmediateBattleSortie`（即時出撃）が明確に分かれており、UX要件の違いをコードレベルで表現しています。
-
-### ⚠️ 既知の課題・改善ポイント
-* **専用ModuleContainerが無い**: 他モジュールが採用している`*ModuleContainer`パターンではなく、`SelectedBattleStageState`等の具象インスタンスを個別に`ServiceLocator`へ直接登録しています。
-* **`SelectedBattleStageState`の配置場所**: OutGame側の`StageSelectInitializer`が生成・書き込みするにもかかわらず、namespace上は`Adaptor.InGame.StageSelect`に配置されています（InGame側の消費者に合わせた配置と考えられますが、モジュール境界が分かりづらくなっています）。
-* **未実装のミッション達成状況表示**: `StageSelectController.cs`、`StageDetailPresenter.cs`、`StageDetailDTO.cs`、`StageDetailScreenView.cs`に、ステージ詳細画面でのミッション達成状況表示に関するTODOが残っています。
-* **2つの出撃経路の保守負担**: チュートリアル出撃が戦闘準備画面を意図的にバイパスするため、戦闘準備画面の仕様（装備選択等）が変わった場合、通常出撃・チュートリアル出撃の両方を追従させる必要があります。

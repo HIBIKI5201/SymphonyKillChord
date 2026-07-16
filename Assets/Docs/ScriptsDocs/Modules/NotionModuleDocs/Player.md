@@ -178,12 +178,3 @@ sequenceDiagram
     PAC ->> PAC: ダメージ計算・適用（Character&Battleモジュール）
     PAC -->> MissionRec: OnAttackExecuted イベント発火
 ```
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **入力バッファキューによるアクション分離**: `PlayerInputView`から生の入力を受け取るのではなく、`InputBufferingQueue`によってバッファ（キュー）に蓄積された操作を`PlayerController`が自身のペースで読み出して処理するため、入力フレームレートに依存しない安定したゲームプレイが実現されています。
-* **移動挙動のピュアクラス化**: `PlayerMovementApplication`および`PlayerDodgeMovementApplication`という、移動や回避に特化したピュアなロジッククラスに切り出されており、ゲーム内バランス調整（パラメータ変更）やテストが行いやすい構成です。
-
-### ⚠️ 既知の課題・改善ポイント
-* **Enemy/Bossからの直接結合**: `EnemyInitializer`/`BossInitializer`が`PlayerModuleContainer`を`ServiceLocator`経由で直接取得しています（Enemyページの既知の課題を参照）。Player側から見ると、自身のComposition層の公開範囲を制御する術がありません。
