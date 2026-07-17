@@ -44,7 +44,11 @@ namespace KillChord.Runtime.View.InGame.Camera
                 if (playerForward.sqrMagnitude > float.Epsilon)
                 {
                     float targetYaw = Quaternion.LookRotation(playerForward.normalized, Vector3.up).eulerAngles.y;
-                    yaw = Mathf.MoveTowardsAngle(yaw, targetYaw, _parameter.MoveFollowRotationSpeed * context.DeltaTime);
+                    float angleDifference = Mathf.Abs(Mathf.DeltaAngle(yaw, targetYaw));
+                    if (angleDifference > _parameter.MoveFollowAngleDeadZone)
+                    {
+                        yaw = Mathf.MoveTowardsAngle(yaw, targetYaw, _parameter.MoveFollowRotationSpeed * context.DeltaTime);
+                    }
                 }
             }
 

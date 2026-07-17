@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Camera.CameraSystemView
   _cameraT: {fileID: 6603128112584395780}
-  _updateMode: 2
+  _updateMode: 3
   _mouseLookSensitivity: 5
   _gamepadLookSensitivity: 20
   _mobileLookSensitivity: 10

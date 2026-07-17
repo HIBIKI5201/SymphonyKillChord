@@ -4,7 +4,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 {
     /// <summary>
     ///     カメラの回転（注視点制御など）を担当するクラス。
-    ///     ロックオンの切り替えを ratio で滑らかに表現し、回転速度と補間を分離する。
+    ///     ロックオン状態や対象の変更に対して注視回転を滑らかに追従させる。
     /// </summary>
     public sealed class CameraLookAtRotationCalculator
     {
@@ -20,8 +20,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     ロックオン状態に応じてカメラの注視点回転を更新する。
         ///     ロックオン中はプレイヤーのモデル中心と対象の中間点を注視するよう補間する。
-        ///     ratio をロックオンの有無でスムーズに変化させることで、
-        ///     回転速度パラメータと補間処理を分離し target のブレによるバウンスを防ぐ。
+        ///     状態や対象が切り替わった場合も現在回転から目標回転まで継続的に補間する。
         /// </summary>
         /// <param name="isLockOn"> ロックオン中かどうか。</param>
         /// <param name="rotation"> 更新対象のカメラ回転。参照渡しで更新される。</param>
@@ -38,9 +37,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             in Vector3 targetPosition
         )
         {
-            // ロックオンの有無に応じて ratio を 0〜1 でスムーズに変化させる
-            _ratio = Mathf.Lerp(_ratio, isLockOn ? 1f : 0f, context.DeltaTime * _parameter.LockOnRotationSpeed);
-
             Quaternion target = Quaternion.identity;
             if (isLockOn)
             {
@@ -57,13 +53,11 @@ namespace KillChord.Runtime.View.InGame.Camera
                 }
             }
 
-            // ratio を Slerp の t として使用することで、回転速度と補間処理を分離する
-            rotation = Quaternion.Slerp(rotation, target, _ratio);
+            float interpolationRatio = 1f - Mathf.Exp(
+                -Mathf.Max(0f, _parameter.LockOnRotationSpeed) * Mathf.Max(0f, context.DeltaTime));
+            rotation = Quaternion.Slerp(rotation, target, interpolationRatio);
         }
 
         private readonly CameraConfig _parameter;
-
-        /// <summary> ロックオン切り替えの補間比率。0: フリー状態, 1: ロックオン完了状態。 </summary>
-        private float _ratio;
     }
 }
