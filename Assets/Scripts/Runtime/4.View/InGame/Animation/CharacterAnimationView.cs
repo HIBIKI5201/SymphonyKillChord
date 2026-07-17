@@ -95,7 +95,9 @@ namespace KillChord.Runtime.View
             }
 
             int index = request.Index;
-            bool shouldSkipEnterBlend = HasActiveOverlay() && _overlayIndex == index;
+            bool shouldSkipEnterBlend = request.SkipEnterBlendOnSameClip
+                && HasActiveOverlay()
+                && _overlayIndex == index;
             _playableController.PlayOneShot(index);
             _overlayIndex = index;
             _overlayBaseDuration = request.BaseDurationSeconds;
@@ -248,7 +250,7 @@ namespace KillChord.Runtime.View
                 if (_shouldNotifyDodgeEnded
                     && _context.Signal is CharacterAnimationSignal signal)
                 {
-                    signal.NotifyDodgeEnded();
+                    signal.NotifyOneShotEnded();
                 }
             }
 

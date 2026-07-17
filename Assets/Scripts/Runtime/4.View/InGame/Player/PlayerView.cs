@@ -75,7 +75,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cameraTransform;
         private IPlayerController _controller;
         private ICharacterAnimationViewModel _characterAnimationViewModel;
-        private ICharacterAnimationSignal _characterAnimationSignal;
+        private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
@@ -125,7 +125,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _characterAnimationViewModel = animationContext.ViewModel;
-            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _musicSyncState = musicSyncState;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
