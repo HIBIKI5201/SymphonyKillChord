@@ -28,7 +28,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             _source.Play(_cueName);
         }
 
-        [SerializeField, DataCategory("Skill"), Tooltip("表示するスキルのIDです。")]
+        [SerializeField, SourceDataCollection("Skill"), Tooltip("表示するスキルのIDです。")]
         private DataID _id;
 
         [SerializeField, Tooltip("SkillSE再生用SoundEffectSource")] private SoundEffectSource _source;

@@ -17,7 +17,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary> 表示名を取得します。 </summary>
         public string DisplayName => _displayName;
 
-        [SerializeField, DataCategory("EnemyMissionKey"), Tooltip("敵を識別するためのユニークなID。")] private DataID _id;
+        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("敵を識別するためのユニークなID。")] private DataID _id;
         [SerializeField, Tooltip("ミッションHUD等に表示される敵の名称。")] private string _displayName;
 
 #if UNITY_EDITOR

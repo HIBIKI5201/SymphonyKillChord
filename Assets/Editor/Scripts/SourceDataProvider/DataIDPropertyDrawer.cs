@@ -23,8 +23,9 @@ namespace KillChord.Editor.SourceDataProvider
         {
             EditorGUI.BeginProperty(position, label, property);
 
-            DataCategoryAttribute categoryAttribute = fieldInfo.GetCustomAttribute<DataCategoryAttribute>();
-            string category = categoryAttribute?.Category;
+            SourceDataCollectionAttribute collectionAttribute =
+                fieldInfo.GetCustomAttribute<SourceDataCollectionAttribute>();
+            string collectionKey = collectionAttribute?.CollectionKey;
             SerializedProperty idProperty = property.FindPropertyRelative(
                 SourceDataProviderRepositoryResolver.ID_PROPERTY_NAME);
             SerializedProperty hashProperty = property.FindPropertyRelative(
@@ -42,12 +43,12 @@ namespace KillChord.Editor.SourceDataProvider
                 position.width,
                 EditorGUIUtility.singleLineHeight * WARNING_LINE_COUNT);
 
-            IReadOnlyList<SourceDataIDOption> options = string.IsNullOrWhiteSpace(category)
+            IReadOnlyList<SourceDataIDOption> options = string.IsNullOrWhiteSpace(collectionKey)
                 ? Array.Empty<SourceDataIDOption>()
-                : SourceDataProviderRepositoryResolver.GetOptions(category);
-            bool isAuthoring = string.IsNullOrWhiteSpace(category)
+                : SourceDataProviderRepositoryResolver.GetOptions(collectionKey);
+            bool isAuthoring = string.IsNullOrWhiteSpace(collectionKey)
                 || SourceDataProviderRepositoryResolver.IsAuthoringProperty(
-                    category,
+                    collectionKey,
                     property.serializedObject.targetObject,
                     property.propertyPath);
 
@@ -63,13 +64,13 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (EditorGUI.EndChangeCheck() && (isAuthoring || options.Count == 0))
             {
-                hashProperty.intValue = DataIDHasher.Compute(category, idProperty.stringValue);
+                hashProperty.intValue = DataIDHasher.Compute(collectionKey, idProperty.stringValue);
             }
 
             DrawHash(hashRect, hashProperty);
 
             string warning = BuildWarning(
-                category,
+                collectionKey,
                 idProperty.stringValue,
                 hashProperty.intValue,
                 options,
@@ -172,30 +173,30 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     DataID設定に対する警告文を生成します。
         /// </summary>
-        /// <param name="category"> DataIDのカテゴリ名です。 </param>
+        /// <param name="collectionKey"> DataIDのCollectionKeyです。 </param>
         /// <param name="id"> 人間可読な文字列IDです。 </param>
         /// <param name="hashId"> 焼き込み済み数値IDです。 </param>
         /// <param name="options"> 同一カテゴリの登録済みID一覧です。 </param>
         /// <param name="isAuthoring"> 生成側フィールドの場合はtrueです。 </param>
         /// <returns> 警告がある場合は警告文、それ以外は空文字列です。 </returns>
         private static string BuildWarning(
-            string category,
+            string collectionKey,
             string id,
             int hashId,
             IReadOnlyList<SourceDataIDOption> options,
             bool isAuthoring)
         {
-            if (string.IsNullOrWhiteSpace(category))
+            if (string.IsNullOrWhiteSpace(collectionKey))
             {
-                return "DataCategory属性が設定されていません。";
+                return "SourceDataCollection属性が設定されていません。";
             }
 
-            if (!SourceDataProviderSettings.instance.ContainsCategory(category))
+            if (!SourceDataProviderRepositoryResolver.ContainsCollectionKey(collectionKey))
             {
-                return $"SourceDataProviderにカテゴリ「{category}」が登録されていません。";
+                return $"SourceDataProviderにCollectionKey「{collectionKey}」が登録されていません。";
             }
 
-            int expectedHash = DataIDHasher.Compute(category, id);
+            int expectedHash = DataIDHasher.Compute(collectionKey, id);
             if (hashId != expectedHash)
             {
                 return $"ハッシュが未更新です。Expected: {expectedHash}";
@@ -217,7 +218,7 @@ namespace KillChord.Editor.SourceDataProvider
                 }
             }
 
-            return "選択したIDがリポジトリへ登録されていません。";
+            return "選択したIDがcollectionへ登録されていません。";
         }
 
         private const float COPY_BUTTON_WIDTH = 52f;

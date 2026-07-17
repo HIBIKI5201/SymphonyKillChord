@@ -66,7 +66,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Stage
         /// <returns> サマリーです。 </returns>
         protected abstract string BuildSummary();
 
-        [SerializeField, DataCategory("StageEffect"), Tooltip("StageEffectView側の演出と対応するIDです。")]
+        [SerializeField, SourceDataCollection("StageEffect"), Tooltip("StageEffectView側の演出と対応するIDです。")]
         private DataID _effectId;
 
         [SerializeField, Range(0, 1), Tooltip("0は現在小節、1は次小節で実行します。")]

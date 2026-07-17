@@ -18,7 +18,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         public SkillNodeId RequiredSkillNodeId => new SkillNodeId(_requiredSkillNodeId.Id);
 
         [SerializeField, Tooltip("段階を解放するために必要なノードID。")]
-        [DataCategory("SkillNode")]
+        [SourceDataCollection("SkillNode")]
         private DataID _requiredSkillNodeId;
     }
 }

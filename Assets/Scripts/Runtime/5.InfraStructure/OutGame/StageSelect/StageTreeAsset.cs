@@ -124,11 +124,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             public int ToStageId => _toStageId.Id;
 
             [Tooltip("接続元のステージID。")]
-            [SerializeField, DataCategory("Stage")]
+            [SerializeField, SourceDataCollection("Stage")]
             private DataID _fromStageId;
 
             [Tooltip("接続先のステージID。")]
-            [SerializeField, DataCategory("Stage")]
+            [SerializeField, SourceDataCollection("Stage")]
             private DataID _toStageId;
         }
     }

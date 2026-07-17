@@ -40,7 +40,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         }
 
         [SerializeField, Tooltip("スキルIDです。")]
-        [DataCategory("Skill")]
+        [SourceDataCollection("Skill")]
         private DataID _id;
         [SerializeField, Tooltip("入力パターンです。")]
         private BeatType[] _pattern;

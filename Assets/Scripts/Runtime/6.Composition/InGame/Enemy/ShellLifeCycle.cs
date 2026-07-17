@@ -8,6 +8,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -121,8 +122,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         [SerializeField] private ShellView _view;
-        [SerializeField, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
-        [SerializeField, Tooltip("砲弾音楽仕様の Addressables キーです。")] private string _musicDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("砲弾音楽仕様の Addressables キーです。")] private string _musicDataKey;
 
         private PlayerModuleContainer _playerModuleContainer;
         private MusicSyncInitializer _musicSyncInitializer;
