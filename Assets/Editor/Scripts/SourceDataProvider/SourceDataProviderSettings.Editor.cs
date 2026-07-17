@@ -179,16 +179,16 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         RepositoryMapping legacy = _repositoryMappings[i];
                         if (legacy == null
-                            || string.IsNullOrWhiteSpace(legacy.Category)
+                            || string.IsNullOrWhiteSpace(legacy.CollectionKey)
                             || string.IsNullOrWhiteSpace(legacy.AddressableKey))
                         {
                             continue;
                         }
 
                         _sourceCollectionMappings.Add(new SourceCollectionMapping(
-                            legacy.Category,
+                            legacy.CollectionKey,
                             legacy.AddressableKey,
-                            legacy.PropertyPath));
+                            legacy.ArrayPropertyPath));
                     }
                 }
 
