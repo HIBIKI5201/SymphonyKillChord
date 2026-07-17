@@ -213,6 +213,33 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
+        /// </summary>
+        /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <returns> 設定に成功した場合は true。 </returns>
+        public bool TrySetCurrentTarget(Guid targetId)
+        {
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (targetable.TargetId != targetId)
+                {
+                    continue;
+                }
+
+                if (!IsSelectableTarget(targetable))
+                {
+                    return false;
+                }
+
+                _currentTarget = targetable;
+                _currentCandidate = null;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     現在のターゲット選択を解除する。
         /// </summary>
         public void ClearTarget()

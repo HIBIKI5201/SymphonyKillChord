@@ -139,7 +139,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             float minimumDistanceSquared = _flickMinDistance * _flickMinDistance;
             if (duration <= _flickMaxDuration && displacement.sqrMagnitude >= minimumDistanceSquared)
             {
-                _playerInputView.OnMobileLookFlick(displacement.normalized);
+                _playerInputView.OnMobileLockOnSelect(Mathf.Sign(displacement.x));
             }
         }
 

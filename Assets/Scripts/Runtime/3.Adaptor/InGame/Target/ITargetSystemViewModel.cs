@@ -91,6 +91,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction);
 
         /// <summary>
+        ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
+        /// </summary>
+        /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <returns> 設定に成功した場合は true。 </returns>
+        bool TrySetCurrentTarget(Guid targetId);
+
+        /// <summary>
         ///     現在のターゲット選択を解除する。
         /// </summary>
         void ClearTarget();
