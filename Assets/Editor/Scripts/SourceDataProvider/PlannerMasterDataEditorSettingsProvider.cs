@@ -189,21 +189,33 @@ namespace KillChord.Editor.SourceDataProvider
             string[] options,
             string label)
         {
-            string[] labels = new string[options.Length + 1];
-            labels[0] = "<未設定>";
+            List<string> labels = new() { "<未設定>" };
+            List<string> values = new() { string.Empty };
             int selectedIndex = 0;
 
             for (int i = 0; i < options.Length; i++)
             {
-                labels[i + 1] = options[i];
+                labels.Add(options[i]);
+                values.Add(options[i]);
                 if (string.Equals(options[i], itemProperty.stringValue, StringComparison.Ordinal))
                 {
-                    selectedIndex = i + 1;
+                    selectedIndex = values.Count - 1;
                 }
             }
 
-            int nextIndex = EditorGUILayout.Popup(label, selectedIndex, labels);
-            itemProperty.stringValue = nextIndex <= 0 ? string.Empty : options[nextIndex - 1];
+            if (!string.IsNullOrWhiteSpace(itemProperty.stringValue) && selectedIndex == 0)
+            {
+                labels.Add($"Missing: {itemProperty.stringValue}");
+                values.Add(itemProperty.stringValue);
+                selectedIndex = values.Count - 1;
+            }
+
+            EditorGUI.BeginChangeCheck();
+            int nextIndex = EditorGUILayout.Popup(label, selectedIndex, labels.ToArray());
+            if (EditorGUI.EndChangeCheck())
+            {
+                itemProperty.stringValue = values[nextIndex];
+            }
         }
 
         /// <summary>

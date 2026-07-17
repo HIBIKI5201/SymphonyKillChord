@@ -414,7 +414,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 ## 12. 系統別の初回対応候補
 
-### 11.1 SkillTree 系統
+### 12.1 SkillTree 系統
 
 対象:
 
@@ -428,7 +428,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 - 接続整合性チェック
 - ノード接続プレビュー
 
-### 11.2 StageSelect 系統
+### 12.2 StageSelect 系統
 
 対象:
 
@@ -442,7 +442,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 - 初期解放状態確認
 - 分岐プレビュー
 
-### 11.3 Scenario 系統
+### 12.3 Scenario 系統
 
 対象:
 
@@ -459,11 +459,11 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 ## 13. ビジュアルシミュレーション方針
 
-### 12.1 基本方針
+### 13.1 基本方針
 
 初回は「実行シミュレーター」ではなく「編集内容の視覚化」を優先する。
 
-### 12.2 系統ごとの例
+### 13.2 系統ごとの例
 
 #### SkillTree
 
@@ -480,7 +480,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 - 背景、立ち絵、アニメーションの登録状況一覧
 - テキスト速度設定のパラメータプレビュー
 
-### 12.3 実装方式
+### 13.3 実装方式
 
 初期は IMGUI ベースで十分とする。
 
@@ -612,7 +612,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 2. `SourceAssetMapping` に対象 ScriptableObject 情報を追加する。
 3. `SourceCollectionMapping` に、どの配列 / List を collection とみなすかを追加する。
 4. 必要なら対象型へ `SourceDataCollectionAttribute` を付け、候補補助だけを行う。
-4. 必要なら Planner 側の既存系統へ紐付ける。
+5. 必要なら Planner 側の既存系統へ紐付ける。
 
 この場合も、SourceDataProvider 本体コードの編集は不要とする。
 

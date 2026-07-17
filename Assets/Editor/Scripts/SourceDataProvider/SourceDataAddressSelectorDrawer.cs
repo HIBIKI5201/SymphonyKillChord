@@ -12,6 +12,10 @@ namespace KillChord.Editor.SourceDataProvider
     [CustomPropertyDrawer(typeof(SourceDataAddressAttribute))]
     internal sealed class SourceDataAddressSelectorDrawer : PropertyDrawer
     {
+        private static int _cachedMappingsHash;
+        private static string[] _cachedKeys = Array.Empty<string>();
+        private static string[] _cachedLabels = Array.Empty<string>();
+
         /// <summary>
         ///     Addressable ScriptableObjectキー選択UIを描画します。
         /// </summary>
@@ -28,18 +32,27 @@ namespace KillChord.Editor.SourceDataProvider
 
             IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings =
                 SourceDataProviderSettings.instance.SourceAssetMappings;
-            string[] labels = new string[mappings.Count + 1];
-            labels[0] = UNASSIGNED_LABEL;
+            RebuildCacheIfNeeded(mappings);
+
+            List<string> labels = new() { UNASSIGNED_LABEL };
+            List<string> values = new() { string.Empty };
             int selectedIndex = 0;
 
-            for (int i = 0; i < mappings.Count; i++)
+            for (int i = 0; i < _cachedKeys.Length; i++)
             {
-                SourceDataProviderSettings.SourceAssetMapping mapping = mappings[i];
-                labels[i + 1] = BuildLabel(mapping);
-                if (string.Equals(mapping.AddressableKey, property.stringValue, StringComparison.Ordinal))
+                labels.Add(_cachedLabels[i]);
+                values.Add(_cachedKeys[i]);
+                if (string.Equals(_cachedKeys[i], property.stringValue, StringComparison.Ordinal))
                 {
-                    selectedIndex = i + 1;
+                    selectedIndex = values.Count - 1;
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(property.stringValue) && selectedIndex == 0)
+            {
+                labels.Add($"Missing: {property.stringValue}");
+                values.Add(property.stringValue);
+                selectedIndex = values.Count - 1;
             }
 
             Rect popupRect = new(
@@ -54,10 +67,12 @@ namespace KillChord.Editor.SourceDataProvider
                 position.height);
 
             EditorGUI.BeginProperty(position, label, property);
-            int nextIndex = EditorGUI.Popup(popupRect, label.text, selectedIndex, labels);
-            property.stringValue = nextIndex <= 0
-                ? string.Empty
-                : mappings[nextIndex - 1].AddressableKey;
+            EditorGUI.BeginChangeCheck();
+            int nextIndex = EditorGUI.Popup(popupRect, label.text, selectedIndex, labels.ToArray());
+            if (EditorGUI.EndChangeCheck())
+            {
+                property.stringValue = values[nextIndex];
+            }
 
             using (new EditorGUI.DisabledScope(nextIndex <= 0))
             {
@@ -73,12 +88,45 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
+        ///     SourceAsset候補キャッシュを必要時のみ再構築します。
+        /// </summary>
+        /// <param name="mappings"> 現在のSourceAsset設定一覧です。 </param>
+        private static void RebuildCacheIfNeeded(IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings)
+        {
+            int hash = 17;
+            for (int i = 0; i < mappings.Count; i++)
+            {
+                hash = (hash * 31) + (mappings[i]?.AddressableKey?.GetHashCode() ?? 0);
+            }
+
+            if (hash == _cachedMappingsHash && _cachedKeys.Length == mappings.Count)
+            {
+                return;
+            }
+
+            _cachedMappingsHash = hash;
+            _cachedKeys = new string[mappings.Count];
+            _cachedLabels = new string[mappings.Count];
+            for (int i = 0; i < mappings.Count; i++)
+            {
+                SourceDataProviderSettings.SourceAssetMapping mapping = mappings[i];
+                _cachedKeys[i] = mapping?.AddressableKey ?? string.Empty;
+                _cachedLabels[i] = BuildLabel(mapping);
+            }
+        }
+
+        /// <summary>
         ///     SourceAsset設定の表示名を生成します。
         /// </summary>
         /// <param name="mapping"> 対象のリポジトリ設定です。 </param>
         /// <returns> セレクターへ表示する名前です。 </returns>
         private static string BuildLabel(SourceDataProviderSettings.SourceAssetMapping mapping)
         {
+            if (mapping == null || string.IsNullOrWhiteSpace(mapping.AddressableKey))
+            {
+                return "<空のSourceAsset>";
+            }
+
             if (SourceDataProviderRepositoryResolver.TryResolveAsset(
                 mapping.AddressableKey,
                 out ScriptableObject sourceAsset))

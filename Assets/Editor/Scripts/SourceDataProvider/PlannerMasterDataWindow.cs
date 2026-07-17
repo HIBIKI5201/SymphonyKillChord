@@ -37,6 +37,7 @@ namespace KillChord.Editor.SourceDataProvider
         /// </summary>
         private void OnEnable()
         {
+            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
             EnsureSelection();
         }
 
@@ -171,6 +172,7 @@ namespace KillChord.Editor.SourceDataProvider
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(72f)))
             {
+                SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
                 ClearCachedEditor();
                 Repaint();
             }
@@ -344,10 +346,19 @@ namespace KillChord.Editor.SourceDataProvider
                 : serializedObject.FindProperty(mapping.PropertyPath);
             if (property == null)
             {
-                EditorGUILayout.HelpBox(
-                    "このcollectionはルートScriptableObjectをそのまま扱います。ルートのInspectorを表示します。",
-                    MessageType.None);
-                DrawInspector(sourceAsset);
+                if (string.IsNullOrWhiteSpace(mapping.PropertyPath))
+                {
+                    EditorGUILayout.HelpBox(
+                        "このcollectionはルートScriptableObjectをそのまま扱います。ルートのInspectorを表示します。",
+                        MessageType.None);
+                    DrawInspector(sourceAsset);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox(
+                        $"Property Path「{mapping.PropertyPath}」を解決できません。Source Data Provider設定を確認してください。",
+                        MessageType.Error);
+                }
                 return;
             }
 
@@ -356,8 +367,7 @@ namespace KillChord.Editor.SourceDataProvider
             if (EditorGUI.EndChangeCheck())
             {
                 serializedObject.ApplyModifiedProperties();
-                EditorUtility.SetDirty(sourceAsset);
-                AssetDatabase.SaveAssets();
+                SaveAssetIfDirty(sourceAsset);
             }
 
             EditorGUILayout.Space();
@@ -404,8 +414,7 @@ namespace KillChord.Editor.SourceDataProvider
             editor.OnInspectorGUI();
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(target);
-                AssetDatabase.SaveAssets();
+                SaveAssetIfDirty(target);
             }
         }
 
@@ -600,7 +609,25 @@ namespace KillChord.Editor.SourceDataProvider
                 DrawObjectReferencePreview(assetProperty.objectReferenceValue);
             }
 
-            EditorGUILayout.PropertyField(element, INCLUDE_CHILDREN);
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.PropertyField(element, INCLUDE_CHILDREN);
+            }
+        }
+
+        /// <summary>
+        ///     編集されたアセットのみを保存します。
+        /// </summary>
+        /// <param name="target"> 保存対象です。 </param>
+        private static void SaveAssetIfDirty(UnityEngine.Object target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            EditorUtility.SetDirty(target);
+            AssetDatabase.SaveAssetIfDirty(target);
         }
 
         /// <summary>

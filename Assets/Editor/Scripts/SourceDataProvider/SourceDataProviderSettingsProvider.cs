@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KillChord.Editor.SourceDataProvider
 {
@@ -62,6 +63,16 @@ namespace KillChord.Editor.SourceDataProvider
             {
                 settings.SaveSettings();
             }
+        }
+
+        /// <summary>
+        ///     設定画面表示開始時にSourceAsset一覧を同期します。
+        /// </summary>
+        /// <param name="searchContext"> 検索文字列です。 </param>
+        /// <param name="rootElement"> ルートGUI要素です。 </param>
+        public override void OnActivate(string searchContext, VisualElement rootElement)
+        {
+            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
         }
 
         /// <summary>
@@ -235,30 +246,38 @@ namespace KillChord.Editor.SourceDataProvider
             SerializedProperty sourceAssetKey,
             SerializedProperty sourceAssets)
         {
-            string[] labels = new string[sourceAssets.arraySize + 1];
-            labels[0] = "<未設定>";
+            List<string> labels = new() { "<未設定>" };
+            List<string> values = new() { string.Empty };
             int selectedIndex = 0;
 
             for (int i = 0; i < sourceAssets.arraySize; i++)
             {
                 SerializedProperty mapping = sourceAssets.GetArrayElementAtIndex(i);
                 SerializedProperty addressableKey = mapping.FindPropertyRelative(SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY);
-                labels[i + 1] = string.IsNullOrWhiteSpace(addressableKey.stringValue)
+                string value = addressableKey.stringValue;
+                labels.Add(string.IsNullOrWhiteSpace(value)
                     ? $"Source Asset {i + 1}"
-                    : addressableKey.stringValue;
-                if (string.Equals(addressableKey.stringValue, sourceAssetKey.stringValue, StringComparison.Ordinal))
+                    : value);
+                values.Add(value);
+                if (string.Equals(value, sourceAssetKey.stringValue, StringComparison.Ordinal))
                 {
-                    selectedIndex = i + 1;
+                    selectedIndex = values.Count - 1;
                 }
             }
 
-            int nextIndex = EditorGUILayout.Popup("Source Asset", selectedIndex, labels);
-            sourceAssetKey.stringValue = nextIndex <= 0
-                ? string.Empty
-                : sourceAssets
-                    .GetArrayElementAtIndex(nextIndex - 1)
-                    .FindPropertyRelative(SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY)
-                    .stringValue;
+            if (!string.IsNullOrWhiteSpace(sourceAssetKey.stringValue) && selectedIndex == 0)
+            {
+                labels.Add($"Missing: {sourceAssetKey.stringValue}");
+                values.Add(sourceAssetKey.stringValue);
+                selectedIndex = values.Count - 1;
+            }
+
+            EditorGUI.BeginChangeCheck();
+            int nextIndex = EditorGUILayout.Popup("Source Asset", selectedIndex, labels.ToArray());
+            if (EditorGUI.EndChangeCheck())
+            {
+                sourceAssetKey.stringValue = values[nextIndex];
+            }
         }
 
         /// <summary>
@@ -270,23 +289,33 @@ namespace KillChord.Editor.SourceDataProvider
             SerializedProperty propertyPath,
             string[] availablePaths)
         {
-            string[] labels = new string[availablePaths.Length + 1];
-            labels[0] = "<未設定>";
+            List<string> labels = new() { "<未設定>" };
+            List<string> values = new() { string.Empty };
             int selectedIndex = 0;
 
             for (int i = 0; i < availablePaths.Length; i++)
             {
-                labels[i + 1] = availablePaths[i];
+                labels.Add(availablePaths[i]);
+                values.Add(availablePaths[i]);
                 if (string.Equals(availablePaths[i], propertyPath.stringValue, StringComparison.Ordinal))
                 {
-                    selectedIndex = i + 1;
+                    selectedIndex = values.Count - 1;
                 }
             }
 
-            int nextIndex = EditorGUILayout.Popup("Collection Property Path", selectedIndex, labels);
-            propertyPath.stringValue = nextIndex <= 0
-                ? string.Empty
-                : availablePaths[nextIndex - 1];
+            if (!string.IsNullOrWhiteSpace(propertyPath.stringValue) && selectedIndex == 0)
+            {
+                labels.Add($"Missing: {propertyPath.stringValue}");
+                values.Add(propertyPath.stringValue);
+                selectedIndex = values.Count - 1;
+            }
+
+            EditorGUI.BeginChangeCheck();
+            int nextIndex = EditorGUILayout.Popup("Collection Property Path", selectedIndex, labels.ToArray());
+            if (EditorGUI.EndChangeCheck())
+            {
+                propertyPath.stringValue = values[nextIndex];
+            }
         }
 
         private const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + "Source Data Provider";

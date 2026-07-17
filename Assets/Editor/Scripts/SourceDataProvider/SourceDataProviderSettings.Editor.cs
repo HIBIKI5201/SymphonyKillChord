@@ -126,6 +126,20 @@ namespace KillChord.Editor.SourceDataProvider
             Save(true);
         }
 
+        /// <summary>
+        ///     Addressablesへ登録済みのScriptableObject一覧を明示的に同期します。
+        /// </summary>
+        public void RefreshSourceAssetsFromAddressables()
+        {
+            if (!_isInitialized)
+            {
+                EnsureInitialized();
+                return;
+            }
+
+            SynchronizeSourceAssetsFromAddressables();
+        }
+
         [SerializeField, Tooltip("Addressable ScriptableObject設定一覧です。")]
         private List<SourceAssetMapping> _sourceAssetMappings = new();
 
@@ -159,10 +173,28 @@ namespace KillChord.Editor.SourceDataProvider
                     }
                 }
 
-                _isInitialized = true;
-            }
+                if (_sourceCollectionMappings.Count == 0)
+                {
+                    for (int i = 0; i < _repositoryMappings.Count; i++)
+                    {
+                        RepositoryMapping legacy = _repositoryMappings[i];
+                        if (legacy == null
+                            || string.IsNullOrWhiteSpace(legacy.Category)
+                            || string.IsNullOrWhiteSpace(legacy.AddressableKey))
+                        {
+                            continue;
+                        }
 
-            SynchronizeSourceAssetsFromAddressables();
+                        _sourceCollectionMappings.Add(new SourceCollectionMapping(
+                            legacy.Category,
+                            legacy.AddressableKey,
+                            legacy.PropertyPath));
+                    }
+                }
+
+                _isInitialized = true;
+                SynchronizeSourceAssetsFromAddressables();
+            }
         }
 
         /// <summary>
@@ -191,7 +223,8 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
-                    if (AssetDatabase.LoadMainAssetAtPath(entry.AssetPath) is not ScriptableObject)
+                    Type mainAssetType = AssetDatabase.GetMainAssetTypeAtPath(entry.AssetPath);
+                    if (mainAssetType == null || !typeof(ScriptableObject).IsAssignableFrom(mainAssetType))
                     {
                         continue;
                     }

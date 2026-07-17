@@ -165,15 +165,16 @@ namespace KillChord.Editor.SourceDataProvider
 
             HashSet<int> visitedInstanceIds = new();
             SerializedObject serializedObject = new(sourceAsset);
-            SerializedProperty rootProperty = string.IsNullOrWhiteSpace(mapping.PropertyPath)
+            bool useRootObject = string.IsNullOrWhiteSpace(mapping.PropertyPath);
+            SerializedProperty rootProperty = useRootObject
                 ? null
                 : serializedObject.FindProperty(mapping.PropertyPath);
 
-            if (rootProperty == null)
+            if (useRootObject)
             {
                 CollectFromObject(sourceAsset, collectionKey, options, visitedInstanceIds);
             }
-            else
+            else if (rootProperty != null)
             {
                 CollectFromProperty(
                     serializedObject,
@@ -208,7 +209,8 @@ namespace KillChord.Editor.SourceDataProvider
             if (target == sourceAsset)
             {
                 return string.IsNullOrWhiteSpace(mapping.PropertyPath)
-                    || propertyPath.StartsWith(mapping.PropertyPath, StringComparison.Ordinal);
+                    || string.Equals(propertyPath, mapping.PropertyPath, StringComparison.Ordinal)
+                    || propertyPath.StartsWith($"{mapping.PropertyPath}.", StringComparison.Ordinal);
             }
 
             if (string.IsNullOrWhiteSpace(mapping.PropertyPath))
