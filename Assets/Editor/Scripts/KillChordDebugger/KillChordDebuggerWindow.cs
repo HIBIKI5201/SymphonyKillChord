@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -18,7 +19,7 @@ namespace KillChord.Editor.Debugger
 
         private const string SAVE_DATA_PANEL_KEY = "savedata";
 
-        [MenuItem("KillChord/Debugger")]
+        [MenuItem(EditorWindowPathConst.KILL_CHORD_DEBUGGER_PATH)]
         private static void Open()
         {
             KillChordDebuggerWindow window = GetWindow<KillChordDebuggerWindow>();
