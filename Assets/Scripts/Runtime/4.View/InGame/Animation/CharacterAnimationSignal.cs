@@ -34,7 +34,7 @@ namespace KillChord.Runtime.View
         /// <returns> 再生時間です。 </returns>
         public float RequestDodge()
         {
-            return RequestOneShot(_playbackMap.Dodge, true);
+            return RequestOneShot(_playbackMap.Dodge, true, false);
         }
 
         /// <summary>
@@ -48,13 +48,13 @@ namespace KillChord.Runtime.View
             {
                 if (_playbackMap.TryGetOneShotIndex(animationKey, out int oneShotIndex))
                 {
-                    return RequestOneShot(oneShotIndex, false);
+                    return RequestOneShot(oneShotIndex, false, true);
                 }
 
                 Debug.LogError($"[{nameof(CharacterAnimationSignal)}] ワンショットアニメーションキーが登録されていません。Key: {animationKey}");
             }
 
-            return RequestOneShot(_playbackMap.Attack, false);
+            return RequestOneShot(_playbackMap.Attack, false, true);
         }
 
         /// <summary>
@@ -66,10 +66,10 @@ namespace KillChord.Runtime.View
         {
             if (_playbackMap.TryGetAttackIndex(attackType, out int attackIndex))
             {
-                return RequestOneShot(attackIndex, false);
+                return RequestOneShot(attackIndex, false, true);
             }
 
-            return RequestOneShot(_playbackMap.Attack, false);
+            return RequestOneShot(_playbackMap.Attack, false, true);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace KillChord.Runtime.View
                 return false;
             }
 
-            duration = RequestOneShot(oneShotIndex, false);
+            duration = RequestOneShot(oneShotIndex, false, false);
             return true;
         }
 
@@ -113,8 +113,12 @@ namespace KillChord.Runtime.View
         /// </summary>
         /// <param name="index"> 再生インデックスです。 </param>
         /// <param name="shouldNotifyDodgeEnded"> 回避終了通知が必要ならtrue。 </param>
+        /// <param name="canCancelByMovement"> 移動による再生キャンセルを許可するならtrue。 </param>
         /// <returns> 現在速度を加味した再生時間です。 </returns>
-        private float RequestOneShot(int index, bool shouldNotifyDodgeEnded)
+        private float RequestOneShot(
+            int index,
+            bool shouldNotifyDodgeEnded,
+            bool canCancelByMovement)
         {
             float clipLength = _playbackMap.GetClipLength(index);
             float enterBlendDuration = _timingCalculator.GetEnterBlendDurationSeconds(
@@ -129,7 +133,8 @@ namespace KillChord.Runtime.View
                 clipLength,
                 enterBlendDuration,
                 exitBlendDuration,
-                shouldNotifyDodgeEnded));
+                shouldNotifyDodgeEnded,
+                canCancelByMovement));
 
             return _timingCalculator.GetPlaybackDurationSeconds(clipLength, GetAnimationSpeed());
         }

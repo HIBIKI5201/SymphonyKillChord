@@ -13,18 +13,21 @@ namespace KillChord.Runtime.View
         /// <param name="enterBlendDurationSeconds"> 基準時間上の開始ブレンド時間です。 </param>
         /// <param name="exitBlendDurationSeconds"> 基準時間上の終了ブレンド時間です。 </param>
         /// <param name="shouldNotifyDodgeEnded"> 回避終了通知が必要ならtrue。 </param>
+        /// <param name="canCancelByMovement"> 移動による再生キャンセルを許可するならtrue。 </param>
         public CharacterAnimationRequest(
             int index,
             float baseDurationSeconds,
             float enterBlendDurationSeconds,
             float exitBlendDurationSeconds,
-            bool shouldNotifyDodgeEnded)
+            bool shouldNotifyDodgeEnded,
+            bool canCancelByMovement)
         {
             Index = index;
             BaseDurationSeconds = baseDurationSeconds;
             EnterBlendDurationSeconds = enterBlendDurationSeconds;
             ExitBlendDurationSeconds = exitBlendDurationSeconds;
             ShouldNotifyDodgeEnded = shouldNotifyDodgeEnded;
+            CanCancelByMovement = canCancelByMovement;
         }
 
         /// <summary> 再生インデックスです。 </summary>
@@ -41,5 +44,8 @@ namespace KillChord.Runtime.View
 
         /// <summary> 回避終了通知が必要かどうかです。 </summary>
         public bool ShouldNotifyDodgeEnded { get; }
+
+        /// <summary> 移動による再生キャンセルが可能かどうかです。 </summary>
+        public bool CanCancelByMovement { get; }
     }
 }
