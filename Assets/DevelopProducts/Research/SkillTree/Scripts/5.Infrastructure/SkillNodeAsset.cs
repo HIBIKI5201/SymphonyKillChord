@@ -3,26 +3,33 @@ using UnityEngine;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードの初期設定Asset
+    /// </summary>
     [CreateAssetMenu(fileName = "SkillNodeAsset", menuName = "DevelopProducts/SkillTree/SkillNodeAsset")]
     public class SkillNodeAsset : ScriptableObject
     {
-        public int Id => _id;
+        /// <summary>Entity(自分自身)</summary>
         public SkillNodeEntity SkillNodeEntity => _skillNodeEntity;
-        public INodeUnlockEffect[] NodeUnlockEffects => _nodeUnlockEffets;
+        /// <summary>親のノード</summary>
         public SkillNodeAsset[] Parents => _parents;
-        public int Cost => _cost;
-
+        /// <summary>
+        ///     Entityに変換
+        /// </summary>
+        /// <returns></returns>
         public SkillNodeEntity ToDomain()
         {
-            _skillNodeEntity = new SkillNodeEntity(_id, _cost, _nodeUnlockEffets, _algorithmService, _isUnlocked, _isEnable);
+            _skillNodeEntity = new SkillNodeEntity(_id, _cost, _algorithmService);
             return _skillNodeEntity;
         }
-        [SerializeReference, SubclassSelector] private INodeUnlockEffect[] _nodeUnlockEffets;
+        [Header("ノードを解放した時の報酬")]
+        [SerializeReference, SubclassSelector] private IParameterUpgradeEffect[] _nodeUnlockEffets;
+        [SerializeReference, SubclassSelector] private ISkillUnlockEffect[] _skillUnlockEffets;
+
+        [Header("解放するにあたっての必要条件")]
         [SerializeReference, SubclassSelector] private IAlgorithmService _algorithmService;
 
         [SerializeField] private int _id;
-        [SerializeField] private bool _isUnlocked;
-        [SerializeField] private bool _isEnable;
         [SerializeField] private SkillNodeAsset[] _parents;
         [SerializeField] private int _cost;
 

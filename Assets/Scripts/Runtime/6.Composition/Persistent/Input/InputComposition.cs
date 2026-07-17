@@ -1,8 +1,10 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.Persistent.Input;
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,8 +14,14 @@ namespace KillChord.Runtime.Composition.Persistent.Input
     ///     入力の初期化クラス。
     /// </summary>
     [RequireComponent(typeof(PlayerInputView), typeof(PlayerInput))]
-    public class InputComposition : MonoBehaviour
+    public sealed class InputComposition : PersistentInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(InputComposition);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 50;
+
         public PlayerInputView GetInputView => _playerInputView;
 
         public UnityInputMapController GetInputMapController => _inputMapController;
@@ -21,7 +29,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
 
-        [Header("Bufferの最大容量")] [SerializeField]
+        [Header("Bufferの最大容量")]
+        [SerializeField]
         private int _bufferCapacity;
 
         private PlayerInput _playerInput;
@@ -32,19 +41,51 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
 
-        private void Awake()
+        /// <summary>
+        ///     入力関連の純粋オブジェクトとView連携を構築する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             _playerInputView = GetComponent<PlayerInputView>();
             _playerInput = GetComponent<PlayerInput>();
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
-            ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance(_playerInputView);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            return true;
         }
 
         private void OnDisable()
         {
             UnbindViewAdaptor();
+        }
+
+        /// <summary>
+        ///     登録済み入力サービスを解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
+                && ReferenceEquals(registeredInputView, _playerInputView))
+            {
+                ServiceLocator.UnregisterInstance<PlayerInputView>();
+            }
+
+            if (ServiceLocator.TryGetInstance(out InputComposition registeredInputComposition)
+                && ReferenceEquals(registeredInputComposition, this))
+            {
+                ServiceLocator.UnregisterInstance(this);
+            }
+        }
+
+        /// <summary>
+        ///     破棄時の安全側解除を行う。
+        /// </summary>
+        private void OnDestroy()
+        {
+            Shutdown();
         }
 
         /// <summary>
@@ -70,8 +111,9 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InputActionMap commonMap = actions.FindActionMap(InputMapNames.Common, true);
             InputActionMap inGameMap = actions.FindActionMap(InputMapNames.InGame, true);
             InputActionMap outGameMap = actions.FindActionMap(InputMapNames.OutGame, true);
+            InputActionMap scenarioMap = actions.FindActionMap(InputMapNames.Scenario, true);
 
-            _inputMapController = new UnityInputMapController(commonMap, inGameMap, outGameMap);
+            _inputMapController = new UnityInputMapController(commonMap, inGameMap, outGameMap, scenarioMap);
         }
 
         /// <summary>
@@ -85,7 +127,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput += _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput += _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput += _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput += _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput += _inputAdaptor.HandleLook;
         }
 
         /// <summary>
@@ -99,7 +141,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _playerInputView.OnDodgeInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnAttackInput -= _inputAdaptor.HandleButton;
             _playerInputView.OnMoveInput -= _inputAdaptor.HandleMove;
-            _playerInputView.OnLookInput -= _inputAdaptor.HandleLook;
+            _playerInputView.OnLookMouseInput -= _inputAdaptor.HandleLook;
         }
     }
 }

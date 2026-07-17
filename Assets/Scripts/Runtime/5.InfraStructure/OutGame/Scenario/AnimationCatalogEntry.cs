@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -9,8 +10,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct AnimationCatalogEntry
     {
-        public string Id;
+        [SourceDataCollection("ScenarioAnimation"), Tooltip("シナリオアニメーションを一意に識別するIDです。")]
+        public DataID Id;
+
+        [Tooltip("アニメーションのAddressableキーです。")]
         public string AssetKey;
+
+        [Tooltip("再生するアニメーションクリップです。")]
         public AnimationClip Asset;
     }
 }

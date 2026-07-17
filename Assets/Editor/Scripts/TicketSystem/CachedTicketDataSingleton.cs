@@ -14,7 +14,7 @@ namespace KillChord.Editor.TicketSystem
         /// キャッシュされたチケットデータをすべて取得する。
         /// </summary>
         /// <returns></returns>
-        public List<TicketData> GetAll()
+        public IReadOnlyList<TicketData> GetAll()
         {
             return _cachedTickets;
         }
@@ -71,17 +71,5 @@ namespace KillChord.Editor.TicketSystem
                 return string.Compare(a.sceneName, b.sceneName, StringComparison.Ordinal);
             });
         }
-    }
-
-    // --- 内部データ構造 ---
-    [Serializable]
-    public class TicketData
-    {
-        public string id;
-        public string sceneName;
-        public bool isInUse;
-        public string userName;
-        public string masterPath;
-        public string timestamp;
     }
 }

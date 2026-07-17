@@ -329,7 +329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc4ac1da365ff44b9402a65528d1e32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.ScenarioView
-  _canvasGroup: {fileID: 0}
+  _canvasGroup: {fileID: 5367599119196324965}
   _chat: {fileID: 9077911072766306316}
   _backgroundImage: {fileID: 7441568288651883614}
   _animationPlayer: {fileID: 0}

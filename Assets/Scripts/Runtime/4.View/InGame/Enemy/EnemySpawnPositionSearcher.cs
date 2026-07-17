@@ -1,128 +1,100 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
+    /// <summary>
+    ///     敵の生成位置を探索するクラス。
+    /// </summary>
     public class EnemySpawnPositionSearcher : MonoBehaviour
     {
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="camera"></param>
-        /// <param name="playerTransform"></param>
-        public void Initialize(UnityEngine.Camera camera, Transform playerTransform)
+        /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
+        public void Initialize(Transform playerTransform)
         {
-            _camera = camera;
+            _positionPairs = GameObject.FindObjectsByType<SpawnPositionPair>(FindObjectsSortMode.None);
+            if (_positionPairs == null || _positionPairs.Length < 1)
+            {
+                throw new Exception("[EnemySpawnPositionSearcher] 敵生成の位置情報が見つかりませんでした。");
+            }
             _playerTransform = playerTransform;
-            cameraPlanes = new Plane[CAMERA_PLANES_COUNT];
-            _path = new NavMeshPath();
-            _candidatePositions = new Vector3[_samplingCount];
         }
 
         /// <summary>
-        ///     敵を生成できる位置を探索する。
+        ///     敵の生成位置をランダムで１つ選定する。
         /// </summary>
-        /// <param name="distance">プレイヤーからの距離</param>
-        /// <param name="positions">生成位置を格納する配列</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void FindSpawnPositions(float distance, Vector3[] positions)
+        /// <returns> 使用する生成位置です。 </returns>
+        public async ValueTask<SpawnPositionPair> GetRandomSpawnPositionAsync()
         {
-            if(positions == null)
+            int loopCnt = 0;
+            while (loopCnt < _maxSearchLoop)
             {
-                throw new ArgumentNullException("positions", "生成位置配列がNULL。");
-            }
-            int posIndex = 0;
-
-            // プレイヤーを中心に、一定距離の円周上に候補位置を取得
-            for (int i = 0; i < _candidatePositions.Length; i++)
-            {
-                float angle = i * Mathf.PI * 2 / _samplingCount;
-
-                Vector3 dir = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
-                Vector3 candidate = _playerTransform.position + dir * distance;
-                _candidatePositions[i] = candidate;
-            }
-
-            for (int i = 0; i < _candidatePositions.Length; i++)
-            {
-                // 候補位置がCameraに映っている場合、スキップする
-                GeometryUtility.CalculateFrustumPlanes(_camera, cameraPlanes);
-                Bounds bounds = new Bounds(_candidatePositions[i], Vector3.one * 0.5f);
-                if (GeometryUtility.TestPlanesAABB(cameraPlanes, bounds))
+                ShuffulePositionPairs();
+                for (int i = 0; i < _positionPairs.Length; i++)
                 {
-                    continue;
-                }
-
-                // 候補位置がプレイヤーに到達できない場合、スキップする
-                if (NavMesh.SamplePosition(_candidatePositions[i], out NavMeshHit hit, 1f, NavMesh.AllAreas))
-                {
-                    NavMesh.CalculatePath(_candidatePositions[i], _playerTransform.position, NavMesh.AllAreas, _path);
-                    if (_path.status != NavMeshPathStatus.PathComplete)
+                    if ((!_positionPairs[i].IsInUse) && !IsPositionNearPlayer(_positionPairs[i]))
                     {
-                        continue;
+                        return _positionPairs[i];
                     }
                 }
-                else
-                {
-                    continue;
-                }
-                // 見つかった位置を引数に設定する
-                positions[posIndex] = _candidatePositions[i];
-                posIndex++;
-                if(posIndex >= positions.Length)
-                {
-                    return;
-                }
+                // 使える生成位置がない場合、一定時間待って再探索する
+                await Task.Delay(_searchDelay);
+                loopCnt++;
             }
-            // 見つかった位置の数が足りない場合、最後に見つかった位置を不足分に設定する
-            if(posIndex < positions.Length)
+            // 一定回数探索しても生成位置が見つからない場合、明示された既定位置を使う
+            Debug.LogWarning("[EnemySpawnPositionSearcher] 予期せぬ原因により、敵生成位置取得が失敗しました。初期位置で敵を生成します。");
+            if (_defaultPositionPair != null)
             {
-                // 一つも見つからなかった場合、既定位置を設定する
-                if (posIndex == 0)
-                {
-                    if(_defaultPosition == null)
-                    {
-                        throw new InvalidOperationException("_defaultPosition が未設定です。");
-                    }
-                    positions[0] = _defaultPosition.position;
-                    posIndex++;
-                }
-                for (int i = posIndex; i < positions.Length; i++)
-                {
-                    positions[i] = positions[posIndex - 1];
-                }
+                return _defaultPositionPair;
             }
+            throw new Exception("[EnemySpawnPositionSearcher] 使用可能な敵生成位置が見つかりませんでした。");
         }
-
-        /// <summary> カメラ視野を表す平面の数。探索用 </summary>
-        private const int CAMERA_PLANES_COUNT = 6;
         
         [Header("性能調整")]
-        [SerializeField, Tooltip("探索の侯選ポジション数")]
-        private int _samplingCount = 36;
+        [SerializeField, Tooltip("生成位置が見つからない場合、再探索までの待ち時間(ミリ秒)")]
+        private int _searchDelay = 1000;
+        [SerializeField, Tooltip("生成位置が見つからない場合、再探索を行う最大回数")]
+        private int _maxSearchLoop = 10;
+
         [Space]
         [SerializeField, Tooltip("生成位置が見つからない場合の位置")]
-        private Transform _defaultPosition;
+        private SpawnPositionPair _defaultPositionPair;
+        [SerializeField, Tooltip("生成可能なプレイヤーとの最小距離")]
+        private float _minDistanceToPlayer = 10f;
 
-        private Vector3[] _candidatePositions;
-        private NavMeshPath _path;
-        private Plane[] cameraPlanes;
         private Transform _playerTransform;
-        private UnityEngine.Camera _camera;
+        private SpawnPositionPair[] _positionPairs;
 
-#if UNITY_EDITOR
-        [Header("デバッグ用")]
-        [SerializeField] private bool _drawGizmoFlg = false;
-        private void OnDrawGizmos()
+        /// <summary>
+        ///     生成位置の配列をシャッフルする。
+        /// </summary>
+        private void ShuffulePositionPairs()
         {
-            if (!_drawGizmoFlg) return;
-            Gizmos.color = Color.yellow;
-            for(int i = 0; i < _candidatePositions?.Length; i++)
+            for (int i = _positionPairs.Length - 1; i > 0; i--)
             {
-                Gizmos.DrawCube(_candidatePositions[i], Vector3.one / 2);
+                int index = UnityEngine.Random.Range(0, i + 1);
+                (_positionPairs[i], _positionPairs[index]) = (_positionPairs[index], _positionPairs[i]);
             }
         }
-#endif
+
+        /// <summary>
+        ///     生成位置がプレイヤーに近すぎるか判定する。
+        /// </summary>
+        /// <param name="positionPair"> 判定対象の生成位置です。 </param>
+        /// <returns> 近すぎる場合はtrue。 </returns>
+        private bool IsPositionNearPlayer(SpawnPositionPair positionPair)
+        {
+            if (_playerTransform == null)
+            {
+                return false;
+            }
+
+            float distance = Vector3.Distance(_playerTransform.position, positionPair.transform.position);
+            return distance < _minDistanceToPlayer;
+        }
     }
 }

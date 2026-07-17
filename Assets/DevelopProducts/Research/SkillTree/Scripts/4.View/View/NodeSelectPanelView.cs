@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -6,19 +5,31 @@ using UnityEngine.UI;
 
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     スキルツリーの解放パネルUIに色々表示させるクラス
+    /// </summary>
     public class NodeSelectPanelView : MonoBehaviour
     {
-        public void Initialize(NodeUnlockController nodeUnlockController,
+        /// <summary>
+        ///     初期化メソッド
+        /// </summary>
+        /// <param name="nodeUnlockController"></param>
+        /// <param name="nodeCanUnlockController"></param>
+        /// <param name="skillNodePresenter"></param>
+        /// <param name="nodeVisibleController"></param>
+        /// <param name="skillTreeRepository"></param>
+        public void Initialize(
+            NodeUnlockController nodeUnlockController,
             NodeCanUnlockController nodeCanUnlockController,
-            NodeLockController nodeLockController,
             SkillNodePresenter skillNodePresenter,
-            NodeVisibleController nodeVisibleController)
+            NodeVisibleController nodeVisibleController,
+            ISkillTreeRepository skillTreeRepository)
         {
             _nodeUnlockController = nodeUnlockController;
             _nodeCanUnlockController = nodeCanUnlockController;
-            _nodeLockController = nodeLockController;
             _skillNodePresenter = skillNodePresenter;
             _nodeVisibleController = nodeVisibleController;
+            _skillTreeRepository = skillTreeRepository;
 
             // 流れとしては、最初に全てのノードをロック状態にしてから、アンロックされているノードをアンロック状態にする
             for (int i = 1; i <= _skillTreeRepository.PhaseCount; i++)
@@ -36,6 +47,10 @@ namespace DevelopProducts.SkillTree
             }
             CanUnlockNodes();
         }
+        /// <summary>
+        ///     ノードの状態を代入する
+        /// </summary>
+        /// <param name="nodeView"></param>
         public void SetNode(NodeView nodeView)
         {
             if (nodeView.IsUnlocked) return;
@@ -45,7 +60,6 @@ namespace DevelopProducts.SkillTree
         }
         [SerializeField] private TMP_Text _nodeNameText;
         [SerializeField] private Button _unlockButton;
-        [SerializeField] private SkillTreeRepository _skillTreeRepository;
 
         private int _currentNodeId = -1;
         private int _currentNodeCost = 0;
@@ -53,10 +67,13 @@ namespace DevelopProducts.SkillTree
 
         private NodeUnlockController _nodeUnlockController;
         private NodeCanUnlockController _nodeCanUnlockController;
-        private NodeLockController _nodeLockController;
         private SkillNodePresenter _skillNodePresenter;
         private NodeVisibleController _nodeVisibleController;
+        private ISkillTreeRepository _skillTreeRepository;
 
+        /// <summary>
+        ///     ボタンがクリックされた時に呼び出すメソッド
+        /// </summary>
         private void OnUnlockButtonClicked()
         {
             var result = _nodeUnlockController.UnlockNode(_currentNodeId);
@@ -101,6 +118,9 @@ namespace DevelopProducts.SkillTree
             }
             return isAllUnlocked;
         }
+        /// <summary>
+        ///     ノードが表示可能なノードを可視化させる
+        /// </summary>
         private void CanUnlockNodes()
         {
             var enableNodes = _skillTreeRepository.AllSkillNodes.Where(n => n.IsEnable && !n.IsUnlocked);
@@ -112,10 +132,6 @@ namespace DevelopProducts.SkillTree
         private void Awake()
         {
             _unlockButton.onClick.AddListener(OnUnlockButtonClicked);
-        }
-        private void Start()
-        {
-
         }
         private void OnDestroy()
         {

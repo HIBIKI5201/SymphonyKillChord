@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -17,16 +17,16 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         /// <returns> 生成された攻撃定義オブジェクト。 </returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public static AttackDefinition Create(AttackDefinitionData data)
+        public static AttackDefinition Create(AttackDefinitionAsset data)
         {
             if (data == null)
             {
                 throw new System.ArgumentNullException(nameof(data));
             }
 
-            if (data.AttackParameterSetData == null)
+            if (data.AttackSpecAsset == null)
             {
-                throw new System.ArgumentNullException(nameof(data.AttackParameterSetData));
+                throw new System.ArgumentNullException(nameof(data.AttackSpecAsset));
             }
 
             if (data.AttackPipelineAsset == null)
@@ -34,13 +34,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 throw new System.ArgumentNullException(nameof(data.AttackPipelineAsset));
             }
 
-            AttackParameterSet attackParameterSet = new AttackParameterSet(
-                new CriticalChance(data.AttackParameterSetData.CriticalChance),
-                new CriticalMultiplier(data.AttackParameterSetData.CriticalDamageMultiplier),
-                new Damage(data.AttackParameterSetData.ConfirmedDamage)
+            AttackSpec attackSpec = new AttackSpec(
+                new CriticalChance(data.AttackSpecAsset.CriticalChance),
+                new CriticalMultiplier(data.AttackSpecAsset.CriticalDamageMultiplier),
+                new Damage(data.AttackSpecAsset.ConfirmedDamage)
             );
 
-            int? beatType = data.UseBeatType ? data.BeatType : null;
+            int? beatType = data.UseBeatType ? (int?)data.BeatType : null;
 
             BeatType? resolvedBeatType = null;
             if (beatType.HasValue)
@@ -56,8 +56,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
 
             return new AttackDefinition(
                 data.AttackName,
-                new Damage(data.BaseDamage),
-                attackParameterSet,
+                attackSpec,
                 data.AttackPipelineAsset.Create(),
                 resolvedBeatType,
                 data.JustDamageMultiplier

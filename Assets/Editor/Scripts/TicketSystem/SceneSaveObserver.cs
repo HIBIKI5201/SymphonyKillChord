@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -36,7 +37,7 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
-            var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
+            IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
             if (cachedTickets.Count == 0)
             {
                 Debug.LogWarning("キャッシュされたチケットがありませんでした。");

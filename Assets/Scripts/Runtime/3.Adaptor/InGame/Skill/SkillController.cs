@@ -1,96 +1,57 @@
-using KillChord.Runtime.Application.InGame.Skill;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Skill;
-using System.Collections.Generic;
+using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
-    /// スキルの表示・入力チェックを仲介するコントローラクラス。
+    ///     スキルの表示・入力チェックを仲介するコントローラクラス。
     /// </summary>
-    public class SkillController : IViewAction
+    public class SkillController
     {
         /// <summary>
-        /// コンストラクタ。リポジトリから指定されたスキルを読み込み、視覚演出を登録する。
+        ///     コントローラーを初期化します。
         /// </summary>
-        public SkillController(
-            ISkillRepository skillRepository,
-            ISkillVisual[] skillVisuals,
-            int[] skillId = null,
-            SkillResultPresenter presenter = null,
-            SkillInputProgressController progressController = null)
+        /// <param name="musicSyncService"> 音楽同期サービスです。 </param>
+        public SkillController(IMusicSyncService musicSyncService)
         {
-            skillId ??= new[] { 0 };
-            _skillCache = new SkillDefinition[skillId.Length];
+            _musicSyncService = musicSyncService ?? throw new ArgumentNullException(nameof(musicSyncService));
+        }
 
-            for (int i = 0; i < skillId.Length; i++)
-            {
-                _skillCache[i] = skillRepository.GetSkill(skillId[i]);
-            }
+        /// <summary> スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。 </summary>
+        public event Action<string> OnSkillAnimationRequested;
 
-            _skillVisuals = new Dictionary<int, ISkillVisual>();
-            if (skillVisuals != null)
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="skillExecutionControllers"> スキル実行Controller一覧です。 </param>
+        public void Initialize(SkillExecutionController[] skillExecutionControllers)
+        {
+            _skillExecutionControllers = skillExecutionControllers;
+        }
+
+        /// <summary>
+        ///   指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
+        /// </summary>
+        /// <param name="actionType"> 行動種別です。 </param>
+        /// <param name="beatType"> 現在ビートです。 </param>
+        /// <param name="unscaledTime"> 現在時刻です。 </param>
+        public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        {
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
+
+            for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                foreach (var visual in skillVisuals)
+                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType);
+                if (result.ResultType == SkillExecutionResultType.Executed)
                 {
-                    _skillVisuals[visual.Id] = visual;
+                    OnSkillAnimationRequested?.Invoke(result.AnimationKey);
                 }
             }
-
-            _presenter = presenter;
-            _progressController = progressController;
         }
 
-        /// <summary>
-        /// ユースケースを設定する。
-        /// </summary>
-        /// <param name="usecase">スキル処理のユースケース</param>
-        public void SetUsecase(SkillUsecase usecase)
-        {
-            _skillUseCase = usecase;
-        }
-
-        /// <summary>
-        /// 指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
-        /// </summary>
-        /// <returns>スキルが発動した場合はtrue、それ以外はfalse</returns>
-        public bool CheckSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
-        {
-            _progressController?.UpdateProgress(_skillCache, beatType);
-
-            if (_skillUseCase.TryExecuteSkill(
-                    _skillCache,
-                    actionType,
-                    beatType,
-                    unscaledTime,
-                    out var executedSkill))
-            {
-                _presenter?.Push(executedSkill);
-                _progressController?.ResetSkill(executedSkill.Id.Value);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 指定したスキルIDに対応する視覚演出を実行する。
-        /// </summary>
-        /// <param name="skillId">実行するスキルのID</param>
-        public void Execute(int skillId)
-        {
-            if (_skillVisuals.TryGetValue(skillId, out var visual))
-            {
-                visual.Execute();
-            }
-        }
-
-        // ...インスペクション用のフィールド（順序はコード規定に従う）
-        private readonly SkillDefinition[] _skillCache;
-        private readonly Dictionary<int, ISkillVisual> _skillVisuals;
-        private readonly SkillResultPresenter _presenter;
-        private readonly SkillInputProgressController _progressController;
-        private SkillUsecase _skillUseCase;
+        private SkillExecutionController[] _skillExecutionControllers;
+        private readonly IMusicSyncService _musicSyncService;
     }
 }

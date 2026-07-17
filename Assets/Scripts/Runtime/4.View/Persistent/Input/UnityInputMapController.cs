@@ -9,11 +9,13 @@ namespace KillChord.Runtime.View.Persistent.Input
     {
         public UnityInputMapController(InputActionMap commonMap,
             InputActionMap inGameMap,
-            InputActionMap outGameMap)
+            InputActionMap outGameMap,
+            InputActionMap scenarioMap)
         {
             _commonMap = commonMap;
             _inGameMap = inGameMap;
             _outGameMap = outGameMap;
+            _scenarioMap = scenarioMap;
         }
 
         /// <summary>
@@ -24,6 +26,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             _commonMap.Disable();
             _inGameMap.Disable();
             _outGameMap.Disable();
+            _scenarioMap.Disable();
         }
 
         /// <summary>
@@ -60,6 +63,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private readonly InputActionMap _commonMap;
         private readonly InputActionMap _inGameMap;
         private readonly InputActionMap _outGameMap;
+        private readonly InputActionMap _scenarioMap;
 
         /// <summary>
         ///     引数で指定されたInputMapIdに対応するInputActionMapを返す。
@@ -73,6 +77,7 @@ namespace KillChord.Runtime.View.Persistent.Input
                 InputMapNames.Common => _commonMap,
                 InputMapNames.InGame => _inGameMap,
                 InputMapNames.OutGame => _outGameMap,
+                InputMapNames.Scenario => _scenarioMap,
                 _ => null
             };
         }

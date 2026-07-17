@@ -51,6 +51,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 }
             }
 
+            // TODO: セーブデータから、ミッション達成状況を取得して反映する。
+
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,

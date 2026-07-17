@@ -1,149 +1,311 @@
-using KillChord.Runtime.Application.InGame.Camera.Target;
-using KillChord.Runtime.Composition.InGame.Camera;
-using KillChord.Runtime.Composition.InGame.Enemy;
-using KillChord.Runtime.Composition.InGame.Mission;
-using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Application.Persistent.Load;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.Persistent.Input;
-using KillChord.Runtime.View.InGame.Enemy;
-using KillChord.Runtime.View.InGame.Scene;
-using KillChord.Runtime.View.Persistent.Input;
-using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.Attribute;
+using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.Constant;
+using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using KillChord.Runtime.View.InGame.Camera;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
-    [DefaultExecutionOrder(-100)]
-    public class IngameComposition : MonoBehaviour
+    /// <summary>
+    ///     インゲーム初期化ライフサイクルを実行するクラスです。
+    /// </summary>
+    [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    public sealed class IngameComposition : MonoBehaviour
     {
-        [SerializeField] private MusicSyncInitializer _musicSyncInitializer;
-        [SerializeField] private CameraSystemInitializer _camerasystemInitializer;
-        [SerializeField] private IngameSceneView _ingameSceneView;
-        [SerializeField] private EnemyInfantrySpawner _enemyInfantryTestSpawner;
-        [SerializeField] private EnemyArtillerySpawner _enemyArtilleryTestSpawner;
-        [SerializeField] private InGameMissionInitializer _inGameMissionInitializer;
-        [SerializeField] private MobileInput _mobileInput;
-        [SerializeField] private RhythmGuideInitializer _rhythmGuideInitializer;
-        [SerializeField, SceneNameSelector] private string _backgroundSceneName;
-        [SerializeField] private EnemyPools _enemyPools;
-        [SerializeField] private EnemyInitializer _enemyInitializer;
-        [SerializeField] private EnemySpawnPositionSearcher _enemySpawnPositionSearcher;
-
-        private PlayerInitializer _playerInitializer;
-        private MusicPlayer _musicPlayer;
-
+        /// <summary>
+        ///     シーンロードと初期化フェーズを開始します。
+        /// </summary>
         private async void Start()
         {
-            await _ingameSceneView.LoadScene(_backgroundSceneName);
+            bool isSuccess = false;
 
-            _playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
-            if( _playerInitializer == null)
+            try
             {
-                Debug.LogError("[IngameComposition] PlayerInitializer の取得に失敗しました。");
-                return;
-            }
-            var stageSceneI = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
-            Debug.Log(
-                $"stageSceneI {stageSceneI != null}  PlayerT{stageSceneI.PlayerTransform != null} Skill{stageSceneI.SkillInitializer}");
+                RegisterCurrentScenePriority();
 
-            // 常駐サービスの取得を確実にするため、取得できるまで待機する
-            _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-
-            int retryCount = 0;
-            while (_musicPlayer == null && retryCount < 20)
-            {
-                await System.Threading.Tasks.Task.Delay(100);
-                _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-                retryCount++;
-            }
-
-            if (_musicPlayer == null)
-            {
-                Debug.LogError("[IngameComposition] MusicPlayer の取得に失敗しました。常駐シーンがロードされているか確認してください。");
-                return;
-            }
-
-            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
-            if (mainCamera == null)
-            {
-                Debug.LogError("[IngameComposition] MainCamera が見つかりません。");
-                return;
-            }
-            if (_enemyPools == null)
-            {
-                Debug.LogError("[IngameComposition] EnemyPoolsの参照が未設定です。");
-                return;
-            }
-            if (_enemyInitializer == null)
-            {
-                Debug.LogError("[IngameComposition] EnemyInitializerの参照が未設定です。");
-                return;
-            }
-            if (_enemySpawnPositionSearcher == null)
-            {
-                Debug.LogError("[IngameComposition] EnemySpawnPositionSearcherの参照が未設定です。");
-                return;
-            }
-            if (_enemyInfantryTestSpawner == null)
-            {
-                Debug.LogError("[IngameComposition] EnemyInfantryTestSpawnerの参照が未設定です。");
-                return;
-            }
-            if (_enemyArtilleryTestSpawner == null)
-            {
-                Debug.LogError("[IngameComposition] EnemyArtilleryTestSpawnerの参照が未設定です。");
-                return;
-            }
-
-            TargetManager targetManager = new();
-            TargetEntityRegistry targetEntityRegistry = new();
-
-            // 初期化順序の実行
-            _musicSyncInitializer.Initialize();
-            _inGameMissionInitializer.Initialize();
-
-            var inputC = ServiceLocator.GetInstance<InputComposition>();
-            inputC.GetInputMapController.EnableOnly(InputMapNames.InGame);
-#if UNITY_ANDROID
-            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
-            _mobileInput.Initialize(inputC.GetInputView);
-#else
-            _camerasystemInitializer.Initialize(targetManager, targetEntityRegistry);
-            Cursor.lockState = CursorLockMode.Locked;
-#endif
-
-            _playerInitializer.Initialize(targetManager, targetEntityRegistry, inputC);
-
-            // ステージに事前配置されている敵の情報
-            AssignedEnemyManager assignedEnemyManager = FindFirstObjectByType<AssignedEnemyManager>();
-            if(assignedEnemyManager == null)
-            {
-                Debug.LogWarning("[IngameComposition] 敵の事前配置情報がありません。");
-            }
-            else
-            {
-                if (assignedEnemyManager.Infantries == null || assignedEnemyManager.Infantries.Length == 0)
+                if (!TryResolveBootDependencies(
+                    out SelectedBattleStageState selectedBattleStageState,
+                    out ILoadingOperationExecutor operationExecutor,
+                    out ISceneTransitionService sceneTransitionService))
                 {
-                    Debug.LogWarning("[IngameComposition] 歩兵の事前配置情報がありません。");
+                    FailActiveLoadingSession();
+                    return;
                 }
-                if (assignedEnemyManager.Artillery == null || assignedEnemyManager.Artillery.Length == 0)
+
+                if (!selectedBattleStageState.HasSelectedBattleStage)
                 {
-                    Debug.LogWarning("[IngameComposition] 砲兵の事前配置情報がありません。");
+                    Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                LoadingExecutionOptions options = LoadingExecutionOptions.ContinueAndComplete(
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
+                    1f);
+
+                isSuccess = await operationExecutor.ExecuteAsync(
+                    async totalProgress =>
+                    {
+                        LoadingProgressRange stageLoadProgress = new(
+                            totalProgress,
+                            0f,
+                            LoadingConstants.STAGE_LOAD_END_PROGRESS);
+
+                        bool loadSuccess = await sceneTransitionService.LoadAdditiveAsync(
+                            selectedBattleStageState.BattleSceneName,
+                            stageLoadProgress,
+                            destroyCancellationToken);
+                        if (!loadSuccess)
+                        {
+                            Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの読み込みに失敗しました。", this);
+                            return false;
+                        }
+
+                        if (!await WaitForStageSceneReadyAsync(
+                                selectedBattleStageState.BattleSceneName,
+                                destroyCancellationToken))
+                        {
+                            Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの初期化待機に失敗しました。", this);
+                            return false;
+                        }
+
+                        _modules = CollectModules();
+                        if (_modules.Count == 0)
+                        {
+                            Debug.LogWarning($"[{nameof(IngameComposition)}] 初期化モジュールが見つかりません。", this);
+                            return true;
+                        }
+
+                        LoadingProgressRange initializeProgress = new(
+                            totalProgress,
+                            LoadingConstants.STAGE_LOAD_END_PROGRESS,
+                            1f);
+
+                        return await _initializationCoordinator.InitializeAsync(
+                            _modules,
+                            initializeProgress,
+                            destroyCancellationToken);
+                    },
+                    options,
+                    destroyCancellationToken);
+
+                if (!isSuccess)
+                {
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                if (!await WaitForCameraSystemReadyAsync(destroyCancellationToken))
+                {
+                    Debug.LogError($"[{nameof(IngameComposition)}] カメラ初期化の完了待機に失敗しました。", this);
+                    isSuccess = false;
+                    FailActiveLoadingSession();
                 }
             }
-
-            // 敵生成関連
-            _enemyPools.Initialize();
-            _enemyInitializer.Initialize(targetManager, targetEntityRegistry, _enemyPools);
-
-            _enemySpawnPositionSearcher.Initialize(mainCamera, _playerInitializer.transform);
-            _enemyInfantryTestSpawner.Initialize(assignedEnemyManager?.Infantries);
-            _enemyArtilleryTestSpawner.Initialize(assignedEnemyManager?.Artillery);
-
-            // リズムガイドUI
-            _rhythmGuideInitializer.Initialize();
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                FailActiveLoadingSession();
+                Debug.LogException(exception, this);
+            }
+            finally
+            {
+                CompleteSceneInitialization(isSuccess);
+            }
         }
+
+        /// <summary>
+        ///     現在のインゲームシーン優先度を登録します。
+        /// </summary>
+        private void RegisterCurrentScenePriority()
+        {
+            bool isRegistered = SceneLoader.RegisterLoadedScene(
+                gameObject.scene.name,
+                ScenePriorityResolver.Resolve(gameObject.scene.name));
+            if (!isRegistered)
+            {
+                Debug.LogWarning($"[{nameof(IngameComposition)}] シーン優先度登録に失敗しました。{gameObject.scene.name}", this);
+            }
+        }
+
+        /// <summary>
+        ///     登録順の逆順でモジュールを終了します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_modules == null)
+            {
+                return;
+            }
+
+            for (int i = _modules.Count - 1; i >= 0; i--)
+            {
+                _modules[i]?.Shutdown();
+            }
+
+            _modules = null;
+        }
+
+        /// <summary>
+        ///     シーン内の初期化モジュールを収集して実行順に並べます。
+        /// </summary>
+        /// <returns> 実行対象モジュール一覧です。 </returns>
+        private List<IInGameInitializationModule> CollectModules()
+        {
+            return FindObjectsByType<InGameInitializationModuleBase>(FindObjectsSortMode.None)
+                .Where(module => module.isActiveAndEnabled)
+                .Cast<IInGameInitializationModule>()
+                .OrderBy(module => module.Order)
+                .ToList();
+        }
+
+        /// <summary>
+        ///     起動に必要な常駐サービスを解決します。
+        /// </summary>
+        /// <param name="selectedBattleStageState"> 選択中ステージ状態です。 </param>
+        /// <param name="operationExecutor"> ロード実行器です。 </param>
+        /// <param name="sceneTransitionService"> シーン遷移サービスです。 </param>
+        /// <returns> 解決に成功した場合はtrue。 </returns>
+        private bool TryResolveBootDependencies(
+            out SelectedBattleStageState selectedBattleStageState,
+            out ILoadingOperationExecutor operationExecutor,
+            out ISceneTransitionService sceneTransitionService)
+        {
+            selectedBattleStageState = null;
+            operationExecutor = null;
+            sceneTransitionService = null;
+
+            if (!ServiceLocator.TryGetInstance(out selectedBattleStageState))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(SelectedBattleStageState)} が取得できませんでした。", this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out operationExecutor))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(ILoadingOperationExecutor)} が取得できませんでした。", this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out sceneTransitionService))
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(ISceneTransitionService)} が取得できませんでした。", this);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     実行中のロードセッションを失敗として終了します。
+        /// </summary>
+        private void FailActiveLoadingSession()
+        {
+            if (!ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController))
+            {
+                return;
+            }
+
+            loadingScreenController.FailActiveSession();
+        }
+
+        /// <summary>
+        ///     インゲームシーンの初期化結果を通知します。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
+        private void CompleteSceneInitialization(bool isSuccess)
+        {
+            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            {
+                Debug.LogError(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
+                    this);
+                return;
+            }
+
+            readiness.Complete(gameObject.scene.name, isSuccess);
+        }
+
+        /// <summary>
+        ///     ステージシーンのロード完了とシーン参照登録完了を待機します。
+        /// </summary>
+        /// <param name="stageSceneName"> ステージシーン名です。 </param>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 準備完了した場合はtrue。 </returns>
+        private static async Awaitable<bool> WaitForStageSceneReadyAsync(
+            string stageSceneName,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(stageSceneName))
+            {
+                return false;
+            }
+
+            for (int retryCount = 0; retryCount < MAX_STAGE_READY_WAIT_FRAME; retryCount++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                Scene stageScene = SceneManager.GetSceneByName(stageSceneName);
+                if (stageScene.isLoaded
+                    && ServiceLocator.TryGetInstance(out IStageSceneInstance stageSceneInstance)
+                    && stageSceneInstance != null
+                    && stageSceneInstance.PlayerSpawnPointTransform != null)
+                {
+                    return true;
+                }
+
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     カメラがプレイヤー追従位置へ初回更新されるまで待機します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 準備完了した場合はtrue。 </returns>
+        private async Awaitable<bool> WaitForCameraSystemReadyAsync(
+            System.Threading.CancellationToken cancellationToken)
+        {
+            CameraSystemView cameraSystemView = FindFirstObjectByType<CameraSystemView>();
+            if (cameraSystemView == null)
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(CameraSystemView)} が見つかりません。", this);
+                return false;
+            }
+
+            for (int retryCount = 0; retryCount < MAX_CAMERA_READY_WAIT_FRAME; retryCount++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (cameraSystemView.HasCompletedInitialUpdate)
+                {
+                    return true;
+                }
+
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
+
+            return false;
+        }
+
+        private const int MAX_STAGE_READY_WAIT_FRAME = 120;
+        private const int MAX_CAMERA_READY_WAIT_FRAME = 120;
+        private readonly InGameInitializationCoordinator _initializationCoordinator = new();
+        private List<IInGameInitializationModule> _modules;
     }
 }

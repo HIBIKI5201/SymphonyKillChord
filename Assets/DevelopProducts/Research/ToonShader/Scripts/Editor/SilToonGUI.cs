@@ -11,7 +11,10 @@ namespace DevelopProducts.ToonShader
         static bool showFade = true;
         static bool showNormal = true;
         static bool showFresnel = true;
+        static bool showPBR = true;
+        static bool showSSS = true;
         static bool showOutline = true;
+        static bool showSmears = true;
         static bool showPerspective = true;
         static bool showRenderState = false;
 
@@ -44,6 +47,7 @@ namespace DevelopProducts.ToonShader
             MaterialProperty colorShadow = Find("_ColorShadow", props);
             MaterialProperty isForFace = Find("_IsForFace", props);
             MaterialProperty faceUp = Find("_FaceUp", props);
+            MaterialProperty charShadowOn = Find("_CharShadowOn", props);
 
             MaterialProperty _fadeAlpha = Find("_FadeAlpha", props);
             MaterialProperty _fadeOn = Find("_FadeOn", props);
@@ -55,11 +59,30 @@ namespace DevelopProducts.ToonShader
             MaterialProperty fresnelFront = Find("_FresnelFrontRimLight", props);
             MaterialProperty fresnelBackRim = Find("_FresnelBackRimLight", props);
 
+            MaterialProperty pbrOn = Find("_PBROn", props);
+            MaterialProperty metallicMap = Find("_MetallicMap", props);
+            MaterialProperty metallic = Find("_Metallic", props);
+            MaterialProperty roughnessMap = Find("_RoughnessMap", props);
+            MaterialProperty roughness = Find("_Roughness", props);
+            MaterialProperty specularIntensity = Find("_SpecularIntensity", props);
+            MaterialProperty envReflectionIntensity = Find("_EnvReflectionIntensity", props);
+
+            MaterialProperty sssOn = Find("_SSSOn", props);
+            MaterialProperty sssColor = Find("_SSSColor", props);
+            MaterialProperty sssWrap = Find("_SSSWrap", props);
+            MaterialProperty sssIntensity = Find("_SSSIntensity", props);
+            MaterialProperty sssThickness = Find("_SSSThickness", props);
+            MaterialProperty sssTransmissionPower = Find("_SSSTransmissionPower", props);
+
             MaterialProperty outlineColor = Find("_OutlineColor", props);
             MaterialProperty zOffset = Find("_ZOffset", props);
             MaterialProperty smoothNormal = Find("_IsSmoothNormal", props);
             MaterialProperty outlineWidthLit = Find("_OutlineWidthLit", props);
             MaterialProperty outlineWidthShadow = Find("_OutlineWidthShadow", props);
+
+            MaterialProperty smearsOn = Find("_SmearsOn", props);
+            MaterialProperty smearsPower = Find("_SmearsPower", props);
+            MaterialProperty smearsDirection = Find("_SmearsDirection", props);
 
             MaterialProperty perspectiveRatio = Find("_PerspectiveRemovalRatio", props);
             MaterialProperty perspectiveRadius = Find("_PerspectiveRemovalRadius", props);
@@ -90,6 +113,9 @@ namespace DevelopProducts.ToonShader
                     EditorGUI.indentLevel--;
                 }
 
+                EditorGUILayout.Space(5);
+                materialEditor.ShaderProperty(charShadowOn, new GUIContent("Character Self Shadow", "キャラ専用シャドウマップ(_CharShadowmap)によるセルフシャドウを受け取る"));
+
             });
 
             DrawSection("Fade", ref showFade, () =>
@@ -116,6 +142,35 @@ namespace DevelopProducts.ToonShader
                 materialEditor.ShaderProperty(fresnelBackRim, new GUIContent("Back Rim Intensity", "背面エッジのリムライト強度"));
             });
 
+            DrawSection("PBR", ref showPBR, () =>
+            {
+                materialEditor.ShaderProperty(pbrOn, new GUIContent("PBR On", "トゥーンランプにGGXスペキュラと環境反射を合成(装備・金属向け)"));
+                if (pbrOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Metalness", "金属度マップ(未設定時は黒=非金属)"), metallicMap, metallic);
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Roughness", "粗さマップ(未設定時は白=マット)"), roughnessMap, roughness);
+                    materialEditor.ShaderProperty(specularIntensity, new GUIContent("Specular Intensity", "直接スペキュラの強度"));
+                    materialEditor.ShaderProperty(envReflectionIntensity, new GUIContent("Env Reflection", "リフレクションプローブ反射の強度"));
+                    EditorGUI.indentLevel--;
+                }
+            });
+
+            DrawSection("SSS", ref showSSS, () =>
+            {
+                materialEditor.ShaderProperty(sssOn, new GUIContent("SSS On", "簡易サブサーフェス散乱を有効化"));
+                if (sssOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(sssColor, new GUIContent("SSS Color", "散乱色 (肌の暖色)"));
+                    materialEditor.ShaderProperty(sssWrap, new GUIContent("Wrap", "明暗境界の滲み幅 (0-1)"));
+                    materialEditor.ShaderProperty(sssIntensity, new GUIContent("Intensity", "SSS全体強度"));
+                    materialEditor.ShaderProperty(sssThickness, new GUIContent("Thickness", "透過強度 (耳・指など薄い箇所)"));
+                    materialEditor.ShaderProperty(sssTransmissionPower, new GUIContent("Transmission Power", "透過ローブのシャープさ"));
+                    EditorGUI.indentLevel--;
+                }
+            });
+
             DrawSection("Outline Settings", ref showOutline, () =>
             {
                 materialEditor.ShaderProperty(outlineColor, new GUIContent("Color", "アウトラインの色"));
@@ -128,6 +183,18 @@ namespace DevelopProducts.ToonShader
                 materialEditor.ShaderProperty(outlineWidthLit, new GUIContent("Width (Lit)", "明部の太さ"));
                 materialEditor.ShaderProperty(outlineWidthShadow, new GUIContent("Width (Shadow)", "影部の太さ"));
                 EditorGUI.indentLevel--;
+            });
+
+            DrawSection("Smears", ref showSmears, () =>
+            {
+                materialEditor.ShaderProperty(smearsOn, new GUIContent("Smears On", "アウトラインのスメアを有効化"));
+                if (smearsOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(smearsPower, new GUIContent("Power", "スメアの変位量"));
+                    materialEditor.VectorProperty(smearsDirection, "Direction (World)");
+                    EditorGUI.indentLevel--;
+                }
             });
 
             DrawSection("Perspective Removal", ref showPerspective, () =>
@@ -206,6 +273,51 @@ namespace DevelopProducts.ToonShader
 
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("SilToon v1.0.1", EditorStyles.centeredGreyMiniLabel);
+
+            foreach (var target in materialEditor.targets)
+            {
+                if (target is Material mat)
+                {
+                    SyncKeywords(mat);
+                }
+            }
+        }
+
+        public override void ValidateMaterial(Material material)
+        {
+            SyncKeywords(material);
+        }
+
+        /// <summary>
+        /// 未使用機能の計算をシェーダーバリアントごと省くため、
+        /// マテリアルの設定値に合わせてshader_featureキーワードを同期する。
+        /// </summary>
+        private static void SyncKeywords(Material material)
+        {
+            SetKeyword(material, "_NORMALMAP",
+                material.HasProperty("_NormalMap") && material.GetTexture("_NormalMap") != null);
+            SetKeyword(material, "_ISFORFACE_ON",
+                material.HasProperty("_IsForFace") && material.GetFloat("_IsForFace") > 0);
+            SetKeyword(material, "_PERSPECTIVE_REMOVAL_ON",
+                material.HasProperty("_PerspectiveRemovalRatio") && material.GetFloat("_PerspectiveRemovalRatio") > 0);
+            SetKeyword(material, "_CHAR_SHADOW_ON",
+                material.HasProperty("_CharShadowOn") && material.GetFloat("_CharShadowOn") > 0);
+            SetKeyword(material, "_PBR_ON",
+                material.HasProperty("_PBROn") && material.GetFloat("_PBROn") > 0);
+        }
+
+        private static void SetKeyword(Material material, string keyword, bool enabled)
+        {
+            if (material.IsKeywordEnabled(keyword) == enabled) return;
+
+            if (enabled)
+            {
+                material.EnableKeyword(keyword);
+            }
+            else
+            {
+                material.DisableKeyword(keyword);
+            }
         }
 
         // ===== Helper Methods =====

@@ -8,15 +8,18 @@ namespace SinfoniaStudio.SinfoniaOperator
         public DiscordEnvironment(
             string discordBotTokenKey,
             string discordTaskChannelIDKey,
+            string discordTaskAlertChannelIDKey,
             string discordSprintChannelIDKey)
         {
             EnvironmentVariable discordBotToken = new(discordBotTokenKey);
             EnvironmentVariable discordTaskChannelID = new(discordTaskChannelIDKey);
+            EnvironmentVariable discordTaskAlertChannelID = new(discordTaskAlertChannelIDKey);
             EnvironmentVariable discordSprintChannelID = new(discordSprintChannelIDKey);
 
             if (EnvironmentValidator.Validate([
                 discordBotToken,
                 discordTaskChannelID,
+                discordTaskAlertChannelID,
                 discordSprintChannelID]))
             {
                 throw new ArgumentException("必要な環境変数が見つかりませんでした。");
@@ -24,11 +27,13 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             DiscordBotToken = discordBotToken;
             DiscordTaskChannelID = discordTaskChannelID;
+            DiscordTaskAlertChannelID = discordTaskAlertChannelID;
             DiscordSprintChannelID = discordSprintChannelID;
         }
 
         public readonly string DiscordBotToken;
         public readonly ulong DiscordTaskChannelID;
+        public readonly ulong DiscordTaskAlertChannelID;
         public readonly ulong DiscordSprintChannelID;
 
         public override string ToString()
@@ -36,6 +41,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             StringBuilder sb = new();
             sb.AppendLine($"DiscordBotToken: {(string.IsNullOrEmpty(DiscordBotToken) ? "null or empty" : "set")}, ");
             sb.AppendLine($"DiscordTaskChannelID: {DiscordTaskChannelID}");
+            sb.AppendLine($"DiscordTaskAlertChannelID: {DiscordTaskAlertChannelID}");
             sb.AppendLine($"DiscordSprintChannelID: {DiscordSprintChannelID}");
             return sb.ToString();
         }

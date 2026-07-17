@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine.Networking;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -19,7 +20,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// シナリオ ID から再生用データを読み込む。
         /// </summary>
-        public async ValueTask<ScenarioData> FindByIdAsync(string id, CancellationToken ct)
+        public async ValueTask<ScenarioDefinition> FindByIdAsync(string id, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -38,13 +39,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string[] lines = await ReadScenarioLinesAsync(authoringPath, scenarioPath, isUrlPath, ct);
             if (lines.Length == 0)
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             string firstDataLine = FindFirstDataLine(lines);
             if (string.IsNullOrWhiteSpace(firstDataLine))
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             if (firstDataLine.TrimStart().StartsWith("Type,", StringComparison.OrdinalIgnoreCase))
@@ -58,11 +59,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// 正規化済み CSV をシナリオデータへ変換する。
         /// </summary>
-        private static ScenarioData ParseNormalizedCsv(string[] lines)
+        private static ScenarioDefinition ParseNormalizedCsv(string[] lines)
         {
             if (lines.Length <= 1)
             {
-                return new ScenarioData(Array.Empty<IScenarioEvent>());
+                return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
             List<string> headers = ParseCsvLine(lines[0]);
@@ -136,13 +137,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 events.Add(definitions[step].ToEvent());
             }
 
-            return new ScenarioData(events);
+            return new ScenarioDefinition(events);
         }
 
         /// <summary>
         /// オーサリング形式の CSV をシナリオデータへ変換する。
         /// </summary>
-        private static ScenarioData ParseAuthoringCsv(string[] lines)
+        private static ScenarioDefinition ParseAuthoringCsv(string[] lines)
         {
             var definitions = new Dictionary<int, EventDefinition>();
             var orderedSteps = new List<int>(Math.Max(4, lines.Length));
@@ -205,7 +206,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 events.Add(definitions[step].ToEvent());
             }
 
-            return new ScenarioData(events);
+            return new ScenarioDefinition(events);
         }
 
         /// <summary>
@@ -228,7 +229,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: BackgroundId is required.");
                         }
-                        return new PlainEventDefinition(step, new BackgroundEvent(backgroundId));
+                        return new PlainEventDefinition(step, new BackgroundEvent(CreateBackgroundId(backgroundId)));
                     }
                 case "animation":
                     {
@@ -237,7 +238,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: AnimationId is required.");
                         }
-                        return new PlainEventDefinition(step, new AnimationEvent(animationId));
+                        return new PlainEventDefinition(step, new AnimationEvent(CreateAnimationId(animationId)));
                     }
                 case "fade":
                     {
@@ -260,7 +261,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         float scale = ParseOptionalFloat(GetAuthoringField(fields, 6), 1f, "PortraitScale", lineNo);
                         bool visible = ParseOptionalBool(GetAuthoringField(fields, 7), true, "PortraitVisible", lineNo);
 
-                        return new PlainEventDefinition(step, new PortraitEvent(slot, portraitId, posX, posY, scale, visible));
+                        return new PlainEventDefinition(step, new PortraitEvent(slot, CreatePortraitId(portraitId), posX, posY, scale, visible));
                     }
                 case "layer":
                     {
@@ -349,7 +350,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Background.");
                         }
-                        return new BackgroundEvent(backgroundId);
+                        return new BackgroundEvent(CreateBackgroundId(backgroundId));
                     }
                 case "animation":
                     {
@@ -358,7 +359,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Animation.");
                         }
-                        return new AnimationEvent(animationId);
+                        return new AnimationEvent(CreateAnimationId(animationId));
                     }
                 case "portrait":
                     {
@@ -369,7 +370,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                             throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for Portrait.");
                         }
                         float posX = ParseOptionalFloat(GetAuthoringField(fields, 9), 0f, "OnTriggerArg3", lineNo);
-                        return new PortraitEvent(slot, portraitId, posX, 0f, 1f, true);
+                        return new PortraitEvent(slot, CreatePortraitId(portraitId), posX, 0f, 1f, true);
                     }
                 case "layer":
                     {
@@ -445,7 +446,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
 
             using var request = UnityWebRequest.Get(path);
-            using var ctr = ct.Register(static s => ((UnityWebRequest)s).Abort(), request);
+            using var ctr = ct.Register(s => ((UnityWebRequest)s).Abort(), request);
             UnityWebRequestAsyncOperation operation = request.SendWebRequest();
             while (!operation.isDone)
             {
@@ -503,7 +504,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {row.LineNo}: BackgroundId is required for Background event.");
                         }
-                        return new PlainEventDefinition(row.Step, new BackgroundEvent(backgroundId));
+                        return new PlainEventDefinition(row.Step, new BackgroundEvent(CreateBackgroundId(backgroundId)));
                     }
                 case "animation":
                     {
@@ -512,7 +513,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
                         }
-                        return new PlainEventDefinition(row.Step, new AnimationEvent(animationId));
+                        return new PlainEventDefinition(row.Step, new AnimationEvent(CreateAnimationId(animationId)));
                     }
                 case "fade":
                     {
@@ -539,7 +540,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 
                         return new PlainEventDefinition(
                             row.Step,
-                            new PortraitEvent(slot, portraitId, posX, posY, scale, visible));
+                            new PortraitEvent(slot, CreatePortraitId(portraitId), posX, posY, scale, visible));
                     }
                 case "layer":
                     {
@@ -659,7 +660,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Background.");
                         }
-                        return new BackgroundEvent(backgroundId);
+                        return new BackgroundEvent(CreateBackgroundId(backgroundId));
                     }
                 case "animation":
                     {
@@ -668,7 +669,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
                         }
-                        return new AnimationEvent(animationId);
+                        return new AnimationEvent(CreateAnimationId(animationId));
                     }
                 case "portrait":
                     {
@@ -679,7 +680,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                             throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for OnTriggerType=Portrait.");
                         }
                         float posX = ParseOptionalFloat(GetValue(values, headerIndex, "OnTriggerArg3"), 0f, "OnTriggerArg3", lineNo);
-                        return new PortraitEvent(slot, portraitId, posX, 0f, 1f, true);
+                        return new PortraitEvent(slot, CreatePortraitId(portraitId), posX, 0f, 1f, true);
                     }
                 case "layer":
                     {
@@ -741,6 +742,36 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         private static bool ParseOptionalBool(string raw, bool defaultValue, string columnName, int lineNo)
         {
             return ScenarioCsvUtility.ParseOptionalBool(raw, defaultValue, columnName, lineNo);
+        }
+
+        /// <summary>
+        ///     CSVの文字列IDを背景IDへ変換します。
+        /// </summary>
+        /// <param name="id"> CSVへ記述された文字列IDです。 </param>
+        /// <returns> 実行時用の背景IDです。 </returns>
+        private static BackgroundId CreateBackgroundId(string id)
+        {
+            return new BackgroundId(DataIDHasher.Compute("ScenarioBackground", id));
+        }
+
+        /// <summary>
+        ///     CSVの文字列IDをアニメーションIDへ変換します。
+        /// </summary>
+        /// <param name="id"> CSVへ記述された文字列IDです。 </param>
+        /// <returns> 実行時用のアニメーションIDです。 </returns>
+        private static AnimationId CreateAnimationId(string id)
+        {
+            return new AnimationId(DataIDHasher.Compute("ScenarioAnimation", id));
+        }
+
+        /// <summary>
+        ///     CSVの文字列IDを立ち絵IDへ変換します。
+        /// </summary>
+        /// <param name="id"> CSVへ記述された文字列IDです。 </param>
+        /// <returns> 実行時用の立ち絵IDです。 </returns>
+        private static PortraitId CreatePortraitId(string id)
+        {
+            return new PortraitId(DataIDHasher.Compute("ScenarioPortrait", id));
         }
 
         /// <summary>

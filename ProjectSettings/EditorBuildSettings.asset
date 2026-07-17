@@ -9,14 +9,23 @@ EditorBuildSettings:
     path: Assets/Level/Scenes/Master/Persistent.unity
     guid: 1437f6d8b120a3e4c922d3cc9ada0344
   - enabled: 1
+    path: Assets/Level/Scenes/Master/Title.unity
+    guid: c6641c1091068d443b1e4872a4276f8a
+  - enabled: 1
     path: Assets/Level/Scenes/Master/OutGame.unity
     guid: fce827ee263c86e4eb5c5afade95533a
   - enabled: 1
     path: Assets/Level/Scenes/Master/InGame.unity
     guid: c97fd7b35eef27540892b9e7a17207f3
   - enabled: 1
+    path: Assets/Level/Scenes/Master/Scenario.unity
+    guid: e2449a9cfa91a1243a527989c8c93435
+  - enabled: 1
     path: Assets/Level/Scenes/Master/Stages/Stage_01.unity
     guid: 01b70db0be70fc14eb319daa11636ecb
+  - enabled: 1
+    path: Assets/Level/Scenes/Master/Stages/Stage_02.unity
+    guid: a127c78e8f5b60c4f8a5dafac428396a
   - enabled: 0
     path: Assets/Level/Scenes/Develop/Dodge/InGameDodgeTest.unity
     guid: b76418d614253e54d9f443a3cd8b359c

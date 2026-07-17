@@ -12,10 +12,11 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false)
+        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false, Damage baseDamage = default)
         {
             _attackDefinition = attackDefinition;
-            _damage = attackDefinition.BaseDamage;
+            _baseDamage = baseDamage;
+            _damage = _baseDamage;
             _criticalCount = 0;
             _attacker = attacker;
             _defender = defender;
@@ -37,10 +38,13 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _attacker = attackStepContext._attacker;
             _defender = attackStepContext._defender;
             _isJustHit = attackStepContext._isJustHit;
+            _baseDamage = attackStepContext._baseDamage;
         }
 
         /// <summary> 攻撃定義を取得する。 </summary>
         public AttackDefinition AttackDefinition => _attackDefinition;
+
+        public Damage BaseDamage => _baseDamage;
 
         /// <summary> ダメージ量を取得する。 </summary>
         public Damage Damage => _damage;
@@ -58,6 +62,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         public bool IsJustHit => _isJustHit;
         private readonly AttackDefinition _attackDefinition;
         private readonly Damage _damage;
+        private readonly Damage _baseDamage;
         private readonly int _criticalCount;
         private readonly IAttacker _attacker;
         private readonly IDefender _defender;

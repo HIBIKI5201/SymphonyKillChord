@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,9 +10,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
     /// </summary>
     public class SceneTransitionController
     {
-        public SceneTransitionController(ISceneTransitionService service)
+        public SceneTransitionController(SceneTransitionUsecase usecase)
         {
-            _service = service;
+            _useCase = usecase
+                ?? throw new ArgumentNullException(nameof(usecase));
         }
 
         /// <summary>
@@ -26,9 +28,58 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
             string toSceneName,
             CancellationToken cancellationToken)
         {
-            return await _service.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
+            return await _useCase.ChangeSceneAsync(fromSceneName, toSceneName, cancellationToken);
         }
 
-        private readonly ISceneTransitionService _service;
+        public Task<bool> ChangeSceneKeepingLoadingAsync(
+            string fromSceneName,
+            string toSceneName,
+            CancellationToken cancellationToken)
+        {
+            return _useCase.ChangeSceneKeepLoadingAsync(
+                fromSceneName,
+                toSceneName,
+                cancellationToken);
+        }
+
+        /// <summary>
+        ///     シーンをAdditiveロードする。
+        /// </summary>
+        public Task<bool> LoadAdditiveAsync(
+            string sceneName,
+            CancellationToken cancellationToken)
+        {
+            return _useCase.LoadAdditiveAsync(
+                sceneName,
+                cancellationToken);
+        }
+
+        /// <summary>
+        ///     シーンをアンロードする。
+        /// </summary>
+        public async Task<bool> UnloadAsync(
+            string sceneName,
+            CancellationToken cancellationToken)
+        {
+            return await _useCase.UnloadAsync(
+                sceneName,
+                cancellationToken);
+        }
+
+        /// <summary>
+        ///     対象シーンをUnloadし、ActiveSceneを指定シーンへ戻す。
+        /// </summary>
+        public Task<bool> UnloadAndSetActiveAsync(
+            string unloadSceneName,
+            string activeSceneName,
+            CancellationToken cancellationToken)
+        {
+            return _useCase.UnloadAndSetActiveAsync(
+                unloadSceneName,
+                activeSceneName,
+                cancellationToken);
+        }
+
+        private readonly SceneTransitionUsecase _useCase;
     }
 }

@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Menu.uss?fileID=7433441132597879392&amp;guid=d317849855421ec45937a3da5ae38ede&amp;type=3#Menu"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
+    <ui:VisualElement name="Root" style="width: 100%; height: 100%; background-color: rgb(130, 130, 130);">
+        <ui:VisualElement name="ButtonRoot" style="align-self: center; width: 100%; height: 100%; justify-content: center;">
+            <ui:Button text="オプション" name="OptionButton" class="title-option-button"/>
+            <ui:VisualElement name="Space" style="height: 5%;"/>
+            <ui:Button text="クレジット" name="CreditButton" class="title-option-button"/>
+        </ui:VisualElement>
+        <ui:Button text="戻る" name="BackButton" class="back-button button" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
+    </ui:VisualElement>
+</ui:UXML>

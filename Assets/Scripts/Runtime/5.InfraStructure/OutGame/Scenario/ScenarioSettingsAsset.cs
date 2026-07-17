@@ -18,12 +18,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         public float PausePollIntervalSec => _pausePollIntervalSec;
         /// <summary> CloseDelayAfterCompleteSec を取得する。 </summary>
         public float CloseDelayAfterCompleteSec => _closeDelayAfterCompleteSec;
+        /// <summary> AutoAdvanceDelaySec を取得する。 </summary>
+        public float AutoAdvanceDelaySec => _autoAdvanceDelaySec;
         /// <summary> SkipClosesImmediately を取得する。 </summary>
         public bool SkipClosesImmediately => _skipClosesImmediately;
         /// <summary> WaitForInputOnLastText を取得する。 </summary>
         public bool WaitForInputOnLastText => _waitForInputOnLastText;
-        /// <summary> DefaultScenarioId を取得する。 </summary>
-        public string DefaultScenarioId => _defaultScenarioId;
 
         [Header("Timing")]
         [Tooltip("通常再生時の1文字あたりの表示間隔（秒）です。")]
@@ -38,6 +38,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         [Tooltip("シナリオ通常終了時にViewを閉じるまで待機する時間（秒）です。")]
         [SerializeField, Min(0f)]
         private float _closeDelayAfterCompleteSec = 3f;
+        [Tooltip("自動進行時の待機時間（秒）です。0に近いほど高速になります。")]
+        [SerializeField, Min(0f)]
+        private float _autoAdvanceDelaySec = 2f;
 
         [Header("Flow")]
         [Tooltip("有効な場合、スキップ時は待機せずに即時でViewを閉じます。")]
@@ -46,8 +49,5 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         [Tooltip("有効な場合、最後のテキストでも入力待ちを行います。無効な場合は最後の表示後に終了へ進みます。")]
         [SerializeField]
         private bool _waitForInputOnLastText = false;
-        [Tooltip("PlayScenario実行時に最初に読み込むシナリオIDです。")]
-        [SerializeField]
-        private string _defaultScenarioId = "test";
     }
 }

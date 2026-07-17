@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c03476bdb348df749aa2410de68f7601, type: 3}
+  m_Name: PlayerAnimationConfig
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationCatalogConfig
+  _entries:
+  - ClipType: 0
+    Key: 
+    Clip: {fileID: 7400000, guid: a8d1919c2564f4a4699209a8ed04bd19, type: 2}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 1
+    Key: 
+    Clip: {fileID: 7400000, guid: 9785a2c3720f7bd49bf7221facacfc0e, type: 2}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 2
+    Key: 
+    Clip: {fileID: 1827226128182048838, guid: 4d8b4aa8c67c39647969385d02761813, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
+    Key: 
+    Clip: {fileID: 7400000, guid: ad99f450f4f323b46b8d98a222b706d2, type: 2}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
+    Key: Skill_Right
+    Clip: {fileID: 1827226128182048838, guid: bdd21c2c7c66f0d4a8ce9f170994a484, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
+    Key: Skill_Left
+    Clip: {fileID: 1827226128182048838, guid: a006ecf3f201e0a4d8507ba05d50c9b5, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 12
+  _enterBlendFrameCount: 4
+  _exitBlendFrameCount: 8

@@ -1,5 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -8,56 +11,179 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// </summary>
     public class ScenarioInputView : MonoBehaviour
     {
-        [SerializeField]
-        private KeyCode _advanceKey = KeyCode.Mouse0;
-        [SerializeField]
-        private KeyCode _fastForwardKey = KeyCode.LeftShift;
-        [SerializeField]
-        private KeyCode _pauseToggleKey = KeyCode.Space;
-        [SerializeField]
-        private KeyCode _skipKey = KeyCode.Escape;
-
         /// <summary>
-        /// 依存先を受け取りシナリオ表示を初期化する。
+        ///     依存先を初期化する。
         /// </summary>
-        public void Initialize(InputController inputController)
+        /// <param name="inputController"> シナリオ入力コントローラーです。 </param>
+        /// <param name="playerInputView"> プレイヤー入力Viewです。 </param>
+        public void Initialize(
+            ScenarioInputController inputController,
+            PlayerInputView playerInputView)
         {
             _inputController = inputController;
+            _playerInputView = playerInputView;
+
+            if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
+                enabled = false;
+                return;
+            }
+
+            if (_playerInputView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が未設定です。", this);
+                enabled = false;
+                return;
+            }
+
+            Subscribe();
         }
 
-        /// <summary>
-        /// 毎フレームの入力監視または演出更新を行う。
-        /// </summary>
-        private void Update()
+        private void LateUpdate()
         {
-            if (_inputController == null) return;
-
-            if (Input.GetKeyDown(_advanceKey))
+            if (_requestShowUI)
             {
-                _inputController.MouseClick();
+                _requestShowUI = false;
+                _scenarioUIHideView?.ShowUI();
             }
 
-            if (Input.GetKeyDown(_fastForwardKey))
+            if (_requestHideUI)
             {
-                _inputController.SetFastForward(true);
-            }
-
-            if (Input.GetKeyUp(_fastForwardKey))
-            {
-                _inputController.SetFastForward(false);
-            }
-
-            if (Input.GetKeyDown(_pauseToggleKey))
-            {
-                _inputController.TogglePause();
-            }
-
-            if (Input.GetKeyDown(_skipKey))
-            {
-                _inputController.Skip();
+                _requestHideUI = false;
+                _scenarioUIHideView?.HideUI();
             }
         }
 
-        private InputController _inputController;
+        private void OnDisable()
+        {
+            Unsubscribe();
+        }
+
+        private void OnDestroy()
+        {
+            Unsubscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (_playerInputView == null || _isSubscribed)
+            {
+                return;
+            }
+
+            _playerInputView.OnScenarioAdvanceInput += HandleAdvanceInput;
+            _playerInputView.OnScenarioFastForwardInput += HandleFastForwardInput;
+            _playerInputView.OnScenarioPauseInput += HandlePauseInput;
+            _playerInputView.OnScenarioSkipInput += HandleSkipInput;
+            _playerInputView.OnScenarioAutoInput += HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput += HandleHideUIInput;
+
+            _isSubscribed = true;
+        }
+
+        private void Unsubscribe()
+        {
+            if (_playerInputView == null || !_isSubscribed)
+            {
+                return;
+            }
+
+            _playerInputView.OnScenarioAdvanceInput -= HandleAdvanceInput;
+            _playerInputView.OnScenarioFastForwardInput -= HandleFastForwardInput;
+            _playerInputView.OnScenarioPauseInput -= HandlePauseInput;
+            _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
+            _playerInputView.OnScenarioAutoInput -= HandleAutoAdvanceInput;
+            _playerInputView.OnScenarioHideUIInput -= HandleHideUIInput;
+
+            _isSubscribed = false;
+        }
+
+        private void HandleAdvanceInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            if (_scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
+            {
+                return;
+            }
+
+            if (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden)
+            {
+                _requestShowUI = true;
+                return;
+            }
+
+            _inputController?.MouseClick();
+        }
+
+        private void HandleFastForwardInput(InputContext<float> context)
+        {
+            if (context.Phase == InputActionPhase.Started ||
+                context.Phase == InputActionPhase.Performed)
+            {
+                _inputController?.SetFastForward(true);
+                return;
+            }
+
+            if (context.Phase == InputActionPhase.Canceled)
+            {
+                _inputController?.SetFastForward(false);
+            }
+        }
+
+        private void HandlePauseInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _inputController?.TogglePause();
+        }
+
+        private void HandleSkipInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _inputController?.Skip();
+        }
+
+        private void HandleAutoAdvanceInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+            _inputController?.ToggleAutoAdvance();
+        }
+
+        private void HandleHideUIInput(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            _requestHideUI = true;
+        }
+
+        [SerializeField]
+        private ScenarioUIRaycastView _scenarioUIRaycastView;
+
+        [SerializeField]
+        private ScenarioUIHideView _scenarioUIHideView;
+
+        private ScenarioInputController _inputController;
+        private PlayerInputView _playerInputView;
+        private bool _isSubscribed;
+        private bool _requestHideUI;
+        private bool _requestShowUI;
     }
 }

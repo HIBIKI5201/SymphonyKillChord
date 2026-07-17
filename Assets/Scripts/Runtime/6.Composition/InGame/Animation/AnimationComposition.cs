@@ -1,39 +1,183 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Application;
-using KillChord.Runtime.Domain;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Player;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition
 {
-    public class AnimationComposition : MonoBehaviour
+    /// <summary>
+    ///     キャラクターアニメーションの依存関係を構築する。
+    /// </summary>
+    public sealed class AnimationComposition
     {
-        public ICharacterAnimationController Init(CharacterAnimationView view, CharacterAnimationCatalogAsset asset,
-             MusicSyncState musicSyncState)
+        /// <summary>
+        ///     キャラクターアニメーションを初期化して返す。
+        /// </summary>
+        /// <param name="view"> アニメーション再生View。 </param>
+        /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
+        /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
+        /// <returns> 初期化済みのView側依存群。 </returns>
+        public ICharacterAnimationViewContext Init(
+            CharacterAnimationView view,
+            CharacterAnimationCatalogConfig config,
+            MusicSyncState musicSyncState,
+            PlayerAttackAnimationConfig playerAttackConfig = null)
         {
-            CharacterAnimationClipRepository repository = new CharacterAnimationClipRepository(asset);
+            var baseClipTypes = (CharacterAnimationClipType[])Enum.GetValues(typeof(CharacterAnimationClipType));
+            var baseClips = new AnimationClip[baseClipTypes.Length];
+            var baseEnterBlendFrameCounts = new int[baseClipTypes.Length];
+            var baseExitBlendFrameCounts = new int[baseClipTypes.Length];
+            var oneShotIndices = new Dictionary<string, int>();
+            var attackIndices = new Dictionary<int, int>();
+            var combinedClips = new List<AnimationClip>(baseClips.Length);
+            var combinedEnterBlendFrameCounts = new List<int>(baseClips.Length);
+            var combinedExitBlendFrameCounts = new List<int>(baseClips.Length);
 
-            // Compositionでクリップ配列を解決する（ViewはRepositoryを知らない）
-            var states = (CharacterAnimationState[])Enum.GetValues(typeof(CharacterAnimationState));
-            var clips = new AnimationClip[states.Length];
-            for (int i = 0; i < states.Length; i++)
+            int defaultEnterBlendFrameCount = config != null
+                ? config.EnterBlendFrameCount
+                : 0;
+            int defaultExitBlendFrameCount = config != null
+                ? config.ExitBlendFrameCount
+                : 0;
+
+            if (config != null && config.Entries != null)
             {
-                repository.TryFindByState(states[i], out clips[i]);
+                for (int i = 0; i < config.Entries.Count; i++)
+                {
+                    CharacterAnimationCatalogEntry entry = config.Entries[i];
+                    if (entry.Clip == null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(entry.Key))
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AnimationComposition)}] ワンショットアニメーションのクリップが設定されていません。Key: {entry.Key}",
+                                view);
+                        }
+
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(entry.Key))
+                    {
+                        int index = (int)entry.ClipType;
+                        baseClips[index] = entry.Clip;
+                        baseEnterBlendFrameCounts[index] = ResolveBlendFrameCount(
+                            entry.EnterBlendFrameCount,
+                            defaultEnterBlendFrameCount);
+                        baseExitBlendFrameCounts[index] = ResolveBlendFrameCount(
+                            entry.ExitBlendFrameCount,
+                            defaultExitBlendFrameCount);
+                    }
+                }
             }
 
-            // Application: ブレンド計算を担うサービス
-            ICharacterAnimationApplication application = new CharacterAnimationApplication();
+            for (int i = 0; i < baseClips.Length; i++)
+            {
+                combinedClips.Add(baseClips[i]);
+                combinedEnterBlendFrameCounts.Add(baseEnterBlendFrameCounts[i]);
+                combinedExitBlendFrameCounts.Add(baseExitBlendFrameCounts[i]);
+            }
 
-            // Adaptor: ApplicationとMusicSyncStateを橋渡しする
-            ICharacterAnimationController controller = new CharacterAnimationController(application, musicSyncState);
+            if (playerAttackConfig != null && playerAttackConfig.Entries != null)
+            {
+                for (int i = 0; i < playerAttackConfig.Entries.Count; i++)
+                {
+                    PlayerAttackAnimationEntry entry = playerAttackConfig.Entries[i];
+                    if (entry.Clip == null)
+                    {
+                        continue;
+                    }
 
-            // View: AdaptorとClip配列を受け取って初期化する
-            view.Initialize(controller, clips);
+                    attackIndices[entry.BeatType] = combinedClips.Count;
+                    combinedClips.Add(entry.Clip);
+                    combinedEnterBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.EnterBlendFrameCount,
+                        defaultEnterBlendFrameCount));
+                    combinedExitBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.ExitBlendFrameCount,
+                        defaultExitBlendFrameCount));
+                }
+            }
 
-            return controller;
+            if (config != null && config.Entries != null)
+            {
+                for (int i = 0; i < config.Entries.Count; i++)
+                {
+                    CharacterAnimationCatalogEntry entry = config.Entries[i];
+                    if (entry.Clip == null || string.IsNullOrWhiteSpace(entry.Key))
+                    {
+                        continue;
+                    }
+
+                    oneShotIndices[entry.Key] = combinedClips.Count;
+                    combinedClips.Add(entry.Clip);
+                    combinedEnterBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.EnterBlendFrameCount,
+                        defaultEnterBlendFrameCount));
+                    combinedExitBlendFrameCounts.Add(ResolveBlendFrameCount(
+                        entry.ExitBlendFrameCount,
+                        defaultExitBlendFrameCount));
+                }
+            }
+
+            var clipLengths = new float[combinedClips.Count];
+            for (int i = 0; i < combinedClips.Count; i++)
+            {
+                clipLengths[i] = combinedClips[i] != null
+                    ? combinedClips[i].length
+                    : 0f;
+            }
+
+            CharacterAnimationViewModel viewModel = new CharacterAnimationViewModel();
+            CharacterAnimationPlaybackMap playbackMap = new CharacterAnimationPlaybackMap(
+                attack: (int)CharacterAnimationClipType.Attack,
+                dodge: (int)CharacterAnimationClipType.Dodge,
+                clipLengths: clipLengths,
+                enterBlendFrameCounts: combinedEnterBlendFrameCounts.ToArray(),
+                exitBlendFrameCounts: combinedExitBlendFrameCounts.ToArray(),
+                damage: -1,
+                oneShotIndices: oneShotIndices,
+                attackIndices: attackIndices);
+            CharacterAnimationOneShotTimingCalculator timingCalculator = new CharacterAnimationOneShotTimingCalculator();
+            CharacterAnimationSignal signal = new CharacterAnimationSignal(
+                playbackMap,
+                () => GetAnimationSpeed(musicSyncState),
+                timingCalculator);
+            CharacterAnimationViewContext context = new CharacterAnimationViewContext(viewModel, signal);
+
+            view.Initialize(context, combinedClips.ToArray(), musicSyncState);
+            return context;
+        }
+
+        /// <summary>
+        ///     現在のBPMからアニメーション再生速度を取得する。
+        /// </summary>
+        /// <param name="musicSyncState"> 音楽同期状態です。 </param>
+        /// <returns> 再生速度です。 </returns>
+        private static float GetAnimationSpeed(MusicSyncState musicSyncState)
+        {
+            const float baseBpm = 60f;
+
+            return musicSyncState == null
+                ? 1f
+                : Mathf.Max(1f, (float)musicSyncState.Bpm) / baseBpm;
+        }
+
+        /// <summary>
+        ///     EntryとCatalog全体設定から使用するブレンドフレーム数を解決する。
+        /// </summary>
+        /// <param name="entryFrameCount"> Entry側のフレーム数です。 </param>
+        /// <param name="defaultFrameCount"> Catalog側の既定フレーム数です。 </param>
+        /// <returns> 使用するブレンドフレーム数です。 </returns>
+        private static int ResolveBlendFrameCount(int entryFrameCount, int defaultFrameCount)
+        {
+            return entryFrameCount > 0
+                ? entryFrameCount
+                : defaultFrameCount;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// <summary>
     /// Background の参照情報を取得するリポジトリ。
     /// </summary>
-    public class BackgroundRepository : CatalogRepositoryBase<BackgroundDefinition, BackgroundCatalogEntry>, IBackgroundRepository
+    public class BackgroundRepository : CatalogRepositoryBase<BackgroundId, BackgroundDefinition, BackgroundCatalogEntry>, IBackgroundRepository
     {
         /// <summary>
         /// 背景カタログから参照情報を構築する。
@@ -20,17 +20,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// カタログエントリから検索用の定義情報を生成する。
         /// </summary>
-        protected override bool TryBuild(BackgroundCatalogEntry entry, out string id, out BackgroundDefinition definition)
+        protected override bool TryBuild(BackgroundCatalogEntry entry, out BackgroundId id, out BackgroundDefinition definition)
         {
-            id = entry.Id;
-            if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)
+            if (entry.Id.Id == 0 || entry.Asset == null)
             {
+                id = default;
                 definition = default;
                 return false;
             }
 
+            id = new BackgroundId(entry.Id.Id);
             string assetKey = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
-            definition = new BackgroundDefinition(entry.Id, assetKey);
+            definition = new BackgroundDefinition(id, assetKey);
             return true;
         }
     }

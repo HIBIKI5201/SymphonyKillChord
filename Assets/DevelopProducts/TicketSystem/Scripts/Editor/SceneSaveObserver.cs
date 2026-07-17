@@ -32,14 +32,14 @@ namespace DevelopProducts.TicketSystem
             var currentUserName = TicketSystemSettings.instance.userName;
             if (string.IsNullOrEmpty(currentUserName))
             {
-                Debug.LogWarning($"ユーザー名が設定されていません。{nameof(SceneSaveObserver)}は現在利用できません。");
+                //Debug.LogWarning($"ユーザー名が設定されていません。{nameof(SceneSaveObserver)}は現在利用できません。");
                 return;
             }
 
             var cachedTickets = CachedTicketDataSingleton.instance.GetAll();
             if (cachedTickets.Count == 0)
             {
-                Debug.LogWarning("キャッシュされたチケットがありませんでした。");
+                //Debug.LogWarning("キャッシュされたチケットがありませんでした。");
                 return;
             }
 

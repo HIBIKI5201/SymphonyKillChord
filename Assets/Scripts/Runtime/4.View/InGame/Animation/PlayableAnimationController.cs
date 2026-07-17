@@ -94,6 +94,20 @@ namespace KillChord.Runtime.View
             return _clips[index] != null ? _clips[index].length : 0f;
         }
 
+        /// <summary>
+        /// プレイ可能な状態であれば、指定したStateのクリップをワンショット再生する。
+        /// </summary>
+        public void PlayOneShot(int index)
+        {
+            if (index < 0 || index >= _playables.Count)
+            {
+                return;
+            }
+
+            _playables[index].SetTime(0.0);
+            _mixer.SetInputWeight(index, 1f);
+        }
+
         /// <summary> PlayableGraphを破棄する。 </summary>
         public void Dispose()
         {

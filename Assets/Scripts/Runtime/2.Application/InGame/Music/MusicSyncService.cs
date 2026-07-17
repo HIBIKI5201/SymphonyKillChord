@@ -15,11 +15,16 @@ namespace KillChord.Runtime.Application.InGame.Music
         ///     新しいサービスを生成する。
         /// </summary>
         /// <param name="rhythmDefinition"> リズムの定義。 </param>
+        /// <param name="rhythmJudgmentDefinition"> リズム判定の定義。 </param>
         /// <param name="onJustHit"> ジャストヒット時のアクション。 </param>
-        public MusicSyncService(RhythmDefinition rhythmDefinition,Action onJustHit = null)
+        public MusicSyncService(
+            RhythmDefinition rhythmDefinition,
+            RhythmJudgmentDefinition rhythmJudgmentDefinition,
+            Action onJustHit = null)
         {
             _rhythmState = new(BUFFER_SIZE);
             _rhythmDefinition = rhythmDefinition;
+            _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
             _scheduledActions = new PriorityQueue<ScheduledAction, double>();
             _onJustHit = onJustHit;
         }
@@ -67,12 +72,14 @@ namespace KillChord.Runtime.Application.InGame.Music
         {
             if (_rhythmState.Count == 0) return BeatType.One;
 
-            float lastTime = _rhythmState.LastTiming;
-            double duration = unscaledTime - lastTime;
+            float normalizedBarProgress = GetBarProgress(unscaledTime);
+            if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
+            {
+                _onJustHit?.Invoke();
+                return beatType;
+            }
 
-            BeatType result = _rhythmDefinition.CalculateBeatType(duration,_onJustHit);
-
-            return result;
+            return BeatType.One;
         }
 
         /// <summary>
@@ -142,13 +149,14 @@ namespace KillChord.Runtime.Application.InGame.Music
             float lastTime = _rhythmState.LastTiming;
             float duration = unscaledTime - lastTime;
 
-            return (float)_rhythmDefinition.CalculateElapsedBarCount(duration);
+            return _rhythmDefinition.CalculateNormalizedBarProgress(duration);
         }
 
         private const int BUFFER_SIZE = 64;
         private readonly Action _onJustHit;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;
+        private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
 
     }

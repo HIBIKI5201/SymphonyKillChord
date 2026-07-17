@@ -12,5 +12,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
 
         /// <summary> 向きと速度を更新する。 </summary>
         public void Update(ref Quaternion rotation, Vector2 input, float time, out Vector3 velocity);
+        
+        /// <summary> 回避中かどうかを取得する。 </summary>
+        public bool IsDodging { get; }
     }
 }

@@ -301,6 +301,66 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &453397385
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 453397388}
+  - component: {fileID: 453397387}
+  - component: {fileID: 453397386}
+  m_Layer: 0
+  m_Name: System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &453397386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453397385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7c675dfa0f3bd3498210765a2117a4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.SceneManagement.SceneTransitionView
+  _fromSceneName: Persistent
+  _toSceneName: Persistent
+--- !u!114 &453397387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453397385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3745f4fc8486a57438287a4e4325a6ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.Persistent.SceneManagement.SceneTransitionInitializer
+  _debugView: {fileID: 453397386}
+--- !u!4 &453397388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453397385}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.41972, y: -0, z: 0.13352}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &459519247
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,7 +372,7 @@ GameObject:
   - component: {fileID: 459519249}
   - component: {fileID: 459519248}
   m_Layer: 0
-  m_Name: OutGameUIEvent
+  m_Name: OutGameSceneInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -327,9 +387,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 459519247}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fbd60ffeeebe9343aed807180f93228, type: 3}
+  m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Screen.OutGameUIEvent
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
 --- !u!4 &459519249
 Transform:
   m_ObjectHideFlags: 0
@@ -492,6 +552,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1042491950}
   - component: {fileID: 1042491949}
+  - component: {fileID: 1042491951}
   m_Layer: 0
   m_Name: StageSelectInitializer
   m_TagString: Untagged
@@ -512,7 +573,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 452244044}
-  _stageTreeAsset: {fileID: 11400000, guid: 258321da291460949a3505c9ef2f85fe, type: 2}
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!4 &1042491950
 Transform:
   m_ObjectHideFlags: 0
@@ -528,6 +589,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1042491951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1042491948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f839ce43efb08bf4d9c9b8af7c2b0a6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Sortie.OutGameSortieInitializer
 --- !u!1 &1370918365
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,7 +631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 452244044}
-  _screenRuleData: {fileID: 11400000, guid: ed3d6973f36d66844852d3391a8a18df, type: 2}
+  _screenRuleDataKey: OutGameScreenRuleData
 --- !u!4 &1370918367
 Transform:
   m_ObjectHideFlags: 0
@@ -574,6 +647,66 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1517114467
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1517114470}
+  - component: {fileID: 1517114469}
+  - component: {fileID: 1517114468}
+  m_Layer: 0
+  m_Name: Mission
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1517114468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517114467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cf35a1743a31bf4b8918eec68ee7979, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Mission.OutGameMissionInitializer
+  _buttons:
+  - {fileID: 1517114469}
+--- !u!114 &1517114469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517114467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b987d4cfefaa1c74d82f6965dff626cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Mission.OutGameMissionButtonView
+  _missionId: AllKill
+--- !u!4 &1517114470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517114467}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -23.67764, y: 0, z: -12.56186}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -584,3 +717,5 @@ SceneRoots:
   - {fileID: 1370918367}
   - {fileID: 459519249}
   - {fileID: 1042491950}
+  - {fileID: 453397388}
+  - {fileID: 1517114470}

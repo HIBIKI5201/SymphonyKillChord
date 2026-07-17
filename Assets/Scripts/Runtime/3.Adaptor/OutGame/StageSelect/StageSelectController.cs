@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System.Threading;
 
@@ -37,6 +38,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             if (!_stageTree.TryGetNode(stageId, out var node))
             {
+                _selectedStageId = default;
+                _hasSelectedStage = false;
 #if UNITY_EDITOR
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(StageSelectController)}] StageId '{stageIdValue}' に対応するノードが見つかりませんでした。");
@@ -46,34 +49,41 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             // 現在選択中のノード ID を保持する
             _selectedStageId = stageId;
+            _hasSelectedStage = true;
 
+            // TODO: ノードのデータを渡す時に、セーブデータからミッションの達成状況を受け取るようにする
             _detailPresenter.Push(node);
             _detailScreenView.Show(token);
         }
 
         /// <summary>
-        ///     現在選択中のステージをクリアします。
-        ///     選択中のノードがない場合は何もしません。
+        ///     現在選択中のステージ定義を取得します。
         /// </summary>
-        public bool TryClearSelectedStage(out StageId clearedId)
+        /// <param name="stageDefinition"> 選択中のステージ定義。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetSortieInfo(
+            out StageDefinition stageDefinition)
         {
-            clearedId = _selectedStageId;
+            stageDefinition = default;
 
-            if (_selectedStageId.Value == null)
+            if (!_hasSelectedStage)
             {
-#if UNITY_EDITOR
-                UnityEngine.Debug.LogWarning(
-                    $"[{nameof(StageSelectController)}] 選択中のノードがありません。");
-#endif
                 return false;
             }
 
-            return true;
+            if (!_stageTree.TryGetNode(_selectedStageId, out var node))
+            {
+                return false;
+            }
+
+            stageDefinition = node.Definition;
+            return stageDefinition != null;
         }
 
         private readonly StageTree _stageTree;
         private readonly StageDetailPresenter _detailPresenter;
         private readonly IStageDetailScreenShowable _detailScreenView;
         private StageId _selectedStageId;
+        private bool _hasSelectedStage;
     }
 }

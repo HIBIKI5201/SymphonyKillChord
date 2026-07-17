@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using System.Collections.Generic;
@@ -15,12 +15,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// </summary>
         /// <param name="musicSyncService"> 音楽同期サービス。 </param>
         /// <param name="rhythmGuideUsecase"> リズムガイドユースケース。 </param>
-        /// <param name="targetSelectorController"> ターゲット選択コントローラー。 </param>
-        public RhythmGuidePresenter(IMusicSyncService musicSyncService, RhythmGuideUsecase rhythmGuideUsecase, TargetSelectorController targetSelectorController)
+        /// <param name="targetingSystem"> ターゲット選択システム。 </param>
+        public RhythmGuidePresenter(IMusicSyncService musicSyncService, RhythmGuideUsecase rhythmGuideUsecase, TargetSystemController targetingSystem)
         {
             _musicSyncService = musicSyncService;
             _rhythmGuideUsecase = rhythmGuideUsecase;
-            _targetSelectorController = targetSelectorController;
+            _targetingSystem = targetingSystem;
         }
 
         /// <summary>
@@ -37,11 +37,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             BeatType? currentBeatType = _rhythmGuideUsecase.CalculateCurrentBeatType(barProgress);
 
             int? currentBeatCount = currentBeatType.HasValue
-                ? (int)currentBeatType.Value : null;
+                ? (int?)currentBeatType.Value : null;
 
             _zones.Clear();
 
-            foreach (RhythmGuideRange range in _rhythmGuideUsecase.RhythmGuideDefinition.GuideRanges)
+            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
             {
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,
@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 ));
             }
 
-            bool hasTarget = _targetSelectorController.TryGetCurrentTargetEntity(out _);
+            bool hasTarget = _targetingSystem.TryGetCurrentTargetEntity(out _);
 
             return new RhythmGuideDto(
                 indicatorNormalized,
@@ -62,7 +62,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
         private readonly IMusicSyncService _musicSyncService;
         private readonly RhythmGuideUsecase _rhythmGuideUsecase;
-        private readonly TargetSelectorController _targetSelectorController;
+        private readonly TargetSystemController _targetingSystem;
         private readonly List<RhythmGuideZoneDto> _zones = new();
     }
 }

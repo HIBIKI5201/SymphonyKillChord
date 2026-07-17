@@ -13,11 +13,13 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         public ScreenTransitionResult(
             ScreenId? screenToHideId,
             ScreenId screenToShowId,
-            bool clearHistory)
+            bool clearHistory,
+            string targetSceneName = null)
         {
             ScreenToHideId = screenToHideId;
             ScreenToShowId = screenToShowId;
             ClearHistory = clearHistory;
+            TargetSceneName = targetSceneName;
         }
 
         /// <summary> 非表示対象画面 ID を取得します。 </summary>
@@ -28,5 +30,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
 
         /// <summary> 履歴クリアを伴うかどうかを取得します。 </summary>
         public bool ClearHistory { get; }
+        /// <summary> 遷移先シーン名を取得します。 </summary>
+        public string TargetSceneName { get; }
     }
 }

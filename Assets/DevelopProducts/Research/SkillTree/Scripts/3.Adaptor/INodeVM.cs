@@ -1,5 +1,8 @@
 namespace DevelopProducts.SkillTree
 {
+    /// <summary>
+    ///     ノードの状態をDTO経由でViewに反映させるViewModelのインターフェース
+    /// </summary>
     public interface INodeVM
     {
         event System.Action<bool> CanUnlock;

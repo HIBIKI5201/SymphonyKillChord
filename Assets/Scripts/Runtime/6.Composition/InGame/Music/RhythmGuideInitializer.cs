@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -19,9 +19,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public void Initialize()
         {
-            if (_rhythmGuideDefinitionAsset == null || _rhythmGuideView == null || _rhythmGuideUpdateView == null)
+            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null || _rhythmGuideUpdateView == null)
             {
-                Debug.LogError("RhythmGuideInitializer の参照が未設定です。RhythmGuideDefinitionAsset / RhythmGuideView / RhythmGuideUpdeteView を設定してください。");
+                Debug.LogError("RhythmGuideInitializer の参照が未設定です。RhythmJudgmentDefinitionAsset / RhythmGuideView / RhythmGuideUpdeteView を設定してください。");
                 return;
             }
 
@@ -34,22 +34,22 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            TargetSelectorController targetSelectorController =
-                ServiceLocator.GetInstance<TargetSelectorController>();
+            TargetSystemController targetingSystem =
+                ServiceLocator.GetInstance<TargetSystemController>();
 
-            if (targetSelectorController == null)
+            if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetSelectorController)} が見つかりません。TargetSelectorController が登録されているか確認してください。");
+                Debug.LogError($"{nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。");
                 return;
             }
 
-            RhythmGuideDefinition definition = _rhythmGuideDefinitionAsset.ToDefinition();
+            RhythmJudgmentDefinition definition = _rhythmJudgmentDefinitionAsset.ToDefinition();
             RhythmGuideUsecase usecase = new RhythmGuideUsecase(definition);
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
                 usecase,
-                targetSelectorController
+                targetingSystem
             );
 
             RhythmGuideViewModel viewModel = new RhythmGuideViewModel();
@@ -61,8 +61,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
             );
         }
 
-        [Tooltip("リズムガイド定義アセット。")]
-        [SerializeField] private RhythmGuideDefinitionAsset _rhythmGuideDefinitionAsset;
+        [Tooltip("リズム判定定義アセット。")]
+        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private RhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイド更新View。")]

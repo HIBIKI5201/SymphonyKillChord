@@ -8,6 +8,22 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     /// </summary>
     public interface IScreenController
     {
+
+        /// <summary> タイトル画面を表示します。 </summary>
+        void ShowTitle();
+
+        /// <summary> メニュー画面を表示します。 </summary>
+        void ShowMenu();
+
+        /// <summary> オプション画面を表示します。 </summary>
+        void ShowOptions();
+
+        /// <summary> クレジット画面を表示します。 </summary>
+        void ShowCredit();
+
+        /// <summary> 現在画面を即座に閉じます。 </summary>
+        void CloseCurrentImmediately();
+
         /// <summary> ホーム画面を表示します。 </summary>
         Task ShowHome(CancellationToken token);
 
@@ -21,7 +37,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         Task ShowSkillBuild(CancellationToken token);
 
         /// <summary> 戦闘準備画面を表示します。 </summary>
-        Task ShowBattlePreparation(CancellationToken token);
+        Task ShowBattlePreparation(string targetSceneName, CancellationToken token);
 
         /// <summary> 設定画面を表示します。 </summary>
         Task ShowSetting(CancellationToken token);

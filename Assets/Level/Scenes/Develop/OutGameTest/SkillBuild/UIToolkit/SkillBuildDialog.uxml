@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
+    <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59);">
+        <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 50%; align-self: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
+            <ui:Label text="装備中スキルの変更が保存されていません。保存しますか？" name="Message" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold;"/>
+            <ui:VisualElement name="Buttons" style="flex-direction: row; justify-content: center; align-items: stretch;">
+                <ui:Button text="破棄して戻る" name="DiscardAndCloseButton" class="button" style="font-size: 24px;"/>
+                <ui:VisualElement name="Space" style="width: 10%; max-width: 100px;"/>
+                <ui:Button text="保存して戻る" name="SaveAndCloseButton" class="button" style="font-size: 24px;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

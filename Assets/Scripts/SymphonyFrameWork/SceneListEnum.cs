@@ -2,9 +2,11 @@
 {
     None = 0,
     Persistent = 1,
-    OutGame = 2,
-    InGame = 3,
-    Stage_01 = 4,
-    InGameDodgeTest = 5,
-    InGameAnimation = 6,
+    Title = 2,
+    OutGame = 3,
+    InGame = 4,
+    Scenario = 5,
+    Stage_01 = 6,
+    Stage_02 = 7,
+    InGameDodgeTest = 8,
 }

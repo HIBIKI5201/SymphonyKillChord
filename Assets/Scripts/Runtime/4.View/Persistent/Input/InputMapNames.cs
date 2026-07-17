@@ -8,5 +8,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         public const string Common = "Common";
         public const string InGame = "InGame";
         public const string OutGame = "OutGame";
+        public const string Scenario = "Scenario";
     }
 }

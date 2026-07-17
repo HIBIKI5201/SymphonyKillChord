@@ -10,18 +10,28 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     public interface IScreenViewRegistry
     {
         /// <summary>
-        ///     指定された画面を表示します。
+        ///    指定された画面を即座に表示します。
         /// </summary>
-        Task Show(ScreenId screenId, CancellationToken token);
+        void ShowImmediately(ScreenId screenId, string targetSceneName = null);
 
         /// <summary>
-        ///     指定された画面を非表示にします。
+        ///    指定された画面を即座に非表示にします。
         /// </summary>
-        Task Hide(ScreenId screenId, CancellationToken token);
+        void HideImmediately(ScreenId screenId);
 
         /// <summary>
         ///     すべての画面を即座に非表示にします。
         /// </summary>
         void HideAllImmediately();
+
+        /// <summary>
+        ///     指定された画面を表示します。
+        /// </summary>
+        Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null);
+
+        /// <summary>
+        ///     指定された画面を非表示にします。
+        /// </summary>
+        Task Hide(ScreenId screenId, CancellationToken token);
     }
 }

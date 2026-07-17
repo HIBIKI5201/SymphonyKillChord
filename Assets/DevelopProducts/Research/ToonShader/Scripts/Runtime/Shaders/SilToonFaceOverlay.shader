@@ -7,7 +7,7 @@ Shader "Custom/SilToon/FaceOverlay"
         _ColorMiddle("Middle Color",Color) = (1, 1, 1, 1)
         _ColorShadow("Shadow Color",Color) = (1, 1, 1, 1)
         _Alpha("Alpha",Range(0,1)) = 0.5
-        [Toggle] _IsForFace("Is For Face", Float) = 0
+        [Toggle(_ISFORFACE_ON)] _IsForFace("Is For Face", Float) = 0
         _FaceUp("Face Up", Vector, 3) = (0,1,0)
 
         [Header(Normal)]
@@ -58,6 +58,10 @@ Shader "Custom/SilToon/FaceOverlay"
 
                 #pragma vertex vert
                 #pragma fragment frag
+                #pragma shader_feature_local _NORMALMAP
+                #pragma shader_feature_local_fragment _ISFORFACE_ON
+                #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
+                #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
                 #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\ThroughFragment.hlsl"
 
             ENDHLSL

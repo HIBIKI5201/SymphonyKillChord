@@ -1,3 +1,4 @@
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
@@ -7,8 +8,14 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
     ///     カメラの初期化を担当するクラス。
     ///     ServiceLocator に <see cref="ICameraTransform"/> を登録する。
     /// </summary>
-    public class CameraInitializer : MonoBehaviour, ICameraTransform
+    public sealed class CameraInitializer : PersistentInitializationModuleBase, ICameraTransform
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(CameraInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 40;
+
         /// <summary>
         ///     ICameraTransform の Transform プロパティ。
         ///     MonoBehaviour の transform を返す。  
@@ -18,18 +25,23 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         /// <summary>
         ///     起動時にServiceLocatorへインスタンスを登録する。
         /// </summary>
-        private void Awake()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
-            ServiceLocator.RegisterInstance<ICameraTransform>(this);
+            ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateType.Locator);
+            return true;
         }
-    }
 
-    /// <summary>
-    ///     カメラのTransformを提供するインターフェース。
-    /// </summary>
-    public interface ICameraTransform
-    {
-        /// <summary> カメラのTransform。 </summary>
-        Transform Transform { get; }
+        /// <summary>
+        ///     登録済みカメラTransformを解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (ServiceLocator.TryGetInstance<ICameraTransform>(out var registeredCameraTransform)
+                && ReferenceEquals(registeredCameraTransform, this))
+            {
+                ServiceLocator.UnregisterInstance<ICameraTransform>();
+            }
+        }
     }
 }
