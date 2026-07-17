@@ -6,6 +6,7 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
@@ -36,11 +37,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         [Tooltip("UI Document コンポーネント。")]
         private UIDocument _uiDocument;
 
-        [SerializeField]
+        [SerializeField, SourceDataAddress]
         [Tooltip("セーブデータから入手済みスキルを取得するリポジトリの Addressables キーです。")]
         private string _ownedSkillRepositoryKey;
 
-        [SerializeField]
+        [SerializeField, SourceDataAddress]
         [Tooltip("セーブデータから装備済みスキルを取得するリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
 

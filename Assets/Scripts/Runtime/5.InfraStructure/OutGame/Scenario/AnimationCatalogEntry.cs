@@ -10,7 +10,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct AnimationCatalogEntry
     {
-        [DataCategory("ScenarioAnimation"), Tooltip("シナリオアニメーションを一意に識別するIDです。")]
+        [SourceDataCollection("ScenarioAnimation"), Tooltip("シナリオアニメーションを一意に識別するIDです。")]
         public DataID Id;
 
         [Tooltip("アニメーションのAddressableキーです。")]

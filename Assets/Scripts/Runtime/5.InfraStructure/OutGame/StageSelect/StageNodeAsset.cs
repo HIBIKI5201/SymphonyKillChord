@@ -73,7 +73,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         [Header("基礎情報")]
         [SerializeField, Tooltip("ステージを一意に識別するID。他のノードと重複しないようにすること。")]
-        [DataCategory("Stage")]
+        [SourceDataCollection("Stage")]
         private DataID _stageId;
 
         [SerializeField, Tooltip("ステージの種類。")]

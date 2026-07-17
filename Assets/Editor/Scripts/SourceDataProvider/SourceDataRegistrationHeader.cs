@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine;
 namespace KillChord.Editor.SourceDataProvider
 {
     /// <summary>
-    ///     個別ScriptableObjectのリポジトリ登録状態をInspectorヘッダーへ表示します。
+    ///     個別ScriptableObjectのSourceData登録状態をInspectorヘッダーへ表示します。
     /// </summary>
     [InitializeOnLoad]
     internal static class SourceDataRegistrationHeader
@@ -21,7 +22,7 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     対象アセットに対応するリポジトリ登録UIを描画します。
+        ///     対象アセットに対応する登録UIを描画します。
         /// </summary>
         /// <param name="editor"> 対象Inspectorです。 </param>
         private static void DrawRegistrationHeader(UnityEditor.Editor editor)
@@ -32,44 +33,48 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
-            foreach (SourceDataProviderSettings.RepositoryMapping mapping
-                in SourceDataProviderSettings.instance.RepositoryMappings)
+            IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
+                SourceDataProviderSettings.instance.SourceCollectionMappings;
+            for (int i = 0; i < mappings.Count; i++)
             {
-                if (!TryGetCompatibleArray(mapping, target, out UnityEngine.Object repository, out SerializedProperty array))
+                SourceDataProviderSettings.SourceCollectionMapping mapping = mappings[i];
+                if (!TryGetCompatibleArray(mapping, target, out UnityEngine.Object sourceAsset, out SerializedProperty array))
                 {
                     continue;
                 }
 
-                DrawMapping(mapping, repository, array, target);
+                DrawMapping(mapping, sourceAsset, array, target);
             }
         }
 
         /// <summary>
-        ///     対象アセットを格納できるリポジトリ配列を取得します。
+        ///     対象アセットを格納できる配列を取得します。
         /// </summary>
-        /// <param name="mapping"> リポジトリ設定です。 </param>
+        /// <param name="mapping"> collection設定です。 </param>
         /// <param name="target"> 登録対象アセットです。 </param>
-        /// <param name="repository"> 解決したリポジトリです。 </param>
+        /// <param name="sourceAsset"> 解決したSourceAssetです。 </param>
         /// <param name="array"> 解決した配列プロパティです。 </param>
         /// <returns> 対応する配列を取得できた場合はtrueです。 </returns>
         private static bool TryGetCompatibleArray(
-            SourceDataProviderSettings.RepositoryMapping mapping,
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
             ScriptableObject target,
-            out UnityEngine.Object repository,
+            out UnityEngine.Object sourceAsset,
             out SerializedProperty array)
         {
-            repository = null;
+            sourceAsset = null;
             array = null;
-            if (string.IsNullOrWhiteSpace(mapping.ArrayPropertyPath)
-                || !SourceDataProviderRepositoryResolver.TryResolveRepository(mapping.AddressableKey, out repository)
-                || repository == target
+            if (mapping == null
+                || string.IsNullOrWhiteSpace(mapping.PropertyPath)
+                || !SourceDataProviderRepositoryResolver.TryResolveAsset(mapping.SourceAssetAddressableKey, out ScriptableObject resolvedSourceAsset)
+                || resolvedSourceAsset == target
                 || !SerializedPropertyFieldResolver.TryResolve(
-                    repository.GetType(),
-                    mapping.ArrayPropertyPath,
+                    resolvedSourceAsset.GetType(),
+                    mapping.PropertyPath,
                     out FieldInfo fieldInfo))
             {
                 return false;
             }
+            sourceAsset = resolvedSourceAsset;
 
             Type elementType = GetElementType(fieldInfo.FieldType);
             if (elementType == null || !elementType.IsAssignableFrom(target.GetType()))
@@ -77,8 +82,8 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            SerializedObject serializedRepository = new(repository);
-            array = serializedRepository.FindProperty(mapping.ArrayPropertyPath);
+            SerializedObject serializedSourceAsset = new(sourceAsset);
+            array = serializedSourceAsset.FindProperty(mapping.PropertyPath);
             return array != null && array.isArray;
         }
 
@@ -100,34 +105,37 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     1件分のリポジトリ登録状態と操作ボタンを描画します。
+        ///     1件分の登録状態と操作ボタンを描画します。
         /// </summary>
-        /// <param name="mapping"> リポジトリ設定です。 </param>
-        /// <param name="repository"> 対象リポジトリです。 </param>
+        /// <param name="mapping"> collection設定です。 </param>
+        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
         /// <param name="array"> 登録先配列です。 </param>
         /// <param name="target"> 登録対象アセットです。 </param>
         private static void DrawMapping(
-            SourceDataProviderSettings.RepositoryMapping mapping,
-            UnityEngine.Object repository,
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            UnityEngine.Object sourceAsset,
             SerializedProperty array,
             ScriptableObject target)
         {
             int registeredIndex = FindRegisteredIndex(array, target);
             bool isRegistered = registeredIndex >= 0;
+            string labelCollectionKey = string.IsNullOrWhiteSpace(mapping.CollectionKey)
+                ? sourceAsset.GetType().Name
+                : mapping.CollectionKey;
 
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
             EditorGUILayout.LabelField(
-                $"SourceDataProvider [{mapping.Category}]",
+                $"SourceDataProvider [{labelCollectionKey}]",
                 isRegistered ? "登録済み" : "未登録");
             if (GUILayout.Button("Ping", GUILayout.Width(48f)))
             {
-                EditorGUIUtility.PingObject(repository);
+                EditorGUIUtility.PingObject(sourceAsset);
             }
 
             string buttonLabel = isRegistered ? "登録解除" : "登録";
             if (GUILayout.Button(buttonLabel, GUILayout.Width(64f)))
             {
-                SetRegistration(repository, array.propertyPath, target, registeredIndex);
+                SetRegistration(sourceAsset, array.propertyPath, target, registeredIndex);
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -154,21 +162,21 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     リポジトリ配列への登録または登録解除を実行します。
+        ///     配列への登録または登録解除を実行します。
         /// </summary>
-        /// <param name="repository"> 対象リポジトリです。 </param>
+        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
         /// <param name="arrayPropertyPath"> 登録先配列のプロパティパスです。 </param>
         /// <param name="target"> 登録対象アセットです。 </param>
         /// <param name="registeredIndex"> 現在の登録位置です。 </param>
         private static void SetRegistration(
-            UnityEngine.Object repository,
+            UnityEngine.Object sourceAsset,
             string arrayPropertyPath,
             ScriptableObject target,
             int registeredIndex)
         {
-            Undo.RecordObject(repository, "Change Source Data Registration");
-            SerializedObject serializedRepository = new(repository);
-            SerializedProperty array = serializedRepository.FindProperty(arrayPropertyPath);
+            Undo.RecordObject(sourceAsset, "Change Source Data Registration");
+            SerializedObject serializedSourceAsset = new(sourceAsset);
+            SerializedProperty array = serializedSourceAsset.FindProperty(arrayPropertyPath);
             if (registeredIndex >= 0)
             {
                 int previousSize = array.arraySize;
@@ -185,8 +193,8 @@ namespace KillChord.Editor.SourceDataProvider
                 array.GetArrayElementAtIndex(newIndex).objectReferenceValue = target;
             }
 
-            serializedRepository.ApplyModifiedProperties();
-            EditorUtility.SetDirty(repository);
+            serializedSourceAsset.ApplyModifiedProperties();
+            EditorUtility.SetDirty(sourceAsset);
             AssetDatabase.SaveAssets();
         }
     }

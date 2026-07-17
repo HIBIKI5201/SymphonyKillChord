@@ -63,11 +63,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         }
 
         [SerializeField, Tooltip("ノードを一意に識別するID。")]
-        [DataCategory("SkillNode")]
+        [SourceDataCollection("SkillNode")]
         private DataID _nodeId;
 
         [SerializeField, Tooltip("親ノードのID一覧。")]
-        [DataCategory("SkillNode")]
+        [SourceDataCollection("SkillNode")]
         private DataID[] _parentNodeIds;
     }
 }

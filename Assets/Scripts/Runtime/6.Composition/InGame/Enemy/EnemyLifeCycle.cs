@@ -15,6 +15,7 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
@@ -350,10 +351,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField, Tooltip("敵定義の Addressables キーです。")] private string _enemyDataKey;
-        [SerializeField, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
-        [SerializeField, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
-        [SerializeField, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
 
         [SerializeField] private int _attackIndex;
 
@@ -361,7 +362,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;

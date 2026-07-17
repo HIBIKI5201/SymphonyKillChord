@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.InGame.Stage;
+using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;

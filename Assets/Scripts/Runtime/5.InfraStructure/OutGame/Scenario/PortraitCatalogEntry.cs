@@ -10,7 +10,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct PortraitCatalogEntry
     {
-        [DataCategory("ScenarioPortrait"), Tooltip("シナリオ立ち絵を一意に識別するIDです。")]
+        [SourceDataCollection("ScenarioPortrait"), Tooltip("シナリオ立ち絵を一意に識別するIDです。")]
         public DataID Id;
 
         [Tooltip("立ち絵のAddressableキーです。")]
