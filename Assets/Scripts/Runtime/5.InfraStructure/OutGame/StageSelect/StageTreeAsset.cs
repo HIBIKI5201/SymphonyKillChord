@@ -127,6 +127,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         {
             HashSet<(int FromStageId, int ToStageId)> connections = new();
             HashSet<int> autoAdvanceFromIds = new();
+            Dictionary<StageAssetBase, int> incomingCounts = new();
+            Dictionary<StageAssetBase, List<StageAssetBase>> outgoingStages = new();
+
+            foreach (StageAssetBase stageAsset in registeredStages)
+            {
+                incomingCounts.Add(stageAsset, 0);
+                outgoingStages.Add(stageAsset, new List<StageAssetBase>());
+            }
 
             for (int i = 0; i < _bindAssets.Count; i++)
             {
@@ -151,7 +159,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     Debug.LogError(
                         $"[{nameof(StageTreeAsset)}] Bindが重複しています。Asset: {bindAsset.name}",
                         this);
+                    continue;
                 }
+
+                outgoingStages[bindAsset.FromStage].Add(bindAsset.ToStage);
+                incomingCounts[bindAsset.ToStage]++;
 
                 if (bindAsset.AdvanceMode == StageAdvanceMode.AutoAdvance
                     && !autoAdvanceFromIds.Add(fromStageId))
@@ -161,6 +173,73 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                         $"FromStage: {bindAsset.FromStage.name}",
                         this);
                 }
+            }
+
+            ValidateTopology(registeredStages, incomingCounts, outgoingStages);
+        }
+
+        /// <summary>
+        ///     起点数と循環の有無を検証する。
+        /// </summary>
+        /// <param name="registeredStages"> 登録済みステージアセットの集合。</param>
+        /// <param name="incomingCounts"> ステージ別の入力接続数。</param>
+        /// <param name="outgoingStages"> ステージ別の後続ステージ一覧。</param>
+        private void ValidateTopology(
+            HashSet<StageAssetBase> registeredStages,
+            Dictionary<StageAssetBase, int> incomingCounts,
+            Dictionary<StageAssetBase, List<StageAssetBase>> outgoingStages)
+        {
+            if (registeredStages.Count == 0)
+            {
+                return;
+            }
+
+            Queue<StageAssetBase> processingQueue = new();
+            foreach (StageAssetBase stageAsset in registeredStages)
+            {
+                if (incomingCounts[stageAsset] == 0)
+                {
+                    processingQueue.Enqueue(stageAsset);
+                }
+            }
+
+            int rootCount = processingQueue.Count;
+            if (rootCount == 0)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageTreeAsset)}] 起点ステージがありません。Bindの循環を確認してください。",
+                    this);
+            }
+            else if (rootCount > 1)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(StageTreeAsset)}] 起点ステージが{rootCount}個あります。" +
+                    "作戦画面の左端に複数配置されます。",
+                    this);
+            }
+
+            int processedCount = 0;
+            while (processingQueue.Count > 0)
+            {
+                StageAssetBase currentStage = processingQueue.Dequeue();
+                processedCount++;
+                List<StageAssetBase> nextStages = outgoingStages[currentStage];
+                for (int i = 0; i < nextStages.Count; i++)
+                {
+                    StageAssetBase nextStage = nextStages[i];
+                    incomingCounts[nextStage]--;
+                    if (incomingCounts[nextStage] == 0)
+                    {
+                        processingQueue.Enqueue(nextStage);
+                    }
+                }
+            }
+
+            if (processedCount != registeredStages.Count)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageTreeAsset)}] Bind設定に循環があります。作戦画面を自動配置できません。",
+                    this);
             }
         }
 

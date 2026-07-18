@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset
   _fromStage: {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
   _toStage: {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
-  _advanceMode: 1
+  _advanceMode: 0

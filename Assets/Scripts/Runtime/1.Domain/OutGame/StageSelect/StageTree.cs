@@ -28,16 +28,20 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 throw new ArgumentNullException(nameof(connections));
             }
 
-            _nodes = BuildNodeMap(nodes, out _tutorialNode);
+            _nodes = BuildNodeMap(nodes, out _orderedNodes, out _tutorialNode);
+            _connections = CopyConnections(connections);
             BuildConnectionIndexes(
-                connections,
+                _connections,
                 out _outgoingStageIds,
                 out _incomingStageIds,
                 out _autoAdvanceTargetIds);
         }
 
         /// <summary> ツリー内の全ノード。 </summary>
-        public IReadOnlyCollection<StageNode> Nodes => _nodes.Values;
+        public IReadOnlyList<StageNode> Nodes => _orderedNodes;
+
+        /// <summary> ツリー内の全接続。 </summary>
+        public IReadOnlyList<StageNodeConnection> Connections => _connections;
 
         /// <summary>
         ///     指定IDのノードを取得する。
@@ -93,6 +97,18 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     指定ノードの前提ノードIDを取得する。
+        /// </summary>
+        /// <param name="stageId"> 接続先となるステージID。</param>
+        /// <returns> 前提ノードIDの一覧。</returns>
+        public IReadOnlyList<StageId> GetPreviousIds(StageId stageId)
+        {
+            return _incomingStageIds.TryGetValue(stageId, out StageId[] stageIds)
+                ? stageIds
+                : Array.Empty<StageId>();
+        }
+
+        /// <summary>
         ///     指定ノードの自動遷移先を取得する。
         /// </summary>
         /// <param name="stageId"> 接続元のステージID。</param>
@@ -137,6 +153,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         }
 
         private readonly Dictionary<StageId, StageNode> _nodes;
+        private readonly StageNode[] _orderedNodes;
+        private readonly StageNodeConnection[] _connections;
         private readonly Dictionary<StageId, StageId[]> _outgoingStageIds;
         private readonly Dictionary<StageId, StageId[]> _incomingStageIds;
         private readonly Dictionary<StageId, StageId> _autoAdvanceTargetIds;
@@ -146,13 +164,16 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         ///     ノード一覧をID検索用の辞書へ変換する。
         /// </summary>
         /// <param name="nodes"> 変換するノード一覧。</param>
+        /// <param name="orderedNodes"> 入力順を維持したノード配列。</param>
         /// <param name="tutorialNode"> チュートリアルノード。</param>
         /// <returns> ノード辞書。</returns>
         private static Dictionary<StageId, StageNode> BuildNodeMap(
             IReadOnlyList<StageNode> nodes,
+            out StageNode[] orderedNodes,
             out StageNode tutorialNode)
         {
             Dictionary<StageId, StageNode> nodeMap = new(nodes.Count);
+            List<StageNode> orderedNodeBuilder = new(nodes.Count);
             tutorialNode = null;
 
             for (int i = 0; i < nodes.Count; i++)
@@ -169,6 +190,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                         $"StageIdが重複しています。StageId: {node.Id.Value}");
                 }
 
+                orderedNodeBuilder.Add(node);
+
                 if (!node.Definition.IsTutorial)
                 {
                     continue;
@@ -182,7 +205,25 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 tutorialNode = node;
             }
 
+            orderedNodes = orderedNodeBuilder.ToArray();
             return nodeMap;
+        }
+
+        /// <summary>
+        ///     接続一覧を不変な配列へコピーする。
+        /// </summary>
+        /// <param name="connections"> コピー元の接続一覧。</param>
+        /// <returns> コピーした接続配列。</returns>
+        private static StageNodeConnection[] CopyConnections(
+            IReadOnlyList<StageNodeConnection> connections)
+        {
+            StageNodeConnection[] result = new StageNodeConnection[connections.Count];
+            for (int i = 0; i < connections.Count; i++)
+            {
+                result[i] = connections[i];
+            }
+
+            return result;
         }
 
         /// <summary>

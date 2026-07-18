@@ -28,6 +28,8 @@
 | **`IStageClearRepository`** | Domain | クリア済みステージID取得の抽象（実装はInfrastructure層） |
 | **`StageTree`** | Domain | 全ステージノードと接続関係を保持する集約。重複StageId・複数チュートリアルノードは`InvalidOperationException` |
 | **`StageProgressService`** | Application | ステージクリア時の状態更新（クリアマーク＋次ステージ解放判定） |
+| **`StageMapLayoutBuilder`** | Application | Bindをトポロジカル順に解析し、左から右へ並ぶ列・行位置を構築する |
+| **`StageMapNodePosition`** | Application | 自動配置されたノードの列・行を保持するreadonly struct |
 | **`StageSelectOpenUseCase`** | Application | 画面再オープン時のセーブデータ一括同期・新規クリア差分検出 |
 | **`IOutGameSortieOutputPort`** | Application | 出撃結果（戦闘準備画面表示/即時出撃/シナリオUI切替）の出力境界 |
 | **`OutGameSortieUseCase`** | Application | 出撃種別に応じた分岐処理（`RequestSortieAsync`/`RequestImmediateBattleSortie`） |
@@ -47,7 +49,7 @@
 | **`StageBindAsset`** | Infrastructure | From/Toステージと`ManualSelection`/`AutoAdvance`を保持するScriptableObject |
 | **`StageTreeAsset`** | Infrastructure | ステージとBindを集約し、`OnValidate()`でID・参照・接続重複を検証するScriptableObject |
 | **`SaveDataClearStageRepository`** | Infrastructure | `IStageClearRepository`実装。`StageProgressData.ClearDatas`から実データを返す（スタブではない） |
-| **`StageSelectInitializer`** | Composition | ステージマップの構築、出撃要求の仲介、チュートリアル自動出撃のトリガー |
+| **`StageSelectInitializer`** | Composition | StageTreeからノード・接続線を動的生成・配置し、出撃要求を仲介する |
 | **`OutGameSortieInitializer`** | Composition | `OutGameSortieUseCase`/`OutGameSortieController`の構築・登録 |
 | **`OutGameSortieOutputPort`** | Composition | `IOutGameSortieOutputPort`実装。`OutGameUIEvent`と`InputComposition`の両方に依存するためComposition層に配置 |
 

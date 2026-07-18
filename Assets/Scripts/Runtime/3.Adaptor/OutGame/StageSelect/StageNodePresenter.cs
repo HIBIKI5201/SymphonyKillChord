@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,8 +19,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// </summary>
         /// <param name="node"> 監視対象のステージノード。</param>
         /// <param name="viewModel"> 反映先の ViewModel。</param>
-        /// <param name="incomingConnection">
-        ///     このノードへの接続線 ViewModel。
+        /// <param name="incomingConnections">
+        ///     このノードへの接続線 ViewModel一覧。
         ///     接続線アニメーションが不要な場合は null を指定します。
         /// </param>
         /// <param name="sequencer">
@@ -28,12 +29,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         public StageNodePresenter(
             StageNode node,
             IStageNodeViewModel viewModel,
-            IStageConnectionViewModel incomingConnection,
+            IReadOnlyList<IStageConnectionViewModel> incomingConnections,
             StageNodeAnimationSequencer sequencer)
         {
             _node = node;
             _viewModel = viewModel;
-            _incomingConnection = incomingConnection;
+            _incomingConnections = incomingConnections;
             _sequencer = sequencer;
             _cts = new CancellationTokenSource();
             _transitionTask = Task.CompletedTask;
@@ -75,9 +76,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         private async Task ProcessStatusAsync(StageStatus status, CancellationToken token)
         {
             // Unlocked かつ接続線がある場合は接続線アニメーションを再生する
-            if (status == StageStatus.Unlocked && _incomingConnection != null)
+            if (status == StageStatus.Unlocked
+                && _incomingConnections != null
+                && _incomingConnections.Count > 0)
             {
-                await _incomingConnection.PlayFillAnimationAsync(token);
+                Task[] animationTasks = new Task[_incomingConnections.Count];
+                for (int i = 0; i < _incomingConnections.Count; i++)
+                {
+                    animationTasks[i] = _incomingConnections[i].PlayFillAnimationAsync(token);
+                }
+
+                await Task.WhenAll(animationTasks);
             }
 
             // アニメーション完了後（またはアニメーションなしの場合）に View へ反映する
@@ -106,7 +115,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
         private readonly StageNode _node;
         private readonly IStageNodeViewModel _viewModel;
-        private readonly IStageConnectionViewModel _incomingConnection;
+        private readonly IReadOnlyList<IStageConnectionViewModel> _incomingConnections;
         private readonly StageNodeAnimationSequencer _sequencer;
         private readonly CancellationTokenSource _cts;
         private Task _transitionTask;
