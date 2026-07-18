@@ -1,18 +1,20 @@
-using Notion.Client;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Notion.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal class NotionReader
+    /// <summary>
+    ///     NotionのAPIからページやデータベースを取得・パースするクラス。
+    /// </summary>
+    public class NotionReader
     {
         public NotionReader(string notionToken)
         {
@@ -32,7 +34,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ページ内容の取得中にエラーが発生しました（PageId: {page.Id}）: {ex.Message}");
+                OperatorLog.Write($"ページ内容の取得中にエラーが発生しました（PageId: {page.Id}）: {ex.Message}");
                 return string.Empty;
             }
         }
@@ -63,52 +65,49 @@ namespace SinfoniaStudio.SinfoniaOperator
                     HttpResponseMessage resp = await http.GetAsync(url.ToString());
                     if (!resp.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (BlockId: {blockId})");
+                        OperatorLog.Write($"Notion API エラー: {resp.StatusCode} (BlockId: {blockId})");
                         break;
                     }
 
-                    using JsonDocument doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-                    JsonElement root = doc.RootElement;
+                    JObject root = JObject.Parse(await resp.Content.ReadAsStringAsync());
 
-                    if (!root.TryGetProperty("results", out JsonElement results))
+                    if (root["results"] is not JArray results)
                     {
-                        Console.WriteLine($"Notion API レスポンスに results がありません (BlockId: {blockId})");
+                        OperatorLog.Write($"Notion API レスポンスに results がありません (BlockId: {blockId})");
                         break;
                     }
 
-                    foreach (JsonElement block in results.EnumerateArray())
+                    foreach (JToken block in results)
                     {
                         try
                         {
-                            string type = block.GetProperty("type").GetString() ?? "unknown";
+                            string type = block["type"]?.ToString() ?? "unknown";
 
                             ConvertBlock(sb, type, block);
 
-                            if (block.TryGetProperty("has_children", out JsonElement hasChildrenProp) && hasChildrenProp.ValueKind == JsonValueKind.True)
+                            if (block["has_children"]?.Type == JTokenType.Boolean &&
+                                block["has_children"]!.Value<bool>())
                             {
-                                if (block.TryGetProperty("id", out JsonElement childIdEl))
+                                string? childId = block["id"]?.ToString();
+                                if (!string.IsNullOrEmpty(childId))
                                 {
-                                    string? childId = childIdEl.GetString();
-                                    if (!string.IsNullOrEmpty(childId))
-                                    { 
-                                        sb.AppendLine(await GetBlockChildrenAsync(childId)); 
-                                    }
+                                    sb.AppendLine(await GetBlockChildrenAsync(childId));
                                 }
                             }
                         }
                         catch (Exception innerEx)
                         {
-                            Console.WriteLine($"ブロック処理中にエラー（部分ブロック）: {innerEx.Message}");
+                            OperatorLog.Write($"ブロック処理中にエラー（部分ブロック）: {innerEx.Message}");
                         }
                     }
 
-                    startCursor = root.TryGetProperty("next_cursor", out var nextCursorEl) && nextCursorEl.ValueKind == JsonValueKind.String
-                        ? nextCursorEl.GetString()
+                    startCursor = root["next_cursor"]?.Type == JTokenType.String
+                        ? root["next_cursor"]!.ToString()
                         : null;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ブロック取得中にエラーが発生しました（BlockId: {blockId}）: {ex.Message}");
+                    OperatorLog.Write($"ブロック取得中にエラーが発生しました（BlockId: {blockId}）: {ex.Message}");
                     break;
                 }
 
@@ -132,14 +131,14 @@ namespace SinfoniaStudio.SinfoniaOperator
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
             http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
 
-            Console.WriteLine($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
+            OperatorLog.Write($"[NotionReader] データベースの取得を開始します (DatabaseID: {databaseID})");
 
             do
             {
                 try
                 {
                     pageCount++;
-                    Console.WriteLine($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
+                    OperatorLog.Write($"[NotionReader] クエリ実行中... (ページ: {pageCount})");
 
                     var requestData = new Dictionary<string, object>
                     {
@@ -150,35 +149,33 @@ namespace SinfoniaStudio.SinfoniaOperator
                         requestData.Add("start_cursor", nextCursor);
                     }
 
-                    string jsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
+                    string jsonBody = JsonConvert.SerializeObject(requestData);
                     using var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                     HttpResponseMessage resp = await http.PostAsync($"https://api.notion.com/v1/databases/{databaseID}/query", content);
                     if (!resp.IsSuccessStatusCode)
                     {
                         string errorBody = await resp.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID}) - {errorBody}");
+                        OperatorLog.Write($"Notion API エラー: {resp.StatusCode} (DatabaseID: {databaseID}) - {errorBody}");
                         break;
                     }
 
                     string rawJson = await resp.Content.ReadAsStringAsync();
-                    using JsonDocument doc = JsonDocument.Parse(rawJson);
-                    JsonElement root = doc.RootElement;
+                    JObject root = JObject.Parse(rawJson);
 
-                    if (root.TryGetProperty("results", out JsonElement results))
+                    if (root["results"] is JArray results)
                     {
-                        foreach (JsonElement pageEl in results.EnumerateArray())
+                        foreach (JToken pageEl in results)
                         {
                             try
                             {
                                 // ページ単位でデシリアライズを試みる。
-                                string singlePageJson = pageEl.GetRawText();
-                                var jo = Newtonsoft.Json.Linq.JObject.Parse(singlePageJson);
+                                if (pageEl is not JObject jo) { continue; }
 
                                 // 未知のアイコン形式（custom_emoji等）は、ライブラリのデシリアライザが対応していないため、
                                 // 事前にnullにしておくことでデシリアライズの失敗を防ぐ。
                                 var icon = jo["icon"];
-                                if (icon != null && icon.Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                                if (icon != null && icon.Type != JTokenType.Null)
                                 {
                                     var type = icon["type"]?.ToString();
                                     if (type != "emoji" && type != "external" && type != "file")
@@ -196,21 +193,21 @@ namespace SinfoniaStudio.SinfoniaOperator
                             catch (Exception innerEx)
                             {
                                 // それでもパースに失敗した場合はスキップ。
-                                Console.WriteLine($"[NotionReader] ページの取得をスキップしました (エラー: {innerEx.Message})");
+                                OperatorLog.Write($"[NotionReader] ページの取得をスキップしました (エラー: {innerEx.Message})");
                             }
                         }
                     }
 
-                    nextCursor = root.TryGetProperty("next_cursor", out var nextCursorEl) && nextCursorEl.ValueKind == JsonValueKind.String
-                        ? nextCursorEl.GetString()
+                    nextCursor = root["next_cursor"]?.Type == JTokenType.String
+                        ? root["next_cursor"]!.ToString()
                         : null;
 
-                    Console.WriteLine($"[NotionReader] {allResults.Count} 件のアイテムを取得済み");
+                    OperatorLog.Write($"[NotionReader] {allResults.Count} 件のアイテムを取得済み");
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[NotionReader] データベース取得中に重大なエラーが発生しました: {ex.Message}");
+                    OperatorLog.Write($"[NotionReader] データベース取得中に重大なエラーが発生しました: {ex.Message}");
                     break;
                 }
 
@@ -218,11 +215,11 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             if (allResults.Count == 0)
             {
-                Console.WriteLine($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
+                OperatorLog.Write($"[NotionReader] データベース {databaseID} は空、またはアクセス権限がありません。");
             }
             else
             {
-                Console.WriteLine($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
+                OperatorLog.Write($"[NotionReader] データベースの全件取得が完了しました (合計: {allResults.Count} 件)");
             }
 
             return allResults;
@@ -245,7 +242,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 string name = string.Join("", titleProperty.Title
                     .Where(t => t != null && t.PlainText != null)
                     .Select(t => t.PlainText));
-                
+
                 return string.IsNullOrWhiteSpace(name) ? DEFAULT_NAME : name;
             }
 
@@ -265,7 +262,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly string? _notionToken;
         private const string NOTION_API_VERSION = "2022-06-28";
 
-        private static void ConvertBlock(StringBuilder sb, string type, JsonElement block)
+        private static void ConvertBlock(StringBuilder sb, string type, JToken block)
         {
             string? text = type switch
             {
@@ -283,39 +280,40 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             if (text == null)
             {
-                Console.WriteLine($"未対応のブロックタイプ: {type} (BlockId: {block.GetProperty("id").GetString()})");
+                OperatorLog.Write($"未対応のブロックタイプ: {type} (BlockId: {block["id"]?.ToString()})");
                 return;
             }
 
             sb.AppendLine(text);
         }
 
-        private static string ExtractPlainTextFromRichTextArray(JsonElement richTextArray)
+        private static string ExtractPlainTextFromRichTextArray(JToken? richTextArray)
         {
             StringBuilder sb = new();
-            if (richTextArray.ValueKind != JsonValueKind.Array) return string.Empty;
-            foreach (JsonElement rt in richTextArray.EnumerateArray())
+            if (richTextArray is not JArray array) return string.Empty;
+            foreach (JToken rt in array)
             {
-                if (rt.TryGetProperty("plain_text", out JsonElement plainTextEl))
-                    sb.Append(plainTextEl.GetString());
+                var plainText = rt["plain_text"];
+                if (plainText != null && plainText.Type == JTokenType.String)
+                    sb.Append(plainText.ToString());
             }
             return sb.ToString();
         }
 
-        private static string ConvertBlockParagraph(JsonElement block)
+        private static string ConvertBlockParagraph(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_PARAGRAPH, out var paragraphObj) &&
-                paragraphObj.TryGetProperty("rich_text", out var pRt))
+            var pRt = block[BLOCK_TYPE_PARAGRAPH]?["rich_text"];
+            if (pRt != null)
             {
                 return ExtractPlainTextFromRichTextArray(pRt);
             }
             return string.Empty;
         }
 
-        private static string ConvertBlockHeading(JsonElement block, string headingType)
+        private static string ConvertBlockHeading(JToken block, string headingType)
         {
-            if (block.TryGetProperty(headingType, out var headingObj) &&
-                headingObj.TryGetProperty("rich_text", out var hRt))
+            var hRt = block[headingType]?["rich_text"];
+            if (hRt != null)
             {
                 string prefix = headingType switch
                 {
@@ -329,54 +327,55 @@ namespace SinfoniaStudio.SinfoniaOperator
             return string.Empty;
         }
 
-        private static string ConvertBlockToDo(JsonElement block)
+        private static string ConvertBlockToDo(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_TO_DO, out var todo) &&
-                todo.TryGetProperty("rich_text", out var todoRt))
+            var todo = block[BLOCK_TYPE_TO_DO];
+            var todoRt = todo?["rich_text"];
+            if (todo != null && todoRt != null)
             {
-                bool isChecked = todo.TryGetProperty("checked", out var checkedEl) && checkedEl.ValueKind == JsonValueKind.True;
+                bool isChecked = todo["checked"]?.Type == JTokenType.Boolean && todo["checked"]!.Value<bool>();
                 string checkbox = isChecked ? "[x]" : "[ ]";
                 return $"{checkbox} {ExtractPlainTextFromRichTextArray(todoRt)}";
             }
             return string.Empty;
         }
 
-        private static string ConvertBlockBulletedListItem(JsonElement block)
+        private static string ConvertBlockBulletedListItem(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_BULLETED_LIST_ITEM, out var bullet) &&
-                bullet.TryGetProperty("rich_text", out var bulletRt))
+            var bulletRt = block[BLOCK_TYPE_BULLETED_LIST_ITEM]?["rich_text"];
+            if (bulletRt != null)
             {
                 return $"・{ExtractPlainTextFromRichTextArray(bulletRt)}";
             }
             return string.Empty;
         }
 
-        private static string ConvertBlockNumberedListItem(JsonElement block)
+        private static string ConvertBlockNumberedListItem(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_NUMBERED_LIST_ITEM, out var num) &&
-                num.TryGetProperty("rich_text", out var numRt))
+            var numRt = block[BLOCK_TYPE_NUMBERED_LIST_ITEM]?["rich_text"];
+            if (numRt != null)
             {
                 return $"- {ExtractPlainTextFromRichTextArray(numRt)}";
             }
             return string.Empty;
         }
 
-        private static string ConvertBlockQuote(JsonElement block)
+        private static string ConvertBlockQuote(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_QUOTE, out var quote) &&
-                quote.TryGetProperty("rich_text", out var quoteRt))
+            var quoteRt = block[BLOCK_TYPE_QUOTE]?["rich_text"];
+            if (quoteRt != null)
             {
                 return $"> {ExtractPlainTextFromRichTextArray(quoteRt)}";
             }
             return string.Empty;
         }
 
-        private static string ConvertBlockLinkPreview(JsonElement block)
+        private static string ConvertBlockLinkPreview(JToken block)
         {
-            if (block.TryGetProperty(BLOCK_TYPE_LINK_PREVIEW, out var linkPreviewObj) &&
-                linkPreviewObj.TryGetProperty("url", out var urlEl))
+            var urlEl = block[BLOCK_TYPE_LINK_PREVIEW]?["url"];
+            if (urlEl != null)
             {
-                string urlString = urlEl.GetString() ?? string.Empty;
+                string urlString = urlEl.ToString();
                 if (!string.IsNullOrEmpty(urlString))
                 {
                     return $"[ページリンク]({urlString})";

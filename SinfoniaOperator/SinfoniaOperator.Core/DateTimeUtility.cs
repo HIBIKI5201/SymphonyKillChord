@@ -1,9 +1,11 @@
-using Discord.Rest;
-using System;
+﻿using System;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal static class DateTimeUtility
+    /// <summary>
+    ///     日本時間の取得や変換を行うユーティリティクラス。
+    /// </summary>
+    public static class DateTimeUtility
     {
         public static bool ConvertDateUtcToJst(DateTime? utc, out DateTime jst)
         {

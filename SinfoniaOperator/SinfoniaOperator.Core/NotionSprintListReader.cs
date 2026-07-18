@@ -1,4 +1,4 @@
-using Notion.Client;
+﻿using Notion.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal class NotionSprintListReader
+    /// <summary>
+    ///     Notionのスプリントデータベースを読み取り、今週のスプリント内容を構築するクラス。
+    /// </summary>
+    public class NotionSprintListReader
     {
         public NotionSprintListReader(NotionEnvironment env)
         {
@@ -38,10 +41,10 @@ namespace SinfoniaStudio.SinfoniaOperator
                     evaluatedCount++;
                     if (item == null) continue;
 
-                    if (item is not Page page) 
+                    if (item is not Page page)
                     {
                         logBuilder.AppendLine($"[SprintReader] アイテム {evaluatedCount} はページではないためスキップします。");
-                        continue; 
+                        continue;
                     }
 
                     string pageName = NotionReader.GetPageName(page, _env.NamePropertyName) ?? "(null)";
@@ -115,7 +118,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
             finally
             {
-                Console.WriteLine(logBuilder.ToString());
+                OperatorLog.Write(logBuilder.ToString());
             }
         }
 
