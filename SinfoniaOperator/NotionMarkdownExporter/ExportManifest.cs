@@ -39,7 +39,23 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (!File.Exists(path)) { return null; }
 
             string json = File.ReadAllText(path, Encoding.UTF8);
-            return JsonSerializer.Deserialize<ExportManifest>(json);
+            ExportManifest? manifest = JsonSerializer.Deserialize<ExportManifest>(json);
+            if (manifest == null)
+            {
+                throw new InvalidDataException("マニフェストの内容が空です。");
+            }
+
+            if (manifest.Version != CURRENT_VERSION)
+            {
+                throw new InvalidDataException($"未対応のマニフェストバージョンです: {manifest.Version}");
+            }
+
+            if (manifest.Files == null)
+            {
+                throw new InvalidDataException("マニフェストに生成ファイル一覧がありません。");
+            }
+
+            return manifest;
         }
 
         /// <summary>
@@ -75,31 +91,19 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         }
 
         /// <summary>
-        ///     前回マニフェストにのみ存在する管理対象ファイルを削除する。
+        ///     前回マニフェストに記録された管理対象ファイルをすべて削除する。
         /// </summary>
         /// <param name="previous">前回マニフェスト。</param>
-        /// <param name="currentRootPageId">今回のルートページID。</param>
         /// <param name="outputDirectory">出力先ルート。</param>
-        /// <param name="currentFiles">今回生成したファイル。</param>
         /// <param name="warning">警告出力。</param>
-        internal static void DeleteStaleFiles(
+        internal static void DeleteGeneratedFiles(
             ExportManifest? previous,
-            string currentRootPageId,
             string outputDirectory,
-            ISet<string> currentFiles,
             Action<string> warning)
         {
             if (previous == null) { return; }
-            if (!string.Equals(previous.RootPageId, currentRootPageId, StringComparison.OrdinalIgnoreCase))
-            {
-                warning("出力先の前回ルートページが異なるため、古いファイルは削除しませんでした。");
-                return;
-            }
 
-            HashSet<string> current = new(
-                currentFiles.Select(NormalizeRelativePath),
-                StringComparer.OrdinalIgnoreCase);
-            foreach (string relativePath in previous.Files.Select(NormalizeRelativePath).Except(current, StringComparer.OrdinalIgnoreCase))
+            foreach (string relativePath in previous.Files.Select(NormalizeRelativePath).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 string fullPath = Path.GetFullPath(Path.Combine(outputDirectory, relativePath));
                 if (!PathUtility.IsInsideDirectory(outputDirectory, fullPath))
@@ -112,6 +116,11 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 File.Delete(fullPath);
                 DeleteEmptyParentDirectories(Path.GetDirectoryName(fullPath), outputDirectory);
             }
+
+            string manifestPath = Path.Combine(outputDirectory, MANIFEST_FILE_NAME);
+            if (File.Exists(manifestPath)) { File.Delete(manifestPath); }
+            string temporaryManifestPath = manifestPath + ".tmp";
+            if (File.Exists(temporaryManifestPath)) { File.Delete(temporaryManifestPath); }
         }
 
         /// <summary>

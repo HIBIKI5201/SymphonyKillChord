@@ -17,6 +17,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private const string API_BASE_URL = "https://api.notion.com/v1";
         private const string NOTION_API_VERSION = "2026-03-11";
         private const int MAX_RETRY_COUNT = 4;
+        private const int DATA_SOURCE_PAGE_SIZE = 25;
 
         private readonly HttpClient _httpClient;
         private bool _isDisposed;
@@ -114,20 +115,19 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         }
 
         /// <summary>
-        ///     指定データソースに含まれる全ページをページネーションしながら取得する。
+        ///     指定データソースに含まれるページをページネーションしながら逐次取得する。
         /// </summary>
         /// <param name="dataSourceId">データソースID。</param>
-        /// <returns>データソース内のページ一覧。</returns>
-        internal async Task<IReadOnlyList<PageMetadata>> QueryDataSourcePagesAsync(string dataSourceId)
+        /// <returns>データソース内のページを返す非同期ストリーム。</returns>
+        internal async IAsyncEnumerable<PageMetadata> QueryDataSourcePagesAsync(string dataSourceId)
         {
-            List<PageMetadata> pages = new();
             string? nextCursor = null;
 
             do
             {
                 Dictionary<string, object> requestBody = new()
                 {
-                    ["page_size"] = 100
+                    ["page_size"] = DATA_SOURCE_PAGE_SIZE
                 };
                 if (!string.IsNullOrWhiteSpace(nextCursor))
                 {
@@ -146,7 +146,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                         if (result.TryGetProperty("object", out JsonElement objectElement) &&
                             objectElement.GetString() == "page")
                         {
-                            pages.Add(PageMetadata.FromJson(result));
+                            yield return PageMetadata.FromJson(result);
                         }
                     }
                 }
@@ -157,7 +157,6 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                     : null;
             } while (!string.IsNullOrWhiteSpace(nextCursor));
 
-            return pages;
         }
 
         /// <summary>

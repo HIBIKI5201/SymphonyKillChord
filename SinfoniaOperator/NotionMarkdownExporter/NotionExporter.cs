@@ -20,6 +20,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private readonly Dictionary<string, DatabaseExportNode> _databasesById = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<PageExportNode> _pages = new();
         private readonly List<DatabaseExportNode> _databases = new();
+        private readonly string _stagingRootDirectory;
+        private readonly string _stagingDirectory;
         private int _warningCount;
 
         /// <summary>
@@ -31,6 +33,11 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         {
             _apiClient = apiClient;
             _options = options;
+            _stagingRootDirectory = Path.Combine(
+                Path.GetTempPath(),
+                "SinfoniaStudio",
+                "NotionMarkdownExporter");
+            _stagingDirectory = Path.Combine(_stagingRootDirectory, Guid.NewGuid().ToString("N"));
         }
 
         /// <summary>
@@ -40,69 +47,82 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         internal async Task<ExportSummary> ExportAsync()
         {
             Directory.CreateDirectory(_options.OutputDirectory);
-            ExportManifest? previousManifest = TryLoadPreviousManifest();
-
-            Console.WriteLine($"ルートページを取得します: {_options.RootPageId}");
-            await BuildPageAsync(_options.RootPageId, _options.OutputDirectory, null);
-
-            Dictionary<string, string> pagePaths = _pagesById.ToDictionary(
-                pair => pair.Key,
-                pair => pair.Value.FilePath,
-                StringComparer.OrdinalIgnoreCase);
-            Dictionary<string, string> databasePaths = _databasesById.ToDictionary(
-                pair => pair.Key,
-                pair => pair.Value.FilePath,
-                StringComparer.OrdinalIgnoreCase);
-            HashSet<string> generatedFiles = new(StringComparer.OrdinalIgnoreCase);
-            int assetCount = 0;
-
-            using AssetDownloader assetDownloader = new();
-            foreach (PageExportNode page in _pages)
+            Directory.CreateDirectory(_stagingDirectory);
+            try
             {
-                string markdown = CreatePageMarkdown(page);
-                markdown = MarkdownReferenceProcessor.RewriteReferences(
-                    markdown,
-                    page.FilePath,
-                    pagePaths,
-                    databasePaths);
-                if (_options.DownloadsAssets)
+                ExportManifest? previousManifest = LoadPreviousManifest();
+                Console.WriteLine($"ルートページを取得します: {_options.RootPageId}");
+                await BuildPageAsync(_options.RootPageId, _options.OutputDirectory, null);
+
+                if (previousManifest != null)
                 {
-                    AssetDownloadResult assets = await assetDownloader.DownloadAndRewriteAsync(
-                        page.Metadata.Id,
-                        markdown,
-                        page.FilePath,
+                    Console.WriteLine("前回のエクスポートデータをクリーンアップします。");
+                    ExportManifest.DeleteGeneratedFiles(
+                        previousManifest,
                         _options.OutputDirectory,
-                        generatedFiles,
                         WriteWarning);
-                    markdown = assets.Markdown;
-                    assetCount += assets.DownloadedCount;
                 }
 
-                await WriteMarkdownAsync(page.FilePath, markdown);
-                generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, page.FilePath));
-            }
+                Dictionary<string, string> pagePaths = _pagesById.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.FilePath,
+                    StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> databasePaths = _databasesById.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.FilePath,
+                    StringComparer.OrdinalIgnoreCase);
+                HashSet<string> generatedFiles = new(StringComparer.OrdinalIgnoreCase);
+                int assetCount = 0;
 
-            foreach (DatabaseExportNode database in _databases)
+                using AssetDownloader assetDownloader = new();
+                foreach (PageExportNode page in _pages)
+                {
+                    string rawMarkdown = await File.ReadAllTextAsync(page.StagingFilePath, Encoding.UTF8);
+                    string markdown = CreatePageMarkdown(page, rawMarkdown);
+                    rawMarkdown = string.Empty;
+                    markdown = MarkdownReferenceProcessor.RewriteReferences(
+                        markdown,
+                        page.FilePath,
+                        pagePaths,
+                        databasePaths);
+                    if (_options.DownloadsAssets)
+                    {
+                        AssetDownloadResult assets = await assetDownloader.DownloadAndRewriteAsync(
+                            page.Id,
+                            markdown,
+                            page.FilePath,
+                            _options.OutputDirectory,
+                            generatedFiles,
+                            WriteWarning);
+                        markdown = assets.Markdown;
+                        assetCount += assets.DownloadedCount;
+                    }
+
+                    await WriteMarkdownAsync(page.FilePath, markdown);
+                    File.Delete(page.StagingFilePath);
+                    generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, page.FilePath));
+                }
+
+                foreach (DatabaseExportNode database in _databases)
+                {
+                    string markdown = CreateDatabaseMarkdown(database);
+                    await WriteMarkdownAsync(database.FilePath, markdown);
+                    generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, database.FilePath));
+                }
+
+                await ExportManifest.SaveAsync(_options.OutputDirectory, _options.RootPageId, generatedFiles);
+
+                return new ExportSummary(
+                    _pages.Count,
+                    _databases.Count,
+                    assetCount,
+                    _warningCount,
+                    _options.OutputDirectory);
+            }
+            finally
             {
-                string markdown = CreateDatabaseMarkdown(database);
-                await WriteMarkdownAsync(database.FilePath, markdown);
-                generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, database.FilePath));
+                DeleteStagingDirectory();
             }
-
-            ExportManifest.DeleteStaleFiles(
-                previousManifest,
-                _options.RootPageId,
-                _options.OutputDirectory,
-                generatedFiles,
-                WriteWarning);
-            await ExportManifest.SaveAsync(_options.OutputDirectory, _options.RootPageId, generatedFiles);
-
-            return new ExportSummary(
-                _pages.Count,
-                _databases.Count,
-                assetCount,
-                _warningCount,
-                _options.OutputDirectory);
         }
 
         /// <summary>
@@ -124,14 +144,24 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             MarkdownPayload payload = await _apiClient.GetCompleteMarkdownAsync(pageId);
             foreach (string warning in payload.Warnings) { WriteWarning(warning); }
 
+            IReadOnlyList<MarkdownReference> pageReferences =
+                MarkdownReferenceProcessor.FindPageReferences(payload.Markdown);
+            IReadOnlyList<MarkdownReference> databaseReferences =
+                MarkdownReferenceProcessor.FindDatabaseReferences(payload.Markdown);
+            string stagingFilePath = Path.Combine(_stagingDirectory, metadata.Id + ".md");
+            await File.WriteAllTextAsync(stagingFilePath, payload.Markdown, new UTF8Encoding(false));
+
             string nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
             string filePath = Path.Combine(parentDirectory, nodeName + ".md");
             string childDirectory = Path.Combine(parentDirectory, nodeName);
-            PageExportNode node = new(metadata, payload.Markdown, filePath, childDirectory);
+            string propertiesMarkdown = PropertyFormatter.CreateMarkdownTable(metadata.Properties);
+            PageExportNode node = new(metadata, propertiesMarkdown, stagingFilePath, filePath, childDirectory);
             _pagesById[metadata.Id] = node;
             _pages.Add(node);
+            payload = null!;
+            metadata = null!;
 
-            foreach (MarkdownReference pageReference in MarkdownReferenceProcessor.FindPageReferences(payload.Markdown))
+            foreach (MarkdownReference pageReference in pageReferences)
             {
                 if (_pagesById.ContainsKey(pageReference.Id)) { continue; }
 
@@ -145,7 +175,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 }
             }
 
-            foreach (MarkdownReference databaseReference in MarkdownReferenceProcessor.FindDatabaseReferences(payload.Markdown))
+            foreach (MarkdownReference databaseReference in databaseReferences)
             {
                 if (_databasesById.ContainsKey(databaseReference.Id)) { continue; }
 
@@ -206,8 +236,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                         pageDirectory = Path.Combine(directoryPath, sourceName);
                     }
 
-                    IReadOnlyList<PageMetadata> pages = await _apiClient.QueryDataSourcePagesAsync(sourceReference.Id);
-                    foreach (PageMetadata page in pages)
+                    await foreach (PageMetadata page in _apiClient.QueryDataSourcePagesAsync(sourceReference.Id))
                     {
                         PageExportNode pageNode = await BuildPageAsync(page.Id, pageDirectory, page);
                         if (!sourceNode.Pages.Contains(pageNode)) { sourceNode.Pages.Add(pageNode); }
@@ -224,43 +253,43 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         ///     ページのメタデータ、プロパティ、Enhanced Markdown本文を一つのファイルへ構成する。
         /// </summary>
         /// <param name="page">ページのエクスポート情報。</param>
+        /// <param name="rawMarkdown">一時ファイルから読み込んだEnhanced Markdown本文。</param>
         /// <returns>保存するMarkdown。</returns>
-        private static string CreatePageMarkdown(PageExportNode page)
+        private static string CreatePageMarkdown(PageExportNode page, string rawMarkdown)
         {
             StringBuilder markdown = new();
             markdown.AppendLine("<!-- NotionMarkdownExporterによる自動生成ファイルです。 -->");
             markdown.Append("# ");
-            markdown.AppendLine(PathUtility.EscapeHeading(page.Metadata.Title));
+            markdown.AppendLine(PathUtility.EscapeHeading(page.Title));
             markdown.AppendLine();
-            if (!string.IsNullOrWhiteSpace(page.Metadata.Url))
+            if (!string.IsNullOrWhiteSpace(page.Url))
             {
                 markdown.Append("[Notionで開く](");
-                markdown.Append(page.Metadata.Url);
+                markdown.Append(page.Url);
                 markdown.AppendLine(")");
             }
 
-            if (page.Metadata.LastEditedTime != null)
+            if (page.LastEditedTime != null)
             {
                 markdown.AppendLine();
                 markdown.Append("最終更新: ");
-                markdown.AppendLine(page.Metadata.LastEditedTime.Value.ToString("O"));
+                markdown.AppendLine(page.LastEditedTime.Value.ToString("O"));
             }
 
-            string properties = PropertyFormatter.CreateMarkdownTable(page.Metadata.Properties);
-            if (!string.IsNullOrWhiteSpace(properties))
+            if (!string.IsNullOrWhiteSpace(page.PropertiesMarkdown))
             {
                 markdown.AppendLine();
                 markdown.AppendLine("## プロパティ");
                 markdown.AppendLine();
-                markdown.AppendLine(properties);
+                markdown.AppendLine(page.PropertiesMarkdown);
             }
 
-            if (!string.IsNullOrWhiteSpace(page.Markdown))
+            if (!string.IsNullOrWhiteSpace(rawMarkdown))
             {
                 markdown.AppendLine();
                 markdown.AppendLine("---");
                 markdown.AppendLine();
-                markdown.Append(page.Markdown.TrimEnd());
+                markdown.Append(rawMarkdown.TrimEnd());
                 markdown.AppendLine();
             }
 
@@ -317,12 +346,12 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 }
 
                 foreach (PageExportNode page in source.Pages.OrderBy(
-                             page => page.Metadata.Title,
+                             page => page.Title,
                              StringComparer.OrdinalIgnoreCase))
                 {
                     string relativePath = PathUtility.GetRelativeMarkdownPath(database.FilePath, page.FilePath);
                     markdown.Append("- [");
-                    markdown.Append(PathUtility.EscapeLinkText(page.Metadata.Title));
+                    markdown.Append(PathUtility.EscapeLinkText(page.Title));
                     markdown.Append("](");
                     markdown.Append(relativePath);
                     markdown.AppendLine(")");
@@ -345,10 +374,32 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         }
 
         /// <summary>
-        ///     前回マニフェストを読み込み、破損時は警告して新規エクスポートを継続する。
+        ///     今回の実行で作成した一時ディレクトリを安全性確認後に削除する。
+        /// </summary>
+        private void DeleteStagingDirectory()
+        {
+            try
+            {
+                if (!Directory.Exists(_stagingDirectory)) { return; }
+                if (!PathUtility.IsInsideDirectory(_stagingRootDirectory, _stagingDirectory))
+                {
+                    WriteWarning($"一時ディレクトリが想定範囲外のため削除しませんでした: {_stagingDirectory}");
+                    return;
+                }
+
+                Directory.Delete(_stagingDirectory, true);
+            }
+            catch (Exception ex)
+            {
+                WriteWarning($"一時ディレクトリを削除できませんでした: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///     前回マニフェストを読み込み、破損時は出力の混在を防ぐため処理を停止する。
         /// </summary>
         /// <returns>前回マニフェスト。読み込めない場合はnull。</returns>
-        private ExportManifest? TryLoadPreviousManifest()
+        private ExportManifest? LoadPreviousManifest()
         {
             try
             {
@@ -356,8 +407,9 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
             catch (Exception ex)
             {
-                WriteWarning($"前回マニフェストを読み込めないため、古いファイルは削除しません: {ex.Message}");
-                return null;
+                throw new InvalidDataException(
+                    $"前回マニフェストを読み込めないため、安全にクリーンアップできません: {ex.Message}",
+                    ex);
             }
         }
 

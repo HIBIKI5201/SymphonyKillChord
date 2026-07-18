@@ -12,23 +12,33 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         ///     ページのエクスポート情報を生成する。
         /// </summary>
         /// <param name="metadata">ページメタデータ。</param>
-        /// <param name="markdown">Enhanced Markdown本文。</param>
+        /// <param name="propertiesMarkdown">ページプロパティのMarkdown。</param>
+        /// <param name="stagingFilePath">取得直後のMarkdownを退避する一時ファイル。</param>
         /// <param name="filePath">保存先ファイル。</param>
         /// <param name="childDirectory">子要素の保存先。</param>
         internal PageExportNode(
             PageMetadata metadata,
-            string markdown,
+            string propertiesMarkdown,
+            string stagingFilePath,
             string filePath,
             string childDirectory)
         {
-            Metadata = metadata;
-            Markdown = markdown;
+            Id = metadata.Id;
+            Title = metadata.Title;
+            Url = metadata.Url;
+            LastEditedTime = metadata.LastEditedTime;
+            PropertiesMarkdown = propertiesMarkdown;
+            StagingFilePath = stagingFilePath;
             FilePath = filePath;
             ChildDirectory = childDirectory;
         }
 
-        internal PageMetadata Metadata { get; }
-        internal string Markdown { get; }
+        internal string Id { get; }
+        internal string Title { get; }
+        internal string Url { get; }
+        internal DateTimeOffset? LastEditedTime { get; }
+        internal string PropertiesMarkdown { get; }
+        internal string StagingFilePath { get; }
         internal string FilePath { get; }
         internal string ChildDirectory { get; }
     }
