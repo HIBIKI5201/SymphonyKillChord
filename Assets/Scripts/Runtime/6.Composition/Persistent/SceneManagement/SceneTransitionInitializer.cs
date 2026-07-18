@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.SceneManagement;
@@ -13,20 +14,53 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
     /// <summary>
     ///     シーン遷移機能の初期化を行うクラス。
     /// </summary>
-    public class SceneTransitionInitializer : MonoBehaviour
+    public sealed class SceneTransitionInitializer : PersistentInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(SceneTransitionInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 0;
+
+        private const int DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT = 3600;
+
         [SerializeField, Tooltip("シーン遷移中に表示するロード画面")]
         private LoadingScreenView _loadingScreenView;
 
         [SerializeField, Tooltip("シーン遷移確認用のデバッグView")]
         private SceneTransitionView _debugView;
 
-        private void Awake()
+        [SerializeField, Min(1), Tooltip("シーン初期化完了を待機する最大フレーム数")]
+        private int _sceneInitializationTimeoutFrameCount =
+            DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT;
+
+        /// <summary>
+        ///     シーン遷移システムを構築して登録する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             // 既に SceneTransitionController が存在する場合はそれを使用し、存在しない場合は新たに作成して登録する。
-            if (ServiceLocator.TryGetInstance<SceneTransitionController>(out var existingController)
-                && ServiceLocator.TryGetInstance(out LoadingScreenController existingLoadingScreenController))
+            bool hasExistingController =
+                ServiceLocator.TryGetInstance<SceneTransitionController>(out var existingController);
+            bool hasExistingLoadingController =
+                ServiceLocator.TryGetInstance(out LoadingScreenController existingLoadingScreenController);
+
+            if (hasExistingController || hasExistingLoadingController)
             {
+                if (!hasExistingController
+                    || !hasExistingLoadingController
+                    || !ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var existingReadiness))
+                {
+                    Debug.LogError(
+                        $"[{nameof(SceneTransitionInitializer)}] " +
+                        "既存のシーン遷移サービス登録が不完全です。",
+                        this);
+                    return false;
+                }
+
+                _sceneInitializationReadiness = existingReadiness;
+
                 if (_loadingScreenView != null)
                 {
                     _loadingScreenView.Initialize(
@@ -34,23 +68,29 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 }
 
                 InitializeViews(existingController);
-                return;
+                return true;
             }
 
-            LoadingScreenController loadingScreenController = new();
+            _loadingScreenController = new LoadingScreenController();
 
-            ILoadingOperationExecutor loadingOperationExecutor = 
-                new LoadingOperationExecutor(loadingScreenController);
-            ISceneTransitionService service = new SceneTransitionService();
-            var usecase = new SceneTransitionUsecase(service, loadingOperationExecutor);
-            SceneTransitionController controller = new SceneTransitionController(usecase);
+            _loadingOperationExecutor = new LoadingOperationExecutor(_loadingScreenController);
+            _sceneTransitionService = new SceneTransitionService();
+            _sceneInitializationReadiness = new SceneInitializationReadinessRegistry(
+                _sceneInitializationTimeoutFrameCount);
+            _sceneTransitionUsecase = new SceneTransitionUsecase(
+                _sceneTransitionService,
+                _loadingOperationExecutor,
+                _sceneInitializationReadiness);
+            _sceneTransitionController = new SceneTransitionController(_sceneTransitionUsecase);
 
-            ServiceLocator.RegisterInstance(loadingScreenController);
-            ServiceLocator.RegisterInstance<ILoadingSessionFactory>(loadingScreenController);
-            ServiceLocator.RegisterInstance<ILoadingOperationExecutor>(loadingOperationExecutor);
-            ServiceLocator.RegisterInstance<ISceneTransitionService>(service);
-            ServiceLocator.RegisterInstance(usecase);
-            ServiceLocator.RegisterInstance(controller);
+            ServiceLocator.RegisterInstance(_loadingScreenController);
+            ServiceLocator.RegisterInstance<ILoadingSessionFactory>(_loadingScreenController);
+            ServiceLocator.RegisterInstance<ILoadingOperationExecutor>(_loadingOperationExecutor);
+            ServiceLocator.RegisterInstance<ISceneTransitionService>(_sceneTransitionService);
+            ServiceLocator.RegisterInstance<ISceneInitializationReadiness>(_sceneInitializationReadiness);
+            ServiceLocator.RegisterInstance(_sceneTransitionUsecase);
+            ServiceLocator.RegisterInstance(_sceneTransitionController);
+            _ownsRegistrations = true;
 
             if (_loadingScreenView == null)
             {
@@ -62,10 +102,72 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             else
             {
                 _loadingScreenView.Initialize(
-                    loadingScreenController);
+                    _loadingScreenController);
             }
 
-            InitializeViews(controller);
+            InitializeViews(_sceneTransitionController);
+            return true;
+        }
+
+        /// <summary>
+        ///     登録済みサービスを解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (!_ownsRegistrations)
+            {
+                return;
+            }
+
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController registeredController)
+                && ReferenceEquals(registeredController, _sceneTransitionController))
+            {
+                ServiceLocator.UnregisterInstance<SceneTransitionController>();
+            }
+
+            if (ServiceLocator.TryGetInstance(out SceneTransitionUsecase registeredUsecase)
+                && ReferenceEquals(registeredUsecase, _sceneTransitionUsecase))
+            {
+                ServiceLocator.UnregisterInstance<SceneTransitionUsecase>();
+            }
+
+            if (ServiceLocator.TryGetInstance<ISceneTransitionService>(out var registeredService)
+                && ReferenceEquals(registeredService, _sceneTransitionService))
+            {
+                ServiceLocator.UnregisterInstance<ISceneTransitionService>();
+            }
+
+            if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var registeredReadiness)
+                && ReferenceEquals(registeredReadiness, _sceneInitializationReadiness))
+            {
+                ServiceLocator.UnregisterInstance<ISceneInitializationReadiness>();
+            }
+
+            if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var registeredLoadingOperationExecutor)
+                && ReferenceEquals(registeredLoadingOperationExecutor, _loadingOperationExecutor))
+            {
+                ServiceLocator.UnregisterInstance<ILoadingOperationExecutor>();
+            }
+
+            if (ServiceLocator.TryGetInstance<ILoadingSessionFactory>(out var registeredLoadingSessionFactory)
+                && ReferenceEquals(registeredLoadingSessionFactory, _loadingScreenController))
+            {
+                ServiceLocator.UnregisterInstance<ILoadingSessionFactory>();
+            }
+
+            if (ServiceLocator.TryGetInstance(out LoadingScreenController registeredLoadingScreenController)
+                && ReferenceEquals(registeredLoadingScreenController, _loadingScreenController))
+            {
+                ServiceLocator.UnregisterInstance<LoadingScreenController>();
+            }
+
+            _loadingScreenController = null;
+            _loadingOperationExecutor = null;
+            _sceneTransitionService = null;
+            _sceneInitializationReadiness = null;
+            _sceneTransitionUsecase = null;
+            _sceneTransitionController = null;
+            _ownsRegistrations = false;
         }
 
         /// <summary>
@@ -82,5 +184,13 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 _debugView.Initialize(controller);
             }
         }
+
+        private LoadingScreenController _loadingScreenController;
+        private ILoadingOperationExecutor _loadingOperationExecutor;
+        private ISceneTransitionService _sceneTransitionService;
+        private ISceneInitializationReadiness _sceneInitializationReadiness;
+        private SceneTransitionUsecase _sceneTransitionUsecase;
+        private SceneTransitionController _sceneTransitionController;
+        private bool _ownsRegistrations;
     }
 }

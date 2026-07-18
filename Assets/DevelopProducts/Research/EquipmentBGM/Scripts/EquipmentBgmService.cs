@@ -67,7 +67,7 @@ namespace DevelopProducts.EquipmentBGM
             foreach (var slot in skillBuild.EquippedSkills)
             {
                 if (!slot.HasSkill) continue;
-                if (table.TryGetLabel(slot.SkillData.Id, out string label))
+                if (table.TryGetLabel(slot.SkillTemplate.Id.Value, out string label))
                     skillLabels.Add(label);
             }
 

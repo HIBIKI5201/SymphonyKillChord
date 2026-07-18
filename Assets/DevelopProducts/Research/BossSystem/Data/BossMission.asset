@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13035cc144f4b9044b312988167fe8bb, type: 3}
   m_Name: BossMission
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Mission.EnemyMissionKeyAsset
-  _id: 4
+  _id:
+    _id: boss_research
+    _hashId: 1910175038
   _displayName: Boss

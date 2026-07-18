@@ -1,4 +1,4 @@
-using KillChord.Runtime.Application.InGame.Battle;
+﻿using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -19,11 +19,11 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         ///     スキル効果を実行するメソッド。スキルの効果を対象のキャラクターエンティティに適用する。
         /// </summary>
         /// <param name="context">スキル効果の発動に必要な情報をまとめた構造体。</param>
-        public override void Execute(SkillEffectContext context)
+        public override void Execute(in SkillEffectContext context)
         {
              AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             //  武器なし攻撃を実装するための箱替え。
-            AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackParameterSet,attackDefinition.AttackPipeline);
+            AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackSpec,attackDefinition.AttackPipeline);
 
 
             for (int i = 0; i < _attackCount; i++)
@@ -32,7 +32,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 Damage damage = result.FinalDamage * _multiplier;
                 if(result.IsCritical)
                 {
-                    damage /= unbulletDefinition.AttackParameterSet.CriticalMultiplier.Value; //元の攻撃定義のクリティカル倍率でダメージを補正してから、スキル固有のクリティカル倍率を適用
+                    damage /= unbulletDefinition.AttackSpec.CriticalMultiplier.Value; //元の攻撃定義のクリティカル倍率でダメージを補正してから、スキル固有のクリティカル倍率を適用
                     damage *= _criticalMultiplier; //クリティカルヒットのダメージを補正
                 }
                 context.TargetEntity.TakeDamage(damage);

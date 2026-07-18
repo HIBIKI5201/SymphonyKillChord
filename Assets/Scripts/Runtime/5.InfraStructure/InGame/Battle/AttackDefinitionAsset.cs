@@ -1,0 +1,33 @@
+﻿using KillChord.Runtime.InfraStructure.InGame.Battle;
+using UnityEngine;
+
+namespace KillChord.Runtime.InfraStructure.InGame.Battle
+{
+    /// <summary>
+    ///     攻撃の定義を保持するScriptableObjectクラス。
+    /// </summary>
+    [CreateAssetMenu(fileName = "AttackDefinitionAsset", menuName = "KillChord/AttackDefinitionAsset")]
+    public class AttackDefinitionAsset : ScriptableObject
+    {
+        /// <summary> 攻撃名を取得する。 </summary>
+        public string AttackName => _attackName;
+        /// <summary> 攻撃パラメーターセットを取得する。 </summary>
+        public AttackSpecAsset AttackSpecAsset => _attackParameterSetData;
+        /// <summary> 攻撃パイプラインアセットを取得する。 </summary>
+        public AttackPipelineAsset AttackPipelineAsset => _attackPipelineAsset;
+        /// <summary> ビートタイプを使用するかどうかを取得する。 </summary>
+        public bool UseBeatType => _useBeatType;
+        /// <summary> ビートタイプを取得する。 </summary>
+        public int BeatType => _beatType;
+        /// <summary> ジャストダメージ倍率を取得する。 </summary>
+        public float JustDamageMultiplier => _justDamageMultiplier;
+
+        [SerializeField, Tooltip("攻撃名")] private string _attackName;
+        [SerializeField, Tooltip("攻撃パラメーターセット")] private AttackSpecAsset _attackParameterSetData;
+        [SerializeField, Tooltip("攻撃パイプラインアセット")] private AttackPipelineAsset _attackPipelineAsset;
+        [SerializeField, Tooltip("ジャストダメージ倍率")] private float _justDamageMultiplier;
+        [SerializeField, Tooltip("ビートタイプを使用するかどうか")] private bool _useBeatType;
+        [SerializeField, Tooltip("ビートタイプ")] private int _beatType;
+    }
+}
+

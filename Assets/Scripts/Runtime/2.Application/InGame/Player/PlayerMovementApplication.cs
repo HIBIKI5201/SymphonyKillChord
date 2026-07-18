@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Player;
+﻿using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Player
@@ -8,10 +8,10 @@ namespace KillChord.Runtime.Application.InGame.Player
     /// </summary>
     public sealed class PlayerMovementApplication
     {
-        private readonly PlayerMoveParameter _parameter;
+        private readonly PlayerMoveSpec _parameter;
 
         /// <summary> 通常移動アプリケーションを初期化する。 </summary>
-        public PlayerMovementApplication(PlayerMoveParameter parameter)
+        public PlayerMovementApplication(PlayerMoveSpec parameter)
         {
             _parameter = parameter;
         }
@@ -36,3 +36,4 @@ namespace KillChord.Runtime.Application.InGame.Player
         }
     }
 }
+

@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,7 +16,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         public void Initialize(InputTimestampProvider timestampProvider)
         {
             _timestampProvider = timestampProvider;
-            ServiceLocator.RegisterInstance(this);
         }
 
         // イベント群。
@@ -33,7 +31,12 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<Vector2>> OnLookGamepadInput;
         /// <summary> ロックオン入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnInput;
+        /// <summary> ロックオン対象切り替え入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnLockOnSelectInput;
         public event Action<InputContext<Vector2>> OnMobileLookInput;
+
+        /// <summary> モバイルのロックオン対象切り替え入力を通知するイベント。 </summary>
+        public event Action<float> OnMobileLockOnSelectInput;
 
         public event Action<InputContext<float>> OnScenarioAdvanceInput;
         public event Action<InputContext<float>> OnScenarioFastForwardInput;
@@ -113,6 +116,18 @@ namespace KillChord.Runtime.View.Persistent.Input
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.LockOn, context, time);
             OnLockOnInput?.Invoke(inputContext);
+        }
+
+        /// <summary>
+        ///     ロックオン対象切り替え入力を通知する。
+        /// </summary>
+        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
+        public void OnLockOnSelect(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.LockOnSelect, context, time);
+            OnLockOnSelectInput?.Invoke(inputContext);
         }
 
         public void OnScenarioAdvance(InputAction.CallbackContext context)
@@ -203,6 +218,15 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnMobileLookInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     モバイルのロックオン対象切り替え入力を通知する。
+        /// </summary>
+        /// <param name="direction"> 左右方向を表す入力値。 </param>
+        public void OnMobileLockOnSelect(float direction)
+        {
+            OnMobileLockOnSelectInput?.Invoke(direction);
+        }
+
         private const string OPTION_ACTION_NAME = "Option";
         private const string SUBMIT_ACTION_NAME = "Submit";
         private const string CANCEL_ACTION_NAME = "Cancel";
@@ -211,6 +235,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string MOVE_ACTION_NAME = "Move";
         private const string LOOK_ACTION_NAME = "Look";
         private const string LOCK_ON_ACTION_NAME = "LockOn";
+        private const string LOCK_ON_SELECT_ACTION_NAME = "LockOnSelect";
         private const string SCENARIO_ADVANCE_ACTION_NAME = "Advance";
         private const string SCENARIO_FAST_FORWARD_ACTION_NAME = "FastForward";
         private const string SCENARIO_PAUSE_ACTION_NAME = "Pause";
@@ -231,6 +256,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _lockOnAction;
+        private InputAction _lockOnSelectAction;
 
         private InputAction _scenarioAdvanceAction;
         private InputAction _scenarioFastForwardAction;
@@ -268,6 +294,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_moveAction, OnMove);
             RegisterAction(_lookAction, OnLook);
             RegisterAction(_lockOnAction, OnLockOn);
+            RegisterAction(_lockOnSelectAction, OnLockOnSelect);
             RegisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             RegisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             RegisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -286,6 +313,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             UnregisterAction(_moveAction, OnMove);
             UnregisterAction(_lookAction, OnLook);
             UnregisterAction(_lockOnAction, OnLockOn);
+            UnregisterAction(_lockOnSelectAction, OnLockOnSelect);
             UnregisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             UnregisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             UnregisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -309,6 +337,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             _moveAction = actions.FindAction($"{InputMapNames.InGame}/{MOVE_ACTION_NAME}", true);
             _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
             _lockOnAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_ACTION_NAME}", true);
+            _lockOnSelectAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_SELECT_ACTION_NAME}", true);
             _scenarioAdvanceAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_ADVANCE_ACTION_NAME}", true);
             _scenarioFastForwardAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_FAST_FORWARD_ACTION_NAME}", true);
             _scenarioPauseAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_PAUSE_ACTION_NAME}", true);

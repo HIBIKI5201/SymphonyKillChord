@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement name="kcd-root" class="kcd-root">
+        <ui:VisualElement name="kcd-header" class="kcd-header">
+            <ui:Label text="KillChord Debugger" name="kcd-title" class="kcd-header__title" />
+        </ui:VisualElement>
+        <ui:VisualElement name="kcd-body" class="kcd-body">
+            <ui:VisualElement name="kcd-nav" class="kcd-nav">
+                <ui:Button name="kcd-nav-savedata" text="セーブデータ" class="kcd-nav__button kcd-nav__button--active" />
+            </ui:VisualElement>
+            <ui:VisualElement name="kcd-content" class="kcd-content" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

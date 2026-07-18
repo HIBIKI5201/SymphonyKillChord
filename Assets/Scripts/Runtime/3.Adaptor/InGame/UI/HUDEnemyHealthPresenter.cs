@@ -1,8 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.Camera;
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
-using KillChord.Runtime.Application.InGame.Camera.Target;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Character;
-using KillChord.Runtime.Utility.InGame;
 using System;
 using UnityEngine;
 
@@ -16,26 +13,15 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         /// <summary>
         ///     ロックオン状態・対象解決のコントローラーとViewModelを受け取り、Presenterを初期化するコンストラクタ。
         /// </summary>
-        /// <param name="cameraSystemController"> カメラのロックオン状態を提供するコントローラー。</param>
-        /// <param name="targetSelectorController"> 現在のロックオン対象エンティティを解決するコントローラー。</param>
+        /// <param name="targetingSystem"> 現在のターゲット情報を解決するシステム。</param>
         /// <param name="viewModel"> 敵HP HUDのViewModel。</param>
         public HUDEnemyHealthPresenter(
-            CameraSystemController cameraSystemController,
-            TargetSelectorController targetSelectorController,
-            IHUDEnemyHealthViewModel viewModel,
-            TargetSelector targetSelector)
+            TargetSystemController targetingSystem,
+            IHUDEnemyHealthViewModel viewModel)
         {
-            if (cameraSystemController == null)
-                throw new ArgumentNullException(nameof(cameraSystemController), "CameraSystemControllerがNULL。");
-            _cameraSystemController = cameraSystemController;
-
-            if (targetSelectorController == null)
-                throw new ArgumentNullException(nameof(targetSelectorController), "TargetSelectorControllerがNULL。");
-            _targetSelectorController = targetSelectorController;
-
-            if (targetSelector == null)
-                throw new ArgumentNullException(nameof(targetSelector), "TargetSelectorがNULL。");
-            _targetSelector = targetSelector;
+            if (targetingSystem == null)
+                throw new ArgumentNullException(nameof(targetingSystem), "TargetingSystemがNULL。");
+            _targetingSystem = targetingSystem;
 
             if (viewModel == null)
                 throw new ArgumentNullException(nameof(viewModel), "敵HPのViewModelがNULL。");
@@ -48,26 +34,36 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         /// </summary>
         public void Update()
         {
-            if (_cameraSystemController.LockOnState != CameraLockOnState.Free
-                && _targetSelectorController.TryGetCurrentTargetEntity(out CharacterEntity entity))
+            if (_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity entity)
+                && _targetingSystem.TryGetCurrentTargetPosition(out Vector3 result))
             {
-                _targetSelector.TryGetTargetPosition(default, default, out Vector3 result);
                 _viewModel.Update(new HUDEnemyHealthDTO(
                     entity.CurrentHealth.Value,
                     entity.MaxHealth.Value,
-                    true,
+                    LockOnDisplayState.LockedOn,
                     result));
+            }
+            else if (_targetingSystem.TryGetCurrentCandidateEntity(out _)
+                && _targetingSystem.TryGetCurrentCandidatePosition(out Vector3 candidatePosition))
+            {
+                _viewModel.Update(new HUDEnemyHealthDTO(
+                    0f,
+                    1f,
+                    LockOnDisplayState.Candidate,
+                    candidatePosition));
             }
             else
             {
                 // 対象なし。ゼロ除算を避けるため MaxHealth には 1 を渡す
-                _viewModel.Update(new HUDEnemyHealthDTO(0f, 1f, false, Vector3.zero));
+                _viewModel.Update(new HUDEnemyHealthDTO(
+                    0f,
+                    1f,
+                    LockOnDisplayState.Hidden,
+                    Vector3.zero));
             }
         }
 
-        private readonly CameraSystemController _cameraSystemController;
-        private readonly TargetSelectorController _targetSelectorController;
-        private readonly TargetSelector _targetSelector;
+        private readonly TargetSystemController _targetingSystem;
         private readonly IHUDEnemyHealthViewModel _viewModel;
     }
 }

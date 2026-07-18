@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
-using KillChord.Runtime.View.InGame.UI;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -75,16 +74,39 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.updateRotation = false;
         }
 
+        [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
+        private ParticleSystem _attackHitEffectPrefab;
+
+        [SerializeField, Tooltip("攻撃予約時に再生するエフェクトPrefab。")]
+        private ParticleSystem _attackReserveEffectPrefab;
+
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private BossAIController _bossAIController;
+        private ParticleSystem _attackHitEffectInstance;
+        private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;
 
+        /// <summary>
+        ///     初期化時に必要な参照を取得します。
+        /// </summary>
         private void Awake()
         {
             _navMeshAgent = GetComponent<NavMeshAgent>();
+            InitializeAttackEffects();
         }
 
+        /// <summary>
+        ///     無効化時に再利用用のエフェクト状態を初期化します。
+        /// </summary>
+        private void OnDisable()
+        {
+            ResetAttackEffects();
+        }
+
+        /// <summary>
+        ///     破棄時に購読解除とController破棄を行います。
+        /// </summary>
         private void OnDestroy()
         {
             if (_bossAIController == null) return;
@@ -127,24 +149,92 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectReserved()
         {
             if (!_isPlaying) return;
-            ParticleController.Instance.PlayParticleReserve(transform.position);
+            PlayAttackEffect(_attackReserveEffectInstance);
         }
 
+        /// <summary>
+        ///     攻撃時の演出を再生します。
+        /// </summary>
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-            ParticleController.Instance.PlayParticle(transform.position);
+            PlayAttackEffect(_attackHitEffectInstance);
             MoveToAttack();
         }
 
+        /// <summary>
+        ///     攻撃1拍前の停止処理を行います。
+        /// </summary>
         private void On1BeatBefore()
         {
             StopMoving();
             StopRotating();
         }
 
+        /// <summary>
+        ///     攻撃2拍前の処理を行います。
+        /// </summary>
         private void On2BeatBefore()
         {
+        }
+
+        /// <summary>
+        ///     ボス専用の攻撃エフェクトを生成します。
+        /// </summary>
+        private void InitializeAttackEffects()
+        {
+            _attackHitEffectInstance = CreateAttackEffectInstance(_attackHitEffectPrefab);
+            _attackReserveEffectInstance = CreateAttackEffectInstance(_attackReserveEffectPrefab);
+        }
+
+        /// <summary>
+        ///     攻撃エフェクトのインスタンスを生成します。
+        /// </summary>
+        /// <param name="effectPrefab"> 生成元のエフェクトPrefab。 </param>
+        /// <returns> 生成したエフェクトインスタンス。 </returns>
+        private ParticleSystem CreateAttackEffectInstance(ParticleSystem effectPrefab)
+        {
+            if (effectPrefab == null)
+            {
+                return null;
+            }
+
+            ParticleSystem instance = Instantiate(effectPrefab, transform);
+            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            instance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            return instance;
+        }
+
+        /// <summary>
+        ///     指定した攻撃エフェクトを現在位置で再生します。
+        /// </summary>
+        /// <param name="effectInstance"> 再生するエフェクト。 </param>
+        private void PlayAttackEffect(ParticleSystem effectInstance)
+        {
+            if (effectInstance == null)
+            {
+                return;
+            }
+
+            effectInstance.transform.position = transform.position;
+            effectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            effectInstance.Play();
+        }
+
+        /// <summary>
+        ///     攻撃エフェクトの再生状態を初期化します。
+        /// </summary>
+        private void ResetAttackEffects()
+        {
+            if (_attackHitEffectInstance != null)
+            {
+                _attackHitEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
     }
 }

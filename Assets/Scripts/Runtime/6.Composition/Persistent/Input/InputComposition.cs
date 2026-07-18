@@ -1,8 +1,10 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.Persistent.Input;
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,8 +14,14 @@ namespace KillChord.Runtime.Composition.Persistent.Input
     ///     入力の初期化クラス。
     /// </summary>
     [RequireComponent(typeof(PlayerInputView), typeof(PlayerInput))]
-    public class InputComposition : MonoBehaviour
+    public sealed class InputComposition : PersistentInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(InputComposition);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 50;
+
         public PlayerInputView GetInputView => _playerInputView;
 
         public UnityInputMapController GetInputMapController => _inputMapController;
@@ -33,14 +41,20 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
 
-        private void Awake()
+        /// <summary>
+        ///     入力関連の純粋オブジェクトとView連携を構築する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             _playerInputView = GetComponent<PlayerInputView>();
             _playerInput = GetComponent<PlayerInput>();
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
+            ServiceLocator.RegisterInstance(_playerInputView);
             ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            return true;
         }
 
         private void OnDisable()
@@ -48,9 +62,30 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             UnbindViewAdaptor();
         }
 
+        /// <summary>
+        ///     登録済み入力サービスを解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
+                && ReferenceEquals(registeredInputView, _playerInputView))
+            {
+                ServiceLocator.UnregisterInstance<PlayerInputView>();
+            }
+
+            if (ServiceLocator.TryGetInstance(out InputComposition registeredInputComposition)
+                && ReferenceEquals(registeredInputComposition, this))
+            {
+                ServiceLocator.UnregisterInstance(this);
+            }
+        }
+
+        /// <summary>
+        ///     破棄時の安全側解除を行う。
+        /// </summary>
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance(this);
+            Shutdown();
         }
 
         /// <summary>

@@ -1,5 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -10,8 +12,66 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// <summary>
     ///     インゲームにおけるミッションシステムの初期化を行うクラス。
     /// </summary>
-    public class InGameMissionInitializer : MonoBehaviour
+    public class InGameMissionInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(InGameMissionInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 600;
+
+        /// <summary>
+        ///     ミッションシステムを構築してContainerを登録します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
+        {
+            if (!TryInitialize(out MissionRuntimeService missionRuntimeService))
+            {
+                return false;
+            }
+
+            MissionEventController missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            if (missionEventController == null)
+            {
+                Debug.LogError($"[{nameof(InGameMissionInitializer)}] {nameof(MissionEventController)} を取得できませんでした。", this);
+                return false;
+            }
+
+            _moduleContainer = new MissionModuleContainer(missionRuntimeService, missionEventController);
+            ServiceLocator.RegisterInstance(_moduleContainer);
+            _isModuleRegistered = true;
+            return true;
+        }
+
+        /// <summary>
+        ///     プレイヤー戦闘イベントとミッション実績記録を結合します。
+        /// </summary>
+        /// <returns> 結合に成功した場合はtrueです。 </returns>
+        public override bool Ready()
+        {
+            PlayerModuleContainer playerModuleContainer =
+                ServiceLocator.GetInstance<PlayerModuleContainer>();
+            if (playerModuleContainer == null
+                || playerModuleContainer.PlayerEntity == null
+                || playerModuleContainer.PlayerAttackController == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
+                    this);
+                return false;
+            }
+
+            MissionProgressRecorderController recorderController =
+                new MissionProgressRecorderController(
+                    _moduleContainer.MissionRuntimeService.MissionProgress);
+            recorderController.Bind(
+                playerModuleContainer.PlayerEntity,
+                playerModuleContainer.PlayerAttackController);
+            _moduleContainer.MissionProgressRecorderController = recorderController;
+            return true;
+        }
+
         /// <summary>
         ///     初期化処理を行います。
         /// </summary>
@@ -81,11 +141,30 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             return true;
         }
 
+        /// <summary>
+        ///     登録済みContainerを解除します。
+        /// </summary>
+        public override void Shutdown()
+        {
+            _moduleContainer?.MissionProgressRecorderController?.Dispose();
+
+            if (!_isModuleRegistered)
+            {
+                return;
+            }
+
+            ServiceLocator.UnregisterInstance<MissionModuleContainer>();
+            _moduleContainer = null;
+            _isModuleRegistered = false;
+        }
+
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
+        private bool _isModuleRegistered;
+        private MissionModuleContainer _moduleContainer;
 
         private void OnDestroy()
         {

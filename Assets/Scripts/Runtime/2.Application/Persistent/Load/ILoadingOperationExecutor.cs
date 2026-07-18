@@ -10,6 +10,11 @@ namespace KillChord.Runtime.Application.Persistent.Load
     public interface ILoadingOperationExecutor
     {
         /// <summary>
+        ///     アクティブなロードセッションが存在する場合はtrue。
+        /// </summary>
+        bool IsSessionActive { get; }
+
+        /// <summary>
         ///     通常のロード画面付き処理として実行する。
         /// </summary>
         /// <param name="operation"> 進捗通知先を受け取る非同期処理。 </param>

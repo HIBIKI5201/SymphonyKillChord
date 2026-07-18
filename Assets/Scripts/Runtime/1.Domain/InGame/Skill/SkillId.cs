@@ -42,5 +42,12 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         {
             return _value;
         }
+
+        /// <summary> 数値IDの文字列表現を取得する。 </summary>
+        /// <returns> 数値IDの文字列表現。 </returns>
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
     }
 }

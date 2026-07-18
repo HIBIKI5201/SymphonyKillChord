@@ -8,6 +8,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public class SkillInputProgressController
     {
+        /// <summary>
+        ///     コントローラーを初期化します。
+        /// </summary>
+        /// <param name="state"> 入力進捗状態です。 </param>
+        /// <param name="presenter"> 入力進捗Presenterです。 </param>
         public SkillInputProgressController(
             SkillInputProgressState state,
             SkillInputProgressPresenter presenter)
@@ -19,9 +24,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary>
         ///     入力されたビートに基づいて、スキルの入力進捗を更新する。
         /// </summary>
-        /// <param name="now"></param>
-        /// <param name="skillReadyTimestamp"></param>
-        /// <param name="inputBeatType"></param>
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
+        /// <param name="inputBeatType"> 入力ビートです。 </param>
         public void UpdateProgress(float now, float skillReadyTimestamp, BeatType inputBeatType)
         {
             _state.CheckInputBeatType(inputBeatType);
@@ -31,12 +36,23 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary>
         ///     スキルを発動した場合の更新処理。
         /// </summary>
-        /// <param name="now"></param>
-        /// <param name="skillReadyTimestamp"></param>
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
         public void SkillTriggered(float now, float skillReadyTimestamp)
         {
             _state.ResetProgress();
             _presenter.UpdateRow(new SkillInputProgressUpdateDTO(_state.CurrentMachedCount, now, skillReadyTimestamp, true));
+        }
+
+        /// <summary>
+        ///     入力進捗をリセットします。
+        /// </summary>
+        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="skillReadyTimestamp"> スキル再使用可能時刻です。 </param>
+        public void ResetProgress(float now, float skillReadyTimestamp)
+        {
+            _state.ResetProgress();
+            _presenter.UpdateRow(new SkillInputProgressUpdateDTO(_state.CurrentMachedCount, now, skillReadyTimestamp, false));
         }
 
         private readonly SkillInputProgressState _state;

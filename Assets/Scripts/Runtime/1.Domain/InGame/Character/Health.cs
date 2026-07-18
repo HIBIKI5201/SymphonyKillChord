@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     体力値を表す値オブジェクト。
     /// </summary>
-    public readonly struct Health : IEquatable<Health>
+    public readonly struct Health : IEquatable<Health>, IComparable<Health>
     {
         /// <summary>
         ///     体力値を初期化するコンストラクタ。
@@ -32,6 +32,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="health"></param>
         public static explicit operator float(Health health) => health.Value;
 
+        public static bool operator <=(Health left, Health right) => left.CompareTo(right) <= 0;
+        public static bool operator <(Health left, Health right) => left.CompareTo(right) < 0;
+        public static bool operator >=(Health left, Health right) => left.CompareTo(right) >= 0;
+        public static bool operator >(Health left, Health right) => left.CompareTo(right) > 0;
+
         /// <summary>
         ///     等価比較を行う。
         /// </summary>
@@ -56,7 +61,17 @@ namespace KillChord.Runtime.Domain.InGame.Character
             return Value.Equals(other.Value);
         }
 
+        /// <summary>
+        ///     大小比較を行う。
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public int CompareTo(Health other)
+        {
+            return (Value.CompareTo(other.Value));
+        }
+
         /// <summary> 体力値。 </summary>
-        public readonly float Value;
-    }
+        public readonly float Value { get; }
+        }
 }

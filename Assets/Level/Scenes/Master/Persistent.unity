@@ -612,12 +612,13 @@ GameObject:
   m_Component:
   - component: {fileID: 509160716}
   - component: {fileID: 509160715}
+  - component: {fileID: 509160717}
   m_Layer: 0
   m_Name: SoundEffectInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!114 &509160715
 MonoBehaviour:
@@ -631,6 +632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dc9f31b4cd45b74f8a69d72a9c4125e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.SoundEffectInitializer
+  _isDebug: 0
 --- !u!4 &509160716
 Transform:
   m_ObjectHideFlags: 0
@@ -640,12 +642,24 @@ Transform:
   m_GameObject: {fileID: 509160714}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.76889, z: -0.05121}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &509160717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509160714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 879db628053e46945af341f4f374c6c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Audio.PersistentAudioVolumeRegistryView
 --- !u!1 &519239619
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,6 +946,10 @@ MonoBehaviour:
     loaderStatus: 0
   - name: CueSheet_0
     acbFile: CueSheet_0.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: BattleSE
+    acbFile: BattleSE.acb
     awbFile: 
     loaderStatus: 0
   dspBusSetting: 
@@ -1349,6 +1367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.Persistent.SceneManagement.SceneTransitionInitializer
   _loadingScreenView: {fileID: 1437668362}
   _debugView: {fileID: 0}
+  _sceneInitializationTimeoutFrameCount: 3600
 --- !u!1 &2129858558
 GameObject:
   m_ObjectHideFlags: 0

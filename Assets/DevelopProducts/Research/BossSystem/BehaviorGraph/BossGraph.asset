@@ -101,6 +101,347 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 4420143682420736
+      type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 298270578720197623
+          m_Value1: 8199659298432521536
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: -2
+        m_Child:
+          rid: 4420143682420737
+        Repeat: 1
+        AllowMultipleRepeatsPerTick: 0
+    - rid: 4420143682420737
+      type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 9017652583584295552
+          m_Value1: 15562640313334705690
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420736
+        m_Children:
+        - rid: 4420143682420738
+        - rid: 4420143682420739
+        m_RegisteredObservers:
+        - Observer:
+            rid: 4420143682420739
+    - rid: 4420143682420738
+      type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 4377907921342068016
+          m_Value1: 12918410418094005627
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420737
+        m_Child:
+          rid: 4420143682420740
+        m_Conditions:
+        - rid: 4420143682420741
+        m_RequiresAllConditions: 0
+        m_ObserverType: 0
+    - rid: 4420143682420739
+      type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 17709107539698879041
+          m_Value1: 1713266202511485620
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420737
+        m_Child:
+          rid: 4420143682420742
+        m_Conditions:
+        - rid: 4420143682420743
+        m_RequiresAllConditions: 0
+        m_AbortTarget: 2
+    - rid: 4420143682420740
+      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 1634618623071459286
+          m_Value1: 7906543182792848808
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420738
+        m_Children:
+        - rid: 4420143682420744
+        - rid: 4420143682420745
+        m_RegisteredObservers: []
+    - rid: 4420143682420741
+      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+      data:
+        Graph:
+          rid: 8353671707150779266
+        State:
+          rid: 4420143682420746
+        Bool:
+          rid: 4420143682420747
+    - rid: 4420143682420742
+      type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 15511742718617324104
+          m_Value1: 11649294690267602194
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420739
+        m_Child:
+          rid: 4420143682420748
+        m_AllowMultipleRepeatsPerTick: 0
+    - rid: 4420143682420743
+      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+      data:
+        Graph:
+          rid: 8353671707150779266
+        State:
+          rid: 4420143682420749
+        Bool:
+          rid: 4420143682420750
+    - rid: 4420143682420744
+      type: {class: BossStopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 1634618623071459286
+          m_Value1: 7906543182792848808
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420740
+        Movement:
+          rid: 4420143682420751
+        State:
+          rid: 4420143682420752
+    - rid: 4420143682420745
+      type: {class: BossGetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 18308684116021897195
+          m_Value1: 10991797778514411948
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420740
+        State:
+          rid: 4420143682420753
+        Battle:
+          rid: 4420143682420754
+    - rid: 4420143682420746
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420747
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 1
+    - rid: 4420143682420748
+      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 8791596817553281394
+          m_Value1: 3776550087554662360
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420742
+        m_Children:
+        - rid: 4420143682420755
+        - rid: 4420143682420756
+        m_RegisteredObservers: []
+    - rid: 4420143682420749
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420750
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 1
+    - rid: 4420143682420751
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964417
+    - rid: 4420143682420752
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420753
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420754
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964416
+    - rid: 4420143682420755
+      type: {class: BossMoveToAttackAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 8791596817553281394
+          m_Value1: 3776550087554662360
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420748
+        Movement:
+          rid: 4420143682420757
+        State:
+          rid: 4420143682420758
+    - rid: 4420143682420756
+      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        ID:
+          m_Value0: 11930641162824848114
+          m_Value1: 9721971629474659164
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420748
+        m_Children:
+        - rid: 4420143682420759
+        - rid: 4420143682420760
+        m_RegisteredObservers: []
+    - rid: 4420143682420757
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964417
+    - rid: 4420143682420758
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420759
+      type: {class: BossStopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 11930641162824848114
+          m_Value1: 9721971629474659164
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420756
+        Movement:
+          rid: 4420143682420761
+        State:
+          rid: 4420143682420762
+    - rid: 4420143682420760
+      type: {class: BossAttackTargetAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      data:
+        ID:
+          m_Value0: 4122637960115304867
+          m_Value1: 12157780775917834791
+        Graph:
+          rid: 8353671707150779266
+        m_Parent:
+          rid: 4420143682420756
+        Battle:
+          rid: 4420143682420763
+        State:
+          rid: 4420143682420764
+    - rid: 4420143682420761
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964417
+    - rid: 4420143682420762
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
+    - rid: 4420143682420763
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964416
+    - rid: 4420143682420764
+      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+        m_LinkedVariable:
+          rid: 8921973433662964419
     - rid: 8353671707150779266
       type: {class: BehaviorGraphModule, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -112,8 +453,8 @@ MonoBehaviour:
           rid: 8353671707150779267
         BlackboardGroupReferences: []
         Root:
-          rid: 8921973433662964413
-        m_VersionTimestamp: 639184855819632657
+          rid: 4420143682420736
+        m_VersionTimestamp: 639188147398516917
     - rid: 8353671707150779267
       type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -129,52 +470,6 @@ MonoBehaviour:
         - rid: 8921973433662964417
         - rid: 8921973433662964418
         - rid: 8921973433662964419
-    - rid: 8921973433662964152
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 1
-    - rid: 8921973433662964155
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 1
-    - rid: 8921973433662964413
-      type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 298270578720197623
-          m_Value1: 8199659298432521536
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: -2
-        m_Child:
-          rid: 8921973433662964414
-        Repeat: 1
-        AllowMultipleRepeatsPerTick: 0
-    - rid: 8921973433662964414
-      type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 9017652583584295552
-          m_Value1: 15562640313334705690
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964413
-        m_Children:
-        - rid: 8921973433662964420
-        - rid: 8921973433662964421
-        m_RegisteredObservers:
-        - Observer:
-            rid: 8921973433662964421
     - rid: 8921973433662964415
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -215,301 +510,6 @@ MonoBehaviour:
           m_Value1: 9918647191724063549
         Name: Boss State Facade
         m_Value: {fileID: 0}
-    - rid: 8921973433662964420
-      type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 4377907921342068016
-          m_Value1: 12918410418094005627
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964414
-        m_Child:
-          rid: 8921973433662964422
-        m_Conditions:
-        - rid: 8921973433662964423
-        m_RequiresAllConditions: 0
-        m_ObserverType: 0
-    - rid: 8921973433662964421
-      type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 17709107539698879041
-          m_Value1: 1713266202511485620
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964414
-        m_Child:
-          rid: 8921973433662964424
-        m_Conditions:
-        - rid: 8921973433662964425
-        m_RequiresAllConditions: 0
-        m_AbortTarget: 2
-    - rid: 8921973433662964422
-      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 1634618623071459286
-          m_Value1: 7906543182792848808
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964420
-        m_Children:
-        - rid: 8921973433662964426
-        - rid: 8921973433662964427
-        m_RegisteredObservers: []
-    - rid: 8921973433662964423
-      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
-      data:
-        Graph:
-          rid: 8353671707150779266
-        State:
-          rid: 8921973433662964428
-        Bool:
-          rid: 8921973433662964152
-    - rid: 8921973433662964424
-      type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 15511742718617324104
-          m_Value1: 11649294690267602194
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964421
-        m_Child:
-          rid: 8921973433662964429
-        m_AllowMultipleRepeatsPerTick: 0
-    - rid: 8921973433662964425
-      type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
-      data:
-        Graph:
-          rid: 8353671707150779266
-        State:
-          rid: 8921973433662964430
-        Bool:
-          rid: 8921973433662964155
-    - rid: 8921973433662964426
-      type: {class: BossStopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
-      data:
-        ID:
-          m_Value0: 1634618623071459286
-          m_Value1: 7906543182792848808
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964422
-        Movement:
-          rid: 8921973433662964431
-        State:
-          rid: 8921973433662964432
-    - rid: 8921973433662964427
-      type: {class: BossGetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
-      data:
-        ID:
-          m_Value0: 18308684116021897195
-          m_Value1: 10991797778514411948
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964422
-        State:
-          rid: 8921973433662964433
-        Battle:
-          rid: 8921973433662964434
-    - rid: 8921973433662964428
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964429
-      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 8791596817553281394
-          m_Value1: 3776550087554662360
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964424
-        m_Children:
-        - rid: 8921973433662964435
-        - rid: 8921973433662964436
-        m_RegisteredObservers: []
-    - rid: 8921973433662964430
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964431
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964417
-    - rid: 8921973433662964432
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964433
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964434
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964416
-    - rid: 8921973433662964435
-      type: {class: BossMoveToAttackAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
-      data:
-        ID:
-          m_Value0: 8791596817553281394
-          m_Value1: 3776550087554662360
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964429
-        Movement:
-          rid: 8921973433662964437
-        State:
-          rid: 8921973433662964438
-    - rid: 8921973433662964436
-      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        ID:
-          m_Value0: 11930641162824848114
-          m_Value1: 9721971629474659164
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964429
-        m_Children:
-        - rid: 8921973433662964439
-        - rid: 8921973433662964440
-        m_RegisteredObservers: []
-    - rid: 8921973433662964437
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964417
-    - rid: 8921973433662964438
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964439
-      type: {class: BossStopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
-      data:
-        ID:
-          m_Value0: 11930641162824848114
-          m_Value1: 9721971629474659164
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964436
-        Movement:
-          rid: 8921973433662964441
-        State:
-          rid: 8921973433662964442
-    - rid: 8921973433662964440
-      type: {class: BossAttackTargetAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
-      data:
-        ID:
-          m_Value0: 4122637960115304867
-          m_Value1: 12157780775917834791
-        Graph:
-          rid: 8353671707150779266
-        m_Parent:
-          rid: 8921973433662964436
-        Battle:
-          rid: 8921973433662964443
-        State:
-          rid: 8921973433662964444
-    - rid: 8921973433662964441
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossMovementAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964417
-    - rid: 8921973433662964442
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
-    - rid: 8921973433662964443
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossBattleAIFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964416
-    - rid: 8921973433662964444
-      type: {class: 'ComponentToComponentBlackboardVariable`2[[DevelopProducts.Boss.BossStateFacade, DevelopProducts-Boss],[KillChord.Runtime.View.InGame.Enemy.BossStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-        m_LinkedVariable:
-          rid: 8921973433662964419
 --- !u!114 &-1925673734827059310
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -613,7 +613,7 @@ MonoBehaviour:
   - rid: 8353671723336074144
   - rid: 8353671723336074171
   - rid: 8353671723336074234
-  m_VersionTimestamp: 639184855819632657
+  m_VersionTimestamp: 639188147398516917
   m_SerializedVersion: 2
   m_DebugInfo: {fileID: -6316138842400658221}
   m_RuntimeGraph: {fileID: -2324828011024662561}

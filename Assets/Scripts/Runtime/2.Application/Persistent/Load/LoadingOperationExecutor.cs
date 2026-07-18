@@ -20,6 +20,11 @@ namespace KillChord.Runtime.Application.Persistent.Load
                 ?? throw new ArgumentNullException(nameof(loadingSessionFactory));
         }
 
+        /// <summary>
+        ///     アクティブなロードセッションが存在する場合はtrue。
+        /// </summary>
+        public bool IsSessionActive => _sessionFactory.IsLoading;
+
         public Task<bool> ExecuteAsync(Func<IProgress<float>, Task<bool>> operation, CancellationToken cancellationToken = default)
         {
             return ExecuteAsync(

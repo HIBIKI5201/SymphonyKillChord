@@ -1,15 +1,18 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.Utility.OutGame.Savedata;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,53 +26,13 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
     /// <summary>
     ///     スキルツリーを初期化するクラス。
     /// </summary>
-    public class SkillTreeInitializer : MonoBehaviour
+    public sealed class SkillTreeInitializer : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(SkillTreeInitializer);
 
-        [SerializeField]
-        private UIDocument _uiDocument;
-        [SerializeField]
-        private SkillNodeDataRepo _skillNodeDataRepo;
-        [SerializeField]
-        private SkillNodeBindRepo _skillNodeBindRepo;
-        [SerializeField]
-        private SkillNodePhaseBindDataRepo _skillNodePhaseBindRepo;
-        [SerializeField]
-        private VideoPlayer _videoPlayer;
-        [Space]
-        [Header("デバッグ用")]
-        [SerializeField]
-        private SkillTreeTestInputData _inputData;
-        [SerializeField]
-        private bool _isDebugMode = false;
-
-        private VisualElement _rootElement;
-        private VisualElement _skillDetailRoot;
-        private VisualElement _playerStatusRoot;
-        private VisualElement _previewVideoContainerRoot;
-        private VisualElement _previewVideoRoot;
-        private Label _currentPointsLabel;
-
-        private SkillDetailScreenView _skillDetailScreenView;
-        private PlayerStatusScreenView _playerStatusScreenView;
-        private PreviewVideoScreenView _previewVideoScreenView;
-
-        private SkillTreeController _skillTreeController;
-        private SkillDetailPresenter _skillDetailPresenter;
-        private PlayerStatusPresenter _playerStatusPresenter;
-
-        private SkillUnlockData _skillUnlockData;
-
-        private OutGameUIEvent _outGameUIEvent;
-        private CancellationTokenSource _cts;
-        private RenderTexture _renderTexture;
-
-        private Dictionary<int, SkillNodeEntity> _skillNodeEntities;
-        private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
-        private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
-        private Dictionary<int, string[]> _skillNodeConnBinds;
-        private Dictionary<int, VisualElement> _unlockPhases;
-        private Dictionary<int, VideoClip> _skillPreviewVideos;
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 120;
 
         private const string E_NAME_SKILL_DETAIL = "SkillDetail";
         private const string E_NAME_PLAYER_STATUS = "PlayerStatus";
@@ -77,56 +40,217 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
 
+        [SerializeField]
+        [Tooltip("スキルツリー画面のUIDocumentです。")]
+        private UIDocument _uiDocument;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
+        private string _skillNodeDataRepoKey;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルノード接続定義リポジトリの Addressables キーです。")]
+        private string _skillNodeBindRepoKey;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルツリー段階定義リポジトリの Addressables キーです。")]
+        private string _skillNodePhaseBindRepoKey;
+
+        [SerializeField]
+        [Tooltip("スキルプレビュー動画を再生する VideoPlayer です。")]
+        private VideoPlayer _videoPlayer;
+
+        private VisualElement _rootElement;
+        private VisualElement _skillDetailRoot;
+        private VisualElement _playerStatusRoot;
+        private VisualElement _previewVideoContainerRoot;
+        private VisualElement _previewVideoRoot;
+        private Label _currentPointsLabel;
+        private SkillDetailScreenView _skillDetailScreenView;
+        private PlayerStatusScreenView _playerStatusScreenView;
+        private PreviewVideoScreenView _previewVideoScreenView;
+        private SkillTreeController _skillTreeController;
+        private SkillDetailPresenter _skillDetailPresenter;
+        private PlayerStatusPresenter _playerStatusPresenter;
+        private SkillUnlockData _skillUnlockData;
+        private OutGameUIEvent _outGameUIEvent;
+        private CancellationTokenSource _cts;
+        private RenderTexture _renderTexture;
+        private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
+        private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
+        private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
+        private Dictionary<int, string[]> _skillNodeConnBinds;
+        private Dictionary<int, VisualElement> _unlockPhases;
+        private Dictionary<int, VideoClip> _skillPreviewVideos;
+        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
+        private SkillNodeBindRepo _loadedSkillNodeBindRepo;
+        private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
+        private SavedataSystem _savedataSystem;
+        private bool _isInitialized;
+        private bool _isSubscribed;
+
         /// <summary>
-        ///     初期化処理。
+        ///     非同期のリソースロードを行います。
         /// </summary>
-        private async void Awake()
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            await Initialize();
+            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, destroyCancellationToken);
+            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepo>(this, destroyCancellationToken);
+            _loadedSkillNodePhaseBindRepo =
+                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepo>(this, destroyCancellationToken);
+
+            if (_loadedSkillNodeDataRepo == null
+                || _loadedSkillNodeBindRepo == null
+                || _loadedSkillNodePhaseBindRepo == null)
+            {
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] SavedataSystem が取得できませんでした。", this);
+                return false;
+            }
+
+            _savedataSystem = savedataSystem;
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            if (saveData == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] SaveData が取得できませんでした。", this);
+                return false;
+            }
+
+            _skillUnlockData = saveData.SkillUnlock;
+            return _skillUnlockData != null;
         }
 
         /// <summary>
-        ///     イベントを登録する。
+        ///     システムを構築します。
         /// </summary>
-        private void OnEnable()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
+            return Initialize();
+        }
+
+        /// <summary>
+        ///     他モジュールとの結合を行います。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            if (!_isInitialized)
+            {
+                return false;
+            }
+
             _cts = new CancellationTokenSource();
             Subscribe();
+            return true;
         }
 
         /// <summary>
-        ///     イベント登録を解除する。
+        ///     登録済みサービスやイベント購読を解除します。
         /// </summary>
-        private void OnDisable()
+        public override void Shutdown()
         {
             Unsubscribe();
             DisposeComponents();
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = null;
+            CancelAndDisposeCts();
+
+            _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
+            _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
+            _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
+            _loadedSkillNodeDataRepo = null;
+            _loadedSkillNodeBindRepo = null;
+            _loadedSkillNodePhaseBindRepo = null;
+            _skillUnlockData = null;
+            _savedataSystem = null;
+            _outGameUIEvent = null;
+            _isInitialized = false;
+            _isSubscribed = false;
         }
 
-        private async Task Initialize()
+        /// <summary>
+        ///     永続化された数値IDをスキルノードIDへ変換します。
+        /// </summary>
+        /// <param name="values"> 永続化された数値ID。 </param>
+        /// <returns> スキルノードID配列。 </returns>
+        private static SkillNodeId[] CreateSkillNodeIds(IReadOnlyList<int> values)
         {
+            SkillNodeId[] ids = new SkillNodeId[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                ids[i] = new SkillNodeId(values[i]);
+            }
+
+            return ids;
+        }
+
+        /// <summary>
+        ///     永続化された数値IDをスキルIDへ変換します。
+        /// </summary>
+        /// <param name="values"> 永続化された数値ID。 </param>
+        /// <returns> スキルID配列。 </returns>
+        private static SkillId[] CreateSkillIds(IReadOnlyList<int> values)
+        {
+            SkillId[] ids = new SkillId[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                ids[i] = new SkillId(values[i]);
+            }
+
+            return ids;
+        }
+
+        /// <summary>
+        ///     スキルツリーを構築します。
+        /// </summary>
+        /// <returns> 初期化に成功した場合はtrue。 </returns>
+        private bool Initialize()
+        {
+            if (_uiDocument == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] UIDocument が設定されていません。", this);
+                return false;
+            }
+
+            if (_videoPlayer == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] VideoPlayer が設定されていません。", this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] OutGameUIEvent が取得できませんでした。", this);
+                return false;
+            }
+
             _rootElement = _uiDocument.rootVisualElement;
-            _outGameUIEvent = ServiceLocator.GetInstance<OutGameUIEvent>();
             _skillDetailRoot = _rootElement.Q<VisualElement>(E_NAME_SKILL_DETAIL);
             _playerStatusRoot = _rootElement.Q<VisualElement>(E_NAME_PLAYER_STATUS);
             _previewVideoContainerRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
-            _previewVideoRoot = _previewVideoContainerRoot.Q<VisualElement>(name: E_NAME_PREVIEW_VIDEO);
-            _currentPointsLabel = _rootElement.Q<Label>(name: E_NAME_CURRENT_POINTS_LABEL);
+            _previewVideoRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO);
+            _currentPointsLabel = _rootElement.Q<Label>(E_NAME_CURRENT_POINTS_LABEL);
+
+            if (_skillDetailRoot == null
+                || _playerStatusRoot == null
+                || _previewVideoContainerRoot == null
+                || _previewVideoRoot == null
+                || _currentPointsLabel == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] スキルツリー用のUI要素が不足しています。", this);
+                return false;
+            }
 
             _videoPlayer.source = VideoSource.VideoClip;
             _videoPlayer.renderMode = VideoRenderMode.RenderTexture;
             _videoPlayer.isLooping = true;
-
             _renderTexture = _videoPlayer.targetTexture;
             _previewVideoRoot.style.backgroundImage = Background.FromRenderTexture(_renderTexture);
-
-            // セーブデータをロードして、スキル解放状態を取得する
-            var savedataSystem = ServiceLocator.GetInstance<SavedataSystem>();
-            var saveData = await savedataSystem.LoadAsync<SaveData>();
-            _skillUnlockData = saveData.SkillUnlock;
 
             BuildSkillNodes();
             BuildNodeConns();
@@ -140,22 +264,16 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
 
-            if (_isDebugMode)
-            {
-                _skillUnlockData.SetResearchPoint(_skillUnlockData.ResearchPoint == 0 ? _inputData.currentPoints : _skillUnlockData.ResearchPoint);
-
-                _skillUnlockData.SetUnlockedSkillNodeIds(_inputData.UnlockedSkillNodeIds.Length == 0
-                    ? _skillUnlockData.UnlockedSkillNodeIds : _inputData.UnlockedSkillNodeIds);
-            }
-
-            SkillTreeStatusEntity skillTreeEntity = new SkillTreeStatusEntity(_skillUnlockData.ResearchPoint, _skillUnlockData.UnlockedSkillNodeIds, _skillUnlockData.UnlockedSkillIds);
-
-            SkillTreeService skillTreeService = new SkillTreeService(_skillNodeEntities);
+            SkillTreeStatusEntity skillTreeEntity = new(
+                _skillUnlockData.ResearchPoint,
+                CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
+                CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
+            SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
             _playerStatusPresenter = new PlayerStatusPresenter();
-
-            _skillTreeController = new SkillTreeController(_skillDetailScreenView,
+            _skillTreeController = new SkillTreeController(
+                _skillDetailScreenView,
                 _skillDetailPresenter,
                 _currentPointsLabel,
                 skillTreeService,
@@ -170,22 +288,25 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillPreviewVideos,
                 skillTreeEntity,
                 () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke());
+
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
-        ///     スキルノードと接続線の紐づきを作成する。
+        ///     スキルノードと接続線の紐づきを作成します。
         /// </summary>
         private void BuildConnBinds()
         {
             _skillNodeConnBinds = new();
-            foreach (SkillNodeBindData bind in _skillNodeBindRepo.SkillNodeBinds)
+            foreach (SkillNodeBindData bind in _loadedSkillNodeBindRepo.SkillNodeBinds)
             {
-                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId, bind.FromConnNames);
+                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId.Id, bind.FromConnNames);
             }
         }
 
         /// <summary>
-        ///     スキルノードのEntityとViewを作成し、ノードのIDとの紐づけを作成する。
+        ///     スキルノードのEntityとViewを作成し、ノードIDとの紐づきを作成します。
         /// </summary>
         private void BuildSkillNodes()
         {
@@ -196,39 +317,42 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             for (int i = 0; i < nodes.Count; i++)
             {
                 string nodeName = nodes[i].name;
-                SkillNodeData nodeData = _skillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
+                SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
                 if (nodeData == null)
                 {
                     throw new KeyNotFoundException($"SkillNodeBindDataが見つかりません：{nodeName}");
                 }
 
                 SkillNodeEntity nodeEntity = nodeData.ToDomain();
-                SkillNodeView nodeView = new SkillNodeView(nodes[i], nodeData.NodeId, _outGameUIEvent);
+                SkillNodeView nodeView = new SkillNodeView(nodes[i], nodeData.NodeId.Id, _outGameUIEvent);
                 SetNodeUnlockState(nodeView, nodeEntity);
 
                 _skillNodeEntities.Add(nodeData.NodeId, nodeEntity);
-                _skillNodeViews.Add(nodeData.NodeId, nodeView);
+                _skillNodeViews.Add(nodeData.NodeId.Id, nodeView);
             }
 
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
             {
-                SkillNodeData data = _skillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO.Id);
-                SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeIds.Length];
-                for (int i = 0; i < data.ParentNodeIds.Length; i++)
+                SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO);
+                SkillNodeEntity[] parents = new SkillNodeEntity[data.ParentNodeCount];
+                for (int i = 0; i < data.ParentNodeCount; i++)
                 {
-                    if (!_skillNodeEntities.TryGetValue(data.ParentNodeIds[i], out SkillNodeEntity parent))
+                    SkillNodeId parentNodeId = data.GetParentNodeId(i);
+                    if (!_skillNodeEntities.TryGetValue(parentNodeId, out SkillNodeEntity parent))
                     {
                         throw new KeyNotFoundException(
-                            $"親ノードID {data.ParentNodeIds[i]} が UI/Bind 構築結果に存在しません。子ノードID: {entity.SkillNodeIdVO.Id}");
+                            $"親ノードID {parentNodeId.Id} が UI/Bind 構築結果に存在しません。子ノードID: {entity.SkillNodeIdVO.Id}");
                     }
+
                     parents[i] = parent;
                 }
+
                 entity.SetParent(parents);
             }
         }
 
         /// <summary>
-        ///     ノード接続線のViewを作成する。
+        ///     ノード接続線のViewを作成します。
         /// </summary>
         private void BuildNodeConns()
         {
@@ -243,10 +367,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     スキルノードの初期解放状態を設定する。
+        ///     スキルノードの初期解放状態を設定します。
         /// </summary>
-        /// <param name="view"></param>
-        /// <param name="entity"></param>
+        /// <param name="view"> 対象ノードViewです。 </param>
+        /// <param name="entity"> 対象ノードEntityです。 </param>
         private void SetNodeUnlockState(SkillNodeView view, SkillNodeEntity entity)
         {
             if (_skillUnlockData.UnlockedSkillNodeIds.Contains(entity.SkillNodeIdVO.Id))
@@ -257,19 +381,20 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     解放段階の初期状態を設定する。
+        ///     解放段階の初期状態を設定します。
         /// </summary>
         private void InitializePhaseState()
         {
             _unlockPhases = new();
-            for (int i = 0; i < _skillNodePhaseBindRepo.PhaseBindData.Length; i++)
+            for (int i = 0; i < _loadedSkillNodePhaseBindRepo.PhaseBindData.Length; i++)
             {
-                SkillNodePhaseBindData phaseBindData = _skillNodePhaseBindRepo.PhaseBindData[i];
+                SkillNodePhaseBindData phaseBindData = _loadedSkillNodePhaseBindRepo.PhaseBindData[i];
                 string phaseName = phaseBindData.PhaseName;
-                VisualElement phaseRoot = _rootElement.Q(name: phaseName);
-                _unlockPhases.Add(phaseBindData.RequiredSkillNodeId, phaseRoot);
+                VisualElement phaseRoot = _rootElement.Q(phaseName);
+                _unlockPhases.Add(phaseBindData.RequiredSkillNodeId.Id, phaseRoot);
                 phaseRoot.visible = false;
             }
+
             for (int i = 0; i < _skillUnlockData.UnlockedSkillNodeIds.Length; i++)
             {
                 SetUnlockPhaseState(_skillUnlockData.UnlockedSkillNodeIds[i]);
@@ -277,75 +402,125 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     解放段階を設定する。
+        ///     解放段階を設定します。
         /// </summary>
-        /// <param name="nodeId"></param>
+        /// <param name="nodeId"> 解放済みノードIDです。 </param>
         private void SetUnlockPhaseState(int nodeId)
         {
-            string phaseName;
-            if (_skillNodePhaseBindRepo.TryGetUnlockPhaseName(nodeId, out phaseName))
+            if (_loadedSkillNodePhaseBindRepo.TryGetUnlockPhaseName(new SkillNodeId(nodeId), out string phaseName))
             {
-                _rootElement.Q(name: phaseName).visible = true;
+                _rootElement.Q(phaseName).visible = true;
             }
         }
 
         /// <summary>
-        ///     スキルノードのIDとプレビュー動画の紐づきを作成する。
+        ///     スキルノードのIDとプレビュー動画の紐づきを作成します。
         /// </summary>
         private void BuildVideoClipDict()
         {
             _skillPreviewVideos = new();
-            foreach (SkillNodeData node in _skillNodeDataRepo.SkillNodes)
+            foreach (SkillNodeData node in _loadedSkillNodeDataRepo.SkillNodes)
             {
                 if (node.PreviewVideoClip != null)
                 {
-                    _skillPreviewVideos.Add(node.NodeId, node.PreviewVideoClip);
+                    _skillPreviewVideos.Add(node.NodeId.Id, node.PreviewVideoClip);
                 }
             }
         }
 
+        /// <summary>
+        ///     イベントを購読します。
+        /// </summary>
         private void Subscribe()
         {
+            if (!_isInitialized || _outGameUIEvent == null || _isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnSkillNodeSelected += HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed += HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked += HandleSkillUnlocked;
             _outGameUIEvent.OnSkillPreviewButtonClicked += HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked += HandlePreviewClosed;
+            _isSubscribed = true;
         }
 
+        /// <summary>
+        ///     イベント購読を解除します。
+        /// </summary>
         private void Unsubscribe()
         {
+            if (!_isInitialized || _outGameUIEvent == null || !_isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnSkillNodeSelected -= HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed -= HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked -= HandleSkillUnlocked;
             _outGameUIEvent.OnSkillPreviewButtonClicked -= HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked -= HandlePreviewClosed;
+            _isSubscribed = false;
         }
 
+        /// <summary>
+        ///     生成したコンポーネントを解放します。
+        /// </summary>
         private void DisposeComponents()
         {
-            _previewVideoScreenView.Dispose();
-            _skillDetailScreenView.Dispose();
-            foreach (int key in _skillNodeViews.Keys)
+            _previewVideoScreenView?.Dispose();
+            _previewVideoScreenView = null;
+            _skillDetailScreenView?.Dispose();
+            _skillDetailScreenView = null;
+            _playerStatusScreenView = null;
+            _skillTreeController = null;
+            _skillDetailPresenter = null;
+            _playerStatusPresenter = null;
+
+            if (_skillNodeViews != null)
             {
-                ((SkillNodeView)_skillNodeViews[key]).Dispose();
+                foreach (ISkillNodeViewModel skillNodeViewModel in _skillNodeViews.Values)
+                {
+                    if (skillNodeViewModel is SkillNodeView skillNodeView)
+                    {
+                        skillNodeView.Dispose();
+                    }
+                }
             }
+
+            _skillNodeEntities = null;
+            _skillNodeViews = null;
+            _skillNodeConnViews = null;
+            _skillNodeConnBinds = null;
+            _unlockPhases = null;
+            _skillPreviewVideos = null;
         }
 
         /// <summary>
-        ///     スキルノードを選択した時の処理。
+        ///     キャンセルトークンを解放します。
         /// </summary>
-        /// <param name="nodeName"></param>
+        private void CancelAndDisposeCts()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+        }
+
+        /// <summary>
+        ///     スキルノードを選択した時の処理です。
+        /// </summary>
+        /// <param name="nodeName"> 選択されたノード名です。 </param>
         private void HandleSkillNodeSelected(string nodeName)
         {
-            SkillNodeData nodeData = _skillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId, _cts.Token);
+            SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
+            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id, _cts.Token);
         }
 
         /// <summary>
-        ///     スキル詳細画面を閉じる時の処理。
+        ///     スキル詳細画面を閉じる時の処理です。
         /// </summary>
-        /// <param name="nodeId"></param>
+        /// <param name="nodeId"> 対象ノードIDです。 </param>
         private void HandleSkillDetailClosed(int nodeId)
         {
             _skillTreeController.OnSkillDetailClosed();
@@ -353,7 +528,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     スキルを解放する時の処理。
+        ///     スキルを解放する時の処理です。
         /// </summary>
         private void HandleSkillUnlocked()
         {
@@ -361,7 +536,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     プレビュー動画再生ボタンを押下時の処理。
+        ///     プレビュー動画再生ボタン押下時の処理です。
         /// </summary>
         private void HandlePreviewButtonClicked()
         {
@@ -369,7 +544,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     プレイビュー動画画面を閉じるボタンを押下時の処理。
+        ///     プレビュー動画画面を閉じるボタン押下時の処理です。
         /// </summary>
         private void HandlePreviewClosed()
         {

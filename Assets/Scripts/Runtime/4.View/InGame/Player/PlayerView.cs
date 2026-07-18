@@ -1,8 +1,10 @@
-using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Animation;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
@@ -44,8 +46,25 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
 
-        private const string ATTACK_BEAT_1_KEY = "Attack_Beat1";
-        private const string ATTACK_BEAT_2_KEY = "Attack_Beat2";
+        [SerializeField, Tooltip("足音演出Viewです。")]
+        private FootStepView _footStepView;
+
+        [SerializeField, Tooltip("足音SEの共通CueName。床設定側にCueNameがない場合に使用します。")]
+        private string _defaultFootstepCueName;
+
+        [SerializeField, Tooltip("床素材ごとの足音SE設定。")]
+        private PlayerFootstepSoundConfig[] _footstepSoundConfigs;
+
+        [SerializeField, Tooltip("足元判定の開始位置オフセット。")]
+        private Vector3 _footstepRayOffset;
+
+        [SerializeField, Min(0.01f), Tooltip("足元判定の距離。")]
+        private float _footstepRayDistance = 1.5f;
+
+        [SerializeField, Min(0.01f), Tooltip("音楽同期が使えない場合の足音SE再生間隔です。")]
+        private float _footstepInterval = 0.35f;
+
+        private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
@@ -55,12 +74,15 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
-        private ICharacterAnimationController _characterAnimationController;
+        private ICharacterAnimationViewModel _characterAnimationViewModel;
+        private ICharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private CancellationTokenSource _cancellationTokenSource;
-        private CharacterAnimationIndices _characterAnimationIndices;
         private Quaternion _rotation;
+        private float _lastFootstepTime;
+        private int _lastFootstepEighthIndex = int.MinValue;
+        private MusicSyncState _musicSyncState;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -94,16 +116,17 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Initialize(
             IPlayerController playerMovementController,
             PlayerAttackController playerAttackController,
-            ICharacterAnimationController characterAnimationController,
-             CharacterAnimationIndices animationIndices,
+            ICharacterAnimationViewContext animationContext,
+            MusicSyncState musicSyncState,
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
-            _characterAnimationController = characterAnimationController;
-            _characterAnimationIndices = animationIndices;
+            _characterAnimationViewModel = animationContext.ViewModel;
+            _characterAnimationSignal = animationContext.Signal;
+            _musicSyncState = musicSyncState;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
@@ -126,6 +149,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             RegisterActions();
+            SyncFootstepTiming();
             _isPlaying = true;
         }
 
@@ -149,8 +173,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 _rb.angularVelocity = Vector3.zero;
             }
 
-            _characterAnimationController?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
             _attackWeaponView?.HideAllWeapons();
+            SyncFootstepTiming();
         }
 
         /// <summary>
@@ -221,7 +246,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = true;
 
                 PlaySound(_dodgeSoundSource, null);
-                _characterAnimationController?.TriggerOneShot(_characterAnimationIndices.Dodge);
+                _characterAnimationSignal?.RequestDodge();
             }
         }
 
@@ -256,24 +281,15 @@ namespace KillChord.Runtime.View.InGame.Player
                 string animationKey = _pendingSkillAnimationKey;
                 _pendingSkillAnimationKey = null;
 
-                if (string.IsNullOrWhiteSpace(animationKey))
+                float attackAnimationLength = 0f;
+                if (_characterAnimationSignal != null)
                 {
-                    animationKey = GetAttackAnimationKey(resultBeatType);
+                    attackAnimationLength = string.IsNullOrWhiteSpace(animationKey)
+                        ? _characterAnimationSignal.RequestAttack(resultBeatType)
+                        : _characterAnimationSignal.RequestAttack(animationKey);
                 }
-
-                int attackIndex = _characterAnimationIndices.Attack;
-
-                if (!string.IsNullOrEmpty(animationKey)
-                    && _characterAnimationIndices.TryGetOneShotIndex(animationKey, out int oneShotIndex))
-                {
-                    attackIndex = oneShotIndex;
-                }
-
-                float attackAnimationLength =
-                    _characterAnimationController?.GetOneShotAnimationLength(attackIndex) ?? 0f;
 
                 _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
-                _characterAnimationController?.TriggerOneShot(attackIndex);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -329,7 +345,8 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
-            _characterAnimationController?.SetVelocity(new Vector2(velocity.x, velocity.z));
+            _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
+            PlayFootstepSound(velocity);
         }
 
         /// <summary>
@@ -430,20 +447,154 @@ namespace KillChord.Runtime.View.InGame.Player
             source.Play(cueName);
         }
 
-        //TODO:今はint直置きだから後で調整しやすいようにしとく。
-        private string GetAttackAnimationKey(int beatType)
+        /// <summary>
+        ///     現在の足元に対応する足音SE設定を取得します。
+        /// </summary>
+        /// <returns> 足音SE設定です。 </returns>
+        private PlayerFootstepSoundConfig GetCurrentFootstepSoundConfig()
         {
-            return beatType switch
+            Vector3 origin = transform.position + _footstepRayOffset;
+            if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _footstepRayDistance))
             {
-                1 or 2 or 3 => ATTACK_BEAT_1_KEY,
-                4 or 6 or 8 => ATTACK_BEAT_2_KEY,
-                _ => string.Empty
-            };
+                return default;
+            }
+
+            if (_footstepSoundConfigs == null || _footstepSoundConfigs.Length == 0)
+            {
+                return default;
+            }
+
+            int hitLayerMask = 1 << hit.collider.gameObject.layer;
+            for (int i = 0; i < _footstepSoundConfigs.Length; i++)
+            {
+                if ((_footstepSoundConfigs[i].SurfaceLayer.value & hitLayerMask) != 0)
+                {
+                    return _footstepSoundConfigs[i];
+                }
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        ///     足音SEをテンポ同期で再生します。
+        /// </summary>
+        /// <param name="velocity"> 現在速度です。 </param>
+        private void PlayFootstepSound(Vector3 velocity)
+        {
+            if (_controller == null || _controller.IsDodging)
+            {
+                SyncFootstepTiming();
+                return;
+            }
+
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+            if (horizontalVelocity.sqrMagnitude <= MIN_FOOTSTEP_VELOCITY_SQR)
+            {
+                SyncFootstepTiming();
+                return;
+            }
+
+            if (!TryConsumeFootstepTiming())
+            {
+                return;
+            }
+
+            PlayerFootstepSoundConfig config = GetCurrentFootstepSoundConfig();
+            string cueName = string.IsNullOrWhiteSpace(config.CueName)
+                ? _defaultFootstepCueName
+                : config.CueName;
+
+            _footStepView?.Play(cueName);
+        }
+
+        /// <summary>
+        ///     足音再生タイミングを消費可能か判定します。
+        /// </summary>
+        /// <returns> 再生可能な場合はtrue。 </returns>
+        private bool TryConsumeFootstepTiming()
+        {
+            if (_musicSyncState != null && _musicSyncState.BeatLength > 0d)
+            {
+                int currentEighthIndex = GetCurrentFootstepEighthIndex();
+                if (_lastFootstepEighthIndex == currentEighthIndex)
+                {
+                    return false;
+                }
+
+                _lastFootstepEighthIndex = currentEighthIndex;
+                return true;
+            }
+
+            if (Time.time - _lastFootstepTime < _footstepInterval)
+            {
+                return false;
+            }
+
+            _lastFootstepTime = Time.time;
+            return true;
+        }
+
+        /// <summary>
+        ///     現在時刻の足音タイミングへ同期します。
+        /// </summary>
+        private void SyncFootstepTiming()
+        {
+            if (_musicSyncState != null && _musicSyncState.BeatLength > 0d)
+            {
+                _lastFootstepEighthIndex = GetCurrentFootstepEighthIndex();
+                return;
+            }
+
+            _lastFootstepTime = Time.time;
+        }
+
+        /// <summary>
+        ///     現在の八分音符インデックスを取得します。
+        /// </summary>
+        /// <returns> 八分音符インデックスです。 </returns>
+        private int GetCurrentFootstepEighthIndex()
+        {
+            return Mathf.FloorToInt((float)(_musicSyncState.AccurateBeat * 2d));
         }
 
         /// <summary> 2Dベクトルを指定角度だけ回転させる。 </summary>
         private static Vector2 Rotate(Vector2 v, float degrees)
             => Quaternion.Euler(0, 0, degrees) * v;
+
+#if UNITY_EDITOR
+        /// <summary>
+        ///     足音判定用RayをSceneビューへ描画します。
+        /// </summary>
+        private void OnDrawGizmosSelected()
+        {
+            Vector3 origin = transform.position + _footstepRayOffset;
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _footstepRayDistance))
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(origin, hit.point);
+                Gizmos.DrawWireSphere(hit.point, 0.1f);
+            }
+            else
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(origin, origin + (Vector3.down * _footstepRayDistance));
+            }
+        }
+#endif
+
+        /// <summary>
+        ///     足元の判定結果と足音SEの対応情報です。
+        /// </summary>
+        [System.Serializable]
+        private struct PlayerFootstepSoundConfig
+        {
+            [Tooltip("足元判定で使用するレイヤー。")]
+            public LayerMask SurfaceLayer;
+
+            [Tooltip("この床で再生するCueName。空の場合は共通Cueを使用します。")]
+            public string CueName;
+        }
     }
 }
 

@@ -1,10 +1,9 @@
-
-using KillChord.Runtime.Domain.InGame.Buff;
-
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
-
+using System;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -13,19 +12,32 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_02 : SkillBase
     {
-        
-        public Skill_02(IBuff buff) : base(buff)
+        /// <summary>
+        ///     スキル効果を初期化します。
+        /// </summary>
+        /// <param name="buff"> 付与バフです。 </param>
+        /// <param name="attackController"> 攻撃実行器です。 </param>
+        public Skill_02(IBuff buff, IAttackController attackController) : base(buff)
         {
+            _attackController = attackController;
         }
-        public override void Execute(SkillEffectContext context)
-        {
-             _attackController.Execute((int)_shotGunBeat); //ショットガン処理を実行する。
-             var targets = context.Repository.FindByRule(); //ショットガンにヒットしたキャラクタを取得する。
-             foreach(var target in targets) target.BuffSystem.Add(_buff);
 
+        /// <summary>
+        ///     スキル効果を実行します。
+        /// </summary>
+        /// <param name="context"> 実行コンテキストです。 </param>
+        public override void Execute(in SkillEffectContext context)
+        {
+            _attackController?.Execute((int)_shotGunBeat);
+
+            ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                targets[i]?.BuffSystem.Add(_buff);
+            }
         }
-        private float _multiplier = 0.9f; //強力な一回攻撃。
-        private BeatType _shotGunBeat = BeatType.Two;
-        private IAttackController _attackController;
+
+        private readonly BeatType _shotGunBeat = BeatType.Two;
+        private readonly IAttackController _attackController;
     }
 }

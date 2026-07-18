@@ -590,7 +590,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.addressables": "1.21.19"
       },
-      "hash": "f641e2ca86758aa93f21de0ae6414d3ba5ab6e92"
+      "hash": "c71d6ae765cde35d10825956452270f61a6da4e9"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

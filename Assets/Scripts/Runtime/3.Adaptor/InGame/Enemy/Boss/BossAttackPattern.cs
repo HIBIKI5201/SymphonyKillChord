@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <param name="controller"> 実際に攻撃を実行するController。 </param>
         public BossAttackPattern(
             AttackDefinition definition,
-            EnemyMusicSpec timing,
+            MusicSyncSpec timing,
             IEnemyAttackController controller)
         {
             Definition = definition;
@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         ///     発動タイミング。
         ///     通常1=4拍子3拍目 / 通常2=3拍子2拍目 / 特殊1=2拍子1拍目 を想定。
         /// </summary>
-        public EnemyMusicSpec Timing { get; }
+        public MusicSyncSpec Timing { get; }
 
         /// <summary> この攻撃を実行するController。 </summary>
         public IEnemyAttackController Controller { get; }

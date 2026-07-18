@@ -3,21 +3,21 @@ using KillChord.Runtime.Domain.InGame.Music;
 namespace KillChord.Runtime.Application.InGame.Music
 {
     /// <summary>
-    ///     リズムガイドの計算ロジックを担当するユースケースクラス。
+        ///     リズムガイドの計算ロジックを担当するユースケースクラス。
     /// </summary>
     public class RhythmGuideUsecase
     {
         /// <summary>
         ///     新しいユースケースを生成する。
         /// </summary>
-        /// <param name="rhythmGuideDefinition"> リズムガイドの定義。 </param>
-        public RhythmGuideUsecase(RhythmGuideDefinition rhythmGuideDefinition)
+        /// <param name="rhythmJudgmentDefinition"> リズム判定の定義。 </param>
+        public RhythmGuideUsecase(RhythmJudgmentDefinition rhythmJudgmentDefinition)
         {
-            _rhythmGuideDefinition = rhythmGuideDefinition;
+            _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
         }
 
-        /// <summary> リズムガイドの定義。 </summary>
-        public RhythmGuideDefinition RhythmGuideDefinition => _rhythmGuideDefinition;
+        /// <summary> リズム判定の定義。 </summary>
+        public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
 
         /// <summary>
         ///     インジケーターの正規化された位置を計算する。
@@ -35,20 +35,18 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <summary>
         ///     指定された拍における拍の種類を計算する。
         /// </summary>
-        /// <param name="elapsedBeat"> 経過した拍数。 </param>
+        /// <param name="normalizedBarProgress"> 小節内の正規化進捗。 </param>
         /// <returns> 拍の種類。範囲外の場合は null。 </returns>
-        public BeatType? CalculateCurrentBeatType(float elapsedBeat)
+        public BeatType? CalculateCurrentBeatType(float normalizedBarProgress)
         {
-            foreach (RhythmGuideRange range in _rhythmGuideDefinition.GuideRanges)
+            if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
             {
-                if (range.Contains(elapsedBeat))
-                {
-                    return range.BeatType;
-                }
+                return beatType;
             }
+
             return null;
         }
 
-        private readonly RhythmGuideDefinition _rhythmGuideDefinition;
+        private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
     }
 }

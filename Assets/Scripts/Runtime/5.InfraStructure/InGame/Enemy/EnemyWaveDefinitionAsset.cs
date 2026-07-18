@@ -1,5 +1,10 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Stage;
+using KillChord.Runtime.InfraStructure.InGame.Stage;
+using KillChord.Runtime.Utility.Identity;
+using SymphonyFrameWork.Attribute;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
@@ -27,11 +32,60 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                     EnemyWaveDetail detail = new EnemyWaveDetail(sourceDetails[j].EnemyType, sourceDetails[j].EnemyAmount);
                     details[j] = detail;
                 }
-                EnemyWaveDefinition wave = new EnemyWaveDefinition(details, sourceWaves[i].WaveDuration);
+
+                List<int> stageEffectIds = new();
+                if (sourceWaves[i].StageEffects != null)
+                {
+                    for (int j = 0; j < sourceWaves[i].StageEffects.Count; j++)
+                    {
+                        StageEffectAssetBase stageEffect = sourceWaves[i].StageEffects[j];
+                        if (stageEffect != null)
+                        {
+                            stageEffectIds.Add(stageEffect.EffectId);
+                        }
+                    }
+                }
+
+                EnemyWaveDefinition wave = new EnemyWaveDefinition(
+                    details,
+                    sourceWaves[i].WaveDuration,
+                    stageEffectIds);
                 waves[i] = wave;
             }
+
             EnemyWaves ret = new EnemyWaves(waves, _loop, _loopStart);
             return ret;
+        }
+
+        /// <summary>
+        ///     既存Wave定義からステージ演出カタログを生成します。
+        /// </summary>
+        /// <returns> 演出IDをキーにしたカタログです。 </returns>
+        public IReadOnlyDictionary<int, IStageEffectDefinition> CreateStageEffectCatalog()
+        {
+            Dictionary<int, IStageEffectDefinition> catalog = new();
+            SingleWaveDefinition[] sourceWaves = _waves ?? Array.Empty<SingleWaveDefinition>();
+            for (int i = 0; i < sourceWaves.Length; i++)
+            {
+                List<StageEffectAssetBase> stageEffects = sourceWaves[i].StageEffects;
+                if (stageEffects == null)
+                {
+                    continue;
+                }
+
+                for (int j = 0; j < stageEffects.Count; j++)
+                {
+                    StageEffectAssetBase stageEffect = stageEffects[j];
+                    if (stageEffect == null || catalog.ContainsKey(stageEffect.EffectId))
+                    {
+                        continue;
+                    }
+
+                    catalog.Add(stageEffect.EffectId, stageEffect.Create());
+                }
+            }
+
+            return catalog;
         }
 
         [SerializeField, Tooltip("1Wave分の定義")]
@@ -45,7 +99,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         private class WaveDetailDefinition
         {
             /// <summary> 敵種類 </summary>
-            [Tooltip("敵種類")]public EnemyType EnemyType;
+            [Tooltip("敵種類")] public EnemyType EnemyType;
             /// <summary> 敵の数 </summary>
             [Tooltip("敵の生成数"), Range(0, 20)] public int EnemyAmount;
         }
@@ -57,6 +111,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
             [Tooltip("Waveの継続時間(秒)"), Range(0, 1800)] public float WaveDuration;
+            /// <summary> Wave開始時に予約するステージ演出です。 </summary>
+            [SerializeReference, SubclassSelector, Tooltip("Wave開始時に音楽同期で実行するステージ演出です。")]
+            public List<StageEffectAssetBase> StageEffects = new();
         }
     }
 }

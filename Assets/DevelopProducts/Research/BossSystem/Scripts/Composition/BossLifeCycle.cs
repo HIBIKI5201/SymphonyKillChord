@@ -1,19 +1,22 @@
-using KillChord.Runtime.Adaptor.InGame.Camera.Target;
+﻿using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -43,8 +46,7 @@ namespace DevelopProducts.Boss
             CharacterEntity targetEntity,
             MusicSyncState musicSyncState,
             IMusicSyncService musicSyncService,
-            TargetManagerController targetManagerController,
-            TargetEntityRegistryController targetEntityRegistryController,
+            TargetSystemController targetSystemController,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             Action<BossLifeCycle> releaseCallback
@@ -64,8 +66,7 @@ namespace DevelopProducts.Boss
                 return;
             }
 
-            _targetManagerController = targetManagerController;
-            _targetEntityRegistryController = targetEntityRegistryController;
+            _targetSystemController = targetSystemController;
             _enemyEntity = CharacterFactory.Create(_enemyData);
 
             _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
@@ -109,7 +110,7 @@ namespace DevelopProducts.Boss
             foreach (BossAttackEntry entry in _attackEntries)
             {
                 AttackDefinition definition = _enemyEntity.CombatSpec.GetAttackDifinition(entry.AttackIndex);
-                EnemyMusicSpec timing = new EnemyMusicSpec(
+                MusicSyncSpec timing = new MusicSyncSpec(
                     entry.TimingData.BarFlag,
                     entry.TimingData.TimeSignature,
                     entry.TimingData.TargetBeat);
@@ -130,7 +131,7 @@ namespace DevelopProducts.Boss
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _lockOnTargetGateway = new LockOnTargetGateway(transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
 
             // View接続
             _view.Initialize(aiController, target);
@@ -168,8 +169,7 @@ namespace DevelopProducts.Boss
             {
                 _enemyEntity.OnDied += HandleEnemyDied;
             }
-            _targetManagerController?.Register(_lockOnTargetGateway);
-            _targetEntityRegistryController?.RegisterTargetEntity(_lockOnTargetGateway, _enemyEntity);
+            _targetSystemController?.RegisterTarget(_targetable, _enemyEntity);
 
             // コンポーネント有効化
             _view.Activate();
@@ -196,8 +196,7 @@ namespace DevelopProducts.Boss
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
+            _targetSystemController?.UnregisterTarget(_targetable);
 
             _reservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -257,8 +256,8 @@ namespace DevelopProducts.Boss
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField] private CharacterData _enemyData;
-        [SerializeField] private EnemyMoveData _moveData;
+        [SerializeField] private CharacterDefinitionAsset _enemyData;
+        [SerializeField] private EnemyMoveSpecAsset _moveData;
 
         [Header("攻撃パターン（通常1/通常2/特殊1）")]
         [SerializeField] private BossAttackEntry[] _attackEntries;
@@ -278,9 +277,8 @@ namespace DevelopProducts.Boss
         [Header("砲撃攻撃を含む場合に必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
-        private TargetEntityRegistryController _targetEntityRegistryController;
-        private TargetManagerController _targetManagerController;
-        private LockOnTargetGateway _lockOnTargetGateway;
+        private TargetSystemController _targetSystemController;
+        private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
@@ -308,9 +306,9 @@ namespace DevelopProducts.Boss
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
-            _targetManagerController?.Unregister(_lockOnTargetGateway);
-            _targetEntityRegistryController?.UnregisterTargetEntity(_lockOnTargetGateway);
-            _lockOnTargetGateway?.Dispose();
+            _targetSystemController?.UnregisterTarget(_targetable);
+            _targetable?.Dispose();
         }
     }
 }
+

@@ -8,8 +8,8 @@ namespace DevelopProducts.SkillTree
     {
         public int GetSkill()
         {
-            return _skillData.Id;
+            return _skillData.Id.Value;
         }
-        [SerializeField, Tooltip("スキルのデータ")] private SkillDataAsset _skillData;
+        [SerializeField, Tooltip("スキルのデータ")] private SkillTemplateAsset _skillData;
     }
 }

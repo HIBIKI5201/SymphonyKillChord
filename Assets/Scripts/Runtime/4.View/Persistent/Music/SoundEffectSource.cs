@@ -1,6 +1,6 @@
 using CriWare;
 using KillChord.Runtime.Adaptor.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.View.Persistent.Audio;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Music
@@ -16,6 +16,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void Play()
         {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.Play();
         }
 
@@ -31,6 +36,11 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.cueName = cueName;
             _source.Play();
         }
@@ -41,11 +51,16 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="volume"> 音量。 </param>
         public void ApplyVolume(float volume)
         {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
             _source.volume = volume;
         }
 
         private CriAtomSource _source;
-        private SoundEffectVolumeManager _volumeManager;
+        private PersistentAudioVolumeRegistryView _volumeRegistryView;
 
         private void Awake()
         {
@@ -54,13 +69,34 @@ namespace KillChord.Runtime.View.Persistent.Music
 
         private void OnEnable()
         {
-            ServiceLocator.TryGetInstance(out _volumeManager);
-            _volumeManager?.Register(this);
+            _volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();
+            _volumeRegistryView?.RegisterSoundEffectSource(this);
         }
 
         private void OnDisable()
         {
-            _volumeManager?.UnRegister(this);
+            _volumeRegistryView?.UnregisterSoundEffectSource(this);
+        }
+
+        /// <summary>
+        ///     CriAtomSource参照を必要時に解決します。
+        /// </summary>
+        /// <returns> 参照解決に成功した場合はtrueです。 </returns>
+        private bool TryEnsureSource()
+        {
+            if (_source != null)
+            {
+                return true;
+            }
+
+            _source = GetComponent<CriAtomSource>();
+            if (_source != null)
+            {
+                return true;
+            }
+
+            Debug.LogError("[SoundEffectSource] CriAtomSource is not assigned.", this);
+            return false;
         }
     }
 }

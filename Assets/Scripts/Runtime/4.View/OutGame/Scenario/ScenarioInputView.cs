@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,19 +14,25 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         ///     依存先を初期化する。
         /// </summary>
-        public void Initialize(ScenarioInputController inputController)
+        /// <param name="inputController"> シナリオ入力コントローラーです。 </param>
+        /// <param name="playerInputView"> プレイヤー入力Viewです。 </param>
+        public void Initialize(
+            ScenarioInputController inputController,
+            PlayerInputView playerInputView)
         {
             _inputController = inputController;
-
-            if (!ServiceLocator.TryGetInstance(out _playerInputView))
-            {
-                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が取得できませんでした。", this);
-                return;
-            }
+            _playerInputView = playerInputView;
 
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
                 Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
+                enabled = false;
+                return;
+            }
+
+            if (_playerInputView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] PlayerInputView が未設定です。", this);
                 enabled = false;
                 return;
             }

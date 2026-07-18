@@ -10,13 +10,8 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary>
         /// アニメーション定義を初期化する。
         /// </summary>
-        public AnimationDefinition(string id, string assetKey)
+        public AnimationDefinition(AnimationId id, string assetKey)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new ArgumentException("id is empty.", nameof(id));
-            }
-
             if (string.IsNullOrWhiteSpace(assetKey))
             {
                 throw new ArgumentException("assetKey is empty.", nameof(assetKey));
@@ -27,7 +22,7 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         }
 
         /// <summary> Id を取得する。 </summary>
-        public string Id { get; }
+        public AnimationId Id { get; }
         /// <summary> AssetKey を取得する。 </summary>
         public string AssetKey { get; }
     }

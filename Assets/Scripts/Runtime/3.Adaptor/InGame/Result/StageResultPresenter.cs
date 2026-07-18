@@ -14,8 +14,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
     {
         private const string MAIN_MISSION_CLEAR_TEXT = "達成";
         private const string MAIN_MISSION_FAIL_TEXT = "失敗";
-        private const string UNIMPLEMENTED_VALUE_TEXT = "未実装";
-
         private const string DEFAULT_DEFEAT_TIP_TEXT = "敵の攻撃をよくみて、回避後の隙に攻撃しましょう。";
         private const int SECOND_PER_MINUTE = 60;
 
@@ -48,12 +46,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary>
         ///   ステージクリアの結果を表示する。
         /// </summary>
-        public void PresentVictory()
+        /// <param name="evaluationResult"> 確定済みのミッション評価結果です。 </param>
+        public void PresentVictory(MissionEvaluationResult evaluationResult)
         {
-            MissionEvaluationResult evaluationResult =
-                _missionRuntimeService.BuildEvaluationResult();
+            if (evaluationResult == null)
+            {
+                throw new ArgumentNullException(nameof(evaluationResult));
+            }
 
             StageResultMissionItemDTO[] subMissionItems = BuildSubMissionItems(evaluationResult);
+            StageRank stageRank = StageRankCalculator.Calculate(evaluationResult.AchievedCount);
 
             StageResultDTO dto = new(
                 StageResultType.Victory,
@@ -62,8 +64,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 MAIN_MISSION_CLEAR_TEXT,
                 subMissionItems,
                 FormatBattleTime(_missionRuntimeService.MissionProgress.ElapsedTime.Value),
-                UNIMPLEMENTED_VALUE_TEXT,
-                UNIMPLEMENTED_VALUE_TEXT,
+                _missionRuntimeService.MissionProgress.MaxCombo.Value.ToString(),
+                stageRank.ToString(),
                 string.Empty);
 
             _stageResultViewModel.Apply(dto);
@@ -81,7 +83,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 MAIN_MISSION_FAIL_TEXT,
                 Array.Empty<StageResultMissionItemDTO>(),
                 FormatBattleTime(_missionRuntimeService.MissionProgress.ElapsedTime.Value),
-                UNIMPLEMENTED_VALUE_TEXT,
+                _missionRuntimeService.MissionProgress.MaxCombo.Value.ToString(),
                 string.Empty,
                 SelectDefeatTip(_missionRuntimeService.MissionDefinition.DefeatTips));
 

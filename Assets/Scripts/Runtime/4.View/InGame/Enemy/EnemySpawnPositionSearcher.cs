@@ -13,8 +13,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="camera"></param>
-        /// <param name="playerTransform"></param>
+        /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
         public void Initialize(Transform playerTransform)
         {
             _positionPairs = GameObject.FindObjectsByType<SpawnPositionPair>(FindObjectsSortMode.None);
@@ -28,7 +27,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     敵の生成位置をランダムで１つ選定する。
         /// </summary>
-        /// <returns></returns>
+        /// <returns> 使用する生成位置です。 </returns>
         public async ValueTask<SpawnPositionPair> GetRandomSpawnPositionAsync()
         {
             int loopCnt = 0;
@@ -85,10 +84,15 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     生成位置がプレイヤーに近すぎるか判定する。
         /// </summary>
-        /// <param name="positionPair"></param>
-        /// <returns></returns>
+        /// <param name="positionPair"> 判定対象の生成位置です。 </param>
+        /// <returns> 近すぎる場合はtrue。 </returns>
         private bool IsPositionNearPlayer(SpawnPositionPair positionPair)
         {
+            if (_playerTransform == null)
+            {
+                return false;
+            }
+
             float distance = Vector3.Distance(_playerTransform.position, positionPair.transform.position);
             return distance < _minDistanceToPlayer;
         }

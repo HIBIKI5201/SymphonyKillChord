@@ -1,13 +1,16 @@
-public struct ScreenSettingData
+namespace KillChord.Runtime.View.OutGame.Setting
 {
-    public ScreenSettingData(int resolutionIndex, int screenModeIndex, bool isVSync)
+    public struct ScreenSettingData
     {
-        ResolutionIndex = resolutionIndex;
-        ScreenModeIndex = screenModeIndex;
-        IsVSync = isVSync;
-    }
+        public ScreenSettingData(int resolutionIndex, int screenModeIndex, bool isVSync)
+        {
+            ResolutionIndex = resolutionIndex;
+            ScreenModeIndex = screenModeIndex;
+            IsVSync = isVSync;
+        }
 
-    public int ResolutionIndex { get; set; }
-    public int ScreenModeIndex { get; set; }
-    public bool IsVSync { get; set; }
+        public int ResolutionIndex { get; set; }
+        public int ScreenModeIndex { get; set; }
+        public bool IsVSync { get; set; }
+    }
 }

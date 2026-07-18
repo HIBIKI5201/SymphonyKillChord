@@ -10,18 +10,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public class SkillController
     {
+        /// <summary>
+        ///     コントローラーを初期化します。
+        /// </summary>
+        /// <param name="musicSyncService"> 音楽同期サービスです。 </param>
         public SkillController(IMusicSyncService musicSyncService)
         {
             _musicSyncService = musicSyncService ?? throw new ArgumentNullException(nameof(musicSyncService));
         }
 
-        /// <summary>スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。</summary>
+        /// <summary> スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。 </summary>
         public event Action<string> OnSkillAnimationRequested;
 
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="skillExecutionControllers"></param>
+        /// <param name="skillExecutionControllers"> スキル実行Controller一覧です。 </param>
         public void Initialize(SkillExecutionController[] skillExecutionControllers)
         {
             _skillExecutionControllers = skillExecutionControllers;
@@ -30,22 +34,23 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary>
         ///   指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
         /// </summary>
+        /// <param name="actionType"> 行動種別です。 </param>
+        /// <param name="beatType"> 現在ビートです。 </param>
+        /// <param name="unscaledTime"> 現在時刻です。 </param>
         public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
 
-            // 装備中のスキルごとに入力をチェックし、発動判定を行う
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                SkillExecutionController exeController = _skillExecutionControllers[i];
-                if(exeController.TryExecuteSkill(beatType, unscaledTime, actionType, out string animationKey))
+                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType);
+                if (result.ResultType == SkillExecutionResultType.Executed)
                 {
-                    OnSkillAnimationRequested?.Invoke(animationKey);
+                    OnSkillAnimationRequested?.Invoke(result.AnimationKey);
                 }
             }
         }
 
-        // ...インスペクション用のフィールド（順序はコード規定に従う）
         private SkillExecutionController[] _skillExecutionControllers;
         private readonly IMusicSyncService _musicSyncService;
     }

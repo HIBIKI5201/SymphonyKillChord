@@ -1,6 +1,8 @@
-using KillChord.Runtime.Domain.OutGame.SkillTree;
+﻿using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
-using SymphonyFrameWork.Attribute;
+using KillChord.Runtime.Utility.Identity;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -12,10 +14,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     [CreateAssetMenu(fileName = "SkillNodeData", menuName = "SymphonyDev/SkillTree/SkillNodeData")]
     public class SkillNodeData : ScriptableObject
     {
-        /// <summary> ノードのID </summary>
-        public int NodeId;
-        /// <summary> 親ノードのID </summary>
-        public int[] ParentNodeIds;
+        /// <summary> ノードのIDを取得する。 </summary>
+        public SkillNodeId NodeId => new SkillNodeId(_nodeId.Id);
+
+        /// <summary> 親ノード数を取得する。 </summary>
+        public int ParentNodeCount => _parentNodeIds == null ? 0 : _parentNodeIds.Length;
         /// <summary> 解放に必要なポイント </summary>
         public int UnlockCost;
         /// <summary> スキル説明文 </summary>
@@ -26,7 +29,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [Header("ノードを解放した時の報酬")]
         //[SerializeReference, SubclassSelector] private IParameterUpgradeEffect[] _nodeUnlockEffets;
         [SerializeField, Tooltip("ノードを解放した時に解放されるスキル")]
-        private SkillDataAsset[] _unlockSkills;
+        private SkillTemplateAsset[] _unlockSkills;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -34,12 +37,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <returns></returns>
         public SkillNodeEntity ToDomain()
         {
-            // UnlockSkillId の配列の長さを取得する
-            // _unlockSkills が null の場合は 0 を返す
             int unlockSkills = _unlockSkills == null ? 0 : _unlockSkills.Length;
-
-            // UnlockSkillId の配列を生成する
-            var skillIds = new UnlockSkillId[unlockSkills];
+            List<SkillId> skillIds = new List<SkillId>(unlockSkills);
             for (var i = 0; i < unlockSkills; i++)
             {
                 if (_unlockSkills[i] == null)
@@ -47,10 +46,28 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                     continue;
                 }
 
-                skillIds[i] = new UnlockSkillId(_unlockSkills[i].Id);
+                skillIds.Add(_unlockSkills[i].Id);
             }
 
-            return new SkillNodeEntity(NodeId, UnlockCost, SkillDetail, skillIds);
+            return new SkillNodeEntity(NodeId, UnlockCost, SkillDetail, skillIds.ToArray());
         }
+
+        /// <summary>
+        ///     指定した位置の親ノードIDを取得する。
+        /// </summary>
+        /// <param name="index"> 親ノード配列の位置。 </param>
+        /// <returns> 親ノードID。 </returns>
+        public SkillNodeId GetParentNodeId(int index)
+        {
+            return new SkillNodeId(_parentNodeIds[index].Id);
+        }
+
+        [SerializeField, Tooltip("ノードを一意に識別するID。")]
+        [SourceDataCollection("SkillNode")]
+        private DataID _nodeId;
+
+        [SerializeField, Tooltip("親ノードのID一覧。")]
+        [SourceDataCollection("SkillNode")]
+        private DataID[] _parentNodeIds;
     }
 }

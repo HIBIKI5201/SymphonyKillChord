@@ -9,9 +9,30 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
     /// </summary>
     public class TitleStartController
     {
+        /// <summary>
+        ///     コントローラーを初期化します。
+        /// </summary>
+        /// <param name="sceneTransitionController"> シーン遷移コントローラーです。 </param>
         public TitleStartController(SceneTransitionController sceneTransitionController)
         {
             _sceneTransitionController = sceneTransitionController;
+        }
+
+        /// <summary>
+        ///     タイトルから直接遷移するチュートリアル戦闘シーンを設定します。
+        /// </summary>
+        /// <param name="tutorialBattleSceneName"> 遷移先シーン名です。 </param>
+        public void SetTutorialBattleTarget(string tutorialBattleSceneName)
+        {
+            _tutorialBattleSceneName = tutorialBattleSceneName;
+        }
+
+        /// <summary>
+        ///     タイトルから直接遷移するチュートリアル戦闘シーン設定を解除します。
+        /// </summary>
+        public void ClearTutorialBattleTarget()
+        {
+            _tutorialBattleSceneName = string.Empty;
         }
 
         /// <summary>
@@ -35,8 +56,23 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
 
             try
             {
+                if (!string.IsNullOrWhiteSpace(_tutorialBattleSceneName))
+                {
+                    isSuccess = await _sceneTransitionController.ChangeSceneKeepingLoadingAsync(
+                        currentSceneName,
+                        _tutorialBattleSceneName,
+                        token);
+
+                    if (!isSuccess)
+                    {
+                        _isActivate = false;
+                    }
+
+                    return isSuccess;
+                }
+
                 isSuccess =
-                    await _sceneTransitionController.LoadAdditiveAndSetActiveAsync(targetSceneName, token);
+                    await _sceneTransitionController.LoadAdditiveAsync(targetSceneName, token);
 
                 if (!isSuccess)
                 {
@@ -62,5 +98,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         ///    多重呼び出しを防ぐために使用する。
         /// </summary>
         private bool _isActivate = false;
+        private string _tutorialBattleSceneName = string.Empty;
     }
 }

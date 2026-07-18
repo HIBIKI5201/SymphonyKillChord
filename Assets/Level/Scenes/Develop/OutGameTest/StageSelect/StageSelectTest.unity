@@ -372,7 +372,7 @@ GameObject:
   - component: {fileID: 459519249}
   - component: {fileID: 459519248}
   m_Layer: 0
-  m_Name: OutGameUIEvent
+  m_Name: OutGameSceneInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -387,9 +387,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 459519247}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fbd60ffeeebe9343aed807180f93228, type: 3}
+  m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Screen.OutGameUIEvent
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
 --- !u!4 &459519249
 Transform:
   m_ObjectHideFlags: 0
@@ -573,7 +573,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 452244044}
-  _stageTreeAsset: {fileID: 11400000, guid: 258321da291460949a3505c9ef2f85fe, type: 2}
+  _stageTreeAssetKey: StageTreeAsset
 --- !u!4 &1042491950
 Transform:
   m_ObjectHideFlags: 0
@@ -631,7 +631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 452244044}
-  _screenRuleData: {fileID: 11400000, guid: ed3d6973f36d66844852d3391a8a18df, type: 2}
+  _screenRuleDataKey: OutGameScreenRuleData
 --- !u!4 &1370918367
 Transform:
   m_ObjectHideFlags: 0

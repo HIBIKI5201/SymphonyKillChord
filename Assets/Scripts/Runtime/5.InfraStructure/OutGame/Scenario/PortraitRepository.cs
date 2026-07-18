@@ -6,7 +6,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// <summary>
     /// Portrait の参照情報を取得するリポジトリ。
     /// </summary>
-    public class PortraitRepository : CatalogRepositoryBase<PortraitDefinition, PortraitCatalogEntry>, IPortraitRepository
+    public class PortraitRepository : CatalogRepositoryBase<PortraitId, PortraitDefinition, PortraitCatalogEntry>, IPortraitRepository
     {
         /// <summary>
         /// 立ち絵カタログから参照情報を構築する。
@@ -19,17 +19,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// カタログエントリから検索用の定義情報を生成する。
         /// </summary>
-        protected override bool TryBuild(PortraitCatalogEntry entry, out string id, out PortraitDefinition definition)
+        protected override bool TryBuild(PortraitCatalogEntry entry, out PortraitId id, out PortraitDefinition definition)
         {
-            id = entry.Id;
-            if (string.IsNullOrWhiteSpace(entry.Id) || entry.Asset == null)
+            if (entry.Id.Id == 0 || entry.Asset == null)
             {
+                id = default;
                 definition = default;
                 return false;
             }
 
+            id = new PortraitId(entry.Id.Id);
             string assetKey = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
-            definition = new PortraitDefinition(entry.Id, assetKey);
+            definition = new PortraitDefinition(id, assetKey);
             return true;
         }
     }

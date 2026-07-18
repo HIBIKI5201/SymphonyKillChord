@@ -72,16 +72,4 @@ namespace KillChord.Editor.TicketSystem
             });
         }
     }
-
-    // --- 内部データ構造 ---
-    [Serializable]
-    public class TicketData
-    {
-        public string id;
-        public string sceneName;
-        public bool isInUse;
-        public string userName;
-        public string masterPath;
-        public string timestamp;
-    }
 }

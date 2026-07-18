@@ -6,6 +6,11 @@ namespace KillChord.Runtime.Application.Persistent.Load
     public interface ILoadingSessionFactory
     {
         /// <summary>
+        ///     アクティブなロードセッションが存在する場合はtrue。
+        /// </summary>
+        bool IsLoading { get; }
+
+        /// <summary>
         ///    ロードセッションを開始する。
         /// </summary>
         /// <param name="reuseActiveSession"> 既存のアクティブなセッションを再利用するかどうか。 </param>

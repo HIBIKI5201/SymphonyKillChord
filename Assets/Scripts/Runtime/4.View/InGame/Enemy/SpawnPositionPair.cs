@@ -24,5 +24,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("場外の出現位置")] private Transform _spawnPosition;
         [SerializeField, Tooltip("入場演出の移動目的地")] private Transform _entryPosition;
         private bool _isInUse = false;
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.cyan;
+            Vector3 from = _spawnPosition.position;
+            Vector3 to = _entryPosition.position;
+            Gizmos.DrawLine(from, to);
+        }
     }
 }

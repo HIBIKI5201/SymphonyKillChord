@@ -1,9 +1,15 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
@@ -20,8 +26,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
     /// <summary>
     ///     タイトルシーンの初期化を行うクラス。
     /// </summary>
-    public class TitleSceneInitializer : MonoBehaviour
+    public sealed class TitleSceneInitializer : OutGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(TitleSceneInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 20;
+
         private const string TITLE_SCREEN_NAME = "TitleContainer";
         private const string MENU_SCREEN_NAME = "MenuContainer";
         private const string OPTION_SCREEN_NAME = "OptionContainer";
@@ -30,8 +42,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, Tooltip("UI Document")]
         private UIDocument _uiDocument;
 
-        [SerializeField, Tooltip("画面遷移ルールデータ")]
-        private ScreenRuleData _ruleData;
+        [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        private string _ruleDataKey;
 
         [Header("シーン遷移設定")]
         [SerializeField, SceneNameSelector, Tooltip("遷移元のシーン名")]
@@ -40,26 +52,57 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
-        [SerializeField, SceneNameSelector, Tooltip("初回起動時の遷移先のシーン名")]
-        private string _firstLaunchTargetSceneName;
+        [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+
+        private string _stageTreeAssetKey = "StageTreeAsset";
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
+        private TitleStartController _titleStartController;
         private ScreenController _screenController;
+        private BattleSortieSelectionService _battleSortieSelectionService;
         private SavedataSystem _savedataSystem;
+        private ScreenRuleData _loadedRuleData;
+        private StageTreeAsset _loadedStageTreeAsset;
+        private SaveData _loadedSaveData;
 
-        // チュートリアルが完了しているかどうかのフラグ
-        private bool _isTutorialCompleted;
+        private bool _isInitialized;
+        private bool _isSubscribed;
 
-        private async void Start()
+        /// <summary>
+        ///     タイトル画面に必要なアセットをロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
+        {
+            if (!ServiceLocator.TryGetInstance(out _savedataSystem))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] {nameof(SavedataSystem)}を取得できませんでした。",
+                    this);
+                return false;
+            }
+
+            _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
+            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
+            return _loadedRuleData != null && _loadedStageTreeAsset != null && _loadedSaveData != null;
+        }
+
+        /// <summary>
+        ///     タイトル画面を構築します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             if (_uiDocument == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: UI Document が設定されていません。");
 #endif
-                return;
+                return false;
             }
 
             var root = _uiDocument.rootVisualElement;
@@ -68,7 +111,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: Root VisualElement が null です。");
 #endif
-                return;
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
+#endif
+                return false;
             }
 
             SceneTransitionController sceneTransitionController;
@@ -79,10 +130,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
 #endif
-                return;
+                return false;
             }
 
-            TitleStartController titleStartController = new(sceneTransitionController);
+            _titleStartController = new(sceneTransitionController);
+            _battleSortieSelectionService = new BattleSortieSelectionService();
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
             var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
@@ -93,7 +145,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: タイトル画面のルート VisualElement が見つかりません。{TITLE_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (menuRoot == null)
@@ -101,7 +153,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルート VisualElement が見つかりません。{MENU_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (optionRoot == null)
@@ -109,7 +161,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: オプション画面のルート VisualElement が見つかりません。{OPTION_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
             if (creditRoot == null)
@@ -117,10 +169,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: クレジット画面のルート VisualElement が見つかりません。{CREDIT_SCREEN_NAME}");
 #endif
-                return;
+                return false;
             }
 
-            _titleSceneView = new(titleRoot, _outGameUIEvent, titleStartController, _currentSceneName, _targetSceneName);
+            _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
@@ -130,7 +182,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
-            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_ruleData);
+            IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
 
             IScreenTransitionApplicable screenViewModel = new ScreenViewApplicator(_titleScreenViewRegistry);
             IScreenPresenter screenPresenter = new ScreenPresenter(screenViewModel);
@@ -153,36 +205,70 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            bool isFirstLaunch = !_savedataSystem.Exists<SaveData>();
-            RegisterUIEventCallbacks();
+            bool isTutorialCompleted = _loadedSaveData.Tutorial.IsTutorialCompleted;
 
-            _screenController.ShowTitle();
-
-            if (isFirstLaunch)
+            if (!isTutorialCompleted
+                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
             {
 #if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{_firstLaunchTargetSceneName}");
+                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{tutorialTargetSceneName}");
 #endif
-                _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
+                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
             }
             else
             {
 #if UNITY_EDITOR
                 Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
 #endif
+                _titleStartController.ClearTutorialBattleTarget();
                 _titleSceneView.SetTargetSceneName(_targetSceneName);
             }
+
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
-        ///   コールバックの登録を解除する。
+        ///     他モジュールとの結合と初期表示を行います。
         /// </summary>
-        private void OnDestroy()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
         {
-            if (_outGameUIEvent != null)
+            if (!_isInitialized)
+            {
+                return false;
+            }
+
+            RegisterUIEventCallbacks();
+            _screenController.ShowTitle();
+            return true;
+        }
+
+        /// <summary>
+        ///     登録済みサービスやイベント購読を解除します。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
             }
+
+            _ruleDataKey.ReleaseLoadedAsset(this);
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _loadedRuleData = null;
+            _loadedStageTreeAsset = null;
+            _loadedSaveData = null;
+            _titleScreenViewRegistry = null;
+            _titleSceneView = null;
+            _titleStartController = null;
+            _battleSortieSelectionService = null;
+            _screenController = null;
+            _savedataSystem = null;
+            _outGameUIEvent = null;
+            _isInitialized = false;
+            _isSubscribed = false;
         }
 
         /// <summary>
@@ -191,7 +277,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="sceneTransitionController"></param>
         /// <param name="musicPlayer"></param>
         /// <param name="sePlayer"></param>
-        /// <param name="root"></param>
+        /// <param name="savedataSystem"> セーブシステム。 </param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
@@ -206,14 +292,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionController が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
@@ -250,12 +328,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void RegisterUIEventCallbacks()
         {
+            if (_outGameUIEvent == null || _isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnShowTitleScreen += HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen += HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen += HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen += HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked += HandleDataResetButtonClicked;
+            _isSubscribed = true;
         }
 
         /// <summary>
@@ -263,12 +347,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void UnRegisterUIEventCallbacks()
         {
+            if (_outGameUIEvent == null || !_isSubscribed)
+            {
+                return;
+            }
+
             _outGameUIEvent.OnShowTitleScreen -= HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen -= HandleMenuScreenShown;
             _outGameUIEvent.OnShowOptionsScreen -= HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen -= HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked -= HandleDataResetButtonClicked;
+            _isSubscribed = false;
         }
 
 
@@ -317,13 +407,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
-            // セーブデータをリセットする前に、現在のセーブデータをロードして、チュートリアル完了フラグを保持する。
-            var currentSaveData = await LoadSaveData();
-            if (currentSaveData != null)
-            {
-                _isTutorialCompleted = currentSaveData.Tutorial.IsTutorialCompleted;
-            }
-
             try
             {
                 await _savedataSystem.DeleteSaveDataAsync<SaveData>();
@@ -336,10 +419,51 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             // セーブデータをロードして、初期状態に戻す。
-            var newSaveData = await LoadSaveData();
+            _loadedSaveData = await LoadSaveData();
 
-            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定する。
-            _titleSceneView.SetTargetSceneName(_firstLaunchTargetSceneName);
+            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
+            if (_loadedSaveData != null
+                && !_loadedSaveData.Tutorial.IsTutorialCompleted
+                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
+            {
+                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
+                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
+                return;
+            }
+
+            _titleStartController.ClearTutorialBattleTarget();
+            _titleSceneView.SetTargetSceneName(_targetSceneName);
+        }
+
+        /// <summary>
+        ///     初回チュートリアル用の戦闘出撃準備を行います。
+        /// </summary>
+        /// <param name="tutorialTargetSceneName"> 遷移先シーン名です。 </param>
+        /// <returns> 準備に成功した場合はtrueです。 </returns>
+        private bool TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName)
+        {
+            tutorialTargetSceneName = string.Empty;
+
+            if (_loadedStageTreeAsset == null || _battleSortieSelectionService == null)
+            {
+                return false;
+            }
+
+            StageTree stageTree = _loadedStageTreeAsset.Create();
+            if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                || tutorialNode?.Definition == null)
+            {
+                return false;
+            }
+
+            StageDefinition tutorialStageDefinition = tutorialNode.Definition;
+            if (!_battleSortieSelectionService.TryPrepareBattleSortie(tutorialStageDefinition, _targetSceneName))
+            {
+                return false;
+            }
+
+            tutorialTargetSceneName = tutorialStageDefinition.TargetSceneName;
+            return true;
         }
 
         /// <summary>

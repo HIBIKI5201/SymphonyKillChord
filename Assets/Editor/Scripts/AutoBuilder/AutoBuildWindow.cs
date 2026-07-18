@@ -19,6 +19,14 @@ namespace KillChord.Editor.AutoBuilder
         private void OnGUI()
         {
             AutoBuilderSettings settings = AutoBuilderSettings.instance;
+            bool isRunning = AutoBuildExecuter.IsRunning;
+
+            if (isRunning)
+            {
+                EditorGUILayout.HelpBox("自動ビルドを実行中です。完了までお待ちください。", MessageType.Info);
+            }
+
+            EditorGUI.BeginDisabledGroup(isRunning);
 
             if (!AutoBuilderSettings.IsPathValid(settings.MasterPath))
             {
@@ -47,6 +55,8 @@ namespace KillChord.Editor.AutoBuilder
                         settings.DevelopBuildProfiles);
                 }
             }
+
+            EditorGUI.EndDisabledGroup();
         }
     }
 }

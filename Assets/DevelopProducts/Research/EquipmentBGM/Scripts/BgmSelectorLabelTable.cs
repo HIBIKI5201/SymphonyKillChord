@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace DevelopProducts.EquipmentBGM
@@ -35,14 +36,14 @@ namespace DevelopProducts.EquipmentBGM
         [Serializable]
         public struct Entry
         {
-            /// <summary> SkillData.Id と一致させるスキルID。 </summary>
-            public int SkillId => _skillId;
+            /// <summary> SkillTemplate.Id と一致させるスキルID。 </summary>
+            public int SkillId => _skillId.Id;
 
             /// <summary> CRIセレクターラベル名。 </summary>
             public string SelectorLabel => _selectorLabel;
 
-            [SerializeField, Tooltip("SkillData.Id と一致させるスキルID。")]
-            private int _skillId;
+            [SerializeField, SourceDataCollection("Skill"), Tooltip("SkillTemplate.Id と一致させるスキルID。")]
+            private DataID _skillId;
             [SerializeField, Tooltip("CRIセレクターラベル名。例: SelectorLabel_S01")]
             private string _selectorLabel;
         }

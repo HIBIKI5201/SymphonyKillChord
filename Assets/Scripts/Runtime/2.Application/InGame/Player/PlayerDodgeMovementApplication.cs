@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KillChord.Runtime.Domain.InGame.Player;
 using UnityEngine;
 
@@ -10,13 +10,13 @@ namespace KillChord.Runtime.Application.InGame.Player
     public sealed class PlayerDodgeMovementApplication
     {
         /// <summary> 回避移動アプリケーションを初期化する。 </summary>
-        public PlayerDodgeMovementApplication(PlayerMoveParameter parameter)
+        public PlayerDodgeMovementApplication(PlayerMoveSpec parameter)
         {
             _parameter = parameter;
             _previousDodgedTime = float.NegativeInfinity;
         }
 
-        private readonly PlayerMoveParameter _parameter;
+        private readonly PlayerMoveSpec _parameter;
         private Vector3 _direction;
         private float _previousDodgedTime;
         private bool _isDodging;
@@ -79,3 +79,4 @@ namespace KillChord.Runtime.Application.InGame.Player
         }
     }
 }
+

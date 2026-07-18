@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Battle;
+﻿using KillChord.Runtime.Domain.InGame.Battle;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
@@ -15,8 +15,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            float chance = context.AttackDefinition.AttackParameterSet.CriticalChance.Value;
-            float multiplier = context.AttackDefinition.AttackParameterSet.CriticalMultiplier.Value;
+            float chance = context.AttackDefinition.AttackSpec.CriticalChance.Value;
+            float multiplier = context.AttackDefinition.AttackSpec.CriticalMultiplier.Value;
 
             if (Random.value >= chance)
             {
@@ -30,3 +30,4 @@ namespace KillChord.Runtime.Application.InGame.Battle
         }
     }
 }
+
