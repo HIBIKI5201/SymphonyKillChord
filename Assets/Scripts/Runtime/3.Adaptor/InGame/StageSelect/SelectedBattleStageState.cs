@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
     public class SelectedBattleStageState
     {
         /// <summary> 現在選択されているステージ定義。 </summary>
-        public StageDefinition CurrentStageDefinition
+        public BattleStageDefinition CurrentStageDefinition
         {
             get
             {
@@ -58,16 +58,11 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
         /// </summary>
         /// <param name="stageDefinition"> 選択するステージ定義。 </param>
         /// <param name="returnSceneName"> 戦闘終了後に戻るOutGameシーン名。 </param>
-        public void SelectBattleStage(StageDefinition stageDefinition, string returnSceneName)
+        public void SelectBattleStage(BattleStageDefinition stageDefinition, string returnSceneName)
         {
             if (stageDefinition == null)
             {
                 throw new ArgumentNullException(nameof(stageDefinition));
-            }
-
-            if (stageDefinition.StageType != StageType.Battle)
-            {
-                throw new ArgumentException($"ステージタイプがBattleではありません。StageType={stageDefinition.StageType}", nameof(stageDefinition));
             }
 
             if (string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName))
@@ -93,7 +88,7 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
             _returnSceneName = string.Empty;
         }
 
-        private StageDefinition _currentBattleStageDefinition = null;
+        private BattleStageDefinition _currentBattleStageDefinition;
         private string _returnSceneName = string.Empty;
     }
 }

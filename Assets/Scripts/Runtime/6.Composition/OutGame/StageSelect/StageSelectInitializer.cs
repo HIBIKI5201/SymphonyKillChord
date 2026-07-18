@@ -70,7 +70,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SelectedMissionState _selectedMissionState;
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private BattleSortieSelectionService _battleSortieSelectionService;
-        private NodeTransitionRuleResolver _nodeTransitionRuleResolver;
         private StageTreeAsset _loadedStageTreeAsset;
         private SaveData _loadedSaveData;
         private bool _isSubscribed;
@@ -120,6 +119,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
+            TryExecutePendingNodeTransitionAfterReturn();
             return _isInitialized;
         }
 
@@ -166,36 +166,32 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
-            if (stageDefinition.StageType == StageType.Battle)
+            ReserveNodeTransitionChain(stageDefinition);
+            if (stageDefinition is BattleStageDefinition battleStageDefinition)
             {
-                _pendingNodeTransitionState?.Clear();
-                if (!TryPrepareBattleSortie(stageDefinition))
+                if (!TryPrepareBattleSortie(battleStageDefinition))
                 {
+                    _pendingNodeTransitionState?.Clear();
                     return;
                 }
             }
-            else if (stageDefinition.StageType == StageType.Scenario)
+            else if (stageDefinition is ScenarioStageDefinition scenarioStageDefinition)
             {
                 _selectedBattleStageState.Clear();
                 _selectedMissionState.Clear();
 
-                if (string.IsNullOrWhiteSpace(stageDefinition.ScenarioId))
-                {
-#if UNITY_EDITOR
-                    Debug.LogError($"[{nameof(StageSelectInitializer)}] シナリオIDが設定されていません。", this);
-#endif
-                    return;
-                }
-
-                TryReserveNodeTransition(stageDefinition);
-                _selectedScenarioState.SelectScenario(stageDefinition.ScenarioId);
+                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
             }
 
-            await _outGameSortieController.RequestSortieAsync(
+            bool requested = await _outGameSortieController.RequestSortieAsync(
                 stageDefinition.StageType,
                 _currentSceneName,
                 stageDefinition.TargetSceneName,
                 _cts.Token);
+            if (!requested)
+            {
+                _pendingNodeTransitionState?.Clear();
+            }
         }
 
         /// <summary>
@@ -203,7 +199,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         /// <param name="stageDefinition"> 出撃するステージ定義です。 </param>
         /// <returns> 出撃準備に成功した場合はtrueです。 </returns>
-        private bool TryPrepareBattleSortie(StageDefinition stageDefinition)
+        private bool TryPrepareBattleSortie(BattleStageDefinition stageDefinition)
         {
             if (_battleSortieSelectionService == null)
             {
@@ -315,8 +311,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             // Presenter 生成前に既知のクリアステージをツリーへ反映する。
             _openUseCase.ApplySavedClearedStages();
-            _nodeTransitionRuleResolver = new NodeTransitionRuleResolver(_stageTree, BuildNodeTransitionRules());
-
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
@@ -347,7 +341,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedStageTreeAsset = null;
             _loadedSaveData = null;
-            _nodeTransitionRuleResolver = null;
             _battleSortieSelectionService = null;
             _isInitialized = false;
         }
@@ -499,10 +492,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     現在のステージに適用できる後続遷移を予約します。
+        ///     現在のステージから連続する自動遷移を予約する。
         /// </summary>
         /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
-        private void TryReserveNodeTransition(StageDefinition stageDefinition)
+        private void ReserveNodeTransitionChain(StageDefinition stageDefinition)
         {
             if (_pendingNodeTransitionState == null)
             {
@@ -510,63 +503,109 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             _pendingNodeTransitionState.Clear();
-            if (_nodeTransitionRuleResolver == null
-                || stageDefinition == null
-                || stageDefinition.StageType != StageType.Scenario)
+            if (stageDefinition == null)
             {
                 return;
             }
 
-            if (!_nodeTransitionRuleResolver.TryResolve(
-                    stageDefinition,
-                    _loadedSaveData.Tutorial.IsTutorialCompleted,
-                    out NodeTransitionRule resolvedRule,
-                    out StageDefinition targetStageDefinition))
+            HashSet<StageId> visitedStageIds = new();
+            StageDefinition currentStageDefinition = stageDefinition;
+            while (_stageTree.TryGetAutoAdvanceTarget(
+                       currentStageDefinition.StageId,
+                       out StageDefinition targetStageDefinition))
             {
-                return;
-            }
+                if (!visitedStageIds.Add(currentStageDefinition.StageId))
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"[{nameof(StageSelectInitializer)}] 自動遷移に循環があります。" +
+                        $"StageId: {currentStageDefinition.StageId.Value}",
+                        this);
+#endif
+                    _pendingNodeTransitionState.Clear();
+                    return;
+                }
 
-            _pendingNodeTransitionState.Reserve(new PendingNodeTransition(
-                resolvedRule.ActionType,
-                targetStageDefinition,
-                _currentSceneName));
+                _pendingNodeTransitionState.Reserve(new PendingNodeTransition(
+                    currentStageDefinition.StageId,
+                    targetStageDefinition,
+                    _currentSceneName));
+                currentStageDefinition = targetStageDefinition;
+            }
         }
 
         /// <summary>
-        ///     ノード連結ルール一覧を構築します。
+        ///     バトルからホームへ戻った後の予約済み自動遷移を実行する。
         /// </summary>
-        /// <returns> 構築したルール一覧です。 </returns>
-        private List<NodeTransitionRule> BuildNodeTransitionRules()
+        private async void TryExecutePendingNodeTransitionAfterReturn()
         {
-            List<NodeTransitionRule> rules = new();
-
-            foreach (StageNode node in _stageTree.Nodes)
+            if (_pendingNodeTransitionState == null
+                || !_pendingNodeTransitionState.HasPending)
             {
-                if (node?.Definition == null
-                    || node.Definition.StageType != StageType.Scenario)
-                {
-                    continue;
-                }
-
-                IReadOnlyList<StageId> nextIds = _stageTree.GetNextIds(node.Id);
-                for (int i = 0; i < nextIds.Count; i++)
-                {
-                    if (!_stageTree.TryGetDefinition(nextIds[i], out StageDefinition nextStageDefinition)
-                        || nextStageDefinition.StageType != StageType.Battle)
-                    {
-                        continue;
-                    }
-
-                    rules.Add(new NodeTransitionRule(
-                        node.Id,
-                        true,
-                        NodeTransitionActionType.StartBattle,
-                        nextStageDefinition.StageId,
-                        nextStageDefinition.IsTutorial ? 100 : 0));
-                }
+                return;
             }
 
-            return rules;
+            if (!_pendingNodeTransitionState.TryConsumeCompleted(
+                    out PendingNodeTransition pendingNodeTransition))
+            {
+                _pendingNodeTransitionState.Clear();
+                return;
+            }
+
+            try
+            {
+                if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
+                {
+                    _pendingNodeTransitionState.Clear();
+                }
+            }
+            catch (System.OperationCanceledException)
+            {
+            }
+            catch (System.Exception exception)
+            {
+                _pendingNodeTransitionState.Clear();
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     予約済み遷移の対象ステージを自動開始する。
+        /// </summary>
+        /// <param name="pendingNodeTransition"> 実行する予約済み遷移。</param>
+        /// <returns> 開始要求に成功した場合はtrue。</returns>
+        private async Task<bool> ExecutePendingNodeTransitionAsync(
+            PendingNodeTransition pendingNodeTransition)
+        {
+            if (pendingNodeTransition.TargetStageDefinition
+                is BattleStageDefinition battleStageDefinition)
+            {
+                _selectedScenarioState.Clear();
+                if (!_battleSortieSelectionService.TryPrepareBattleSortie(
+                        battleStageDefinition,
+                        pendingNodeTransition.ReturnSceneName))
+                {
+                    return false;
+                }
+
+                return _outGameSortieController.RequestImmediateBattleSortie(
+                    battleStageDefinition.TargetSceneName);
+            }
+
+            if (pendingNodeTransition.TargetStageDefinition
+                is ScenarioStageDefinition scenarioStageDefinition)
+            {
+                _selectedBattleStageState.Clear();
+                _selectedMissionState.Clear();
+                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
+                return await _outGameSortieController.RequestSortieAsync(
+                    StageType.Scenario,
+                    _currentSceneName,
+                    scenarioStageDefinition.TargetSceneName,
+                    _cts.Token);
+            }
+
+            return false;
         }
 
         /// <summary>
