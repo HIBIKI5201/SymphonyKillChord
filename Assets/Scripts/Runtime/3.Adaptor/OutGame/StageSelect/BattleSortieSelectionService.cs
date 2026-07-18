@@ -17,10 +17,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
         /// <param name="returnSceneName"> 戦闘終了後の帰還先シーン名です。 </param>
         /// <returns> 準備に成功した場合はtrueです。 </returns>
-        public bool TryPrepareBattleSortie(StageDefinition stageDefinition, string returnSceneName)
+        public bool TryPrepareBattleSortie(
+            BattleStageDefinition stageDefinition,
+            string returnSceneName)
         {
             if (stageDefinition == null
-                || stageDefinition.StageType != StageType.Battle
                 || stageDefinition.MissionDefinition == null
                 || string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName)
                 || string.IsNullOrWhiteSpace(returnSceneName))

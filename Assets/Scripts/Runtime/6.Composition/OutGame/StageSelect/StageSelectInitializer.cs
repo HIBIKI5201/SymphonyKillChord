@@ -24,7 +24,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 {
     /// <summary>
     ///     ステージ選択画面の依存を解決するクラス。
-    ///     UIBuilder で配置されたノード要素・接続線要素を収集して StageTree と紐付けます。
+    ///     StageTreeから作戦画面のノードと接続線を生成して各機能を紐付ける。
     /// </summary>
     public sealed class StageSelectInitializer : OutGameInitializationModuleBase
     {
@@ -38,12 +38,34 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string NODE_USS_CLASS = "stage-node";
         /// <summary> 接続線要素のUSSクラス名。 </summary>
         private const string CONNECTION_USS_CLASS = "stage-connection";
-        /// <summary> 接続線要素のname形式。 </summary>
-        private const string CONNECTION_NAME_FORMAT = "{fromId}-{toId}";
-        /// <summary> ステージIDのSourceDataProviderカテゴリ。 </summary>
-        private const string STAGE_ID_CATEGORY = "Stage";
+        /// <summary> 接続線塗りつぶし要素のUSSクラス名。 </summary>
+        private const string CONNECTION_FILL_USS_CLASS = "stage-connection__fill";
+        /// <summary> 通常ステージノードのUSSクラス名。 </summary>
+        private const string STAGE_NODE_USS_CLASS = "stage-node--stage";
+        /// <summary> バトルステージノードのUSSクラス名。 </summary>
+        private const string BATTLE_NODE_USS_CLASS = "stage-node--boss";
+        /// <summary> ステージノードラベルのUSSクラス名。 </summary>
+        private const string NODE_LABEL_USS_CLASS = "stage-node__label";
+        /// <summary> 作戦マップScrollView要素名。 </summary>
+        private const string STAGE_MAP_SCROLL_VIEW_NAME = "StageNodeRoot";
+        /// <summary> 作戦マップ内容要素名。 </summary>
+        private const string STAGE_MAP_CONTENT_NAME = "MainRow";
+        /// <summary> 自動生成する作戦マップ描画領域名。 </summary>
+        private const string STAGE_MAP_CANVAS_NAME = "StageMapCanvas";
+        /// <summary> 接続線塗りつぶし要素名。 </summary>
+        private const string CONNECTION_FILL_NAME = "ConnectionFill";
         /// <summary> ステージ詳細画面のルート要素名。 </summary>
         private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
+        /// <summary> ノードの一辺の長さ。 </summary>
+        private const float NODE_SIZE = 100.0f;
+        /// <summary> 列間の中心距離。 </summary>
+        private const float HORIZONTAL_SPACING = 220.0f;
+        /// <summary> 行間の中心距離。 </summary>
+        private const float VERTICAL_SPACING = 160.0f;
+        /// <summary> マップ内容の周囲余白。 </summary>
+        private const float MAP_PADDING = 40.0f;
+        /// <summary> 接続線の太さ。 </summary>
+        private const float CONNECTION_THICKNESS = 14.0f;
 
         [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
         private UIDocument _uiDocument;
@@ -70,9 +92,12 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SelectedMissionState _selectedMissionState;
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private BattleSortieSelectionService _battleSortieSelectionService;
-        private NodeTransitionRuleResolver _nodeTransitionRuleResolver;
         private StageTreeAsset _loadedStageTreeAsset;
         private SaveData _loadedSaveData;
+        private ScrollView _stageMapScrollView;
+        private VisualElement _stageMapContent;
+        private VisualElement _stageMapCanvas;
+        private float _stageMapCanvasHeight;
         private bool _isSubscribed;
 
         /// <summary>
@@ -120,6 +145,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
+            TryExecutePendingNodeTransitionAfterReturn();
             return _isInitialized;
         }
 
@@ -166,36 +192,32 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
-            if (stageDefinition.StageType == StageType.Battle)
+            ReserveNodeTransitionChain(stageDefinition);
+            if (stageDefinition is BattleStageDefinition battleStageDefinition)
             {
-                _pendingNodeTransitionState?.Clear();
-                if (!TryPrepareBattleSortie(stageDefinition))
+                if (!TryPrepareBattleSortie(battleStageDefinition))
                 {
+                    _pendingNodeTransitionState?.Clear();
                     return;
                 }
             }
-            else if (stageDefinition.StageType == StageType.Scenario)
+            else if (stageDefinition is ScenarioStageDefinition scenarioStageDefinition)
             {
                 _selectedBattleStageState.Clear();
                 _selectedMissionState.Clear();
 
-                if (string.IsNullOrWhiteSpace(stageDefinition.ScenarioId))
-                {
-#if UNITY_EDITOR
-                    Debug.LogError($"[{nameof(StageSelectInitializer)}] シナリオIDが設定されていません。", this);
-#endif
-                    return;
-                }
-
-                TryReserveNodeTransition(stageDefinition);
-                _selectedScenarioState.SelectScenario(stageDefinition.ScenarioId);
+                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
             }
 
-            await _outGameSortieController.RequestSortieAsync(
+            bool requested = await _outGameSortieController.RequestSortieAsync(
                 stageDefinition.StageType,
                 _currentSceneName,
                 stageDefinition.TargetSceneName,
                 _cts.Token);
+            if (!requested)
+            {
+                _pendingNodeTransitionState?.Clear();
+            }
         }
 
         /// <summary>
@@ -203,7 +225,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         /// <param name="stageDefinition"> 出撃するステージ定義です。 </param>
         /// <returns> 出撃準備に成功した場合はtrueです。 </returns>
-        private bool TryPrepareBattleSortie(StageDefinition stageDefinition)
+        private bool TryPrepareBattleSortie(BattleStageDefinition stageDefinition)
         {
             if (_battleSortieSelectionService == null)
             {
@@ -220,6 +242,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private async void HandleStageSelectScreenCompleted()
         {
             await ApplyNewlyClearedStagesAsync(_cts.Token);
+        }
+
+        /// <summary>
+        ///     作戦マップの表示領域変更に合わせて縦中央位置を更新する。
+        /// </summary>
+        /// <param name="evt"> 変更後の表示領域情報。</param>
+        private void StageMapViewportGeometryChangedHandler(GeometryChangedEvent evt)
+        {
+            UpdateStageMapVerticalAlignment(evt.newRect.height);
         }
 
         /// <summary>
@@ -315,15 +346,42 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             // Presenter 生成前に既知のクリアステージをツリーへ反映する。
             _openUseCase.ApplySavedClearedStages();
-            _nodeTransitionRuleResolver = new NodeTransitionRuleResolver(_stageTree, BuildNodeTransitionRules());
-
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
 
             // --- View 層（接続線・ノード）---
-            var connectionViewMap = BuildConnectionViewMap(root);
-            BuildNodeComponents(root, connectionViewMap);
+            var layoutBuilder = new StageMapLayoutBuilder();
+            IReadOnlyDictionary<StageId, StageMapNodePosition> nodePositions;
+            try
+            {
+                nodePositions = layoutBuilder.Build(_stageTree, out int rootCount);
+#if UNITY_EDITOR
+                if (rootCount > 1)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(StageSelectInitializer)}] 起点ステージが{rootCount}個あります。" +
+                        "作戦画面の左端に複数配置します。",
+                        this);
+                }
+#endif
+            }
+            catch (System.InvalidOperationException exception)
+            {
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] {exception.Message}", this);
+                return false;
+            }
+
+            if (!TryBuildStageMapElements(
+                    root,
+                    nodePositions,
+                    out Dictionary<StageId, VisualElement> nodeElementMap,
+                    out Dictionary<StageId, List<IStageConnectionViewModel>> connectionViewMap))
+            {
+                return false;
+            }
+
+            BuildNodeComponents(nodeElementMap, connectionViewMap);
 
             // --- Adaptor 層 ---
             BuildControllers();
@@ -340,6 +398,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             Unsubscribe();
             _isSubscribed = false;
+            UnregisterStageMapGeometryCallback();
             _cts?.Cancel();
             DisposeNodeComponents();
             _cts?.Dispose();
@@ -347,7 +406,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedStageTreeAsset = null;
             _loadedSaveData = null;
-            _nodeTransitionRuleResolver = null;
+            _stageMapScrollView = null;
+            _stageMapContent = null;
+            _stageMapCanvas = null;
+            _stageMapCanvasHeight = 0.0f;
             _battleSortieSelectionService = null;
             _isInitialized = false;
         }
@@ -383,109 +445,317 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     接続線 VisualElement を収集し、ToStageId をキーとした Map を構築します。
+        ///     StageTreeの配置情報からノードと接続線のVisualElementを生成する。
         /// </summary>
-        /// <param name="root"> 検索対象のルート VisualElement。</param>
-        /// <returns> ToStageId → StageNodeConnectionView の辞書。</returns>
-        private Dictionary<StageId, StageNodeConnectionView> BuildConnectionViewMap(VisualElement root)
+        /// <param name="root"> 作戦画面のルート要素。</param>
+        /// <param name="nodePositions"> ステージID別のグリッド位置。</param>
+        /// <param name="nodeElementMap"> 生成したノード要素。</param>
+        /// <param name="connectionViewMap"> 接続先別の接続線ViewModel一覧。</param>
+        /// <returns> 生成に成功した場合はtrue。</returns>
+        private bool TryBuildStageMapElements(
+            VisualElement root,
+            IReadOnlyDictionary<StageId, StageMapNodePosition> nodePositions,
+            out Dictionary<StageId, VisualElement> nodeElementMap,
+            out Dictionary<StageId, List<IStageConnectionViewModel>> connectionViewMap)
         {
-            // 接続線要素の name は "{fromId}-{toId}" 形式で設定しておくこと
-            // 例）stage_tutorial-stage_02
-            var connectionElements = root.Query<VisualElement>(className: CONNECTION_USS_CLASS).ToList();
-            var connectionViewMap = new Dictionary<StageId, StageNodeConnectionView>(connectionElements.Count);
-
-            for (var i = 0; i < connectionElements.Count; i++)
+            nodeElementMap = new Dictionary<StageId, VisualElement>(_stageTree.Nodes.Count);
+            connectionViewMap = new Dictionary<StageId, List<IStageConnectionViewModel>>();
+            ScrollView mapScrollView = root.Q<ScrollView>(STAGE_MAP_SCROLL_VIEW_NAME);
+            VisualElement mapContent = root.Q<VisualElement>(STAGE_MAP_CONTENT_NAME);
+            if (mapScrollView == null || mapContent == null)
             {
-                var element = connectionElements[i];
-                var parts = element.name?.Split('-');
-
-                if (parts == null || parts.Length != 2)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の name が '{CONNECTION_NAME_FORMAT}' 形式ではありません。", this);
-#endif
-                    continue;
-                }
-
-                int toStageIdValue = DataIDHasher.Compute(STAGE_ID_CATEGORY, parts[1]);
-                if (toStageIdValue == 0)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] 接続線要素 '{element.name}' の ToStageId が未設定です。", this);
-#endif
-                    continue;
-                }
-
-                var toStageId = new StageId(toStageIdValue);
-                connectionViewMap.Add(toStageId, new StageNodeConnectionView(element));
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] 作戦マップのScrollViewまたは内容要素が見つかりませんでした。",
+                    this);
+                return false;
             }
 
-            return connectionViewMap;
+            UnregisterStageMapGeometryCallback();
+            mapContent.Clear();
+            var mapCanvas = new VisualElement
+            {
+                name = STAGE_MAP_CANVAS_NAME,
+                pickingMode = PickingMode.Position,
+            };
+            mapContent.Add(mapCanvas);
+            Dictionary<StageId, Vector2> nodeCenters = BuildNodeCenterMap(
+                mapCanvas,
+                nodePositions,
+                out float canvasWidth,
+                out float canvasHeight);
+            mapContent.style.position = Position.Relative;
+            mapContent.style.width = canvasWidth;
+            mapContent.style.flexShrink = 0.0f;
+            BuildConnectionElements(mapCanvas, nodeCenters, connectionViewMap);
+            BuildNodeElements(mapCanvas, nodeCenters, nodeElementMap);
+
+            _stageMapScrollView = mapScrollView;
+            _stageMapContent = mapContent;
+            _stageMapCanvas = mapCanvas;
+            _stageMapCanvasHeight = canvasHeight;
+            _stageMapScrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(
+                StageMapViewportGeometryChangedHandler);
+            UpdateStageMapVerticalAlignment(
+                _stageMapScrollView.contentViewport.resolvedStyle.height);
+            _stageMapScrollView.schedule.Execute(UpdateStageMapVerticalAlignmentAfterLayout);
+            return true;
         }
 
         /// <summary>
-        ///     ノード VisualElement を収集し、StageNodeView / StageNodePresenter を生成して各リストに登録します。
+        ///     UIレイアウト確定後の表示領域サイズを使用して縦中央位置を更新する。
         /// </summary>
-        /// <param name="root"> 検索対象のルート VisualElement。</param>
-        /// <param name="connectionViewMap"> 接続線 View の辞書。</param>
-        private void BuildNodeComponents(VisualElement root, Dictionary<StageId, StageNodeConnectionView> connectionViewMap)
+        private void UpdateStageMapVerticalAlignmentAfterLayout()
         {
-            var nodeElements = root.Query<VisualElement>(className: NODE_USS_CLASS).ToList();
-            _nodeViews = new List<StageNodeView>(nodeElements.Count);
-            _nodePresenters = new List<StageNodePresenter>(nodeElements.Count);
-            _nodePresenterMap = new Dictionary<StageId, StageNodePresenter>(nodeElements.Count);
+            if (_stageMapScrollView == null)
+            {
+                return;
+            }
+
+            float viewportHeight = _stageMapScrollView.contentViewport.layout.height;
+            if (!IsValidLayoutLength(viewportHeight))
+            {
+                viewportHeight = _stageMapScrollView.contentViewport.resolvedStyle.height;
+            }
+            if (!IsValidLayoutLength(viewportHeight))
+            {
+                viewportHeight = _stageMapScrollView.layout.height;
+            }
+
+            UpdateStageMapVerticalAlignment(viewportHeight);
+        }
+
+        /// <summary>
+        ///     作戦マップCanvasを表示領域の縦中央へ配置する。
+        /// </summary>
+        /// <param name="viewportHeight"> ScrollView表示領域の高さ。</param>
+        private void UpdateStageMapVerticalAlignment(float viewportHeight)
+        {
+            if (_stageMapContent == null || _stageMapCanvas == null)
+            {
+                return;
+            }
+
+            if (!IsValidLayoutLength(viewportHeight))
+            {
+                viewportHeight = _stageMapCanvasHeight;
+            }
+
+            float contentHeight = Mathf.Max(_stageMapCanvasHeight, viewportHeight);
+            float canvasTop = (contentHeight - _stageMapCanvasHeight) * 0.5f;
+            _stageMapContent.style.height = contentHeight;
+            _stageMapCanvas.style.top = canvasTop;
+        }
+
+        /// <summary>
+        ///     UIレイアウトから取得した長さが配置計算に使用可能か判定する。
+        /// </summary>
+        /// <param name="length"> 判定する長さ。</param>
+        /// <returns> 有限の正数である場合はtrue。</returns>
+        private static bool IsValidLayoutLength(float length)
+        {
+            return !float.IsNaN(length)
+                && !float.IsInfinity(length)
+                && length > 0.0f;
+        }
+
+        /// <summary>
+        ///     作戦マップ表示領域のサイズ変更購読を解除する。
+        /// </summary>
+        private void UnregisterStageMapGeometryCallback()
+        {
+            _stageMapScrollView?.contentViewport?.UnregisterCallback<GeometryChangedEvent>(
+                StageMapViewportGeometryChangedHandler);
+        }
+
+        /// <summary>
+        ///     StageNodeViewとStageNodePresenterを生成して各リストへ登録する。
+        /// </summary>
+        /// <param name="nodeElementMap"> ステージID別のノード要素。</param>
+        /// <param name="connectionViewMap"> 接続先別の接続線ViewModel一覧。</param>
+        private void BuildNodeComponents(
+            Dictionary<StageId, VisualElement> nodeElementMap,
+            Dictionary<StageId, List<IStageConnectionViewModel>> connectionViewMap)
+        {
+            _nodeViews = new List<StageNodeView>(_stageTree.Nodes.Count);
+            _nodePresenters = new List<StageNodePresenter>(_stageTree.Nodes.Count);
+            _nodePresenterMap = new Dictionary<StageId, StageNodePresenter>(_stageTree.Nodes.Count);
 
             // ノードのアニメーションを順番に再生するためのシーケンサーを生成する
             var sequencer = new StageNodeAnimationSequencer();
 
-            for (var i = 0; i < nodeElements.Count; i++)
+            for (int i = 0; i < _stageTree.Nodes.Count; i++)
             {
-                var nodeElement = nodeElements[i];
-                var stageIdValue = nodeElement.name;
+                StageNode node = _stageTree.Nodes[i];
+                StageId stageId = node.Id;
+                VisualElement nodeElement = nodeElementMap[stageId];
+                var nodeView = new StageNodeView(nodeElement, stageId.Value, _outGameUIEvent);
 
-                // ステージノードの VisualElement の name には可読IDを設定する。
-                if (string.IsNullOrEmpty(stageIdValue))
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] USS クラス '{NODE_USS_CLASS}' の要素 (index:{i}) に name が設定されていません。", this);
-#endif
-                    continue;
-                }
+                // このノードへの接続線View一覧を取得する（存在しない場合はnull）。
+                connectionViewMap.TryGetValue(stageId, out List<IStageConnectionViewModel> incomingConnectionViews);
 
-                int stageIdHash = DataIDHasher.Compute(STAGE_ID_CATEGORY, stageIdValue);
-                if (stageIdHash == 0)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] ノード要素 '{stageIdValue}' の可読IDが未設定です。", this);
-#endif
-                    continue;
-                }
-
-                var stageId = new StageId(stageIdHash);
-                if (!_stageTree.TryGetNode(stageId, out var node))
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning(
-                        $"[{nameof(StageSelectInitializer)}] StageId '{stageIdValue}' に対応するノードが StageTree に存在しません。", this);
-#endif
-                    continue;
-                }
-
-                var nodeView = new StageNodeView(nodeElement, stageIdHash, _outGameUIEvent);
-
-                // このノードへの接続線Viewを取得する（存在しない場合は null）
-                connectionViewMap.TryGetValue(stageId, out var incomingConnectionView);
-
-                var nodePresenter = new StageNodePresenter(node, nodeView, incomingConnectionView, sequencer);
+                var nodePresenter = new StageNodePresenter(
+                    node,
+                    nodeView,
+                    incomingConnectionViews,
+                    sequencer);
 
                 _nodeViews.Add(nodeView);
                 _nodePresenters.Add(nodePresenter);
                 // ID で引けるようにマップへも登録する
                 _nodePresenterMap.Add(stageId, nodePresenter);
+            }
+        }
+
+        /// <summary>
+        ///     グリッド位置を画面座標へ変換してマップ内容サイズを設定する。
+        /// </summary>
+        /// <param name="mapCanvas"> ノードと接続線を格納する描画領域。</param>
+        /// <param name="nodePositions"> ステージID別のグリッド位置。</param>
+        /// <param name="contentWidth"> 描画領域の幅。</param>
+        /// <param name="contentHeight"> 描画領域の高さ。</param>
+        /// <returns> ステージID別のノード中心座標。</returns>
+        private static Dictionary<StageId, Vector2> BuildNodeCenterMap(
+            VisualElement mapCanvas,
+            IReadOnlyDictionary<StageId, StageMapNodePosition> nodePositions,
+            out float contentWidth,
+            out float contentHeight)
+        {
+            Dictionary<int, int> columnCounts = new();
+            int maxColumn = 0;
+            int maxRowCount = 1;
+            foreach (KeyValuePair<StageId, StageMapNodePosition> pair in nodePositions)
+            {
+                int rowCount = pair.Value.Row + 1;
+                if (!columnCounts.TryGetValue(pair.Value.Column, out int currentRowCount)
+                    || rowCount > currentRowCount)
+                {
+                    columnCounts[pair.Value.Column] = rowCount;
+                }
+                maxColumn = Mathf.Max(maxColumn, pair.Value.Column);
+                maxRowCount = Mathf.Max(maxRowCount, rowCount);
+            }
+
+            contentWidth = MAP_PADDING * 2.0f + NODE_SIZE + maxColumn * HORIZONTAL_SPACING;
+            contentHeight = MAP_PADDING * 2.0f + NODE_SIZE + (maxRowCount - 1) * VERTICAL_SPACING;
+            mapCanvas.style.position = Position.Absolute;
+            mapCanvas.style.left = 0.0f;
+            mapCanvas.style.top = 0.0f;
+            mapCanvas.style.width = contentWidth;
+            mapCanvas.style.height = contentHeight;
+
+            Dictionary<StageId, Vector2> nodeCenters = new(nodePositions.Count);
+            foreach (KeyValuePair<StageId, StageMapNodePosition> pair in nodePositions)
+            {
+                int columnCount = columnCounts[pair.Value.Column];
+                float columnOffset = (maxRowCount - columnCount) * VERTICAL_SPACING * 0.5f;
+                float centerX = MAP_PADDING + NODE_SIZE * 0.5f
+                    + pair.Value.Column * HORIZONTAL_SPACING;
+                float centerY = MAP_PADDING + NODE_SIZE * 0.5f + columnOffset
+                    + pair.Value.Row * VERTICAL_SPACING;
+                nodeCenters.Add(pair.Key, new Vector2(centerX, centerY));
+            }
+
+            return nodeCenters;
+        }
+
+        /// <summary>
+        ///     Bindごとの接続線要素を生成する。
+        /// </summary>
+        /// <param name="mapContent"> 接続線を格納する要素。</param>
+        /// <param name="nodeCenters"> ステージID別のノード中心座標。</param>
+        /// <param name="connectionViewMap"> 接続先別の接続線ViewModel一覧。</param>
+        private void BuildConnectionElements(
+            VisualElement mapContent,
+            Dictionary<StageId, Vector2> nodeCenters,
+            Dictionary<StageId, List<IStageConnectionViewModel>> connectionViewMap)
+        {
+            for (int i = 0; i < _stageTree.Connections.Count; i++)
+            {
+                StageNodeConnection connection = _stageTree.Connections[i];
+                Vector2 fromPosition = nodeCenters[connection.FromStageId];
+                Vector2 toPosition = nodeCenters[connection.ToStageId];
+                Vector2 direction = toPosition - fromPosition;
+
+                var connectionElement = new VisualElement
+                {
+                    name = $"connection-{connection.FromStageId.Value}-{connection.ToStageId.Value}",
+                    pickingMode = PickingMode.Ignore,
+                };
+                connectionElement.AddToClassList(CONNECTION_USS_CLASS);
+                connectionElement.style.position = Position.Absolute;
+                connectionElement.style.left = fromPosition.x;
+                connectionElement.style.top = fromPosition.y - CONNECTION_THICKNESS * 0.5f;
+                connectionElement.style.width = direction.magnitude;
+                connectionElement.style.height = CONNECTION_THICKNESS;
+                connectionElement.style.transformOrigin = new TransformOrigin(
+                    Length.Percent(0.0f),
+                    Length.Percent(50.0f));
+                connectionElement.style.rotate = new Rotate(
+                    new Angle(
+                        Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg,
+                        AngleUnit.Degree));
+
+                var fillElement = new VisualElement
+                {
+                    name = CONNECTION_FILL_NAME,
+                    pickingMode = PickingMode.Ignore,
+                };
+                fillElement.AddToClassList(CONNECTION_FILL_USS_CLASS);
+                connectionElement.Add(fillElement);
+                mapContent.Add(connectionElement);
+
+                if (!connectionViewMap.TryGetValue(
+                        connection.ToStageId,
+                        out List<IStageConnectionViewModel> incomingConnections))
+                {
+                    incomingConnections = new List<IStageConnectionViewModel>();
+                    connectionViewMap.Add(connection.ToStageId, incomingConnections);
+                }
+
+                incomingConnections.Add(new StageNodeConnectionView(connectionElement));
+            }
+        }
+
+        /// <summary>
+        ///     ステージごとのノード要素を生成する。
+        /// </summary>
+        /// <param name="mapContent"> ノードを格納する要素。</param>
+        /// <param name="nodeCenters"> ステージID別のノード中心座標。</param>
+        /// <param name="nodeElementMap"> 生成したノード要素。</param>
+        private void BuildNodeElements(
+            VisualElement mapContent,
+            Dictionary<StageId, Vector2> nodeCenters,
+            Dictionary<StageId, VisualElement> nodeElementMap)
+        {
+            for (int i = 0; i < _stageTree.Nodes.Count; i++)
+            {
+                StageNode node = _stageTree.Nodes[i];
+                Vector2 center = nodeCenters[node.Id];
+                var nodeElement = new Button
+                {
+                    name = $"stage-{node.Id.Value}",
+                    text = string.Empty,
+                };
+                nodeElement.AddToClassList("button");
+                nodeElement.AddToClassList(NODE_USS_CLASS);
+                nodeElement.AddToClassList(
+                    node.Definition.StageType == StageType.Battle
+                        ? BATTLE_NODE_USS_CLASS
+                        : STAGE_NODE_USS_CLASS);
+                nodeElement.style.position = Position.Absolute;
+                nodeElement.style.left = center.x - NODE_SIZE * 0.5f;
+                nodeElement.style.top = center.y - NODE_SIZE * 0.5f;
+                nodeElement.style.width = NODE_SIZE;
+                nodeElement.style.height = NODE_SIZE;
+
+                var label = new Label(node.Definition.StageName)
+                {
+                    pickingMode = PickingMode.Ignore,
+                };
+                label.AddToClassList(NODE_LABEL_USS_CLASS);
+                nodeElement.Add(label);
+                mapContent.Add(nodeElement);
+                nodeElementMap.Add(node.Id, nodeElement);
             }
         }
 
@@ -499,10 +769,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     現在のステージに適用できる後続遷移を予約します。
+        ///     現在のステージから連続する自動遷移を予約する。
         /// </summary>
         /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
-        private void TryReserveNodeTransition(StageDefinition stageDefinition)
+        private void ReserveNodeTransitionChain(StageDefinition stageDefinition)
         {
             if (_pendingNodeTransitionState == null)
             {
@@ -510,63 +780,109 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             _pendingNodeTransitionState.Clear();
-            if (_nodeTransitionRuleResolver == null
-                || stageDefinition == null
-                || stageDefinition.StageType != StageType.Scenario)
+            if (stageDefinition == null)
             {
                 return;
             }
 
-            if (!_nodeTransitionRuleResolver.TryResolve(
-                    stageDefinition,
-                    _loadedSaveData.Tutorial.IsTutorialCompleted,
-                    out NodeTransitionRule resolvedRule,
-                    out StageDefinition targetStageDefinition))
+            HashSet<StageId> visitedStageIds = new();
+            StageDefinition currentStageDefinition = stageDefinition;
+            while (_stageTree.TryGetAutoAdvanceTarget(
+                       currentStageDefinition.StageId,
+                       out StageDefinition targetStageDefinition))
             {
-                return;
-            }
+                if (!visitedStageIds.Add(currentStageDefinition.StageId))
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(
+                        $"[{nameof(StageSelectInitializer)}] 自動遷移に循環があります。" +
+                        $"StageId: {currentStageDefinition.StageId.Value}",
+                        this);
+#endif
+                    _pendingNodeTransitionState.Clear();
+                    return;
+                }
 
-            _pendingNodeTransitionState.Reserve(new PendingNodeTransition(
-                resolvedRule.ActionType,
-                targetStageDefinition,
-                _currentSceneName));
+                _pendingNodeTransitionState.Reserve(new PendingNodeTransition(
+                    currentStageDefinition.StageId,
+                    targetStageDefinition,
+                    _currentSceneName));
+                currentStageDefinition = targetStageDefinition;
+            }
         }
 
         /// <summary>
-        ///     ノード連結ルール一覧を構築します。
+        ///     バトルからホームへ戻った後の予約済み自動遷移を実行する。
         /// </summary>
-        /// <returns> 構築したルール一覧です。 </returns>
-        private List<NodeTransitionRule> BuildNodeTransitionRules()
+        private async void TryExecutePendingNodeTransitionAfterReturn()
         {
-            List<NodeTransitionRule> rules = new();
-
-            foreach (StageNode node in _stageTree.Nodes)
+            if (_pendingNodeTransitionState == null
+                || !_pendingNodeTransitionState.HasPending)
             {
-                if (node?.Definition == null
-                    || node.Definition.StageType != StageType.Scenario)
-                {
-                    continue;
-                }
-
-                IReadOnlyList<StageId> nextIds = _stageTree.GetNextIds(node.Id);
-                for (int i = 0; i < nextIds.Count; i++)
-                {
-                    if (!_stageTree.TryGetDefinition(nextIds[i], out StageDefinition nextStageDefinition)
-                        || nextStageDefinition.StageType != StageType.Battle)
-                    {
-                        continue;
-                    }
-
-                    rules.Add(new NodeTransitionRule(
-                        node.Id,
-                        true,
-                        NodeTransitionActionType.StartBattle,
-                        nextStageDefinition.StageId,
-                        nextStageDefinition.IsTutorial ? 100 : 0));
-                }
+                return;
             }
 
-            return rules;
+            if (!_pendingNodeTransitionState.TryConsumeCompleted(
+                    out PendingNodeTransition pendingNodeTransition))
+            {
+                _pendingNodeTransitionState.Clear();
+                return;
+            }
+
+            try
+            {
+                if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
+                {
+                    _pendingNodeTransitionState.Clear();
+                }
+            }
+            catch (System.OperationCanceledException)
+            {
+            }
+            catch (System.Exception exception)
+            {
+                _pendingNodeTransitionState.Clear();
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     予約済み遷移の対象ステージを自動開始する。
+        /// </summary>
+        /// <param name="pendingNodeTransition"> 実行する予約済み遷移。</param>
+        /// <returns> 開始要求に成功した場合はtrue。</returns>
+        private async Task<bool> ExecutePendingNodeTransitionAsync(
+            PendingNodeTransition pendingNodeTransition)
+        {
+            if (pendingNodeTransition.TargetStageDefinition
+                is BattleStageDefinition battleStageDefinition)
+            {
+                _selectedScenarioState.Clear();
+                if (!_battleSortieSelectionService.TryPrepareBattleSortie(
+                        battleStageDefinition,
+                        pendingNodeTransition.ReturnSceneName))
+                {
+                    return false;
+                }
+
+                return _outGameSortieController.RequestImmediateBattleSortie(
+                    battleStageDefinition.TargetSceneName);
+            }
+
+            if (pendingNodeTransition.TargetStageDefinition
+                is ScenarioStageDefinition scenarioStageDefinition)
+            {
+                _selectedBattleStageState.Clear();
+                _selectedMissionState.Clear();
+                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
+                return await _outGameSortieController.RequestSortieAsync(
+                    StageType.Scenario,
+                    _currentSceneName,
+                    scenarioStageDefinition.TargetSceneName,
+                    _cts.Token);
+            }
+
+            return false;
         }
 
         /// <summary>
