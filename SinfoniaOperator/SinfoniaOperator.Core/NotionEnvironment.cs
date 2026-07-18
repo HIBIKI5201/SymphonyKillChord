@@ -1,12 +1,37 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal readonly struct NotionEnvironment
+    /// <summary>
+    ///     Notionへのアクセスに必要な設定値を保持する構造体。
+    /// </summary>
+    public readonly struct NotionEnvironment
     {
         public NotionEnvironment(
+            string notionToken,
+            string taskDatabaseID,
+            string sprintDatabaseID,
+            string datePropertyName,
+            string namePropertyName,
+            string statusPropertyName,
+            string[] taskDoneStatusName)
+        {
+            NotionToken = notionToken;
+            TaskDatabaseID = taskDatabaseID;
+            SprintDatabaseID = sprintDatabaseID;
+            DatePropertyName = datePropertyName;
+            NamePropertyName = namePropertyName;
+            StatusPropertyName = statusPropertyName;
+            TaskDoneStatusName = taskDoneStatusName;
+        }
+
+        /// <summary>
+        ///     設定値（JSON設定または環境変数）を読み込んで構築する。
+        ///     必要な設定値が見つからない場合は例外を投げる。
+        /// </summary>
+        public static NotionEnvironment FromConfig(
             string notionTokenKey,
             string taskDatabaseIDKey,
             string sprintDatabaseIDKey,
@@ -35,13 +60,14 @@ namespace SinfoniaStudio.SinfoniaOperator
                 throw new ArgumentException("必要な環境変数が見つかりませんでした。");
             }
 
-            NotionToken = notionToken;
-            TaskDatabaseID = taskDatabaseID;
-            SprintDatabaseID = sprintDatabaseID;
-            DatePropertyName = datePropertyName;
-            NamePropertyName = namePropertyName;
-            StatusPropertyName = statusPropertyName;
-            TaskDoneStatusName = GetTaskDoneStatuses(taskDoneStatusName);
+            return new NotionEnvironment(
+                notionToken,
+                taskDatabaseID,
+                sprintDatabaseID,
+                datePropertyName,
+                namePropertyName,
+                statusPropertyName,
+                GetTaskDoneStatuses(taskDoneStatusName));
         }
 
         public readonly string NotionToken;
@@ -65,7 +91,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             return sb.ToString();
         }
 
-        private string[] GetTaskDoneStatuses(string value)
+        /// <summary>
+        ///     カンマ区切りの完了ステータス名を配列に分割する。
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string[] GetTaskDoneStatuses(string value)
         {
             return value.Split(',').Select(s => s.Trim()).ToArray();
         }

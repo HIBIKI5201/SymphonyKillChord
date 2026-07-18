@@ -1,13 +1,17 @@
-using System;
+﻿using System;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
-    internal readonly struct EnvironmentVariable
+    /// <summary>
+    ///     設定値のキーと値を保持する構造体。
+    ///     値はOperatorConfig経由（JSON設定または環境変数）で取得する。
+    /// </summary>
+    public readonly struct EnvironmentVariable
     {
         public EnvironmentVariable(string key)
         {
             Key = key;
-            Value = Environment.GetEnvironmentVariable(key) ?? string.Empty;
+            Value = OperatorConfig.GetValue(key);
         }
 
         public readonly string Key;
@@ -17,9 +21,9 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             if (string.IsNullOrEmpty(variable.Value))
             {
-                throw new InvalidOperationException($"環境変数 {variable.Key} が見つかりませんでした。");
+                throw new InvalidOperationException($"設定値 {variable.Key} が見つかりませんでした。");
             }
-            
+
             return variable.Value;
         }
 
@@ -27,7 +31,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             if (!ulong.TryParse(variable.Value, out ulong result))
             {
-                throw new InvalidOperationException($"環境変数 {variable.Key} の値 {variable.Value} を数値に変換できませんでした。");
+                throw new InvalidOperationException($"設定値 {variable.Key} の値 {variable.Value} を数値に変換できませんでした。");
             }
 
             return result;

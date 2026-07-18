@@ -1,42 +1,38 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class SinfoniaOperator
     {
-        private const string DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN";
-        private const string DISCORD_TASK_CHANNEL_ID = "DISCORD_TASK_CHANNEL_ID";
-        private const string DISCORD_TASK_ALERT_CHANNEL_ID = "DISCORD_TASK_ALERT_CHANNEL_ID";
-        private const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
-        private const string NOTION_TOKEN = "NOTION_TOKEN";
-        private const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
-        private const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
-        private const string NOTION_DATABASE_DATE_PROPERTY = "NOTION_DATABASE_DATE_PROPERTY";
-        private const string NOTION_DATABASE_NAME_PROPERTY = "NOTION_DATABASE_NAME_PROPERTY";
-        private const string NOTION_DATABASE_STATUS_PROPERTY = "NOTION_DATABASE_STATUS_PROPERTY";
-        private const string NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY = "NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY";
+        /// <summary> ローカル実行用のJSON設定ファイル名。 </summary>
+        private const string DEFAULT_CONFIG_FILE = "sinfonia-operator.settings.json";
 
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
             Console.WriteLine("[Main] SinfoniaOperator 起動中...");
+
+            // 設定ソースを選択する。JSON設定があれば優先し、なければ環境変数を使用する。
+            if (!TryLoadConfig(args)) { return; }
+
             DiscordEnvironment discordEnv = default;
             NotionEnvironment notionEnv = default;
             try
             {
                 discordEnv = new DiscordEnvironment(
-                    DISCORD_BOT_TOKEN,
-                    DISCORD_TASK_CHANNEL_ID,
-                    DISCORD_TASK_ALERT_CHANNEL_ID,
-                    DISCORD_SPRINT_CHANNEL_ID);
-                notionEnv = new NotionEnvironment(
-                    NOTION_TOKEN,
-                    NOTION_TASK_DATABASE_ID,
-                    NOTION_SPRINT_DATABASE_ID,
-                    NOTION_DATABASE_DATE_PROPERTY,
-                    NOTION_DATABASE_NAME_PROPERTY,
-                    NOTION_DATABASE_STATUS_PROPERTY,
-                    NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY);
+                    OperatorConfigKeys.DISCORD_BOT_TOKEN,
+                    OperatorConfigKeys.DISCORD_TASK_CHANNEL_ID,
+                    OperatorConfigKeys.DISCORD_TASK_ALERT_CHANNEL_ID,
+                    OperatorConfigKeys.DISCORD_SPRINT_CHANNEL_ID);
+                notionEnv = NotionEnvironment.FromConfig(
+                    OperatorConfigKeys.NOTION_TOKEN,
+                    OperatorConfigKeys.NOTION_TASK_DATABASE_ID,
+                    OperatorConfigKeys.NOTION_SPRINT_DATABASE_ID,
+                    OperatorConfigKeys.NOTION_DATABASE_DATE_PROPERTY,
+                    OperatorConfigKeys.NOTION_DATABASE_NAME_PROPERTY,
+                    OperatorConfigKeys.NOTION_DATABASE_STATUS_PROPERTY,
+                    OperatorConfigKeys.NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY);
             }
             catch (Exception ex)
             {
@@ -63,6 +59,38 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             await Task.WhenAll(taskListTask, sprintTask);
             Console.WriteLine("[Main] 全ての処理が完了しました。");
+        }
+
+        /// <summary>
+        ///     JSON設定ファイルの読み込みを試みる。
+        ///     引数でパスが指定された場合はそのファイルを必須とし、見つからなければfalseを返す。
+        ///     指定が無い場合はカレントディレクトリと実行ファイルの場所を探し、
+        ///     どちらにも無ければ環境変数を使用する。
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static bool TryLoadConfig(string[] args)
+        {
+            // 引数でパスが明示された場合。
+            if (args.Length > 0)
+            {
+                if (!OperatorConfig.LoadJsonFile(args[0]))
+                {
+                    Console.WriteLine($"[Main] 指定されたJSON設定ファイルが見つかりません: {args[0]}");
+                    return false;
+                }
+                return true;
+            }
+
+            // カレントディレクトリ、次に実行ファイルの場所を探す。
+            string baseDirPath = Path.Combine(AppContext.BaseDirectory, DEFAULT_CONFIG_FILE);
+            if (OperatorConfig.LoadJsonFile(DEFAULT_CONFIG_FILE) || OperatorConfig.LoadJsonFile(baseDirPath))
+            {
+                return true;
+            }
+
+            Console.WriteLine("[Main] JSON設定が見つからないため、環境変数を使用します。");
+            return true;
         }
 
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
