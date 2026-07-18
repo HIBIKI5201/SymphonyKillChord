@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -14,7 +15,7 @@ namespace KillChord.Editor.TicketSystem
     {
         // --- ウィンドウの描画部分 ---
 
-        [MenuItem("Window/Master Ticket Window")]
+        [MenuItem(EditorWindowPathConst.TICKET_SYSTEM_PATH)]
         public static void ShowWindow()
         {
             GetWindow<MasterTicketWindow>("Master Ticket Window");
