@@ -41,6 +41,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             // 初期状態を反映する
             _viewModel.UpdateStatus(ConvertStatus(node.Status));
+            if ((node.Status == StageStatus.Unlocked || node.Status == StageStatus.Cleared)
+                && _incomingConnections != null)
+            {
+                for (int i = 0; i < _incomingConnections.Count; i++)
+                {
+                    _incomingConnections[i].ApplyFilledState();
+                }
+            }
 
             // 状態変化を購読する
             _node.OnStatusChanged += HandleStatusChanged;

@@ -195,6 +195,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             ReserveNodeTransitionChain(stageDefinition);
             if (stageDefinition is BattleStageDefinition battleStageDefinition)
             {
+                _selectedScenarioState.Clear();
                 if (!TryPrepareBattleSortie(battleStageDefinition))
                 {
                     _pendingNodeTransitionState?.Clear();
