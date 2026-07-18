@@ -9,22 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: befc44a5af6a869489c5d3b14768302e, type: 3}
-  m_Name: Stage_06
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageNodeAsset
+  m_Script: {fileID: 11500000, guid: 85625acbabd549f080e9b621c889f688, type: 3}
+  m_Name: BattleStage_03
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
   _plannerMemo: 
   _stageId:
-    _id: stage_06
-    _hashId: 536051464
-  _stageType: 0
+    _id: battle_stage_03
+    _hashId: -2095617183
   _isInitiallyUnlocked: 1
-  _isTutorial: 0
   _stageName: "\u30C6\u30B9\u30C8"
   _flavorText: "\u30C6\u30B9\u30C8\u30B7\u30FC\u30F3"
   _targetSceneName: InGame
-  _battleSceneName: Stage_02
-  _enemyWaveDefinitionAssetKey: EnemyWaveDefinitionAsset
-  _scenarioId: 
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
+  _isTutorial: 0
+  _battleSceneName: Stage_02
+  _enemyWaveDefinitionAssetKey: EnemyWaveDefinitionAsset
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
