@@ -46,8 +46,10 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
                 if (!_service.HasSequence)
                 {
-                    Debug.LogWarning(
-                        $"[{nameof(EquipmentBgmInitializer)}] セレクターシーケンスが空です。スキル装備と対応表を確認してください。",
+                    // 装備スキルが無い（または対応ラベルが無い）場合はセレクターを操作せず、
+                    // CRIのデフォルト＝通常BGMをそのまま再生する正常系。
+                    Debug.Log(
+                        $"[{nameof(EquipmentBgmInitializer)}] 装備スキルの差分が無いため、通常BGM（セレクター切替なし）で再生します。",
                         this);
                     _service = null;
                     return;
