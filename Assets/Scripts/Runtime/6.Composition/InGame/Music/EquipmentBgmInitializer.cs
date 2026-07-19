@@ -42,7 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
                 SkillBgmSelectorTable table = _labelTable.ToDomain();
                 BgmSelectorSequence sequence = table.CreateSequence(CollectEquippedSkillIds(skillBuild));
-                _service = new EquipmentBgmService(sequence, _measuresPerStep);
+                _service = new EquipmentBgmService(sequence, _measuresPerDivision);
 
                 if (!_service.HasSequence)
                 {
@@ -104,13 +104,13 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
         [SerializeField, Tooltip("スキルIDとCRIセレクターラベル名の対応表。")]
         private BgmSelectorLabelTableAsset _labelTable;
-        [SerializeField, Tooltip("シーケンスを1ステップ進める間隔（小節数）。")]
-        private int _measuresPerStep = DEFAULT_MEASURES_PER_STEP;
+        [SerializeField, Tooltip("セレクターを切り替える1区切りの小節数。16小節ループを原曲/S1/S2/S3の4区切りで回すため既定は4。")]
+        private int _measuresPerDivision = DEFAULT_MEASURES_PER_DIVISION;
 
         /// <summary> CRIのセレクター名。 </summary>
         private const string SELECTOR_NAME = "Selector_BGM";
-        /// <summary> 切り替え間隔の初期値（小節数）。 </summary>
-        private const int DEFAULT_MEASURES_PER_STEP = 1;
+        /// <summary> 1区切りの小節数の初期値。16小節ループを4区切りに分割するため4とする。 </summary>
+        private const int DEFAULT_MEASURES_PER_DIVISION = 4;
 
         private MusicPlayer _musicPlayer;
         private MusicSyncState _musicSyncState;
