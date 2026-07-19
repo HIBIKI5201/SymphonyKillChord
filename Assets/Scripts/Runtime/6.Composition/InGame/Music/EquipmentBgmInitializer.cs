@@ -58,7 +58,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 _musicPlayer.SetSelectorLabel(SELECTOR_NAME, _service.InitialLabel);
                 if (_logSelectorSwitch)
                 {
-                    Debug.Log($"[{nameof(EquipmentBgmInitializer)}] BGMループ開始 → 原曲 : '{_service.InitialLabel}'", this);
+                    Debug.Log($"<color=red>[{nameof(EquipmentBgmInitializer)}] BGMループ開始 → 原曲 : '{_service.InitialLabel}'</color>", this);
                 }
             }
             catch (OperationCanceledException)
@@ -83,7 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 {
                     string kind = label == _service.InitialLabel ? "原曲" : "スキル";
                     Debug.Log(
-                        $"[{nameof(EquipmentBgmInitializer)}] 区切り切替 → {kind} : '{label}' (beat={_musicSyncState.CurrentBeat})",
+                        $"<color=red>[{nameof(EquipmentBgmInitializer)}] 区切り切替 → {kind} : '{label}' (beat={_musicSyncState.CurrentBeat})</color>",
                         this);
                 }
             }
