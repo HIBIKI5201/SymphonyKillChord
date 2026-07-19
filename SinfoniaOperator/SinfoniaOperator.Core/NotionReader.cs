@@ -22,7 +22,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     ページの中身を再帰的に文字列にする。
+        ///     ページの中身をMarkdown文字列にする。
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
@@ -30,7 +30,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             try
             {
-                return await GetBlockChildrenAsync(page.Id);
+                return await GetPageMarkdownAsync(page.Id);
             }
             catch (Exception ex)
             {
@@ -40,80 +40,65 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     ブロックの中身を再帰的に文字列にする。
+        ///     Enhanced Markdown APIを使い、ページの内容をMarkdown文字列として取得する。
+        ///     ページがAPI上限で分割された場合は、未取得ブロックを追加取得して連結する。
         /// </summary>
-        /// <param name="blockId"></param>
+        /// <param name="pageOrBlockId"></param>
         /// <returns></returns>
-        public async Task<string> GetBlockChildrenAsync(string blockId)
+        public async Task<string> GetPageMarkdownAsync(string pageOrBlockId)
         {
-            StringBuilder sb = new();
-            string? startCursor = null;
             using HttpClient http = new();
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _notionToken);
-            http.DefaultRequestHeaders.Add("Notion-Version", NOTION_API_VERSION);
+            http.DefaultRequestHeaders.Add("Notion-Version", NOTION_MARKDOWN_API_VERSION);
 
-            do
+            StringBuilder markdown = new();
+            Queue<string> pendingIds = new();
+            pendingIds.Enqueue(pageOrBlockId);
+            HashSet<string> fetchedIds = new(StringComparer.OrdinalIgnoreCase);
+
+            while (pendingIds.Count > 0)
             {
+                string id = pendingIds.Dequeue();
+                if (!fetchedIds.Add(id)) { continue; }
+
                 try
                 {
-                    StringBuilder url = new($"https://api.notion.com/v1/blocks/{blockId}/children?page_size=100");
-                    if (!string.IsNullOrEmpty(startCursor))
-                    {
-                        url.Append($"&start_cursor={Uri.EscapeDataString(startCursor)}");
-                    }
-
-                    HttpResponseMessage resp = await http.GetAsync(url.ToString());
+                    HttpResponseMessage resp = await http.GetAsync(
+                        $"https://api.notion.com/v1/pages/{Uri.EscapeDataString(id)}/markdown");
                     if (!resp.IsSuccessStatusCode)
                     {
-                        OperatorLog.Write($"Notion API エラー: {resp.StatusCode} (BlockId: {blockId})");
-                        break;
+                        OperatorLog.Write($"Notion API エラー: {resp.StatusCode} (PageId: {id})");
+                        continue;
                     }
 
                     JObject root = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                    string fragment = root["markdown"]?.ToString() ?? string.Empty;
 
-                    if (root["results"] is not JArray results)
+                    if (markdown.Length > 0) { markdown.AppendLine(); }
+                    markdown.Append(fragment);
+
+                    bool isTruncated = root["truncated"]?.Type == JTokenType.Boolean && root["truncated"]!.Value<bool>();
+                    if (isTruncated)
                     {
-                        OperatorLog.Write($"Notion API レスポンスに results がありません (BlockId: {blockId})");
-                        break;
+                        OperatorLog.Write($"[NotionReader] ページ {id} はAPI上限により分割取得されます。");
                     }
 
-                    foreach (JToken block in results)
+                    if (root["unknown_block_ids"] is JArray unknownIds)
                     {
-                        try
+                        foreach (JToken idToken in unknownIds)
                         {
-                            string type = block["type"]?.ToString() ?? "unknown";
-
-                            ConvertBlock(sb, type, block);
-
-                            if (block["has_children"]?.Type == JTokenType.Boolean &&
-                                block["has_children"]!.Value<bool>())
-                            {
-                                string? childId = block["id"]?.ToString();
-                                if (!string.IsNullOrEmpty(childId))
-                                {
-                                    sb.AppendLine(await GetBlockChildrenAsync(childId));
-                                }
-                            }
-                        }
-                        catch (Exception innerEx)
-                        {
-                            OperatorLog.Write($"ブロック処理中にエラー（部分ブロック）: {innerEx.Message}");
+                            string? childId = idToken.ToString();
+                            if (!string.IsNullOrWhiteSpace(childId)) { pendingIds.Enqueue(childId); }
                         }
                     }
-
-                    startCursor = root["next_cursor"]?.Type == JTokenType.String
-                        ? root["next_cursor"]!.ToString()
-                        : null;
                 }
                 catch (Exception ex)
                 {
-                    OperatorLog.Write($"ブロック取得中にエラーが発生しました（BlockId: {blockId}）: {ex.Message}");
-                    break;
+                    OperatorLog.Write($"Markdown取得中にエラーが発生しました（PageId: {id}）: {ex.Message}");
                 }
+            }
 
-            } while (!string.IsNullOrEmpty(startCursor));
-
-            return sb.ToString();
+            return markdown.ToString();
         }
 
         /// <summary>
@@ -249,139 +234,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             return DEFAULT_NAME;
         }
 
-        private const string BLOCK_TYPE_PARAGRAPH = "paragraph";
-        private const string BLOCK_TYPE_HEADING_1 = "heading_1";
-        private const string BLOCK_TYPE_HEADING_2 = "heading_2";
-        private const string BLOCK_TYPE_HEADING_3 = "heading_3";
-        private const string BLOCK_TYPE_TO_DO = "to_do";
-        private const string BLOCK_TYPE_BULLETED_LIST_ITEM = "bulleted_list_item";
-        private const string BLOCK_TYPE_NUMBERED_LIST_ITEM = "numbered_list_item";
-        private const string BLOCK_TYPE_QUOTE = "quote";
-        private const string BLOCK_TYPE_LINK_PREVIEW = "link_preview";
-
         private readonly string? _notionToken;
+
+        /// <summary> データベースクエリ等、既存のブロックベースAPIで使用するバージョン。 </summary>
         private const string NOTION_API_VERSION = "2022-06-28";
 
-        private static void ConvertBlock(StringBuilder sb, string type, JToken block)
-        {
-            string? text = type switch
-            {
-                BLOCK_TYPE_PARAGRAPH => ConvertBlockParagraph(block),
-                BLOCK_TYPE_HEADING_1 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_1),
-                BLOCK_TYPE_HEADING_2 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_2),
-                BLOCK_TYPE_HEADING_3 => ConvertBlockHeading(block, BLOCK_TYPE_HEADING_3),
-                BLOCK_TYPE_TO_DO => ConvertBlockToDo(block),
-                BLOCK_TYPE_BULLETED_LIST_ITEM => ConvertBlockBulletedListItem(block),
-                BLOCK_TYPE_NUMBERED_LIST_ITEM => ConvertBlockNumberedListItem(block),
-                BLOCK_TYPE_QUOTE => ConvertBlockQuote(block),
-                BLOCK_TYPE_LINK_PREVIEW => ConvertBlockLinkPreview(block),
-                _ => null
-            };
-
-            if (text == null)
-            {
-                OperatorLog.Write($"未対応のブロックタイプ: {type} (BlockId: {block["id"]?.ToString()})");
-                return;
-            }
-
-            sb.AppendLine(text);
-        }
-
-        private static string ExtractPlainTextFromRichTextArray(JToken? richTextArray)
-        {
-            StringBuilder sb = new();
-            if (richTextArray is not JArray array) return string.Empty;
-            foreach (JToken rt in array)
-            {
-                var plainText = rt["plain_text"];
-                if (plainText != null && plainText.Type == JTokenType.String)
-                    sb.Append(plainText.ToString());
-            }
-            return sb.ToString();
-        }
-
-        private static string ConvertBlockParagraph(JToken block)
-        {
-            var pRt = block[BLOCK_TYPE_PARAGRAPH]?["rich_text"];
-            if (pRt != null)
-            {
-                return ExtractPlainTextFromRichTextArray(pRt);
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockHeading(JToken block, string headingType)
-        {
-            var hRt = block[headingType]?["rich_text"];
-            if (hRt != null)
-            {
-                string prefix = headingType switch
-                {
-                    BLOCK_TYPE_HEADING_1 => "# ",
-                    BLOCK_TYPE_HEADING_2 => "## ",
-                    BLOCK_TYPE_HEADING_3 => "### ",
-                    _ => string.Empty
-                };
-                return $"{prefix}{ExtractPlainTextFromRichTextArray(hRt)}";
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockToDo(JToken block)
-        {
-            var todo = block[BLOCK_TYPE_TO_DO];
-            var todoRt = todo?["rich_text"];
-            if (todo != null && todoRt != null)
-            {
-                bool isChecked = todo["checked"]?.Type == JTokenType.Boolean && todo["checked"]!.Value<bool>();
-                string checkbox = isChecked ? "[x]" : "[ ]";
-                return $"{checkbox} {ExtractPlainTextFromRichTextArray(todoRt)}";
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockBulletedListItem(JToken block)
-        {
-            var bulletRt = block[BLOCK_TYPE_BULLETED_LIST_ITEM]?["rich_text"];
-            if (bulletRt != null)
-            {
-                return $"・{ExtractPlainTextFromRichTextArray(bulletRt)}";
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockNumberedListItem(JToken block)
-        {
-            var numRt = block[BLOCK_TYPE_NUMBERED_LIST_ITEM]?["rich_text"];
-            if (numRt != null)
-            {
-                return $"- {ExtractPlainTextFromRichTextArray(numRt)}";
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockQuote(JToken block)
-        {
-            var quoteRt = block[BLOCK_TYPE_QUOTE]?["rich_text"];
-            if (quoteRt != null)
-            {
-                return $"> {ExtractPlainTextFromRichTextArray(quoteRt)}";
-            }
-            return string.Empty;
-        }
-
-        private static string ConvertBlockLinkPreview(JToken block)
-        {
-            var urlEl = block[BLOCK_TYPE_LINK_PREVIEW]?["url"];
-            if (urlEl != null)
-            {
-                string urlString = urlEl.ToString();
-                if (!string.IsNullOrEmpty(urlString))
-                {
-                    return $"[ページリンク]({urlString})";
-                }
-            }
-            return string.Empty;
-        }
+        /// <summary> Enhanced Markdown APIで使用するバージョン。 </summary>
+        private const string NOTION_MARKDOWN_API_VERSION = "2026-03-11";
     }
 }
