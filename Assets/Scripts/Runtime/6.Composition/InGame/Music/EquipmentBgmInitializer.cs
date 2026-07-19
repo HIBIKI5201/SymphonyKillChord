@@ -40,8 +40,17 @@ namespace KillChord.Runtime.Composition.InGame.Music
                     return;
                 }
 
+                IReadOnlyList<int> equippedSkillIds = CollectEquippedSkillIds(skillBuild);
+                if (_logSelectorSwitch)
+                {
+                    Debug.Log(
+                        $"<color=blue>[{nameof(EquipmentBgmInitializer)}] InGame開始時の保持スキルID: " +
+                        $"[{string.Join(", ", equippedSkillIds)}]（{equippedSkillIds.Count}個）</color>",
+                        this);
+                }
+
                 SkillBgmSelectorTable table = _labelTable.ToDomain();
-                BgmSelectorSequence sequence = table.CreateSequence(CollectEquippedSkillIds(skillBuild));
+                BgmSelectorSequence sequence = table.CreateSequence(equippedSkillIds);
                 _service = new EquipmentBgmService(sequence, _measuresPerDivision);
 
                 if (!_service.HasSequence)
