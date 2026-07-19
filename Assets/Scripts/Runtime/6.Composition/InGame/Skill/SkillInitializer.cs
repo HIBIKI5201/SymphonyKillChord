@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         [SerializeField, Tooltip("スキル演出View一覧です。")]
         private SkillView[] _skillVisuals;
         [SerializeField, Tooltip("入力進捗UI設定です。未設定時はPlayer側設定を流用します。")]
-        private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        private SkillInputProgressUIConfig _inputProgressUIConfig;
         [SerializeField, Tooltip("テスト用の装備スキル一覧です。未設定時はPlayer側設定を流用します。")]
         private SkillTemplateAsset[] _equippedSkills;
 

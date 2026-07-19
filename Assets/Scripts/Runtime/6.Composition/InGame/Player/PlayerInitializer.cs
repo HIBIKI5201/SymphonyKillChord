@@ -54,7 +54,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("プレイヤーViewプレハブです。")]
         private PlayerView _playerViewPrefab;
         [SerializeField, Tooltip("入力進捗UI設定です。")]
-        private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        private SkillInputProgressUIConfig _inputProgressUIConfig;
         [SerializeField, Tooltip("プレイヤー共通のアニメーション設定です。")]
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
 
@@ -90,7 +90,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public SkillView[] SkillVisuals => _skillVisuals;
 
         /// <summary> スキル入力進捗UI設定です。 </summary>
-        public SkillInputProgressViewConfigAsset SkillInputProgressViewConfigAsset => _inputProgressViewConfigAsset;
+        public SkillInputProgressUIConfig SkillInputProgressUIConfig => _inputProgressUIConfig;
 
         /// <summary> テスト用装備スキル一覧です。 </summary>
         public SkillTemplateAsset[] EquippedSkillAssets => _equippedSkills;

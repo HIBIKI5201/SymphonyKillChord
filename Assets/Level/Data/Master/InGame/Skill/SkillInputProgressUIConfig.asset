@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79f5234056670b24a9db9028a2b59246, type: 3}
-  m_Name: SkillInputProgressViewConfigAsset
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Skill.SkillInputProgressViewConfigAsset
+  m_Name: SkillInputProgressUIConfig
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillInputProgressUIConfig
   _settings:
   - _beatType: 1
     _normalColor: {r: 0.9578371, g: 0, b: 1, a: 0}
@@ -37,3 +37,14 @@ MonoBehaviour:
     _normalColor: {r: 1, g: 0.47209585, b: 0, a: 1}
     _activeColor: {r: 1, g: 0.82918984, b: 0.6773585, a: 1}
     _icon: {fileID: 0}
+  _inputSuccessScaleMultiplier: 1.25
+  _inputSuccessRotationAngle: 12
+  _inputSuccessDuration: 0.3
+  _inputSuccessEase: 5
+  _inputSuccessRotationFrequency: 5
+  _inputSuccessRotationDampingRatio: 1
+  _resetShakeDistance: 20
+  _resetShakeDuration: 0.35
+  _resetShakeEase: 5
+  _resetShakeFrequency: 6
+  _resetShakeDampingRatio: 1
