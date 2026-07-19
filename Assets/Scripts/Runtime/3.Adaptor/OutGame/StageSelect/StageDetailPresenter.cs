@@ -34,12 +34,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             var def = node.Definition;
 
             // シナリオパートはミッションテキストなし
-            var mainMissionText = def.StageType == StageType.Battle && def.MissionDefinition != null
-                ? def.MissionDefinition.MainMissionText
+            BattleStageDefinition battleDefinition = def as BattleStageDefinition;
+            var mainMissionText = battleDefinition?.MissionDefinition != null
+                ? battleDefinition.MissionDefinition.MainMissionText
                 : null;
 
-            var subMissionTexts = def.StageType == StageType.Battle && def.MissionDefinition != null
-                ? new string[def.MissionDefinition.EvaluationConditions.Count]
+            var subMissionTexts = battleDefinition?.MissionDefinition != null
+                ? new string[battleDefinition.MissionDefinition.EvaluationConditions.Count]
                 : null;
 
             if (subMissionTexts != null)
@@ -47,7 +48,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 // 全てのサブミッションテキストを取得。
                 for(int i = 0; i < subMissionTexts.Length; i++)
                 {
-                    subMissionTexts[i] = def.MissionDefinition.EvaluationConditions[i].GetDescription();
+                    subMissionTexts[i] =
+                        battleDefinition.MissionDefinition.EvaluationConditions[i].GetDescription();
                 }
             }
 

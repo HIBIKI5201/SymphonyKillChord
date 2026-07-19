@@ -10,6 +10,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
     public interface IStageConnectionViewModel
     {
         /// <summary>
+        ///     接続線をアニメーションせず塗りつぶし済み状態へ更新します。
+        /// </summary>
+        void ApplyFilledState();
+
+        /// <summary>
         ///     接続線の塗りつぶしアニメーションを再生します。
         /// </summary>
         /// <param name="token"> キャンセルトークン。</param>

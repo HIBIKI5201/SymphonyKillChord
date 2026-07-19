@@ -46,9 +46,9 @@ MonoBehaviour:
   - _addressableKey: OutGameScreenRuleData
   - _addressableKey: SkillTreeTestInputData
   _sourceCollectionMappings:
-  - _collectionKey: Stage
+  - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
-    _propertyPath: _nodeAssets
+    _propertyPath: _stageAssets
   - _collectionKey: Skill
     _sourceAssetAddressableKey: OutGameSkillRepository
     _propertyPath: _skillDataAssets
@@ -70,6 +70,9 @@ MonoBehaviour:
   - _collectionKey: Wave
     _sourceAssetAddressableKey: EnemyWaveDefinitionAsset
     _propertyPath: _waves
+  - _collectionKey: StageBind
+    _sourceAssetAddressableKey: StageTreeAsset
+    _propertyPath: _bindAssets
   _repositoryMappings:
   - _category: Stage
     _addressableKey: StageTreeAsset
