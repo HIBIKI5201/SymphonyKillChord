@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -98,6 +99,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _stageProgressSaveDataService =
                 new StageProgressSaveDataService(savedataSystem);
+            ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();
             StartStageSequenceAsync();
@@ -124,6 +126,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _container = null;
             _selectedBattleStageState = null;
             _stageProgressSaveDataService = null;
+            _pendingNodeTransitionState = null;
             _isEnding = false;
         }
 
@@ -189,12 +192,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         {
             try
             {
-                StageDefinition stageDefinition =
+                BattleStageDefinition stageDefinition =
                     _selectedBattleStageState.CurrentStageDefinition;
                 await _stageProgressSaveDataService.SaveClearAsync(
                     stageDefinition.StageId,
                     evaluationResult,
                     stageDefinition.IsTutorial);
+                _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
             }
             catch (Exception exception)
             {
@@ -210,6 +214,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private InGamePlayDirector _inGamePlayDirector;
         private SelectedBattleStageState _selectedBattleStageState;
         private StageProgressSaveDataService _stageProgressSaveDataService;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
         private bool _isRegistered;
         private bool _isEnding;
     }
