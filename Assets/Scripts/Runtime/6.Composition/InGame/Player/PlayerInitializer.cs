@@ -22,7 +22,6 @@ using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;

@@ -9,7 +9,6 @@ using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
-using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
