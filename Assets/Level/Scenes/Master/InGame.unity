@@ -3775,6 +3775,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.EquipmentBgmInitializer
   _labelTable: {fileID: 11400000, guid: f4b5344a42c4ffd4893bcdb0152a3bda, type: 2}
   _measuresPerDivision: 4
+  _logSelectorSwitch: 1
 --- !u!1 &1896219133
 GameObject:
   m_ObjectHideFlags: 0
