@@ -46,11 +46,32 @@ namespace KillChord.Runtime.View.Persistent.Music
             return _cri.volume;
         }
 
+        /// <summary>
+        ///     再生中BGMのセレクターラベルを設定し、再生中の音声へ即時反映する。
+        /// </summary>
+        /// <param name="selectorName"> CRIのセレクター名。 </param>
+        /// <param name="labelName"> 設定するセレクターラベル名。 </param>
+        public void SetSelectorLabel(string selectorName, string labelName)
+        {
+            if (_cri == null || string.IsNullOrEmpty(selectorName) || string.IsNullOrEmpty(labelName))
+            {
+                return;
+            }
+
+            _cri.player.SetSelectorLabel(selectorName, labelName);
+
+            if (_isPlaying)
+            {
+                _cri.player.Update(_playback);
+            }
+        }
+
         private const double MILLISECONDS_PER_SECOND = 1000d;
 
         private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
+        private bool _isPlaying;
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -77,6 +98,7 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             _cri.cueName = cueName;
             _playback = _cri.Play();
+            _isPlaying = true;
         }
 
         /// <summary>
@@ -86,6 +108,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _playback.Stop();
             _cri.cueName = string.Empty;
+            _isPlaying = false;
         }
 
     }
