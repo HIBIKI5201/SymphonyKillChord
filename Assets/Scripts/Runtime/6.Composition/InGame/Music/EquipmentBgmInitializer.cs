@@ -56,6 +56,10 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 }
 
                 _musicPlayer.SetSelectorLabel(SELECTOR_NAME, _service.InitialLabel);
+                if (_logSelectorSwitch)
+                {
+                    Debug.Log($"[{nameof(EquipmentBgmInitializer)}] BGMループ開始 → 原曲 : '{_service.InitialLabel}'", this);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -75,6 +79,13 @@ namespace KillChord.Runtime.Composition.InGame.Music
             if (_service.TryAdvance(_musicSyncState.CurrentBeat, out string label))
             {
                 _musicPlayer.SetSelectorLabel(SELECTOR_NAME, label);
+                if (_logSelectorSwitch)
+                {
+                    string kind = label == _service.InitialLabel ? "原曲" : "スキル";
+                    Debug.Log(
+                        $"[{nameof(EquipmentBgmInitializer)}] 区切り切替 → {kind} : '{label}' (beat={_musicSyncState.CurrentBeat})",
+                        this);
+                }
             }
         }
 
@@ -108,6 +119,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         private BgmSelectorLabelTableAsset _labelTable;
         [SerializeField, Tooltip("セレクターを切り替える1区切りの小節数。16小節ループを原曲/S1/S2/S3の4区切りで回すため既定は4。")]
         private int _measuresPerDivision = DEFAULT_MEASURES_PER_DIVISION;
+        [SerializeField, Tooltip("区切り切替のたびに、原曲/スキルとラベル名をConsoleへ出力する（動作確認用）。")]
+        private bool _logSelectorSwitch = true;
 
         /// <summary> CRIのセレクター名。 </summary>
         private const string SELECTOR_NAME = "Selector_BGM";
