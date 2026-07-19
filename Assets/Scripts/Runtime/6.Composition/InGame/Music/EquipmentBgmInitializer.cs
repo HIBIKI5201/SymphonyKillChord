@@ -30,9 +30,13 @@ namespace KillChord.Runtime.Composition.InGame.Music
                     return;
                 }
 
+                if (_logSelectorSwitch)
+                {
+                    Debug.Log($"<color=cyan>[{nameof(EquipmentBgmInitializer)}] Start: 依存解決を開始します。</color>", this);
+                }
+
                 _musicPlayer = await ServiceLocator.GetInstanceAsync<MusicPlayer>();
                 _musicSyncState = await ServiceLocator.GetInstanceAsync<MusicSyncState>();
-                SkillBuildDefinition skillBuild = await ServiceLocator.GetInstanceAsync<SkillBuildDefinition>();
 
                 if (_musicPlayer == null || _musicSyncState == null)
                 {
@@ -40,12 +44,18 @@ namespace KillChord.Runtime.Composition.InGame.Music
                     return;
                 }
 
+                // SkillBuildDefinition は OutGame（スキルビルド画面）で登録されるため、
+                // Title→InGame直行等では未登録の場合がある。awaitで待ち続けると初期化が止まるため、
+                // TryGetInstanceで取得し、無ければ装備なし（通常BGM）として扱う。
+                bool hasSkillBuild = ServiceLocator.TryGetInstance(out SkillBuildDefinition skillBuild);
+
                 IReadOnlyList<int> equippedSkillIds = CollectEquippedSkillIds(skillBuild);
                 if (_logSelectorSwitch)
                 {
+                    string source = hasSkillBuild ? "SkillBuildDefinition" : "未登録(装備なし扱い)";
                     Debug.Log(
                         $"<color=blue>[{nameof(EquipmentBgmInitializer)}] InGame開始時の保持スキルID: " +
-                        $"[{string.Join(", ", equippedSkillIds)}]（{equippedSkillIds.Count}個）</color>",
+                        $"[{string.Join(", ", equippedSkillIds)}]（{equippedSkillIds.Count}個 / 取得元: {source}）</color>",
                         this);
                 }
 
