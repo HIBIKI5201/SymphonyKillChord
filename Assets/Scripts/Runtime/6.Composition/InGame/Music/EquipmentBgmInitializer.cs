@@ -73,7 +73,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 // 設定漏れに気付けるよう明示的に警告する。
                 Debug.LogWarning(
                     $"[{ModuleName}] セレクターラベルが未登録のスキルがあります。" +
-                    $"該当スキルは切り替え対象から除外されます。ID: [{string.Join(", ", unmappedSkillIds)}]",
+                    $"該当スキルは切り替え対象から除外されます。対象: [{DescribeSkills(unmappedSkillIds)}]",
                     this);
             }
 
@@ -143,7 +143,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             List<string> descriptions = new(equippedSkillIds.Count);
             for (int i = 0; i < equippedSkillIds.Count; i++)
             {
-                descriptions.Add($"slot{i}: id={equippedSkillIds[i]}");
+                descriptions.Add($"slot{i}: {DescribeSkill(equippedSkillIds[i])}");
             }
 
             Debug.Log(
@@ -247,6 +247,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             }
 
             skillSource = nameof(SkillBuildDefinition);
+            _skillDisplayNames.Clear();
 
             List<int> skillIds = new(skillBuild.EquippedSkills.Count);
             foreach (EquippedSkill equippedSkill in skillBuild.EquippedSkills)
@@ -256,10 +257,45 @@ namespace KillChord.Runtime.Composition.InGame.Music
                     continue;
                 }
 
-                skillIds.Add(equippedSkill.SkillTemplate.Id.Value);
+                int skillId = equippedSkill.SkillTemplate.Id.Value;
+                skillIds.Add(skillId);
+                _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
 
             return skillIds;
+        }
+
+        /// <summary>
+        ///     スキルIDをログ用の表示名へ変換する。
+        ///     表示名が未設定の場合は数値IDにフォールバックする。
+        /// </summary>
+        /// <param name="skillId"> スキルID。 </param>
+        /// <returns> ログ表示用の文字列。 </returns>
+        private string DescribeSkill(int skillId)
+        {
+            if (_skillDisplayNames.TryGetValue(skillId, out string displayName)
+                && !string.IsNullOrEmpty(displayName))
+            {
+                return $"スキル{displayName}";
+            }
+
+            return $"id={skillId}";
+        }
+
+        /// <summary>
+        ///     スキルID列をログ用の表示名へ変換して連結する。
+        /// </summary>
+        /// <param name="skillIds"> スキルID列。 </param>
+        /// <returns> ログ表示用の文字列。 </returns>
+        private string DescribeSkills(IReadOnlyList<int> skillIds)
+        {
+            string[] descriptions = new string[skillIds.Count];
+            for (int i = 0; i < skillIds.Count; i++)
+            {
+                descriptions[i] = DescribeSkill(skillIds[i]);
+            }
+
+            return string.Join(", ", descriptions);
         }
 
         [SerializeField, Tooltip("スキルIDとCRIセレクターラベル名の対応表です。")]
@@ -277,5 +313,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         private EquipmentBgmModuleContainer _moduleContainer;
         private bool _isModuleRegistered;
         private string _originalLabel;
+
+        /// <summary> スキルIDとログ表示用の名前の対応。 </summary>
+        private readonly Dictionary<int, string> _skillDisplayNames = new();
     }
 }
