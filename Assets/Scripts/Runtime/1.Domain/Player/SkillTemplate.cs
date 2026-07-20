@@ -22,7 +22,7 @@ namespace KillChord.Runtime.Domain.Player
         public double CooldownBarRatio { get; }
 
         /// <summary> スキルの種類です。 </summary>
-        public SkillType Type { get; }
+        public SkillType[] Type { get; }
 
         /// <summary> 効果定義です。 </summary>
         public SkillEffectSpec EffectSpec { get; }
@@ -43,9 +43,9 @@ namespace KillChord.Runtime.Domain.Player
         public SkillTemplate(
             SkillId id,
             BeatType[] pattern,
+            SkillType[] type,
             int cooldownNumerator,
             int cooldownDenomimator,
-            SkillType type,
             SkillEffectSpec effectSpec,
             string animationKey,
             string displayName)
@@ -79,8 +79,8 @@ namespace KillChord.Runtime.Domain.Player
             return new SkillDefinition(
                 Id,
                 new SkillPattern(new(Pattern)),
-                CooldownBarRatio,
                 Type,
+                CooldownBarRatio,
                 EffectSpec,
                 bpm,
                 AnimationKey);

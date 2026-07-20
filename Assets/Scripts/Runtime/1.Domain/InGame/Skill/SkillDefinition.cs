@@ -15,11 +15,11 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキルの入力パターン。 </summary>
         public SkillPattern SkillPattern { get; }
 
+        /// <summary> スキルの種類。 </summary>
+        public SkillType[] Type { get; }
+
         /// <summary> クールダウン時間の長さ。 </summary>
         public SkillCooldownTime CooldownTime { get; }
-
-        /// <summary> スキルの種類。 </summary>
-        public SkillType Type { get; }
 
         /// <summary> スキルの効果定義です。 </summary>
         public SkillEffectSpec EffectSpec { get; }
@@ -32,7 +32,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, double cooldownBarRatio, SkillType type, SkillEffectSpec effectSpec, double bpm, string animationKey)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, SkillType[] type, double cooldownBarRatio, SkillEffectSpec effectSpec, double bpm, string animationKey)
         {
             if (!double.IsFinite(bpm) || bpm <= 0d)
             {
