@@ -456,7 +456,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            StageDefinition tutorialStageDefinition = tutorialNode.Definition;
+            if (tutorialNode.Definition is not BattleStageDefinition tutorialStageDefinition)
+            {
+                return false;
+            }
+
             if (!_battleSortieSelectionService.TryPrepareBattleSortie(tutorialStageDefinition, _targetSceneName))
             {
                 return false;

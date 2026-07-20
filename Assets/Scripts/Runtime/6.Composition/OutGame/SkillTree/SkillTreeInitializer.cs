@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -6,17 +5,18 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.Utility.OutGame.Savedata;
-using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
@@ -43,6 +43,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [SerializeField]
         [Tooltip("スキルツリー画面のUIDocumentです。")]
         private UIDocument _uiDocument;
+
+        [SerializeField, Tooltip("表示するプレイヤーの基礎ステータス定義です。")]
+        private CharacterDefinitionAsset _playerData;
 
         [SerializeField, SourceDataAddress]
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
@@ -223,6 +226,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
+            if (_playerData == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] プレイヤー定義アセットが設定されていません。", this);
+                return false;
+            }
+
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -269,9 +278,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
+            PlayerStatusBonusCalculator playerStatusBonusCalculator =
+                new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
-            _playerStatusPresenter = new PlayerStatusPresenter();
+            _playerStatusPresenter = new PlayerStatusPresenter(
+                _playerStatusScreenView,
+                playerStatusBonusCalculator,
+                skillTreeEntity,
+                _playerData.MaxHealth,
+                _playerData.BaseDamage,
+                GetBaseCriticalChance(),
+                GetBaseCriticalDamageMultiplier());
+            _playerStatusPresenter.Push();
             _skillTreeController = new SkillTreeController(
                 _skillDetailScreenView,
                 _skillDetailPresenter,
@@ -291,6 +310,52 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _isInitialized = true;
             return true;
+        }
+
+        /// <summary>
+        ///     プレイヤーの先頭攻撃定義から基礎会心率を取得します。
+        /// </summary>
+        /// <returns> 基礎会心率。攻撃定義がない場合は0。 </returns>
+        private float GetBaseCriticalChance()
+        {
+            AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
+            if (attackDefinitions == null)
+            {
+                return 0f;
+            }
+
+            for (int i = 0; i < attackDefinitions.Length; i++)
+            {
+                if (attackDefinitions[i] != null && attackDefinitions[i].AttackSpecAsset != null)
+                {
+                    return attackDefinitions[i].AttackSpecAsset.CriticalChance;
+                }
+            }
+
+            return 0f;
+        }
+
+        /// <summary>
+        ///     プレイヤーの先頭攻撃定義から基礎会心ダメージ倍率を取得します。
+        /// </summary>
+        /// <returns> 基礎会心ダメージ倍率。攻撃定義がない場合は0。 </returns>
+        private float GetBaseCriticalDamageMultiplier()
+        {
+            AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
+            if (attackDefinitions == null)
+            {
+                return 0f;
+            }
+
+            for (int i = 0; i < attackDefinitions.Length; i++)
+            {
+                if (attackDefinitions[i] != null && attackDefinitions[i].AttackSpecAsset != null)
+                {
+                    return attackDefinitions[i].AttackSpecAsset.CriticalDamageMultiplier;
+                }
+            }
+
+            return 0f;
         }
 
         /// <summary>

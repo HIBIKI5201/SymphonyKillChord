@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
@@ -17,26 +18,39 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                     throw new InvalidOperationException("Scenario has not been selected.");
                 }
 
-                return _currentScenarioId;
+                return _currentStageDefinition.ScenarioId;
+            }
+        }
+
+        /// <summary> 現在選択されているシナリオステージ定義を取得します。 </summary>
+        public ScenarioStageDefinition CurrentStageDefinition
+        {
+            get
+            {
+                if (!HasSelectedScenario)
+                {
+                    throw new InvalidOperationException("Scenario has not been selected.");
+                }
+
+                return _currentStageDefinition;
             }
         }
 
         /// <summary> シナリオが選択されているかどうかを取得します。 </summary>
-        public bool HasSelectedScenario { get; private set; }
+        public bool HasSelectedScenario => _currentStageDefinition != null;
 
         /// <summary>
         ///     シナリオを選択します。
         /// </summary>
-        /// <param name="scenarioId">選択するシナリオID。</param>
-        public void SelectScenario(string scenarioId)
+        /// <param name="stageDefinition"> 選択するシナリオステージ定義。</param>
+        public void SelectScenario(ScenarioStageDefinition stageDefinition)
         {
-            if (string.IsNullOrWhiteSpace(scenarioId))
+            if (stageDefinition == null)
             {
-                throw new ArgumentException("Scenario id must not be null or empty.", nameof(scenarioId));
+                throw new ArgumentNullException(nameof(stageDefinition));
             }
 
-            _currentScenarioId = scenarioId;
-            HasSelectedScenario = true;
+            _currentStageDefinition = stageDefinition;
         }
 
         /// <summary>
@@ -44,11 +58,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         public void Clear()
         {
-            _currentScenarioId = string.Empty;
-            HasSelectedScenario = false;
+            _currentStageDefinition = null;
         }
 
-        /// <summary> 現在選択されているシナリオID。 </summary>
-        private string _currentScenarioId = string.Empty;
+        private ScenarioStageDefinition _currentStageDefinition;
     }
 }

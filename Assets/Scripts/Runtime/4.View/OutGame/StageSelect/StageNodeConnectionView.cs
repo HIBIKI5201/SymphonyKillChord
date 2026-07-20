@@ -26,6 +26,15 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     接続線をアニメーションせず塗りつぶし済み状態へ更新します。
+        /// </summary>
+        public void ApplyFilledState()
+        {
+            _fill.style.width = new Length(STYLESIZE_PERCENT, LengthUnit.Percent);
+            _fill.style.height = new Length(STYLESIZE_PERCENT, LengthUnit.Percent);
+        }
+
+        /// <summary>
         ///     接続線の塗りつぶしアニメーションを再生します。
         ///     USS トランジションを使用して完了まで待機します。
         /// </summary>

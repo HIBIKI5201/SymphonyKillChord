@@ -15,7 +15,7 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     ウィンドウを開きます。
         /// </summary>
-        [MenuItem(ToolConst.TOOLS_PATH + "Source Data Provider/Planner Master Data Window")]
+        [MenuItem(EditorWindowPathConst.PLANNER_MASTER_DATA_WINDOW_PATH)]
         public static void ShowWindow()
         {
             PlannerMasterDataWindow window = GetWindow<PlannerMasterDataWindow>();

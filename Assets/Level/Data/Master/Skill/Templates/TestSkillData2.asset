@@ -15,6 +15,7 @@ MonoBehaviour:
   _id:
     _id: skill_01
     _hashId: -1127918619
+  _displayName: 2
   _pattern: 030000000300000003000000
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
