@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.Utility.Identity;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,7 +48,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 Debug.LogError($"[SkillNodeDataRepo] スキルノード情報リポジトリーが空です。");
                 return null;
             }
-            for(int i = 0; i < SkillNodes.Length; i++)
+            for (int i = 0; i < SkillNodes.Length; i++)
             {
                 var node = SkillNodes[i];
                 if (node == null)
