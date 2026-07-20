@@ -8,7 +8,6 @@ using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
-using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Sequence;
@@ -20,15 +19,11 @@ using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
-using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Skill;
-using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Player;
@@ -37,8 +32,6 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -72,8 +65,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField, Tooltip("プレイヤー定義アセットです。")]
         private CharacterDefinitionAsset _playerData;
-        [SerializeField, Tooltip("スキルノード定義リポジトリです。")]
-        private SkillNodeDataRepo _skillNodeDataRepo;
         [Header("装備中スキル（テスト用）")]
         [SerializeField, Tooltip("テスト用装備スキル一覧です。")]
         private SkillTemplateAsset[] _equippedSkills;
@@ -88,7 +79,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerView _player;
         private SkillView[] _skillVisuals;
         private CharacterAnimationView _characterAnimationView;
-        private PlayerStatusBonus _playerStatusBonus = PlayerStatusBonus.None;
 
         /// <summary> プレイヤーEntityです。 </summary>
         public CharacterEntity PlayerEntity => _playerEntity;
@@ -104,35 +94,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> テスト用装備スキル一覧です。 </summary>
         public SkillTemplateAsset[] EquippedSkillAssets => _equippedSkills;
-
-        /// <summary> 解放済みスキルノードから得られたステータスボーナスです。 </summary>
-        public PlayerStatusBonus PlayerStatusBonus => _playerStatusBonus;
-
-        /// <summary>
-        ///     解放済みスキルノードからプレイヤーステータスボーナスを読み込みます。
-        /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> 読み込みに成功した場合はtrueです。 </returns>
-        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (_skillNodeDataRepo == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SkillNodeDataRepo)} が設定されていません。", this);
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SavedataSystem)} が見つかりません。", this);
-                return false;
-            }
-
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
-            cancellationToken.ThrowIfCancellationRequested();
-            _playerStatusBonus = CalculatePlayerStatusBonus(saveData.SkillUnlock.UnlockedSkillNodeIds);
-            return true;
-        }
 
         /// <summary>
         ///     ServiceLocatorへ自身を登録します。
@@ -158,18 +119,30 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
+            {
+                Debug.LogError(
+                    $"[{nameof(PlayerInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} が見つかりません。",
+                    this);
+                return false;
+            }
+
             _playerEntity = CharacterFactory.Create(
                 _playerData,
-                _playerStatusBonus.MaxHealthMultiplier,
-                _playerStatusBonus.AttackPowerMultiplier,
-                _playerStatusBonus.CriticalChanceAddition,
-                _playerStatusBonus.CriticalMultiplierAddition);
+                playerStatusBonusContainer.PlayerStatusBonus.MaxHealthMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.AttackPowerMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalChanceAddition,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalMultiplierAddition);
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
 
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
-            _moduleContainer = new PlayerModuleContainer(this, _player, _playerEntity);
+            _moduleContainer = new PlayerModuleContainer(
+                this,
+                _player,
+                _playerEntity,
+                playerStatusBonusContainer.PlayerStatusBonus);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -395,7 +368,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerConfig == null
                 || _playerViewPrefab == null
                 || _playerData == null
-                || _skillNodeDataRepo == null
                 || _characterAnimationConfig == null
                 || _playerAttackAnimationConfig == null)
             {
@@ -404,39 +376,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             return true;
-        }
-
-        /// <summary>
-        ///     解放済みノードIDからプレイヤーステータスボーナスを集計します。
-        /// </summary>
-        /// <param name="unlockedNodeIds"> 解放済みノードIDです。 </param>
-        /// <returns> 集計済みのステータスボーナスです。 </returns>
-        private PlayerStatusBonus CalculatePlayerStatusBonus(int[] unlockedNodeIds)
-        {
-            List<SkillNodeEntity> skillNodes = new List<SkillNodeEntity>();
-            SkillNodeData[] nodeData = _skillNodeDataRepo.SkillNodes;
-            if (nodeData != null)
-            {
-                for (int i = 0; i < nodeData.Length; i++)
-                {
-                    if (nodeData[i] != null)
-                    {
-                        skillNodes.Add(nodeData[i].ToDomain());
-                    }
-                }
-            }
-
-            List<SkillNodeId> unlockedIds = new List<SkillNodeId>();
-            if (unlockedNodeIds != null)
-            {
-                for (int i = 0; i < unlockedNodeIds.Length; i++)
-                {
-                    unlockedIds.Add(new SkillNodeId(unlockedNodeIds[i]));
-                }
-            }
-
-            PlayerStatusBonusCalculator calculator = new PlayerStatusBonusCalculator(skillNodes);
-            return calculator.Calculate(unlockedIds);
         }
 
         /// <summary>
