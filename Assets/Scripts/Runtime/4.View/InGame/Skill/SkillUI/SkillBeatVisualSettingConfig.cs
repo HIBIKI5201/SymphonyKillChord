@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using UnityEngine;
 
@@ -17,15 +16,15 @@ namespace KillChord.Runtime.View.InGame.Skill
         public SkillBeatVisualSetting Create()
         {
             return new SkillBeatVisualSetting(
-                (int)_beatType,
+                _beatType,
                 _normalColor,
                 _activeColor,
                 _icon
             );
         }
 
-        [SerializeField, Tooltip("対応する拍子。")]
-        private BeatType _beatType;
+        [SerializeField, Min(0), Tooltip("対応する拍子のBeatType値。")]
+        private int _beatType;
 
         [SerializeField, Tooltip("未入力時の色。")]
         private Color _normalColor = Color.gray;

@@ -35,6 +35,18 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="playTime"> 現在の再生時間。 </param>
         public void Update(double playTime)
         {
+            double nextPlayTime = double.IsNaN(playTime) || double.IsInfinity(playTime)
+                ? 0d
+                : Math.Max(0d, playTime);
+
+            if (nextPlayTime + PLAYBACK_REWIND_TOLERANCE_SECONDS < _currentPlayTime)
+            {
+                _rhythmState.Clear();
+                _scheduledActions.Clear();
+            }
+
+            _currentPlayTime = nextPlayTime;
+
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
             {
                 if (actionData.CancellationToken.IsCancellationRequested)
@@ -43,7 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Music
                     continue;
                 }
 
-                if (executeTime <= playTime)
+                if (executeTime <= _currentPlayTime)
                 {
                     _scheduledActions.Dequeue();
                     actionData.Action?.Invoke();
@@ -66,13 +78,16 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <summary>
         ///     現在のタイミングにおける拍の種類を取得する。
         /// </summary>
-        /// <param name="unscaledTime"> 現在の時間。 </param>
         /// <returns> 拍の種類。 </returns>
-        public BeatType GetCurrentBeatType(float unscaledTime)
+        public BeatType GetCurrentBeatType()
         {
-            if (_rhythmState.Count == 0) return BeatType.One;
+            if (_rhythmState.Count == 0
+                || _currentPlayTime < _rhythmDefinition.BeatOffsetSeconds)
+            {
+                return BeatType.One;
+            }
 
-            float normalizedBarProgress = GetBarProgress(unscaledTime);
+            float normalizedBarProgress = GetBarProgress();
             if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
             {
                 _onJustHit?.Invoke();
@@ -131,33 +146,34 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         /// <param name="actionType"> アクションの種類。 </param>
         /// <param name="beatType"> 拍の種類。 </param>
-        /// <param name="unscaledTime"> 登録時間。 </param>
-        public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType)
         {
-            _rhythmState.Enqueue(beatType, unscaledTime, actionType);
+            _rhythmState.Enqueue(beatType, (float)_currentPlayTime, actionType);
         }
 
         /// <summary>
-        ///     現在の小節内の進捗を取得する。
+        ///     直前のアクション入力から次の小節までの進捗を取得する。
         /// </summary>
-        /// <param name="unscaledTime"> 現在の時間。 </param>
         /// <returns> 0〜1の進捗。 </returns>
-        public float GetBarProgress(float unscaledTime)
+        public float GetBarProgress()
         {
-            if (_rhythmState.Count == 0) return 0f;
+            if (_rhythmState.Count == 0)
+            {
+                return 0f;
+            }
 
-            float lastTime = _rhythmState.LastTiming;
-            float duration = unscaledTime - lastTime;
-
-            return _rhythmDefinition.CalculateNormalizedBarProgress(duration);
+            double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
+            return _rhythmDefinition.CalculateNormalizedBarProgress(elapsedSeconds);
         }
 
         private const int BUFFER_SIZE = 64;
+        private const double PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01d;
         private readonly Action _onJustHit;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;
         private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
+        private double _currentPlayTime;
 
     }
 }
