@@ -87,3 +87,4 @@ sinfonia-operator.settings.json
 # ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
+Docs/NotionSpecifications/
