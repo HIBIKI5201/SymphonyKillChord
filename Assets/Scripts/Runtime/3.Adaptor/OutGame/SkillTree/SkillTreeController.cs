@@ -1,5 +1,4 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
-using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
@@ -83,9 +82,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillDetailPresenter.Push(dto);
             _skillDetailView.Show(token);
             view.SetSelected();
-
-            // TODO プレイヤーステータスの反映
-            _playerStatusPresenter.Push();
         }
 
         /// <summary>
@@ -127,6 +123,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
         }
 
