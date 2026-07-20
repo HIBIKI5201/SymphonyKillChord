@@ -88,7 +88,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             bool hasTarget = TryUpdateCurrentTarget();
 
             float now = Time.unscaledTime;
-            BeatType beatType = _musicSyncService.GetCurrentBeatType(now);
+            BeatType beatType = _musicSyncService.GetCurrentBeatType();
 
             _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 

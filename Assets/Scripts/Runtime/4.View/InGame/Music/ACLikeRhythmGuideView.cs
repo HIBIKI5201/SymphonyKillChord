@@ -223,7 +223,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
             if (_justTimingVignette != null)
             {
-                if (Application.isPlaying)
+                if (UnityEngine.Application.isPlaying)
                 {
                     Destroy(_justTimingVignette);
                 }
@@ -235,7 +235,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
             if (_vignetteProfile != null)
             {
-                if (Application.isPlaying)
+                if (UnityEngine.Application.isPlaying)
                 {
                     Destroy(_vignetteProfile);
                 }

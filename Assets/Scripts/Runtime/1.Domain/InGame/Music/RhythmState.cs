@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <summary> 現在の履歴数。 </summary>
         public int Count => _recordBuffer.Count;
 
-        /// <summary> 最後に登録されたタイミング（unscaledTime）を取得する。 </summary>
+        /// <summary> 最後に登録された音源再生タイミングを取得する。 </summary>
         public float LastTiming => Count > 0 ? _recordBuffer.PeekLast().Timing : 0f;
 
         /// <summary>
