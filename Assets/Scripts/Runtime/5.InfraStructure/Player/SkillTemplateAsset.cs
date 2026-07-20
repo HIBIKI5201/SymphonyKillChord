@@ -15,6 +15,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <summary> スキルIDです。 </summary>
         public SkillId Id => new SkillId(_id.Id);
 
+        /// <summary> 表示名です。 </summary>
+        public string DisplayName => _displayName;
+
         /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern => _pattern;
 
@@ -36,22 +39,29 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <returns> Domain層のテンプレートです。 </returns>
         public SkillTemplate ToDomain()
         {
-            return new SkillTemplate(Id, _pattern, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey);
+            return new SkillTemplate(
+                Id, _pattern, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey, _displayName);
         }
 
-        [SerializeField, Tooltip("スキルIDです。")]
-        [SourceDataCollection("Skill")]
+        [SerializeField, Tooltip("スキルIDです。")] [SourceDataCollection("Skill")]
         private DataID _id;
-        [SerializeField, Tooltip("入力パターンです。")]
-        private BeatType[] _pattern;
+
+        [SerializeField, Tooltip("スキル表示名です。")] private string _displayName;
+
+        [SerializeField, Tooltip("入力パターンです。")] private BeatType[] _pattern;
+
         [SerializeField, Min(0), Tooltip("小節単位で表すクールダウン時間の分子です。")]
         private int _cooldownNumerator = 1;
+
         [SerializeField, Min(1), Tooltip("小節単位で表すクールダウン時間の分母です。")]
         private int _cooldownDenomimator = 1;
+
         [SerializeField, Tooltip("スキル効果の識別子です。")]
         private SkillEffectType _skillEffectType;
+
         [SerializeField, Tooltip("スキル対象の解決ルールです。")]
         private SkillTargetingType _skillTargetingType;
+
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;
     }
