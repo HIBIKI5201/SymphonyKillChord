@@ -279,7 +279,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
-                new PlayerStatusBonusCalculator(_skillNodeEntities.Values);
+                new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
             _playerStatusPresenter = new PlayerStatusPresenter(
