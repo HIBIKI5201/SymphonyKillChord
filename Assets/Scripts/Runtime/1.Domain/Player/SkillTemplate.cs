@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary> クールダウンの小節比率です。 </summary>
         public double CooldownBarRatio { get; }
 
+        /// <summary> スキルの種類です。 </summary>
+        public SkillType Type { get; }
+
         /// <summary> 効果定義です。 </summary>
         public SkillEffectSpec EffectSpec { get; }
 
@@ -42,6 +45,7 @@ namespace KillChord.Runtime.Domain.Player
             BeatType[] pattern,
             int cooldownNumerator,
             int cooldownDenomimator,
+            SkillType type,
             SkillEffectSpec effectSpec,
             string animationKey,
             string displayName)
@@ -59,6 +63,7 @@ namespace KillChord.Runtime.Domain.Player
             Id = id;
             Pattern = pattern;
             CooldownBarRatio = (double)cooldownNumerator / cooldownDenomimator;
+            Type = type;
             EffectSpec = effectSpec;
             AnimationKey = animationKey;
             DisplayName = displayName;
@@ -75,6 +80,7 @@ namespace KillChord.Runtime.Domain.Player
                 Id,
                 new SkillPattern(new(Pattern)),
                 CooldownBarRatio,
+                Type,
                 EffectSpec,
                 bpm,
                 AnimationKey);

@@ -27,6 +27,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <summary> クールダウンの分母です。 </summary>
         public int CooldownDenomimator => _cooldownDenomimator;
 
+        /// <summary> スキルの種類です。 </summary>
+        public SkillType SkillType => _skillType;
+
         /// <summary> 効果定義です。 </summary>
         public SkillEffectSpec EffectSpec => new SkillEffectSpec(_skillEffectType, _skillTargetingType);
 
@@ -40,10 +43,11 @@ namespace KillChord.Runtime.InfraStructure.Player
         public SkillTemplate ToDomain()
         {
             return new SkillTemplate(
-                Id, _pattern, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey, _displayName);
+                Id, _pattern, _cooldownNumerator, _cooldownDenomimator, _skillType, EffectSpec, _animationKey, _displayName);
         }
 
-        [SerializeField, Tooltip("スキルIDです。")] [SourceDataCollection("Skill")]
+        [SerializeField, Tooltip("スキルIDです。")]
+        [SourceDataCollection("Skill")]
         private DataID _id;
 
         [SerializeField, Tooltip("スキル表示名です。")] private string _displayName;
@@ -55,6 +59,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Min(1), Tooltip("小節単位で表すクールダウン時間の分母です。")]
         private int _cooldownDenomimator = 1;
+
+        [SerializeField, Tooltip("スキルの種類です。")]
+        private SkillType _skillType;
 
         [SerializeField, Tooltip("スキル効果の識別子です。")]
         private SkillEffectType _skillEffectType;
