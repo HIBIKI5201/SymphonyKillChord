@@ -7,17 +7,24 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// <summary>
     ///     スキル入力進行UIの表示設定を管理するクラス。
     /// </summary>
-    public class SkillInputProgressViewconfig
+    public class SkillInputProgressViewSetting
     {
         /// <summary>
         ///     スキル入力進行UIの表示設定を管理するクラスを生成する。
         /// </summary>
         /// <param name="settings"> スキル入力進行UIの拍子ごとの表示設定のリスト。 </param>
+        /// <param name="animationSetting"> スキル入力進行UIのアニメーション設定。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillInputProgressViewconfig(IReadOnlyList<SkillBeatVisualSetting> settings)
+        public SkillInputProgressViewSetting(
+            IReadOnlyList<SkillBeatVisualSetting> settings,
+            SkillInputProgressAnimationSetting animationSetting)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            AnimationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
         }
+
+        /// <summary> スキル入力進行UIのアニメーション設定。 </summary>
+        public SkillInputProgressAnimationSetting AnimationSetting { get; }
 
         /// <summary>
         ///     指定されたBeatTypeに対応する表示設定を取得する。
