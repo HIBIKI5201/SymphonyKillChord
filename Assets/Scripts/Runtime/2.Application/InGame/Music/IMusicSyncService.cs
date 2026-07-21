@@ -23,11 +23,10 @@ namespace KillChord.Runtime.Application.InGame.Music
         int GetHistoryLength();
 
         /// <summary>
-        ///     小節内の進捗を取得する。
+        ///     直前のアクション入力から次の小節までの進捗を取得する。
         /// </summary>
-        /// <param name="unscaledTime"> 現在の時間。 </param>
         /// <returns> 0〜1の進捗。 </returns>
-        float GetBarProgress(float unscaledTime);
+        float GetBarProgress();
 
         /// <summary>
         ///     拍の種類履歴を取得する。
@@ -36,7 +35,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         ReadOnlySpan<BeatType> GetBeatTypeHistory();
 
         /// <summary>
-        ///     拍のタイミング履歴を取得する。
+        ///     音源再生時間を基準とした拍のタイミング履歴を取得する。
         /// </summary>
         /// <returns> タイミングスパン。 </returns>
         ReadOnlySpan<float> GetBeatTypeTiming();
@@ -63,16 +62,14 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <summary>
         ///     現在の拍の種類を取得する。
         /// </summary>
-        /// <param name="unscaledTime"> 現在の時間。 </param>
         /// <returns> 拍の種類。 </returns>
-        BeatType GetCurrentBeatType(float unscaledTime);
+        BeatType GetCurrentBeatType();
 
         /// <summary>
         ///     アクション履歴を登録する。
         /// </summary>
         /// <param name="actionType"> アクションの種類。 </param>
         /// <param name="beatType"> 拍の種類。 </param>
-        /// <param name="unscaledTime"> 登録時間。 </param>
-        void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType, float unscaledTime);
+        void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType);
     }
 }

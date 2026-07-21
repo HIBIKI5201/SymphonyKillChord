@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Mission;
 using System;
 
 namespace KillChord.Runtime.Domain.OutGame.StageSelect
@@ -32,9 +31,6 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <summary> ステージの定義情報。 </summary>
 
         public StageDefinition Definition => _definition;
-        /// <summary> ステージに関連付けられたミッションの定義。 </summary>
-        public MissionDefinition MissionDefinition => _definition.MissionDefinition;
-
         /// <summary>
         ///     ステージをクリア済みにする。
         /// </summary>

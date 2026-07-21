@@ -51,4 +51,6 @@
   <Project Path="UniHumanoid.Editor.Tests.csproj" />
   <Project Path="UniGLTF.UniUnlit.Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj" />
+  <Project Path="SinfoniaOperator/SinfoniaOperator.Core/SinfoniaOperator.Core.csproj" />
 </Solution>

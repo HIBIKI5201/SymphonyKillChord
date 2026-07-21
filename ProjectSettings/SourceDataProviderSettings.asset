@@ -45,35 +45,63 @@ MonoBehaviour:
   - _addressableKey: SkillBuildRepositoryDebug
   - _addressableKey: OutGameScreenRuleData
   - _addressableKey: SkillTreeTestInputData
+  - _addressableKey: CameraConfig
   _sourceCollectionMappings:
-  - _collectionKey: Stage
+  - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
-    _propertyPath: _nodeAssets
+    _propertyPath: _stageAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Stages
   - _collectionKey: Skill
     _sourceAssetAddressableKey: OutGameSkillRepository
     _propertyPath: _skillDataAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/Skill/Templates
   - _collectionKey: SkillNode
     _sourceAssetAddressableKey: SkillNodeDataRepo
     _propertyPath: SkillNodes
+    _assetCreationDirectory:
   - _collectionKey: SkillNodeBind
     _sourceAssetAddressableKey: SkillNodeBindRepo
     _propertyPath: SkillNodeBinds
+    _assetCreationDirectory:
   - _collectionKey: ScenarioAnimation
     _sourceAssetAddressableKey: AnimationCatalogAsset
     _propertyPath: _entries
+    _assetCreationDirectory:
   - _collectionKey: ScenarioPortrait
     _sourceAssetAddressableKey: PortraitCatalogAsset
     _propertyPath: _entries
+    _assetCreationDirectory:
   - _collectionKey: ScenarioBackground
     _sourceAssetAddressableKey: BackgroundCatalogAsset
     _propertyPath: _entries
+    _assetCreationDirectory:
   - _collectionKey: Wave
     _sourceAssetAddressableKey: EnemyWaveDefinitionAsset
     _propertyPath: _waves
+    _assetCreationDirectory:
+  - _collectionKey: StageBind
+    _sourceAssetAddressableKey: StageTreeAsset
+    _propertyPath: _bindAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/StageBinds
+  - _collectionKey: BossAttackEntry
+    _sourceAssetAddressableKey: BossAttackEntryRepo
+    _propertyPath: _attackEntries
+    _assetCreationDirectory: Assets/Level/Data/Develop/Boss
+  - _collectionKey: PlayerAttack
+    _sourceAssetAddressableKey: Player
+    _propertyPath: _attackDifinitions
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
+  - _collectionKey: EnemyAttack
+    _sourceAssetAddressableKey: Enemy
+    _propertyPath: _attackDifinitions
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
   _repositoryMappings:
-  - _category: Stage
+  - _category: StageAsset
     _addressableKey: StageTreeAsset
-    _arrayPropertyPath: _nodeAssets
+    _arrayPropertyPath: _stageAssets
+  - _category: StageBind
+    _addressableKey: StageTreeAsset
+    _arrayPropertyPath: _bindAssets
   - _category: Skill
     _addressableKey: OutGameSkillRepository
     _arrayPropertyPath: _skillDataAssets

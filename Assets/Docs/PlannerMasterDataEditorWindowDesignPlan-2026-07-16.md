@@ -697,3 +697,42 @@ SourceAsset 設定と collection 設定が分かれることで、設定間の�
 最終的なあるべき姿は、「新しいデータ型が増えても、単体アセットなら SourceAsset 登録だけ、collection 系でも SourceAsset 登録 + collection 設定追加だけで統合管理画面に載る」構造である。
 
 実装順としては、まず SourceDataProvider の一般化と互換レイヤを整備し、その後 `SkillTree` を最初の実運用系統として Planner Window に載せ、次に `StageSelect`、`Scenario` の順で広げるのが安全である。
+
+## 20. 2026-07-19 追加要件への対応計画
+
+### 20.1 編集画面の責務
+
+- `Source Assets` 画面は、リポジトリを含む SourceAsset 自体の全シリアライズ項目を編集する。
+- `Collections` 画面は、配列 / List 全体ではなく、含まれる個別データを一覧から1件選択して編集する。
+- Collection 上部には SourceAsset の詳細を重複表示しない。必要な場合のみ「Source Assetを開く」導線を表示する。
+- プレビューは編集欄と明確に分離し、プレビュー側を読み取り専用にする。
+
+### 20.2 Collectionデータの作成
+
+- `SourceCollectionMapping` に生成先ディレクトリを追加し、Project Settings から `Assets` 配下のフォルダを設定できるようにする。
+- Collection要素が ScriptableObject 参照の場合は、設定された型とディレクトリから新規アセットを作成してCollectionへ登録する。
+- インライン要素の場合は、SourceAsset 内へ新しい要素を追加する。
+- ディレクトリ未設定、型が抽象型、または `Assets` 外を指定した場合は作成せず、理由を画面へ表示する。
+
+### 20.3 系統ページ
+
+- Player: 体力、移動速度、拍子別攻撃、スキルデータ。
+- UI: カメラ設定、リズムUI設定、リズム判定設定。
+- Enemy: 体力、移動、攻撃ステータス、ボス攻撃Collection。
+- EnemyのキャラクターSourceAssetには、体力・攻撃力・攻撃速度・攻撃数を俯瞰できるレーダーグラフを表示する。
+
+ページへの割り当ては `PlannerMasterDataEditorSettings` を正本とし、専用プレビュー以外は型ごとのウィンドウ実装を増やさない。
+
+### 20.4 StageTreeの現行構造対応
+
+- 旧 `_nodeAssets` / `_connections` 参照を廃止する。
+- 現行 `StageTreeAsset._stageAssets` と `StageTreeAsset._bindAssets` を使用する。
+- ノードは `BattleStageAsset` / `ScenarioStageAsset` を区別して表示する。
+- Edgeは `StageBindAsset._fromStage` / `_toStage` / `_advanceMode` から生成する。
+- 入力Edge数を用いたトポロジカル配置で左から右へ表示し、複数起点と循環をプレビュー上でも警告する。
+
+### 20.5 検証方針
+
+- Editorアセンブリと関連Runtimeアセンブリをコンパイルする。
+- SourceAsset編集、Collection個別選択、追加、削除、StageTreeグラフ、Enemyレーダーの各経路を確認する。
+- 既存の `DataID` PropertyDrawer とAddressable解決を維持する。
