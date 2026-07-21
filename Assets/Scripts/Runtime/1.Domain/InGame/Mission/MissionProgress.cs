@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Mission
@@ -14,6 +15,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         {
             _elapsedTime = new MissionElapsedTime(0f);
             _enemyKillRecord = new EnemyKillRecord();
+            _damageTaken = new MissionDamageTaken(0f);
+            _maxCombo = new MissionCombo(0);
+            _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
             _endReason = MissionEndReason.None;
         }
 
@@ -21,6 +25,12 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public MissionElapsedTime ElapsedTime => _elapsedTime;
         /// <summary> 敵撃破記録を取得します。 </summary>
         public EnemyKillRecord EnemyKillRecord => _enemyKillRecord;
+        /// <summary> 累計被ダメージを取得します。 </summary>
+        public MissionDamageTaken DamageTaken => _damageTaken;
+        /// <summary> 使用した武器種類数を取得します。 </summary>
+        public MissionWeaponVariety WeaponVariety => new(_usedWeaponIds.Count);
+        /// <summary> 最大コンボ数を取得します。 </summary>
+        public MissionCombo MaxCombo => _maxCombo;
 
         /// <summary> プレイヤーが死亡したかどうかを取得します。 </summary>
         public bool IsPlayerDead => _isPlayerDead;
@@ -47,6 +57,43 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         }
 
         /// <summary>
+        ///     プレイヤーが受けたダメージを記録します。
+        /// </summary>
+        /// <param name="damage"> 受けたダメージです。 </param>
+        public void RecordDamageTaken(float damage)
+        {
+            _damageTaken = _damageTaken.Add(damage);
+        }
+
+        /// <summary>
+        ///     使用した武器を記録します。
+        /// </summary>
+        /// <param name="weaponId"> 武器を識別するIDです。 </param>
+        public void RecordWeaponUse(string weaponId)
+        {
+            if (string.IsNullOrWhiteSpace(weaponId))
+            {
+                return;
+            }
+
+            _usedWeaponIds.Add(weaponId.Trim());
+        }
+
+        /// <summary>
+        ///     現在コンボ数から最大コンボを更新します。
+        /// </summary>
+        /// <param name="combo"> 現在コンボ数です。 </param>
+        public void RecordCombo(int combo)
+        {
+            if (combo <= _maxCombo.Value)
+            {
+                return;
+            }
+
+            _maxCombo = new MissionCombo(combo);
+        }
+
+        /// <summary>
         ///     ミッションを終了させます。
         /// </summary>
         /// <param name="reason">終了理由。</param>
@@ -64,6 +111,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private MissionElapsedTime _elapsedTime;
         /// <summary> 敵撃破記録。 </summary>
         private readonly EnemyKillRecord _enemyKillRecord;
+        private readonly HashSet<string> _usedWeaponIds;
+        private MissionDamageTaken _damageTaken;
+        private MissionCombo _maxCombo;
 
         /// <summary> プレイヤー死亡フラグ。 </summary>
         private bool _isPlayerDead;

@@ -1,0 +1,158 @@
+/*
+ * KillChord Debugger 共通スタイル。
+ * ウィンドウ本体(KillChordDebuggerWindow.uxml)と各機能パネル(例: SaveDataDebugView.uxml)から
+ * 共通で参照し、見た目を統一するためのクラス群です。
+ */
+
+.kcd-root {
+    flex-grow: 1;
+}
+
+.kcd-header {
+    padding: 8px 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.35);
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.kcd-header__title {
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.kcd-body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.kcd-nav {
+    width: 140px;
+    padding: 6px;
+    border-right-width: 1px;
+    border-right-color: rgba(0, 0, 0, 0.35);
+}
+
+.kcd-nav__button {
+    margin: 0 0 2px 0;
+    -unity-text-align: middle-left;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.kcd-nav__button--active {
+    background-color: rgba(58, 121, 187, 0.5);
+    -unity-font-style: bold;
+}
+
+.kcd-content {
+    flex-grow: 1;
+}
+
+/* 各機能パネルの共通レイアウト */
+.kcd-panel {
+    flex-grow: 1;
+    padding: 8px;
+}
+
+.kcd-panel__toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.kcd-panel__list {
+    flex-grow: 1;
+}
+
+/* 汎用ボタン・ラベル */
+.kcd-button {
+    margin-right: 4px;
+}
+
+.kcd-button--primary {
+    -unity-font-style: bold;
+}
+
+.kcd-status-label {
+    margin-left: 8px;
+    opacity: 0.7;
+}
+
+.kcd-status-label--dirty {
+    color: rgb(230, 170, 60);
+    opacity: 1;
+}
+
+/* セーブデータ1件分のセクション */
+.kcd-section {
+    margin-bottom: 10px;
+    padding: 6px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+.kcd-section__path {
+    margin-bottom: 4px;
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.kcd-section__toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+/* リフレクションで生成するフィールド行 */
+.kcd-fields {
+    margin-left: 4px;
+}
+
+.kcd-field-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.kcd-field-row__label {
+    width: 160px;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+.kcd-field-row__value {
+    flex-grow: 1;
+}
+
+.kcd-field-row__readonly {
+    flex-grow: 1;
+    opacity: 0.6;
+}
+
+.kcd-nested-foldout {
+    margin: 0 0 4px 6px;
+}
+
+.kcd-list-body {
+    margin-left: 6px;
+}
+
+.kcd-list-item-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.kcd-list-item-row__value {
+    flex-grow: 1;
+}
+
+.kcd-list-item-row__remove {
+    width: 48px;
+}
+
+.kcd-list__add-button {
+    width: 80px;
+    align-self: flex-start;
+}

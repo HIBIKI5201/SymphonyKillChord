@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -98,7 +99,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         ///     既存の予約がある場合はキャンセルしてから新しい予約を設定する。
         /// </summary>
         /// <param name="musicSpec"></param>
-        private void Reserve(in EnemyMusicSpec musicSpec)
+        private void Reserve(in MusicSyncSpec musicSpec)
         {
             Debug.Log("[EnemyAttackReservationUsecase] Reserve 開始");
             // 既存の予約をキャンセルしてから新しい予約を設定する。
@@ -116,12 +117,12 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             {
             
             _musicActionScheduler.Schedule(
-                new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
+                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
                 Handle2BeatBefore,
                 _cancellationTokenSource.Token);
 
             _musicActionScheduler.Schedule(
-                new EnemyMusicSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
+                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
                 Handle1BeatBefore,
                 _cancellationTokenSource.Token);
             }

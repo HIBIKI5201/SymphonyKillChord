@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -65,6 +66,22 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
                 _outputPort.SetOutGameActiveForScenario(true);
                 throw;
             }
+        }
+
+        /// <summary>
+        ///     戦闘準備画面を介さずにバトル開始を要求します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
+        /// <returns> 要求を受理した場合はtrueです。 </returns>
+        public bool RequestImmediateBattleSortie(string targetSceneName)
+        {
+            if (string.IsNullOrWhiteSpace(targetSceneName))
+            {
+                return false;
+            }
+
+            _outputPort.StartBattle(targetSceneName);
+            return true;
         }
 
         private readonly SceneTransitionUsecase _usecase;

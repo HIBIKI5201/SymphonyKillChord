@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: edf783b390a177a42bb1aec28341bc15, type: 3}
-  m_Name: SkillRepositoryTest
+  m_Name: OutGameSkillRepository
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
   _skillDataAssets:
   - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}

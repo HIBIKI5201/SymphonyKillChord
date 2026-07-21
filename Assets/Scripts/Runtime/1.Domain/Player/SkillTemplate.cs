@@ -10,7 +10,10 @@ namespace KillChord.Runtime.Domain.Player
     public class SkillTemplate
     {
         /// <summary> スキルIDです。 </summary>
-        public int Id { get; }
+        public SkillId Id { get; }
+
+        /// <summary> スキル表示名です。 </summary>
+        public string DisplayName { get; }
 
         /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern { get; }
@@ -33,13 +36,15 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="cooldownDenomimator"> クールダウン分母です。 </param>
         /// <param name="effectSpec"> 効果定義です。 </param>
         /// <param name="animationKey"> アニメーションキーです。 </param>
+        /// <param name="displayName"> スキルの表示名です </param>
         public SkillTemplate(
-            int id,
+            SkillId id,
             BeatType[] pattern,
             int cooldownNumerator,
             int cooldownDenomimator,
             SkillEffectSpec effectSpec,
-            string animationKey)
+            string animationKey,
+            string displayName)
         {
             if (cooldownDenomimator <= 0)
             {
@@ -56,6 +61,7 @@ namespace KillChord.Runtime.Domain.Player
             CooldownBarRatio = (double)cooldownNumerator / cooldownDenomimator;
             EffectSpec = effectSpec;
             AnimationKey = animationKey;
+            DisplayName = displayName;
         }
 
         /// <summary>
@@ -66,7 +72,7 @@ namespace KillChord.Runtime.Domain.Player
         public SkillDefinition ToSkillDefinition(double bpm)
         {
             return new SkillDefinition(
-                new SkillId(Id),
+                Id,
                 new SkillPattern(new(Pattern)),
                 CooldownBarRatio,
                 EffectSpec,

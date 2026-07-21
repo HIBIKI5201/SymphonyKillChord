@@ -1,3 +1,5 @@
+using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -12,7 +14,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         public int PhaseIndex;
         /// <summary> 段階のコンテナーの要素名 </summary>
         public string PhaseName;
-        /// <summary> 段階を解放するために必要なノードID </summary>
-        public int RequiredSkillNodeId;
+        /// <summary> 段階を解放するために必要なノードID。 </summary>
+        public SkillNodeId RequiredSkillNodeId => new SkillNodeId(_requiredSkillNodeId.Id);
+
+        [SerializeField, Tooltip("段階を解放するために必要なノードID。")]
+        [SourceDataCollection("SkillNode")]
+        private DataID _requiredSkillNodeId;
     }
 }

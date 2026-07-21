@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -9,8 +10,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// </summary>
     public struct BackgroundCatalogEntry
     {
-        public string Id;
+        [SourceDataCollection("ScenarioBackground"), Tooltip("シナリオ背景を一意に識別するIDです。")]
+        public DataID Id;
+
+        [Tooltip("背景のAddressableキーです。")]
         public string AssetKey;
+
+        [Tooltip("表示する背景です。")]
         public Sprite Asset;
     }
 }

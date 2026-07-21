@@ -12,8 +12,11 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     [Serializable]
     public sealed class SaveData : SaveBase
     {
-        private static readonly int[] INITIAL_UNLOCKED_SKILL_IDS = { 0, 13 };
-        private static readonly int[] INITIAL_EQUIPPED_SKILL_IDS = { 0, 13 };
+        private const int SKILL_00_ID = -876453005;
+        private const int SKILL_13_ID = 1271923592;
+
+        private static readonly int[] INITIAL_UNLOCKED_SKILL_IDS = { SKILL_00_ID, SKILL_13_ID };
+        private static readonly int[] INITIAL_EQUIPPED_SKILL_IDS = { SKILL_00_ID, SKILL_13_ID };
 
         /// <summary>
         ///     SaveData クラスの新しいインスタンスを初期化する。

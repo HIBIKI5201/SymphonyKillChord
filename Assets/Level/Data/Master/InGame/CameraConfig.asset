@@ -18,10 +18,20 @@ MonoBehaviour:
   _followOffsetPower: 1
   _followLerpSpeed: 2
   _boneRotateSpeed: 10
+  _lockOnRotationMinSpeed: 0.35
+  _lockOnRotationSpeedAngleRange: 60
   _lockOnAngleMargin: 12
   _followRotationSpeed: 1.5
+  _moveFollowRotationSpeed: 90
+  _moveFollowIdleLookThreshold: 0.01
+  _moveFollowAngleDeadZone: 1
   _lockOnLookAtRatio: 1
   _lockOnRotationSpeed: 20
+  _lockOnViewportMargin: 0.05
+  _lockOnBreakWindow: 0.15
+  _lockOnBreakThreshold: 25
+  _autoLockOnReleaseDelay: 3
+  _autoLockOnViewportGraceDuration: 0.35
   _collisionRadius: 0.2
   _collisionMask:
     serializedVersion: 2

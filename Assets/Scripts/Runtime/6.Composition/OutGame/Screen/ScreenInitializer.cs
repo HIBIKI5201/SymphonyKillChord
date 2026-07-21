@@ -1,9 +1,11 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -33,7 +35,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            try
+            {
+                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+            }
+            catch (Exception ex) { Debug.LogException(ex, this); }
             return _loadedScreenRuleData != null;
         }
 
@@ -476,7 +482,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField]
         [Tooltip("画面表示に使用する UIDocument です。")]
         private UIDocument _uiDocument;
-        [SerializeField, Tooltip("画面遷移ルールデータの Addressables キーです。")]
+        [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
 
         private bool IsTransitioning => _transitionTask != null && !_transitionTask.IsCompleted;

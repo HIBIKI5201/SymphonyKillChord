@@ -1,12 +1,18 @@
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Sequence
@@ -82,6 +88,18 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState)
+                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError(
+                    $"[{nameof(SequenceInitializationModule)}] ステージ選択状態またはセーブシステムを取得できませんでした。",
+                    this);
+                return false;
+            }
+
+            _stageProgressSaveDataService =
+                new StageProgressSaveDataService(savedataSystem);
+            ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();
             StartStageSequenceAsync();
@@ -106,6 +124,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
 
             _container = null;
+            _selectedBattleStageState = null;
+            _stageProgressSaveDataService = null;
+            _pendingNodeTransitionState = null;
             _isEnding = false;
         }
 
@@ -146,7 +167,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 switch (reason)
                 {
                     case MissionEndReason.Clear:
-                        await _container.SequenceDirector.ClearAsync(destroyCancellationToken);
+                        MissionEvaluationResult evaluationResult =
+                            _missionRuntimeService.BuildEvaluationResult();
+                        await SaveClearResultAsync(evaluationResult);
+                        await _container.SequenceDirector.ClearAsync(
+                            evaluationResult,
+                            destroyCancellationToken);
                         break;
                     case MissionEndReason.Fail:
                         await _container.SequenceDirector.GameOverAsync(destroyCancellationToken);
@@ -158,12 +184,37 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
+        /// <summary>
+        ///     確定済み評価結果をステージ進行へ保存します。
+        /// </summary>
+        /// <param name="evaluationResult"> 保存する評価結果です。 </param>
+        private async Task SaveClearResultAsync(MissionEvaluationResult evaluationResult)
+        {
+            try
+            {
+                BattleStageDefinition stageDefinition =
+                    _selectedBattleStageState.CurrentStageDefinition;
+                await _stageProgressSaveDataService.SaveClearAsync(
+                    stageDefinition.StageId,
+                    evaluationResult,
+                    stageDefinition.IsTutorial);
+                _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
         private SequenceModuleContainer _container;
         private MissionRuntimeService _missionRuntimeService;
         private StageSequenceView _stageSequenceView;
         private StageSequenceMessageView _stageSequenceMessageView;
         private StageResultView _stageResultView;
         private InGamePlayDirector _inGamePlayDirector;
+        private SelectedBattleStageState _selectedBattleStageState;
+        private StageProgressSaveDataService _stageProgressSaveDataService;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
         private bool _isRegistered;
         private bool _isEnding;
     }

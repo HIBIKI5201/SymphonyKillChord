@@ -1,5 +1,5 @@
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
 
@@ -31,7 +31,7 @@ namespace DevelopProducts.Boss
         ///     指定タイミングで攻撃を予約する。
         ///     既存予約がある場合はキャンセルしてから設定する。
         /// </summary>
-        public void Reserve(in EnemyMusicSpec timing)
+        public void Reserve(in MusicSyncSpec timing)
         {
             Cancel();
 
@@ -88,7 +88,7 @@ namespace DevelopProducts.Boss
         /// <param name="timing"> 攻撃本体のタイミング。 </param>
         /// <param name="beatsBefore"> 何拍前か（2拍前なら2）。 </param>
         /// <param name="handler"> 到達時に呼ぶ処理。 </param>
-        private void ScheduleBeatBefore(in EnemyMusicSpec timing, double beatsBefore, Action handler)
+        private void ScheduleBeatBefore(in MusicSyncSpec timing, double beatsBefore, Action handler)
         {
             double signature = timing.TimeSignature;
             if (signature <= 0d) return;
@@ -107,7 +107,7 @@ namespace DevelopProducts.Boss
             if (barFlag < 0) return;
 
             _musicActionScheduler.Schedule(
-                new EnemyMusicSpec((byte)barFlag, signature, beat),
+                new MusicSyncSpec((byte)barFlag, signature, beat),
                 handler,
                 _cancellationTokenSource.Token);
         }

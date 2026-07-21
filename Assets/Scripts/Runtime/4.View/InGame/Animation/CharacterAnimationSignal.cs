@@ -1,5 +1,6 @@
 using System;
 using KillChord.Runtime.Adaptor.InGame.Animation;
+using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
@@ -43,10 +44,29 @@ namespace KillChord.Runtime.View
         /// <returns> 再生時間です。 </returns>
         public float RequestAttack(string animationKey = null)
         {
-            if (!string.IsNullOrWhiteSpace(animationKey)
-                && _playbackMap.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+            if (!string.IsNullOrWhiteSpace(animationKey))
             {
-                return RequestOneShot(oneShotIndex, false);
+                if (_playbackMap.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+                {
+                    return RequestOneShot(oneShotIndex, false);
+                }
+
+                Debug.LogError($"[{nameof(CharacterAnimationSignal)}] ワンショットアニメーションキーが登録されていません。Key: {animationKey}");
+            }
+
+            return RequestOneShot(_playbackMap.Attack, false);
+        }
+
+        /// <summary>
+        ///     攻撃BeatTypeに対応するアニメーションの再生を要求します。
+        /// </summary>
+        /// <param name="attackType"> 攻撃結果のBeatTypeです。 </param>
+        /// <returns> 再生時間です。 </returns>
+        public float RequestAttack(int attackType)
+        {
+            if (_playbackMap.TryGetAttackIndex(attackType, out int attackIndex))
+            {
+                return RequestOneShot(attackIndex, false);
             }
 
             return RequestOneShot(_playbackMap.Attack, false);

@@ -10,6 +10,7 @@ using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
@@ -109,7 +110,7 @@ namespace DevelopProducts.Boss
             foreach (BossAttackEntry entry in _attackEntries)
             {
                 AttackDefinition definition = _enemyEntity.CombatSpec.GetAttackDifinition(entry.AttackIndex);
-                EnemyMusicSpec timing = new EnemyMusicSpec(
+                MusicSyncSpec timing = new MusicSyncSpec(
                     entry.TimingData.BarFlag,
                     entry.TimingData.TimeSignature,
                     entry.TimingData.TargetBeat);

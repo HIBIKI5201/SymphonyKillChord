@@ -12,17 +12,12 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// </summary>
         public PortraitEvent(
             PortraitSlot slot,
-            string portraitId,
+            PortraitId portraitId,
             float positionX,
             float positionY,
             float scale,
             bool visible)
         {
-            if (string.IsNullOrWhiteSpace(portraitId))
-            {
-                throw new ArgumentException("portraitId is empty.", nameof(portraitId));
-            }
-
             Slot = slot;
             PortraitId = portraitId;
             PositionX = positionX;
@@ -34,7 +29,7 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary> Slot を取得する。 </summary>
         public PortraitSlot Slot { get; }
         /// <summary> PortraitId を取得する。 </summary>
-        public string PortraitId { get; }
+        public PortraitId PortraitId { get; }
         /// <summary> PositionX を取得する。 </summary>
         public float PositionX { get; }
         /// <summary> PositionY を取得する。 </summary>

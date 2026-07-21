@@ -7,6 +7,6 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IAnimationRepository
     {
-        bool TryFindById(string id, out AnimationDefinition animation);
+        bool TryFindById(AnimationId id, out AnimationDefinition animation);
     }
 }

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using KillChord.Runtime.View.InGame.Camera;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
@@ -26,31 +27,33 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private async void Start()
         {
-            RegisterCurrentScenePriority();
-
-            if (!TryResolveBootDependencies(
-                out SelectedBattleStageState selectedBattleStageState,
-                out ILoadingOperationExecutor operationExecutor,
-                out ISceneTransitionService sceneTransitionService))
-            {
-                FailActiveLoadingSession();
-                return;
-            }
-
-            if (!selectedBattleStageState.HasSelectedBattleStage)
-            {
-                Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
-                FailActiveLoadingSession();
-                return;
-            }
-
-            LoadingExecutionOptions options = LoadingExecutionOptions.ContinueAndComplete(
-                LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
-                1f);
+            bool isSuccess = false;
 
             try
             {
-                bool success = await operationExecutor.ExecuteAsync(
+                RegisterCurrentScenePriority();
+
+                if (!TryResolveBootDependencies(
+                    out SelectedBattleStageState selectedBattleStageState,
+                    out ILoadingOperationExecutor operationExecutor,
+                    out ISceneTransitionService sceneTransitionService))
+                {
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                if (!selectedBattleStageState.HasSelectedBattleStage)
+                {
+                    Debug.LogError($"[{nameof(IngameComposition)}] バトルステージが選択されていません。", this);
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                LoadingExecutionOptions options = LoadingExecutionOptions.ContinueAndComplete(
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS,
+                    1f);
+
+                isSuccess = await operationExecutor.ExecuteAsync(
                     async totalProgress =>
                     {
                         LoadingProgressRange stageLoadProgress = new(
@@ -96,8 +99,16 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     options,
                     destroyCancellationToken);
 
-                if (!success)
+                if (!isSuccess)
                 {
+                    FailActiveLoadingSession();
+                    return;
+                }
+
+                if (!await WaitForCameraSystemReadyAsync(destroyCancellationToken))
+                {
+                    Debug.LogError($"[{nameof(IngameComposition)}] カメラ初期化の完了待機に失敗しました。", this);
+                    isSuccess = false;
                     FailActiveLoadingSession();
                 }
             }
@@ -108,6 +119,10 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             {
                 FailActiveLoadingSession();
                 Debug.LogException(exception, this);
+            }
+            finally
+            {
+                CompleteSceneInitialization(isSuccess);
             }
         }
 
@@ -207,6 +222,24 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         }
 
         /// <summary>
+        ///     インゲームシーンの初期化結果を通知します。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
+        private void CompleteSceneInitialization(bool isSuccess)
+        {
+            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            {
+                Debug.LogError(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
+                    this);
+                return;
+            }
+
+            readiness.Complete(gameObject.scene.name, isSuccess);
+        }
+
+        /// <summary>
         ///     ステージシーンのロード完了とシーン参照登録完了を待機します。
         /// </summary>
         /// <param name="stageSceneName"> ステージシーン名です。 </param>
@@ -240,7 +273,38 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             return false;
         }
 
+        /// <summary>
+        ///     カメラがプレイヤー追従位置へ初回更新されるまで待機します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 準備完了した場合はtrue。 </returns>
+        private async Awaitable<bool> WaitForCameraSystemReadyAsync(
+            System.Threading.CancellationToken cancellationToken)
+        {
+            CameraSystemView cameraSystemView = FindFirstObjectByType<CameraSystemView>();
+            if (cameraSystemView == null)
+            {
+                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(CameraSystemView)} が見つかりません。", this);
+                return false;
+            }
+
+            for (int retryCount = 0; retryCount < MAX_CAMERA_READY_WAIT_FRAME; retryCount++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (cameraSystemView.HasCompletedInitialUpdate)
+                {
+                    return true;
+                }
+
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
+
+            return false;
+        }
+
         private const int MAX_STAGE_READY_WAIT_FRAME = 120;
+        private const int MAX_CAMERA_READY_WAIT_FRAME = 120;
         private readonly InGameInitializationCoordinator _initializationCoordinator = new();
         private List<IInGameInitializationModule> _modules;
     }

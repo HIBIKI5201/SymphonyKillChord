@@ -42,6 +42,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         bool TryGetCurrentTargetPosition(out Vector3 result);
 
         /// <summary>
+        ///     現在の候補ターゲットの取得を試みる。
+        /// </summary>
+        /// <param name="targetable"> 取得した候補ターゲット。取得失敗時はnull。 </param>
+        /// <returns> 取得に成功した場合はtrue。 </returns>
+        bool TryGetCurrentCandidate(out ITargetableViewModel targetable);
+
+        /// <summary>
+        ///     現在の候補ターゲットIDの取得を試みる。
+        /// </summary>
+        /// <param name="targetId"> 取得した候補ターゲットID。取得失敗時は <see cref="Guid.Empty"/>。 </param>
+        /// <returns> 取得に成功した場合はtrue。 </returns>
+        bool TryGetCurrentCandidateId(out Guid targetId);
+
+        /// <summary>
+        ///     現在の候補ターゲット位置の取得を試みる。
+        /// </summary>
+        /// <param name="result"> 取得した位置。取得失敗時は <see cref="Vector3.zero"/>。 </param>
+        /// <returns> 取得に成功した場合はtrue。 </returns>
+        bool TryGetCurrentCandidatePosition(out Vector3 result);
+
+        /// <summary>
         ///     現在登録されているターゲット一覧のスナップショットを取得する。
         /// </summary>
         /// <returns> 登録ターゲット一覧です。 </returns>
@@ -53,6 +74,28 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         void ChangeTarget(in Vector3 playerPosition, in Vector3 direction);
+
+        /// <summary>
+        ///     プレイヤー位置と方向をもとに候補ターゲットを更新する。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        void UpdateCandidate(in Vector3 playerPosition, in Vector3 direction);
+
+        /// <summary>
+        ///     指定方向で評価した別ターゲットへの切り替えを試みる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction);
+
+        /// <summary>
+        ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
+        /// </summary>
+        /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <returns> 設定に成功した場合は true。 </returns>
+        bool TrySetCurrentTarget(Guid targetId);
 
         /// <summary>
         ///     現在のターゲット選択を解除する。

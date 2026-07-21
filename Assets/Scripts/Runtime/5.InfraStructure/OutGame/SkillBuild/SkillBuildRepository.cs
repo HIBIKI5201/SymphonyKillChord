@@ -1,4 +1,5 @@
 ﻿using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
@@ -97,7 +98,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             for (int i = 0; i < skillIds.Count; i++)
             {
                 int skillId = skillIds[i];
-                if (!_skillRepository.TryGetSkill(skillId, out var skillData))
+                if (!_skillRepository.TryGetSkill(new SkillId(skillId), out var skillData))
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning($"スキル ID '{skillId}' に対応する SkillTemplate が見つかりませんでした。");

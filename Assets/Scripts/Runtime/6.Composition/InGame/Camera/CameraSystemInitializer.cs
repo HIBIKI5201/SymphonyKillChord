@@ -81,6 +81,8 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraFreeLookRotationCalculator freeLookRotationCalculator = new(_config);
             CameraLookAtRotationCalculator lookAtRotationCalculator = new(_config);
             CameraFollowCalculator followCalculator = new(_config);
+            CameraLockOnRangeChecker lockOnRangeChecker = new(_config);
+            CameraLockOnBreakTracker lockOnBreakTracker = new(_config);
 
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
             if (playerModuleContainer == null || playerModuleContainer.PlayerView == null)
@@ -97,8 +99,12 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                     bool hasTarget = targetingSystem.TryGetCurrentTargetPosition(out Vector3 targetPosition);
                     return (hasTarget, targetPosition);
                 },
+                (playerPosition, direction) => targetingSystem.UpdateCandidate(playerPosition, direction),
+                (playerPosition, direction) => targetingSystem.TrySwitchTarget(playerPosition, direction),
+                targetId => targetingSystem.TrySetCurrentTarget(targetId),
                 followCalculator, lockOnRotationCalculator,
-                freeLookRotationCalculator, lookAtRotationCalculator, _config, playerModuleContainer.PlayerView.transform,
+                freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, lockOnBreakTracker,
+                _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
         }
 

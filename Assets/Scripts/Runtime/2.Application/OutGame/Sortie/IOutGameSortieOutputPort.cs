@@ -12,6 +12,12 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         void ShowBattlePreparationScreen(string targetSceneName);
 
         /// <summary>
+        ///     戦闘準備画面を介さずにバトル開始を要求します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
+        void StartBattle(string targetSceneName);
+
+        /// <summary>
         ///    シナリオステージの出撃処理を要求する。
         /// </summary>
         /// <param name="isActive"> シナリオステージの出撃処理を有効にするかどうか。 </param>

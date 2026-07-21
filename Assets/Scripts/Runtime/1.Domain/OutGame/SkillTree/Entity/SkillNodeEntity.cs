@@ -1,3 +1,5 @@
+using KillChord.Runtime.Domain.InGame.Skill;
+
 namespace KillChord.Runtime.Domain.OutGame.SkillTree
 {
     /// <summary>
@@ -5,11 +7,11 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     /// </summary>
     public class SkillNodeEntity
     {
-        public SkillNodeEntity(int nodeId,
+        public SkillNodeEntity(SkillNodeId nodeId,
             int cost, string skillDetail,
-            UnlockSkillId[] unlockSkillIds)
+            SkillId[] unlockSkillIds)
         {
-            SkillNodeIdVO = new SkillNodeId(nodeId);
+            SkillNodeIdVO = nodeId;
             UnlockCost = new UnlockCost(cost);
             _parents = null;
             SkillDetail = skillDetail;
@@ -28,7 +30,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public SkillNodeEntity[] Parents => _parents;
 
         /// <summary> 解放されるスキルの ID。 </summary>
-        public UnlockSkillId[] UnlockSkillIds => _unlockSkillIds;
+        public SkillId[] UnlockSkillIds => _unlockSkillIds;
 
         /// <summary>
         ///     親ノードを設定する。
@@ -49,6 +51,6 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         private bool _isUnlocked = false;
         private SkillNodeEntity[] _parents;
-        private UnlockSkillId[] _unlockSkillIds;
+        private SkillId[] _unlockSkillIds;
     }
 }

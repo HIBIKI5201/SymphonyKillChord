@@ -25,11 +25,28 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
             _inputComposition = inputComposition;
         }
 
+        /// <summary>
+        ///     戦闘準備画面の表示を要求します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
         public void ShowBattlePreparationScreen(string targetSceneName)
         {
             _outGameUIEvent.OnShownBattlePreparationScreen?.Invoke(targetSceneName);
         }
 
+        /// <summary>
+        ///     バトル開始イベントを通知します。
+        /// </summary>
+        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
+        public void StartBattle(string targetSceneName)
+        {
+            _outGameUIEvent.OnStartGame?.Invoke(targetSceneName);
+        }
+
+        /// <summary>
+        ///     シナリオ再生状態に合わせてOutGameの表示と入力を切り替えます。
+        /// </summary>
+        /// <param name="isActive"> OutGameを有効にする場合はtrueです。 </param>
         public void SetOutGameActiveForScenario(bool isActive)
         {
             _outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(isActive);

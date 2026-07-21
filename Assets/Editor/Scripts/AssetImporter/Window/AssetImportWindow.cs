@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using KillChord.Editor.AssetImporter.Settings;
-using DevelopProducts.Utility;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -22,7 +22,7 @@ namespace KillChord.Editor.AssetImporter
         private string latestFileName = "未取得 (API Key と Folder ID を入力して更新してください)";
         private bool isFetchingFileInfo;
 
-        [MenuItem(DevelopProductsConst.DEVELOP_PRODUCTS_WINDOW_PATH + nameof(AssetImportWindow))]
+        [MenuItem(ToolConst.WINDOW_PATH + nameof(AssetImportWindow))]
         public static void ShowWindow()
         {
             GetWindow<AssetImportWindow>(nameof(AssetImportWindow));

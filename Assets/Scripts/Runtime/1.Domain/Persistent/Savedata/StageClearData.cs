@@ -12,12 +12,12 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     {
         public StageClearData(int stageId)
         {
-            if (stageId <= 0)
+            if (stageId == 0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(stageId),
                     stageId,
-                    "ステージIDは1以上である必要があります。");
+                    "ステージIDに0は使用できません。");
             }
 
             _stageId = stageId;

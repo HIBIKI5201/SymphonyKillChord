@@ -7,20 +7,21 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
     /// <summary>
     /// カタログアセットを辞書参照可能にする基底リポジトリ。
     /// </summary>
-    public abstract class CatalogRepositoryBase<TDefinition, TEntry>
+    public abstract class CatalogRepositoryBase<TId, TDefinition, TEntry>
+        where TId : struct
     {
         /// <summary>
         /// カタログアセットから検索用辞書を構築する。
         /// </summary>
         protected CatalogRepositoryBase(IReadOnlyList<TEntry> entries)
         {
-            _map = new Dictionary<string, TDefinition>(StringComparer.Ordinal);
+            _map = new Dictionary<TId, TDefinition>();
             if (entries == null) return;
 
             for (int i = 0; i < entries.Count; i++)
             {
                 TEntry entry = entries[i];
-                if (!TryBuild(entry, out string id, out TDefinition definition))
+                if (!TryBuild(entry, out TId id, out TDefinition definition))
                 {
                     Debug.LogWarning($"{GetType().Name}: skipped invalid catalog entry at index {i}.");
                     continue;
@@ -36,22 +37,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary>
         /// ID から定義情報を検索する。
         /// </summary>
-        public bool TryFindById(string id, out TDefinition definition)
+        public bool TryFindById(TId id, out TDefinition definition)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                definition = default;
-                return false;
-            }
-
             return _map.TryGetValue(id, out definition);
         }
 
         /// <summary>
         /// カタログエントリから検索用の定義情報を生成する。
         /// </summary>
-        protected abstract bool TryBuild(TEntry entry, out string id, out TDefinition definition);
+        protected abstract bool TryBuild(TEntry entry, out TId id, out TDefinition definition);
 
-        private readonly Dictionary<string, TDefinition> _map;
+        private readonly Dictionary<TId, TDefinition> _map;
     }
 }

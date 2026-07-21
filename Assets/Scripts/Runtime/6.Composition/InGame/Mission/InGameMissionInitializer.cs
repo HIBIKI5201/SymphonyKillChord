@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -17,7 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         public override string ModuleName => nameof(InGameMissionInitializer);
 
         /// <summary> 実行順です。 </summary>
-        public override int Order => 300;
+        public override int Order => 600;
 
         /// <summary>
         ///     ミッションシステムを構築してContainerを登録します。
@@ -40,6 +41,34 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _moduleContainer = new MissionModuleContainer(missionRuntimeService, missionEventController);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
+            return true;
+        }
+
+        /// <summary>
+        ///     プレイヤー戦闘イベントとミッション実績記録を結合します。
+        /// </summary>
+        /// <returns> 結合に成功した場合はtrueです。 </returns>
+        public override bool Ready()
+        {
+            PlayerModuleContainer playerModuleContainer =
+                ServiceLocator.GetInstance<PlayerModuleContainer>();
+            if (playerModuleContainer == null
+                || playerModuleContainer.PlayerEntity == null
+                || playerModuleContainer.PlayerAttackController == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
+                    this);
+                return false;
+            }
+
+            MissionProgressRecorderController recorderController =
+                new MissionProgressRecorderController(
+                    _moduleContainer.MissionRuntimeService.MissionProgress);
+            recorderController.Bind(
+                playerModuleContainer.PlayerEntity,
+                playerModuleContainer.PlayerAttackController);
+            _moduleContainer.MissionProgressRecorderController = recorderController;
             return true;
         }
 
@@ -117,6 +146,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         public override void Shutdown()
         {
+            _moduleContainer?.MissionProgressRecorderController?.Dispose();
+
             if (!_isModuleRegistered)
             {
                 return;

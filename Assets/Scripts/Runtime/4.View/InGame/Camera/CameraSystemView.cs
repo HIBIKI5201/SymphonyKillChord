@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.InGame;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.Persistent.Input;
 using System;
 using UnityEngine;
@@ -14,16 +15,24 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
+        /// <summary> 初回カメラ更新が完了している場合はtrueです。 </summary>
+        public bool HasCompletedInitialUpdate => _hasCompletedInitialUpdate;
+
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
         /// <param name="changeTargetAction"> ターゲット切り替え処理。</param>
         /// <param name="clearTargetAction"> ターゲット解除処理。</param>
         /// <param name="getCurrentTargetPositionFunc"> 現在ターゲット位置の取得処理。</param>
+        /// <param name="updateCandidateAction"> 候補ターゲット更新処理。</param>
+        /// <param name="trySwitchTargetFunc"> 別ターゲットへの切り替え処理。</param>
+        /// <param name="trySetTargetByIdFunc"> 指定IDのターゲットを現在ターゲットへ設定する処理。</param>
         /// <param name="followCalculator"> 追従移動計算クラス。</param>
         /// <param name="lockOnRotationCalculator"> ロックオン回転計算クラス。</param>
         /// <param name="freeLookRotationCalculator"> フリールック回転計算クラス。</param>
         /// <param name="lookAtRotationCalculator"> カメラ回転計算クラス。</param>
+        /// <param name="lockOnRangeChecker"> 自動ロックオン対象の視野内判定クラス。</param>
+        /// <param name="lockOnBreakTracker"> 強い視点操作によるロックオン解除判定クラス。</param>
         /// <param name="viewSettings"> View が利用するカメラ設定値。</param>
         /// <param name="playerT"> プレイヤーの Transform。</param>
         /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
@@ -31,10 +40,15 @@ namespace KillChord.Runtime.View.InGame.Camera
             Action<Vector3, Vector3> changeTargetAction,
             Action clearTargetAction,
             Func<(bool HasTarget, Vector3 TargetPosition)> getCurrentTargetPositionFunc,
+            Action<Vector3, Vector3> updateCandidateAction,
+            Func<Vector3, Vector3, bool> trySwitchTargetFunc,
+            Func<Guid, bool> trySetTargetByIdFunc,
             CameraFollowCalculator followCalculator,
             CameraLockOnRotationCalculator lockOnRotationCalculator,
             CameraFreeLookRotationCalculator freeLookRotationCalculator,
             CameraLookAtRotationCalculator lookAtRotationCalculator,
+            CameraLockOnRangeChecker lockOnRangeChecker,
+            CameraLockOnBreakTracker lockOnBreakTracker,
             CameraConfig viewSettings,
             Transform playerT,
             PlayerInputView playerInputView)
@@ -42,24 +56,36 @@ namespace KillChord.Runtime.View.InGame.Camera
             _changeTargetAction = changeTargetAction;
             _clearTargetAction = clearTargetAction;
             _getCurrentTargetPositionFunc = getCurrentTargetPositionFunc;
+            _updateCandidateAction = updateCandidateAction;
+            _trySwitchTargetFunc = trySwitchTargetFunc;
+            _trySetTargetByIdFunc = trySetTargetByIdFunc;
             _followCalculator = followCalculator;
             _lockOnRotationCalculator = lockOnRotationCalculator;
             _freeLookRotationCalculator = freeLookRotationCalculator;
             _lookAtRotationCalculator = lookAtRotationCalculator;
+            _lockOnRangeChecker = lockOnRangeChecker;
+            _lockOnBreakTracker = lockOnBreakTracker;
             _viewSettings = viewSettings;
             _playerT = playerT;
             _inputView = playerInputView;
+            _camera = _cameraT != null
+                ? _cameraT.GetComponent<UnityEngine.Camera>() ?? UnityEngine.Camera.main
+                : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
+            _hasCompletedInitialUpdate = false;
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
+            _inputView.OnMobileLockOnSelectInput += LockOnSelectHandlerMobile;
 #else
             _inputView.OnLookMouseInput += LookHandlerMouse;
             _inputView.OnLookGamepadInput += LookHandlerGamepad;
+            _inputView.OnLockOnSelectInput += LockOnSelectHandler;
 #endif
             _inputView.OnMoveInput += MoveHandler;
             _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
+            EventBus<EOnTakeDamage>.Register(OnTakeDamage);
         }
 
         /// <summary> カメラ距離の補間速度。 </summary>
@@ -84,6 +110,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private int _mobileLookSensitivity = 10;
 
         private PlayerInputView _inputView;
+        private UnityEngine.Camera _camera;
         private Transform _playerT;
         private Vector2 _input;
         private Vector2 _moveInput;
@@ -97,10 +124,18 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLockOnRotationCalculator _lockOnRotationCalculator;
         private CameraFreeLookRotationCalculator _freeLookRotationCalculator;
         private CameraLookAtRotationCalculator _lookAtRotationCalculator;
+        private CameraLockOnRangeChecker _lockOnRangeChecker;
+        private CameraLockOnBreakTracker _lockOnBreakTracker;
         private Action<Vector3, Vector3> _changeTargetAction;
+        private Action<Vector3, Vector3> _updateCandidateAction;
         private Action _clearTargetAction;
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
+        private Func<Vector3, Vector3, bool> _trySwitchTargetFunc;
+        private Func<Guid, bool> _trySetTargetByIdFunc;
         private CameraLockOnState _lockOnState;
+        private bool _hasCompletedInitialUpdate;
+        private float _autoLockOnIdleTimer;
+        private float _autoLockOnViewportGraceTimer;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -144,13 +179,16 @@ namespace KillChord.Runtime.View.InGame.Camera
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput -= LookHandlerMobile;
+            _inputView.OnMobileLockOnSelectInput -= LockOnSelectHandlerMobile;
 #else
             _inputView.OnLookMouseInput -= LookHandlerMouse;
             _inputView.OnLookGamepadInput -= LookHandlerGamepad;
+            _inputView.OnLockOnSelectInput -= LockOnSelectHandler;
 #endif
             _inputView.OnMoveInput -= MoveHandler;
             _inputView.OnLockOnInput -= LockOnHandler;
             _inputView.OnAttackInput -= OnAttack;
+            EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
         }
 
         /// <summary>
@@ -161,6 +199,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void LookHandlerMobile(InputContext<Vector2> context)
         {
             _input = context.Value * _mobileLookSensitivity;
+        }
+
+        /// <summary>
+        ///     モバイルのロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        /// </summary>
+        /// <param name="direction"> 左右方向を表す入力値。 </param>
+        private void LockOnSelectHandlerMobile(float direction)
+        {
+            TrySelectAdjacentTarget(direction);
         }
 #else
         private void LookHandlerMouse(InputContext<Vector2> context)
@@ -175,6 +222,20 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void LookHandlerGamepad(InputContext<Vector2> context)
         {
             _input = context.Value * _gamepadLookSensitivity;
+        }
+
+        /// <summary>
+        ///     ロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        /// </summary>
+        /// <param name="context"> ロックオン対象切り替えの入力コンテキスト。</param>
+        private void LockOnSelectHandler(InputContext<float> context)
+        {
+            if (context.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+
+            TrySelectAdjacentTarget(context.Value);
         }
 #endif
 
@@ -212,15 +273,45 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
+        ///     プレイヤーの攻撃命中イベントを受け取り、オートロックオン解除タイマーを延長する。
+        /// </summary>
+        /// <param name="eventData"> ダメージイベント。 </param>
+        private void OnTakeDamage(EOnTakeDamage eventData)
+        {
+            if (_lockOnState == CameraLockOnState.LockOnManual)
+            {
+                return;
+            }
+
+            if (_trySetTargetByIdFunc == null || !_trySetTargetByIdFunc.Invoke(eventData.DefenderId))
+            {
+                return;
+            }
+
+            _lockOnState = CameraLockOnState.LockOnAuto;
+            _lockOnBreakTracker.Reset();
+            _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
+        }
+
+        /// <summary>
         ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
         /// </summary>
         /// <param name="deltaTime"> 前フレームからの経過時間。</param>
         private void Tick(float deltaTime)
         {
             if (_changeTargetAction == null || _clearTargetAction == null || _getCurrentTargetPositionFunc == null
+                || _updateCandidateAction == null || _trySetTargetByIdFunc == null || _followCalculator == null || _lockOnRotationCalculator == null
+                || _freeLookRotationCalculator == null || _lookAtRotationCalculator == null
+                || _lockOnRangeChecker == null || _lockOnBreakTracker == null
                 || _playerT == null || _cameraT == null)
             {
                 return;
+            }
+
+            if (_camera == null)
+            {
+                _camera = UnityEngine.Camera.main;
             }
 
             CameraUpdateFrame frame = BuildFrame(deltaTime);
@@ -257,6 +348,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
             _cameraT.SetPositionAndRotation(position, rotation);
+            _hasCompletedInitialUpdate = true;
         }
 
         /// <summary>
@@ -281,6 +373,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             _lockOnState = CameraLockOnState.LockOnAuto;
+            _lockOnBreakTracker.Reset();
+            _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = 0f;
             _changeTargetAction.Invoke(currentPosition, direction);
         }
 
@@ -294,6 +389,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             if (!IsLockOn())
             {
                 _lockOnState = CameraLockOnState.LockOnManual;
+                _lockOnBreakTracker.Reset();
+                _autoLockOnIdleTimer = 0f;
+                _autoLockOnViewportGraceTimer = 0f;
                 _changeTargetAction.Invoke(currentPosition, direction);
                 return;
             }
@@ -326,7 +424,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         {
             if (frame.IsLockOn)
             {
-                _lockOnRotationCalculator.Update(ref _cameraBoneRotation, frame.Context, frame.TargetPosition);
+                _lockOnRotationCalculator.Update(
+                    ref _cameraBoneRotation,
+                    frame.Context,
+                    frame.TargetPosition);
             }
             else
             {
@@ -342,13 +443,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraUpdateFrame BuildFrame(float deltaTime)
         {
             Vector2 input = ApplyInvert(_input * _lookSensitivity);
-            CameraUpdateContext context = new(_playerT.position, input, _moveInput, deltaTime);
-
-            if (_lockOnState == CameraLockOnState.LockOnAuto
-                && (context.Input.sqrMagnitude > float.Epsilon || context.MoveInput.sqrMagnitude > float.Epsilon))
-            {
-                ClearLockOn();
-            }
+            CameraUpdateContext context = new(_playerT.position, _playerT.forward, input, _moveInput, deltaTime);
 
             Vector3 targetPosition = Vector3.zero;
             if (IsLockOn())
@@ -361,7 +456,22 @@ namespace KillChord.Runtime.View.InGame.Camera
                 else
                 {
                     targetPosition = targetResult.TargetPosition;
+                    if (_lockOnState == CameraLockOnState.LockOnAuto)
+                    {
+                        _autoLockOnIdleTimer += deltaTime;
+                        _autoLockOnViewportGraceTimer = Mathf.Max(0f, _autoLockOnViewportGraceTimer - deltaTime);
+                        if (ShouldClearAutoLockOn(context, targetPosition))
+                        {
+                            ClearLockOn();
+                            targetPosition = Vector3.zero;
+                        }
+                    }
                 }
+            }
+
+            if (!IsLockOn())
+            {
+                _updateCandidateAction.Invoke(_playerT.position, GetCurrentForward());
             }
 
             return new CameraUpdateFrame(context, targetPosition, IsLockOn());
@@ -373,7 +483,62 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void ClearLockOn()
         {
             _lockOnState = CameraLockOnState.Free;
+            _lockOnBreakTracker.Reset();
+            _autoLockOnIdleTimer = 0f;
+            _autoLockOnViewportGraceTimer = 0f;
             _clearTargetAction.Invoke();
+        }
+
+        /// <summary>
+        ///     ロックオン対象の左右切り替えを試みる。
+        /// </summary>
+        /// <param name="direction"> 左右方向を表す入力値。 </param>
+        private void TrySelectAdjacentTarget(float direction)
+        {
+            if (_lockOnState != CameraLockOnState.LockOnManual
+                || _trySwitchTargetFunc == null
+                || _playerT == null
+                || _cameraT == null)
+            {
+                return;
+            }
+
+            float selectDirection = Mathf.Sign(direction);
+            if (Mathf.Approximately(selectDirection, 0f))
+            {
+                return;
+            }
+
+            Vector3 candidateDirection = GetCurrentForward() + (_cameraT.right * selectDirection);
+            if (candidateDirection.sqrMagnitude <= float.Epsilon)
+            {
+                return;
+            }
+
+            _trySwitchTargetFunc.Invoke(_playerT.position, candidateDirection.normalized);
+        }
+
+        /// <summary>
+        ///     オートロックオンを解除するべきかを判定する。
+        /// </summary>
+        /// <param name="context"> 今フレームの更新コンテキスト。 </param>
+        /// <param name="targetPosition"> 現在のロックオン対象座標。 </param>
+        /// <returns> 解除するべき場合は true。 </returns>
+        private bool ShouldClearAutoLockOn(in CameraUpdateContext context, in Vector3 targetPosition)
+        {
+            if (_autoLockOnIdleTimer >= _viewSettings.AutoLockOnReleaseDelay)
+            {
+                return true;
+            }
+
+            if (_autoLockOnViewportGraceTimer <= 0f
+                && _camera != null
+                && !_lockOnRangeChecker.IsWithinRange(_camera, targetPosition))
+            {
+                return true;
+            }
+
+            return _lockOnBreakTracker.Update(context);
         }
 
         /// <summary>

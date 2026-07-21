@@ -1,17 +1,20 @@
-﻿using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
@@ -41,10 +44,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <returns> 成功した場合はtrue。 </returns>
         public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
         {
-            _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
-            _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
-            _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
-            _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
+            try
+            {
+                _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
+                _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
+                _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+                _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
+            }
+            catch (Exception ex) { Debug.LogException(ex, this); }
+
             return _loadedEnemyData != null
                 && _loadedMoveData != null
                 && _loadedMissionKeyAsset != null
@@ -102,7 +110,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
 
-            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
+            _missionEventController = missionModuleContainer?.MissionEventController;
             _releaseCallback = releaseCallback;
 
             // 敵射線判定
@@ -147,7 +156,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             foreach (BossAttackEntryAsset entry in _loadedAttackEntryRepo.AttackEntries)
             {
                 AttackDefinition definition = _enemyEntity.CombatSpec.GetAttackDifinition(entry.AttackIndex);
-                EnemyMusicSpec musicSpec = new EnemyMusicSpec(
+                MusicSyncSpec musicSpec = new MusicSyncSpec(
                     entry.MusicData.BarFlag,
                     entry.MusicData.TimeSignature,
                     entry.MusicData.TargetBeat);
@@ -303,16 +312,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField, Tooltip("ボス定義の Addressables キーです。")] private string _enemyDataKey;
-        [SerializeField, Tooltip("ボス移動仕様の Addressables キーです。")] private string _moveDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("ボス定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("ボス移動仕様の Addressables キーです。")] private string _moveDataKey;
 
         [SerializeField] private BossMoveView _view;
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private TripleShotRaycastDetectView _tripleShotRaycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, Tooltip("ボスミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
-        [SerializeField, Tooltip("ボス攻撃定義群の Addressables キーです。")] private string _attackEntryRepoKey;
+        [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
+        [SerializeField, SourceDataAddress, Tooltip("ボス攻撃定義群の Addressables キーです。")] private string _attackEntryRepoKey;
         [SerializeField] private BossMovementAIFacade _bossMovementAIFacade;
         [SerializeField] private BossBattleAIFacade _bossBattleAIFacade;
         [SerializeField] private BossStateFacade _bossStateFacade;

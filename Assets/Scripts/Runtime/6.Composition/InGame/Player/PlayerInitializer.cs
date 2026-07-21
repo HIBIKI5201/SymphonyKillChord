@@ -20,7 +20,6 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Domain.InGame.Player;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Skill;
@@ -56,8 +55,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerView _playerViewPrefab;
         [SerializeField, Tooltip("入力進捗UI設定です。")]
         private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
-        [SerializeField, Tooltip("キャラクターアニメーション設定です。")]
-        private CharacterAnimationCatalogAsset _characterAnimationCatalogAsset;
+        [SerializeField, Tooltip("プレイヤー共通のアニメーション設定です。")]
+        private CharacterAnimationCatalogConfig _characterAnimationConfig;
+
+        [SerializeField, Tooltip("プレイヤーの攻撃種別ごとのアニメーション設定です。")]
+        private PlayerAttackAnimationConfig _playerAttackAnimationConfig;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -238,12 +240,17 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value,
                 (int)_playerEntity.BaseDamage.Value);
+            _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             AnimationComposition animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext = animationComposition.Init(_characterAnimationView, _characterAnimationCatalogAsset, musicSyncState);
+            ICharacterAnimationViewContext animationContext = animationComposition.Init(
+                _characterAnimationView,
+                _characterAnimationConfig,
+                musicSyncState,
+                _playerAttackAnimationConfig);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
             dodge.OnDodgeStarted += duration => _playerEntity.SetInvincible(true);
@@ -344,7 +351,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerConfig == null
                 || _playerViewPrefab == null
                 || _playerData == null
-                || _characterAnimationCatalogAsset == null)
+                || _characterAnimationConfig == null
+                || _playerAttackAnimationConfig == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤー初期化参照が不足しています。", this);
                 return false;

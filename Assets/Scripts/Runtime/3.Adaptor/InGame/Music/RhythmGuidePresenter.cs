@@ -37,7 +37,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             BeatType? currentBeatType = _rhythmGuideUsecase.CalculateCurrentBeatType(barProgress);
 
             int? currentBeatCount = currentBeatType.HasValue
-                ? (int)currentBeatType.Value : null;
+                ? (int?)currentBeatType.Value : null;
 
             _zones.Clear();
 

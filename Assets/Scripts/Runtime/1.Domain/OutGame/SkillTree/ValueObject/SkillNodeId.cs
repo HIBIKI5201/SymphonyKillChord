@@ -49,6 +49,15 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     数値IDの文字列表現を取得します。
+        /// </summary>
+        /// <returns> 数値IDの文字列表現。 </returns>
+        public override string ToString()
+        {
+            return _id.ToString();
+        }
+
+        /// <summary>
         ///     2つのスキルノードIDが等しいかどうかを判定します。
         /// </summary>
         /// <param name="left">比較する左辺のスキルノードID。</param>

@@ -1,3 +1,5 @@
+using KillChord.Runtime.Domain.InGame.Music;
+
 namespace KillChord.Runtime.Domain.InGame.Enemy
 {
     /// <summary>
@@ -5,15 +7,15 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyAttackMusicSpec
     {
-        public EnemyAttackMusicSpec(EnemyMusicSpec encounterTiming, EnemyMusicSpec battleTiming)
+        public EnemyAttackMusicSpec(MusicSyncSpec encounterTiming, MusicSyncSpec battleTiming)
         {
             EncounterTiming = encounterTiming;
             BattleTiming = battleTiming;
         }
 
         /// <summary> 初回エンカウンター時の攻撃の音楽同期タイミング </summary>
-        public EnemyMusicSpec EncounterTiming { get; }
+        public MusicSyncSpec EncounterTiming { get; }
         /// <summary> 2回目以降の攻撃の音楽同期タイミング </summary>
-        public EnemyMusicSpec BattleTiming { get; }
+        public MusicSyncSpec BattleTiming { get; }
     }
 }

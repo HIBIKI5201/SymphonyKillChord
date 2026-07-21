@@ -1,4 +1,5 @@
 ﻿using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using System;
@@ -70,7 +71,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 
         private readonly SkillBuildUseCase _skillBuildUseCase;
         private readonly ISkillBuildViewModel _viewModel;
-        private Dictionary<int, SkillTemplate> _skillDataMap;
+        private Dictionary<SkillId, SkillTemplate> _skillDataMap;
         private bool _isDisposed;
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     continue;
                 }
 
-                if (!_skillDataMap.TryGetValue(skillId, out SkillTemplate skillData))
+                if (!_skillDataMap.TryGetValue(new SkillId(skillId), out SkillTemplate skillData))
                 {
                     throw new InvalidOperationException($"保存対象のスキル ID が入手済み一覧に存在しません。 skillId={skillId}");
                 }
@@ -137,7 +138,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 throw new ArgumentNullException(nameof(ownedSkills));
             }
 
-            Dictionary<int, SkillTemplate> skillDataMap = new Dictionary<int, SkillTemplate>(ownedSkills.Count);
+            Dictionary<SkillId, SkillTemplate> skillDataMap = new Dictionary<SkillId, SkillTemplate>(ownedSkills.Count);
 
             for (int i = 0; i < ownedSkills.Count; i++)
             {
