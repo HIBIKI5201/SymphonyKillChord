@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
@@ -99,6 +100,15 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            if (stageResultContainer.Controller == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(SequenceInitializationModule)}] "
+                    + $"{nameof(StageResultModuleContainer.Controller)} が初期化されていません。",
+                    this);
+                return false;
+            }
+
             if (playerContainer.PlayerView == null)
             {
                 Debug.LogError(
@@ -107,6 +117,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                     this);
                 return false;
             }
+
+            _stageResultController = stageResultContainer.Controller;
 
             _stageStartCameraView.Initialize(
                 _cameraSystemView,
@@ -179,6 +191,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageProgressSaveDataService = null;
             _pendingNodeTransitionState = null;
             _loadingScreenController = null;
+            _stageResultController = null;
             _hasStarted = false;
             _isEnding = false;
         }
@@ -203,16 +216,67 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         ///     ロード処理の終了通知を受け取ります。
         /// </summary>
         /// <param name="isSuccess"> ロード処理に成功した場合はtrue。 </param>
-        private void HandleLoadingCompleted(bool isSuccess)
+        private async void HandleLoadingCompleted(bool isSuccess)
         {
             UnsubscribeLoadingCompleted();
 
-            if (!isSuccess)
+            if (isSuccess)
+            {
+                StartStageSequence();
+                return;
+            }
+
+            await ReturnToOutGameAfterLoadingFailureAsync();
+        }
+
+        /// <summary>
+        ///     ロード失敗時に開始演出を中止してOutGameへ戻ります。
+        /// </summary>
+        private async Task ReturnToOutGameAfterLoadingFailureAsync()
+        {
+            if (_isEnding)
             {
                 return;
             }
 
-            StartStageSequence();
+            _isEnding = true;
+
+            _container?.SequenceDirector?.Cancel();
+            _inGamePlayDirector.StopGameplay();
+
+            // 不完全なステージ画面を表示しないように、
+            // OutGameへの遷移が完了するまで黒画面を維持する。
+            _stageStartFadeView.ShowBlackImmediate();
+
+            Debug.LogError(
+                $"[{nameof(SequenceInitializationModule)}] "
+                + "ステージロードに失敗したため、OutGameへ戻ります。",
+                this);
+
+            try
+            {
+                bool success =
+                    await _stageResultController.CompleteAsync();
+
+                if (success)
+                {
+                    return;
+                }
+
+                // シーン遷移にも失敗した場合は、
+                // 黒画面と入力遮断が残らないように解除する。
+                _stageStartFadeView.HideImmediate();
+
+                Debug.LogError(
+                    $"[{nameof(SequenceInitializationModule)}] "
+                    + "ロード失敗後のOutGame遷移にも失敗しました。",
+                    this);
+            }
+            catch (Exception exception)
+            {
+                _stageStartFadeView.HideImmediate();
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -236,6 +300,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private void StartStageSequence()
         {
             if (_hasStarted
+                || _isEnding
                 || _container?.SequenceDirector == null)
             {
                 return;
@@ -317,6 +382,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageStartCameraView _stageStartCameraView;
         private CameraSystemView _cameraSystemView;
         private StageResultView _stageResultView;
+        private StageResultController _stageResultController;
         private InGamePlayDirector _inGamePlayDirector;
         private SelectedBattleStageState _selectedBattleStageState;
         private StageProgressSaveDataService _stageProgressSaveDataService;
