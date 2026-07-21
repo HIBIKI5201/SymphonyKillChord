@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <summary> 判定された拍子。 </summary>
         public BeatType BeatType { get; }
 
-        /// <summary> 入力タイミング（unscaledTime）。 </summary>
+        /// <summary> 入力時に使用した時計のタイムスタンプ。 </summary>
         public float Timing { get; }
 
         /// <summary> アクションの種類。 </summary>

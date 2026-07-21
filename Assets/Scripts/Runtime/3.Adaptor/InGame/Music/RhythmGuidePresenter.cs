@@ -26,11 +26,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary>
         ///     リズムガイドの表示用DTOを生成する。
         /// </summary>
-        /// <param name="unscaledTime"> スケールされていない再生時間。 </param>
         /// <returns> リズムガイドDTO。 </returns>
-        public RhythmGuideDto CreateDto(float unscaledTime)
+        public RhythmGuideDto CreateDto()
         {
-            float barProgress = _musicSyncService.GetBarProgress(unscaledTime);
+            float barProgress = _musicSyncService.GetBarProgress();
 
             float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(barProgress);
 

@@ -188,7 +188,8 @@ namespace KillChord.Editor.SourceDataProvider
                         _sourceCollectionMappings.Add(new SourceCollectionMapping(
                             legacy.CollectionKey,
                             legacy.AddressableKey,
-                            legacy.ArrayPropertyPath));
+                            legacy.ArrayPropertyPath,
+                            GetDefaultCreationDirectory(legacy.CollectionKey)));
                     }
                 }
 
@@ -276,7 +277,10 @@ namespace KillChord.Editor.SourceDataProvider
         {
             return new List<RepositoryMapping>
             {
-                new("Stage", "StageTreeAsset", "_nodeAssets"),
+                new("StageAsset", "StageTreeAsset", "_stageAssets"),
+                new("StageBind", "StageTreeAsset", "_bindAssets"),
+                new("PlayerAttack", "Player", "_attackDifinitions"),
+                new("EnemyAttack", "Enemy", "_attackDifinitions"),
                 new("Skill", "OutGameSkillRepository", "_skillDataAssets"),
                 new("SkillNode", "SkillNodeDataRepo", "SkillNodes"),
                 new("SkillNodeBind", "SkillNodeBindRepo", "SkillNodeBinds"),
@@ -286,6 +290,25 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
                 new("Wave", "EnemyWaveDefinitionAsset", "_waves"),
                 new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
+            };
+        }
+
+        /// <summary>
+        ///     既定CollectionのScriptableObject生成先を取得します。
+        /// </summary>
+        /// <param name="collectionKey"> CollectionKeyです。 </param>
+        /// <returns> 既定生成先です。未定義の場合は空文字です。 </returns>
+        private static string GetDefaultCreationDirectory(string collectionKey)
+        {
+            return collectionKey switch
+            {
+                "StageAsset" => "Assets/Level/Data/Master/OutGame/StageSelect/Stages",
+                "StageBind" => "Assets/Level/Data/Master/OutGame/StageSelect/StageBinds",
+                "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
+                "EnemyAttack" => "Assets/Level/Data/Master/InGame/Battle",
+                "Skill" => "Assets/Level/Data/Master/Skill/Templates",
+                "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
+                _ => string.Empty,
             };
         }
 
@@ -323,14 +346,17 @@ namespace KillChord.Editor.SourceDataProvider
             /// <param name="collectionKey"> CollectionKeyです。 </param>
             /// <param name="sourceAssetAddressableKey"> SourceAssetのAddressableキーです。 </param>
             /// <param name="propertyPath"> collectionのプロパティパスです。 </param>
+            /// <param name="assetCreationDirectory"> 新規アセットの生成先ディレクトリです。 </param>
             public SourceCollectionMapping(
                 string collectionKey,
                 string sourceAssetAddressableKey,
-                string propertyPath)
+                string propertyPath,
+                string assetCreationDirectory = "")
             {
                 _collectionKey = collectionKey;
                 _sourceAssetAddressableKey = sourceAssetAddressableKey;
                 _propertyPath = propertyPath;
+                _assetCreationDirectory = assetCreationDirectory;
             }
 
             /// <summary> CollectionKeyです。 </summary>
@@ -342,6 +368,9 @@ namespace KillChord.Editor.SourceDataProvider
             /// <summary> collectionのプロパティパスです。 </summary>
             public string PropertyPath => _propertyPath;
 
+            /// <summary> 新規ScriptableObjectの生成先ディレクトリです。 </summary>
+            public string AssetCreationDirectory => _assetCreationDirectory;
+
             [FormerlySerializedAs("_category")]
             [SerializeField, Tooltip("DataIDフィールドへ指定するCollectionKeyです。")]
             private string _collectionKey;
@@ -351,6 +380,9 @@ namespace KillChord.Editor.SourceDataProvider
 
             [SerializeField, Tooltip("collectionとして扱う配列またはListのSerializedPropertyパスです。")]
             private string _propertyPath;
+
+            [SerializeField, Tooltip("collectionへ追加するScriptableObjectの生成先Assetsディレクトリです。")]
+            private string _assetCreationDirectory;
         }
 
         /// <summary>

@@ -665,6 +665,8 @@ GameObject:
   - component: {fileID: 191554238}
   - component: {fileID: 191554239}
   - component: {fileID: 191554240}
+  - component: {fileID: 191554242}
+  - component: {fileID: 191554241}
   m_Layer: 0
   m_Name: StageSequenceCanvas
   m_TagString: Untagged
@@ -822,6 +824,33 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &191554241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 191554232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5daef5dfe69293418b88881cab7fd34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageStartFadeView
+  _config: {fileID: 11400000, guid: ac32ca087591f1949b96915888395ff2, type: 2}
+  _canvasGroup: {fileID: 191554237}
+--- !u!114 &191554242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 191554232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603da19df244fb94384fe63c8c703fec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Camera.StageStartCameraView
+  _config: {fileID: 11400000, guid: ac32ca087591f1949b96915888395ff2, type: 2}
 --- !u!1 &255723354
 GameObject:
   m_ObjectHideFlags: 0
@@ -1270,7 +1299,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SkillInitializer
   _skillVisuals: []
-  _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _inputProgressUIConfig: {fileID: 0}
   _equippedSkills: []
 --- !u!114 &438459092
 MonoBehaviour:
@@ -1334,7 +1363,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PlayerInitializer
   _playerConfig: {fileID: 11400000, guid: 02ac4acd11c13e94f951e778560963f3, type: 2}
   _playerViewPrefab: {fileID: 7750579596343814766, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
-  _inputProgressViewConfigAsset: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _inputProgressUIConfig: {fileID: 0}
   _characterAnimationConfig: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerAttackAnimationConfig: {fileID: 11400000, guid: 1db9fea642254577a56f08077cf48952, type: 2}
   _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
@@ -2605,7 +2634,7 @@ PlayableDirector:
   m_InitialTime: 0
   m_SceneBindings:
   - key: {fileID: -5894260030613724543, guid: d97dc1735b27c8d42a8789466763473d, type: 2}
-    value: {fileID: 191554240}
+    value: {fileID: 395575201}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &1136649842
@@ -2786,6 +2815,7 @@ MonoBehaviour:
   _musicSyncView: {fileID: 1249666142}
   _testCue: BGM_Ingame
   _testBpm: 105
+  _testBeatOffsetSeconds: 0
   _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
 --- !u!114 &1249666142
 MonoBehaviour:
@@ -3729,6 +3759,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyIArtilleryTestSpawner
   _enemyPools: {fileID: 1599172285}
   _spawnPositionSearcher: {fileID: 1443016744}
+--- !u!1 &1776231711
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1776231712}
+  - component: {fileID: 1776231713}
+  m_Layer: 0
+  m_Name: Equipment Bgm Initializer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1776231712
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776231711}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.99385, y: 0, z: -12.16941}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2100000001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1776231713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776231711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc477a7ac5149c29a10a39534ec1380, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.EquipmentBgmInitializer
+  _labelTable: {fileID: 11400000, guid: f4b5344a42c4ffd4893bcdb0152a3bda, type: 2}
+  _measuresPerDivision: 4
+  _logSelectorSwitch: 1
 --- !u!1 &1896219133
 GameObject:
   m_ObjectHideFlags: 0
@@ -4522,6 +4599,7 @@ Transform:
   - {fileID: 866643818}
   - {fileID: 1249666143}
   - {fileID: 2200000001}
+  - {fileID: 1776231712}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2100000002
@@ -4607,6 +4685,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a372907bc4cf4ebebcb5592f15847ce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Stage.StageEffectInitializer
+  _stageEffectCatalogAssets: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &2200000003
 MonoBehaviour:
   m_ObjectHideFlags: 0
