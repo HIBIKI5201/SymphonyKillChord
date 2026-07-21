@@ -146,6 +146,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
             ServiceLocator.UnregisterInstance<IMusicSyncService>();
             ServiceLocator.UnregisterInstance<MusicSyncState>();
 
+            // 拍の通知ストリームを破棄する。購読側は先にShutdownで解除されている想定。
+            MusicSyncState?.Dispose();
+
             _isRegistered = false;
         }
     }
