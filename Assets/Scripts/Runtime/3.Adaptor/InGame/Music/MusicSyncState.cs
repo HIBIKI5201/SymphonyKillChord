@@ -28,6 +28,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public double AccurateBeat { get; private set; }
         /// <summary> 1拍の長さ（秒）。 </summary>
         public double BeatLength { get; private set; }
+        /// <summary> 音源先頭から最初の小節頭までの秒数。 </summary>
+        public double BeatOffsetSeconds { get; private set; }
 
         /// <summary>
         ///     BPMを設定する。
@@ -35,10 +37,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="bpm"> 設定するBPM。 </param>
         public void SetBpm(double bpm)
         {
-            if (bpm <= 0d)
+            SetRhythm(bpm, 0d);
+        }
+
+        /// <summary>
+        ///     BPMと音源先頭からの拍オフセットを設定する。
+        /// </summary>
+        /// <param name="bpm"> 設定するBPM。 </param>
+        /// <param name="beatOffsetSeconds"> 音源先頭から最初の小節頭までの秒数。 </param>
+        public void SetRhythm(double bpm, double beatOffsetSeconds)
+        {
+            if (bpm <= 0d || double.IsNaN(bpm) || double.IsInfinity(bpm))
             {
                 Bpm = 0;
                 BeatLength = 0d;
+                BeatOffsetSeconds = 0d;
                 AccurateBeat = 0d;
                 _currentBeat.Value = 0;
                 NearestBeat = 0;
@@ -47,6 +60,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             Bpm = bpm;
             BeatLength = MusicConstants.SECONDS_PER_MINUTE / Bpm;
+            BeatOffsetSeconds = double.IsNaN(beatOffsetSeconds) || double.IsInfinity(beatOffsetSeconds)
+                ? 0d
+                : beatOffsetSeconds;
         }
 
         /// <summary>
@@ -55,7 +71,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="playTime"> 現在の再生時間。 </param>
         public void UpdatePlayTime(double playTime)
         {
-            PlayTime = playTime;
+            PlayTime = double.IsNaN(playTime) || double.IsInfinity(playTime)
+                ? 0d
+                : Math.Max(0d, playTime);
 
             if (BeatLength <= 0d)
             {
@@ -65,7 +83,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 return;
             }
 
-            AccurateBeat = PlayTime / BeatLength;
+            double elapsedSeconds = PlayTime - BeatOffsetSeconds;
+            AccurateBeat = elapsedSeconds > 0d ? elapsedSeconds / BeatLength : 0d;
             NearestBeat = (int)Math.Floor(AccurateBeat + MusicConstants.HALF_BEAT_THRESHOLD);
 
             // ReactivePropertyは同値を弾くため、拍が変わったフレームだけ購読者へ通知される。

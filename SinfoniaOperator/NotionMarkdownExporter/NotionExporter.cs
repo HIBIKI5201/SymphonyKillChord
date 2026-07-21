@@ -80,6 +80,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                     string rawMarkdown = await File.ReadAllTextAsync(page.StagingFilePath, Encoding.UTF8);
                     string markdown = CreatePageMarkdown(page, rawMarkdown);
                     rawMarkdown = string.Empty;
+                    markdown = MarkdownDecorationProcessor.RemoveBlockBackgroundColors(markdown);
                     markdown = MarkdownReferenceProcessor.RewriteReferences(
                         markdown,
                         page.FilePath,

@@ -61,7 +61,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             MusicSyncState = new();
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
             MusicSyncService = new MusicSyncService(
-                new RhythmDefinition(_testBpm),
+                new RhythmDefinition(_testBpm, _testBeatOffsetSeconds),
                 _rhythmJudgmentDefinitionAsset.ToDefinition(),
                 RhythmJustService.Instance.TriggerJustHit);
             MusicSyncController = new(MusicSyncState, MusicSyncService);
@@ -69,7 +69,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 _musicPlayer,
                 MusicSyncState,
                 MusicSyncController,
-                _testBpm
+                _testBpm,
+                _testBeatOffsetSeconds
             );
 
             ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
@@ -125,6 +126,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         [SerializeField] private string _testCue;
         [Tooltip("テスト用のBPM。")]
         [SerializeField] private double _testBpm;
+        [Tooltip("音源先頭から最初の小節頭までのオフセット秒数。負数で判定を前倒しできます。")]
+        [SerializeField] private double _testBeatOffsetSeconds;
         [Tooltip("リズム判定定義アセット。")]
         [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
 
