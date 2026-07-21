@@ -24,5 +24,11 @@
         public const string NOTION_DATABASE_NAME_PROPERTY = "NOTION_DATABASE_NAME_PROPERTY";
         public const string NOTION_DATABASE_STATUS_PROPERTY = "NOTION_DATABASE_STATUS_PROPERTY";
         public const string NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY = "NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY";
+
+        /// <summary> Markdownエクスポートの起点にするNotionページのURLまたはID。 </summary>
+        public const string NOTION_EXPORT_ROOT_PAGE = "NOTION_EXPORT_ROOT_PAGE";
+
+        /// <summary> Markdownエクスポートの出力先ディレクトリ。 </summary>
+        public const string NOTION_EXPORT_OUTPUT = "NOTION_EXPORT_OUTPUT";
     }
 }

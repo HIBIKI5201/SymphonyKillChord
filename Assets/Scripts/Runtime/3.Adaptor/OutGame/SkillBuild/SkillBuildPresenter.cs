@@ -49,14 +49,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 }
 
                 int skillId = equippedSkill.SkillTemplate.Id.Value;
-                slots[i] = new SkillBuildSlotDTO(i, skillId, ConvertSkillLabel(skillId));
+                slots[i] = new SkillBuildSlotDTO(i, skillId, equippedSkill.SkillTemplate.DisplayName);
             }
 
             (int skillId, string skillLabel)[] skills = new (int, string)[ownedSkills.Count];
             for (int i = 0; i < ownedSkills.Count; i++)
             {
                 int skillId = ownedSkills[i].Id.Value;
-                skills[i] = (skillId, ConvertSkillLabel(skillId));
+                skills[i] = (skillId, ownedSkills[i].DisplayName);
             }
 
             SkillBuildViewDTO dto = new(slots, skills);
@@ -67,16 +67,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         private const string EMPTY_SKILL_LABEL = "未設定";
 
         private readonly ISkillBuildViewModel _viewModel;
-
-        /// <summary>
-        ///     表示用のスキルラベルへ変換する。
-        /// </summary>
-        /// <param name="skillId"> スキル ID。 </param>
-        /// <returns> 表示用ラベル。 </returns>
-        private string ConvertSkillLabel(int skillId)
-        {
-            return skillId.ToString();
-        }
     }
 }
-

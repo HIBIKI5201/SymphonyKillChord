@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
-    m_Address: SkillInputProgressViewConfigAsset
+    m_Address: SkillInputProgressUIConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

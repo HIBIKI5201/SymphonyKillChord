@@ -82,3 +82,4 @@ ExportedPackages/
 
 # SinfoniaOperatorのローカル設定 (トークンを含むためコミット禁止)
 sinfonia-operator.settings.json
+Docs/NotionSpecifications/

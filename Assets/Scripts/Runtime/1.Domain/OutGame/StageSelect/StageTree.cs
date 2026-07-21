@@ -254,6 +254,62 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
 
             outgoingStageIds = FreezeIndexes(outgoingBuilder);
             incomingStageIds = FreezeIndexes(incomingBuilder);
+            ValidateAcyclicGraph(outgoingStageIds, incomingStageIds);
+        }
+
+        /// <summary>
+        ///     接続グラフが循環を持たないことを検証する。
+        /// </summary>
+        /// <param name="outgoingStageIds"> 接続元別の後続ID辞書。</param>
+        /// <param name="incomingStageIds"> 接続先別の前提ID辞書。</param>
+        private void ValidateAcyclicGraph(
+            Dictionary<StageId, StageId[]> outgoingStageIds,
+            Dictionary<StageId, StageId[]> incomingStageIds)
+        {
+            Dictionary<StageId, int> remainingIncomingCounts = new(_nodes.Count);
+            Queue<StageId> processingQueue = new();
+            foreach (StageId stageId in _nodes.Keys)
+            {
+                int incomingCount = incomingStageIds.TryGetValue(
+                    stageId,
+                    out StageId[] incomingIds)
+                    ? incomingIds.Length
+                    : 0;
+                remainingIncomingCounts.Add(stageId, incomingCount);
+                if (incomingCount == 0)
+                {
+                    processingQueue.Enqueue(stageId);
+                }
+            }
+
+            int processedCount = 0;
+            while (processingQueue.Count > 0)
+            {
+                StageId currentStageId = processingQueue.Dequeue();
+                processedCount++;
+                if (!outgoingStageIds.TryGetValue(
+                        currentStageId,
+                        out StageId[] nextStageIds))
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < nextStageIds.Length; i++)
+                {
+                    StageId nextStageId = nextStageIds[i];
+                    remainingIncomingCounts[nextStageId]--;
+                    if (remainingIncomingCounts[nextStageId] == 0)
+                    {
+                        processingQueue.Enqueue(nextStageId);
+                    }
+                }
+            }
+
+            if (processedCount != _nodes.Count)
+            {
+                throw new InvalidOperationException(
+                    "ステージ接続グラフに循環があります。StageTreeはDAGである必要があります。");
+            }
         }
 
         /// <summary>

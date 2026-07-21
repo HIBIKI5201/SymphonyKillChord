@@ -40,7 +40,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     接続元が完了済みの先頭遷移を一度だけ取り出す。
+        ///     接続元が完了済みの先頭遷移を取り出す。
         /// </summary>
         /// <param name="pendingNodeTransition"> 取得した遷移情報。</param>
         /// <returns> 取得できた場合はtrue。</returns>
@@ -53,7 +53,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             }
 
             PendingNodeTransition candidate = _pendingNodeTransitions.Peek();
-            if (!_completedStageIds.Remove(candidate.TriggerStageId))
+            if (!_completedStageIds.Contains(candidate.TriggerStageId))
             {
                 return false;
             }
