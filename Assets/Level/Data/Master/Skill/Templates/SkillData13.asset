@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
-  m_Name: TestSkillData13
+  m_Name: SkillData13
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
   _id:
     _id: skill_13
