@@ -121,6 +121,46 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
+        ///     SourceAssetのcollectionプロパティから要素型を取得します。
+        /// </summary>
+        /// <param name="sourceAsset"> collectionを保持するSourceAssetです。 </param>
+        /// <param name="propertyPath"> collectionのSerializedPropertyパスです。 </param>
+        /// <param name="elementType"> 取得した要素型です。 </param>
+        /// <returns> 配列またはListの要素型を取得できた場合はtrueです。 </returns>
+        public static bool TryGetCollectionElementType(
+            UnityEngine.Object sourceAsset,
+            string propertyPath,
+            out Type elementType)
+        {
+            elementType = null;
+            if (sourceAsset == null
+                || string.IsNullOrWhiteSpace(propertyPath)
+                || !SerializedPropertyFieldResolver.TryResolve(
+                    sourceAsset.GetType(),
+                    propertyPath,
+                    out FieldInfo fieldInfo))
+            {
+                return false;
+            }
+
+            Type collectionType = fieldInfo.FieldType;
+            if (collectionType.IsArray)
+            {
+                elementType = collectionType.GetElementType();
+                return elementType != null;
+            }
+
+            if (collectionType.IsGenericType
+                && collectionType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                elementType = collectionType.GetGenericArguments()[0];
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     指定SourceAssetに紐づく有効なcollectionプロパティパス一覧を取得します。
         /// </summary>
         /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
