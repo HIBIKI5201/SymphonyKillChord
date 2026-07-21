@@ -56,7 +56,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            RhythmGuideDto dto = _presenter.CreateDto(Time.unscaledTime);
+            RhythmGuideDto dto = _presenter.CreateDto();
             _viewModel.Apply(dto);
             _view.Render(_viewModel);
         }

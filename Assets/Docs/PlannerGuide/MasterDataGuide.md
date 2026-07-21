@@ -277,6 +277,21 @@ graph TD
 
 ---
 
+## Planner Master Dataウィンドウで編集する
+
+メニューから`Planner Master Data`を開くと、Player / UI / Enemy / Stage Select / Skill Tree / Scenarioの各ページを切り替えて編集できます。
+
+- `Source Assets`: 選択したSourceAssetの全シリアライズ項目を編集します。リポジトリ自体の設定もここで変更します。
+- `Collections`: リポジトリやカタログに含まれる個別データを左の一覧から1件選択して編集します。
+- `データを追加`: ScriptableObject型のCollectionでは新規アセットを作成して自動登録します。インライン型ではSourceAsset内に新規要素を作成します。
+- `Source Assetを開く`: Collectionを保持するSourceAssetのページへ移動します。
+
+ScriptableObjectの生成場所は`Project Settings > KillChord > Source Data Provider`の各Collectionにある`Asset Creation Directory`で指定します。存在する`Assets/`配下のフォルダだけを設定してください。
+
+Stage Selectの`StageAsset` / `StageBind` Collectionでは、現行の`StageTreeAsset`をグラフ表示します。ノードをクリックすると該当ステージを選択でき、緑の線は自動遷移、灰色の線はホーム帰還を表します。EnemyページのキャラクターSourceAssetには、主要ステータスのレーダーグラフを表示します。
+
+---
+
 ## 📚 早見表: エンジニアへの依頼が必要になる主なケース
 
 | ケース | 理由 |
