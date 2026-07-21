@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
 
             double currentBar = Math.Floor(accurateBeat / MusicConstants.STANDARD_BEATS_PER_BAR);
             double targetBar = currentBar + executeRequestTiming.BarFlag;
-            double targetBarStartTime = targetBar * rhythmDefinition.BarLength;
+            double targetBarStartTime = rhythmDefinition.BeatOffsetSeconds + targetBar * rhythmDefinition.BarLength;
             double offsetInBar = rhythmDefinition.BarLength / executeRequestTiming.Beat.Signature * (executeRequestTiming.Beat.Count - 1d);
 
             return targetBarStartTime + offsetInBar;

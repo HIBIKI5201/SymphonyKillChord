@@ -1,6 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -14,12 +13,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     {
         private void Awake()
         {
-            if (_skillInputProgressViewConfigAsset == null)
+            if (_skillInputProgressUIConfig == null)
             {
                 Debug.LogError("スキル入力進行UIの表示設定が未設定です。");
                 return;
             }
-            _inputProgressViewConfig = _skillInputProgressViewConfigAsset.Create();
+            _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
             ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
         }
@@ -38,22 +37,23 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         public SkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition)
         {
             SkillInputProgressRowView rowView = Instantiate(_rowViewPrefab, _rowRoot);
+            rowView.Initialize(_inputProgressViewSetting.AnimationSetting);
             SkillInputProgressStepView[] stepViews = new SkillInputProgressStepView[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
             {
                 BeatType beatType = definition.SkillPattern.Signatures[i];
                 SkillInputProgressStepView stepView = Instantiate(_stepViewPrefab, rowView.StepRoot);
                 stepView.transform.SetAsLastSibling();
-                SkillBeatVisualSetting setting = _inputProgressViewConfig.GetSetting((int)beatType);
-                stepView.Initialize(setting);
+                SkillBeatVisualSetting setting = _inputProgressViewSetting.GetSetting((int)beatType);
+                stepView.Initialize(setting, _inputProgressViewSetting.AnimationSetting);
                 stepViews[i] = stepView;
             }
             rowView.SetSteps(stepViews);
             return rowView;
         }
 
-        [SerializeField, Tooltip("スキル入力進行UIの設定情報Asset")]
-        private SkillInputProgressViewConfigAsset _skillInputProgressViewConfigAsset;
+        [SerializeField, Tooltip("スキル入力進行UIの表示設定。")]
+        private SkillInputProgressUIConfig _skillInputProgressUIConfig;
         [SerializeField, Tooltip("行のprefab")]
         private SkillInputProgressRowView _rowViewPrefab;
         [SerializeField, Tooltip("入力拍子のprefab")]
@@ -61,7 +61,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         [SerializeField, Tooltip("RowViewを並べる親Transform。")]
         private Transform _rowRoot;
 
-        private SkillInputProgressViewconfig _inputProgressViewConfig;
+        private SkillInputProgressViewSetting _inputProgressViewSetting;
         private bool _isRegistered;
     }
 }
