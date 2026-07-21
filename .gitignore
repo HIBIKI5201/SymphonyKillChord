@@ -80,6 +80,9 @@ ExportedPackages/
 .idea/
 .utmp/
 
-# SinfoniaOperatorのローカル設定 (トークンを含むためコミット禁止)
-sinfonia-operator.settings.json
+# SinfoniaOperatorの秘密設定（Notion・Discordトークンを含むためコミット禁止）
+/SinfoniaOperator/sinfonia-operator.secrets.json
+
+# 分割前のローカル設定。古いファイルからトークンが漏れないよう引き続き除外する。
+/SinfoniaOperator/sinfonia-operator.settings.json
 Docs/NotionSpecifications/
