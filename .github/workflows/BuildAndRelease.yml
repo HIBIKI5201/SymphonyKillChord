@@ -280,7 +280,17 @@ jobs:
 
               $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
               if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
-              $DestAbs     = Join-Path $ProjectRoot $DestRelPath
+
+              $DestAbs = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot $DestRelPath))
+              $ResolvedRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
+              if (-not $ResolvedRoot.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+                $ResolvedRoot += [System.IO.Path]::DirectorySeparatorChar
+              }
+
+              if (-not $DestAbs.StartsWith($ResolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+                Write-Host "WARNING: Path traversal detected, skipping: $DestRelPath"
+                continue
+              }
 
               $AssetSrc = Join-Path $GuidDir.FullName "asset"
               $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
