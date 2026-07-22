@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8351cdae6b9c6c14aa15be57fd69b4c7, type: 3}
   m_Name: EnemyWaveDefinitionAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset
+  _id:
+    _id: enemy_wave_default
+    _hashId: -1074717099
   _waves:
   - Details:
     - EnemyType: 0
