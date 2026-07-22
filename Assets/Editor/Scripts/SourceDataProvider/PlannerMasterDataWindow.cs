@@ -990,36 +990,31 @@ namespace KillChord.Editor.SourceDataProvider
         /// <param name="property"> Wave配列プロパティです。 </param>
         private static void DrawWaveCollectionPreview(SerializedProperty property)
         {
-            float totalDuration = 0f;
-            for (int i = 0; i < property.arraySize; i++)
-            {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                if (durationProperty != null)
-                {
-                    totalDuration += durationProperty.floatValue;
-                }
-            }
-
-            EditorGUILayout.LabelField($"Total Duration: {totalDuration:0.##} sec", EditorStyles.miniBoldLabel);
             for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
             {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(WAVE_STAGE_EFFECTS_PROPERTY_NAME);
-
-                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
-                int spawnCount = CountWaveEnemies(detailsProperty);
-                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
-                float duration = durationProperty?.floatValue ?? 0f;
-                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
-
+                SerializedProperty element = property.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
-                EditorGUILayout.LabelField($"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
-                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
-                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+                if (element.objectReferenceValue is ScriptableObject definitionAsset)
+                {
+                    SerializedObject serializedDefinitionAsset = new(definitionAsset);
+                    SerializedProperty idProperty = serializedDefinitionAsset.FindProperty(
+                        WAVE_DEFINITION_ID_PROPERTY_NAME);
+                    SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(
+                        SOURCE_DATA_ID_PROPERTY_NAME);
+                    string label = string.IsNullOrWhiteSpace(idValueProperty?.stringValue)
+                        ? definitionAsset.name
+                        : idValueProperty.stringValue;
+
+                    EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+                    DrawWaveDefinitionPreview(serializedDefinitionAsset.FindProperty(
+                        WAVE_DEFINITIONS_PROPERTY_NAME));
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox(
+                        $"EnemyWaveDefinitionAssetが未設定です。Index: {i}",
+                        MessageType.Warning);
+                }
                 EditorGUILayout.EndVertical();
             }
 
@@ -1027,6 +1022,62 @@ namespace KillChord.Editor.SourceDataProvider
             {
                 EditorGUILayout.HelpBox(
                     $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
+                    MessageType.None);
+            }
+        }
+
+        /// <summary>
+        ///     1つの敵Wave定義アセットが持つWave構成を描画します。
+        /// </summary>
+        /// <param name="wavesProperty"> Wave配列プロパティです。 </param>
+        private static void DrawWaveDefinitionPreview(SerializedProperty wavesProperty)
+        {
+            if (wavesProperty == null || !wavesProperty.isArray)
+            {
+                EditorGUILayout.HelpBox("Wave定義を取得できません。", MessageType.Warning);
+                return;
+            }
+
+            float totalDuration = 0f;
+            for (int i = 0; i < wavesProperty.arraySize; i++)
+            {
+                SerializedProperty wave = wavesProperty.GetArrayElementAtIndex(i);
+                SerializedProperty durationProperty = wave.FindPropertyRelative(
+                    WAVE_DURATION_PROPERTY_NAME);
+                if (durationProperty != null)
+                {
+                    totalDuration += durationProperty.floatValue;
+                }
+            }
+
+            EditorGUILayout.LabelField(
+                $"Wave数: {wavesProperty.arraySize} / Total Duration: {totalDuration:0.##} sec",
+                EditorStyles.miniBoldLabel);
+            for (int i = 0; i < Mathf.Min(wavesProperty.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
+            {
+                SerializedProperty wave = wavesProperty.GetArrayElementAtIndex(i);
+                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
+                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
+                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(
+                    WAVE_STAGE_EFFECTS_PROPERTY_NAME);
+
+                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
+                int spawnCount = CountWaveEnemies(detailsProperty);
+                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
+                float duration = durationProperty?.floatValue ?? 0f;
+                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
+
+                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
+                EditorGUILayout.LabelField(
+                    $"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
+                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
+                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+            }
+
+            if (wavesProperty.arraySize > PREVIEW_ELEMENT_LIMIT)
+            {
+                EditorGUILayout.HelpBox(
+                    $"残り {wavesProperty.arraySize - PREVIEW_ELEMENT_LIMIT} WaveはInspector側で確認してください。",
                     MessageType.None);
             }
         }
@@ -1279,6 +1330,8 @@ namespace KillChord.Editor.SourceDataProvider
         private const string STAGE_ASSET_COLLECTION_KEY = "StageAsset";
         private const string STAGE_BIND_COLLECTION_KEY = "StageBind";
         private const string WAVE_COLLECTION_KEY = "Wave";
+        private const string WAVE_DEFINITION_ID_PROPERTY_NAME = "_id";
+        private const string WAVE_DEFINITIONS_PROPERTY_NAME = "_waves";
         private const string SCENARIO_BACKGROUND_COLLECTION_KEY = "ScenarioBackground";
         private const string SCENARIO_ANIMATION_COLLECTION_KEY = "ScenarioAnimation";
         private const string SCENARIO_PORTRAIT_COLLECTION_KEY = "ScenarioPortrait";
