@@ -23,8 +23,8 @@ MonoBehaviour:
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
   _isTutorial: 0
-  _battleSceneName: Stage_02
+  _battleSceneName: Stage_01
   _enemyWaveDefinitionId:
-    _id: enemy_wave_default
-    _hashId: -1074717099
+    _id: enemy_wave_01
+    _hashId: 480330467
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
