@@ -21,7 +21,14 @@ namespace KillChord.Editor.SourceDataProvider
             {
                 SerializedProperty element = repositoryProperty.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                if (element.objectReferenceValue == null)
+                if (element.propertyType != SerializedPropertyType.ObjectReference)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Wave Collectionの要素がアセット参照ではありません。"
+                        + " Source Data Provider設定のProperty Pathを確認してください。",
+                        MessageType.Error);
+                }
+                else if (element.objectReferenceValue == null)
                 {
                     EditorGUILayout.HelpBox(
                         $"EnemyWaveDefinitionAssetが未設定です。Index: {i}",

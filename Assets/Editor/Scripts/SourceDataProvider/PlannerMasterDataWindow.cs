@@ -1023,21 +1023,25 @@ namespace KillChord.Editor.SourceDataProvider
                 SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
                 SerializedProperty assetKeyProperty = element.FindPropertyRelative(CATALOG_ASSET_KEY_PROPERTY_NAME);
                 SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
+                UnityEngine.Object catalogAsset = assetProperty != null
+                    && assetProperty.propertyType == SerializedPropertyType.ObjectReference
+                    ? assetProperty.objectReferenceValue
+                    : null;
 
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    Texture preview = AssetPreview.GetAssetPreview(assetProperty.objectReferenceValue)
-                        ?? AssetPreview.GetMiniThumbnail(assetProperty.objectReferenceValue);
+                    Texture preview = AssetPreview.GetAssetPreview(catalogAsset)
+                        ?? AssetPreview.GetMiniThumbnail(catalogAsset);
                     GUILayout.Label(preview, GUILayout.Width(64f), GUILayout.Height(64f));
                 }
 
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField($"ID: {idValueProperty?.stringValue ?? "<未設定>"}");
                 EditorGUILayout.LabelField($"Key: {assetKeyProperty?.stringValue ?? "<未設定>"}");
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    EditorGUILayout.ObjectField("Asset", assetProperty.objectReferenceValue, typeof(UnityEngine.Object), false);
+                    EditorGUILayout.ObjectField("Asset", catalogAsset, typeof(UnityEngine.Object), false);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndHorizontal();
@@ -1179,22 +1183,33 @@ namespace KillChord.Editor.SourceDataProvider
         /// <returns> 個別データ表示名です。 </returns>
         private static string BuildCollectionItemLabel(SerializedProperty element, int index)
         {
-            if (element?.objectReferenceValue != null)
+            if (element == null)
             {
+                return $"Element {index + 1}";
+            }
+
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                UnityEngine.Object referencedAsset = element.objectReferenceValue;
+                if (referencedAsset == null)
+                {
+                    return $"Element {index + 1}";
+                }
+
                 if (PlannerEnemyWavePreview.TryBuildItemLabel(
-                    element.objectReferenceValue,
+                    referencedAsset,
                     out string label))
                 {
                     return label;
                 }
 
-                return element.objectReferenceValue.name;
+                return referencedAsset.name;
             }
 
-            SerializedProperty dataIdProperty = element?.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
-                ?? element?.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
+            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
             SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
-                ?? element?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
             if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
             {
                 return idValueProperty.stringValue;
