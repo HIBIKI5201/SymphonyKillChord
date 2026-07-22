@@ -470,6 +470,7 @@ namespace KillChord.Editor.SourceDataProvider
                 property.arraySize - 1);
             SerializedProperty element = property.GetArrayElementAtIndex(_selectedCollectionItemIndex);
             DrawCollectionItemEditor(
+                collectionKey,
                 sourceAsset,
                 serializedObject,
                 element,
@@ -671,11 +672,13 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     Collectionの選択中要素を編集します。
         /// </summary>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
         /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
         /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
         /// <param name="element"> 選択中要素です。 </param>
         /// <param name="elementIndex"> 選択中インデックスです。 </param>
         private void DrawCollectionItemEditor(
+            string collectionKey,
             ScriptableObject sourceAsset,
             SerializedObject serializedObject,
             SerializedProperty element,
@@ -701,7 +704,9 @@ namespace KillChord.Editor.SourceDataProvider
                 {
                     DrawInspector(element.objectReferenceValue);
                     EditorGUILayout.Space();
-                    DrawObjectReferencePreview(element.objectReferenceValue);
+                    DrawCollectionObjectReferencePreview(
+                        collectionKey,
+                        element.objectReferenceValue);
                 }
                 return;
             }
@@ -887,7 +892,7 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (string.Equals(label, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                DrawWaveCollectionPreview(property);
+                PlannerEnemyWavePreview.DrawRepository(property, PREVIEW_ELEMENT_LIMIT);
                 return;
             }
 
@@ -985,101 +990,24 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     Wave collection向けの専用プレビューを描画します。
+        ///     CollectionKeyに応じた参照アセットのプレビューを描画します。
         /// </summary>
-        /// <param name="property"> Wave配列プロパティです。 </param>
-        private static void DrawWaveCollectionPreview(SerializedProperty property)
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="target"> 参照先アセットです。 </param>
+        private static void DrawCollectionObjectReferencePreview(
+            string collectionKey,
+            UnityEngine.Object target)
         {
-            for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+            if (string.Equals(collectionKey, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                SerializedProperty element = property.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                if (element.objectReferenceValue is ScriptableObject definitionAsset)
-                {
-                    SerializedObject serializedDefinitionAsset = new(definitionAsset);
-                    SerializedProperty idProperty = serializedDefinitionAsset.FindProperty(
-                        WAVE_DEFINITION_ID_PROPERTY_NAME);
-                    SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(
-                        SOURCE_DATA_ID_PROPERTY_NAME);
-                    string label = string.IsNullOrWhiteSpace(idValueProperty?.stringValue)
-                        ? definitionAsset.name
-                        : idValueProperty.stringValue;
-
-                    EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
-                    DrawWaveDefinitionPreview(serializedDefinitionAsset.FindProperty(
-                        WAVE_DEFINITIONS_PROPERTY_NAME));
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox(
-                        $"EnemyWaveDefinitionAssetが未設定です。Index: {i}",
-                        MessageType.Warning);
-                }
+                PlannerEnemyWavePreview.Draw(target, PREVIEW_ELEMENT_LIMIT);
                 EditorGUILayout.EndVertical();
-            }
-
-            if (property.arraySize > PREVIEW_ELEMENT_LIMIT)
-            {
-                EditorGUILayout.HelpBox(
-                    $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
-                    MessageType.None);
-            }
-        }
-
-        /// <summary>
-        ///     1つの敵Wave定義アセットが持つWave構成を描画します。
-        /// </summary>
-        /// <param name="wavesProperty"> Wave配列プロパティです。 </param>
-        private static void DrawWaveDefinitionPreview(SerializedProperty wavesProperty)
-        {
-            if (wavesProperty == null || !wavesProperty.isArray)
-            {
-                EditorGUILayout.HelpBox("Wave定義を取得できません。", MessageType.Warning);
                 return;
             }
 
-            float totalDuration = 0f;
-            for (int i = 0; i < wavesProperty.arraySize; i++)
-            {
-                SerializedProperty wave = wavesProperty.GetArrayElementAtIndex(i);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(
-                    WAVE_DURATION_PROPERTY_NAME);
-                if (durationProperty != null)
-                {
-                    totalDuration += durationProperty.floatValue;
-                }
-            }
-
-            EditorGUILayout.LabelField(
-                $"Wave数: {wavesProperty.arraySize} / Total Duration: {totalDuration:0.##} sec",
-                EditorStyles.miniBoldLabel);
-            for (int i = 0; i < Mathf.Min(wavesProperty.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
-            {
-                SerializedProperty wave = wavesProperty.GetArrayElementAtIndex(i);
-                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(
-                    WAVE_STAGE_EFFECTS_PROPERTY_NAME);
-
-                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
-                int spawnCount = CountWaveEnemies(detailsProperty);
-                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
-                float duration = durationProperty?.floatValue ?? 0f;
-                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
-
-                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
-                EditorGUILayout.LabelField(
-                    $"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
-                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
-                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
-            }
-
-            if (wavesProperty.arraySize > PREVIEW_ELEMENT_LIMIT)
-            {
-                EditorGUILayout.HelpBox(
-                    $"残り {wavesProperty.arraySize - PREVIEW_ELEMENT_LIMIT} WaveはInspector側で確認してください。",
-                    MessageType.None);
-            }
+            DrawObjectReferencePreview(target);
         }
 
         /// <summary>
@@ -1253,6 +1181,13 @@ namespace KillChord.Editor.SourceDataProvider
         {
             if (element?.objectReferenceValue != null)
             {
+                if (PlannerEnemyWavePreview.TryBuildItemLabel(
+                    element.objectReferenceValue,
+                    out string label))
+                {
+                    return label;
+                }
+
                 return element.objectReferenceValue.name;
             }
 
@@ -1280,32 +1215,6 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     Wave内の敵総数を集計します。
-        /// </summary>
-        /// <param name="detailsProperty"> Wave詳細配列です。 </param>
-        /// <returns> 敵総数です。 </returns>
-        private static int CountWaveEnemies(SerializedProperty detailsProperty)
-        {
-            if (detailsProperty == null || !detailsProperty.isArray)
-            {
-                return 0;
-            }
-
-            int count = 0;
-            for (int i = 0; i < detailsProperty.arraySize; i++)
-            {
-                SerializedProperty detail = detailsProperty.GetArrayElementAtIndex(i);
-                SerializedProperty amountProperty = detail.FindPropertyRelative(WAVE_ENEMY_AMOUNT_PROPERTY_NAME);
-                if (amountProperty != null)
-                {
-                    count += amountProperty.intValue;
-                }
-            }
-
-            return count;
-        }
-
-        /// <summary>
         ///     Scenario catalog系のCollectionKeyか判定します。
         /// </summary>
         /// <param name="collectionKey"> CollectionKeyです。 </param>
@@ -1330,15 +1239,9 @@ namespace KillChord.Editor.SourceDataProvider
         private const string STAGE_ASSET_COLLECTION_KEY = "StageAsset";
         private const string STAGE_BIND_COLLECTION_KEY = "StageBind";
         private const string WAVE_COLLECTION_KEY = "Wave";
-        private const string WAVE_DEFINITION_ID_PROPERTY_NAME = "_id";
-        private const string WAVE_DEFINITIONS_PROPERTY_NAME = "_waves";
         private const string SCENARIO_BACKGROUND_COLLECTION_KEY = "ScenarioBackground";
         private const string SCENARIO_ANIMATION_COLLECTION_KEY = "ScenarioAnimation";
         private const string SCENARIO_PORTRAIT_COLLECTION_KEY = "ScenarioPortrait";
-        private const string WAVE_DETAILS_PROPERTY_NAME = "Details";
-        private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
-        private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
-        private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
 
         private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
 
