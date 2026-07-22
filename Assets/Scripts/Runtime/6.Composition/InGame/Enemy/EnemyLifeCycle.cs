@@ -559,10 +559,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
                 handle = LSequence.Create()
                     .Join(handle)
-                    .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.zero, _deathEffectDuration)
+                    .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.up * 0.1f, _deathEffectDuration)
                         .WithEase(Ease.OutQuad)
                         .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Join(LMotion.Create(Vector3.zero, Vector3.up * -1f, 1f)
+                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, 3f)
                         .WithDelay(_deathEffectDuration)
                         .BindToLocalPosition(_deathSwampGameObject.transform))
                     .Run();
