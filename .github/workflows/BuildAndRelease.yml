@@ -273,6 +273,7 @@ jobs:
 
             $GuidDirs    = Get-ChildItem -Path $PkgWorkDir -Directory
             $PlacedCount = 0
+            $PackageFailed = $false
 
             foreach ($GuidDir in $GuidDirs) {
               $PathnameFi = Join-Path $GuidDir.FullName "pathname"
@@ -295,22 +296,32 @@ jobs:
               $AssetSrc = Join-Path $GuidDir.FullName "asset"
               $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
 
-              if (Test-Path $AssetSrc) {
-                $DestDir = Split-Path $DestAbs -Parent
-                New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
-                Copy-Item -Path $AssetSrc -Destination $DestAbs -Force
-                $PlacedCount++
-              } else {
-                New-Item -ItemType Directory -Path $DestAbs -Force | Out-Null
-              }
+              try {
+                if (Test-Path $AssetSrc) {
+                  $DestDir = Split-Path $DestAbs -Parent
+                  New-Item -ItemType Directory -Path $DestDir -Force -ErrorAction Stop | Out-Null
+                  Copy-Item -Path $AssetSrc -Destination $DestAbs -Force -ErrorAction Stop
+                  $PlacedCount++
+                } else {
+                  New-Item -ItemType Directory -Path $DestAbs -Force -ErrorAction Stop | Out-Null
+                }
 
-              if (Test-Path $MetaSrc) {
-                Copy-Item -Path $MetaSrc -Destination "$DestAbs.meta" -Force
+                if (Test-Path $MetaSrc) {
+                  Copy-Item -Path $MetaSrc -Destination "$DestAbs.meta" -Force -ErrorAction Stop
+                }
+              } catch {
+                Write-Host "ERROR: Failed to write asset for $($Package.Name): $_"
+                $PackageFailed = $true
+                break
               }
             }
 
-            Write-Host "  Placed $PlacedCount asset file(s)."
-            $TotalPlaced += $PlacedCount
+            if ($PackageFailed) {
+              $FailedPackages += $Package.Name
+            } else {
+              Write-Host "  Placed $PlacedCount asset file(s)."
+              $TotalPlaced += $PlacedCount
+            }
             Remove-Item -Path $PkgWorkDir -Recurse -Force -ErrorAction SilentlyContinue
           }
 
