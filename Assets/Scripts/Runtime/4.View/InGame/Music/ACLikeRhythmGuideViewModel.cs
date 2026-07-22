@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.View.InGame.Sequence;
-using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
@@ -34,7 +33,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
 
-            RhythmGuideDto dto = _presenter.CreateDto(Time.unscaledTime);
+            RhythmGuideDto dto = _presenter.CreateDto();
 
             _view.ConfigureZones(dto.Zones);
             _view.SetAlpha(dto.HasTarget);
