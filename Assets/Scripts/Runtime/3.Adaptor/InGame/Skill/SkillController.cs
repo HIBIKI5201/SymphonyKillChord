@@ -39,7 +39,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="unscaledTime"> 現在時刻です。 </param>
         public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
 
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {

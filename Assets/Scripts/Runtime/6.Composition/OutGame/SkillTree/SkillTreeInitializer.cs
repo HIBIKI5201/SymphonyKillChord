@@ -72,6 +72,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillDetailScreenView _skillDetailScreenView;
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
+        private SkillTreeResetDialogView _skillTreeResetDialogView;
         private SkillTreeController _skillTreeController;
         private SkillDetailPresenter _skillDetailPresenter;
         private PlayerStatusPresenter _playerStatusPresenter;
@@ -272,6 +273,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _playerStatusScreenView = new PlayerStatusScreenView(_playerStatusRoot, _outGameUIEvent);
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
+            _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,
@@ -506,6 +508,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected += HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed += HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked += HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillTreeResetRequested += HandleSkillTreeResetRequested;
+            _outGameUIEvent.OnSkillTreeResetConfirmed += HandleSkillTreeResetConfirmed;
+            _outGameUIEvent.OnSkillTreeResetCancelled += HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked += HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked += HandlePreviewClosed;
             _isSubscribed = true;
@@ -524,6 +529,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected -= HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed -= HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked -= HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillTreeResetRequested -= HandleSkillTreeResetRequested;
+            _outGameUIEvent.OnSkillTreeResetConfirmed -= HandleSkillTreeResetConfirmed;
+            _outGameUIEvent.OnSkillTreeResetCancelled -= HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked -= HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked -= HandlePreviewClosed;
             _isSubscribed = false;
@@ -536,6 +544,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             _previewVideoScreenView?.Dispose();
             _previewVideoScreenView = null;
+            _skillTreeResetDialogView?.Dispose();
+            _skillTreeResetDialogView = null;
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
             _playerStatusScreenView = null;
@@ -598,6 +608,58 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillUnlocked()
         {
             _skillTreeController.OnSkillUnlocked();
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットの確認ダイアログを表示する。
+        /// </summary>
+        private void HandleSkillTreeResetRequested()
+        {
+            int refundPoints = _skillTreeController.GetResetRefundPoints();
+            _skillTreeResetDialogView.Show(refundPoints);
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットを確定して保存する。
+        /// </summary>
+        private async void HandleSkillTreeResetConfirmed()
+        {
+            SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
+            SkillTreeController controller = _skillTreeController;
+            if (dialogView == null || controller == null || _cts == null)
+            {
+                return;
+            }
+
+            dialogView.SetInteractionEnabled(false);
+            bool isSucceeded;
+            try
+            {
+                isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
+            }
+            finally
+            {
+                if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                {
+                    dialogView.SetInteractionEnabled(true);
+                }
+            }
+
+            if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+            {
+                return;
+            }
+
+            dialogView.Hide();
+            _skillDetailScreenView?.HideImmediately();
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットをキャンセルする。
+        /// </summary>
+        private void HandleSkillTreeResetCancelled()
+        {
+            _skillTreeResetDialogView.Hide();
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -18,6 +18,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(SkillBuildRepository))]
     public class SkillBuildRepository : ScriptableObject, ISkillBuildRepository
     {
+        private const int EMPTY_SKILL_ID = -1;
+
         /// <summary>
         ///     セーブデータシステムを初期化する。
         /// </summary>
@@ -98,11 +100,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             for (int i = 0; i < skillIds.Count; i++)
             {
                 int skillId = skillIds[i];
+                if (skillId == EMPTY_SKILL_ID)
+                {
+                    _equippedSkills.Add(default);
+                    continue;
+                }
+
                 if (!_skillRepository.TryGetSkill(new SkillId(skillId), out var skillData))
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning($"スキル ID '{skillId}' に対応する SkillTemplate が見つかりませんでした。");
 #endif
+                    _equippedSkills.Add(default);
                     continue;
                 }
 

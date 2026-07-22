@@ -273,7 +273,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             try
             {
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
+                IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+                _skillBuildDefinition.UpdateEquippedSkills(ToArray(equippedSkills));
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(_skillBuildDefinition.EquippedSkills, ownedSkillData);
             }

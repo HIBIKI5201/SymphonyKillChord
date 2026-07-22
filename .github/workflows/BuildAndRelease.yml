@@ -262,6 +262,7 @@ jobs:
               "-batchmode",
               "-nographics",
               "-quit",
+              "-ignorecompilererrors",
               "-projectPath", "${{ github.workspace }}",
               "-importPackage", "$($Package.FullName)",
               "-logFile", "unity_import_$($Package.BaseName).log"
@@ -278,8 +279,10 @@ jobs:
               exit 124
             }
 
-            if ($UnityProcess.ExitCode -ne 0) {
-              Write-Host "WARNING: Unity returned non-zero code ($($UnityProcess.ExitCode)) for $($Package.Name)."
+            $ExitCode = if ($null -eq $UnityProcess.ExitCode) { -1 } else { [int]$UnityProcess.ExitCode }
+
+            if ($ExitCode -ne 0) {
+              Write-Host "WARNING: Unity returned non-zero code ($ExitCode) for $($Package.Name)."
               Write-Host "         See unity_import_$($Package.BaseName).log for details."
               $FailedPackages += $Package.Name
             } else {
@@ -306,13 +309,13 @@ jobs:
           Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
           Write-Host ""
 
-          $Args = @(
+          $UnityArgs = @(
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
             "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
             "-logFile", "unity_build.log"
           )
-          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $Args -PassThru -NoNewWindow
+          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $UnityArgs -PassThru -NoNewWindow
 
           if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
             Write-Host ""
