@@ -150,8 +150,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e769e9900eed0c94eaa8d71f564c1966
-    m_Address: EnemyWaveDefinitionAsset
+  - m_GUID: 9b244ab8c89d4230b98ee894aa815b0b
+    m_Address: EnemyWaveDefinitionRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

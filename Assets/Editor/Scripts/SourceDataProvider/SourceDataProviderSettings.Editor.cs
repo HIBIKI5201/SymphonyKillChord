@@ -288,7 +288,7 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioAnimation", "AnimationCatalogAsset", "_entries"),
                 new("ScenarioPortrait", "PortraitCatalogAsset", "_entries"),
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
-                new("Wave", "EnemyWaveDefinitionAsset", "_waves"),
+                new("Wave", "EnemyWaveDefinitionRepository", "_waveDefinitionAssets"),
                 new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
             };
         }
@@ -307,6 +307,7 @@ namespace KillChord.Editor.SourceDataProvider
                 "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "EnemyAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
+                "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
                 "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
                 _ => string.Empty,
             };
