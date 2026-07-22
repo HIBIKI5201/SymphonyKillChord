@@ -55,6 +55,14 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     ノードを未解放に戻す。
+        /// </summary>
+        public void Lock()
+        {
+            _isUnlocked = false;
+        }
+
+        /// <summary>
         ///     保持しているステータスボーナス効果を適用する。
         /// </summary>
         /// <param name="builder"> ボーナスの集計先。 </param>
