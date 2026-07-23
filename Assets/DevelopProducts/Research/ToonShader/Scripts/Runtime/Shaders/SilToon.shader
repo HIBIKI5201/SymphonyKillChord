@@ -99,7 +99,9 @@ Shader "Custom/SilToon/Base"
 
                 #pragma vertex vert
                 #pragma fragment frag
+
                 #pragma multi_compile _ FADE_ON
+
                 #pragma shader_feature_local _NORMALMAP
                 #pragma shader_feature_local_fragment _ISFORFACE_ON
                 #pragma shader_feature_local_fragment _CHAR_SHADOW_ON

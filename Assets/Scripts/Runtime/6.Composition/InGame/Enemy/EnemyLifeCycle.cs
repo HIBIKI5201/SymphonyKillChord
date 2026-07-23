@@ -1,10 +1,9 @@
-using KillChord.Runtime.Adaptor;
+using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.InGame.Target;
-using KillChord.Runtime.Adaptor.InGame.Animation;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Mission;
@@ -16,12 +15,15 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.Rendering;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
+using LitMotion;
+using LitMotion.Extensions;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -194,11 +196,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _battleState.Reset();
             _aiController.Activate();
             _healthHudPresenter.Activate();
+            ResetDeathEffect();
 
-            if (_missionEventController != null && _loadedMissionKeyAsset != null)
-            {
-                _enemyEntity.OnDied += HandleEnemyDied;
-            }
+            _enemyEntity.OnDied += HandleEnemyDied;
             _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
 
             // コンポーネント有効化
@@ -224,7 +224,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             CancellationToken ct)
         {
             bool hasPreparedEntrance = false;
-			positionPair.SetInUse(true);
+            positionPair.SetInUse(true);
             try
             {
                 ct.ThrowIfCancellationRequested();
@@ -238,7 +238,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                         ct);
 
                 ct.ThrowIfCancellationRequested();
-				positionPair.SetInUse(false);
+                positionPair.SetInUse(false);
                 if (!hasArrived || this == null)
                 {
                     if (this != null)
@@ -285,9 +285,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             SetDyingCollidersEnabled(true);
             _view.Deactivate();
 
+            _enemyEntity.OnDied -= HandleEnemyDied;
             if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
-                _enemyEntity.OnDied -= HandleEnemyDied;
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
             _targetingSystem?.UnregisterTarget(_targetable);
@@ -374,12 +374,25 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
         [SerializeField, Tooltip("死亡時に再生するワンショットアニメーションキー。")]
         private string _deathAnimationKey = "Enemy_Death";
-        [SerializeField,Tooltip("死体消滅時のワンショットアニメーションキー。")]
+        [SerializeField, Tooltip("死体消滅時のワンショットアニメーションキー。")]
         private string _destroyAniamtionKey = "Enemy_Destroy";
         [SerializeField, Min(0f), Tooltip("死亡アニメーションキーが見つからない場合の待機秒数。")]
         private float _deathAnimationFallbackSeconds = 0.5f;
         [SerializeField, Tooltip("死亡アニメーション開始前に無効化する判定。未設定の場合は何もしません。")]
         private Collider[] _disableOnDyingColliders;
+
+        [SerializeField, Tooltip("死亡演出でMaterialプロパティを変化させる対象のRendererです。未設定の場合は何もしません。")]
+        private Renderer[] _deathEffectRenderers;
+        [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
+        private GameObject _deathSwampGameObject;
+        /// <summary>
+        ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
+        /// </summary>
+        private static readonly int DeathEffectPropertyId = Shader.PropertyToID("_DeathEffectAmount");
+        [SerializeField, Min(0f), Tooltip("死亡演出のMaterialプロパティが変化する時間（秒）です。")]
+        private float _deathEffectDuration = 1f;
+        [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
+        private float _deathSwampSinkDuration = 3f;
 
 
         [Header("砲兵の場合のみ必要")]
@@ -499,31 +512,91 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             float waitSeconds = _deathAnimationFallbackSeconds;
 
             if (_characterAnimationContext != null
-                && _characterAnimationContext.Signal.TryRequestOneShot(_deathAnimationKey, out waitSeconds))
+                && _characterAnimationContext.Signal.TryRequestOneShot(_deathAnimationKey, out float deathDuration))
             {
+                waitSeconds = deathDuration;
                 _characterAnimationContext.ViewModel.SetVelocity(Vector2.zero);
             }
 
-            if (waitSeconds <= 0f)
+            if (waitSeconds > 0f)
+            {
+                //TODO ボイス処理を追加する。
+                await Awaitable.WaitForSecondsAsync(waitSeconds, destroyCancellationToken);//floatで時間を渡すためにAwatable
+            }
+
+
+            waitSeconds = 0f;
+            if (_characterAnimationContext != null
+                && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey, out float destroyDuration))
+            {
+                waitSeconds = destroyDuration;
+            }
+
+
+            await PlayDeathMaterialEffectAsync();
+
+            if (waitSeconds > 0f)
+            {
+                await Awaitable.WaitForSecondsAsync(waitSeconds, destroyCancellationToken);
+            }
+        }
+
+        /// <summary>
+        ///     死亡演出として、対象RendererのMaterialプロパティをLMotionで変化させる。
+        /// </summary>
+        private ValueTask PlayDeathMaterialEffectAsync()
+        {
+            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
+            {
+                return default;
+            }
+
+            // DestroyFadeシェーダーは_DeathEffectAmountのデフォルトが1(通常表示)で、0に近づくほど消滅する。
+            MotionHandle handle = LMotion.Create(1f, 0f, _deathEffectDuration)
+                .WithEase(Ease.OutQuad)
+                .BindToMaterialPropertyBlockFloat(_deathEffectRenderers, DeathEffectPropertyId);
+
+            if (_deathSwampGameObject != null)
+            {
+                _deathSwampGameObject.SetActive(true);
+
+                handle = LSequence.Create()
+                    .Join(handle)
+                    .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.up * 0.1f, _deathEffectDuration)
+                        .WithEase(Ease.OutQuad)
+                        .BindToLocalPosition(_deathSwampGameObject.transform))
+                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, _deathSwampSinkDuration)
+                        .WithDelay(_deathEffectDuration)
+                        .BindToLocalPosition(_deathSwampGameObject.transform))
+                    .Run();
+            }
+
+            return handle.ToValueTask(destroyCancellationToken);
+        }
+
+        /// <summary>
+        ///     プールから再利用した際に、前回の死亡演出で変化したMaterialPropertyBlockを既定値へ戻す。
+        /// </summary>
+        private void ResetDeathEffect()
+        {
+            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
             {
                 return;
             }
-            //TODO ボイス処理を追加する。
-            await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);//floatで時間を渡すためにAwatable
 
-
-           if( _characterAnimationContext != null
-               && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey,out float destroyDuration)){
-            waitSeconds = destroyDuration;
-            }
-
-            if(waitSeconds <= 0f)
+            foreach (Renderer renderer in _deathEffectRenderers)
             {
-                return;
-            }
+                if (renderer == null)
+                {
+                    continue;
+                }
 
-            //TODO エフェクト処理を追加する。
-            await Awaitable.WaitForSecondsAsync(waitSeconds,destroyCancellationToken);
+                renderer.SetPropertyBlock(null);
+            }
+            if (_deathSwampGameObject != null)
+            {
+                _deathSwampGameObject.SetActive(false);
+            }
         }
 
         /// <summary>
