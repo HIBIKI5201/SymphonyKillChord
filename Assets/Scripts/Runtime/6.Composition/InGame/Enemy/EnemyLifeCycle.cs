@@ -391,6 +391,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private static readonly int DeathEffectPropertyId = Shader.PropertyToID("_DeathEffectAmount");
         [SerializeField, Min(0f), Tooltip("死亡演出のMaterialプロパティが変化する時間（秒）です。")]
         private float _deathEffectDuration = 1f;
+        [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
+        private float _deathSwampSinkDuration = 3f;
 
 
         [Header("砲兵の場合のみ必要")]
@@ -523,6 +525,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
 
+            waitSeconds = 0f;
             if (_characterAnimationContext != null
                 && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey, out float destroyDuration))
             {
@@ -562,7 +565,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.up * 0.1f, _deathEffectDuration)
                         .WithEase(Ease.OutQuad)
                         .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, 3f)
+                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, _deathSwampSinkDuration)
                         .WithDelay(_deathEffectDuration)
                         .BindToLocalPosition(_deathSwampGameObject.transform))
                     .Run();
