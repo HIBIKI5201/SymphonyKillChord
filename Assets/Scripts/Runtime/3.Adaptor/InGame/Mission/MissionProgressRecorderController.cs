@@ -2,7 +2,6 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
-using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -59,8 +58,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(targetSystemController));
 
             _playerEntity.OnHealthChanged += HandleHealthChanged;
-            _playerEntity.OnDamageAvoided += HandleDamageAvoided;
             _playerController.OnMoved += HandleMoved;
+            _playerController.OnDodgeSucceeded += HandleDodgeSucceeded;
             _attackController.OnAttackExecuted += HandleAttackExecuted;
             _attackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
             _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
@@ -75,7 +74,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             if (_playerEntity != null)
             {
                 _playerEntity.OnHealthChanged -= HandleHealthChanged;
-                _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
             }
 
             if (_attackController != null)
@@ -87,6 +85,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             if (_playerController != null)
             {
                 _playerController.OnMoved -= HandleMoved;
+                _playerController.OnDodgeSucceeded -= HandleDodgeSucceeded;
             }
 
             if (_skillController != null)
@@ -125,10 +124,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private int _currentCombo;
 
         /// <summary>
-        ///     実際にダメージを回避したことをミッションへ通知します。
+        ///     回避の実行をミッションへ通知します。敵の攻撃を実際に避けられたかどうかは問いません。
         /// </summary>
-        /// <param name="damage"> 回避したダメージです。 </param>
-        private void HandleDamageAvoided(Damage damage)
+        private void HandleDodgeSucceeded()
         {
             _missionEventController.NotifyActionPerformed(MissionActionKind.Dodge);
         }
