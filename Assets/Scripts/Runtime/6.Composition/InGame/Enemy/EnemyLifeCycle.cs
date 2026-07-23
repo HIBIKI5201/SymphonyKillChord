@@ -590,7 +590,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
                 renderer.SetPropertyBlock(null);
             }
-            _deathSwampGameObject.SetActive(false);
+            if (_deathSwampGameObject != null)
+            {
+                _deathSwampGameObject.SetActive(false);
+            }
         }
 
         /// <summary>
