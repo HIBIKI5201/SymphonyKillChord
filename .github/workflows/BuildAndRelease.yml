@@ -250,6 +250,8 @@ jobs:
           Write-Host "::group::Installing packages via direct tar extraction"
 
           $ProjectRoot    = "${{ github.workspace }}"
+          $LongProjectRoot = "\\?\" + $ProjectRoot.TrimEnd("\")
+          $ResolvedRoot   = $LongProjectRoot + "\"
           $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
           $TotalPlaced    = 0
           $FailedPackages = @()
@@ -282,32 +284,32 @@ jobs:
               $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
               if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
 
-              $DestAbs = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot $DestRelPath))
-              $ResolvedRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
-              if (-not $ResolvedRoot.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
-                $ResolvedRoot += [System.IO.Path]::DirectorySeparatorChar
-              }
+              $DestRelNorm = $DestRelPath.Replace('/', '\').TrimStart('\')
 
-              if (-not $DestAbs.StartsWith($ResolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+              if ($DestRelNorm -match '\.\.') {
                 Write-Host "WARNING: Path traversal detected, skipping: $DestRelPath"
                 continue
               }
+
+              $DestAbs = $LongProjectRoot + "\" + $DestRelNorm
 
               $AssetSrc = Join-Path $GuidDir.FullName "asset"
               $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
 
               try {
                 if (Test-Path $AssetSrc) {
-                  $DestDir = Split-Path $DestAbs -Parent
-                  New-Item -ItemType Directory -Path $DestDir -Force -ErrorAction Stop | Out-Null
-                  Copy-Item -Path $AssetSrc -Destination $DestAbs -Force -ErrorAction Stop
+                  $DestDir = [System.IO.Path]::GetDirectoryName($DestAbs)
+                  # Create directories and copy files using .NET API to bypass 260-character path limit.
+                  [System.IO.Directory]::CreateDirectory($DestDir) | Out-Null
+                  [System.IO.File]::Copy($AssetSrc, $DestAbs, $true)
                   $PlacedCount++
                 } else {
-                  New-Item -ItemType Directory -Path $DestAbs -Force -ErrorAction Stop | Out-Null
+                  [System.IO.Directory]::CreateDirectory($DestAbs) | Out-Null
                 }
 
                 if (Test-Path $MetaSrc) {
-                  Copy-Item -Path $MetaSrc -Destination "$DestAbs.meta" -Force -ErrorAction Stop
+                  $MetaDest = $DestAbs + ".meta"
+                  [System.IO.File]::Copy($MetaSrc, $MetaDest, $true)
                 }
               } catch {
                 Write-Host "ERROR: Failed to write asset for $($Package.Name): $_"
