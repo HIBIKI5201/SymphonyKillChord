@@ -525,6 +525,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
 
+            waitSeconds = 0f;
             if (_characterAnimationContext != null
                 && _characterAnimationContext.Signal.TryRequestOneShot(_destroyAniamtionKey, out float destroyDuration))
             {
