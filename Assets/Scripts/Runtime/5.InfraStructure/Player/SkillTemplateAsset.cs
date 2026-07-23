@@ -18,6 +18,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <summary> 表示名です。 </summary>
         public string DisplayName => _displayName;
 
+        /// <summary> スキル詳細です。 </summary>
+        public string SkillDetail => _skillDetail;
+
         /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern => _pattern;
 
@@ -46,7 +49,8 @@ namespace KillChord.Runtime.InfraStructure.Player
         public SkillTemplate ToDomain()
         {
             return new SkillTemplate(
-                Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator, EffectSpec, _animationKey, _displayName);
+                Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
+                EffectSpec, _animationKey, _displayName, _skillDetail);
         }
 
         [SerializeField, Tooltip("スキルIDです。")]
@@ -56,6 +60,8 @@ namespace KillChord.Runtime.InfraStructure.Player
         [SerializeField, Tooltip("スキル表示名です。")] private string _displayName;
 
         [SerializeField, Tooltip("入力パターンです。")] private BeatType[] _pattern;
+
+        [SerializeField, TextArea, Tooltip("スキル詳細です。")] private string _skillDetail;
 
         [SerializeField, Tooltip("スキルの種類です。")]
         private SkillType[] _skillType;
