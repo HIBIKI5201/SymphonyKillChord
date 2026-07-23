@@ -11,6 +11,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
     {
         public void StartGameplay()
         {
+            if (_autoSpawnSuppressed)
+            {
+                return;
+            }
+
             _waveSpawnerController.SpawnNextWave();
         }
 
@@ -24,6 +29,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _waveSpawnerController = controller;
             _timerActive = false;
             _waveTimer = 0f;
+        }
+
+        /// <summary>
+        ///     ゲームプレイ開始時のWave自動生成を抑制するかどうかを設定する。
+        ///     チュートリアル等、任意のタイミングまで敵を生成させたくない場合に使用する。
+        /// </summary>
+        /// <param name="suppressed"> 抑制する場合はtrue。 </param>
+        public void SetAutoSpawnSuppressed(bool suppressed)
+        {
+            _autoSpawnSuppressed = suppressed;
         }
 
         /// <summary>
@@ -61,5 +76,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private EnemyWaveSpawnerController _waveSpawnerController;
         private bool _timerActive;
         private float _waveTimer;
+        private bool _autoSpawnSuppressed;
     }
 }

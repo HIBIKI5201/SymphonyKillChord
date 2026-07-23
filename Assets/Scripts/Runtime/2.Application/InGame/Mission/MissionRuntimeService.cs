@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using System;
 
 namespace KillChord.Runtime.Application.InGame.Mission
@@ -15,6 +16,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
         /// <param name="missionProgress">進行状況。</param>
         /// <param name="missionTimeAdvanceUseCase">時間経過ユースケース。</param>
         /// <param name="missionEnemyKilledUseCase">敵撃破ユースケース。</param>
+        /// <param name="missionActionPerformedUseCase">プレイヤー行動発動ユースケース。</param>
         /// <param name="missionPlayerDeadUseCase">プレイヤー死亡ユースケース。</param>
         /// <param name="missionRuleRunner">ルール評価器。</param>
         /// <param name="missionEvaluationRunner">評価実行器。</param>
@@ -23,6 +25,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             MissionProgress missionProgress,
             MissionTimeAdvanceUsecase missionTimeAdvanceUseCase,
             MissionEnemyKilledUsecase missionEnemyKilledUseCase,
+            MissionActionPerformedUsecase missionActionPerformedUseCase,
             MissionPlayerDeadUsecase missionPlayerDeadUseCase,
             MissionRuleRunner missionRuleRunner,
             MissionEvaluationRunner missionEvaluationRunner)
@@ -31,13 +34,20 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionProgress = missionProgress;
             _missionTimeAdvanceUseCase = missionTimeAdvanceUseCase;
             _missionEnemyKilledUseCase = missionEnemyKilledUseCase;
+            _missionActionPerformedUseCase = missionActionPerformedUseCase;
             _missionPlayerDeadUseCase = missionPlayerDeadUseCase;
             _missionRuleRunner = missionRuleRunner;
             _missionEvaluationRunner = missionEvaluationRunner;
+            _lastObjectiveStepIndex = -1;
         }
 
         /// <summary> ミッション終了イベント。 </summary>
         public event Action<MissionEndReason> OnMissionFinished;
+
+        /// <summary>
+        ///     目標シーケンスの現在ステップが変化したときに発火します(クリア条件が目標シーケンスの場合のみ)。
+        /// </summary>
+        public event Action<int> OnObjectiveStepChanged;
 
         /// <summary> ミッション定義を取得します。 </summary>
         public MissionDefinition MissionDefinition => _missionDefinition;
@@ -57,6 +67,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionTimeAdvanceUseCase.Execute(_missionProgress, deltaTime);
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
+            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -72,6 +83,23 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionEnemyKilledUseCase.Execute(_missionProgress, enemyMissionKey);
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
+            CheckObjectiveStepChanged();
+        }
+
+        /// <summary>
+        ///     プレイヤー行動が発動した際の処理を行います。
+        /// </summary>
+        /// <param name="actionKind">発動した行動の種別。</param>
+        public void OnActionPerformed(MissionActionKind actionKind)
+        {
+            if (_missionProgress.IsFinished)
+            {
+                return;
+            }
+            _missionActionPerformedUseCase.Execute(_missionProgress, actionKind);
+            _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
+            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -86,6 +114,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionPlayerDeadUseCase.Execute(_missionProgress);
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
+            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -107,6 +136,8 @@ namespace KillChord.Runtime.Application.InGame.Mission
         private readonly MissionTimeAdvanceUsecase _missionTimeAdvanceUseCase;
         /// <summary> 敵撃破ユースケース。 </summary>
         private readonly MissionEnemyKilledUsecase _missionEnemyKilledUseCase;
+        /// <summary> プレイヤー行動発動ユースケース。 </summary>
+        private readonly MissionActionPerformedUsecase _missionActionPerformedUseCase;
         /// <summary> プレイヤー死亡ユースケース。 </summary>
         private readonly MissionPlayerDeadUsecase _missionPlayerDeadUseCase;
         /// <summary> ルール評価器。 </summary>
@@ -118,6 +149,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
         // 複数回OnMissionFinishedイベントが発火するのを防止するためのフラグ。
         private bool _hasFinished = false;
 
+        /// <summary> 目標シーケンスの直前のステップIndex。変化検知に使用する。 </summary>
+        private int _lastObjectiveStepIndex;
+
         /// <summary>
         ///    ミッションが終了しているかどうかをチェックし、終了している場合はイベントを発火させます。
         /// </summary>
@@ -128,6 +162,26 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 _hasFinished = true;
                 OnMissionFinished?.Invoke(_missionProgress.EndReason);
             }
+        }
+
+        /// <summary>
+        ///     クリア条件が目標シーケンスの場合に、現在ステップの変化を検知してイベントを発火させます。
+        /// </summary>
+        private void CheckObjectiveStepChanged()
+        {
+            if (_missionDefinition.ClearCondition is not ObjectiveSequenceClearCondition sequence)
+            {
+                return;
+            }
+
+            int currentStepIndex = sequence.GetCurrentStepIndex(_missionProgress);
+            if (currentStepIndex == _lastObjectiveStepIndex)
+            {
+                return;
+            }
+
+            _lastObjectiveStepIndex = currentStepIndex;
+            OnObjectiveStepChanged?.Invoke(currentStepIndex);
         }
     }
 }

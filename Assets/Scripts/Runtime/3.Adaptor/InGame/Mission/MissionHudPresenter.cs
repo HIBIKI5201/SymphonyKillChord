@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -37,9 +38,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
 
             string resultText = _missionRuntimeService.MissionProgress.EndReason.ToString();
+            string mainMissionText = GetMainMissionText();
 
             MissionHudDTO dto = new MissionHudDTO(
-                _missionRuntimeService.MissionDefinition.MainMissionText,
+                mainMissionText,
                 resultText,
                 evaluationItems);
 
@@ -50,6 +52,26 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private readonly MissionRuntimeService _missionRuntimeService;
         /// <summary> ミッションHUDビューモデル。 </summary>
         private readonly IMissionHudViewModel _missionHudViewModel;
+
+        /// <summary>
+        ///     現在の進行状態に対応するメインミッション表示文を取得します。
+        /// </summary>
+        /// <returns> 表示するメインミッション文です。 </returns>
+        private string GetMainMissionText()
+        {
+            if (_missionRuntimeService.MissionDefinition.ClearCondition
+                    is not ObjectiveSequenceClearCondition sequence)
+            {
+                return _missionRuntimeService.MissionDefinition.MainMissionText;
+            }
+
+            int stepIndex = sequence.GetCurrentStepIndex(
+                _missionRuntimeService.MissionProgress);
+            ObjectiveSequenceStep step = sequence.GetStep(stepIndex);
+            return string.IsNullOrWhiteSpace(step?.GuideMessageText)
+                ? _missionRuntimeService.MissionDefinition.MainMissionText
+                : step.GuideMessageText;
+        }
 
         private MissionEvaluationDisplayState ConvertDisplayState(
             MissionEvaluationDisplaySituation situation)

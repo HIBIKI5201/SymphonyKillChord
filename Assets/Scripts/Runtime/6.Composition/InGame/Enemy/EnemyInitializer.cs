@@ -2,13 +2,16 @@ using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -169,6 +172,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyWaveTimerView);
             _enemyWaveTimerView.Initialize(_moduleContainer.EnemyWaveSpawnerController);
 
+            BindObjectiveSequenceWaveStart();
+
             _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools);
             if (_moduleContainer.BossInitializer != null)
             {
@@ -252,6 +257,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public override void Shutdown()
         {
+            if (_missionRuntimeService != null)
+            {
+                _missionRuntimeService.OnObjectiveStepChanged -= HandleObjectiveStepChanged;
+                _missionRuntimeService = null;
+            }
+
             if (_moduleContainer?.EnemyWaveSpawnerController != null)
             {
                 _moduleContainer.EnemyWaveSpawnerController.Dispose();
@@ -302,6 +313,44 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;
         private IReadOnlyDictionary<int, IStageEffectDefinition> _loadedStageEffectCatalog;
+        private MissionRuntimeService _missionRuntimeService;
+
+        /// <summary>
+        ///     目標シーケンスを使用するミッションでは、最終ステップまでWave開始を抑制します。
+        /// </summary>
+        private void BindObjectiveSequenceWaveStart()
+        {
+            MissionModuleContainer missionModuleContainer =
+                ServiceLocator.GetInstance<MissionModuleContainer>();
+            MissionRuntimeService missionRuntimeService =
+                missionModuleContainer?.MissionRuntimeService;
+            if (missionRuntimeService?.MissionDefinition.ClearCondition
+                    is not ObjectiveSequenceClearCondition)
+            {
+                return;
+            }
+
+            _missionRuntimeService = missionRuntimeService;
+            _enemyWaveTimerView.SetAutoSpawnSuppressed(true);
+            _missionRuntimeService.OnObjectiveStepChanged += HandleObjectiveStepChanged;
+        }
+
+        /// <summary>
+        ///     最終目標ステップの開始時に敵Waveを開始します。
+        /// </summary>
+        /// <param name="stepIndex"> 開始した目標ステップのIndexです。 </param>
+        private void HandleObjectiveStepChanged(int stepIndex)
+        {
+            if (_missionRuntimeService?.MissionDefinition.ClearCondition
+                    is not ObjectiveSequenceClearCondition sequence
+                || stepIndex != sequence.StepCount - 1)
+            {
+                return;
+            }
+
+            _enemyWaveTimerView.SetAutoSpawnSuppressed(false);
+            _enemyWaveTimerView.StartGameplay();
+        }
 
         /// <summary>
         ///     Inspector参照を検証する。

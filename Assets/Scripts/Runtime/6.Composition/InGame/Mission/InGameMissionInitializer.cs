@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -52,9 +53,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             PlayerModuleContainer playerModuleContainer =
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
+            SkillModuleContainer skillModuleContainer =
+                ServiceLocator.GetInstance<SkillModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
-                || playerModuleContainer.PlayerAttackController == null)
+                || playerModuleContainer.PlayerAttackController == null
+                || skillModuleContainer?.SkillController == null)
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
@@ -64,10 +68,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
-                    _moduleContainer.MissionRuntimeService.MissionProgress);
+                    _moduleContainer.MissionRuntimeService.MissionProgress,
+                    _moduleContainer.MissionEventController);
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
-                playerModuleContainer.PlayerAttackController);
+                playerModuleContainer.PlayerAttackController,
+                skillModuleContainer.SkillController);
             _moduleContainer.MissionProgressRecorderController = recorderController;
             return true;
         }
@@ -113,6 +119,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 progress,
                 new MissionTimeAdvanceUsecase(),
                 new MissionEnemyKilledUsecase(),
+                new MissionActionPerformedUsecase(),
                 new MissionPlayerDeadUsecase(),
                 new MissionRuleRunner(definition),
                 new MissionEvaluationRunner());

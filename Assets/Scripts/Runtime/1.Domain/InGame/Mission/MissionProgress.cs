@@ -15,6 +15,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         {
             _elapsedTime = new MissionElapsedTime(0f);
             _enemyKillRecord = new EnemyKillRecord();
+            _actionRecord = new MissionActionRecord();
             _damageTaken = new MissionDamageTaken(0f);
             _maxCombo = new MissionCombo(0);
             _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
@@ -25,6 +26,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public MissionElapsedTime ElapsedTime => _elapsedTime;
         /// <summary> 敵撃破記録を取得します。 </summary>
         public EnemyKillRecord EnemyKillRecord => _enemyKillRecord;
+        /// <summary> プレイヤー行動の発動記録を取得します。 </summary>
+        public MissionActionRecord ActionRecord => _actionRecord;
         /// <summary> 累計被ダメージを取得します。 </summary>
         public MissionDamageTaken DamageTaken => _damageTaken;
         /// <summary> 使用した武器種類数を取得します。 </summary>
@@ -80,6 +83,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         }
 
         /// <summary>
+        ///     プレイヤー行動の発動を記録します。
+        /// </summary>
+        /// <param name="actionKind"> 発動した行動の種別です。 </param>
+        public void RecordActionPerformed(MissionActionKind actionKind)
+        {
+            _actionRecord.RecordAction(actionKind);
+        }
+
+        /// <summary>
         ///     現在コンボ数から最大コンボを更新します。
         /// </summary>
         /// <param name="combo"> 現在コンボ数です。 </param>
@@ -111,6 +123,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private MissionElapsedTime _elapsedTime;
         /// <summary> 敵撃破記録。 </summary>
         private readonly EnemyKillRecord _enemyKillRecord;
+        /// <summary> プレイヤー行動の発動記録。 </summary>
+        private readonly MissionActionRecord _actionRecord;
         private readonly HashSet<string> _usedWeaponIds;
         private MissionDamageTaken _damageTaken;
         private MissionCombo _maxCombo;

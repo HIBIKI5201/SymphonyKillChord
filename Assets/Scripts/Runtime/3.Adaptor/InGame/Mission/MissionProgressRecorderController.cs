@@ -1,4 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System;
@@ -14,20 +16,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     記録対象のミッション進行を設定します。
         /// </summary>
         /// <param name="missionProgress"> 記録対象です。 </param>
-        public MissionProgressRecorderController(MissionProgress missionProgress)
+        /// <param name="missionEventController"> ミッション行動を通知するControllerです。 </param>
+        public MissionProgressRecorderController(
+            MissionProgress missionProgress,
+            MissionEventController missionEventController)
         {
             _missionProgress = missionProgress
                 ?? throw new ArgumentNullException(nameof(missionProgress));
+            _missionEventController = missionEventController
+                ?? throw new ArgumentNullException(nameof(missionEventController));
         }
 
         /// <summary>
-        ///     プレイヤーと攻撃Controllerのイベントを購読します。
+        ///     プレイヤー、攻撃、スキルのイベントを購読します。
         /// </summary>
         /// <param name="playerEntity"> プレイヤーEntityです。 </param>
         /// <param name="attackController"> プレイヤー攻撃Controllerです。 </param>
+        /// <param name="skillController"> スキルControllerです。 </param>
         public void Bind(
             CharacterEntity playerEntity,
-            PlayerAttackController attackController)
+            PlayerAttackController attackController,
+            SkillController skillController)
         {
             Unbind();
 
@@ -35,9 +44,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(playerEntity));
             _attackController = attackController
                 ?? throw new ArgumentNullException(nameof(attackController));
+            _skillController = skillController
+                ?? throw new ArgumentNullException(nameof(skillController));
 
             _playerEntity.OnHealthChanged += HandleHealthChanged;
+            _playerEntity.OnDamageAvoided += HandleDamageAvoided;
             _attackController.OnAttackExecuted += HandleAttackExecuted;
+            _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
         }
 
         /// <summary>
@@ -48,6 +61,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             if (_playerEntity != null)
             {
                 _playerEntity.OnHealthChanged -= HandleHealthChanged;
+                _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
             }
 
             if (_attackController != null)
@@ -55,8 +69,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _attackController.OnAttackExecuted -= HandleAttackExecuted;
             }
 
+            if (_skillController != null)
+            {
+                _skillController.OnSkillAnimationRequested -= HandleSkillAnimationRequested;
+            }
+
             _playerEntity = null;
             _attackController = null;
+            _skillController = null;
             _currentCombo = 0;
         }
 
@@ -69,9 +89,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         }
 
         private readonly MissionProgress _missionProgress;
+        private readonly MissionEventController _missionEventController;
         private CharacterEntity _playerEntity;
         private PlayerAttackController _attackController;
+        private SkillController _skillController;
         private int _currentCombo;
+
+        /// <summary>
+        ///     実際にダメージを回避したことをミッションへ通知します。
+        /// </summary>
+        /// <param name="damage"> 回避したダメージです。 </param>
+        private void HandleDamageAvoided(Damage damage)
+        {
+            _missionEventController.NotifyActionPerformed(MissionActionKind.Evade);
+        }
 
         /// <summary>
         ///     プレイヤーHP変化を記録します。
@@ -101,6 +132,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleAttackExecuted(string weaponId, bool hasHit)
         {
             _missionProgress.RecordWeaponUse(weaponId);
+            _missionEventController.NotifyActionPerformed(MissionActionKind.Attack);
 
             if (!hasHit)
             {
@@ -110,6 +142,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             _currentCombo++;
             _missionProgress.RecordCombo(_currentCombo);
+        }
+
+        /// <summary>
+        ///     スキル発動をミッションへ通知します。
+        /// </summary>
+        /// <param name="animationKey"> 発動したスキルのアニメーションキーです。 </param>
+        private void HandleSkillAnimationRequested(string animationKey)
+        {
+            _missionEventController.NotifyActionPerformed(MissionActionKind.Skill);
         }
     }
 }
