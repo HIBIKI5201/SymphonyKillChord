@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc352a4ea3d433199f8a5b67447fb5b, type: 3}
+  m_Name: EnemyWaveDefinitionRepository
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionRepository
+  _waveDefinitionAssets:
+  - {fileID: 11400000, guid: e769e9900eed0c94eaa8d71f564c1966, type: 2}
+  - {fileID: 11400000, guid: 1a117376df01a2e4786d869b19648c3b, type: 2}

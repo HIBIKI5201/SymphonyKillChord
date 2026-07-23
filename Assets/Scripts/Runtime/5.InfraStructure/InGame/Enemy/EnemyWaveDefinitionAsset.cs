@@ -15,6 +15,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(fileName = "EnemyWavesDefinitionAsset", menuName = "KillChord/Enemy/" + nameof(EnemyWaveDefinitionAsset))]
     public class EnemyWaveDefinitionAsset : ScriptableObject
     {
+        /// <summary> 敵Wave定義IDです。 </summary>
+        public EnemyWaveDefinitionId Id => new EnemyWaveDefinitionId(_id.Id);
+
         /// <summary>
         ///     1ステージ分の敵Wave定義を生成する。
         /// </summary>
@@ -87,6 +90,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 
             return catalog;
         }
+
+        [SerializeField, SourceDataCollection("Wave"), Tooltip("敵Wave定義を一意に識別するIDです。")]
+        private DataID _id;
 
         [SerializeField, Tooltip("1Wave分の定義")]
         private SingleWaveDefinition[] _waves;

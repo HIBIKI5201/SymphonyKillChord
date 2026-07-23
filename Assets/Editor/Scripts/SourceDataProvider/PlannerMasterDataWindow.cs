@@ -470,6 +470,7 @@ namespace KillChord.Editor.SourceDataProvider
                 property.arraySize - 1);
             SerializedProperty element = property.GetArrayElementAtIndex(_selectedCollectionItemIndex);
             DrawCollectionItemEditor(
+                collectionKey,
                 sourceAsset,
                 serializedObject,
                 element,
@@ -671,11 +672,13 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     Collectionの選択中要素を編集します。
         /// </summary>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
         /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
         /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
         /// <param name="element"> 選択中要素です。 </param>
         /// <param name="elementIndex"> 選択中インデックスです。 </param>
         private void DrawCollectionItemEditor(
+            string collectionKey,
             ScriptableObject sourceAsset,
             SerializedObject serializedObject,
             SerializedProperty element,
@@ -701,7 +704,9 @@ namespace KillChord.Editor.SourceDataProvider
                 {
                     DrawInspector(element.objectReferenceValue);
                     EditorGUILayout.Space();
-                    DrawObjectReferencePreview(element.objectReferenceValue);
+                    DrawCollectionObjectReferencePreview(
+                        collectionKey,
+                        element.objectReferenceValue);
                 }
                 return;
             }
@@ -887,7 +892,7 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (string.Equals(label, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                DrawWaveCollectionPreview(property);
+                PlannerEnemyWavePreview.DrawRepository(property, PREVIEW_ELEMENT_LIMIT);
                 return;
             }
 
@@ -985,50 +990,24 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     Wave collection向けの専用プレビューを描画します。
+        ///     CollectionKeyに応じた参照アセットのプレビューを描画します。
         /// </summary>
-        /// <param name="property"> Wave配列プロパティです。 </param>
-        private static void DrawWaveCollectionPreview(SerializedProperty property)
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="target"> 参照先アセットです。 </param>
+        private static void DrawCollectionObjectReferencePreview(
+            string collectionKey,
+            UnityEngine.Object target)
         {
-            float totalDuration = 0f;
-            for (int i = 0; i < property.arraySize; i++)
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+            if (string.Equals(collectionKey, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                if (durationProperty != null)
-                {
-                    totalDuration += durationProperty.floatValue;
-                }
-            }
-
-            EditorGUILayout.LabelField($"Total Duration: {totalDuration:0.##} sec", EditorStyles.miniBoldLabel);
-            for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
-            {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(WAVE_STAGE_EFFECTS_PROPERTY_NAME);
-
-                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
-                int spawnCount = CountWaveEnemies(detailsProperty);
-                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
-                float duration = durationProperty?.floatValue ?? 0f;
-                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
-
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
-                EditorGUILayout.LabelField($"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
-                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
-                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+                PlannerEnemyWavePreview.Draw(target, PREVIEW_ELEMENT_LIMIT);
                 EditorGUILayout.EndVertical();
+                return;
             }
 
-            if (property.arraySize > PREVIEW_ELEMENT_LIMIT)
-            {
-                EditorGUILayout.HelpBox(
-                    $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
-                    MessageType.None);
-            }
+            DrawObjectReferencePreview(target);
         }
 
         /// <summary>
@@ -1044,21 +1023,25 @@ namespace KillChord.Editor.SourceDataProvider
                 SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
                 SerializedProperty assetKeyProperty = element.FindPropertyRelative(CATALOG_ASSET_KEY_PROPERTY_NAME);
                 SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
+                UnityEngine.Object catalogAsset = assetProperty != null
+                    && assetProperty.propertyType == SerializedPropertyType.ObjectReference
+                    ? assetProperty.objectReferenceValue
+                    : null;
 
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    Texture preview = AssetPreview.GetAssetPreview(assetProperty.objectReferenceValue)
-                        ?? AssetPreview.GetMiniThumbnail(assetProperty.objectReferenceValue);
+                    Texture preview = AssetPreview.GetAssetPreview(catalogAsset)
+                        ?? AssetPreview.GetMiniThumbnail(catalogAsset);
                     GUILayout.Label(preview, GUILayout.Width(64f), GUILayout.Height(64f));
                 }
 
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField($"ID: {idValueProperty?.stringValue ?? "<未設定>"}");
                 EditorGUILayout.LabelField($"Key: {assetKeyProperty?.stringValue ?? "<未設定>"}");
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    EditorGUILayout.ObjectField("Asset", assetProperty.objectReferenceValue, typeof(UnityEngine.Object), false);
+                    EditorGUILayout.ObjectField("Asset", catalogAsset, typeof(UnityEngine.Object), false);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndHorizontal();
@@ -1200,15 +1183,33 @@ namespace KillChord.Editor.SourceDataProvider
         /// <returns> 個別データ表示名です。 </returns>
         private static string BuildCollectionItemLabel(SerializedProperty element, int index)
         {
-            if (element?.objectReferenceValue != null)
+            if (element == null)
             {
-                return element.objectReferenceValue.name;
+                return $"Element {index + 1}";
             }
 
-            SerializedProperty dataIdProperty = element?.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
-                ?? element?.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                UnityEngine.Object referencedAsset = element.objectReferenceValue;
+                if (referencedAsset == null)
+                {
+                    return $"Element {index + 1}";
+                }
+
+                if (PlannerEnemyWavePreview.TryBuildItemLabel(
+                    referencedAsset,
+                    out string label))
+                {
+                    return label;
+                }
+
+                return referencedAsset.name;
+            }
+
+            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
             SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
-                ?? element?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
             if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
             {
                 return idValueProperty.stringValue;
@@ -1226,32 +1227,6 @@ namespace KillChord.Editor.SourceDataProvider
         {
             return string.Equals(collectionKey, STAGE_ASSET_COLLECTION_KEY, StringComparison.Ordinal)
                 || string.Equals(collectionKey, STAGE_BIND_COLLECTION_KEY, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        ///     Wave内の敵総数を集計します。
-        /// </summary>
-        /// <param name="detailsProperty"> Wave詳細配列です。 </param>
-        /// <returns> 敵総数です。 </returns>
-        private static int CountWaveEnemies(SerializedProperty detailsProperty)
-        {
-            if (detailsProperty == null || !detailsProperty.isArray)
-            {
-                return 0;
-            }
-
-            int count = 0;
-            for (int i = 0; i < detailsProperty.arraySize; i++)
-            {
-                SerializedProperty detail = detailsProperty.GetArrayElementAtIndex(i);
-                SerializedProperty amountProperty = detail.FindPropertyRelative(WAVE_ENEMY_AMOUNT_PROPERTY_NAME);
-                if (amountProperty != null)
-                {
-                    count += amountProperty.intValue;
-                }
-            }
-
-            return count;
         }
 
         /// <summary>
@@ -1282,10 +1257,6 @@ namespace KillChord.Editor.SourceDataProvider
         private const string SCENARIO_BACKGROUND_COLLECTION_KEY = "ScenarioBackground";
         private const string SCENARIO_ANIMATION_COLLECTION_KEY = "ScenarioAnimation";
         private const string SCENARIO_PORTRAIT_COLLECTION_KEY = "ScenarioPortrait";
-        private const string WAVE_DETAILS_PROPERTY_NAME = "Details";
-        private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
-        private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
-        private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
 
         private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
 
