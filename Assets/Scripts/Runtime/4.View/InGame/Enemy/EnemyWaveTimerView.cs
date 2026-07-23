@@ -33,7 +33,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         /// <summary>
         ///     ゲームプレイ開始時のWave自動生成を抑制するかどうかを設定する。
-        ///     チュートリアル等、任意のタイミングまで敵を生成させたくない場合に使用する。
+        ///     Mission等から明示的にWaveを開始する場合に使用する。
         /// </summary>
         /// <param name="suppressed"> 抑制する場合はtrue。 </param>
         public void SetAutoSpawnSuppressed(bool suppressed)
@@ -66,6 +66,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 if(_waveTimer <= 0f)
                 {
                     Debug.Log("[EnemyWaveTimerView] Wave Timeout.");
+
+                    if (_autoSpawnSuppressed)
+                    {
+                        StopTimer();
+                        return;
+                    }
+
                     _waveSpawnerController.SpawnNextWave();
                     return;
                 }

@@ -262,6 +262,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerMovementApplication move = new PlayerMovementApplication(parameter);
             PlayerApplication application = new PlayerApplication(move, dodge);
             PlayerController playerMovementController = new PlayerController(application, inputComposition.GetBufferedInputBuffer);
+            _moduleContainer.SetPlayerController(playerMovementController);
 
             _player.Initialize(
                 playerMovementController,

@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -57,8 +58,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 ServiceLocator.GetInstance<SkillModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
+                || playerModuleContainer.PlayerController == null
                 || playerModuleContainer.PlayerAttackController == null
-                || skillModuleContainer?.SkillController == null)
+                || skillModuleContainer?.SkillController == null
+                || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
@@ -72,8 +75,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                     _moduleContainer.MissionEventController);
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
+                playerModuleContainer.PlayerController,
                 playerModuleContainer.PlayerAttackController,
-                skillModuleContainer.SkillController);
+                skillModuleContainer.SkillController,
+                targetSystemController);
             _moduleContainer.MissionProgressRecorderController = recorderController;
             return true;
         }

@@ -22,7 +22,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 throw new InvalidOperationException($"{nameof(_condition)} is required.");
             }
 
-            return new ObjectiveSequenceStep(_condition.Create(), _guideMessageText);
+            IMissionClearCondition condition = _condition.Create();
+            return _startsEnemyWave
+                ? new WaveObjectiveSequenceStep(condition, _guideMessageText)
+                : new ObjectiveSequenceStep(condition, _guideMessageText);
         }
 
         [SerializeReference, SubclassSelector, Tooltip("このステップの達成条件。")]
@@ -30,5 +33,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
 
         [SerializeField, TextArea(2, 4), Tooltip("ステップ開始時に案内するメッセージ。不要な場合は空欄。")]
         private string _guideMessageText;
+
+        [SerializeField, Tooltip("このステップの開始時に次の敵Waveを生成する場合はオンにする。")]
+        private bool _startsEnemyWave;
     }
 }

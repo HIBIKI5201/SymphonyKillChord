@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     /// <summary>
     ///     指定した敵を一定数以上倒すとクリアとなる条件。
     /// </summary>
-    public class EnemyKillCountClearCondition : IMissionClearCondition
+    public class EnemyKillCountClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition
     {
         /// <summary>
         ///     EnemyKillCountClearCondition クラスの新しいインスタンスを初期化します。
@@ -44,7 +44,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <returns>条件を満たしている場合は true、そうでない場合は false。</returns>
         public bool IsSatisfied(MissionProgress progress)
         {
-            return progress.EnemyKillRecord.GetKillCount(_key) >= _requiredKillCount;
+            return progress.EnemyKillRecord.GetKillCount(_key) - _baselineKillCount >= _requiredKillCount;
+        }
+
+        /// <inheritdoc />
+        public void BeginStep(MissionProgress progress)
+        {
+            _baselineKillCount = progress.EnemyKillRecord.GetKillCount(_key);
         }
 
         /// <summary> 敵のキー。 </summary>
@@ -53,5 +59,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         private readonly int _requiredKillCount;
         /// <summary> 表示名。 </summary>
         private readonly string _displayName;
+        private int _baselineKillCount;
     }
 }

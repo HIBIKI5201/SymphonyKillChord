@@ -2,10 +2,18 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
+    /// <summary>Objectiveステップ開始時の進行値を基準として評価する条件です。</summary>
+    public interface IObjectiveSequenceStepCondition
+    {
+        /// <summary>ステップ開始時の進行値を記録します。</summary>
+        /// <param name="progress">Mission進行状況です。</param>
+        void BeginStep(MissionProgress progress);
+    }
+
     /// <summary>
     ///     目標シーケンスの1ステップを表すクラス。達成条件と、ステップ開始時に案内するメッセージを保持する。
     /// </summary>
-    public sealed class ObjectiveSequenceStep
+    public class ObjectiveSequenceStep
     {
         /// <summary>
         ///     ObjectiveSequenceStep クラスの新しいインスタンスを初期化します。
@@ -23,5 +31,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
         /// <summary> ステップ開始時に案内するメッセージです。未設定の場合はnullまたは空文字です。 </summary>
         public string GuideMessageText { get; }
+
+        /// <summary>ステップ開始時の進行値を条件へ通知します。</summary>
+        /// <param name="progress">Mission進行状況です。</param>
+        public void Begin(MissionProgress progress)
+        {
+            if (Condition is IObjectiveSequenceStepCondition stepCondition)
+            {
+                stepCondition.BeginStep(progress);
+            }
+        }
     }
 }

@@ -35,6 +35,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         }
 
         [SerializeField, Tooltip("計測する行動の種別。")] private MissionActionKind _actionKind;
-        [SerializeField, Tooltip("クリアに必要な発動回数。")] private int _requiredCount = 1;
+        [SerializeField, Min(1), Tooltip("クリアに必要な発動回数。")] private int _requiredCount = 1;
     }
 }

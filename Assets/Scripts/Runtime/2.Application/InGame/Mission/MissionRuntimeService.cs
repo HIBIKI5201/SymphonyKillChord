@@ -39,6 +39,11 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionRuleRunner = missionRuleRunner;
             _missionEvaluationRunner = missionEvaluationRunner;
             _lastObjectiveStepIndex = -1;
+
+            if (_missionDefinition.ClearCondition is ObjectiveSequenceClearCondition sequence)
+            {
+                sequence.Reset();
+            }
         }
 
         /// <summary> ミッション終了イベント。 </summary>

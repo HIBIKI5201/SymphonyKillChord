@@ -43,15 +43,24 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
                 return false;
             }
 
-            for (int i = 0; i < _steps.Count; i++)
+            EnsureCurrentStepStarted(progress);
+            if (_currentStepIndex >= _steps.Count)
             {
-                if (!_steps[i].Condition.IsSatisfied(progress))
-                {
-                    return false;
-                }
+                return true;
             }
 
-            return true;
+            if (!_steps[_currentStepIndex].Condition.IsSatisfied(progress))
+            {
+                return false;
+            }
+
+            _currentStepIndex++;
+            if (_currentStepIndex < _steps.Count)
+            {
+                _steps[_currentStepIndex].Begin(progress);
+            }
+
+            return _currentStepIndex >= _steps.Count;
         }
 
         /// <summary>
@@ -62,20 +71,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <returns>現在のステップIndex。</returns>
         public int GetCurrentStepIndex(MissionProgress progress)
         {
-            if (_steps == null)
-            {
-                return 0;
-            }
-
-            for (int i = 0; i < _steps.Count; i++)
-            {
-                if (!_steps[i].Condition.IsSatisfied(progress))
-                {
-                    return i;
-                }
-            }
-
-            return _steps.Count;
+            EnsureCurrentStepStarted(progress);
+            return _currentStepIndex;
         }
 
         /// <summary>
@@ -93,7 +90,52 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             return _steps[index];
         }
 
+        /// <summary>
+        ///     指定した種類のステップが含まれているか確認します。
+        /// </summary>
+        /// <typeparam name="TStep"> 検索するステップの型です。 </typeparam>
+        /// <returns> 指定した種類のステップが存在する場合はtrueです。 </returns>
+        public bool HasStep<TStep>() where TStep : ObjectiveSequenceStep
+        {
+            if (_steps == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _steps.Count; i++)
+            {
+                if (_steps[i] is TStep)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>ランタイムのステップ進行状態を初期化します。</summary>
+        public void Reset()
+        {
+            _currentStepIndex = 0;
+            _hasStarted = false;
+        }
+
         /// <summary> 実行順のステップ一覧。 </summary>
         private readonly IReadOnlyList<ObjectiveSequenceStep> _steps;
+        private int _currentStepIndex;
+        private bool _hasStarted;
+
+        /// <summary>初期ステップの開始基準を一度だけ記録します。</summary>
+        /// <param name="progress">Mission進行状況です。</param>
+        private void EnsureCurrentStepStarted(MissionProgress progress)
+        {
+            if (_hasStarted || _steps == null || _steps.Count == 0)
+            {
+                return;
+            }
+
+            _hasStarted = true;
+            _steps[0].Begin(progress);
+        }
     }
 }

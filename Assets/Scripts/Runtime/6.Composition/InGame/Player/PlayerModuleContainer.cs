@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 
@@ -34,6 +35,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> プレイヤー攻撃Controllerです。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
 
+        /// <summary> プレイヤー移動Controllerです。 </summary>
+        public PlayerController PlayerController { get; private set; }
+
         /// <summary>
         ///     他モジュールへ公開する攻撃Controllerを設定します。
         /// </summary>
@@ -41,6 +45,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public void SetPlayerAttackController(PlayerAttackController playerAttackController)
         {
             PlayerAttackController = playerAttackController;
+        }
+
+        /// <summary>
+        ///     他モジュールへ公開する移動Controllerを設定します。
+        /// </summary>
+        /// <param name="playerController"> 公開する移動Controllerです。 </param>
+        public void SetPlayerController(PlayerController playerController)
+        {
+            PlayerController = playerController;
         }
     }
 }
