@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Animation;
+using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
@@ -244,9 +244,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
                 _dogeVector = _moveVector;
                 _isDodge = true;
-
-                PlaySound(_dodgeSoundSource, null);
-                _characterAnimationSignal?.RequestDodge();
             }
         }
 
@@ -333,7 +330,14 @@ namespace KillChord.Runtime.View.InGame.Player
                     dodgeDir.y = fwd.z;
                 }
                 dodgeDir = Rotate(dodgeDir, -_cameraTransform.eulerAngles.y);
-                _controller.TryDodge(dodgeDir, Time.time);
+                bool dodgeSucceeded = _controller.TryDodge(dodgeDir, Time.time);
+
+                if (dodgeSucceeded)
+                {
+                    PlaySound(_dodgeSoundSource, null);
+                    _characterAnimationSignal?.RequestDodge();
+                }
+
                 _isDodge = false;
             }
 

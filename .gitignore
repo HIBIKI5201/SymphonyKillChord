@@ -80,9 +80,10 @@ ExportedPackages/
 .idea/
 .utmp/
 
-# SinfoniaOperatorの秘密設定（Notion・Discordトークンを含むためコミット禁止）
 /SinfoniaOperator/sinfonia-operator.secrets.json
 
-# 分割前のローカル設定。古いファイルからトークンが漏れないよう引き続き除外する。
-/SinfoniaOperator/sinfonia-operator.settings.json
+# CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
+# ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
+/[Aa]ssets/SymphonyKillChord/
+/[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/

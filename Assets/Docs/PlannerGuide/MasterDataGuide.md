@@ -54,7 +54,7 @@
      | ステージ名 / ステージのフレーバーテキスト | マップ画面に表示される名称・説明文 |
      | 遷移先のシーン名 | 通常は`InGame`のままでよい |
      | バトルパートで遷移するステージシーン名（Battleのみ） | 背景の異なるステージシーン（`Stage_01`等）を選択 |
-     | バトルパートで使用する敵Wave定義のAddressablesキー（Battleのみ） | ②で作成するWave定義アセットの**Addressableアドレス文字列**（後述） |
+     | バトルパートで使用する敵Wave定義ID（Battleのみ） | ②で作成し、リポジトリへ登録したWave定義IDをSourceDataProviderの候補から選択 |
      | シナリオパートで再生するシナリオId（Scenarioのみ） | Scenarioモジュール側で定義したシナリオID |
      | スキル編成・強化に使用するポイント／スキル解放・パラメーター強化に使用するポイント | クリア報酬 |
      | バトルパートのミッション定義アセット（Battleのみ） | ⑤で作成する`MissionDefinitionAsset`を割り当てる |
@@ -78,7 +78,7 @@
 - Bindの接続先になっていないステージが作戦画面の起点です。起点が2つ以上ある場合は警告され、作戦画面の左端に上下で複数配置されます。通常は起点が1つになるようにBindを設定してください。
 - Bindに循環がある場合は作戦画面を自動配置できないためエラーになります。
 - 作戦画面のノードと接続線は`StageTreeAsset`から自動生成されます。ステージ追加時にUXMLへノードを手動追加する必要はありません。
-- Battleステージの敵Wave定義キーまたはミッション定義が未設定の場合、**ゲーム起動時に例外が発生します**。
+- Battleステージの敵Wave定義IDまたはミッション定義が未設定の場合、**ゲーム起動時に例外が発生します**。
 - 同じ接続元から複数の`Auto Advance`を設定すると、`StageTreeAsset`の検証でエラーになります。
 
 ### 🔧 要エンジニア
@@ -92,6 +92,7 @@
 
 - フォルダ: `Assets/Level/Data/Master/InGame/Enemy/`
 - メニュー: `KillChord/Enemy/EnemyWaveDefinitionAsset`
+- 「敵Wave定義を一意に識別するID」には、他のWave定義と重複しないIDを入力します。
 - 構成: 「1Wave分の定義」のリストで、Waveごとに以下を設定します。
 
   | 項目 | 内容 |
@@ -101,7 +102,8 @@
   | Wave開始時に音楽同期で実行するステージ演出 | ⑥で作成する演出アセットをここに追加する（任意） |
   | 全Wave終了後、繰り返して生成するか／繰り返す場合の開始Index | ループ設定 |
 
-- 作成後、このアセットに **Addressableアドレスを設定**し、そのアドレス文字列を①のステージノードの「敵Wave定義のAddressablesキー」へ入力してください（プロジェクトウィンドウでアセットを選択→インスペクター上部の「Addressable」にチェック→アドレス欄に文字列を入力）。
+- 作成後、`EnemyWaveDefinitionRepository`アセットの「IDで取得可能にする敵Wave定義アセットの一覧」へ追加します。個々のWave定義をAddressableにする必要はありません。
+- ①の`BattleStageAsset`では「バトルパートで使用する敵Wave定義ID」を開き、SourceDataProviderに表示される候補から登録済みIDを選択します。
 
 ### 個々の敵の強さ（既存の敵タイプを調整する場合）
 
@@ -274,6 +276,21 @@ graph TD
 - **新しいスキル効果を作る場合（最重要）**: 「スキル効果の識別子」は既存の登録済みリストからしか選べません。全く新しい効果（新しい弾を撃つ、新しい回復量、新しい演出）を作る場合、エンジニアが新しい効果クラスを実装し、識別子リストに登録する必要があります。**この登録が終わるまで、プランナーは新スキルの動作を確認できません。**
 - **既存スキルの威力・回数などの微調整も現状は要エンジニア**: `SkillTemplateAsset`にはダメージ倍率やヒット回数などの数値項目が無く、これらは効果クラス内にプログラムの数値として直接書かれています。「このスキルをもう少し弱くしたい」といった調整も、現状はエンジニアへの依頼が必要です。
 - 新しく登録したスキルをゲーム開始時点から所持・装備済みにしたい場合、初期所持リストへのID追加はコード変更が必要です。
+
+---
+
+## Planner Master Dataウィンドウで編集する
+
+メニューから`Planner Master Data`を開くと、Player / UI / Enemy / Stage Select / Skill Tree / Scenarioの各ページを切り替えて編集できます。
+
+- `Source Assets`: 選択したSourceAssetの全シリアライズ項目を編集します。リポジトリ自体の設定もここで変更します。
+- `Collections`: リポジトリやカタログに含まれる個別データを左の一覧から1件選択して編集します。
+- `データを追加`: ScriptableObject型のCollectionでは新規アセットを作成して自動登録します。インライン型ではSourceAsset内に新規要素を作成します。
+- `Source Assetを開く`: Collectionを保持するSourceAssetのページへ移動します。
+
+ScriptableObjectの生成場所は`Project Settings > KillChord > Source Data Provider`の各Collectionにある`Asset Creation Directory`で指定します。存在する`Assets/`配下のフォルダだけを設定してください。
+
+Stage Selectの`StageAsset` / `StageBind` Collectionでは、現行の`StageTreeAsset`をグラフ表示します。ノードをクリックすると該当ステージを選択でき、緑の線は自動遷移、灰色の線はホーム帰還を表します。EnemyページのキャラクターSourceAssetには、主要ステータスのレーダーグラフを表示します。
 
 ---
 
