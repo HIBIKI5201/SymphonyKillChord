@@ -62,6 +62,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
 
+        /// <summary> スキルツリーのリセット確認表示を要求するイベント。 </summary>
+        public Action OnSkillTreeResetRequested;
+
+        /// <summary> スキルツリーのリセットを確定するイベント。 </summary>
+        public Action OnSkillTreeResetConfirmed;
+
+        /// <summary> スキルツリーのリセットをキャンセルするイベント。 </summary>
+        public Action OnSkillTreeResetCancelled;
+
         /// <summary> 入手済みスキル一覧が更新された時のイベント。 </summary>
         public Action OnOwnedSkillChanged;
 

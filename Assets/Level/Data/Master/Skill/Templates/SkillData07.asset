@@ -10,15 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
-  m_Name: TestSkillData1
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
+  m_Name: SkillData07
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset
   _id:
-    _id: skill_00
-    _hashId: -876453005
-  _displayName: 1
-  _pattern: 04000000040000000400000004000000
+    _id: skill_07
+    _hashId: 1437005520
+  _displayName: 7
+  _pattern: 0800000008000000040000000400000004000000
+  _skillType: 0100000002000000
+  _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
-  _skillEffectType: 0
-  _skillTargetingType: 2
-  _animationKey: Skill_Right
+  _skillEffectType: 7
+  _skillTargetingType: 3
+  _animationKey: 

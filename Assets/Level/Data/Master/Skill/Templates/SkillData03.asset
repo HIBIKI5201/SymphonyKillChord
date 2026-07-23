@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
+  m_Name: SkillData03
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillDataAsset
+  _id:
+    _id: skill_03
+    _hashId: 1389048521
+  _displayName: 3
+  _pattern: 03000000060000000600000003000000
+  _skillType: 00000000
+  _level: 0
+  _cooldownNumerator: 1
+  _cooldownDenomimator: 1
+  _skillEffectType: 3
+  _skillTargetingType: 4
+  _animationKey: Skill_Right
