@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     音楽との同期タイミングを管理するViewクラス。
     /// </summary>
+    [DefaultExecutionOrder(-900)]
     public class MusicSyncView : MonoBehaviour
     {
         /// <summary> 音楽同期状態。 </summary>
@@ -20,17 +21,20 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="musicSyncState"> 音楽同期状態。 </param>
         /// <param name="musicSyncController"> 音楽同期コントローラー。 </param>
         /// <param name="testBpm"> テスト用BPM。 </param>
+        /// <param name="beatOffsetSeconds"> 音源先頭から最初の小節頭までの秒数。 </param>
         public void Bind(
             MusicPlayer musicPlayer,
             MusicSyncState musicSyncState,
             MusicSyncController musicSyncController,
-            double testBpm)
+            double testBpm,
+            double beatOffsetSeconds)
         {
             _musicPlayer = musicPlayer;
             _musicSyncState = musicSyncState;
             _musicSyncController = musicSyncController;
             _musicViewModel = _musicPlayer.MusicVM;
             _testBpm = testBpm;
+            _beatOffsetSeconds = beatOffsetSeconds;
 
             _musicViewModel.CueName
                 .Subscribe(PlayBgm)
@@ -38,6 +42,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         private double _testBpm;
+        private double _beatOffsetSeconds;
         private MusicPlayer _musicPlayer;
         private MusicViewModel _musicViewModel;
         private MusicSyncState _musicSyncState;
@@ -63,7 +68,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="cueName"> キュー名。 </param>
         private void PlayBgm(string cueName)
         {
-            _musicSyncState.SetBpm(_testBpm);
+            _musicSyncState.SetRhythm(_testBpm, _beatOffsetSeconds);
         }
     }
 }

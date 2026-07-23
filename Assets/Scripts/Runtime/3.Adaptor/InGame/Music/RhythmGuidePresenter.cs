@@ -26,11 +26,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary>
         ///     リズムガイドの表示用DTOを生成する。
         /// </summary>
-        /// <param name="unscaledTime"> スケールされていない再生時間。 </param>
         /// <returns> リズムガイドDTO。 </returns>
-        public RhythmGuideDto CreateDto(float unscaledTime)
+        public RhythmGuideDto CreateDto()
         {
-            float barProgress = _musicSyncService.GetBarProgress(unscaledTime);
+            float barProgress = _musicSyncService.GetBarProgress();
 
             float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(barProgress);
 
@@ -41,8 +40,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             _zones.Clear();
 
-            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
+            IReadOnlyList<RhythmJudgmentRange> judgmentRanges = _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges;
+            for (int i = 0; i < judgmentRanges.Count; i++)
             {
+                RhythmJudgmentRange range = judgmentRanges[i];
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,
                     range.StartNormalized,

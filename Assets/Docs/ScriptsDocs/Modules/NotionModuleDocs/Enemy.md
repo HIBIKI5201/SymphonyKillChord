@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールです。ステージごとに異なるWave定義をAddressables経由でロードし、Wave開始をイベントで他モジュールへ通知します。
+> インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールです。Addressables経由で共通のWave定義リポジトリをロードし、選択ステージのIDに対応するWaveを生成して、Wave開始をイベントで他モジュールへ通知します。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Enemy |
 | **カテゴリ** | InGame / Character |
 | **ステータス** | 実装済み（`BossInitializer`はテスト専用ドライバとして残存、本実装への統合は未完了） |
-| **最終更新日** | 2026-07-16 |
+| **最終更新日** | 2026-07-22 |
 
 ---
 
@@ -17,6 +17,7 @@
 | --- | --- | --- |
 | **`EnemyType`** | Domain | 敵のクラス分け（歩兵・砲兵等）。ファイル名は`EnemyTypeEnum.cs`だが型名は`EnemyType` |
 | **`EnemyWaveDefinition`** | Domain | 1ウェーブ分のデータ構成（敵種類・数・継続時間・`StageEffectIds`）。Stageモジュールの型は持たず、演出IDのみを保持する |
+| **`EnemyWaveDefinitionId`** | Domain | 1ステージ分のWave定義アセットを識別するreadonly構造体（`int`ラップ） |
 | **`EnemyWaves`** | Domain | `EnemyWaveDefinition[]`をラップし、ループ設定・次ウェーブ取得・最終ウェーブ判定を提供 |
 | **`EnemyMoveDecision`** | Domain | 移動AIが次フレームに取るべき行動を保持するreadonly struct |
 | **`EnemyMoveUsecase`** | Application | 移動方向の算出やレイキャストによる衝突回避ロジック |
@@ -24,6 +25,7 @@
 | **`EnemyAttackReservationUsecase`** | Application | ビートに同期した非同期攻撃予約システム |
 | **`EnemyRaycastDetectService`** | Application | 索敵・壁検知レイキャストロジック |
 | **`NearestAttackPositionSearchService`** | Application | プレイヤーへ接近する際の最適な攻撃座標を探索 |
+| **`IEnemyWaveDefinitionRepository`** | Application | Wave定義IDから`EnemyWaves`を生成するリポジトリ境界 |
 | **`EnemyAIController`** | Adaptor | AIの状態管理と`EnemyMoveUsecase`/`EnemyAttackReservationUsecase`への仲介 |
 | **`EnemyBattleState`** | Adaptor | 敵の戦闘中のバフ・ステータスを保持 |
 | **`EnemyWaveSpawnerState`** | Adaptor | 現在の出現フェーズを保持。`OnWaveStarted(int, EnemyWaveDefinition)`イベントを公開 |
@@ -32,7 +34,8 @@
 | **`IRaycastDetectView`** | Adaptor | 索敵データの伝達インターフェース |
 | **`EnemyWaveTimerView`** | View | ウェーブの残り時間を UI に表示する MonoBehaviour |
 | **`EnemyModuleContainer`** | Composition | `EnemyWaveSpawnerState`等をServiceLocatorへ公開するContainer（Stageモジュール等が参照） |
-| **`EnemyInitializer`** | Composition | 一般敵のセットアップ。ステージ固有のWave定義をAddressablesロード |
+| **`EnemyWaveDefinitionRepository`** | Infrastructure | 複数の`EnemyWaveDefinitionAsset`を保持し、ID検索してDomainデータを生成するScriptableObject |
+| **`EnemyInitializer`** | Composition | 一般敵のセットアップ。共通リポジトリをAddressablesロードし、選択ステージのIDからWave定義を取得 |
 | **`BossInitializer`** | Composition | ボス戦闘のセットアップ（テスト専用ドライバ、本実装統合は未完了） |
 | **`EnemyInfantrySpawner`** | Composition | オブジェクトプールを使った歩兵の動的生成管理 |
 | **`EnemyPools`** | Composition | 敵プレハブのプール管理クラス |
@@ -88,7 +91,7 @@ graph TD
     E_Composition -->|"プレイヤー位置/Entity参照"| P_Composition
     E_App -->|"リズム攻撃予約トリガー"| M_App
     E_Adaptor -->|"ロックオン対象として登録"| T_View
-    SS_Adaptor -->|"ステージ固有Wave定義キー"| E_Composition
+    SS_Adaptor -->|"ステージ固有Wave定義ID"| E_Composition
     E_Composition -->|"敵撃破通知（MissionModuleContainer経由）"| MS_Composition
     E_Adaptor -->|"OnWaveStarted（演出IDのみ）"| ST_Composition
 ```
@@ -105,8 +108,8 @@ graph TD
   * *依存箇所*: `ITargetable`実装の登録
   * *詳細*: 敵がプレイヤーやカメラのロックオン対象として扱われるよう、自身をTargetモジュールへ登録します。
 * **`OutGame/StageSelect`**
-  * *依存箇所*: `SelectedBattleStageState`, `StageDefinition.EnemyWaveDefinitionAssetKey`
-  * *詳細*: 選択中ステージに紐づくWave定義のAddressablesキーを取得し、ステージごとに異なる敵Wave構成をロードします。
+  * *依存箇所*: `SelectedBattleStageState`, `BattleStageDefinition.EnemyWaveDefinitionId`
+  * *詳細*: 選択中ステージに紐づくWave定義IDを取得し、Addressablesロード済みの共通リポジトリからステージごとに異なる敵Wave構成を生成します。
 
 ### 📤 依存されているもの
 
@@ -132,7 +135,7 @@ AIの主要な状態管理とユースケースの連携を担う`EnemyAIControl
 ### ④ View
 ウェーブの制限時間を画面上に描画・表示制御する`EnemyWaveTimerView`などを担当します。
 ### ⑤ Infrastructure
-`EnemyWaveDefinitionAsset`が敵Wave構成・Wave毎の`StageEffectAssetBase`一覧をScriptableObjectとして保持し、Addressables経由でステージごとにロードされます。Domain変換（`ToDefinition()`）では各`StageEffectAssetBase`の`EffectId`のみを抽出して`EnemyWaveDefinition.StageEffectIds`に渡し、Stage側のDomain型は生成しません。別途`CreateStageEffectCatalog()`が、Stage側の独自カタログが未設定の場合の互換フォールバック用に`IStageEffectDefinition`のカタログを生成します（📤依存されているもの→Stage参照）。
+`EnemyWaveDefinitionAsset`が敵Wave構成・Wave毎の`StageEffectAssetBase`一覧を個別に保持し、`EnemyWaveDefinitionRepository`が複数アセットをID検索できるよう集約します。Addressables対象は共通リポジトリであり、`EnemyInitializer`が選択ステージのIDに対応する定義を取得します。Domain変換（`ToDefinition()`）では各`StageEffectAssetBase`の`EffectId`のみを抽出して`EnemyWaveDefinition.StageEffectIds`に渡し、Stage側のDomain型は生成しません。別途`CreateStageEffectCatalog()`が、Stage側の独自カタログが未設定の場合の互換フォールバック用に`IStageEffectDefinition`のカタログを生成します（📤依存されているもの→Stage参照）。
 ### ⑥ Composition
 一般敵の`EnemyInitializer`、ボスの`BossInitializer`（テスト専用）、オブジェクトプールにより大量の敵歩兵を動的に管理する`EnemyInfantrySpawner`などの生成・依存注入、ライフサイクル管理を担当します。`EnemyModuleContainer`が他モジュールへの公開窓口です。
 

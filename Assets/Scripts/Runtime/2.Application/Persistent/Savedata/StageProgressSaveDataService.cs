@@ -56,6 +56,25 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         }
 
         /// <summary>
+        ///     ミッション評価を持たないステージのクリア結果を保存する。
+        /// </summary>
+        /// <param name="stageId"> クリアしたステージID。</param>
+        /// <returns> セーブ内容が変化した場合はtrue。</returns>
+        public async ValueTask<bool> SaveClearAsync(StageId stageId)
+        {
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            bool stageProgressChanged =
+                saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
+            if (!stageProgressChanged)
+            {
+                return false;
+            }
+
+            await _savedataSystem.SaveAsync(saveData);
+            return true;
+        }
+
+        /// <summary>
         ///     保存済みのステージ進行状況を読み込む。
         ///     現時点では呼び出し元を作成しない。
         /// </summary>
