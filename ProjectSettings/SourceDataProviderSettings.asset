@@ -21,7 +21,7 @@ MonoBehaviour:
   - _addressableKey: AnimationCatalogAsset
   - _addressableKey: PortraitCatalogAsset
   - _addressableKey: BackgroundCatalogAsset
-  - _addressableKey: EnemyWaveDefinitionAsset
+  - _addressableKey: EnemyWaveDefinitionRepository
   - _addressableKey: PlayerConfig
   - _addressableKey: SkillInputProgressViewConfigAsset
   - _addressableKey: TestSkillData1
@@ -76,9 +76,9 @@ MonoBehaviour:
     _propertyPath: _entries
     _assetCreationDirectory:
   - _collectionKey: Wave
-    _sourceAssetAddressableKey: EnemyWaveDefinitionAsset
-    _propertyPath: _waves
-    _assetCreationDirectory:
+    _sourceAssetAddressableKey: EnemyWaveDefinitionRepository
+    _propertyPath: _waveDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy
   - _collectionKey: StageBind
     _sourceAssetAddressableKey: StageTreeAsset
     _propertyPath: _bindAssets
@@ -121,6 +121,6 @@ MonoBehaviour:
     _addressableKey: BackgroundCatalogAsset
     _arrayPropertyPath: _entries
   - _category: Wave
-    _addressableKey: EnemyWaveDefinitionAsset
-    _arrayPropertyPath: _waves
+    _addressableKey: EnemyWaveDefinitionRepository
+    _arrayPropertyPath: _waveDefinitionAssets
   _isInitialized: 1
