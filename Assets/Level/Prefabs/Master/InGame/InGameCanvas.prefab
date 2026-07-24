@@ -85,10 +85,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7851524415466626811}
   - component: {fileID: 8017968515083914362}
-  - component: {fileID: 8413408501260066833}
-  - component: {fileID: 1101820685082934499}
+  - component: {fileID: 4566914460441615612}
   m_Layer: 5
-  m_Name: Image
+  m_Name: SkillCenter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -110,9 +109,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.7722168, y: -0.0017700195}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 110}
+  m_SizeDelta: {x: 1000, y: 200}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &8017968515083914362
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -121,7 +120,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 65238057743810174}
   m_CullTransparentMesh: 1
---- !u!114 &8413408501260066833
+--- !u!114 &4566914460441615612
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,40 +129,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 65238057743810174}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &1101820685082934499
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 65238057743810174}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a161b88d80ae0e479987527bd51b35e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillCrosshairProgressView
-  _iconImage: {fileID: 8413408501260066833}
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 7
+  m_Spacing: 20
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &72082197877164794
 GameObject:
   m_ObjectHideFlags: 0
@@ -472,7 +454,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6790183858884239250
 RectTransform:
   m_ObjectHideFlags: 0
@@ -735,7 +717,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &9001659323386563184
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1450,7 +1432,7 @@ GameObject:
   - component: {fileID: 5306966441488033859}
   - component: {fileID: 3245619258000581200}
   - component: {fileID: 2814488824962291877}
-  - component: {fileID: 5782957052695944996}
+  - component: {fileID: 5236480580957991468}
   m_Layer: 5
   m_Name: InGameCanvas
   m_TagString: Untagged
@@ -1570,7 +1552,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4011713318222993239}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e81248dfc1926454da911f1b6524e509, type: 3}
   m_Name: 
@@ -1619,7 +1601,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Reticle.ReticleHudInitializer
   _view: {fileID: 4733900250912141561}
---- !u!114 &5782957052695944996
+--- !u!114 &5236480580957991468
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1628,10 +1610,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4011713318222993239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b6f610c068857f479a2f20fbb315ad1, type: 3}
+  m_Script: {fileID: 11500000, guid: be502d049ae1a7a45a587d6a89066e33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.UI.SkillCrosshairProgressUIInitializer
-  _view: {fileID: 1101820685082934499}
+  _uiConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
+  _viewPrefab: {fileID: 3884559395399551324, guid: 4863cd63879c93042ba097240c312c9c, type: 3}
+  _stepViewPrefab: {fileID: 6288447880981826847, guid: 36a8fbab202445f498a0bd2183434b53, type: 3}
+  _viewRoot: {fileID: 7851524415466626811}
 --- !u!1 &4144755797720839312
 GameObject:
   m_ObjectHideFlags: 0
