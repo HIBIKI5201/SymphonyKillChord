@@ -1252,6 +1252,7 @@ GameObject:
   - component: {fileID: 438459093}
   - component: {fileID: 438459094}
   - component: {fileID: 438459095}
+  - component: {fileID: 438459097}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1372,6 +1373,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
   - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
   - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
+--- !u!114 &438459097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38b61911f99c47048f2d45cdacd94247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.ReturnToTitleInitializer
+  _titleSceneName: Title
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2442,6 +2456,8 @@ PlayableDirector:
     value: {fileID: 191554240}
   - key: {fileID: -6596586482438994658, guid: e78bc196393ddca49a8dbebd764a45db, type: 2}
     value: {fileID: 395575201}
+  - key: {fileID: 9057800444235546416, guid: e78bc196393ddca49a8dbebd764a45db, type: 2}
+    value: {fileID: 1435826636}
   m_ExposedReferences:
     m_References: []
 --- !u!224 &1122440035 stripped
@@ -3275,6 +3291,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1546686501}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1544702106
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1544702108}
+  - component: {fileID: 1544702107}
+  m_Layer: 0
+  m_Name: ArtilleryExplosionEffectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1544702107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544702106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7a5317d2fd48579d1a768ba2e7d2ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ParticleSystemPoolView
+  _particleSystemTemplate: {fileID: 5205020749059622475, guid: 1187d84257545374183579b751260efb, type: 3}
+  _defaultCapacity: 4
+  _maxPoolSize: 16
+--- !u!4 &1544702108
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544702106}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1546686500
 GameObject:
   m_ObjectHideFlags: 0
@@ -3490,6 +3553,7 @@ MonoBehaviour:
   _shellPrefab: {fileID: 425184521389573371, guid: 18302f9c3e6be1f46bfa34f66180b21c, type: 3}
   _defaultShellPoolSize: 20
   _maxShellPoolSize: 40
+  _shellExplosionEffectView: {fileID: 1544702107}
 --- !u!4 &1599172286
 Transform:
   m_ObjectHideFlags: 0
@@ -4908,3 +4972,4 @@ SceneRoots:
   - {fileID: 887821556}
   - {fileID: 1546686501}
   - {fileID: 1435826634}
+  - {fileID: 1544702108}
