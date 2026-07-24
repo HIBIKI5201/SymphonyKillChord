@@ -338,9 +338,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             MissionModuleContainer missionModuleContainer =
                 ServiceLocator.GetInstance<MissionModuleContainer>();
             missionRuntimeService = missionModuleContainer?.MissionRuntimeService;
-            if (missionRuntimeService?.MissionDefinition.ClearCondition
-                    is not ObjectiveSequenceClearCondition sequence
-                || !sequence.HasStepWithCondition<WaveStartClearCondition>())
+            ObjectiveSequenceClearCondition sequence = missionRuntimeService?.MissionDefinition.ClearCondition;
+            if (sequence == null || !sequence.HasStepWithCondition<WaveStartClearCondition>())
             {
                 objectiveSequence = null;
                 return false;

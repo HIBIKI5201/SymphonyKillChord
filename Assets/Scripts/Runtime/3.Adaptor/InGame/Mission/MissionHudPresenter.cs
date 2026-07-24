@@ -59,15 +59,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <returns> 表示するメインミッション文です。 </returns>
         private string GetMainMissionText()
         {
-            if (_missionRuntimeService.MissionDefinition.ClearCondition
-                    is not ObjectiveSequenceClearCondition sequence)
-            {
-                return _missionRuntimeService.MissionDefinition.MainMissionText;
-            }
-
-            int stepIndex = sequence.GetCurrentStepIndex(
-                _missionRuntimeService.MissionProgress);
-            ObjectiveSequenceStep step = sequence.GetStep(stepIndex);
+            int stepIndex = _missionRuntimeService.MissionProgress.ObjectiveStepIndex;
+            ObjectiveSequenceStep step = _missionRuntimeService.MissionDefinition.ClearCondition.GetStep(stepIndex);
             if (string.IsNullOrWhiteSpace(step?.GuideMessageText))
             {
                 return _missionRuntimeService.MissionDefinition.MainMissionText;

@@ -2,14 +2,6 @@ using System;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
-    /// <summary>Objectiveステップ開始時の進行値を基準として評価する条件です。</summary>
-    public interface IObjectiveSequenceStepCondition
-    {
-        /// <summary>ステップ開始時の進行値を記録します。</summary>
-        /// <param name="progress">Mission進行状況です。</param>
-        void BeginStep(MissionProgress progress);
-    }
-
     /// <summary>
     ///     目標シーケンスの1ステップを表すクラス。達成条件と、ステップ開始時に案内するメッセージを保持する。
     ///     Wave開始やポップアップ表示などの特殊な振る舞いは、Step自体ではなく<see cref="Condition"/>側(デコレータ条件)が表現する。

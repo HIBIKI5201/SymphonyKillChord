@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             MissionId missionId,
             string displayName,
             string mainMissionText,
-            IMissionClearCondition clearCondition,
+            ObjectiveSequenceClearCondition clearCondition,
             IMissionFailCondition failCondition,
             IReadOnlyList<IMissionEvaluationCondition> evaluationConditions,
             IReadOnlyList<string> defeatTips)
@@ -46,8 +46,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <summary> メインミッションのテキストを取得します。 </summary>
         public string MainMissionText { get; }
 
-        /// <summary> クリア条件を取得します。 </summary>
-        public IMissionClearCondition ClearCondition { get; }
+        /// <summary>
+        ///     クリア条件を取得します。全てのミッションは目標シーケンスとして表現され、
+        ///     単一の条件しか持たないミッションは要素数1のシーケンスとして扱います。
+        /// </summary>
+        public ObjectiveSequenceClearCondition ClearCondition { get; }
         /// <summary> 失敗条件を取得します。 </summary>
         public IMissionFailCondition FailCondition { get; }
         /// <summary> 評価条件のリストを取得します。 </summary>

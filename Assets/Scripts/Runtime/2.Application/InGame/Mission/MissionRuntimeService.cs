@@ -39,13 +39,15 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionRuleRunner = missionRuleRunner;
             _missionEvaluationRunner = missionEvaluationRunner;
             _lastObjectiveStepIndex = -1;
+
+            _missionDefinition.ClearCondition.Start(_missionProgress);
         }
 
         /// <summary> ミッション終了イベント。 </summary>
         public event Action<MissionEndReason> OnMissionFinished;
 
         /// <summary>
-        ///     目標シーケンスの現在ステップが変化したときに発火します(クリア条件が目標シーケンスの場合のみ)。
+        ///     クリア条件の現在ステップが変化したときに発火します。
         /// </summary>
         public event Action<int> OnObjectiveStepChanged;
 
@@ -145,38 +147,30 @@ namespace KillChord.Runtime.Application.InGame.Mission
         /// <summary> 評価実行器。 </summary>
         private readonly MissionEvaluationRunner _missionEvaluationRunner;
 
-        // Tick()などでミッションの終了を検知した際に、
-        // 複数回OnMissionFinishedイベントが発火するのを防止するためのフラグ。
-        private bool _hasFinished = false;
-
         /// <summary> 目標シーケンスの直前のステップIndex。変化検知に使用する。 </summary>
         private int _lastObjectiveStepIndex;
 
         /// <summary>
         ///    ミッションが終了しているかどうかをチェックし、終了している場合はイベントを発火させます。
+        ///    全ての進行APIはメソッド先頭で<see cref="MissionProgress.IsFinished"/>を確認して即returnするため、
+        ///    このメソッドが終了検知後に再度到達することはなく、イベントは一度しか発火しません。
         /// </summary>
         private void CheckMissionFinished()
         {
-            if (_missionProgress.IsFinished && !_hasFinished)
+            if (_missionProgress.IsFinished)
             {
-                _hasFinished = true;
                 OnMissionFinished?.Invoke(_missionProgress.EndReason);
             }
         }
 
         /// <summary>
-        ///     クリア条件が目標シーケンスの場合に、現在ステップを進め、変化を検知してイベントを発火させます。
+        ///     クリア条件の現在ステップを進め、変化を検知してイベントを発火させます。
         /// </summary>
         private void CheckObjectiveStepChanged()
         {
-            if (_missionDefinition.ClearCondition is not ObjectiveSequenceClearCondition sequence)
-            {
-                return;
-            }
+            _missionDefinition.ClearCondition.TryAdvance(_missionProgress);
 
-            sequence.TryAdvance(_missionProgress);
-
-            int currentStepIndex = sequence.GetCurrentStepIndex(_missionProgress);
+            int currentStepIndex = _missionProgress.ObjectiveStepIndex;
             if (currentStepIndex == _lastObjectiveStepIndex)
             {
                 return;

@@ -80,15 +80,13 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 playerModuleContainer.PlayerAttackController,
                 skillModuleContainer.SkillController,
                 targetSystemController);
-            _moduleContainer.MissionProgressRecorderController = recorderController;
+            _recorderController = recorderController;
 
-            if (_missionStepPopupView != null
-                && _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition
-                    is ObjectiveSequenceClearCondition objectiveSequence)
+            if (_missionStepPopupView != null)
             {
-                _moduleContainer.MissionStepPopupController = new MissionStepPopupController(
+                _popupController = new MissionStepPopupController(
                     _moduleContainer.MissionRuntimeService,
-                    objectiveSequence,
+                    _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                     _missionStepPopupView);
             }
 
@@ -170,8 +168,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         public override void Shutdown()
         {
-            _moduleContainer?.MissionProgressRecorderController?.Dispose();
-            _moduleContainer?.MissionStepPopupController?.Dispose();
+            _recorderController?.Dispose();
+            _popupController?.Dispose();
 
             if (!_isModuleRegistered)
             {
@@ -191,6 +189,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private bool _registeredMissionEventController;
         private bool _isModuleRegistered;
         private MissionModuleContainer _moduleContainer;
+        private MissionProgressRecorderController _recorderController;
+        private MissionStepPopupController _popupController;
 
         private void OnDestroy()
         {
