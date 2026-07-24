@@ -15,6 +15,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         {
             _elapsedTime = new MissionElapsedTime(0f);
             _enemyKillRecord = new EnemyKillRecord();
+            _actionRecord = new MissionActionRecord();
             _damageTaken = new MissionDamageTaken(0f);
             _maxCombo = new MissionCombo(0);
             _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
@@ -25,6 +26,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public MissionElapsedTime ElapsedTime => _elapsedTime;
         /// <summary> 敵撃破記録を取得します。 </summary>
         public EnemyKillRecord EnemyKillRecord => _enemyKillRecord;
+        /// <summary> プレイヤー行動の発動記録を取得します。 </summary>
+        public MissionActionRecord ActionRecord => _actionRecord;
         /// <summary> 累計被ダメージを取得します。 </summary>
         public MissionDamageTaken DamageTaken => _damageTaken;
         /// <summary> 使用した武器種類数を取得します。 </summary>
@@ -80,6 +83,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         }
 
         /// <summary>
+        ///     プレイヤー行動の発動を記録します。
+        /// </summary>
+        /// <param name="actionKind"> 発動した行動の種別です。 </param>
+        public void RecordActionPerformed(MissionActionKind actionKind)
+        {
+            _actionRecord.RecordAction(actionKind);
+        }
+
+        /// <summary>
         ///     現在コンボ数から最大コンボを更新します。
         /// </summary>
         /// <param name="combo"> 現在コンボ数です。 </param>
@@ -107,10 +119,34 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _endReason = reason;
         }
 
+        /// <summary> 目標シーケンスの現在のステップIndexを取得します。 </summary>
+        public int ObjectiveStepIndex => _objectiveStepIndex;
+
+        /// <summary> 目標シーケンスが開始済みかどうかを取得します。 </summary>
+        public bool ObjectiveSequenceStarted => _objectiveSequenceStarted;
+
+        /// <summary>
+        ///     目標シーケンスの開始を記録します。
+        /// </summary>
+        public void MarkObjectiveSequenceStarted()
+        {
+            _objectiveSequenceStarted = true;
+        }
+
+        /// <summary>
+        ///     目標シーケンスの現在ステップを次へ進めます。
+        /// </summary>
+        public void AdvanceObjectiveStep()
+        {
+            _objectiveStepIndex++;
+        }
+
         /// <summary> 経過時間。 </summary>
         private MissionElapsedTime _elapsedTime;
         /// <summary> 敵撃破記録。 </summary>
         private readonly EnemyKillRecord _enemyKillRecord;
+        /// <summary> プレイヤー行動の発動記録。 </summary>
+        private readonly MissionActionRecord _actionRecord;
         private readonly HashSet<string> _usedWeaponIds;
         private MissionDamageTaken _damageTaken;
         private MissionCombo _maxCombo;
@@ -119,5 +155,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private bool _isPlayerDead;
         /// <summary> 終了理由。 </summary>
         private MissionEndReason _endReason;
+        /// <summary> 目標シーケンスの現在ステップIndex。 </summary>
+        private int _objectiveStepIndex;
+        /// <summary> 目標シーケンスが開始済みかどうか。 </summary>
+        private bool _objectiveSequenceStarted;
     }
 }

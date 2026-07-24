@@ -2,7 +2,10 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -52,9 +55,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             PlayerModuleContainer playerModuleContainer =
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
+            SkillModuleContainer skillModuleContainer =
+                ServiceLocator.GetInstance<SkillModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
-                || playerModuleContainer.PlayerAttackController == null)
+                || playerModuleContainer.PlayerController == null
+                || playerModuleContainer.PlayerAttackController == null
+                || skillModuleContainer?.SkillController == null
+                || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
@@ -64,11 +72,26 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
-                    _moduleContainer.MissionRuntimeService.MissionProgress);
+                    _moduleContainer.MissionRuntimeService.MissionProgress,
+                    _moduleContainer.MissionEventController);
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
-                playerModuleContainer.PlayerAttackController);
+                playerModuleContainer.PlayerController,
+                playerModuleContainer.PlayerAttackController,
+                skillModuleContainer.SkillController,
+                targetSystemController);
             _moduleContainer.MissionProgressRecorderController = recorderController;
+
+            if (_missionStepPopupView != null
+                && _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition
+                    is ObjectiveSequenceClearCondition objectiveSequence)
+            {
+                _moduleContainer.MissionStepPopupController = new MissionStepPopupController(
+                    _moduleContainer.MissionRuntimeService,
+                    objectiveSequence,
+                    _missionStepPopupView);
+            }
+
             return true;
         }
 
@@ -113,6 +136,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 progress,
                 new MissionTimeAdvanceUsecase(),
                 new MissionEnemyKilledUsecase(),
+                new MissionActionPerformedUsecase(),
                 new MissionPlayerDeadUsecase(),
                 new MissionRuleRunner(definition),
                 new MissionEvaluationRunner());
@@ -147,6 +171,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         public override void Shutdown()
         {
             _moduleContainer?.MissionProgressRecorderController?.Dispose();
+            _moduleContainer?.MissionStepPopupController?.Dispose();
 
             if (!_isModuleRegistered)
             {
@@ -160,6 +185,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
+        [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;

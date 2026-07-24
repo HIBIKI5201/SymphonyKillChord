@@ -70,7 +70,7 @@ namespace KillChord.Editor.SourceDataProvider
                     new List<string>
                     {
                         "StageTreeAsset",
-                        "EnemyWaveDefinitionAsset",
+                        "EnemyWaveDefinitionRepository",
                         "EnemyMissionKeyAsset"
                     },
                     new List<string>

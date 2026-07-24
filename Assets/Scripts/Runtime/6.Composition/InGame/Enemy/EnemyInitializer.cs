@@ -1,20 +1,27 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -49,20 +56,20 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            _loadedEnemyWaveDefinitionAssetKey =
-                selectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionAssetKey;
-            if (string.IsNullOrWhiteSpace(_loadedEnemyWaveDefinitionAssetKey))
+            if (string.IsNullOrWhiteSpace(_enemyWaveDefinitionRepositoryKey))
             {
                 Debug.LogError(
-                    $"[{nameof(EnemyInitializer)}] ステージ固有の敵Wave定義キーが未設定です。",
+                    $"[{nameof(EnemyInitializer)}] 敵Wave定義リポジトリのキーが未設定です。",
                     this);
                 return false;
             }
 
             try
             {
-                _loadedEnemyWaveDefinitionAsset =
-                    await _loadedEnemyWaveDefinitionAssetKey.LoadAssetAsync<EnemyWaveDefinitionAsset>(this, cancellationToken);
+                _loadedEnemyWaveDefinitionRepository =
+                    await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
+                        this,
+                        cancellationToken);
             }
             catch (Exception ex)
             {
@@ -70,8 +77,24 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            if (_loadedEnemyWaveDefinitionAsset == null)
+            if (_loadedEnemyWaveDefinitionRepository == null)
             {
+                return false;
+            }
+
+            EnemyWaveDefinitionId enemyWaveDefinitionId =
+                selectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionId;
+            if (!_loadedEnemyWaveDefinitionRepository.TryCreateEnemyWaves(
+                    enemyWaveDefinitionId,
+                    out _loadedEnemyWaves)
+                || !_loadedEnemyWaveDefinitionRepository.TryCreateStageEffectCatalog(
+                    enemyWaveDefinitionId,
+                    out _loadedStageEffectCatalog))
+            {
+                Debug.LogError(
+                    $"[{nameof(EnemyInitializer)}] 敵Wave定義IDに対応するデータが見つかりません。"
+                    + $" Id: {enemyWaveDefinitionId.Value}",
+                    this);
                 return false;
             }
 
@@ -141,16 +164,28 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
-            _moduleContainer.StageEffectCatalog =
-                _loadedEnemyWaveDefinitionAsset.CreateStageEffectCatalog();
-            EnemyWaves enemyWaves = _loadedEnemyWaveDefinitionAsset.ToDefinition();
+            bool isMissionControlledWave = TryResolveMissionControlledWaveSequence(
+                out MissionRuntimeService missionRuntimeService,
+                out ObjectiveSequenceClearCondition objectiveSequence);
+
+            _moduleContainer.StageEffectCatalog = _loadedStageEffectCatalog;
             _moduleContainer.EnemyWaveSpawnerController = new EnemyWaveSpawnerController(
-                enemyWaves,
+                _loadedEnemyWaves,
                 _moduleContainer.EnemyWaveSpawnerState,
                 _enemyInfantrySpawner,
                 _enemyArtillerySpawner,
-                _enemyWaveTimerView);
+                _enemyWaveTimerView,
+                !isMissionControlledWave);
             _enemyWaveTimerView.Initialize(_moduleContainer.EnemyWaveSpawnerController);
+
+            if (isMissionControlledWave)
+            {
+                _missionWaveController = new MissionWaveController(
+                    missionRuntimeService,
+                    objectiveSequence,
+                    _moduleContainer.EnemyWaveSpawnerController,
+                    _enemyWaveTimerView);
+            }
 
             _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools);
             if (_moduleContainer.BossInitializer != null)
@@ -235,6 +270,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public override void Shutdown()
         {
+            _missionWaveController?.Dispose();
+            _missionWaveController = null;
+
             if (_moduleContainer?.EnemyWaveSpawnerController != null)
             {
                 _moduleContainer.EnemyWaveSpawnerController.Dispose();
@@ -249,10 +287,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _moduleContainer = null;
             _initialized = false;
-            _loadedEnemyWaveDefinitionAssetKey.ReleaseLoadedAsset(this);
-            _loadedEnemyWaveDefinitionAssetKey = string.Empty;
-            _loadedEnemyWaveDefinitionAsset = null;
+            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedEnemyWaveDefinitionRepository = null;
+            _loadedEnemyWaves = null;
+            _loadedStageEffectCatalog = null;
         }
+
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリのAddressablesキーです。")]
+        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
         [SerializeField, Tooltip("敵プールです。")]
         private EnemyPools _enemyPools;
@@ -278,8 +320,35 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _initialized = false;
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
-        private EnemyWaveDefinitionAsset _loadedEnemyWaveDefinitionAsset;
-        private string _loadedEnemyWaveDefinitionAssetKey = string.Empty;
+        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
+        private EnemyWaves _loadedEnemyWaves;
+        private IReadOnlyDictionary<int, IStageEffectDefinition> _loadedStageEffectCatalog;
+        private MissionWaveController _missionWaveController;
+
+        /// <summary>
+        ///     MissionがWave開始を制御する目標シーケンスを取得します。
+        /// </summary>
+        /// <param name="missionRuntimeService"> Missionのランタイムサービスです。 </param>
+        /// <param name="objectiveSequence"> Waveステップを含む目標シーケンスです。 </param>
+        /// <returns> Waveステップを含む目標シーケンスを取得できた場合はtrueです。 </returns>
+        private bool TryResolveMissionControlledWaveSequence(
+            out MissionRuntimeService missionRuntimeService,
+            out ObjectiveSequenceClearCondition objectiveSequence)
+        {
+            MissionModuleContainer missionModuleContainer =
+                ServiceLocator.GetInstance<MissionModuleContainer>();
+            missionRuntimeService = missionModuleContainer?.MissionRuntimeService;
+            if (missionRuntimeService?.MissionDefinition.ClearCondition
+                    is not ObjectiveSequenceClearCondition sequence
+                || !sequence.HasStepWithCondition<WaveStartClearCondition>())
+            {
+                objectiveSequence = null;
+                return false;
+            }
+
+            objectiveSequence = sequence;
+            return true;
+        }
 
         /// <summary>
         ///     Inspector参照を検証する。
