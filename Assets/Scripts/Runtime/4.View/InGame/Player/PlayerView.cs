@@ -55,6 +55,9 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
         private string _gameOverVoiceCueName;
+
+        [SerializeField, Tooltip("スキル発動時VoiceのCueName。空の場合は再生しない。")]
+        private string _skillVoiceCueName;
         [Space]
 
         [Header("SE")]
@@ -260,7 +263,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayStageStartVoice()
         {
-            PlaySequenceVoice(_stageStartVoiceCueName);
+            PlayPriorityVoice(_stageStartVoiceCueName);
         }
 
         /// <summary>
@@ -268,7 +271,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayStageClearVoice()
         {
-            PlaySequenceVoice(_stageClearVoiceCueName);
+            PlayPriorityVoice(_stageClearVoiceCueName);
         }
 
         /// <summary>
@@ -276,7 +279,15 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayGameOverVoice()
         {
-            PlaySequenceVoice(_gameOverVoiceCueName);
+            PlayPriorityVoice(_gameOverVoiceCueName);
+        }
+
+        /// <summary>
+        ///     スキル発動時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlaySkillVoice()
+        {
+            PlayPriorityVoice(_skillVoiceCueName);
         }
 
         public void PlaySkillAnimation(string animationKey)
@@ -625,10 +636,10 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     ステージシーケンス用のPlayer Voiceを再生します。
+        ///     優先度の高いVoiceを再生します。再生中のVoiceがある場合は停止してから再生します。
         /// </summary>
         /// <param name="cueName"> 再生するVoiceのCue名。 </param>
-        private void PlaySequenceVoice(string cueName)
+        private void PlayPriorityVoice(string cueName)
         {
             if (_voiceSource == null
                 || string.IsNullOrWhiteSpace(cueName))
@@ -636,8 +647,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            // 被弾Voiceなどが再生中の場合は停止し、
-            // ステージシーケンスのVoiceを優先する。
+            // 再生中のVoiceがある場合は停止してから再生する。
             _voiceSource.Stop();
             _voiceSource.Play(cueName);
         }
