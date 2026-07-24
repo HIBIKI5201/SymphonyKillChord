@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     /// <summary>
     ///     指定した行動を一定回数以上行うとクリアとなる条件。
     /// </summary>
-    public class ActionRepeatCountClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition
+    public class ActionRepeatCountClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter
     {
         /// <summary>
         ///     ActionRepeatCountClearCondition クラスの新しいインスタンスを初期化します。
@@ -50,6 +50,16 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         {
             _baselineCount = progress.ActionRecord.GetCount(_actionKind);
         }
+
+        /// <inheritdoc />
+        public int CurrentCount(MissionProgress progress)
+        {
+            int count = progress.ActionRecord.GetCount(_actionKind) - _baselineCount;
+            return Math.Clamp(count, 0, _requiredCount);
+        }
+
+        /// <inheritdoc />
+        public int RequiredCount => _requiredCount;
 
         /// <summary> 行動の種別。 </summary>
         private readonly MissionActionKind _actionKind;

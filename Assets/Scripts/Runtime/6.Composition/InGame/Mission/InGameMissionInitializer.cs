@@ -5,6 +5,7 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -80,6 +81,17 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 skillModuleContainer.SkillController,
                 targetSystemController);
             _moduleContainer.MissionProgressRecorderController = recorderController;
+
+            if (_missionStepPopupView != null
+                && _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition
+                    is ObjectiveSequenceClearCondition objectiveSequence)
+            {
+                _moduleContainer.MissionStepPopupController = new MissionStepPopupController(
+                    _moduleContainer.MissionRuntimeService,
+                    objectiveSequence,
+                    _missionStepPopupView);
+            }
+
             return true;
         }
 
@@ -159,6 +171,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         public override void Shutdown()
         {
             _moduleContainer?.MissionProgressRecorderController?.Dispose();
+            _moduleContainer?.MissionStepPopupController?.Dispose();
 
             if (!_isModuleRegistered)
             {
@@ -172,6 +185,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
+        [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;

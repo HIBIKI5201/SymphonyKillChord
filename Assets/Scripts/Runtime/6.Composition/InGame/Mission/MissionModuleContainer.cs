@@ -29,5 +29,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         /// <summary> 戦闘実績値を記録するControllerです。 </summary>
         public MissionProgressRecorderController MissionProgressRecorderController { get; set; }
+
+        /// <summary> 目標ステップの説明ポップアップ表示を仲介するControllerです。 </summary>
+        public MissionStepPopupController MissionStepPopupController { get; set; }
     }
 }

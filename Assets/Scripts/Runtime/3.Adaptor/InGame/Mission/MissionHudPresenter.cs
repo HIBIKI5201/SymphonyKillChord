@@ -68,9 +68,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             int stepIndex = sequence.GetCurrentStepIndex(
                 _missionRuntimeService.MissionProgress);
             ObjectiveSequenceStep step = sequence.GetStep(stepIndex);
-            return string.IsNullOrWhiteSpace(step?.GuideMessageText)
-                ? _missionRuntimeService.MissionDefinition.MainMissionText
-                : step.GuideMessageText;
+            if (string.IsNullOrWhiteSpace(step?.GuideMessageText))
+            {
+                return _missionRuntimeService.MissionDefinition.MainMissionText;
+            }
+
+            if (step.Condition is IObjectiveProgressReporter progressReporter
+                && progressReporter.RequiredCount > 0)
+            {
+                int currentCount = progressReporter.CurrentCount(_missionRuntimeService.MissionProgress);
+                return $"{step.GuideMessageText}({currentCount}/{progressReporter.RequiredCount}回)";
+            }
+
+            return step.GuideMessageText;
         }
 
         private MissionEvaluationDisplayState ConvertDisplayState(

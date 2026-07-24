@@ -56,8 +56,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <param name="stepIndex"> 開始した目標ステップのIndexです。 </param>
         private void HandleObjectiveStepChanged(int stepIndex)
         {
-            if (_objectiveSequence.GetStep(stepIndex)
-                    is not WaveObjectiveSequenceStep)
+            if (_objectiveSequence.GetStep(stepIndex)?.Condition is not WaveStartClearCondition)
             {
                 return;
             }

@@ -39,11 +39,6 @@ namespace KillChord.Runtime.Application.InGame.Mission
             _missionRuleRunner = missionRuleRunner;
             _missionEvaluationRunner = missionEvaluationRunner;
             _lastObjectiveStepIndex = -1;
-
-            if (_missionDefinition.ClearCondition is ObjectiveSequenceClearCondition sequence)
-            {
-                sequence.Reset();
-            }
         }
 
         /// <summary> ミッション終了イベント。 </summary>
@@ -70,9 +65,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
             _missionTimeAdvanceUseCase.Execute(_missionProgress, deltaTime);
+            CheckObjectiveStepChanged();
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
-            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -86,9 +81,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
             _missionEnemyKilledUseCase.Execute(_missionProgress, enemyMissionKey);
+            CheckObjectiveStepChanged();
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
-            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -102,9 +97,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
             _missionActionPerformedUseCase.Execute(_missionProgress, actionKind);
+            CheckObjectiveStepChanged();
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
-            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -117,9 +112,9 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
             _missionPlayerDeadUseCase.Execute(_missionProgress);
+            CheckObjectiveStepChanged();
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();
-            CheckObjectiveStepChanged();
         }
 
         /// <summary>
@@ -170,7 +165,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
         }
 
         /// <summary>
-        ///     クリア条件が目標シーケンスの場合に、現在ステップの変化を検知してイベントを発火させます。
+        ///     クリア条件が目標シーケンスの場合に、現在ステップを進め、変化を検知してイベントを発火させます。
         /// </summary>
         private void CheckObjectiveStepChanged()
         {
@@ -178,6 +173,8 @@ namespace KillChord.Runtime.Application.InGame.Mission
             {
                 return;
             }
+
+            sequence.TryAdvance(_missionProgress);
 
             int currentStepIndex = sequence.GetCurrentStepIndex(_missionProgress);
             if (currentStepIndex == _lastObjectiveStepIndex)

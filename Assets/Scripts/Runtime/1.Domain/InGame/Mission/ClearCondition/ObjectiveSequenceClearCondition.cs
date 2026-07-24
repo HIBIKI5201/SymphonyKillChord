@@ -6,6 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     /// <summary>
     ///     複数の目標を順番に達成させ、達成の度に現在の目標が更新されるクリア条件を表すクラス。
     ///     チュートリアルの練習ステップやボス戦のフェーズ管理など、ミッション全体で再利用できる汎用の複合条件。
+    ///     現在のステップIndexや開始済み状態は<see cref="MissionProgress"/>側に保持され、本クラス自体は状態を持ちません。
     /// </summary>
     public class ObjectiveSequenceClearCondition : IMissionClearCondition
     {
@@ -32,6 +33,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
         /// <summary>
         ///     条件が満たされているかどうかを判定します。すべてのステップが達成されている場合に満たされます。
+        ///     問い合わせのみを行い、状態は変更しません。ステップの進行は<see cref="TryAdvance"/>で行います。
         /// </summary>
         /// <param name="progress">ミッションの進行状況。</param>
         /// <returns>条件を満たしている場合は true、そうでない場合は false。</returns>
@@ -43,36 +45,55 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
                 return false;
             }
 
-            EnsureCurrentStepStarted(progress);
-            if (_currentStepIndex >= _steps.Count)
+            return progress.ObjectiveStepIndex >= _steps.Count;
+        }
+
+        /// <summary>
+        ///     現在のステップの達成条件が満たされていれば、次のステップへ進めます。
+        ///     未開始の場合は先頭ステップの開始処理も行います。
+        /// </summary>
+        /// <param name="progress">ミッションの進行状況。</param>
+        public void TryAdvance(MissionProgress progress)
+        {
+            if (_steps == null || _steps.Count == 0)
             {
-                return true;
+                return;
             }
 
-            if (!_steps[_currentStepIndex].Condition.IsSatisfied(progress))
+            if (!progress.ObjectiveSequenceStarted)
             {
-                return false;
+                progress.MarkObjectiveSequenceStarted();
+                _steps[0].Begin(progress);
             }
 
-            _currentStepIndex++;
-            if (_currentStepIndex < _steps.Count)
+            int currentIndex = progress.ObjectiveStepIndex;
+            if (currentIndex >= _steps.Count)
             {
-                _steps[_currentStepIndex].Begin(progress);
+                return;
             }
 
-            return _currentStepIndex >= _steps.Count;
+            if (!_steps[currentIndex].Condition.IsSatisfied(progress))
+            {
+                return;
+            }
+
+            progress.AdvanceObjectiveStep();
+            int newIndex = progress.ObjectiveStepIndex;
+            if (newIndex < _steps.Count)
+            {
+                _steps[newIndex].Begin(progress);
+            }
         }
 
         /// <summary>
         ///     現在の目標のステップIndexを取得します。先頭から見て最初に未達成のステップを返します。
-        ///     すべて達成済みの場合は<see cref="StepCount"/>を返します。
+        ///     すべて達成済みの場合は<see cref="StepCount"/>を返します。問い合わせのみを行い、状態は変更しません。
         /// </summary>
         /// <param name="progress">ミッションの進行状況。</param>
         /// <returns>現在のステップIndex。</returns>
         public int GetCurrentStepIndex(MissionProgress progress)
         {
-            EnsureCurrentStepStarted(progress);
-            return _currentStepIndex;
+            return progress.ObjectiveStepIndex;
         }
 
         /// <summary>
@@ -91,11 +112,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         }
 
         /// <summary>
-        ///     指定した種類のステップが含まれているか確認します。
+        ///     指定した種類の達成条件を持つステップが含まれているか確認します。
         /// </summary>
-        /// <typeparam name="TStep"> 検索するステップの型です。 </typeparam>
-        /// <returns> 指定した種類のステップが存在する場合はtrueです。 </returns>
-        public bool HasStep<TStep>() where TStep : ObjectiveSequenceStep
+        /// <typeparam name="TCondition"> 検索する達成条件の型です。 </typeparam>
+        /// <returns> 指定した種類の達成条件を持つステップが存在する場合はtrueです。 </returns>
+        public bool HasStepWithCondition<TCondition>() where TCondition : IMissionClearCondition
         {
             if (_steps == null)
             {
@@ -104,7 +125,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
             for (int i = 0; i < _steps.Count; i++)
             {
-                if (_steps[i] is TStep)
+                if (_steps[i].Condition is TCondition)
                 {
                     return true;
                 }
@@ -113,29 +134,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             return false;
         }
 
-        /// <summary>ランタイムのステップ進行状態を初期化します。</summary>
-        public void Reset()
-        {
-            _currentStepIndex = 0;
-            _hasStarted = false;
-        }
-
         /// <summary> 実行順のステップ一覧。 </summary>
         private readonly IReadOnlyList<ObjectiveSequenceStep> _steps;
-        private int _currentStepIndex;
-        private bool _hasStarted;
-
-        /// <summary>初期ステップの開始基準を一度だけ記録します。</summary>
-        /// <param name="progress">Mission進行状況です。</param>
-        private void EnsureCurrentStepStarted(MissionProgress progress)
-        {
-            if (_hasStarted || _steps == null || _steps.Count == 0)
-            {
-                return;
-            }
-
-            _hasStarted = true;
-            _steps[0].Begin(progress);
-        }
     }
 }

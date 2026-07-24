@@ -12,8 +12,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
     /// <summary>
     ///     目標シーケンスの1ステップを表すクラス。達成条件と、ステップ開始時に案内するメッセージを保持する。
+    ///     Wave開始やポップアップ表示などの特殊な振る舞いは、Step自体ではなく<see cref="Condition"/>側(デコレータ条件)が表現する。
     /// </summary>
-    public class ObjectiveSequenceStep
+    public sealed class ObjectiveSequenceStep
     {
         /// <summary>
         ///     ObjectiveSequenceStep クラスの新しいインスタンスを初期化します。
