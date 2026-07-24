@@ -29,6 +29,7 @@ using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
+using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
@@ -82,6 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerModuleContainer _moduleContainer;
         private PlayerView _player;
         private PlayerInputView _playerInputView;
+        private CameraSystemView _cameraSystemView;
         private ReturnToTitleController _returnToTitleController;
         private bool _isReturningToTitle;
         private SkillView[] _skillVisuals;
@@ -322,6 +324,29 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
+
+            // カメラの向きもスタート時の前方へ戻す。
+            ResetCameraOrientation(spawnPointTransform.forward);
+        }
+
+        /// <summary>
+        ///     カメラの向きを指定した前方へ戻します。
+        /// </summary>
+        /// <param name="forward"> カメラを向ける前方(ワールド空間)です。 </param>
+        private void ResetCameraOrientation(Vector3 forward)
+        {
+            if (_cameraSystemView == null)
+            {
+                _cameraSystemView = FindFirstObjectByType<CameraSystemView>();
+            }
+
+            if (_cameraSystemView == null)
+            {
+                Debug.LogWarning($"[{nameof(PlayerInitializer)}] {nameof(CameraSystemView)} が見つからないためカメラの向きをリセットできません。", this);
+                return;
+            }
+
+            _cameraSystemView.ResetOrientation(forward);
         }
 
         /// <summary>
