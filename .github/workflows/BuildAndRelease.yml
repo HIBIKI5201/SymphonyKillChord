@@ -245,55 +245,95 @@ jobs:
           Write-Host "::endgroup::"
 
           # ==========================================
-          # 3. 各 .unitypackage の順次インポート
+          # 3. .unitypackage を tar 展開してファイルを直接配置
           # ==========================================
-          Write-Host "::group::Sequential Unitypackage Import via CLI"
-          $Packages = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
-          Write-Host "Found $($Packages.Count) packages to import."
+          Write-Host "::group::Installing packages via direct tar extraction"
 
-          $TimeoutSec     = 1800
+          $ProjectRoot    = "${{ github.workspace }}"
+          $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
+          $TotalPlaced    = 0
           $FailedPackages = @()
+
+          Write-Host "Found $($Packages.Count) package(s) to install."
 
           foreach ($Package in $Packages) {
             Write-Host "--------------------------------------------------"
-            Write-Host "Starting Import: $($Package.Name)"
+            Write-Host "Processing: $($Package.Name)"
 
-            $UnityArgs = @(
-              "-batchmode",
-              "-nographics",
-              "-quit",
-              "-ignorecompilererrors",
-              "-projectPath", "${{ github.workspace }}",
-              "-importPackage", "$($Package.FullName)",
-              "-logFile", "unity_import_$($Package.BaseName).log"
-            )
+            $PkgWorkDir = Join-Path $env:TEMP "pkg_$([System.IO.Path]::GetRandomFileName())"
+            New-Item -ItemType Directory -Path $PkgWorkDir -Force | Out-Null
 
-            $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
-                                          -ArgumentList $UnityArgs `
-                                          -PassThru -NoNewWindow
-
-            if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
-              Write-Host "ERROR: Timeout importing $($Package.Name) after $TimeoutSec seconds."
-              $UnityProcess.Kill()
-              Write-Host "::endgroup::"
-              exit 124
+            $TarOutput = & tar -xzf "$($Package.FullName)" -C "$PkgWorkDir" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "ERROR: tar extraction failed (exit $LASTEXITCODE): $TarOutput"
+              $FailedPackages += $Package.Name
+              Remove-Item -Path $PkgWorkDir -Recurse -Force -ErrorAction SilentlyContinue
+              continue
             }
 
-            $ExitCode = if ($null -eq $UnityProcess.ExitCode) { -1 } else { [int]$UnityProcess.ExitCode }
+            $GuidDirs    = Get-ChildItem -Path $PkgWorkDir -Directory
+            $PlacedCount = 0
+            $PackageFailed = $false
 
-            if ($ExitCode -ne 0) {
-              Write-Host "WARNING: Unity returned non-zero code ($ExitCode) for $($Package.Name)."
-              Write-Host "         See unity_import_$($Package.BaseName).log for details."
+            foreach ($GuidDir in $GuidDirs) {
+              $PathnameFi = Join-Path $GuidDir.FullName "pathname"
+              if (-not (Test-Path $PathnameFi)) { continue }
+
+              $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
+              if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
+
+              $DestAbs = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot $DestRelPath))
+              $ResolvedRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
+              if (-not $ResolvedRoot.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+                $ResolvedRoot += [System.IO.Path]::DirectorySeparatorChar
+              }
+
+              if (-not $DestAbs.StartsWith($ResolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+                Write-Host "WARNING: Path traversal detected, skipping: $DestRelPath"
+                continue
+              }
+
+              $AssetSrc = Join-Path $GuidDir.FullName "asset"
+              $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
+
+              try {
+                if (Test-Path $AssetSrc) {
+                  $DestDir = Split-Path $DestAbs -Parent
+                  New-Item -ItemType Directory -Path $DestDir -Force -ErrorAction Stop | Out-Null
+                  Copy-Item -Path $AssetSrc -Destination $DestAbs -Force -ErrorAction Stop
+                  $PlacedCount++
+                } else {
+                  New-Item -ItemType Directory -Path $DestAbs -Force -ErrorAction Stop | Out-Null
+                }
+
+                if (Test-Path $MetaSrc) {
+                  Copy-Item -Path $MetaSrc -Destination "$DestAbs.meta" -Force -ErrorAction Stop
+                }
+              } catch {
+                Write-Host "ERROR: Failed to write asset for $($Package.Name): $_"
+                $PackageFailed = $true
+                break
+              }
+            }
+
+            if ($PackageFailed) {
               $FailedPackages += $Package.Name
             } else {
-              Write-Host "SUCCESS: Completed import for $($Package.Name)"
+              Write-Host "  Placed $PlacedCount asset file(s)."
+              $TotalPlaced += $PlacedCount
             }
+            Remove-Item -Path $PkgWorkDir -Recurse -Force -ErrorAction SilentlyContinue
           }
 
           if ($FailedPackages.Count -gt 0) {
-            Write-Host "WARNING: $($FailedPackages.Count) package(s) returned non-zero exit codes:"
+            Write-Host "ERROR: $($FailedPackages.Count) package(s) failed to extract:"
             $FailedPackages | ForEach-Object { Write-Host "  - $_" }
+            Write-Host "::endgroup::"
+            exit 1
           }
+
+          Write-Host ""
+          Write-Host "OK: All packages installed. Total asset files placed: $TotalPlaced"
           Write-Host "::endgroup::"
         shell: powershell
 
