@@ -205,6 +205,48 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーを指定したスタート地点へ戻し、移動・物理・進行中の演出状態をリセットします。
+        /// </summary>
+        /// <param name="position"> 戻す位置です。 </param>
+        /// <param name="rotation"> 戻す回転です。 </param>
+        public void ResetToSpawn(Vector3 position, Quaternion rotation)
+        {
+            // 攻撃時の回転補間を停止する。
+            CancelAttackRotate();
+
+            // 回避関連の状態と演出をリセットする。
+            _dodgeMaterialEffectHandle.TryCancel();
+            ResetDodgeMaterialEffect();
+
+            // 位置と回転をスタート地点へ戻す。
+            if (_cacheTransform != null)
+            {
+                _cacheTransform.SetPositionAndRotation(position, rotation);
+            }
+            else
+            {
+                transform.SetPositionAndRotation(position, rotation);
+            }
+
+            // Rigidbodyの位置・回転・速度を同期してリセットする。
+            if (_rb != null)
+            {
+                _rb.position = position;
+                _rb.rotation = rotation;
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+
+            // 入力由来の移動・回避要求をクリアする。
+            _moveVector = Vector2.zero;
+            _dogeVector = Vector2.zero;
+            _isDodge = false;
+
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            SyncFootstepTiming();
+        }
+
+        /// <summary>
         ///     被弾時のSEと仮Voiceを再生します。
         /// </summary>
         public void PlayDamageFeedbackSound()
