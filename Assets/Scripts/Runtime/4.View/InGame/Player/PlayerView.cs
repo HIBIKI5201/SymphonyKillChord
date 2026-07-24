@@ -30,6 +30,12 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
+
+        [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
+        private Transform _damageEffectPoint;
+
         [SerializeField, Tooltip("回避成功時の仮エフェクト")]
         private ParticleSystem _dodgeEffect;
 
@@ -40,15 +46,29 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _dodgeSmearsPower = 1f;
         [Space]
 
-        [SerializeField, Tooltip("被弾SE用Source。")]
-        private SoundEffectSource _damageSoundSource;
-        [Space]
-
-        [SerializeField, Tooltip("仮Voice用Source。")]
+        [Header("Voice")]
+        [SerializeField, Tooltip("Voice用Source。")]
         private VoiceSource _voiceSource;
+
         [SerializeField, Tooltip("被弾時VoiceのCueName。空の場合はSource側のCueを再生します。")]
         private string _damageVoiceCueName;
+
+        [SerializeField, Tooltip("ステージ開始時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageStartVoiceCueName;
+
+        [SerializeField, Tooltip("ステージクリア時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueName;
+
+        [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
+        private string _gameOverVoiceCueName;
+
+        [SerializeField, Tooltip("スキル発動時VoiceのCueName。空の場合は再生しない。")]
+        private string _skillVoiceCueName;
         [Space]
+
+        [Header("SE")]
+        [SerializeField, Tooltip("被弾SE用Source。")]
+        private SoundEffectSource _damageSoundSource;
 
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
@@ -120,7 +140,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_healthHudPresenter != null)
             {
-                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedback;
                 _healthHudPresenter?.Dispose();
             }
 
@@ -146,7 +166,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
-            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
+            _healthHudPresenter.OnDamaged += PlayDamageFeedback;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -238,10 +258,53 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary>
         ///     被弾時のSEと仮Voiceを再生します。
         /// </summary>
-        public void PlayDamageFeedbackSound()
+        public void PlayDamageFeedback()
         {
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
+
+            if (_damageEffectView == null)
+            {
+                return;
+            }
+
+            Vector3 effectPosition = _damageEffectPoint != null
+                ? _damageEffectPoint.position
+                : transform.position;
+
+            _damageEffectView.PlayAt(effectPosition);
+        }
+
+        /// <summary>
+        ///     ステージ開始時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageStartVoice()
+        {
+            PlayPriorityVoice(_stageStartVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ステージクリア時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageClearVoice()
+        {
+            PlayPriorityVoice(_stageClearVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ゲームオーバー時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayGameOverVoice()
+        {
+            PlayPriorityVoice(_gameOverVoiceCueName);
+        }
+
+        /// <summary>
+        ///     スキル発動時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlaySkillVoice()
+        {
+            PlayPriorityVoice(_skillVoiceCueName);
         }
 
         public void PlaySkillAnimation(string animationKey)
@@ -587,6 +650,23 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             source.Play(cueName);
+        }
+
+        /// <summary>
+        ///     優先度の高いVoiceを再生します。再生中のVoiceがある場合は停止してから再生します。
+        /// </summary>
+        /// <param name="cueName"> 再生するVoiceのCue名。 </param>
+        private void PlayPriorityVoice(string cueName)
+        {
+            if (_voiceSource == null
+                || string.IsNullOrWhiteSpace(cueName))
+            {
+                return;
+            }
+
+            // 再生中のVoiceがある場合は停止してから再生する。
+            _voiceSource.Stop();
+            _voiceSource.Play(cueName);
         }
 
         /// <summary>
