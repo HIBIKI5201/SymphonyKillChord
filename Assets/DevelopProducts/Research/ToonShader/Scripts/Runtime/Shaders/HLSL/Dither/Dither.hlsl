@@ -3,7 +3,10 @@
 
 float BayerDither(float2 pos)
 {
-    static const float DITHER_THRESHOLDS[16] =
+    uint2 p = uint2(pos);
+    return (p.x + p.y*3)%5/5.0;
+
+    /*static const float DITHER_THRESHOLDS[16] =
     {
         12.0 / 17.0,  5.0 / 17.0,  6.0 / 17.0, 13.0 / 17.0,
          4.0 / 17.0,  0.0 / 17.0,  1.0 / 17.0,  7.0 / 17.0,
@@ -11,7 +14,7 @@ float BayerDither(float2 pos)
         15.0 / 17.0, 10.0 / 17.0,  9.0 / 17.0, 14.0 / 17.0
     };
     uint2 p = uint2(pos) & 3;
-    return DITHER_THRESHOLDS[p.x * 4 + p.y];
+    return DITHER_THRESHOLDS[p.x * 4 + p.y];*/
 }
 
 #endif
