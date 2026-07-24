@@ -9,6 +9,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
+using LitMotion;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -31,6 +32,12 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避成功時の仮エフェクト")]
         private ParticleSystem _dodgeEffect;
+
+        [SerializeField, Tooltip("回避中にMaterialエフェクトを適用するRenderer一覧。")]
+        private Renderer[] _dodgeEffectRenderers;
+
+        [SerializeField, Tooltip("回避中に到達させるSmearsPowerの最大値。")]
+        private float _dodgeSmearsPower = 1f;
         [Space]
 
         [SerializeField, Tooltip("被弾SE用Source。")]
@@ -65,6 +72,10 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
+        private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
+        private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
+        private static readonly int SmearsDirectionPropertyId = Shader.PropertyToID("_SmearsDirection");
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
@@ -83,6 +94,8 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
+        private MotionHandle _dodgeMaterialEffectHandle;
+        private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -110,6 +123,8 @@ namespace KillChord.Runtime.View.InGame.Player
                 _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
                 _healthHudPresenter?.Dispose();
             }
+
+            _dodgeMaterialEffectHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -209,6 +224,90 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _dodgeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _dodgeEffect.Play();
+        }
+
+        /// <summary>
+        ///     回避中のMaterialエフェクト(Smears)を再生します。
+        /// </summary>
+        /// <param name="duration"> 回避の継続時間です。 </param>
+        /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
+        public void PlayDodgeMaterialEffect(float duration, Vector3 direction)
+        {
+            direction.Normalize();
+
+            if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
+            {
+                return;
+            }
+
+            _dodgeMaterialPropertyBlock ??= new MaterialPropertyBlock();
+
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                // MaterialPropertyBlockはKeywordを切り替えられないため、shader_feature_localの有効化はMaterial側で行う。
+                renderer.material.EnableKeyword(SMEARS_ON_KEYWORD);
+
+                renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
+                _dodgeMaterialPropertyBlock.SetFloat(SmearsOnPropertyId, 0f);
+                _dodgeMaterialPropertyBlock.SetVector(SmearsDirectionPropertyId, -direction);
+                renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
+            }
+
+            _dodgeMaterialEffectHandle.TryCancel();
+
+            _dodgeMaterialEffectHandle = LMotion.Create(_dodgeSmearsPower, 0f, duration)
+                .WithEase(Ease.InQuad)
+                .Bind(this, static (value, state) => state.ApplySmearsPower(value));
+        }
+
+        /// <summary>
+        ///     キャッシュ済みのRenderer配列とMaterialPropertyBlockを使い回して_SmearsPowerを反映します。
+        /// </summary>
+        private void ApplySmearsPower(float value)
+        {
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
+                _dodgeMaterialPropertyBlock.SetFloat(SmearsPowerPropertyId, value);
+                renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
+            }
+        }
+
+        /// <summary>
+        ///     回避終了時にMaterialエフェクト(Smears)を既定値へ戻します。
+        /// </summary>
+        public void ResetDodgeMaterialEffect()
+        {
+            if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
+            {
+                return;
+            }
+
+            if (_dodgeMaterialEffectHandle.IsActive())
+            {
+                _dodgeMaterialEffectHandle.Cancel();
+            }
+
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.material.DisableKeyword(SMEARS_ON_KEYWORD);
+                renderer.SetPropertyBlock(null);
+            }
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
