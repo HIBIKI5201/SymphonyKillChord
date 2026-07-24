@@ -32,6 +32,12 @@ namespace KillChord.Runtime.View.InGame.Skill
             _rhythmGuideView = rhythmGuideView;
             _baseLocalScale = _leftIconImage.rectTransform.localScale;
             _baseLocalEulerAngleZ = _leftIconImage.rectTransform.localEulerAngles.z;
+
+            // ジャストタイミング位置が確定するまでは、誤った位置が見えてしまわないようアイコン・背景ごと隠す。
+            // リズムガイド未設定（X座標追従を使わない構成）の場合は待たずにそのまま表示する。
+            bool waitForPosition = _rhythmGuideView != null;
+            SetIconsVisible(!waitForPosition);
+            _isPositioned = !waitForPosition;
             ApplyStep(0);
         }
 
@@ -66,6 +72,17 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
 
             _patternMatchCount = dto.PatternMatchCount;
+        }
+
+        private void Update()
+        {
+            // ACLikeRhythmGuideViewのゾーンデータは実プレイ開始後まで構築されないため、
+            // Initialize時点では位置取得に失敗しうる。取得できるまで毎フレーム再試行する。
+            if (_isPositioned || _stepSettings == null)
+            {
+                return;
+            }
+            RefreshIconPosition(_patternMatchCount);
         }
 
         private void FixedUpdate()
@@ -113,11 +130,51 @@ namespace KillChord.Runtime.View.InGame.Skill
             _rightIconImage.sprite = setting.Icon;
             _rightIconImage.color = setting.ActiveColor;
 
-            if (_rhythmGuideView != null
-                && _rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition))
+            RefreshIconPosition(index);
+        }
+
+        /// <summary>
+        ///     指定インデックスの拍子アイコンのX座標を、ジャストタイミング位置に合わせて更新する。
+        ///     ACLikeRhythmGuideViewのゾーンデータがまだ構築されていない場合は何もしない。
+        /// </summary>
+        /// <param name="index"> 表示するSignaturesのインデックス。 </param>
+        private void RefreshIconPosition(int index)
+        {
+            if (_rhythmGuideView == null || index < 0 || index >= _stepSettings.Length)
             {
-                SetAnchoredX(_leftIconImage.rectTransform, -xPosition);
-                SetAnchoredX(_rightIconImage.rectTransform, xPosition);
+                return;
+            }
+
+            SkillBeatVisualSetting setting = _stepSettings[index];
+            if (!_rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition))
+            {
+                return;
+            }
+
+            SetAnchoredX(_leftIconImage.rectTransform, -xPosition);
+            SetAnchoredX(_rightIconImage.rectTransform, xPosition);
+
+            if (!_isPositioned)
+            {
+                _isPositioned = true;
+                SetIconsVisible(true);
+            }
+        }
+
+        /// <summary>
+        ///     アイコンとクールダウン背景の表示ON/OFFを切り替える。
+        /// </summary>
+        /// <param name="visible"> 表示する場合はtrue。 </param>
+        private void SetIconsVisible(bool visible)
+        {
+            _leftIconImage.enabled = visible;
+            _rightIconImage.enabled = visible;
+            if (_cooldownBackgroundImage != null || _cooldownBackgroundImage.Length > 0)
+            {
+                for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
+                {
+                    _cooldownBackgroundImage[i].enabled = visible;
+                }
             }
         }
 
@@ -228,11 +285,14 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <param name="fillAmount"> 設定するfillAmount。 </param>
         private void SetCooldownFillAmount(float fillAmount)
         {
-            if (_cooldownBackgroundImage == null)
+            if (_cooldownBackgroundImage == null || _cooldownBackgroundImage.Length <= 0)
             {
                 return;
             }
-            _cooldownBackgroundImage.fillAmount = fillAmount;
+            for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
+            {
+                _cooldownBackgroundImage[i].fillAmount = fillAmount;
+            }
         }
 
         [SerializeField, Tooltip("左側に表示する拍子アイコンのImage。")]
@@ -240,7 +300,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         [SerializeField, Tooltip("右側に表示する拍子アイコンのImage。")]
         private Image _rightIconImage;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
-        private Image _cooldownBackgroundImage;
+        private Image[] _cooldownBackgroundImage;
 
         private SkillBeatVisualSetting[] _stepSettings;
         private SkillInputProgressAnimationSetting _animationSetting;
@@ -250,6 +310,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Vector3 _baseLocalScale;
         private float _baseLocalEulerAngleZ;
         private bool _isSkillCoolingDown;
+        private bool _isPositioned;
         private int _patternMatchCount;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;

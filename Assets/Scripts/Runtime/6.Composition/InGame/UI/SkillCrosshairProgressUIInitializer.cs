@@ -36,6 +36,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _isRegistered = true;
         }
 
+        private void Update()
+        {
+            _controller?.Tick();
+        }
+
         private void OnDestroy()
         {
             if (_isRegistered)
