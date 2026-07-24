@@ -293,10 +293,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            if (_dodgeMaterialEffectHandle.IsActive())
-            {
-                _dodgeMaterialEffectHandle.Cancel();
-            }
+            _dodgeMaterialEffectHandle.TryCancel();
 
             foreach (Renderer renderer in _dodgeEffectRenderers)
             {
