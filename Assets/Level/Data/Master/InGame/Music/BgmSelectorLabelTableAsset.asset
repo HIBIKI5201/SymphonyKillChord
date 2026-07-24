@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2a2680fcdee4212acd7ffb7654d9c7a, type: 3}
   m_Name: BgmSelectorLabelTableAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Music.BgmSelectorLabelTableAsset
-  _originalLabel: 
+  _originalLabel: SelectorLabel_S00
   _entries:
   - _skillId:
       _id: skill_00
