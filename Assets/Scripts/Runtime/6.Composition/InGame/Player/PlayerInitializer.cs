@@ -252,8 +252,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerAttackAnimationConfig);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
-            dodge.OnDodgeStarted += duration => _playerEntity.SetInvincible(true);
-            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+            dodge.OnDodgeStarted += (duration, direction) =>
+            {
+                _playerEntity.SetInvincible(true);
+                _player.PlayDodgeMaterialEffect(duration, direction);
+            };
+            dodge.OnDodgeEnded += () =>
+            {
+                _playerEntity.SetInvincible(false);
+                _player.ResetDodgeMaterialEffect();
+            };
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
             _characterAnimationSignal = animationContext.Signal;

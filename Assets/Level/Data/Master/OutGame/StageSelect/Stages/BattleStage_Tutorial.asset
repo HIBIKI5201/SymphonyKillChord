@@ -24,5 +24,7 @@ MonoBehaviour:
   _rewardSkillUnlockPoint: 1
   _isTutorial: 1
   _battleSceneName: Stage_01
-  _enemyWaveDefinitionAssetKey: EnemyWaveDefinitionAsset
+  _enemyWaveDefinitionId:
+    _id: enemy_wave_default
+    _hashId: -1074717099
   _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}

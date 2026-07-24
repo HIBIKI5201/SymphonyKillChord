@@ -3438,6 +3438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38a73cab12d86aa45893103822914a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.EnemyInitializer
+  _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
   _enemyPools: {fileID: 1599172285}
   _enemySpawnPositionSearcher: {fileID: 1443016744}
   _enemyInfantrySpawner: {fileID: 1136649845}
