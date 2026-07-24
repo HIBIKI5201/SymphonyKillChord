@@ -40,15 +40,26 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _dodgeSmearsPower = 1f;
         [Space]
 
-        [SerializeField, Tooltip("被弾SE用Source。")]
-        private SoundEffectSource _damageSoundSource;
-        [Space]
-
-        [SerializeField, Tooltip("仮Voice用Source。")]
+        [Header("Voice")]
+        [SerializeField, Tooltip("Voice用Source。")]
         private VoiceSource _voiceSource;
+
         [SerializeField, Tooltip("被弾時VoiceのCueName。空の場合はSource側のCueを再生します。")]
         private string _damageVoiceCueName;
+
+        [SerializeField, Tooltip("ステージ開始時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageStartVoiceCueName;
+
+        [SerializeField, Tooltip("ステージクリア時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueName;
+
+        [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
+        private string _gameOverVoiceCueName;
         [Space]
+
+        [Header("SE")]
+        [SerializeField, Tooltip("被弾SE用Source。")]
+        private SoundEffectSource _damageSoundSource;
 
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
@@ -200,6 +211,30 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ステージ開始時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageStartVoice()
+        {
+            PlaySequenceVoice(_stageStartVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ステージクリア時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageClearVoice()
+        {
+            PlaySequenceVoice(_stageClearVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ゲームオーバー時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayGameOverVoice()
+        {
+            PlaySequenceVoice(_gameOverVoiceCueName);
         }
 
         public void PlaySkillAnimation(string animationKey)
@@ -545,6 +580,24 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             source.Play(cueName);
+        }
+
+        /// <summary>
+        ///     ステージシーケンス用のPlayer Voiceを再生します。
+        /// </summary>
+        /// <param name="cueName"> 再生するVoiceのCue名。 </param>
+        private void PlaySequenceVoice(string cueName)
+        {
+            if (_voiceSource == null
+                || string.IsNullOrWhiteSpace(cueName))
+            {
+                return;
+            }
+
+            // 被弾Voiceなどが再生中の場合は停止し、
+            // ステージシーケンスのVoiceを優先する。
+            _voiceSource.Stop();
+            _voiceSource.Play(cueName);
         }
 
         /// <summary>
