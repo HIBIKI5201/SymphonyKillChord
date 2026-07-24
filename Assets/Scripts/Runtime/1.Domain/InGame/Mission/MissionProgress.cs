@@ -122,17 +122,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <summary> 目標シーケンスの現在のステップIndexを取得します。 </summary>
         public int ObjectiveStepIndex => _objectiveStepIndex;
 
-        /// <summary> 目標シーケンスが開始済みかどうかを取得します。 </summary>
-        public bool ObjectiveSequenceStarted => _objectiveSequenceStarted;
-
-        /// <summary>
-        ///     目標シーケンスの開始を記録します。
-        /// </summary>
-        public void MarkObjectiveSequenceStarted()
-        {
-            _objectiveSequenceStarted = true;
-        }
-
         /// <summary>
         ///     目標シーケンスの現在ステップを次へ進めます。
         /// </summary>
@@ -157,7 +146,5 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private MissionEndReason _endReason;
         /// <summary> 目標シーケンスの現在ステップIndex。 </summary>
         private int _objectiveStepIndex;
-        /// <summary> 目標シーケンスが開始済みかどうか。 </summary>
-        private bool _objectiveSequenceStarted;
     }
 }

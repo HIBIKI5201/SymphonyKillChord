@@ -5,8 +5,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
     ///     複数の目標を順番に達成させ、達成の度に現在の目標が更新されるクリア条件を表すクラス。
-    ///     チュートリアルの練習ステップやボス戦のフェーズ管理など、ミッション全体で再利用できる汎用の複合条件。
-    ///     現在のステップIndexや開始済み状態は<see cref="MissionProgress"/>側に保持され、本クラス自体は状態を持ちません。
+    ///     全てのミッションのクリア条件はこのクラスとして表現される(<see cref="MissionDefinition.ClearCondition"/>参照)。
+    ///     単一の条件しか持たないミッションは要素数1のシーケンスとして扱う。
+    ///     現在のステップIndexは<see cref="MissionProgress"/>側に保持され、本クラス自体は状態を持ちません。
     /// </summary>
     public class ObjectiveSequenceClearCondition : IMissionClearCondition
     {
@@ -32,6 +33,18 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         }
 
         /// <summary>
+        ///     先頭ステップの開始処理を行います。ミッション開始時に一度だけ呼び出してください。
+        /// </summary>
+        /// <param name="progress">ミッションの進行状況。</param>
+        public void Start(MissionProgress progress)
+        {
+            if (_steps != null && _steps.Count > 0)
+            {
+                _steps[0].Begin(progress);
+            }
+        }
+
+        /// <summary>
         ///     条件が満たされているかどうかを判定します。すべてのステップが達成されている場合に満たされます。
         ///     問い合わせのみを行い、状態は変更しません。ステップの進行は<see cref="TryAdvance"/>で行います。
         /// </summary>
@@ -50,7 +63,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
         /// <summary>
         ///     現在のステップの達成条件が満たされていれば、次のステップへ進めます。
-        ///     未開始の場合は先頭ステップの開始処理も行います。
         /// </summary>
         /// <param name="progress">ミッションの進行状況。</param>
         public void TryAdvance(MissionProgress progress)
@@ -58,12 +70,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             if (_steps == null || _steps.Count == 0)
             {
                 return;
-            }
-
-            if (!progress.ObjectiveSequenceStarted)
-            {
-                progress.MarkObjectiveSequenceStarted();
-                _steps[0].Begin(progress);
             }
 
             int currentIndex = progress.ObjectiveStepIndex;
@@ -83,17 +89,6 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             {
                 _steps[newIndex].Begin(progress);
             }
-        }
-
-        /// <summary>
-        ///     現在の目標のステップIndexを取得します。先頭から見て最初に未達成のステップを返します。
-        ///     すべて達成済みの場合は<see cref="StepCount"/>を返します。問い合わせのみを行い、状態は変更しません。
-        /// </summary>
-        /// <param name="progress">ミッションの進行状況。</param>
-        /// <returns>現在のステップIndex。</returns>
-        public int GetCurrentStepIndex(MissionProgress progress)
-        {
-            return progress.ObjectiveStepIndex;
         }
 
         /// <summary>
