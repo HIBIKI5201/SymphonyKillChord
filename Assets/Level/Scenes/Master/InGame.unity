@@ -2161,6 +2161,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: InGameCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5369553578249869401, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6383392765179841325, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 380
+      objectReference: {fileID: 0}
     - target: {fileID: 6925067479988106398, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
       propertyPath: m_IsActive
       value: 1
