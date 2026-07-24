@@ -13,7 +13,7 @@ namespace KillChord.Editor.SinfoniaOperator
 {
     /// <summary>
     ///     Notionのタスク表の表示と、Discordへの作業ログ送信を行うエディタウィンドウ。
-    ///     Notion/DiscordのトークンはBot本体(Exe)と共有するJSON設定ファイルから読み込む。
+    ///     Notion/Discordの設定はBot本体(Exe)と共有する公開・秘密JSON設定ファイルから読み込む。
     ///     ファイルへのパスは [Edit > Project Settings > KillChord > SinfoniaOperator] で設定する。
     /// </summary>
     public sealed class SinfoniaOperatorWindow : EditorWindow
@@ -293,19 +293,54 @@ namespace KillChord.Editor.SinfoniaOperator
         }
 
         /// <summary>
-        ///     Bot本体(Exe)と共有するJSON設定ファイルを読み込む。
-        ///     見つからない場合はエラーを表示してfalseを返す。
+        ///     Bot本体(Exe)と共有する公開・秘密JSON設定ファイルを読み込む。
+        ///     公開設定が見つからない場合はエラーを表示してfalseを返す。
         /// </summary>
         /// <returns></returns>
         private bool EnsureConfigLoaded()
         {
-            string path = ResolveConfigPath(SinfoniaOperatorSettings.instance.ConfigJsonPath);
-            if (OperatorConfig.LoadJsonFile(path)) { return true; }
+            SinfoniaOperatorSettings settings = SinfoniaOperatorSettings.instance;
+            string environmentPath = ResolveConfigPath(
+                settings.EnvironmentConfigJsonPath,
+                SinfoniaOperatorSettings.DEFAULT_ENVIRONMENT_CONFIG_JSON_PATH);
+            string secretsPath = ResolveConfigPath(
+                settings.SecretsConfigJsonPath,
+                SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH);
+            string legacyPath = ResolveConfigPath(
+                SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH,
+                SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH);
 
-            Debug.LogError($"[{nameof(SinfoniaOperatorWindow)}] JSON設定ファイルが見つかりません: {path}\n" +
-                "[Edit > Project Settings > KillChord > SinfoniaOperator] でパスを確認するか、" +
-                "SinfoniaOperator/sinfonia-operator.settings.sample.json をコピーして作成してください。");
-            _statusLabel.text = "設定ファイルが見つかりません";
+            OperatorConfig.ClearOverrides();
+            if (!OperatorConfig.LoadJsonFile(environmentPath))
+            {
+                if (OperatorConfig.LoadJsonFile(legacyPath))
+                {
+                    Debug.LogWarning($"[{nameof(SinfoniaOperatorWindow)}] 分割前の設定ファイルを読み込みました。" +
+                        $"{SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH}への移行を推奨します。");
+                    return true;
+                }
+
+                Debug.LogError($"[{nameof(SinfoniaOperatorWindow)}] 公開JSON設定ファイルが見つかりません: {environmentPath}\n" +
+                    "リポジトリから設定ファイルを取得したか確認してください。");
+                _statusLabel.text = "公開設定が見つかりません";
+                return false;
+            }
+
+            if (OperatorConfig.LoadJsonFile(secretsPath)) { return true; }
+
+            if (OperatorConfig.LoadJsonFile(
+                    legacyPath,
+                    OperatorConfigKeys.DISCORD_BOT_TOKEN,
+                    OperatorConfigKeys.NOTION_TOKEN))
+            {
+                Debug.LogWarning($"[{nameof(SinfoniaOperatorWindow)}] トークンを旧設定ファイルから読み込みました。" +
+                    $"{SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH}への移行を推奨します。");
+                return true;
+            }
+
+            Debug.LogError($"[{nameof(SinfoniaOperatorWindow)}] 秘密JSON設定ファイルが見つかりません: {secretsPath}\n" +
+                "sinfonia-operator.secrets.sample.jsonをコピーし、NotionとDiscordのトークンを設定してください。");
+            _statusLabel.text = "秘密設定が見つかりません";
             return false;
         }
 
@@ -313,13 +348,17 @@ namespace KillChord.Editor.SinfoniaOperator
         ///     設定されたJSON設定ファイルのパスを絶対パスへ解決する。
         ///     相対パスの場合はプロジェクトルート（Assetsフォルダの親）を基準とする。
         /// </summary>
-        /// <param name="configuredPath"></param>
+        /// <param name="configuredPath">設定されたパス。</param>
+        /// <param name="defaultPath">未設定時に使用するパス。</param>
         /// <returns></returns>
-        private static string ResolveConfigPath(string configuredPath)
+        private static string ResolveConfigPath(string configuredPath, string defaultPath)
         {
-            string path = string.IsNullOrWhiteSpace(configuredPath)
-                ? SinfoniaOperatorSettings.DEFAULT_CONFIG_JSON_PATH
-                : configuredPath;
+            string path = string.IsNullOrWhiteSpace(configuredPath) ? defaultPath : configuredPath;
+            if (path == SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH &&
+                defaultPath != SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH)
+            {
+                path = defaultPath;
+            }
 
             if (Path.IsPathRooted(path)) { return path; }
 
