@@ -87,7 +87,13 @@ namespace KillChord.Runtime.View.InGame.Character
             }
 
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            particleSystem.transform.SetParent(transform, false);
+
+            // 親階層の無効化中はUnityがSetParentを許可しないため、再親子化を行いません。
+            if (gameObject.activeInHierarchy)
+            {
+                particleSystem.transform.SetParent(transform, false);
+            }
+
             particleSystem.gameObject.SetActive(false);
         }
 
