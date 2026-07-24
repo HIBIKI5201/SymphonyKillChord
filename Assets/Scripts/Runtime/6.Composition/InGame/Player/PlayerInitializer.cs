@@ -3,15 +3,12 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
-using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.Skill;
-using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
-using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Sequence;
@@ -84,8 +81,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerView _player;
         private PlayerInputView _playerInputView;
         private CameraSystemView _cameraSystemView;
-        private ReturnToTitleController _returnToTitleController;
-        private bool _isReturningToTitle;
         private SkillView[] _skillVisuals;
         private CharacterAnimationView _characterAnimationView;
 
@@ -223,9 +218,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
             _playerInputView.OnResetPositionInput += HandleResetPositionInput;
-
-            // タイトル復帰(ESC長押し)機能を構築して入力を購読する。
-            SetupReturnToTitle();
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -365,89 +357,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     タイトル復帰(ESC長押し)機能を構築し、入力を購読します。
-        ///     必要なサービスが揃わない場合はプレイヤー初期化を止めず、機能のみ無効とします。
-        /// </summary>
-        private void SetupReturnToTitle()
-        {
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUsecase))
-            {
-                Debug.LogWarning($"[{nameof(PlayerInitializer)}] {nameof(SceneTransitionUsecase)} が見つからないためタイトル復帰を無効化します。", this);
-                return;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
-            {
-                Debug.LogWarning($"[{nameof(PlayerInitializer)}] {nameof(SelectedBattleStageState)} が見つからないためタイトル復帰を無効化します。", this);
-                return;
-            }
-
-            // ミッション状態は存在すればクリア対象とするため、取得できない場合もnullで許容する。
-            ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState);
-
-            _returnToTitleController = new ReturnToTitleController(
-                sceneTransitionUsecase,
-                selectedBattleStageState,
-                selectedMissionState,
-                SceneListEnum.Title.ToString());
-
-            _playerInputView.OnReturnToTitleInput += HandleReturnToTitleInput;
-        }
-
-        /// <summary>
-        ///     タイトル復帰入力(ESC長押し成立)を受け取って遷移を開始します。
-        /// </summary>
-        /// <param name="input"> タイトル復帰入力です。 </param>
-        private void HandleReturnToTitleInput(InputContext<float> input)
-        {
-            // Hold成立(Performed)時のみ実行する。
-            if (input.Phase != InputActionPhase.Performed)
-            {
-                return;
-            }
-
-            if (_isReturningToTitle || _returnToTitleController == null)
-            {
-                return;
-            }
-
-            _ = ReturnToTitleAsync();
-        }
-
-        /// <summary>
-        ///     タイトルシーンへの遷移を非同期で実行します。
-        /// </summary>
-        private async Awaitable ReturnToTitleAsync()
-        {
-            _isReturningToTitle = true;
-
-            // ゲームプレイ中はカーソルをロックしているため、タイトル復帰時に解除する。
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
-            try
-            {
-                bool success = await _returnToTitleController.ReturnToTitleAsync(
-                    gameObject.scene.name,
-                    destroyCancellationToken);
-
-                if (!success)
-                {
-                    Debug.LogError($"[{nameof(PlayerInitializer)}] タイトルシーンへの復帰に失敗しました。", this);
-                    _isReturningToTitle = false;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-                _isReturningToTitle = false;
-            }
-        }
-
-        /// <summary>
         ///     回避成功時の演出を再生します。
         /// </summary>
         /// <param name="damage"> 回避したダメージです。 </param>
@@ -473,11 +382,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerInputView != null)
             {
                 _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
-                _playerInputView.OnReturnToTitleInput -= HandleReturnToTitleInput;
                 _playerInputView = null;
             }
-
-            _returnToTitleController = null;
 
             if (_characterAnimationSignal != null && _onDodgeEndedHandler != null)
             {
