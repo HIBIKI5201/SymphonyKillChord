@@ -113,8 +113,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot_1
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot6
+  _cueSheet: CueSheet_0
 --- !u!114 &5739161915442774456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,7 +138,7 @@ GameObject:
   - component: {fileID: 5485773287200338797}
   - component: {fileID: 3481780863284298569}
   m_Layer: 7
-  m_Name: AK
+  m_Name: ShotGun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -240,8 +240,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: RifleShoot_2
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot8
+  _cueSheet: CueSheet_0
 --- !u!114 &2529952797976715942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -445,8 +445,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: SelfHit
-  _cueSheet: BattleSE
+  _cueName: SE_Hit_Normal
+  _cueSheet: CueSheet_0
 --- !u!114 &7161724074417242993
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,8 +572,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot_3
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot1
+  _cueSheet: CueSheet_0
 --- !u!114 &4205263839828522592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -650,8 +650,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: Dodge
-  _cueSheet: BattleSE
+  _cueName: SE_Dodge
+  _cueSheet: CueSheet_0
 --- !u!114 &5796462889585123171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -782,13 +782,20 @@ MonoBehaviour:
   - {fileID: 8148004679493761661}
   - {fileID: 5775244101618659086}
   _dodgeSmearsPower: 7
-  _damageSoundSource: {fileID: 7161724074417242993}
   _voiceSource: {fileID: 795784838904872616}
-  _damageVoiceCueName: RifleShoot_1
+  _damageVoiceCueName: VOICE_Damage_Light
+  _stageStartVoiceCueName: VOICE_Battlestart
+  _stageClearVoiceCueName: VOICE_Gameclear1
+  _gameOverVoiceCueName: 
+  _damageSoundSource: {fileID: 7161724074417242993}
   _dodgeSoundSource: {fileID: 5796462889585123171}
   _footStepView: {fileID: 6123456789012345682}
-  _defaultFootstepCueName: FootStep
-  _footstepSoundConfigs: []
+  _defaultFootstepCueName: SE_Symphony_Footsteps
+  _footstepSoundConfigs:
+  - SurfaceLayer:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    CueName: SE_Symphony_Footsteps
   _footstepRayOffset: {x: 0, y: 0.1, z: 0}
   _footstepRayDistance: 1.5
   _footstepInterval: 0.35
@@ -996,8 +1003,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: RifleShoot_3
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot2
+  _cueSheet: CueSheet_0
 --- !u!114 &2575966551703790041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1123,8 +1130,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: RifleShoot_1
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot4
+  _cueSheet: CueSheet_0
 --- !u!114 &7931507902407285823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1302,7 +1309,7 @@ MonoBehaviour:
   - _beatType: 3
     _weaponItem: {fileID: 8727964179033488586}
   - _beatType: 4
-    _weaponItem: {fileID: 3481780863284298569}
+    _weaponItem: {fileID: 3988770832189472322}
   - _beatType: 6
     _weaponItem: {fileID: 5651158032206325677}
   - _beatType: 8
@@ -1434,7 +1441,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: HandgunShoot_1
-  _cueSheet: GunSound
+  _cueSheet: CueSheet_0
 --- !u!114 &795784838904872616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1514,7 +1521,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: FootStep
-  _cueSheet: BattleSE
+  _cueSheet: CueSheet_0
 --- !u!114 &6123456789012345681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1694,8 +1701,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot_2
-  _cueSheet: GunSound
+  _cueName: SE_Gunshot3
+  _cueSheet: CueSheet_0
 --- !u!114 &7087234266522894019
 MonoBehaviour:
   m_ObjectHideFlags: 0
