@@ -1327,6 +1327,7 @@ GameObject:
   - component: {fileID: 438459093}
   - component: {fileID: 438459094}
   - component: {fileID: 438459095}
+  - component: {fileID: 438459097}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1447,6 +1448,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
   - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
   - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
+--- !u!114 &438459097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38b61911f99c47048f2d45cdacd94247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.ReturnToTitleInitializer
+  _titleSceneName: Title
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2526,6 +2540,8 @@ PlayableDirector:
     value: {fileID: 191554240}
   - key: {fileID: -6596586482438994658, guid: e78bc196393ddca49a8dbebd764a45db, type: 2}
     value: {fileID: 395575201}
+  - key: {fileID: 9057800444235546416, guid: e78bc196393ddca49a8dbebd764a45db, type: 2}
+    value: {fileID: 1435826636}
   m_ExposedReferences:
     m_References: []
 --- !u!224 &1122440035 stripped
@@ -2719,6 +2735,8 @@ PlayableDirector:
   m_SceneBindings:
   - key: {fileID: -5894260030613724543, guid: d97dc1735b27c8d42a8789466763473d, type: 2}
     value: {fileID: 395575201}
+  - key: {fileID: -4262199990437950640, guid: d97dc1735b27c8d42a8789466763473d, type: 2}
+    value: {fileID: 1435826636}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &1136649842
@@ -3321,6 +3339,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1435826634}
+  - component: {fileID: 1435826636}
+  - component: {fileID: 1435826635}
   m_Layer: 0
   m_Name: StageSequenceRoot
   m_TagString: Untagged
@@ -3393,7 +3413,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -3403,7 +3423,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text:
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3483,6 +3503,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438587864}
   m_CullTransparentMesh: 1
+--- !u!114 &1435826635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435826633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 406780a9c1a6149498e3ca21fb6ecb2a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageSequenceVoiceView
+--- !u!114 &1435826636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435826633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e52de21a22b6dd44c9cc19f810c65059, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.SignalReceiver
+  m_Events:
+    m_Signals:
+    - {fileID: 11400000, guid: 75d99e400b3d33042a79ef4792fc9268, type: 2}
+    - {fileID: 11400000, guid: 2c85cb0d7c4902f4ebf3db6b55b6ea06, type: 2}
+    - {fileID: 11400000, guid: fe3b0c5d3757fe84b81b2d717ec63b09, type: 2}
+    m_Events:
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1435826635}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceVoiceView,
+            KillChord.View
+          m_MethodName: PlayStageStartVoice
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument:
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1435826635}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceVoiceView,
+            KillChord.View
+          m_MethodName: PlayStageClearVoice
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument:
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1435826635}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceVoiceView,
+            KillChord.View
+          m_MethodName: PlayGameOverVoice
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument:
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1443016743
 GameObject:
   m_ObjectHideFlags: 0
@@ -3530,6 +3625,53 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1546686501}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1544702106
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1544702108}
+  - component: {fileID: 1544702107}
+  m_Layer: 0
+  m_Name: ArtilleryExplosionEffectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1544702107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544702106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7a5317d2fd48579d1a768ba2e7d2ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ParticleSystemPoolView
+  _particleSystemTemplate: {fileID: 5205020749059622475, guid: 1187d84257545374183579b751260efb, type: 3}
+  _defaultCapacity: 4
+  _maxPoolSize: 16
+--- !u!4 &1544702108
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544702106}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1546686500
 GameObject:
@@ -3746,6 +3888,7 @@ MonoBehaviour:
   _shellPrefab: {fileID: 425184521389573371, guid: 18302f9c3e6be1f46bfa34f66180b21c, type: 3}
   _defaultShellPoolSize: 20
   _maxShellPoolSize: 40
+  _shellExplosionEffectView: {fileID: 1544702107}
 --- !u!4 &1599172286
 Transform:
   m_ObjectHideFlags: 0
@@ -5165,3 +5308,4 @@ SceneRoots:
   - {fileID: 887821556}
   - {fileID: 1546686501}
   - {fileID: 1435826634}
+  - {fileID: 1544702108}
