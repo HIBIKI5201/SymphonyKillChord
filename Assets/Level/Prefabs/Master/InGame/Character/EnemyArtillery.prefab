@@ -352,6 +352,7 @@ MonoBehaviour:
   - {fileID: 8319426868139304390}
   _deathSwampGameObject: {fileID: 6885004927969111772}
   _deathEffectDuration: 1
+  _deathSwampSinkDuration: 3
   _shellSpawner: {fileID: -2597676450090958460}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
@@ -913,9 +914,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3731371427858582317}
     m_Modifications:
+    - target: {fileID: 498760781368693423, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1946695054134519432, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3633621283076261781, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000871761689112775, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4309459416848471988, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7243839929005732014, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8216039841486328010, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_Pivot.x
@@ -1018,7 +1039,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 5246757749188476188}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf62745f13ad0804589d701191c24c15, type: 3}
   m_Name: 
