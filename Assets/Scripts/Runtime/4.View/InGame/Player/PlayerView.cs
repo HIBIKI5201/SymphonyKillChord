@@ -30,6 +30,12 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
+
+        [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
+        private Transform _damageEffectPoint;
+
         [SerializeField, Tooltip("回避成功時の仮エフェクト")]
         private ParticleSystem _dodgeEffect;
 
@@ -134,7 +140,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_healthHudPresenter != null)
             {
-                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedback;
                 _healthHudPresenter?.Dispose();
             }
 
@@ -160,7 +166,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
-            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
+            _healthHudPresenter.OnDamaged += PlayDamageFeedback;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -252,10 +258,21 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary>
         ///     被弾時のSEと仮Voiceを再生します。
         /// </summary>
-        public void PlayDamageFeedbackSound()
+        public void PlayDamageFeedback()
         {
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
+
+            if (_damageEffectView == null)
+            {
+                return;
+            }
+
+            Vector3 effectPosition = _damageEffectPoint != null
+                ? _damageEffectPoint.position
+                : transform.position;
+
+            _damageEffectView.PlayAt(effectPosition);
         }
 
         /// <summary>
