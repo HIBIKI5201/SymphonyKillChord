@@ -42,8 +42,8 @@ MonoBehaviour:
     - rid: 4420578705146119
       type: {class: ElapsedTimeClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "2\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
-        _requiredElapsedTime: 2
+        _inspectorSummary: "10\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 10
     - rid: 4420578705146120
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
