@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// </summary>
     public class SkillInputProgressUIInitializer : MonoBehaviour
     {
+        /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>
+        public SkillGuideProgressController GuideProgressController => _guideProgressController;
+
         private void Awake()
         {
             if (_skillInputProgressUIConfig == null)
@@ -46,6 +49,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 stepSettings[i] = _inputProgressViewSetting.GetSetting((int)beatType);
             }
             view.Initialize(stepSettings, _inputProgressViewSetting.AnimationSetting, _rhythmGuideView);
+            _guideProgressController.Register(view);
             return view;
         }
 
@@ -59,6 +63,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private ACLikeRhythmGuideView _rhythmGuideView;
 
         private SkillInputProgressViewSetting _inputProgressViewSetting;
+        private readonly SkillGuideProgressController _guideProgressController = new();
         private bool _isRegistered;
     }
 }
