@@ -77,6 +77,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
+            ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
 
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
@@ -199,6 +200,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
+            ServiceLocator.RegisterInstance(battlePreparationScreen);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,

@@ -6,9 +6,6 @@ namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class SinfoniaOperator
     {
-        /// <summary> ローカル実行用のJSON設定ファイル名。 </summary>
-        private const string DEFAULT_CONFIG_FILE = "sinfonia-operator.settings.json";
-
         public static async Task Main(string[] args)
         {
             Console.WriteLine("[Main] SinfoniaOperator 起動中...");
@@ -63,34 +60,93 @@ namespace SinfoniaStudio.SinfoniaOperator
 
         /// <summary>
         ///     JSON設定ファイルの読み込みを試みる。
-        ///     引数でパスが指定された場合はそのファイルを必須とし、見つからなければfalseを返す。
-        ///     指定が無い場合はカレントディレクトリと実行ファイルの場所を探し、
-        ///     どちらにも無ければ環境変数を使用する。
+        ///     引数でパスが指定された場合は、指定された全ファイルを順に読み込む。
+        ///     指定が無い場合は公開設定、秘密設定の順に読み込み、
+        ///     見つからない値は環境変数から取得する。
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
         private static bool TryLoadConfig(string[] args)
         {
-            // 引数でパスが明示された場合。
+            OperatorConfig.ClearOverrides();
+
             if (args.Length > 0)
             {
-                if (!OperatorConfig.LoadJsonFile(args[0]))
+                foreach (string path in args)
                 {
-                    Console.WriteLine($"[Main] 指定されたJSON設定ファイルが見つかりません: {args[0]}");
-                    return false;
+                    if (!OperatorConfig.LoadJsonFile(path))
+                    {
+                        Console.WriteLine($"[Main] 指定されたJSON設定ファイルが見つかりません: {path}");
+                        return false;
+                    }
                 }
+
                 return true;
             }
 
-            // カレントディレクトリ、次に実行ファイルの場所を探す。
-            string baseDirPath = Path.Combine(AppContext.BaseDirectory, DEFAULT_CONFIG_FILE);
-            if (OperatorConfig.LoadJsonFile(DEFAULT_CONFIG_FILE) || OperatorConfig.LoadJsonFile(baseDirPath))
+            string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
+            string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+            string? legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
+
+            if (environmentConfigPath != null)
             {
-                return true;
+                OperatorConfig.LoadJsonFile(environmentConfigPath);
             }
 
-            Console.WriteLine("[Main] JSON設定が見つからないため、環境変数を使用します。");
+            if (secretsConfigPath != null)
+            {
+                OperatorConfig.LoadJsonFile(secretsConfigPath);
+            }
+            else if (legacyConfigPath != null)
+            {
+                if (environmentConfigPath == null)
+                {
+                    OperatorConfig.LoadJsonFile(legacyConfigPath);
+                }
+                else
+                {
+                    OperatorConfig.LoadJsonFile(
+                        legacyConfigPath,
+                        OperatorConfigKeys.DISCORD_BOT_TOKEN,
+                        OperatorConfigKeys.NOTION_TOKEN);
+                }
+
+                Console.WriteLine($"[Main] 旧設定ファイルを読み込みました。{OperatorConfig.SECRETS_CONFIG_FILE_NAME}への移行を推奨します。");
+            }
+
+            if (environmentConfigPath == null && secretsConfigPath == null && legacyConfigPath == null)
+            {
+                Console.WriteLine("[Main] JSON設定が見つからないため、環境変数を使用します。");
+            }
+
             return true;
+        }
+
+        /// <summary>
+        ///     カレントディレクトリと実行ファイル位置の祖先から設定ファイルを探す。
+        /// </summary>
+        /// <param name="fileName">設定ファイル名。</param>
+        /// <returns>見つかったファイルのパス。見つからない場合はnull。</returns>
+        private static string? FindConfigFile(string fileName)
+        {
+            string[] startDirectories =
+            {
+                Directory.GetCurrentDirectory(),
+                AppContext.BaseDirectory
+            };
+
+            foreach (string startDirectory in startDirectories)
+            {
+                DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
+                while (current != null)
+                {
+                    string candidate = Path.Combine(current.FullName, fileName);
+                    if (File.Exists(candidate)) { return candidate; }
+                    current = current.Parent;
+                }
+            }
+
+            return null;
         }
 
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)

@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Domain.Player
 {
@@ -14,6 +15,15 @@ namespace KillChord.Runtime.Domain.Player
 
         /// <summary> スキル表示名です。 </summary>
         public string DisplayName { get; }
+
+        /// <summary> スキル詳細です。 </summary>
+        public string SkillDetail { get; }
+
+        /// <summary> アウトゲーム画面で表示するスキルアイコンです。 </summary>
+        public Sprite Icon { get; }
+
+        /// <summary> アウトゲーム画面でのスキル効果表示モードです。 </summary>
+        public SkillEffectDisplayMode EffectDisplayMode { get; }
 
         /// <summary> 入力パターンです。 </summary>
         public BeatType[] Pattern { get; }
@@ -45,6 +55,9 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="effectSpec"> 効果定義です。 </param>
         /// <param name="animationKey"> アニメーションキーです。 </param>
         /// <param name="displayName"> スキルの表示名です </param>
+        /// <param name="skillDetail"> スキルの詳細です </param>
+        /// <param name="icon"> アウトゲーム画面で表示するアイコンです。 </param>
+        /// <param name="effectDisplayMode"> アウトゲーム画面でのスキル効果表示モードです。 </param>
         public SkillTemplate(
             SkillId id,
             BeatType[] pattern,
@@ -54,7 +67,10 @@ namespace KillChord.Runtime.Domain.Player
             int cooldownDenomimator,
             SkillEffectSpec effectSpec,
             string animationKey,
-            string displayName)
+            string displayName,
+            string skillDetail,
+            Sprite icon,
+            SkillEffectDisplayMode effectDisplayMode)
         {
             if (cooldownDenomimator <= 0)
             {
@@ -74,6 +90,9 @@ namespace KillChord.Runtime.Domain.Player
             EffectSpec = effectSpec;
             AnimationKey = animationKey;
             DisplayName = displayName;
+            SkillDetail = skillDetail;
+            Icon = icon;
+            EffectDisplayMode = effectDisplayMode;
         }
 
         /// <summary>

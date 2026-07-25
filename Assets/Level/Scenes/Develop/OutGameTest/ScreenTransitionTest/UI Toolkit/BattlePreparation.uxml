@@ -2,9 +2,23 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
-    <ui:VisualElement class="screen-visible" style="flex-grow: 1; background-color: rgb(127, 147, 178);">
-        <ui:Label text="戦闘準備画面" name="Title" class="title" style="-unity-font-style: bold; font-size: 30px; -unity-text-align: middle-center; border-top-width: 5px; border-right-width: 5px; border-bottom-width: 5px; border-left-width: 5px;"/>
-        <ui:Button text="戻る" name="BackButton" class="button back-button" style="width: 200px; height: 100px; background-color: rgb(188, 188, 188); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px;"/>
-        <ui:Button text="スタート" name="StartButton" class="button" style="width: 400px; height: 100px; background-color: rgb(188, 188, 188); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; position: absolute; top: auto; left: auto; align-self: flex-end; align-content: flex-end; right: 18px; bottom: 20px;"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/BattlePreparation.uss?fileID=7433441132597879392&amp;guid=91f7fe503f514bc5b0c6c6dbdc0d4711&amp;type=3#BattlePreparation"/>
+    <ui:VisualElement class="screen-visible battle-preparation-screen">
+        <ui:Label text="戦闘準備" name="Title" class="title battle-preparation-title" style="display: none;"/>
+        <ui:VisualElement name="PreparationContent" class="battle-preparation-content">
+            <ui:VisualElement name="PreparationPanel" class="battle-preparation-panel">
+                <ui:Label text="装備中のスキル" class="battle-preparation-section-title"/>
+                <ui:VisualElement name="EquippedSkillStrip" class="battle-preparation-skill-strip"/>
+                <ui:Label text="スキル効果" class="battle-preparation-section-title"/>
+                <ui:ScrollView name="EquippedSkillEffectScrollView" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" class="battle-preparation-effect-scroll">
+                    <ui:VisualElement name="EquippedSkillEffectList" class="battle-preparation-effect-list"/>
+                </ui:ScrollView>
+                <ui:VisualElement name="FooterButtons" class="battle-preparation-footer">
+                    <ui:Button text="出撃" name="StartButton" class="button battle-preparation-start-button" style="right: 1%;"/>
+                    <ui:Button text="改造" name="SkillBuildButton" class="button battle-preparation-back-button" style="left: 1%; position: absolute;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Button text="戻る" name="BackButton" class="button back-button" style="left: auto;"/>
     </ui:VisualElement>
 </ui:UXML>

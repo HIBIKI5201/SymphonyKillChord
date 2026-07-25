@@ -4,11 +4,12 @@ using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
-using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -16,7 +17,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Enemy
 {
@@ -58,7 +58,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="shellView"></param>
         /// <param name="enemyBattleState"></param>
         /// <returns></returns>
-        public void Initialize(Action<ShellLifeCycle> releaseCallback)
+        public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView)
         {
             if (!_musicSyncInitializer) _musicSyncInitializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (!_musicSyncView) _musicSyncView = FindAnyObjectByType<MusicSyncView>();
@@ -95,7 +95,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 attackUsecase);
             _controller = controller;
 
-            _view.Initialize(_playerModuleContainer.PlayerView.transform, shellSpecPresenter, Deactivate);
+            _view.Initialize(_playerModuleContainer.PlayerView.transform, shellSpecPresenter, Deactivate, shellExplosionEffectView);
             _releaseCallback = releaseCallback;
         }
 

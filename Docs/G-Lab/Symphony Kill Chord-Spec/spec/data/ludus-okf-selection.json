@@ -1,0 +1,24 @@
+{
+  "ludusCommit": "b949cfa136fa27de101ace324f99a715f17e6846",
+  "bundle": "spec/data/okf/ludus-play",
+  "verification": {
+    "typedDocuments": 907,
+    "propertyGraphNodes": 906,
+    "propertyGraphEdges": 2863
+  },
+  "selectedIds": [
+    "genre:rhythm",
+    "genre:action",
+    "genre:shooter",
+    "system:rhythm:s01",
+    "system:rhythm:s02",
+    "system:action:character-controller",
+    "system:action:camera",
+    "system:action:lock-on",
+    "system:action:combo",
+    "system:action:i-frames",
+    "system:shooter:s03",
+    "system:shooter:s06"
+  ],
+  "dataBoundary": "References and local adoption decisions only; no project-specific evidence is written back to Ludus."
+}

@@ -17,6 +17,13 @@ MonoBehaviour:
     _hashId: -1127918619
   _displayName: 1
   _pattern: 020000000400000001000000
+  _skillDetail: "ターゲットに強力な一回攻撃。\n\n確定でクリティカル発生"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 1
+    _value: 0.9
+    _displayFormat: 2
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

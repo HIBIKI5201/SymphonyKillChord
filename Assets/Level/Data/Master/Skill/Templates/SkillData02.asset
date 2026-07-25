@@ -17,6 +17,10 @@ MonoBehaviour:
     _hashId: 634126943
   _displayName: 2
   _pattern: 040000000400000002000000
+  _skillDetail: "通常攻撃のショットガンの攻撃を発動し、\nその攻撃に当たった対象に被ダメージ量25%増加のデバフを5秒間付与する。"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters: []
   _skillType: 02000000
   _level: 0
   _cooldownNumerator: 1

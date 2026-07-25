@@ -72,7 +72,7 @@ float4 frag(v2f i) : SV_Target
 #ifdef SMEARS_ON
     fadeAlpha *= i.smearsAlpha;
 #endif
-    clip(fadeAlpha - BayerDither(i.pos.xy * 0.5) - 0.0001);
+    clip(fadeAlpha - BayerDither(i.pos.xy) - 0.0001);
 #endif
     return _OutlineColor;
 }
