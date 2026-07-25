@@ -1,18 +1,18 @@
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
-    ///     スキル入力の進捗を表示する行のViewインタフェース。
+    ///     クロスヘア上のリズムコマンド表示Viewインタフェース。
     /// </summary>
-    public interface ISkillInputProgressRowView
+    public interface ISkillCrosshairProgressView
     {
         /// <summary>
-        ///     行内の拍子アイコンの状態を更新する。
+        ///     拍子アイコンの点灯/消灯状態を更新する。
         /// </summary>
         /// <param name="dto"></param>
         public void UpdateSteps(SkillInputProgressUpdateDTO dto);
 
         /// <summary>
-        ///     このスキルのコマンド表示ON/OFFを切り替える。
+        ///     表示ON/OFFを切り替える。
         /// </summary>
         /// <param name="visible"> 表示する場合はtrue。 </param>
         public void SetVisible(bool visible);

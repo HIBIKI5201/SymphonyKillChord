@@ -91,6 +91,35 @@ namespace KillChord.Runtime.View.InGame.Music
             _currentOpenIndex = activeIndex;
         }
         /// <summary>
+        ///     指定した拍子（BeatTypeの整数値）に対応するジャストタイミング位置のX座標（中心からの距離。左右対称に±で使う）を取得する。
+        /// </summary>
+        /// <param name="beatType"> 対象の拍子（BeatTypeの整数値）。 </param>
+        /// <param name="xPosition"> 中心からの距離（絶対値）。取得できない場合は0。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
+        {
+            xPosition = 0f;
+
+            if (_zoneBeatCounts == null || _justTimingBeatBoxIndex == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _zoneBeatCounts.Length && i < _justTimingBeatBoxIndex.Length; i++)
+            {
+                if (_zoneBeatCounts[i] != beatType)
+                {
+                    continue;
+                }
+
+                xPosition = (_justTimingBeatBoxIndex[i] + 0.5f) * _beatWidth;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///    ビートのアニメーションを更新する。
         /// </summary>
         /// <param name="openIndex"> アニメーション対象のブロック番号。 </param>
