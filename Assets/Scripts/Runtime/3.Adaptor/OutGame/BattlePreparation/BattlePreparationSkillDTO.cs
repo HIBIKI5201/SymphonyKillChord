@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
@@ -5,7 +6,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
     /// <summary>
     ///     戦闘準備画面に表示する1スロット分のスキル情報です。
     /// </summary>
-    public readonly struct BattlePreparationSkillDTO
+    public readonly struct BattlePreparationSkillDTO : IEquatable<BattlePreparationSkillDTO>
     {
         /// <summary>
         ///     表示情報を初期化します。
@@ -55,5 +56,47 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
 
         /// <summary> 効果説明です。 </summary>
         public string EffectDescription { get; }
+
+        /// <summary>
+        ///     等値比較を行います。
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(BattlePreparationSkillDTO other)
+        {
+            return SlotIndex == other.SlotIndex &&
+                   HasSkill == other.HasSkill &&
+                   Icon == other.Icon &&
+                   DisplayName == other.DisplayName &&
+                   ComboLabel == other.ComboLabel &&
+                   HasEffectDescription == other.HasEffectDescription &&
+                   EffectDescription == other.EffectDescription;
+        }
+
+        /// <summary>
+        ///     等値比較を行います。
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            return obj is BattlePreparationSkillDTO other && Equals(other);
+        }
+
+        /// <summary>
+        ///    ハッシュコードを取得します。
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                SlotIndex,
+                HasSkill,
+                Icon,
+                DisplayName,
+                ComboLabel,
+                HasEffectDescription,
+                EffectDescription);
+        }
     }
 }
