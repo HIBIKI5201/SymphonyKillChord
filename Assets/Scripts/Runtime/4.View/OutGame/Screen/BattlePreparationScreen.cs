@@ -16,13 +16,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public BattlePreparationScreen(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
-            _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
-                ?? throw new System.ArgumentNullException(
-                    $"[{nameof(BattlePreparationScreen)}] {BACKBUTTON_NAME} が見つかりませんでした。");
+            _backButton = rootElement.Q<Button>(BACK_BUTTON_NAME)
+                ?? throw new ArgumentNullException(
+                    $"[{nameof(BattlePreparationScreen)}] {BACK_BUTTON_NAME} が見つかりませんでした。");
 
-            _startButton = rootElement.Q<Button>(STARTBUTTON_NAME)
-                ?? throw new System.ArgumentNullException(
-                    $"[{nameof(BattlePreparationScreen)}] {STARTBUTTON_NAME} が見つかりませんでした。");
+            _startButton = rootElement.Q<Button>(START_BUTTON_NAME)
+                ?? throw new ArgumentNullException(
+                    $"[{nameof(BattlePreparationScreen)}] {START_BUTTON_NAME} が見つかりませんでした。");
+
+            _skillBuildButton = rootElement.Q<Button>(SKILL_BUILD_BUTTON_NAME)
+                ?? throw new ArgumentNullException(
+                    $"[{nameof(BattlePreparationScreen)}] {SKILL_BUILD_BUTTON_NAME} が見つかりませんでした。");
 
             _equippedSkillStrip = rootElement.Q<VisualElement>(EQUIPPED_SKILL_STRIP_NAME)
                 ?? throw new ArgumentNullException(
@@ -88,6 +92,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             _startButton.RegisterCallback<ClickEvent>(OnStartButtonClicked);
+            _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
         }
 
         /// <summary>
@@ -97,6 +102,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
             _startButton.UnregisterCallback<ClickEvent>(OnStartButtonClicked);
+            _skillBuildButton.UnregisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
         }
 
         /// <summary>
@@ -121,6 +127,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void OnStartButtonClicked(ClickEvent evt)
         {
             OutGameUIEvent.OnStartGame?.Invoke(_pendingTargetSceneName);
+        }
+
+        /// <summary>
+        ///     スキル編成ボタンがクリックされたときの処理です。
+        /// </summary>
+        /// <param name="evt"></param>
+        private void OnSkillBuildButtonClicked(ClickEvent evt)
+        {
+            OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
         /// <summary>
@@ -231,8 +246,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             return item;
         }
 
-        private const string BACKBUTTON_NAME = "BackButton";
-        private const string STARTBUTTON_NAME = "StartButton";
+        private const string BACK_BUTTON_NAME = "BackButton";
+        private const string START_BUTTON_NAME = "StartButton";
+        private const string SKILL_BUILD_BUTTON_NAME = "SkillBuildButton";
         private const string EQUIPPED_SKILL_STRIP_NAME = "EquippedSkillStrip";
         private const string EFFECT_SCROLL_VIEW_NAME = "EquippedSkillEffectScrollView";
         private const string EFFECT_LIST_NAME = "EquippedSkillEffectList";
@@ -240,6 +256,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private readonly Button _backButton;
         private readonly Button _startButton;
+        private readonly Button _skillBuildButton;
         private readonly VisualElement _equippedSkillStrip;
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
