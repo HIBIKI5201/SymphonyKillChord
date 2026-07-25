@@ -61,13 +61,17 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
+            // normalizeOffsetは1小節基準の進捗(0～1)。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
+            // ゾーン・Just位置と同じ基準に揃えるためゲージ全長に対する位置へ変換する。
+            float gaugeNormalized = Mathf.Clamp01(normalizeOffset) / GUIDE_LENGTH_IN_BARS;
+
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
-                _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
+                _beatPositionImages[i].fillAmount = gaugeNormalized;
             }
 
             int activeIndex = Mathf.Clamp(
-                                (int)(_totalBeatBoxCount * Mathf.Clamp01(normalizeOffset)),
+                                (int)(_totalBeatBoxCount * gaugeNormalized),
                                 0,
                                 _totalBeatBoxCount - 1);
             if (activeIndex == _currentOpenIndex)
@@ -633,10 +637,12 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             float position = (blockIndex * beatWidth) / scale;
 
+            // _zoneStarts/_zoneEndsは1小節基準（0～1）の正規化値のため、
+            // GUIDE_LENGTH_IN_BARS小節分を表すゲージ全長へ変換してから比較する。
             for (int i = 0; i < _zoneStarts.Length; i++)
             {
-                float start = _zoneStarts[i] * _displayLength;
-                float end = _zoneEnds[i] * _displayLength;
+                float start = (_zoneStarts[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
+                float end = (_zoneEnds[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
 
                 if (position >= start && position < end)
                 {
