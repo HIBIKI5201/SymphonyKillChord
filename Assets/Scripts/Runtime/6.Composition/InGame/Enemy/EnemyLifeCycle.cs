@@ -10,6 +10,7 @@ using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -171,6 +172,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
+            _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
             if (_shellSpawner != null && shellPool != null)
             {
@@ -409,6 +411,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyBattleState _battleState;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
+
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMusicSpecAsset _loadedEncounterMusicData;
@@ -662,6 +665,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private void HandleEnemyDied(CharacterEntity _)
         {
             DieAsync();
+        }
+
+        /// <summary>
+        ///     敵が攻撃を実行したことをMissionへ通知します。
+        /// </summary>
+        private void HandleEnemyAttackExecuted()
+        {
+            _missionEventController?.NotifyActionPerformed(MissionActionKind.EnemyAttack);
         }
 
         /// <summary>
