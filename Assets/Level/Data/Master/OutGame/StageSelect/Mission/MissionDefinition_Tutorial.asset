@@ -176,9 +176,9 @@ MonoBehaviour:
     - rid: 4420609062207642
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "Attack\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _inspectorSummary: "Attack\u30922\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
         _actionKind: 1
-        _requiredCount: 1
+        _requiredCount: 2
     - rid: 4420609062207874
       type: {class: WaveStartClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
