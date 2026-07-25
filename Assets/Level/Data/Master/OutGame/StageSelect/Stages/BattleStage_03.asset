@@ -16,7 +16,7 @@ MonoBehaviour:
   _stageId:
     _id: battle_stage_03
     _hashId: -992386395
-  _isInitiallyUnlocked: 1
+  _isInitiallyUnlocked: 0
   _stageName: "\u30C6\u30B9\u30C8"
   _flavorText: "\u30C6\u30B9\u30C8\u30B7\u30FC\u30F3"
   _targetSceneName: InGame
