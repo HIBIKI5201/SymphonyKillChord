@@ -21,3 +21,12 @@ MonoBehaviour:
   UnlockCost: 10
   SkillDetail: 
   PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 119001
+  references:
+    version: 2
+    RefIds:
+    - rid: 119001
+      type: {class: CriticalDamageMultiplierAdditionEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
+      data:
+        _value: 0.1
