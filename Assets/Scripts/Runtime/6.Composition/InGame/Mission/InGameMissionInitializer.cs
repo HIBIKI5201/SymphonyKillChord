@@ -90,6 +90,11 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                     _missionStepPopupView);
             }
 
+            _playerBuffController = new MissionPlayerBuffController(
+                _moduleContainer.MissionRuntimeService,
+                _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
+                playerModuleContainer.PlayerEntity);
+
             return true;
         }
 
@@ -170,6 +175,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             _recorderController?.Dispose();
             _popupController?.Dispose();
+            _playerBuffController?.Dispose();
 
             if (!_isModuleRegistered)
             {
@@ -191,6 +197,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
         private MissionStepPopupController _popupController;
+        private MissionPlayerBuffController _playerBuffController;
 
         private void OnDestroy()
         {

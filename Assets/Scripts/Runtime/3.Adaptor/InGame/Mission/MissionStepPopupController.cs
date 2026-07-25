@@ -49,7 +49,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleObjectiveStepChanged(int stepIndex)
         {
             ObjectiveSequenceStep step = _objectiveSequence.GetStep(stepIndex);
-            if (step?.Condition is not PopupClearCondition popupCondition)
+            PopupClearCondition popupCondition = step != null ? ClearConditionChain.Find<PopupClearCondition>(step.Condition) : null;
+            if (popupCondition == null)
             {
                 _popupView.Hide();
                 return;

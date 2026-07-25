@@ -24,11 +24,6 @@ namespace KillChord.Runtime.View.InGame.Mission
         {
             MainMissionText.Value = dto.MainMissionText;
 
-            if (!HasEvaluationItemsChanged(dto.EvaluationItems))
-            {
-                return;
-            }
-
             _evaluationItems.Clear();
 
             for (int i = 0; i < dto.EvaluationItems.Length; i++)
@@ -41,34 +36,7 @@ namespace KillChord.Runtime.View.InGame.Mission
                 ));
             }
 
-            OnEvaluationItemsUpdated?.Invoke((IReadOnlyList<MissionEvaluationItemViewModel>)_evaluationItems);
-        }
-
-        /// <summary>
-        ///     評価項目に前回適用時からの変化があるかどうかを判定します。
-        /// </summary>
-        /// <param name="newItems">今回のDTOに含まれる評価項目。</param>
-        /// <returns>内容が変化している場合はtrue。</returns>
-        private bool HasEvaluationItemsChanged(ReadOnlySpan<MissionEvaluationItemDTO> newItems)
-        {
-            if (newItems.Length != _evaluationItems.Count)
-            {
-                return true;
-            }
-
-            for (int i = 0; i < newItems.Length; i++)
-            {
-                MissionEvaluationItemViewModel current = _evaluationItems[i];
-                MissionEvaluationItemDTO next = newItems[i];
-
-                if (current.DisplayState != next.DisplayState ||
-                    current.Description != next.Description)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            OnEvaluationItemsUpdated?.Invoke(_evaluationItems.AsReadOnly());
         }
 
         /// <summary> 評価項目のリスト。 </summary>

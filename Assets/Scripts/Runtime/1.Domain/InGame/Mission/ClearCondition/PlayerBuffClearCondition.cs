@@ -1,27 +1,28 @@
+using KillChord.Runtime.Domain.InGame.Buff;
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
-    ///     内側の達成条件をラップし、このステップの開始時に説明ポップアップを表示する目印を兼ねるクリア条件です。
-    ///     達成判定(＝ポップアップが閉じる条件)自体は内側の条件に委譲します。
+    ///     内側の達成条件をラップし、このステップの間だけプレイヤーへバフ・デバフを付与する目印を兼ねるクリア条件です。
+    ///     達成判定自体は内側の条件に委譲します。付与・解除のタイミング制御はMission側のControllerが担います。
     /// </summary>
-    public sealed class PopupClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter, IDecoratorClearCondition
+    public sealed class PlayerBuffClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter, IDecoratorClearCondition
     {
         /// <summary>
-        ///     PopupClearCondition クラスの新しいインスタンスを初期化します。
+        ///     PlayerBuffClearCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
-        /// <param name="innerCondition"> ポップアップが閉じる判定を委譲する内側の条件です。 </param>
-        /// <param name="popupImage"> ポップアップに表示する画像です。不要な場合はnullです。 </param>
-        public PopupClearCondition(IMissionClearCondition innerCondition, Sprite popupImage)
+        /// <param name="innerCondition"> 達成判定を委譲する内側の条件です。 </param>
+        /// <param name="buffs"> このステップの間だけプレイヤーへ付与するバフ・デバフです。 </param>
+        public PlayerBuffClearCondition(IMissionClearCondition innerCondition, IReadOnlyList<IBuff> buffs)
         {
             _innerCondition = innerCondition ?? throw new ArgumentNullException(nameof(innerCondition));
-            PopupImage = popupImage;
+            Buffs = buffs ?? Array.Empty<IBuff>();
         }
 
-        /// <summary> ポップアップに表示する画像です。未設定の場合はnullです。 </summary>
-        public Sprite PopupImage { get; }
+        /// <summary> このステップの間だけプレイヤーへ付与するバフ・デバフです。 </summary>
+        public IReadOnlyList<IBuff> Buffs { get; }
 
         /// <inheritdoc />
         public IMissionClearCondition InnerCondition => _innerCondition;

@@ -6,7 +6,6 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
-using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -87,8 +86,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(SkillInputProgressUIInitializer)} が見つかりません。", this);
                 return false;
             }
-
-            _skillCrosshairProgressUIInitializer = ServiceLocator.GetInstance<SkillCrosshairProgressUIInitializer>();
 
             SkillTemplate[] equippedSkills = ResolveEquippedSkills(playerModuleContainer.PlayerInitializer);
             SkillResultPresenter skillResultPresenter = new SkillResultPresenter(_skillResultViewModel);
@@ -197,20 +194,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition)
         {
             ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition);
-
-            ISkillCrosshairProgressView crosshairView = null;
-            SkillCrosshairProgressController crosshairController = null;
-            if (_skillCrosshairProgressUIInitializer != null)
-            {
-                crosshairView = _skillCrosshairProgressUIInitializer.CreateCrosshairProgressView(definition);
-                crosshairController = _skillCrosshairProgressUIInitializer.Controller;
-            }
-
-            SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
-                rowView,
-                crosshairView,
-                crosshairController,
-                _skillInputProgressUIInitializer.GuideProgressController);
+            SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(rowView);
             SkillInputProgressState state = new SkillInputProgressState(definition);
             return new SkillInputProgressController(state, presenter);
         }
@@ -302,7 +286,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         }
 
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
-        private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
         private SkillController _skillController;
         private SkillResultViewModel _skillResultViewModel;
         private SkillModuleContainer _moduleContainer;

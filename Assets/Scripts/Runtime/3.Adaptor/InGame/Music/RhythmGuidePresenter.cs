@@ -40,10 +40,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             _zones.Clear();
 
-            IReadOnlyList<RhythmJudgmentRange> judgmentRanges = _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges;
-            for (int i = 0; i < judgmentRanges.Count; i++)
+            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
             {
-                RhythmJudgmentRange range = judgmentRanges[i];
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,
                     range.StartNormalized,
