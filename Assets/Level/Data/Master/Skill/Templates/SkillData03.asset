@@ -17,6 +17,13 @@ MonoBehaviour:
     _hashId: 1389048521
   _displayName: 3
   _pattern: 03000000060000000600000003000000
+  _skillDetail: "ターゲットに対して単発高火力（通常攻撃の{DamageMultiplier}くらいの威力）\n\nターゲットに的中した後、プレイヤーと敵との半直線状にいる敵に対してスキル火力の50％のダメージを与える。"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 0
+    _value: 2
+    _displayFormat: 3
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

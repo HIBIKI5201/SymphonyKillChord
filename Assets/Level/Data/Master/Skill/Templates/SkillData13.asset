@@ -17,6 +17,19 @@ MonoBehaviour:
     _hashId: 1271923592
   _displayName: 13
   _pattern: 020000000800000008000000
+  _skillDetail: "ターゲットを行っている敵単体に攻撃力{DamageMultiplier}の{HitCount}攻撃を行う。\n\nこの攻撃でクリティカルが発生した場合、クリティカルダメージは{CriticalMultiplier}になる。"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 0
+    _value: 0.6
+    _displayFormat: 2
+  - _id: 3
+    _value: 5
+    _displayFormat: 4
+  - _id: 4
+    _value: 2
+    _displayFormat: 3
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

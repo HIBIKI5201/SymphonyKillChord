@@ -17,6 +17,16 @@ MonoBehaviour:
     _hashId: -1146578948
   _displayName: 5
   _pattern: 04000000020000000800000008000000
+  _skillDetail: "自身の体力を{HealthCostRatio}消費して、その消費量×{DamageMultiplier}のダメージを与える。"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 2
+    _value: 0.3
+    _displayFormat: 2
+  - _id: 0
+    _value: 5
+    _displayFormat: 0
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1
