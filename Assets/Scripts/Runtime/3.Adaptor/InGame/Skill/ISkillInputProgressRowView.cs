@@ -10,5 +10,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="dto"></param>
         public void UpdateSteps(SkillInputProgressUpdateDTO dto);
+
+        /// <summary>
+        ///     このスキルのコマンド表示ON/OFFを切り替える。
+        /// </summary>
+        /// <param name="visible"> 表示する場合はtrue。 </param>
+        public void SetVisible(bool visible);
     }
 }

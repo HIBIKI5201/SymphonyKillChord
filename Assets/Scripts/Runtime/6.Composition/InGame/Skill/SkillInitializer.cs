@@ -206,7 +206,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 crosshairController = _skillCrosshairProgressUIInitializer.Controller;
             }
 
-            SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(rowView, crosshairView, crosshairController);
+            SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
+                rowView,
+                crosshairView,
+                crosshairController,
+                _skillInputProgressUIInitializer.GuideProgressController);
             SkillInputProgressState state = new SkillInputProgressState(definition);
             return new SkillInputProgressController(state, presenter);
         }

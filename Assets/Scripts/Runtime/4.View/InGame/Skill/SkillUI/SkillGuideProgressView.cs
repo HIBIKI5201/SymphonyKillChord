@@ -35,10 +35,16 @@ namespace KillChord.Runtime.View.InGame.Skill
 
             // ジャストタイミング位置が確定するまでは、誤った位置が見えてしまわないようアイコン・背景ごと隠す。
             // リズムガイド未設定（X座標追従を使わない構成）の場合は待たずにそのまま表示する。
-            bool waitForPosition = _rhythmGuideView != null;
-            SetIconsVisible(!waitForPosition);
-            _isPositioned = !waitForPosition;
+            _isPositioned = _rhythmGuideView == null;
+            ApplyVisibility();
             ApplyStep(0);
+        }
+
+        /// <inheritdoc />
+        public void SetVisible(bool visible)
+        {
+            _isDisplayAllowed = visible;
+            ApplyVisibility();
         }
 
         /// <inheritdoc />
@@ -157,24 +163,25 @@ namespace KillChord.Runtime.View.InGame.Skill
             if (!_isPositioned)
             {
                 _isPositioned = true;
-                SetIconsVisible(true);
+                ApplyVisibility();
             }
         }
 
         /// <summary>
-        ///     アイコンとクールダウン背景の表示ON/OFFを切り替える。
+        ///     位置確定済みかつ表示許可がある場合のみ、アイコンとクールダウン背景を表示する。
         /// </summary>
-        /// <param name="visible"> 表示する場合はtrue。 </param>
-        private void SetIconsVisible(bool visible)
+        private void ApplyVisibility()
         {
+            bool visible = _isPositioned && _isDisplayAllowed;
             _leftIconImage.enabled = visible;
             _rightIconImage.enabled = visible;
-            if (_cooldownBackgroundImage != null || _cooldownBackgroundImage.Length > 0)
+            if (_cooldownBackgroundImage == null)
             {
-                for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
-                {
-                    _cooldownBackgroundImage[i].enabled = visible;
-                }
+                return;
+            }
+            for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
+            {
+                _cooldownBackgroundImage[i].enabled = visible;
             }
         }
 
@@ -311,6 +318,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private float _baseLocalEulerAngleZ;
         private bool _isSkillCoolingDown;
         private bool _isPositioned;
+        private bool _isDisplayAllowed = true;
         private int _patternMatchCount;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;
