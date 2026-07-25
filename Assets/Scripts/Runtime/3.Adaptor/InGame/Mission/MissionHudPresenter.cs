@@ -40,7 +40,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             MissionHudDTO dto = new MissionHudDTO(
                 _missionRuntimeService.MissionDefinition.MainMissionText,
-                resultText,
                 evaluationItems);
 
             _missionHudViewModel.Apply(dto);
