@@ -196,10 +196,10 @@
 
 .battle-preparation-start-button,
 .battle-preparation-back-button {
-    width: 42%;
+    width: 40%;
     height: 72px;
     min-height: 56px;
-    margin-left: 12px;
+    margin-left: 10px;
     font-size: 24px;
     background-color: rgb(188, 188, 188);
     border-top-left-radius: 11px;
