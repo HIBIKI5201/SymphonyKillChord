@@ -48,7 +48,8 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 targetResult.PrimaryTargetEntity,
                 _playerEntity,
                 beatType,
-                targetResult.TargetEntities);
+                targetResult.TargetEntities,
+                skillDefinition.EffectSpec);
             executor.Execute(context);
             _playerEntity.BuffSystem.Execute(new BuffContext(_playerEntity, targetResult.PrimaryTargetEntity), BuffExecuteTiming.Skill);
             return true;
