@@ -87,7 +87,9 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _popupController = new MissionStepPopupController(
                     _moduleContainer.MissionRuntimeService,
                     _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
-                    _missionStepPopupView);
+                    _missionStepPopupView,
+                    playerModuleContainer.InputSuppressionState,
+                    _popupInputSuppressionDuration);
             }
 
             _playerBuffController = new MissionPlayerBuffController(
@@ -190,6 +192,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
+        [SerializeField, Min(0f), Tooltip("説明ポップアップ表示直後にプレイヤー入力を無効化する秒数。")] private float _popupInputSuppressionDuration = MissionStepPopupController.DefaultInputSuppressionDuration;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
