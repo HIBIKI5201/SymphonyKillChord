@@ -45,6 +45,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _cameraSystemView = FindFirstObjectByType<CameraSystemView>();
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+            _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -52,7 +53,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageStartCameraView == null
                 || _cameraSystemView == null
                 || _stageResultView == null
-                || _inGamePlayDirector == null)
+                || _inGamePlayDirector == null
+                || _stageSequenceVoiceView == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
@@ -117,6 +119,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                     this);
                 return false;
             }
+
+            _stageSequenceVoiceView.Initialize(
+                playerContainer.PlayerView);
 
             _stageResultController = stageResultContainer.Controller;
 
@@ -388,6 +393,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageProgressSaveDataService _stageProgressSaveDataService;
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
+        private StageSequenceVoiceView _stageSequenceVoiceView;
         private bool _isWaitingForLoadingCompleted;
         private bool _isRegistered;
         private bool _hasStarted;
