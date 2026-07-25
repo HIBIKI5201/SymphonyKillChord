@@ -10,6 +10,7 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -48,7 +49,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
                 _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
-                _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+                EnemyMissionKeyRepository missionKeyRepository =
+                    await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
+                missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
                 _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
@@ -320,7 +323,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private TripleShotRaycastDetectView _tripleShotRaycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
+        [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
+        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("このボスが対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
         [SerializeField, SourceDataAddress, Tooltip("ボス攻撃定義群の Addressables キーです。")] private string _attackEntryRepoKey;
         [SerializeField] private BossMovementAIFacade _bossMovementAIFacade;
         [SerializeField] private BossBattleAIFacade _bossBattleAIFacade;
@@ -372,7 +376,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetable?.Dispose();
             _enemyDataKey.ReleaseLoadedAsset(this);
             _moveDataKey.ReleaseLoadedAsset(this);
-            _missionKeyAssetKey.ReleaseLoadedAsset(this);
+            _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _attackEntryRepoKey.ReleaseLoadedAsset(this);
             _loadedEnemyData = null;
             _loadedMoveData = null;

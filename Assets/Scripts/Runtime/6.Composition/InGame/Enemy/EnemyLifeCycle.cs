@@ -53,7 +53,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
                 _loadedEncounterMusicData = await _encounterMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
                 _loadedBattleMusicData = await _battleMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
-                _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+                EnemyMissionKeyRepository missionKeyRepository =
+                    await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
+                missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
 
@@ -364,7 +366,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
+        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("この敵が対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -691,7 +694,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _moveDataKey.ReleaseLoadedAsset(this);
             _encounterMusicDataKey.ReleaseLoadedAsset(this);
             _battleMusicDataKey.ReleaseLoadedAsset(this);
-            _missionKeyAssetKey.ReleaseLoadedAsset(this);
+            _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _loadedEnemyData = null;
             _loadedMoveData = null;
             _loadedEncounterMusicData = null;

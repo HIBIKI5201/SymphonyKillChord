@@ -534,7 +534,10 @@ MonoBehaviour:
   _raycastView: {fileID: 8457508100998247417}
   _tripleShotRaycastView: {fileID: 1663985275118639641}
   _attackPositionSearchView: {fileID: 7234215661414305059}
-  _missionKeyAssetKey: EnemyMissionKeyAsset
+  _missionKeyRepositoryKey: EnemyMissionKeyRepository
+  _missionKeyId:
+    _id: boss
+    _hashId: 606005395
   _attackEntryRepoKey: BossAttackEntryRepo
   _bossMovementAIFacade: {fileID: 6946616038599445502}
   _bossBattleAIFacade: {fileID: -9177679704855439460}
@@ -588,6 +591,7 @@ MonoBehaviour:
   _hitLayers:
     serializedVersion: 2
     m_Bits: 192
+  _attackWarningDecal: {fileID: 0}
 --- !u!114 &1663985275118639641
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -153,7 +153,10 @@ MonoBehaviour:
   _healthView: {fileID: -5582845147010298855}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -1587367200165867470}
-  _missionKeyAssetKey: EnemyMissionKeyAsset
+  _missionKeyRepositoryKey: EnemyMissionKeyRepository
+  _missionKeyId:
+    _id: enemy_red
+    _hashId: 1401557065
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
