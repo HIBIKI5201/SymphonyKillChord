@@ -610,7 +610,11 @@ namespace KillChord.Runtime.View.InGame.Music
 
             for (int i = 0; i < justTimingBeatBoxIndex.Length; i++)
             {
-                float position = ((_zoneStarts[i] + _zoneEnds[i]) * 0.5f) * _displayLength;
+                int beatCount = _zoneBeatCounts[i];
+                // Justは「1小節をBeatCount(拍種)で割った位置」。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分を表示しているため、
+                // 小節内正規化位置(1/beatCount)をGUIDE_LENGTH_IN_BARSで割ってゲージ全長に対する位置へ変換する。
+                float justNormalized = beatCount > 0 ? (1f / beatCount) / GUIDE_LENGTH_IN_BARS : 0f;
+                float position = justNormalized * _displayLength;
                 justTimingBeatBoxIndex[i] = Mathf.Clamp(
                     Mathf.FloorToInt(position * scale / beatWidth),
                     0,
@@ -643,5 +647,7 @@ namespace KillChord.Runtime.View.InGame.Music
             return _zoneStarts.Length - 1;
         }
         private const float DEFAULT_DISPLAY_LENGTH = 120f;
+        /// <summary> ゲージ全長が表す小節数。Justは小節内正規化位置(1/BeatCount)をこの値で割った位置になる。 </summary>
+        private const float GUIDE_LENGTH_IN_BARS = 1.5f;
     }
 }
