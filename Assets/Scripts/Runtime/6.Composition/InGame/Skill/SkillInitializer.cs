@@ -111,6 +111,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 skillCheckService,
                 skillUsecase));
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
+            _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
             _moduleContainer.SetSkillController(_skillController);
             return true;
@@ -124,6 +125,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             if (_skillController != null && _boundPlayerView != null)
             {
                 _skillController.OnSkillAnimationRequested -= _boundPlayerView.PlaySkillAnimation;
+                _skillController.OnSkillVoiceRequested -= _boundPlayerView.PlaySkillVoice;
             }
 
             _boundPlayerView = null;
