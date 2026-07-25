@@ -30,11 +30,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 114f8ed06b070604fbf83641b90742c9
-    m_Address: TestSkillData1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 134672bf4f515f4439a46323fff09e2a
     m_Address: OwnedSkillRepository
     m_ReadOnly: 0
@@ -90,11 +85,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8836b3eb044a4af4fbfcb41d68328252
-    m_Address: TestSkillData2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 888c47664981fed459937f475b632964
     m_Address: ScenarioSettingsAsset
     m_ReadOnly: 0
@@ -120,13 +110,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b244ab8c89d4230b98ee894aa815b0b
+    m_Address: EnemyWaveDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9c44a325b8ad84f498216394b6a9d584
     m_Address: AnimationCatalogAsset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b11f6152160bbfc42b59af15ef998adc
+    m_Address: InitialSkillLoadout
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bad017c822c5b8c4da79df297d30324c
     m_Address: ExampleEncountMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd2baf74c95bbc545ac18bea3a467152
+    m_Address: CameraConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -150,11 +155,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9b244ab8c89d4230b98ee894aa815b0b
-    m_Address: EnemyWaveDefinitionRepository
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
     m_Address: SkillBuildRepositoryDebug
     m_ReadOnly: 0
@@ -172,11 +172,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fa8820e093edab1489d8bbed0db664af
     m_Address: SkillTreeTestInputData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd2baf74c95bbc545ac18bea3a467152
-    m_Address: CameraConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
