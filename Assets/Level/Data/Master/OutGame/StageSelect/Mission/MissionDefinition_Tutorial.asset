@@ -55,6 +55,9 @@ MonoBehaviour:
       rid: 4420578705146135
     _guideMessageText: "\u30AD\u30EB\u30B3\u30FC\u30C9\u3092\u767A\u52D5\u3057\u3066\u307F\u3088\u3046\u3002"
   - _condition:
+      rid: 4420609062207641
+    _guideMessageText: "\u6226\u95D8\u306B\u3064\u3044\u3066\n"
+  - _condition:
       rid: 4420578705146136
     _guideMessageText: "\u6575\u3092\u6483\u7834\u3057\u3088\u3046\u3002"
   _failCondition:
@@ -73,7 +76,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146122
-        _popupImage: {fileID: 21300000, guid: 5e3e1e33721d08f489d7323fd2161028, type: 3}
+        _popupImage: {fileID: 21300000, guid: 9222079969ed5464fb34b92f86da8a12, type: 3}
     - rid: 4420578705146122
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
@@ -98,7 +101,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146126
-        _popupImage: {fileID: 21300000, guid: 0cac2ba75836c644abf2bf4e211a492e, type: 3}
+        _popupImage: {fileID: 21300000, guid: ec5a829f58f574148b9c8090f30cc5bb, type: 3}
     - rid: 4420578705146126
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
@@ -147,13 +150,13 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146134
-        _popupImage: {fileID: 21300000, guid: 82ab4e8a5e98288439da6a093b1e7b70, type: 3}
+        _popupImage: {fileID: 21300000, guid: 59978ee2f94e48e45aab8b5a924724b6, type: 3}
     - rid: 4420578705146134
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "Attack\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _inspectorSummary: "Attack\u30922\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
         _actionKind: 1
-        _requiredCount: 1
+        _requiredCount: 2
     - rid: 4420578705146135
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
@@ -165,8 +168,21 @@ MonoBehaviour:
       data:
         _inspectorSummary: "Wave\u958B\u59CB + EnemyKillCountClearConditionAsset"
         _innerCondition:
-          rid: 4420578705146137
-    - rid: 4420578705146137
+          rid: 4420609062207643
+    - rid: 4420609062207641
+      type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062207642
+        _popupImage: {fileID: 21300000, guid: 5cb153a0d497c5747b836a8fbcf5cfab, type: 3}
+    - rid: 4420609062207642
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "Attack\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 1
+        _requiredCount: 1
+    - rid: 4420609062207643
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "\u8D64\u3044\u5175\u58EB\u30923\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
