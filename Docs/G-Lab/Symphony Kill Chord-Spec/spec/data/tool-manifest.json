@@ -1,0 +1,39 @@
+{
+  "analysisProfile": "omnipotens-full-static",
+  "retrievedAt": "2026-07-18T16:30:00+09:00",
+  "source": {
+    "repository": "https://github.com/HIBIKI5201/SymphonyKillChord",
+    "commit": "0cca5d536257fd5a2f7951f7d3a0756dfc0d5788",
+    "analysisBranch": "analysis/omnipotens-core",
+    "unity": "6000.3.10f1"
+  },
+  "tools": {
+    "omnipotensSkillCommit": "c89217895078be29b24cc263e7480d8b8ebf8438",
+    "ludusCommit": "b949cfa136fa27de101ace324f99a715f17e6846",
+    "anatomiaVersion": "0.1.0",
+    "anatomiaCommit": "d0cc4d6e77d1a10d1b4b1ca911026a1bec304cbb",
+    "vitiaCommit": "3fa33c9e5e7913c35a2a085dbbe49631cdee9eae",
+    "aiFormatCommit": "ff3edc1a927170d1728df10f635af28fd000dd7c",
+    "canalisVersion": "0.1.0",
+    "canalisCommit": "69b7fdaedc54233589d60c77b185ef195e78d5c8",
+    "canalisAdapter": "NotionPublicSource with same-session Edge fetcher",
+    "diService": "discutere 0.1.0",
+    "diSessionId": "abba676c-4aaa-4ede-a86d-2911a5f1a4ab",
+    "diEndpoint": "POST /api/flow/start + paper review/approve (start-from-paper unavailable)",
+    "node": "v24.14.1",
+    "python": "3.14.3"
+  },
+  "stages": {
+    "planningAndSpecification": "complete-35-of-35-public-spec-pages-reviewed",
+    "ludus": "complete-public-okf-selected-and-verified",
+    "domainModel": "complete-ten-specification-led-boundaries",
+    "anatomia": "complete-unity-aware-static-runtime-scope",
+    "specCodeWiring": "complete-static-spec-comparison-runtime-unverified",
+    "mechanicsEconomy": "partial-static-no-playtest-or-telemetry",
+    "aiFormatArchitecture": "complete-static-only",
+    "vitiaUx": "partial-static-no-representative-user-observation",
+    "marketability": "exploratory-no-store-price-or-campaign-data",
+    "diDiscussion": "complete-59-utterances-8-marks-concluded",
+    "packaging": "complete"
+  }
+}
