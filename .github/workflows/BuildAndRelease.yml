@@ -339,6 +339,35 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Restore NuGet Packages (NuGetForUnity.Cli)
+        run: |
+          Write-Host "::group::Restoring NuGet packages via NuGetForUnity.Cli"
+
+          if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+            Write-Host "dotnet not found. Installing .NET SDK..."
+            Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
+            & "$env:TEMP\dotnet-install.ps1" -Channel LTS -InstallDir "$env:USERPROFILE\.dotnet"
+            $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
+          }
+
+          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
+
+          $ToolsPath = "$env:USERPROFILE\.dotnet\tools"
+          if (Test-Path $ToolsPath) {
+            $env:PATH = "$ToolsPath;$env:PATH"
+          }
+
+          & nugetforunity restore "${{ github.workspace }}"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: NuGet package restore failed (exit $LASTEXITCODE)."
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "OK: NuGet packages restored."
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Execute Unity - Build
         run: |
           Write-Host "::group::Start Unity Build Process"
