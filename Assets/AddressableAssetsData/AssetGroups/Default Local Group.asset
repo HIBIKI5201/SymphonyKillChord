@@ -75,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77438a4db85a96f4982b191e886666d5
+    m_Address: CharacterDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
     m_Address: ShellAttackData
     m_ReadOnly: 0
@@ -102,11 +107,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8f9f05cd27f2f3a4087a15acbe76d7c3
     m_Address: OwnedSkillRepositoryDebug
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 93524034675db3e489e93312c0366c23
-    m_Address: Enemy
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -147,11 +147,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d69421e5dc9278446a38b4415677e2aa
     m_Address: ShellMusicData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d96aa53a8bf8e3e49ac87fa3cd9fbb2b
-    m_Address: BossCharacterData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

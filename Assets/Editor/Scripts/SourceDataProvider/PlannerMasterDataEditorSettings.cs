@@ -106,16 +106,15 @@ namespace KillChord.Editor.SourceDataProvider
                     "Enemy",
                     new List<string>
                     {
-                        "Enemy",
                         "ExampleEnemyMoveData",
                         "ShellAttackData",
-                        "BossCharacterData",
-                        "BossAttackEntryRepo"
+                        "BossAttackEntryRepo",
+                        "CharacterDefinitionRepository"
                     },
                     new List<string>
                     {
-                        "EnemyAttack",
-                        "BossAttackEntry"
+                        "BossAttackEntry",
+                        "Character"
                     }),
                 new(
                     "Skill Tree",

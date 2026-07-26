@@ -47,7 +47,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             try
             {
-                _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
+                CharacterDefinitionRepository characterRepository =
+                    await _characterRepositoryKey.LoadAssetAsync<CharacterDefinitionRepository>(this, cancellationToken);
+                characterRepository?.TryGetAsset(new CharacterDefinitionId(_characterId.Id), out _loadedEnemyData);
                 _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
                 EnemyMissionKeyRepository missionKeyRepository =
                     await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
@@ -315,7 +317,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField, SourceDataAddress, Tooltip("ボス定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")] private string _characterRepositoryKey;
+        [SerializeField, SourceDataCollection("Character"), Tooltip("このボスが対応するキャラクター定義のIDです。")] private DataID _characterId;
         [SerializeField, SourceDataAddress, Tooltip("ボス移動仕様の Addressables キーです。")] private string _moveDataKey;
 
         [SerializeField] private BossMoveView _view;
@@ -374,7 +377,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
-            _enemyDataKey.ReleaseLoadedAsset(this);
+            _characterRepositoryKey.ReleaseLoadedAsset(this);
             _moveDataKey.ReleaseLoadedAsset(this);
             _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _attackEntryRepoKey.ReleaseLoadedAsset(this);

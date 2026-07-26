@@ -85,7 +85,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535ba71651c02f2469918f19291b4862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.View.EnemyMoveDebugInitializer
-  _enemyDataKey: Enemy
+  _characterRepositoryKey: CharacterDefinitionRepository
+  _characterId:
+    _id: enemy
+    _hashId: -710926916
   _moveDataKey: ExampleEnemyMoveData
   _encounterMusicDataKey: ExampleEncountMusicData
   _battleMusicDataKey: ExampleBattleMusicData
