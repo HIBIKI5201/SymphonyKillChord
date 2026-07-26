@@ -160,6 +160,25 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Check .NET SDK / dotnet CLI Availability (Diagnostic)
+        run: |
+          Write-Host "::group::Check .NET SDK Availability"
+
+          $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($DotnetCmd) {
+            Write-Host "OK: dotnet command found at $($DotnetCmd.Source)"
+            & dotnet --version
+            Write-Host ""
+            Write-Host "Installed SDKs:"
+            & dotnet --list-sdks
+          } else {
+            Write-Host "WARNING: dotnet command not found on PATH."
+            Write-Host "         NuGetForUnity.Cli (dotnet tool) will not be usable without installing the .NET SDK."
+          }
+
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Execute Unity - Download and Import Packages
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
