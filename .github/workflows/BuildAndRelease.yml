@@ -578,20 +578,22 @@ jobs:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
           body: |
-            Workflow Run #${{ github.run_id }} から自動生成されたビルドArtifactです。
-            
-            **Trigger Event:** ${{ github.event_name }}
-            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**Trigger:** Manual Execution (workflow_dispatch)' }}
-            **Workflow Run詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            
-            **Build Process:**
-            1. Downloaded assets from Google Drive.
-            2. Automatically imported Unity packages.
-            3. Executed builds for multiple profiles (Development & Master).
-            
-            **Included Build Targets:**
-            - Development Profiles (Development profiles)
-            - Master Profiles (Master profiles)
+            Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
+
+            **トリガーイベント:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**対象PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行 (workflow_dispatch)' }}
+            **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            **実行プロセス:**
+            1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
+            2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
+            3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
+            4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
+            5. **Unity ビルド処理**: 複数ビルドプロファイル（Develop & Master）に基づき、Unity バッチモードによるビルドを実行。
+
+            **ビルド対象プロファイルの種類:**
+            - Develop ビルドプロファイル (DevelopBuildProfiles)
+            - Master ビルドプロファイル (MasterBuildProfiles)
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
