@@ -140,7 +140,7 @@ Creatorの「集約するクラスが生成する」に合致している。
 
 ### 【良好】層間の結合
 
-`ServiceLocator` の参照229箇所のうち227箇所が `6.Composition` 内に収まっており、
+`ServiceLocator` を参照する49ファイル中47ファイルが `6.Composition` 内に収まっており、
 `asmdef` による参照制約も機能している。**これは高く評価すべき**。
 
 ### 【違反】デメテルの法則違反によるチェーン結合
@@ -258,4 +258,117 @@ Pure Fabricationの適用は本プロジェクトの**最も優れている点**
 | [RhythmJustService.cs:11](../../Assets/Scripts/Runtime/2.Application/InGame/Music/RhythmJustService.cs) | 唯一の静的シングルトン。差し替え不能 |
 | [SkillCrosshairProgressController.cs:57](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillCrosshairProgressController.cs) | `static` メソッド内で `ServiceLocator` を直接参照 |
 | `EventBus<T>` | 静的クラス。購読解除漏れが[01](01_イベント購読解除漏れ.md)で問題化 |
-| `Camera.main` 6箇所 | カメラ差し替え演出と競合しうる |
+| `Camera.main` 7箇所 | カメラ差し替え演出と競合しうる |
+
+---
+
+# 付録: 該当箇所の全列挙
+
+## 付録A. `3.Adaptor` の `*Controller`（全41ファイル）
+
+うち3件はインターフェース定義なので、**具象クラスは38件**。
+役割ごとに分類した。改名は影響範囲が大きいため、
+**まず新規クラスから適切な名前を使う**運用を推奨。
+
+### A-1. GRASP的に正しい Controller（入力・イベントを受けて委譲）— 8件
+
+| ファイル | 役割 |
+| --- | --- |
+| [3.Adaptor/OutGame/Screen/ScreenController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/ScreenController.cs) | UseCaseへの委譲 |
+| [3.Adaptor/OutGame/SkillBuild/SkillBuildController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildController.cs) | 編成操作の受付 |
+| [3.Adaptor/OutGame/SkillTree/SkillTreeController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeController.cs) | ツリー操作の受付 |
+| [3.Adaptor/OutGame/StageSelect/StageSelectController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageSelectController.cs) | ステージ選択の受付 |
+| [3.Adaptor/OutGame/Sortie/OutGameSortieController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Sortie/OutGameSortieController.cs) | 出撃操作の受付 |
+| [3.Adaptor/OutGame/Title/TitleStartController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Title/TitleStartController.cs) | 開始操作の受付 |
+| [3.Adaptor/OutGame/Scenario/ScenarioInputController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/ScenarioInputController.cs) | シナリオ入力の受付 |
+| [3.Adaptor/InGame/Sequence/ReturnToTitleController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Sequence/ReturnToTitleController.cs) | タイトル復帰の受付 |
+
+### A-2. 実質 Coordinator / State Machine — 6件
+
+「入力を受けて委譲」ではなく、状態遷移を駆動している。
+
+| ファイル | 推奨名 |
+| --- | --- |
+| [3.Adaptor/InGame/Enemy/EnemyAIController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs) | `EnemyAICoordinator` |
+| [3.Adaptor/InGame/Enemy/Boss/BossAIController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss/BossAIController.cs) | `BossAICoordinator` |
+| [3.Adaptor/InGame/Enemy/ShellController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ShellController.cs) | `ShellCoordinator` |
+| [3.Adaptor/InGame/Enemy/EnemyWaveSpawnerController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyWaveSpawnerController.cs) | `EnemyWaveSpawner`（`EnemyType` switchは[16. OCP](16_SOLID原則.md)参照） |
+| [3.Adaptor/InGame/Mission/MissionEventController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionEventController.cs) | `MissionEventCoordinator` |
+| [3.Adaptor/InGame/Music/MusicSyncController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Music/MusicSyncController.cs) | `MusicSyncCoordinator` |
+
+### A-3. 実質 Service / Pipeline（計算・判定が主）— 9件
+
+| ファイル | 推奨名 |
+| --- | --- |
+| [3.Adaptor/InGame/Battle/PlayerAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/PlayerAttackController.cs) | `AttackPipeline`（CQS違反も併発。[17](17_デメテルの法則とCQS.md)） |
+| [3.Adaptor/InGame/Skill/SkillExecutionController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillExecutionController.cs) | `SkillExecutionPolicy`（死んだswitchあり。[14](14_KISS原則とYAGNI.md)） |
+| [3.Adaptor/InGame/Skill/SkillAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillAttackController.cs) | `SkillAttackService` |
+| [3.Adaptor/InGame/Skill/SkillController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillController.cs) | `SkillService` |
+| [3.Adaptor/InGame/Enemy/EnemyRaycastDetectController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyRaycastDetectController.cs) | `EnemyRaycastDetector` |
+| [3.Adaptor/InGame/Enemy/NearestAttackPositionSearchController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/NearestAttackPositionSearchController.cs) | `NearestAttackPositionSearcher` |
+| [3.Adaptor/InGame/Enemy/EnemyArtilleryAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyArtilleryAttackController.cs) | `EnemyArtilleryAttacker` |
+| [3.Adaptor/InGame/Enemy/EnemyInfantryAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyInfantryAttackController.cs) | `EnemyInfantryAttacker` |
+| [3.Adaptor/InGame/Enemy/Boss/EnemyTripleShotAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss/EnemyTripleShotAttackController.cs) | `EnemyTripleShotAttacker` |
+
+### A-4. 実質 Observer / Recorder（購読して記録）— 5件
+
+| ファイル | 推奨名 | 備考 |
+| --- | --- | --- |
+| [3.Adaptor/InGame/Mission/MissionProgressRecorderController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionProgressRecorderController.cs) | `MissionProgressRecorder` | 7イベントを購読 |
+| [3.Adaptor/InGame/Mission/MissionWaveController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionWaveController.cs) | `MissionWaveObserver` | |
+| [3.Adaptor/InGame/Mission/MissionStepPopupController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionStepPopupController.cs) | `MissionStepPopupPresenter` | |
+| [3.Adaptor/InGame/Mission/MissionPlayerBuffController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionPlayerBuffController.cs) | `MissionPlayerBuffApplier` | バフ配線未完了（[差分分析A-10](../仕様書と実装の差分分析_2026-07-27.md)） |
+| [3.Adaptor/Persistent/Input/RecordController.cs](../../Assets/Scripts/Runtime/3.Adaptor/Persistent/Input/RecordController.cs) | `InputRecorder` | |
+
+### A-5. その他（10件）
+
+| ファイル | 備考 |
+| --- | --- |
+| [3.Adaptor/InGame/Target/TargetSystemController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetSystemController.cs) | `ITargetSystemViewModel` 14メンバ問題の実装元（[16](16_SOLID原則.md)） |
+| [3.Adaptor/InGame/Player/PlayerController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Player/PlayerController.cs) | `ref`+`out` のCQS違反（[17](17_デメテルの法則とCQS.md)） |
+| [3.Adaptor/InGame/Result/StageResultController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Result/StageResultController.cs) | |
+| [3.Adaptor/InGame/Music/EquipmentBgmController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Music/EquipmentBgmController.cs) | |
+| [3.Adaptor/InGame/Skill/SkillUI/SkillCrosshairProgressController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillCrosshairProgressController.cs) | **`ServiceLocator` 直接参照**（レイヤー違反。[08](08_緊密結合とレイヤー違反.md)） |
+| [3.Adaptor/InGame/Skill/SkillUI/SkillGuideProgressController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillGuideProgressController.cs) | |
+| [3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressController.cs) | |
+| [3.Adaptor/InGame/Mission/OutGameMissionSelectController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/OutGameMissionSelectController.cs) | InGame配下にOutGame名。配置が不自然 |
+| [3.Adaptor/Persistent/Load/LoadingScreenController.cs](../../Assets/Scripts/Runtime/3.Adaptor/Persistent/Load/LoadingScreenController.cs) | |
+| [3.Adaptor/Persistent/SceneManagement/SceneTransitionController.cs](../../Assets/Scripts/Runtime/3.Adaptor/Persistent/SceneManagement/SceneTransitionController.cs) | |
+
+### A-6. インターフェース定義（3件・改名対象外）
+
+| ファイル |
+| --- |
+| [3.Adaptor/InGame/Enemy/IEnemyAttackController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IEnemyAttackController.cs) |
+| [3.Adaptor/InGame/Player/IPlayerController.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Player/IPlayerController.cs) |
+| [3.Adaptor/OutGame/Screen/IScreenController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/IScreenController.cs) |
+
+**集計**: 38の具象Controllerのうち、GRASP的に正しい Controller は **8件（21%）**。
+残り30件は他の役割を `Controller` の名前で表している。
+
+## 付録B. Information Expert の検証結果
+
+| クラス | 保持する情報 | 振る舞い | 判定 |
+| --- | --- | --- | --- |
+| [1.Domain/InGame/Character/CharacterEntity.cs](../../Assets/Scripts/Runtime/1.Domain/InGame/Character/CharacterEntity.cs) | HP・無敵状態 | `TakeDamage` / `Heal` / `SetInvincible` / `Reset` / `ChangeBaseDamage` / `SetDamage` | **良好** |
+| [1.Domain/InGame/Battle/AttackIntervalEntity.cs](../../Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackIntervalEntity.cs) | `IsAttacking` / `Interval` | `UpdateAttackState(bool)` のみ | **違反**（遷移ロジックが[AttackIntervalEvaluator.cs](../../Assets/Scripts/Runtime/2.Application/InGame/Battle/AttackIntervalEvaluator.cs)側にある） |
+| [1.Domain/OutGame/SkillTree/Entity/SkillTreeStatusEntity.cs](../../Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/Entity/SkillTreeStatusEntity.cs) | 解放済ノード・ポイント | `ModifyPoint` / `AddUnlockedNode` / `AddUnlockedSkillIds` | 良好（ただし加算経路が未実装。[差分分析A-1](../仕様書と実装の差分分析_2026-07-27.md)） |
+| [1.Domain/Persistent/Savedata/TutorialData.cs](../../Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/TutorialData.cs) | 完了フラグ | `Complete()` | 良好 |
+| [1.Domain/OutGame/SkillBuild/SkillBuildDefinition.cs](../../Assets/Scripts/Runtime/1.Domain/OutGame/SkillBuild/SkillBuildDefinition.cs) | 編成スロット | `EnsureSlotCount` / `SlotCount` | 良好 |
+
+## 付録C. Pure Fabrication の良い適用例（削除・統合しないこと）
+
+| ファイル | 役割 |
+| --- | --- |
+| [4.View/InGame/Camera/Calculation/CameraFollowCalculator.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraFollowCalculator.cs) | 追従計算。※補間式のフレームレート依存は[07](07_ライブラリ未活用.md)参照 |
+| [4.View/InGame/Camera/Calculation/CameraLockOnRotationCalculator.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnRotationCalculator.cs) | ロックオン回転計算 |
+| [4.View/InGame/Camera/Calculation/CameraFreeLookRotationCalculator.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraFreeLookRotationCalculator.cs) | フリールック回転計算 |
+| [4.View/InGame/Camera/Calculation/CameraLookAtRotationCalculator.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLookAtRotationCalculator.cs) | 注視回転計算 |
+| [4.View/InGame/Camera/Calculation/CameraLockOnRangeChecker.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnRangeChecker.cs) | 視野内判定 |
+| [4.View/InGame/Camera/Calculation/CameraLockOnBreakTracker.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnBreakTracker.cs) | ロックオン解除判定 |
+| [5.InfraStructure/OutGame/Scenario/CatalogRepositoryBase.cs](../../Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/CatalogRepositoryBase.cs) | 3リポジトリで共有される辞書キャッシュ基底 |
+| `6.Composition/**/\*ModuleContainer.cs`（10件） | DI組み立て結果の集約。`record`化推奨（[10](10_コード重複と過剰抽象化.md)） |
+
+カメラ計算6クラスは `CameraSystemView`（674行）からロジックを分離したもので、
+本プロジェクトで最も成功した責務分離。**引数15個問題（[17](17_デメテルの法則とCQS.md)）の
+解決時も、この6クラスは維持したまま `CameraCalculatorSet` に束ねるだけでよい**。

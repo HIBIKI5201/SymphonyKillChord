@@ -14,6 +14,8 @@
 
 ### 【違反】400行超のファイルが21個
 
+全件は [付録A](#付録a-400行超のファイル全21件) を参照。特に責務が多いのは以下。
+
 | ファイル | 行数 | 抱えている責務 |
 | --- | --- | --- |
 | [StageSelectInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs) | **945** | DI組み立て / UIレイアウト計算 / イベント配線 / 遷移制御 |
@@ -23,7 +25,9 @@
 | [ACLikeRhythmGuideView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideView.cs) | 689 | GUI生成 / モーション / Vignette生成 / ゾーン計算 |
 | [CameraSystemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs) | 674 | 入力 / ロックオン / 追従 / 障害物回避 / 外部制御 |
 
-### 【違反】60行超のメソッドが15個
+### 【違反】60行超のメソッドが17個
+
+全件は [付録B](#付録b-60行超のメソッド全17件) を参照。上位は以下。
 
 | メソッド | 行数 |
 | --- | --- |
@@ -204,7 +208,7 @@ KillChord.Adaptor     → Utility, Domain, Application
 
 Repository群も Application 層がインターフェースを定義し、
 InfraStructure 層が実装する形（依存の逆転）が正しく実現されている。
-`ServiceLocator` 229箇所中227箇所が `6.Composition` 内という数字がそれを裏付ける。
+`ServiceLocator` を参照する49ファイル中47ファイルが `6.Composition` 内という数字がそれを裏付ける。
 
 ### 【違反】Adaptor層の2箇所
 
@@ -225,4 +229,78 @@ _volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>()
 _positionPairs = GameObject.FindObjectsByType<SpawnPositionPair>(FindObjectsSortMode.None);
 ```
 
-`Camera.main` への直接依存6箇所も同種の問題。
+`Camera.main` への直接依存7箇所も同種の問題。
+
+---
+
+# 付録: 該当箇所の全列挙
+
+## 付録A. 400行超のファイル（全21件）
+
+行数の降順。パスは `Assets/Scripts/Runtime/` 相対。
+
+| # | 行数 | ファイル |
+| --- | --- | --- |
+| 1 | 945 | [6.Composition/OutGame/StageSelect/StageSelectInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs) |
+| 2 | 842 | [4.View/InGame/Player/PlayerView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Player/PlayerView.cs) |
+| 3 | 823 | [5.InfraStructure/OutGame/Scenario/ScenarioRepository.cs](../../Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioRepository.cs) |
+| 4 | 709 | [6.Composition/InGame/Enemy/EnemyLifeCycle.cs](../../Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs) |
+| 5 | 689 | [4.View/InGame/Music/ACLikeRhythmGuideView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideView.cs) |
+| 6 | 674 | [4.View/InGame/Camera/CameraSystemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs) |
+| 7 | 673 | [0.Utility/Collections/PriorityQueue.cs](../../Assets/Scripts/Runtime/0.Utility/Collections/PriorityQueue.cs) ※BCL移植のため対象外 |
+| 8 | 571 | [4.View/InGame/Enemy/EnemyMoveView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs) |
+| 9 | 554 | [6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs) |
+| 10 | 529 | [6.Composition/InGame/Player/PlayerInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs) |
+| 11 | 505 | [6.Composition/OutGame/Screen/ScreenInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenInitializer.cs) |
+| 12 | 500 | [4.View/OutGame/Scenario/ScenarioView.cs](../../Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioView.cs) |
+| 13 | 494 | [6.Composition/OutGame/Title/TitleSceneInitializer.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializer.cs) |
+| 14 | 472 | [4.View/InGame/Camera/StageStartCameraView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/StageStartCameraView.cs) |
+| 15 | 446 | [6.Composition/OutGame/Scenario/ScenarioCom.cs](../../Assets/Scripts/Runtime/6.Composition/OutGame/Scenario/ScenarioCom.cs) |
+| 16 | 444 | [1.Domain/OutGame/StageSelect/StageTree.cs](../../Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageTree.cs) |
+| 17 | 435 | [5.InfraStructure/Persistent/SceneManagement/SceneTransitionService.cs](../../Assets/Scripts/Runtime/5.InfraStructure/Persistent/SceneManagement/SceneTransitionService.cs) |
+| 18 | 413 | [4.View/InGame/Result/StageResultView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs) |
+| 19 | 411 | [4.View/Persistent/Input/PlayerInputView.cs](../../Assets/Scripts/Runtime/4.View/Persistent/Input/PlayerInputView.cs) |
+| 20 | 403 | [4.View/InGame/Enemy/EnemyRaycastDetectView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs) |
+| 21 | 401 | [6.Composition/InGame/Sequence/SequenceInitializationModule.cs](../../Assets/Scripts/Runtime/6.Composition/InGame/Sequence/SequenceInitializationModule.cs) |
+
+`6.Composition` が9件と最多。DI組み立てにイベント配線・UIレイアウトが混入しているのが主因。
+
+## 付録B. 60行超のメソッド（全17件）
+
+`ファイル:開始行` 形式。行数はメソッド全体の長さ。
+
+| # | 行数 | 場所 | シグネチャ |
+| --- | --- | --- | --- |
+| 1 | 151 | [ScreenInitializer.cs:97](../../Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenInitializer.cs) | `private bool Initialize()` |
+| 2 | 133 | [StageSelectInitializer.cs:260](../../Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs) | `private bool Initialize()` |
+| 3 | 132 | [TitleSceneInitializer.cs:98](../../Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializer.cs) | `public override bool Build()` |
+| 4 | 130 | [PlayerInitializer.cs:174](../../Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs) | `public void Initialize(InputComposition, SkillController)` |
+| 5 | 96 | [SequenceInitializationModule.cs:75](../../Assets/Scripts/Runtime/6.Composition/InGame/Sequence/SequenceInitializationModule.cs) | `public override bool Ready()` |
+| 6 | 92 | [IngameComposition.cs:28](../../Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap/IngameComposition.cs) | `private async void Start()` |
+| 7 | 83 | [Skill_07.cs:32](../../Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_07.cs) | `public override void Execute(in SkillEffectContext)` |
+| 8 | 82 | [SkillTreeInitializer.cs:212](../../Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs) | `private bool Initialize()` |
+| 9 | 79 | [ScenarioRepository.cs:62](../../Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioRepository.cs) | `private static ScenarioDefinition ParseNormalizedCsv(string[])` |
+| 10 | 71 | [EquipmentBgmInitializer.cs:37](../../Assets/Scripts/Runtime/6.Composition/InGame/Music/EquipmentBgmInitializer.cs) | `public override bool Build()` |
+| 11 | 69 | [SceneTransitionInitializer.cs:41](../../Assets/Scripts/Runtime/6.Composition/Persistent/SceneManagement/SceneTransitionInitializer.cs) | `public override bool Build()` |
+| 12 | 67 | [EnemyInitializer.cs:48](../../Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyInitializer.cs) | `public override async Awaitable<bool> ResourceLoadAsync(CancellationToken)` |
+| 13 | 65 | [InGameMissionInitializer.cs:106](../../Assets/Scripts/Runtime/6.Composition/InGame/Mission/InGameMissionInitializer.cs) | `public bool TryInitialize(out MissionRuntimeService)` |
+| 14 | 64 | [SkillBuildInitializer.cs:142](../../Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializer.cs) | `private bool Initialize()` |
+| 15 | 64 | [ScenarioCom.cs:100](../../Assets/Scripts/Runtime/6.Composition/OutGame/Scenario/ScenarioCom.cs) | `public override bool Build()` |
+| 16 | 64 | [ScenarioRepository.cs:146](../../Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioRepository.cs) | `private static ScenarioDefinition ParseAuthoringCsv(string[])` |
+| 17 | 62 | [MissionDefinitionAsset.cs:21](../../Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionDefinitionAsset.cs) | `public MissionDefinition Create()` |
+
+17件中12件が `6.Composition`。`ScenarioRepository` の2つのCSVパーサ（#9・#16）は
+構造もよく似ており、[13. DRY原則](13_DRY原則.md) の対象でもある。
+
+## 付録C. ISP検査で「問題なし」と判定した大きめのインターフェース
+
+`ITargetSystemViewModel` 以外はいずれも役割が単一で分割不要と判断した。
+
+| ファイル | 判定 |
+| --- | --- |
+| [3.Adaptor/InGame/Target/ITargetSystemViewModel.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Target/ITargetSystemViewModel.cs)（14メンバ） | **要分割**（本文参照） |
+| [2.Application/InGame/Music/IMusicSyncService.cs](../../Assets/Scripts/Runtime/2.Application/InGame/Music/IMusicSyncService.cs) | 音楽同期という単一の関心事 |
+| [2.Application/Persistent/SceneManagement/ISceneTransitionService.cs](../../Assets/Scripts/Runtime/2.Application/Persistent/SceneManagement/ISceneTransitionService.cs) | シーン遷移の一連の操作 |
+| [3.Adaptor/OutGame/Screen/IScreenController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/IScreenController.cs) | 画面表示操作。ただし1行委譲は[13. DRY](13_DRY原則.md)参照 |
+| [6.Composition/Bootstrap/IInitializationModule.cs](../../Assets/Scripts/Runtime/6.Composition/Bootstrap/IInitializationModule.cs) | 初期化フェーズ契約 |
+| [3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs) | アニメ通知。※フォルダ名綴り誤り([18](18_命名一貫性と可読性.md)) |
