@@ -1377,6 +1377,7 @@ MonoBehaviour:
   _skillVisuals: []
   _inputProgressUIConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _equippedSkills: []
+  _skillBuildRepositoryKey: SkillBuildRepository
 --- !u!114 &438459092
 MonoBehaviour:
   m_ObjectHideFlags: 0

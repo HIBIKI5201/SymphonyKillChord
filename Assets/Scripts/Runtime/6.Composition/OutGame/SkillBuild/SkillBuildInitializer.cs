@@ -1,9 +1,9 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.Application;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
-using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildPresenter _skillBuildPresenter;
         private OutGameUIEvent _outGameUIEvent;
         private SkillElementDragAndDropSetup _skillElementDragAndDropSetup;
-        private OwnedSkillRepository _loadedOwnedSkillRepository;
+        private IOwnedSkillRepository _loadedOwnedSkillRepository;
         private SkillBuildRepository _loadedSkillBuildRepository;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
@@ -71,7 +71,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<OwnedSkillRepository>(this, destroyCancellationToken);
+            _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<IOwnedSkillRepository>(this, destroyCancellationToken);
             _loadedSkillBuildRepository = await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, destroyCancellationToken);
 
             if (!ValidateLoadedRepositories())

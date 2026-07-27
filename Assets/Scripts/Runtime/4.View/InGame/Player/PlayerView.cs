@@ -120,6 +120,8 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
 
+        private PlayerInputSuppressionState _inputSuppressionState;
+
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
         {
@@ -155,10 +157,12 @@ namespace KillChord.Runtime.View.InGame.Player
             MusicSyncState musicSyncState,
             Transform cameraTransform,
             PlayerInputView playerInputView,
-            PlayerHealthHudPresenter healthHudPresenter)
+            PlayerHealthHudPresenter healthHudPresenter,
+            PlayerInputSuppressionState inputSuppressionState = null)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _inputSuppressionState = inputSuppressionState;
             _characterAnimationViewModel = animationContext.ViewModel;
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
@@ -437,6 +441,11 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 回避入力を受け取ったら回避要求フラグを立てる。 </summary>
         private void OnDodge(InputContext<float> input)
         {
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            {
+                return;
+            }
+
             if (input.Phase == InputActionPhase.Started)
             {
                 if (_controller.IsDodging)
@@ -454,6 +463,11 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnAttack(InputContext<float> input)
         {
             if (input.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
             {
                 return;
             }
@@ -514,6 +528,12 @@ namespace KillChord.Runtime.View.InGame.Player
             if (PlayerAttackController.IsAttacking)
             {
                 // 攻撃時、入力をキャンセルする。
+                dir = Vector2.zero;
+            }
+
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            {
+                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
 

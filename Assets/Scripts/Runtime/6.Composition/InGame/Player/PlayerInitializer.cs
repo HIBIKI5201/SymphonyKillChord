@@ -298,6 +298,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerController playerMovementController = new PlayerController(application, inputComposition.GetBufferedInputBuffer);
             _moduleContainer.SetPlayerController(playerMovementController);
 
+            PlayerInputSuppressionState inputSuppressionState = new PlayerInputSuppressionState();
+            _moduleContainer.SetInputSuppressionState(inputSuppressionState);
+
             _player.Initialize(
                 playerMovementController,
                 playerAttackController,
@@ -305,7 +308,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 musicSyncState,
                 cameraTransform.Transform,
                 inputView,
-                healthHudPresenter);
+                healthHudPresenter,
+                inputSuppressionState);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 

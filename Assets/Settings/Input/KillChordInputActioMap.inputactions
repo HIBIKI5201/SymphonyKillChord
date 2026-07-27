@@ -268,7 +268,18 @@
                 },
                 {
                     "name": "",
-                    "id": "f158be36-b74b-4bf0-82b5-d6a9cc30a3ba",
+                    "id": "b72ad35b-c5b1-4489-b58c-000096b55bb8",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94b7b630-617a-4b5b-9e5e-38886dbdc3a8",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
@@ -290,7 +301,18 @@
                 },
                 {
                     "name": "",
-                    "id": "9fe0a5d3-4e29-4047-b5e6-05bb94ae4d5a",
+                    "id": "391a9ec2-30a8-428e-a5b9-e9f1393f0190",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dodge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3c663c8d-d467-4846-bf4f-f38ecfe431ec",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",

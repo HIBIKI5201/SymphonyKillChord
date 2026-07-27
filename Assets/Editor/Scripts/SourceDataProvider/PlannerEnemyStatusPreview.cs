@@ -11,16 +11,17 @@ namespace KillChord.Editor.SourceDataProvider
     internal static class PlannerEnemyStatusPreview
     {
         /// <summary>
-        ///     指定SourceAssetが敵ステータスプレビュー対象か判定します。
+        ///     指定SourceAssetまたはCollectionKeyが敵ステータスプレビュー対象か判定します。
         /// </summary>
-        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <param name="key"> SourceAssetのAddressableキー、またはCollectionKeyです。 </param>
         /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
         /// <returns> 敵キャラクターとして表示する場合はtrueです。 </returns>
-        public static bool CanDraw(string addressableKey, ScriptableObject sourceAsset)
+        public static bool CanDraw(string key, ScriptableObject sourceAsset)
         {
             if (sourceAsset == null
-                || (!string.Equals(addressableKey, ENEMY_ADDRESSABLE_KEY, StringComparison.Ordinal)
-                    && !addressableKey.Contains(BOSS_KEYWORD, StringComparison.OrdinalIgnoreCase)))
+                || (!string.Equals(key, ENEMY_ADDRESSABLE_KEY, StringComparison.Ordinal)
+                    && !string.Equals(key, CHARACTER_COLLECTION_KEY, StringComparison.Ordinal)
+                    && !key.Contains(BOSS_KEYWORD, StringComparison.OrdinalIgnoreCase)))
             {
                 return false;
             }
@@ -252,6 +253,7 @@ namespace KillChord.Editor.SourceDataProvider
         private const float CONFIRMED_DAMAGE_PREVIEW_MAX = 100f;
         private const float JUST_MULTIPLIER_PREVIEW_MAX = 3f;
         private const string ENEMY_ADDRESSABLE_KEY = "Enemy";
+        private const string CHARACTER_COLLECTION_KEY = "Character";
         private const string BOSS_KEYWORD = "Boss";
         private const string MAX_HEALTH_PROPERTY_NAME = "_maxHealth";
         private const string BASE_DAMAGE_PROPERTY_NAME = "_baseDamage";
