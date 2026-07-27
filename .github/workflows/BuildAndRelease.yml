@@ -119,7 +119,9 @@ jobs:
       - name: Determine Build Mode
         id: determine_mode
         run: |
+          # workflow_dispatch では github.base_ref が空のため、develop にフォールバック
           $BaseRef = "${{ github.base_ref }}"
+          if (-not $BaseRef) { $BaseRef = "develop" }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
             $TagPrefix = "release"
