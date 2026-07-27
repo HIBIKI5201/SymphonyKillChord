@@ -10,7 +10,16 @@ on:
       - main 
     types: [ closed ]
 
-  workflow_dispatch:       # Manual execution is also supported.
+  workflow_dispatch:
+    inputs:
+      build_mode:
+        description: 'ビルドモード'
+        required: true
+        default: 'Development'
+        type: choice
+        options:
+          - Development
+          - Master
 
 permissions:
   contents: write      # Minimum permissions required for release creation and repository access
@@ -119,9 +128,12 @@ jobs:
       - name: Determine Build Mode
         id: determine_mode
         run: |
-          # workflow_dispatch では github.base_ref が空のため、develop にフォールバック
+          # workflow_dispatch では github.base_ref が空のため、inputs.build_mode から分岐を決定
           $BaseRef = "${{ github.base_ref }}"
-          if (-not $BaseRef) { $BaseRef = "develop" }
+          if (-not $BaseRef) {
+            $InputMode = "${{ inputs.build_mode }}"
+            if ($InputMode -eq "Master") { $BaseRef = "main" } else { $BaseRef = "develop" }
+          }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
             $TagPrefix = "release"
