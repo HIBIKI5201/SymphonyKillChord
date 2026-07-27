@@ -610,7 +610,7 @@ jobs:
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
-          name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
+          name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
