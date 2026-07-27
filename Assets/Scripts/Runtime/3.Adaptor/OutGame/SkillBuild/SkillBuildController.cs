@@ -60,9 +60,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 
             try
             {
-                await _skillBuildUseCase.SaveSkillBuildAsync(
-                    new List<int>(skillIds.ToArray()),
-                    equippedSkills);
+                await _skillBuildUseCase.SaveSkillBuildAsync(equippedSkills);
                 return true;
             }
             catch (Exception ex)

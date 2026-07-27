@@ -194,7 +194,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                         : SkillBuildDefinition.INITIAL_SLOT_COUNT);
             }
 
-            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition, _savedataSystem);
+            SkillBuildUseCase skillBuildUseCase =
+                new(_skillBuildDefinition, _loadedSkillBuildRepository);
             _skillBuildController = new(skillBuildUseCase, _loadedOwnedSkillTemplates);
             _skillBuildViewModel = new(_skillBuildController);
             SkillDisplayTextFormatter textFormatter =
