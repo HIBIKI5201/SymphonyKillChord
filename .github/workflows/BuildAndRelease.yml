@@ -49,29 +49,30 @@ jobs:
             exit 0
           fi
 
-          # GitHub APIから最新のリリース 取得します
-          echo "INFO: Retrieving latest release from GitHub API..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+          # ターゲットブランチに応じたタグプレフィックスを特定します
+          TAG_PREFIX="dev"
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            TAG_PREFIX="release"
+          fi
+
+          # GitHub APIからリリース一覧（最大100件）を取得します
+          echo "INFO: Retrieving releases list from GitHub API (Prefix: ${TAG_PREFIX}-)..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
-          if [ "$HTTP_CODE" = "404" ]; then
-            echo "INFO: No previous release found"
-            echo "days=999" >> $GITHUB_OUTPUT
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (New release)"
-            exit 0
-          elif [ "$HTTP_CODE" != "200" ]; then
+          if [ "$HTTP_CODE" != "200" ]; then
             echo "ERROR: GitHub API returned HTTP $HTTP_CODE"
             exit 1
           fi
 
-          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
+          # jqを使用して、TAG_PREFIXに合致するタグの中から最新のpublished_atを取得します
+          RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "INFO: Release date not found in API response"
+            echo "INFO: No previous release found with prefix ${TAG_PREFIX}-"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (Running because release date could not be determined)"
+            echo "SUCCESS: Decision: should_run=true (New release for prefix ${TAG_PREFIX})"
             exit 0
           fi
           
