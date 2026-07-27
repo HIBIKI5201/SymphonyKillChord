@@ -117,8 +117,11 @@ jobs:
           persist-credentials: false
 
       - name: Determine Build Mode
+        id: determine_mode
         run: |
+          # workflow_dispatch では github.base_ref が空のため、develop にフォールバック
           $BaseRef = "${{ github.base_ref }}"
+          if (-not $BaseRef) { $BaseRef = "develop" }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
             $TagPrefix = "release"
@@ -134,6 +137,8 @@ jobs:
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
+          "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
+          "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
         shell: powershell
 
       - name: Display Environment Information
@@ -579,10 +584,10 @@ jobs:
           Write-Host "::group::Generate Release Tag"
           
           # Get current counter from repository variable (default to 1 if not set)
-          $Counter = "${{ vars[format('BUILD_VERSION_{0}', env.BUILD_MODE)] }}"
+          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
           if (-not $Counter) { $Counter = "1" }
           
-          $TagName = "$env:TAG_PREFIX-v1.0.$Counter"
+          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
@@ -594,7 +599,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
-          prerelease: ${{ env.BUILD_MODE == 'Development' }}
+          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
@@ -602,17 +607,17 @@ jobs:
             ${{ github.event_name == 'pull_request' && format('**対象PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行 (workflow_dispatch)' }}
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            **ビルドモード:** ${{ env.BUILD_MODE }}
+            **ビルドモード:** ${{ steps.determine_mode.outputs.build_mode }}
 
             **実行プロセス:**
             1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
             2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
             3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
             4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
-            5. **Unity ビルド処理**: ${{ env.BUILD_MODE }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
+            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
 
             **ビルド対象プロファイル:**
-            ${{ env.BUILD_MODE == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
+            ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -622,7 +627,7 @@ jobs:
         run: |
           Write-Host "::group::Increment Release Counter"
           $VarName = "BUILD_VERSION_$env:BUILD_MODE"
-          $CurrentCounter = [int]"${{ vars[format('BUILD_VERSION_{0}', env.BUILD_MODE)] }}"
+          $CurrentCounter = [int]"${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
           if (-not $CurrentCounter) { $CurrentCounter = 1 }
           $NextCounter = $CurrentCounter + 1
           
