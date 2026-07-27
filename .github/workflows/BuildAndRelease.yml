@@ -108,6 +108,7 @@ jobs:
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
       UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
       UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+      BUILD_MODE: ''
 
     steps:
       - name: Checkout Repository
@@ -581,7 +582,7 @@ jobs:
           $Counter = "${{ vars[format('BUILD_VERSION_{0}', env.BUILD_MODE)] }}"
           if (-not $Counter) { $Counter = "1" }
           
-          $TagName = $TagName = "$env:TAG_PREFIX-v1.0.$Counter"
+          $TagName = "$env:TAG_PREFIX-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
