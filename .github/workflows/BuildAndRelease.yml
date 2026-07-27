@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - develop
+      - main 
     types: [ closed ]
 
   workflow_dispatch:       # Manual execution is also supported.
@@ -119,6 +120,25 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Determine Build Mode
+        run: |
+          $BaseRef = "${{ github.base_ref }}"
+          if ($BaseRef -eq "main") {
+            $BuildMode = "Master"
+            $TagPrefix = "release"
+          } elseif ($BaseRef -eq "develop") {
+            $BuildMode = "Development"
+            $TagPrefix = "dev"
+          } else {
+             Write-Host "ERROR: Unsupported base branch: $BaseRef"
+             exit 1
+          }
+ 
+          Write-Host "Base Branch: $BaseRef -> BuildMode: $BuildMode, TagPrefix: $TagPrefix"
+          "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
+          "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
+          "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
+        shell: powershell
 
       - name: Display Environment Information
         run: |
@@ -403,6 +423,7 @@ jobs:
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
             "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
           $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $UnityArgs -PassThru -NoNewWindow
@@ -565,7 +586,7 @@ jobs:
           $Counter = "${{ vars.BUILD_VERSION }}"
           if (-not $Counter) { $Counter = "1" }
           
-          $TagName = "dev-v1.0.$Counter"
+          $TagName = $TagName = "$env:TAG_PREFIX-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
