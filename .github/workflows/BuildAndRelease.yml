@@ -601,16 +601,17 @@ jobs:
             ${{ github.event_name == 'pull_request' && format('**対象PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行 (workflow_dispatch)' }}
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
+            **ビルドモード:** ${{ env.BUILD_MODE }}
+
             **実行プロセス:**
             1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
             2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
             3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
             4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
-            5. **Unity ビルド処理**: 複数ビルドプロファイル（Develop & Master）に基づき、Unity バッチモードによるビルドを実行。
+            5. **Unity ビルド処理**: ${{ env.BUILD_MODE }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
 
-            **ビルド対象プロファイルの種類:**
-            - Develop ビルドプロファイル (DevelopBuildProfiles)
-            - Master ビルドプロファイル (MasterBuildProfiles)
+            **ビルド対象プロファイル:**
+            ${{ env.BUILD_MODE == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
