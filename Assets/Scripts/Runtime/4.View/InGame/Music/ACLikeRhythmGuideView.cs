@@ -90,6 +90,7 @@ namespace KillChord.Runtime.View.InGame.Music
             SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
         }
+
         /// <summary>
         ///     指定した拍子（BeatTypeの整数値）に対応するジャストタイミング位置のX座標（中心からの距離。左右対称に±で使う）を取得する。
         /// </summary>

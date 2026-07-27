@@ -111,7 +111,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// </summary>
         /// <typeparam name="TCondition"> 検索する達成条件の型です。 </typeparam>
         /// <returns> 指定した種類の達成条件を持つステップが存在する場合はtrueです。 </returns>
-        public bool HasStepWithCondition<TCondition>() where TCondition : IMissionClearCondition
+        public bool HasStepWithCondition<TCondition>() where TCondition : class, IMissionClearCondition
         {
             if (_steps == null)
             {
@@ -120,7 +120,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
             for (int i = 0; i < _steps.Count; i++)
             {
-                if (_steps[i].Condition is TCondition)
+                if (ClearConditionChain.Contains<TCondition>(_steps[i].Condition))
                 {
                     return true;
                 }
