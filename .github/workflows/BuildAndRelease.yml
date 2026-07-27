@@ -15,6 +15,10 @@ on:
 permissions:
   contents: write      # Minimum permissions required for release creation and repository access
 
+concurrency:
+  group: build-release-${{ github.base_ref || github.run_id }}
+  cancel-in-progress: false
+
 # Note: If artifact uploads or additional operations are required,
 # verify whether additional permissions are needed.
 
@@ -35,19 +39,6 @@ jobs:
           echo "Trigger Event: ${GITHUB_EVENT_NAME}"
           echo "Repository: ${{ github.repository }}"
           echo "==========================================="
-
-          # Check for other running instances of the same workflow (prevent duplicate execution)
-          echo "INFO: Checking for other running instances of this workflow..."
-          ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
-          OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
-          
-          if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Exiting early..."
-            echo "days=0" >> $GITHUB_OUTPUT
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=false (Skipped due to duplicate execution)"
-            exit 0
-          fi
 
           # 不要なAPIコール 避けるため、手動実行時（workflow_dispatch）はリリース経過days数のチェック スキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
@@ -105,6 +96,9 @@ jobs:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
     runs-on: self-hosted
+    concurrency:
+      group: unity-self-hosted-build
+      cancel-in-progress: false
     timeout-minutes: 120  # Set timeout because build processing may take a long time
     environment: 'AutoBuildAndRelease'
     # Environment variables used throughout the job
