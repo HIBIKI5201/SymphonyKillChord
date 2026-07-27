@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     ///     内側の達成条件をラップし、このステップの開始時に説明ポップアップを表示する目印を兼ねるクリア条件です。
     ///     達成判定(＝ポップアップが閉じる条件)自体は内側の条件に委譲します。
     /// </summary>
-    public sealed class PopupClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter
+    public sealed class PopupClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter, IDecoratorClearCondition
     {
         /// <summary>
         ///     PopupClearCondition クラスの新しいインスタンスを初期化します。
@@ -22,6 +22,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
         /// <summary> ポップアップに表示する画像です。未設定の場合はnullです。 </summary>
         public Sprite PopupImage { get; }
+
+        /// <inheritdoc />
+        public IMissionClearCondition InnerCondition => _innerCondition;
 
         /// <inheritdoc />
         public bool IsSatisfied(MissionProgress progress)

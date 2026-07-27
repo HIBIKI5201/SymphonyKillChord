@@ -19,18 +19,22 @@ namespace SinfoniaStudio.SinfoniaOperator
                 return markdown;
             }
 
-            string text = _emptyBlockLinePattern.Replace(markdown, string.Empty);
-            text = _mentionTagPattern.Replace(text, ReplaceMentionTag);
+            string text = _mentionTagPattern.Replace(markdown, ReplaceMentionTag);
             text = _imagePattern.Replace(text, "[画像]");
+            text = _selfClosingTagPattern.Replace(text, string.Empty);
             text = _emptyBlockBackgroundColorLinePattern.Replace(text, string.Empty);
             text = _blockBackgroundColorSuffixPattern.Replace(text, string.Empty);
+            text = _bareUrlPattern.Replace(text, "<$0>");
             text = _multipleBlankLinesPattern.Replace(text, "\n\n");
 
             return text.Trim();
         }
 
         /// <summary>
-        ///     mention-page / mention-database タグを、タイトルとURLのMarkdownリンクへ書き換える。
+        ///     mention-page / mention-database タグを、タイトルと埋め込み抑制URLへ書き換える。
+        ///     DiscordはMarkdownの[text](url)記法をサポートしておらず、裸のURLは
+        ///     自動でリンクプレビュー（埋め込みカード）を展開してしまうため、
+        ///     URLを &lt;&gt; で囲んで埋め込みを抑制する。
         /// </summary>
         /// <param name="match">タグの正規表現一致。</param>
         /// <returns>書き換え後の文字列。</returns>
@@ -45,14 +49,26 @@ namespace SinfoniaStudio.SinfoniaOperator
             string url = urlMatch.Groups["url"].Value.Trim('{', '}');
             string title = match.Groups["title"].Success ? match.Groups["title"].Value.Trim() : string.Empty;
 
-            return string.IsNullOrEmpty(title) ? $"[リンク]({url})" : $"[{title}]({url})";
+            return string.IsNullOrEmpty(title) ? $"<{url}>" : $"{title}: <{url}>";
         }
 
-        private static readonly Regex _emptyBlockLinePattern = new(
-            @"^[ \t]*<empty-block\s*/>[ \t]*(?:\r?\n|$)",
+        /// <summary>
+        ///     &lt;empty-block/&gt;や&lt;table_of_contents .../&gt;など、
+        ///     テキストとして意味を持たない自己終了タグ。&lt;br&gt;は改行として意味があるため除外する。
+        /// </summary>
+        private static readonly Regex _selfClosingTagPattern = new(
+            @"<(?!br\b)[a-z][a-z0-9_\-]*(?:\s[^<>]*)?/>",
             RegexOptions.Compiled |
             RegexOptions.IgnoreCase |
-            RegexOptions.Multiline |
+            RegexOptions.CultureInvariant);
+
+        /// <summary>
+        ///     &lt;&gt;で囲まれていない裸のURL。壊れたmentionタグの残骸など、
+        ///     想定外の形でURLがテキストに残った場合の保険として埋め込みを抑制する。
+        /// </summary>
+        private static readonly Regex _bareUrlPattern = new(
+            @"(?<!<)https?://[^\s<>()]+",
+            RegexOptions.Compiled |
             RegexOptions.CultureInvariant);
 
         private static readonly Regex _mentionTagPattern = new(

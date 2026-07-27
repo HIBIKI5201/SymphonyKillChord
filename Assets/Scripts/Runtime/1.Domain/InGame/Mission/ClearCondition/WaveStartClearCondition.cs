@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
     ///     内側の達成条件をラップし、このステップの開始時に次の敵Waveを生成する目印を兼ねるクリア条件です。
     ///     達成判定(＝Waveの完了)自体は内側の条件に委譲します。
     /// </summary>
-    public sealed class WaveStartClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter
+    public sealed class WaveStartClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter, IDecoratorClearCondition
     {
         /// <summary>
         ///     WaveStartClearCondition クラスの新しいインスタンスを初期化します。
@@ -16,6 +16,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         {
             _innerCondition = innerCondition ?? throw new ArgumentNullException(nameof(innerCondition));
         }
+
+        /// <inheritdoc />
+        public IMissionClearCondition InnerCondition => _innerCondition;
 
         /// <inheritdoc />
         public bool IsSatisfied(MissionProgress progress)

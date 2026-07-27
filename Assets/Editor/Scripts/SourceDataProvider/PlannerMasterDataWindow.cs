@@ -1007,6 +1007,13 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
+            if (target is ScriptableObject scriptableObjectTarget
+                && PlannerEnemyStatusPreview.CanDraw(collectionKey, scriptableObjectTarget))
+            {
+                PlannerEnemyStatusPreview.Draw(scriptableObjectTarget);
+                return;
+            }
+
             DrawObjectReferencePreview(target);
         }
 
