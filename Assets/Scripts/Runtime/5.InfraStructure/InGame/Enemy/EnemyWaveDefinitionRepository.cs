@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
+using KillChord.Runtime.InfraStructure.Repository;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(
         fileName = nameof(EnemyWaveDefinitionRepository),
         menuName = "KillChord/Enemy/" + nameof(EnemyWaveDefinitionRepository))]
-    public sealed class EnemyWaveDefinitionRepository : ScriptableObject, IEnemyWaveDefinitionRepository
+    public sealed class EnemyWaveDefinitionRepository
+        : ScriptableObjectRepositoryBase<EnemyWaveDefinitionId, EnemyWaveDefinitionAsset, EnemyWaveDefinitionAsset>,
+            IEnemyWaveDefinitionRepository
     {
         /// <summary>
         ///     IDに対応する敵Wave進行データを生成します。
@@ -24,7 +27,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             EnemyWaveDefinitionId id,
             out EnemyWaves enemyWaves)
         {
-            if (TryGetDefinitionAsset(id, out EnemyWaveDefinitionAsset definitionAsset))
+            if (TryFind(id, out EnemyWaveDefinitionAsset definitionAsset))
             {
                 enemyWaves = definitionAsset.ToDefinition();
                 return true;
@@ -44,7 +47,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             EnemyWaveDefinitionId id,
             out IReadOnlyDictionary<int, IStageEffectDefinition> stageEffectCatalog)
         {
-            if (TryGetDefinitionAsset(id, out EnemyWaveDefinitionAsset definitionAsset))
+            if (TryFind(id, out EnemyWaveDefinitionAsset definitionAsset))
             {
                 stageEffectCatalog = definitionAsset.CreateStageEffectCatalog();
                 return true;
@@ -57,75 +60,26 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [SerializeField, Tooltip("IDで取得可能にする敵Wave定義アセットの一覧です。")]
         private EnemyWaveDefinitionAsset[] _waveDefinitionAssets;
 
-        private Dictionary<EnemyWaveDefinitionId, EnemyWaveDefinitionAsset> _definitionAssetMap;
+        protected override IReadOnlyList<EnemyWaveDefinitionAsset> GetEntries() => _waveDefinitionAssets;
 
-        /// <summary>
-        ///     Inspector上の設定が変わった際に検索用辞書を破棄します。
-        /// </summary>
-        private void OnValidate()
+        protected override bool TryBuild(
+            EnemyWaveDefinitionAsset entry,
+            out EnemyWaveDefinitionId id,
+            out EnemyWaveDefinitionAsset value)
         {
-            _definitionAssetMap = null;
-        }
+            id = entry.Id;
+            value = entry;
 
-        /// <summary>
-        ///     IDに対応する敵Wave定義アセットを取得します。
-        /// </summary>
-        /// <param name="id"> 取得する敵Wave定義IDです。 </param>
-        /// <param name="definitionAsset"> 取得した敵Wave定義アセットです。 </param>
-        /// <returns> IDに対応するアセットが存在する場合はtrueです。 </returns>
-        private bool TryGetDefinitionAsset(
-            EnemyWaveDefinitionId id,
-            out EnemyWaveDefinitionAsset definitionAsset)
-        {
-            EnsureDefinitionAssetMap();
-            return _definitionAssetMap.TryGetValue(id, out definitionAsset);
-        }
-
-        /// <summary>
-        ///     敵Wave定義IDをキーとする検索用辞書を構築します。
-        /// </summary>
-        private void EnsureDefinitionAssetMap()
-        {
-            if (_definitionAssetMap != null)
+            if (id.Value == 0)
             {
-                return;
+                Debug.LogWarning(
+                    $"[{nameof(EnemyWaveDefinitionRepository)}] 敵Wave定義IDが未設定です。"
+                    + $" Asset: {entry.name}",
+                    this);
+                return false;
             }
 
-            _definitionAssetMap = new Dictionary<EnemyWaveDefinitionId, EnemyWaveDefinitionAsset>();
-            if (_waveDefinitionAssets == null)
-            {
-                return;
-            }
-
-            for (int i = 0; i < _waveDefinitionAssets.Length; i++)
-            {
-                EnemyWaveDefinitionAsset definitionAsset = _waveDefinitionAssets[i];
-                if (definitionAsset == null)
-                {
-                    continue;
-                }
-
-                EnemyWaveDefinitionId id = definitionAsset.Id;
-                if (id.Value == 0)
-                {
-                    Debug.LogWarning(
-                        $"[{nameof(EnemyWaveDefinitionRepository)}] 敵Wave定義IDが未設定です。"
-                        + $" Asset: {definitionAsset.name}",
-                        this);
-                    continue;
-                }
-
-                if (_definitionAssetMap.ContainsKey(id))
-                {
-                    Debug.LogWarning(
-                        $"[{nameof(EnemyWaveDefinitionRepository)}] 敵Wave定義IDが重複しています。"
-                        + $" Id: {id.Value}, Asset: {definitionAsset.name}",
-                        this);
-                    continue;
-                }
-
-                _definitionAssetMap.Add(id, definitionAsset);
-            }
+            return true;
         }
     }
 }

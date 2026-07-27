@@ -160,6 +160,25 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Check .NET SDK / dotnet CLI Availability (Diagnostic)
+        run: |
+          Write-Host "::group::Check .NET SDK Availability"
+
+          $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($DotnetCmd) {
+            Write-Host "OK: dotnet command found at $($DotnetCmd.Source)"
+            & dotnet --version
+            Write-Host ""
+            Write-Host "Installed SDKs:"
+            & dotnet --list-sdks
+          } else {
+            Write-Host "WARNING: dotnet command not found on PATH."
+            Write-Host "         NuGetForUnity.Cli (dotnet tool) will not be usable without installing the .NET SDK."
+          }
+
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Execute Unity - Download and Import Packages
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -250,6 +269,8 @@ jobs:
           Write-Host "::group::Installing packages via direct tar extraction"
 
           $ProjectRoot    = "${{ github.workspace }}"
+          $LongProjectRoot = "\\?\" + $ProjectRoot.TrimEnd("\")
+          $ResolvedRoot   = $LongProjectRoot + "\"
           $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
           $TotalPlaced    = 0
           $FailedPackages = @()
@@ -282,32 +303,32 @@ jobs:
               $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
               if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
 
-              $DestAbs = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot $DestRelPath))
-              $ResolvedRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
-              if (-not $ResolvedRoot.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
-                $ResolvedRoot += [System.IO.Path]::DirectorySeparatorChar
-              }
+              $DestRelNorm = $DestRelPath.Replace('/', '\').TrimStart('\')
 
-              if (-not $DestAbs.StartsWith($ResolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+              if ($DestRelNorm -match '\.\.') {
                 Write-Host "WARNING: Path traversal detected, skipping: $DestRelPath"
                 continue
               }
+
+              $DestAbs = $LongProjectRoot + "\" + $DestRelNorm
 
               $AssetSrc = Join-Path $GuidDir.FullName "asset"
               $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
 
               try {
                 if (Test-Path $AssetSrc) {
-                  $DestDir = Split-Path $DestAbs -Parent
-                  New-Item -ItemType Directory -Path $DestDir -Force -ErrorAction Stop | Out-Null
-                  Copy-Item -Path $AssetSrc -Destination $DestAbs -Force -ErrorAction Stop
+                  $DestDir = [System.IO.Path]::GetDirectoryName($DestAbs)
+                  # Create directories and copy files using .NET API to bypass 260-character path limit.
+                  [System.IO.Directory]::CreateDirectory($DestDir) | Out-Null
+                  [System.IO.File]::Copy($AssetSrc, $DestAbs, $true)
                   $PlacedCount++
                 } else {
-                  New-Item -ItemType Directory -Path $DestAbs -Force -ErrorAction Stop | Out-Null
+                  [System.IO.Directory]::CreateDirectory($DestAbs) | Out-Null
                 }
 
                 if (Test-Path $MetaSrc) {
-                  Copy-Item -Path $MetaSrc -Destination "$DestAbs.meta" -Force -ErrorAction Stop
+                  $MetaDest = $DestAbs + ".meta"
+                  [System.IO.File]::Copy($MetaSrc, $MetaDest, $true)
                 }
               } catch {
                 Write-Host "ERROR: Failed to write asset for $($Package.Name): $_"
@@ -334,6 +355,35 @@ jobs:
 
           Write-Host ""
           Write-Host "OK: All packages installed. Total asset files placed: $TotalPlaced"
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Restore NuGet Packages (NuGetForUnity.Cli)
+        run: |
+          Write-Host "::group::Restoring NuGet packages via NuGetForUnity.Cli"
+
+          if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+            Write-Host "dotnet not found. Installing .NET SDK..."
+            Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
+            & "$env:TEMP\dotnet-install.ps1" -Channel LTS -InstallDir "$env:USERPROFILE\.dotnet"
+            $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
+          }
+
+          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
+
+          $ToolsPath = "$env:USERPROFILE\.dotnet\tools"
+          if (Test-Path $ToolsPath) {
+            $env:PATH = "$ToolsPath;$env:PATH"
+          }
+
+          & nugetforunity restore "${{ github.workspace }}"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: NuGet package restore failed (exit $LASTEXITCODE)."
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "OK: NuGet packages restored."
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -528,20 +578,22 @@ jobs:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
           body: |
-            Workflow Run #${{ github.run_id }} から自動生成されたビルドArtifactです。
-            
-            **Trigger Event:** ${{ github.event_name }}
-            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**Trigger:** Manual Execution (workflow_dispatch)' }}
-            **Workflow Run詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            
-            **Build Process:**
-            1. Downloaded assets from Google Drive.
-            2. Automatically imported Unity packages.
-            3. Executed builds for multiple profiles (Development & Master).
-            
-            **Included Build Targets:**
-            - Development Profiles (Development profiles)
-            - Master Profiles (Master profiles)
+            Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
+
+            **トリガーイベント:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**対象PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行 (workflow_dispatch)' }}
+            **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            **実行プロセス:**
+            1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
+            2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
+            3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
+            4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
+            5. **Unity ビルド処理**: 複数ビルドプロファイル（Develop & Master）に基づき、Unity バッチモードによるビルドを実行。
+
+            **ビルド対象プロファイルの種類:**
+            - Develop ビルドプロファイル (DevelopBuildProfiles)
+            - Master ビルドプロファイル (MasterBuildProfiles)
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -558,19 +610,35 @@ jobs:
           Write-Host "Next Counter: $NextCounter"
           
           # Update repository variable using GitHub API
-          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_VERSION"
           $Headers = @{
               "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
-          $Body = @{
-              "name" = "BUILD_VERSION"
-              "value" = [string]$NextCounter
-          } | ConvertTo-Json
-          
+
+          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_VERSION"
+          $VariableExists = $true
           try {
-              $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
+              Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers | Out-Null
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  $VariableExists = $false
+              } else {
+                  Write-Host "ERROR: BUILD_VERSION existence check failed: $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
+          }
+
+          try {
+              if ($VariableExists) {
+                  $Body = @{ "name" = "BUILD_VERSION"; "value" = [string]$NextCounter } | ConvertTo-Json
+                  Invoke-RestMethod -Uri $GetUrl -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              } else {
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = "BUILD_VERSION"; "value" = [string]$NextCounter } | ConvertTo-Json
+                  Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              }
               Write-Host "OK: BUILD_VERSION updated to $NextCounter successfully."
           } catch {
               Write-Host "ERROR: BUILD_VERSION Failed to update: $_"

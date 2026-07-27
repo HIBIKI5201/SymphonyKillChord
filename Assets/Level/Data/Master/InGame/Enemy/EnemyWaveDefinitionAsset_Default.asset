@@ -18,7 +18,7 @@ MonoBehaviour:
   _waves:
   - Details:
     - EnemyType: 0
-      EnemyAmount: 1
+      EnemyAmount: 2
     - EnemyType: 1
       EnemyAmount: 1
     WaveDuration: 30

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using System;
 
@@ -22,6 +23,11 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         ///     体力の最大値を取得する。
         /// </summary>
         public Health MaxHealth { get; }
+
+        /// <summary>
+        ///     防御者側のバフシステムを取得する。
+        /// </summary>
+        public IBuffSystem BuffSystem { get; }
 
         /// <summary>
         ///     ダメージを受ける。

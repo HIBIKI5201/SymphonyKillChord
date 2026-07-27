@@ -19,8 +19,10 @@ MonoBehaviour:
   _defeatTips:
   - "\u5371\u967A\u306A\u653B\u6483\u306F\u8DDD\u96E2\u3092\u53D6\u3063\u3066\u56DE\u907F\u3057\u3088\u3046"
   - "\u30B9\u30AD\u30EB\u306E\u6539\u9020\u3092\u3057\u3066\u307F\u3088\u3046\uFF01"
-  _clearCondition:
-    rid: 4163005358158643306
+  _clearConditionSteps:
+  - _condition:
+      rid: 4420578705146117
+    _guideMessageText: 
   _failCondition:
     rid: 8885031662707802242
   _evaluationConditions:
@@ -30,7 +32,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4163005358158643306
+    - rid: 4420578705146117
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "\u8D64\u3044\u5175\u58EB\u309210\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
