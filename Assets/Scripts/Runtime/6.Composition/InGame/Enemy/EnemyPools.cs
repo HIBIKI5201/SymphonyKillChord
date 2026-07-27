@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,7 +101,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             ShellLifeCycle shell = Instantiate(_shellPrefab);
             shell.CopyLoadedAssetsFrom(_shellPrefab);
-            shell.Initialize(ReleaseShell);
+            shell.Initialize(ReleaseShell, _shellExplosionEffectView);
             return shell;
         }
 
@@ -172,6 +173,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private ShellLifeCycle _shellPrefab;
         [SerializeField, Tooltip("初期Poolサイズ")] private int _defaultShellPoolSize;
         [SerializeField, Tooltip("最大Poolサイズ")] private int _maxShellPoolSize;
+        [SerializeField, Tooltip("砲弾着弾時の爆発エフェクトです。")]
+        private ReusableParticleSystemView _shellExplosionEffectView;
 
         private IObjectPool<EnemyLifeCycle> _infantryPool;
         private IObjectPool<EnemyLifeCycle> _artilleryPool;

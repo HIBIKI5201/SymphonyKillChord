@@ -290,6 +290,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private async Task AppendPageContentAsync(StringBuilder sb, Page page)
         {
             string pageContext = await _reader.GetPageContentAsync(page);
+            pageContext = NotionMarkdownSanitizer.SanitizeForNotification(pageContext);
             sb.AppendLine(new string('-', 10));
             sb.AppendLine(pageContext.TrimEnd());
             sb.AppendLine(new string('-', 10));

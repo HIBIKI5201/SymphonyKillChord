@@ -1,0 +1,857 @@
+{
+  "schemaVersion": 3,
+  "project": "Symphony Kill Chord — Omnipotens 最終解析",
+  "language": "ja",
+  "generatedAt": "2026-07-18T18:24:23+09:00",
+  "output": "omnipotens-final.html",
+  "files": [
+    {
+      "path": "report/architecture-review-unity.html",
+      "sha256": "5733f3609bdfa5626f1338db083612e7e5fae59d022bb215408f84b8e4b5bc91"
+    },
+    {
+      "path": "spec/data/anatomia-domains/project.domain.json",
+      "sha256": "0f64d0fa1275df7adb15ce802cd96b11ea6e8ed4f2eb941decfef0624151a999"
+    },
+    {
+      "path": "spec/data/anatomia-unity-analysis-summary.json",
+      "sha256": "875b946bcc20b6209a35c8dd3ffbb741cd38963e2a60671b3acc68c930c2d71c"
+    },
+    {
+      "path": "spec/data/anatomia-unity-architecture-review.json",
+      "sha256": "560b38ea5d20649864073f591fc1d30fb3eba91ebd0be93b96e0998815e5842b"
+    },
+    {
+      "path": "spec/data/anatomia-unity-domain-review.json",
+      "sha256": "e66aaf20dd1c9bc9df26784eec981d86a6ae1a9db39748e921948630286cd4f1"
+    },
+    {
+      "path": "spec/data/anatomia-unity-screens.json",
+      "sha256": "177883b758d3c5adc6a9bec18e46728492afe1ca43611de0bb1ca485fe30f333"
+    },
+    {
+      "path": "spec/data/di-discussion-result.json",
+      "sha256": "44bf4cbf85eee192f4ebb1e35544e4d089e89eaeb67f6a1cb62bcbe9ce3c1ad7"
+    },
+    {
+      "path": "spec/data/game-data-contracts.md",
+      "sha256": "325b6800f940ae9e520d5a6d1c09a1d04a5df741600387cee6bb44b199a85a67"
+    },
+    {
+      "path": "spec/data/ludus-okf-selection.json",
+      "sha256": "8b85b09aad941bf6f52e664b7ee6fc08c32a57ea66a60a77b97f287336b8c596"
+    },
+    {
+      "path": "spec/data/notion-core-pages/beta-guidance.json",
+      "sha256": "d13bdad697d6537521aff7166afffec84ef3b698511eead9d2eb4e5f741fdac1"
+    },
+    {
+      "path": "spec/data/notion-core-pages/boss-battle.json",
+      "sha256": "d403442166d357f6533d74872354253edf019c4e6fa3653b2433af669a08dc08"
+    },
+    {
+      "path": "spec/data/notion-core-pages/character-status.json",
+      "sha256": "6d0732afb5186be2758183b17ae241c0fe3689149c8c6984927306e00e4edbac"
+    },
+    {
+      "path": "spec/data/notion-core-pages/core-mechanics.json",
+      "sha256": "a626d036784f519bdda01c552a1a268eaca692c3ebb5f8e59bc169cac639e948"
+    },
+    {
+      "path": "spec/data/notion-core-pages/enemy.json",
+      "sha256": "cea6aa7f648127d6731ec2e7cb29cfb763a32540f0943efb7760177ec441f69c"
+    },
+    {
+      "path": "spec/data/notion-core-pages/game-flow.json",
+      "sha256": "bb1ba2cd79c59d4ac87c2233ad9d07d76ea54243d915d663a8f0c8fe7a12e4dc"
+    },
+    {
+      "path": "spec/data/notion-core-pages/planning-overview.json",
+      "sha256": "14b005061c47173a355525dbff68ecf53654706ae25b99cce7ec8e83da895d06"
+    },
+    {
+      "path": "spec/data/notion-core-pages/player.json",
+      "sha256": "5721dc2b897c9fed6e9470667b5610b7a24ef663af4373f21144d5dd6b6030cd"
+    },
+    {
+      "path": "spec/data/notion-core-pages/result.json",
+      "sha256": "7709494a4300b4fef5870f67f29ebaec64e1a8d4353de12422af1037ae05ba31"
+    },
+    {
+      "path": "spec/data/notion-core-pages/rhythm-judgment.json",
+      "sha256": "e7de2d912c00ebbd4365267352f8373e80225d4e6f478f7954e19f489f8b55a2"
+    },
+    {
+      "path": "spec/data/notion-core-pages/save-data.json",
+      "sha256": "2247cf8d414b37c4d6dcc4db51649915a4e9ffcc5c29281e584f9b37ef0229eb"
+    },
+    {
+      "path": "spec/data/notion-core-pages/skill.json",
+      "sha256": "91008b98bfe30be4fe3b46a7058cef80ee945e7618221715ba1e92db59b6c77a"
+    },
+    {
+      "path": "spec/data/notion-core-pages/stage-bgm.json",
+      "sha256": "925735317b3578d7e2fc23108e09a68eb73172fb7066904fc7bb4c3e5f13d04f"
+    },
+    {
+      "path": "spec/data/notion-core-pages/stage-rules.json",
+      "sha256": "92db9871bacc47e866500b88dfa7be5c003f08e46fc0769b8419ad68e72b50b0"
+    },
+    {
+      "path": "spec/data/notion-core-spec-index.json",
+      "sha256": "9f36c2957a9f940447d354b802e11f818131c7f942c15b758d68d1ad289aee7b"
+    },
+    {
+      "path": "spec/data/notion-full-pages/01-3437c2c6cc028034abfde7e5ef3590e0.json",
+      "sha256": "48453810d85ac04b11445a5a1781f2a119e23a549ed8aa95b375b1def72d9a1e"
+    },
+    {
+      "path": "spec/data/notion-full-pages/02-3437c2c6cc028012a919ddcccde97581.json",
+      "sha256": "d6ef3deb549e791006aeb198e085c8324f19708c90aad3964428f60a7eb7398c"
+    },
+    {
+      "path": "spec/data/notion-full-pages/03-3437c2c6cc0280a5bcb6ed675cbb7fb2.json",
+      "sha256": "8dbf1533dc0bbba435b1cbb181e7c6b6ca223f166989e5873294f6e3a6698248"
+    },
+    {
+      "path": "spec/data/notion-full-pages/04-3437c2c6cc0280d18adcd63d047f4199.json",
+      "sha256": "813965f4db3effaacb4ee8998df2d827cc28f1ffe50f4213b4a7e9e32952eb9a"
+    },
+    {
+      "path": "spec/data/notion-full-pages/05-3437c2c6cc02807ba886c75657af8359.json",
+      "sha256": "03cd325d5ac523dbeeab189fb27eb07253941205234250403cfad531342ee3ce"
+    },
+    {
+      "path": "spec/data/notion-full-pages/06-3437c2c6cc0280109c38c4294ecb3c27.json",
+      "sha256": "c9569d69d7b614694cb161b6f3fbf7cc6d82c91fd7310467914f7a314979d51b"
+    },
+    {
+      "path": "spec/data/notion-full-pages/07-37f7c2c6cc0280b185f9e47de01e56ad.json",
+      "sha256": "5527e54b0c989d832445549cff588b81d46b4cf3e1ef6106b3a7015c4674824d"
+    },
+    {
+      "path": "spec/data/notion-full-pages/13-27f7c2c6cc0280bb9c24e39e11fc7314.json",
+      "sha256": "e24197929306ad2438d012c0a188a3200adfa6ceb7c4e40812e377b7bb2093e3"
+    },
+    {
+      "path": "spec/data/notion-full-pages/14-3257c2c6cc02809086faf9cd8463c183.json",
+      "sha256": "71898bf0cb7510bde13e66452793b4b29f906c8fbd0c4e1a63116f0183fa4577"
+    },
+    {
+      "path": "spec/data/notion-full-pages/15-3257c2c6cc0280ee8950e36ec0a324d5.json",
+      "sha256": "517c2f37707aa81628aff0a260c0d2b61d36b3ea2bdf97dbbd4fe1108fc495b6"
+    },
+    {
+      "path": "spec/data/notion-full-pages/16-3257c2c6cc0280e183def95681edd07d.json",
+      "sha256": "8fa07de940b355633cc2bab76497c63e96f8c1ee07861e44dbe2d1f4312340d2"
+    },
+    {
+      "path": "spec/data/notion-full-pages/17-3457c2c6cc0280559359f49a8722578b.json",
+      "sha256": "82ebe487dbd0acfb95e5e7b3f11631dac29c3454042184a4992b2eb442c4f328"
+    },
+    {
+      "path": "spec/data/notion-full-pages/18-38d7c2c6cc0280a89c04fcf22a73cb8a.json",
+      "sha256": "c8a0e4ca2a537e24b3bcbc000b4a286f5a34572b92cfa1e94c971e122edb4bf2"
+    },
+    {
+      "path": "spec/data/notion-full-pages/19-3127c2c6cc0280f18e59cd14d6751814.json",
+      "sha256": "111c880afdaebde07d461003d9292fd2a7a39d2da6b07c4247edc691b62fe7f6"
+    },
+    {
+      "path": "spec/data/notion-full-pages/20-3127c2c6cc028086a915dde30557db9b.json",
+      "sha256": "b1c403c480df59642e2f2bc091c75297d7659dde60264b7738b08debb686e335"
+    },
+    {
+      "path": "spec/data/notion-full-pages/21-31f7c2c6cc02809da534ceee55d7b005.json",
+      "sha256": "48ca3f63b5ad5bbef836b0af697905527b37f83530816caca53041946984234d"
+    },
+    {
+      "path": "spec/data/notion-full-pages/22-3387c2c6cc0280feab16dca546d16020.json",
+      "sha256": "8602271030d1720ed007b4588212974f11c1cd5cf6d7491f2b8b47c96e48543b"
+    },
+    {
+      "path": "spec/data/notion-full-pages/23-3437c2c6cc02801db04ed5773ff4255b.json",
+      "sha256": "89d076008ed0f7ff64e6fe71b7480abc3ac272c1837d354f8354e2d62af5f892"
+    },
+    {
+      "path": "spec/data/notion-full-pages/24-3337c2c6cc028090b06cd9617104076d.json",
+      "sha256": "89afd0c9b5d303d965dd707e0559c43fd34f3f2eaf2d27faa61d3dcd7b33a838"
+    },
+    {
+      "path": "spec/data/notion-full-pages/25-3457c2c6cc02801d91fcf042482d733b.json",
+      "sha256": "ed8757ff0c95ea6d328ed2f498eaafd4d395239b01882442ac894dfadbb5c2cd"
+    },
+    {
+      "path": "spec/data/notion-full-pages/26-3457c2c6cc028042a434f043054491f9.json",
+      "sha256": "edcb8cb2c976508f004f46c6cf62bc277b147738a56e32bbacd46c6e4aa04e52"
+    },
+    {
+      "path": "spec/data/notion-full-pages/27-2a77c2c6cc02808cbf11ce704dd7776f.json",
+      "sha256": "1c07150236dbbb4b418520a4c335e32f01187494b6e98f100b3ef7d239362611"
+    },
+    {
+      "path": "spec/data/notion-full-pages/28-2b17c2c6cc0280628bf4cdb6099e9f9b.json",
+      "sha256": "0d7b214cbf0e279472503c041179d7fa6715095f412d4d9a0142a59b985ce626"
+    },
+    {
+      "path": "spec/data/notion-full-pages/29-3347c2c6cc0280cbaec2cc806b530acf.json",
+      "sha256": "2a2a4379b42dff12504ed0e1e8a47d2c3fd59026ca7e1e84cb21462d0822781f"
+    },
+    {
+      "path": "spec/data/notion-full-pages/30-3567c2c6cc0280e994a0da0e48bd16ec.json",
+      "sha256": "b3e985b7ef6bb63684d537458627195b1ae7d5e57ac25d2e633f3cf181eee85a"
+    },
+    {
+      "path": "spec/data/notion-full-pages/31-3457c2c6cc028006802ae7b26ae6b807.json",
+      "sha256": "a8fecb975848cf9be34e9a21089dcf132345a812ac08dde83319c83929862e56"
+    },
+    {
+      "path": "spec/data/notion-full-pages/32-39c7c2c6cc02806d8c0df688aa7fd242.json",
+      "sha256": "514216bafae9f70a74c994b8d4eda3a9a42569d9a3cf348cc7a5644d33d58b6d"
+    },
+    {
+      "path": "spec/data/notion-full-pages/33-3437c2c6cc028035af95fde3f08584dd.json",
+      "sha256": "4373507bfb153648605ffe3dca240acd4732c444326e4bee972065c8525ca739"
+    },
+    {
+      "path": "spec/data/notion-full-pages/34-3457c2c6cc0280499574e6a08ab8fc0a.json",
+      "sha256": "bf336e3c4d37f1c2ab3455c75875d6516c80a9cbdea18e09d3f1ab949c895505"
+    },
+    {
+      "path": "spec/data/notion-full-pages/35-38f7c2c6cc028070b4e6ef6f2e5f2a2e.json",
+      "sha256": "162e4f1e7a1577012764d5f8a3dbec1fb899f52b61032aade67fb3751187ba9a"
+    },
+    {
+      "path": "spec/data/notion-full-spec-index.json",
+      "sha256": "7a1189b2ee0f10c03261639ab445715d3486a47516dce6f52b889b05cf36143e"
+    },
+    {
+      "path": "spec/data/omnipotens-report-layout.json",
+      "sha256": "0178663947e3063888ac287548e56f77ee39eb09e3041dfebd1bc65b300bdc2f"
+    },
+    {
+      "path": "spec/data/tool-manifest.json",
+      "sha256": "b799d5e4e632041ccb6dafc8dfb94eba7e0f2c48c12c9f5df0b6506cac7613a6"
+    },
+    {
+      "path": "spec/data/vitia-game-experience-audit.json",
+      "sha256": "5aaf3cc64857e4f4d0e4064c5c337c4510bcc011619759872e8a0b124032f597"
+    },
+    {
+      "path": "spec/data/vitia-game-experience-input.json",
+      "sha256": "6ce13ff6e30972b26219b45767a611fe9c9b4d979357867c6fee05011f4e4436"
+    },
+    {
+      "path": "spec/data/vitia-marketability-input.json",
+      "sha256": "5a718ff3415ebaa0ddb12e366cbd5d98788999dd08b26fa54fd652988601e92e"
+    },
+    {
+      "path": "spec/data/vitia-marketability-score.json",
+      "sha256": "596174271a259b9d0bfe3445c6665fd493a01675cd72ba8aab33e87c77e9cae0"
+    },
+    {
+      "path": "spec/data/vitia-ux-source-manifest.json",
+      "sha256": "1f5563ce08b5295881014dca6caa3662de3ac5fb1a32f3c5125bca42337ebcb2"
+    },
+    {
+      "path": "spec/feature/game-spec.md",
+      "sha256": "d5f476ed10ceafd5791bd05277eaf78df0a406f0e479ffbb8705696808c5c03c"
+    },
+    {
+      "path": "spec/feature/product-brief.md",
+      "sha256": "780e4d6e46bf42db7f0595e69d449135b86e213a7ad2cf5bf2c3f9f751a3ef0f"
+    },
+    {
+      "path": "spec/interface/runtime-boundaries.md",
+      "sha256": "c11fbb389e9111fe63536844e39e1c1e93b405150369b6b611714e82663a8aea"
+    },
+    {
+      "path": "spec/plan/00-source-manifest.md",
+      "sha256": "fe2cc05c915e3ae589058a56db6deca035a61c6759074dafb2c83c3c557c61ee"
+    },
+    {
+      "path": "spec/plan/01-final-summary.md",
+      "sha256": "f37a67780a58ced041316a5b3c18e99d9d886c2a9192b92e00f153cbd348fa50"
+    },
+    {
+      "path": "spec/plan/03-ludus-analysis.md",
+      "sha256": "2f16d6d404d3b0dc74df9c230f40a9299ab2a9a08a4e94c94c3a889440e00419"
+    },
+    {
+      "path": "spec/plan/04-domain-model.md",
+      "sha256": "a25ff96df39c8e32e553698510a97a028c1a4a0ba2dd00530bb646bdbde07ff8"
+    },
+    {
+      "path": "spec/plan/05-anatomia-analysis.md",
+      "sha256": "26bae9bbe6845fd9f56c0309dd9717b78d23fe706fc60eb95bb1855a7cd95636"
+    },
+    {
+      "path": "spec/plan/06-spec-domain-code-map.md",
+      "sha256": "7a22f16e4df314adeb8e48bb750420217ddfa52e081e8fef856d6664cce9bcd7"
+    },
+    {
+      "path": "spec/plan/07-spec-gaps.md",
+      "sha256": "a630a410df9c16df7b25f4579fe4a3ecd22928800425ca9833bfe1364ea209db"
+    },
+    {
+      "path": "spec/plan/08-mechanics-economy.md",
+      "sha256": "46b04dc220b370ce4e118f946e2b1eeb5e4bc5862980aac721dba63759dab9bf"
+    },
+    {
+      "path": "spec/plan/09-aiformat-architecture-review.md",
+      "sha256": "7cd73852b0870a08bcb2c41b478818975f375b6b2a47575d0e075e1b65aff83e"
+    },
+    {
+      "path": "spec/plan/10-ux-review.md",
+      "sha256": "8cc96fcfaacfc6e55131ceff415ac041f1c156cf2c987b6580d36872f9f83900"
+    },
+    {
+      "path": "spec/plan/11-vitia-marketability.md",
+      "sha256": "e8202e022dca3005d9742657e7053c59197bd93d8bd4c5c9d3fab864d0914e3b"
+    },
+    {
+      "path": "spec/plan/12-di-discussion-paper.md",
+      "sha256": "d852907148f463724b5a5e154029d1872f80aa7fd8410f56d6eaf19344894d56"
+    },
+    {
+      "path": "spec/README.md",
+      "sha256": "e56f8161105c79a9a5b04379236324ff562a0793e4ff3ab834bc4cafbe5cd094"
+    },
+    {
+      "path": "spec/setup/reproducible-build.md",
+      "sha256": "cf061fd568f3c40671e71a30f3a1e16cc77e616d88729be550b9eb9125e744f3"
+    },
+    {
+      "path": "spec/test/review-test-plan.md",
+      "sha256": "0ede7a857d3e5f23ef2a563ad8802bb6c82c34a8f02dae143f431e97de06c7bc"
+    }
+  ],
+  "sources": [
+    {
+      "stage": "04",
+      "path": "report/architecture-review-unity.html",
+      "kind": "html",
+      "sha256": "5733f3609bdfa5626f1338db083612e7e5fae59d022bb215408f84b8e4b5bc91"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/anatomia-domains/project.domain.json",
+      "kind": "json",
+      "sha256": "0f64d0fa1275df7adb15ce802cd96b11ea6e8ed4f2eb941decfef0624151a999"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/anatomia-unity-analysis-summary.json",
+      "kind": "json",
+      "sha256": "875b946bcc20b6209a35c8dd3ffbb741cd38963e2a60671b3acc68c930c2d71c"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/anatomia-unity-architecture-review.json",
+      "kind": "json",
+      "sha256": "560b38ea5d20649864073f591fc1d30fb3eba91ebd0be93b96e0998815e5842b"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/anatomia-unity-domain-review.json",
+      "kind": "json",
+      "sha256": "e66aaf20dd1c9bc9df26784eec981d86a6ae1a9db39748e921948630286cd4f1"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/anatomia-unity-screens.json",
+      "kind": "json",
+      "sha256": "177883b758d3c5adc6a9bec18e46728492afe1ca43611de0bb1ca485fe30f333"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/di-discussion-result.json",
+      "kind": "json",
+      "sha256": "44bf4cbf85eee192f4ebb1e35544e4d089e89eaeb67f6a1cb62bcbe9ce3c1ad7"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/game-data-contracts.md",
+      "kind": "markdown",
+      "sha256": "325b6800f940ae9e520d5a6d1c09a1d04a5df741600387cee6bb44b199a85a67"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/ludus-okf-selection.json",
+      "kind": "json",
+      "sha256": "8b85b09aad941bf6f52e664b7ee6fc08c32a57ea66a60a77b97f287336b8c596"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/beta-guidance.json",
+      "kind": "json",
+      "sha256": "d13bdad697d6537521aff7166afffec84ef3b698511eead9d2eb4e5f741fdac1"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/boss-battle.json",
+      "kind": "json",
+      "sha256": "d403442166d357f6533d74872354253edf019c4e6fa3653b2433af669a08dc08"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/character-status.json",
+      "kind": "json",
+      "sha256": "6d0732afb5186be2758183b17ae241c0fe3689149c8c6984927306e00e4edbac"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/core-mechanics.json",
+      "kind": "json",
+      "sha256": "a626d036784f519bdda01c552a1a268eaca692c3ebb5f8e59bc169cac639e948"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/enemy.json",
+      "kind": "json",
+      "sha256": "cea6aa7f648127d6731ec2e7cb29cfb763a32540f0943efb7760177ec441f69c"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/game-flow.json",
+      "kind": "json",
+      "sha256": "bb1ba2cd79c59d4ac87c2233ad9d07d76ea54243d915d663a8f0c8fe7a12e4dc"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/planning-overview.json",
+      "kind": "json",
+      "sha256": "14b005061c47173a355525dbff68ecf53654706ae25b99cce7ec8e83da895d06"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/player.json",
+      "kind": "json",
+      "sha256": "5721dc2b897c9fed6e9470667b5610b7a24ef663af4373f21144d5dd6b6030cd"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/result.json",
+      "kind": "json",
+      "sha256": "7709494a4300b4fef5870f67f29ebaec64e1a8d4353de12422af1037ae05ba31"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/rhythm-judgment.json",
+      "kind": "json",
+      "sha256": "e7de2d912c00ebbd4365267352f8373e80225d4e6f478f7954e19f489f8b55a2"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/save-data.json",
+      "kind": "json",
+      "sha256": "2247cf8d414b37c4d6dcc4db51649915a4e9ffcc5c29281e584f9b37ef0229eb"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/skill.json",
+      "kind": "json",
+      "sha256": "91008b98bfe30be4fe3b46a7058cef80ee945e7618221715ba1e92db59b6c77a"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/stage-bgm.json",
+      "kind": "json",
+      "sha256": "925735317b3578d7e2fc23108e09a68eb73172fb7066904fc7bb4c3e5f13d04f"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-pages/stage-rules.json",
+      "kind": "json",
+      "sha256": "92db9871bacc47e866500b88dfa7be5c003f08e46fc0769b8419ad68e72b50b0"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-core-spec-index.json",
+      "kind": "json",
+      "sha256": "9f36c2957a9f940447d354b802e11f818131c7f942c15b758d68d1ad289aee7b"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/01-3437c2c6cc028034abfde7e5ef3590e0.json",
+      "kind": "json",
+      "sha256": "48453810d85ac04b11445a5a1781f2a119e23a549ed8aa95b375b1def72d9a1e"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/02-3437c2c6cc028012a919ddcccde97581.json",
+      "kind": "json",
+      "sha256": "d6ef3deb549e791006aeb198e085c8324f19708c90aad3964428f60a7eb7398c"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/03-3437c2c6cc0280a5bcb6ed675cbb7fb2.json",
+      "kind": "json",
+      "sha256": "8dbf1533dc0bbba435b1cbb181e7c6b6ca223f166989e5873294f6e3a6698248"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/04-3437c2c6cc0280d18adcd63d047f4199.json",
+      "kind": "json",
+      "sha256": "813965f4db3effaacb4ee8998df2d827cc28f1ffe50f4213b4a7e9e32952eb9a"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/05-3437c2c6cc02807ba886c75657af8359.json",
+      "kind": "json",
+      "sha256": "03cd325d5ac523dbeeab189fb27eb07253941205234250403cfad531342ee3ce"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/06-3437c2c6cc0280109c38c4294ecb3c27.json",
+      "kind": "json",
+      "sha256": "c9569d69d7b614694cb161b6f3fbf7cc6d82c91fd7310467914f7a314979d51b"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/07-37f7c2c6cc0280b185f9e47de01e56ad.json",
+      "kind": "json",
+      "sha256": "5527e54b0c989d832445549cff588b81d46b4cf3e1ef6106b3a7015c4674824d"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/13-27f7c2c6cc0280bb9c24e39e11fc7314.json",
+      "kind": "json",
+      "sha256": "e24197929306ad2438d012c0a188a3200adfa6ceb7c4e40812e377b7bb2093e3"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/14-3257c2c6cc02809086faf9cd8463c183.json",
+      "kind": "json",
+      "sha256": "71898bf0cb7510bde13e66452793b4b29f906c8fbd0c4e1a63116f0183fa4577"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/15-3257c2c6cc0280ee8950e36ec0a324d5.json",
+      "kind": "json",
+      "sha256": "517c2f37707aa81628aff0a260c0d2b61d36b3ea2bdf97dbbd4fe1108fc495b6"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/16-3257c2c6cc0280e183def95681edd07d.json",
+      "kind": "json",
+      "sha256": "8fa07de940b355633cc2bab76497c63e96f8c1ee07861e44dbe2d1f4312340d2"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/17-3457c2c6cc0280559359f49a8722578b.json",
+      "kind": "json",
+      "sha256": "82ebe487dbd0acfb95e5e7b3f11631dac29c3454042184a4992b2eb442c4f328"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/18-38d7c2c6cc0280a89c04fcf22a73cb8a.json",
+      "kind": "json",
+      "sha256": "c8a0e4ca2a537e24b3bcbc000b4a286f5a34572b92cfa1e94c971e122edb4bf2"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/19-3127c2c6cc0280f18e59cd14d6751814.json",
+      "kind": "json",
+      "sha256": "111c880afdaebde07d461003d9292fd2a7a39d2da6b07c4247edc691b62fe7f6"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/20-3127c2c6cc028086a915dde30557db9b.json",
+      "kind": "json",
+      "sha256": "b1c403c480df59642e2f2bc091c75297d7659dde60264b7738b08debb686e335"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/21-31f7c2c6cc02809da534ceee55d7b005.json",
+      "kind": "json",
+      "sha256": "48ca3f63b5ad5bbef836b0af697905527b37f83530816caca53041946984234d"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/22-3387c2c6cc0280feab16dca546d16020.json",
+      "kind": "json",
+      "sha256": "8602271030d1720ed007b4588212974f11c1cd5cf6d7491f2b8b47c96e48543b"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/23-3437c2c6cc02801db04ed5773ff4255b.json",
+      "kind": "json",
+      "sha256": "89d076008ed0f7ff64e6fe71b7480abc3ac272c1837d354f8354e2d62af5f892"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/24-3337c2c6cc028090b06cd9617104076d.json",
+      "kind": "json",
+      "sha256": "89afd0c9b5d303d965dd707e0559c43fd34f3f2eaf2d27faa61d3dcd7b33a838"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/25-3457c2c6cc02801d91fcf042482d733b.json",
+      "kind": "json",
+      "sha256": "ed8757ff0c95ea6d328ed2f498eaafd4d395239b01882442ac894dfadbb5c2cd"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/26-3457c2c6cc028042a434f043054491f9.json",
+      "kind": "json",
+      "sha256": "edcb8cb2c976508f004f46c6cf62bc277b147738a56e32bbacd46c6e4aa04e52"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/27-2a77c2c6cc02808cbf11ce704dd7776f.json",
+      "kind": "json",
+      "sha256": "1c07150236dbbb4b418520a4c335e32f01187494b6e98f100b3ef7d239362611"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/28-2b17c2c6cc0280628bf4cdb6099e9f9b.json",
+      "kind": "json",
+      "sha256": "0d7b214cbf0e279472503c041179d7fa6715095f412d4d9a0142a59b985ce626"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/29-3347c2c6cc0280cbaec2cc806b530acf.json",
+      "kind": "json",
+      "sha256": "2a2a4379b42dff12504ed0e1e8a47d2c3fd59026ca7e1e84cb21462d0822781f"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/30-3567c2c6cc0280e994a0da0e48bd16ec.json",
+      "kind": "json",
+      "sha256": "b3e985b7ef6bb63684d537458627195b1ae7d5e57ac25d2e633f3cf181eee85a"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/31-3457c2c6cc028006802ae7b26ae6b807.json",
+      "kind": "json",
+      "sha256": "a8fecb975848cf9be34e9a21089dcf132345a812ac08dde83319c83929862e56"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/32-39c7c2c6cc02806d8c0df688aa7fd242.json",
+      "kind": "json",
+      "sha256": "514216bafae9f70a74c994b8d4eda3a9a42569d9a3cf348cc7a5644d33d58b6d"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/33-3437c2c6cc028035af95fde3f08584dd.json",
+      "kind": "json",
+      "sha256": "4373507bfb153648605ffe3dca240acd4732c444326e4bee972065c8525ca739"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/34-3457c2c6cc0280499574e6a08ab8fc0a.json",
+      "kind": "json",
+      "sha256": "bf336e3c4d37f1c2ab3455c75875d6516c80a9cbdea18e09d3f1ab949c895505"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-pages/35-38f7c2c6cc028070b4e6ef6f2e5f2a2e.json",
+      "kind": "json",
+      "sha256": "162e4f1e7a1577012764d5f8a3dbec1fb899f52b61032aade67fb3751187ba9a"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/notion-full-spec-index.json",
+      "kind": "json",
+      "sha256": "7a1189b2ee0f10c03261639ab445715d3486a47516dce6f52b889b05cf36143e"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/omnipotens-report-layout.json",
+      "kind": "json",
+      "sha256": "0178663947e3063888ac287548e56f77ee39eb09e3041dfebd1bc65b300bdc2f"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/tool-manifest.json",
+      "kind": "json",
+      "sha256": "b799d5e4e632041ccb6dafc8dfb94eba7e0f2c48c12c9f5df0b6506cac7613a6"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/vitia-game-experience-audit.json",
+      "kind": "json",
+      "sha256": "5aaf3cc64857e4f4d0e4064c5c337c4510bcc011619759872e8a0b124032f597"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/vitia-game-experience-input.json",
+      "kind": "json",
+      "sha256": "6ce13ff6e30972b26219b45767a611fe9c9b4d979357867c6fee05011f4e4436"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/vitia-marketability-input.json",
+      "kind": "json",
+      "sha256": "5a718ff3415ebaa0ddb12e366cbd5d98788999dd08b26fa54fd652988601e92e"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/vitia-marketability-score.json",
+      "kind": "json",
+      "sha256": "596174271a259b9d0bfe3445c6665fd493a01675cd72ba8aab33e87c77e9cae0"
+    },
+    {
+      "stage": "support",
+      "path": "spec/data/vitia-ux-source-manifest.json",
+      "kind": "json",
+      "sha256": "1f5563ce08b5295881014dca6caa3662de3ac5fb1a32f3c5125bca42337ebcb2"
+    },
+    {
+      "stage": "01",
+      "path": "spec/feature/game-spec.md",
+      "kind": "markdown",
+      "sha256": "d5f476ed10ceafd5791bd05277eaf78df0a406f0e479ffbb8705696808c5c03c"
+    },
+    {
+      "stage": "01",
+      "path": "spec/feature/product-brief.md",
+      "kind": "markdown",
+      "sha256": "780e4d6e46bf42db7f0595e69d449135b86e213a7ad2cf5bf2c3f9f751a3ef0f"
+    },
+    {
+      "stage": "support",
+      "path": "spec/interface/runtime-boundaries.md",
+      "kind": "markdown",
+      "sha256": "c11fbb389e9111fe63536844e39e1c1e93b405150369b6b611714e82663a8aea"
+    },
+    {
+      "stage": "00",
+      "path": "spec/plan/00-source-manifest.md",
+      "kind": "markdown",
+      "sha256": "fe2cc05c915e3ae589058a56db6deca035a61c6759074dafb2c83c3c557c61ee"
+    },
+    {
+      "stage": "00",
+      "path": "spec/plan/01-final-summary.md",
+      "kind": "markdown",
+      "sha256": "f37a67780a58ced041316a5b3c18e99d9d886c2a9192b92e00f153cbd348fa50"
+    },
+    {
+      "stage": "02",
+      "path": "spec/plan/03-ludus-analysis.md",
+      "kind": "markdown",
+      "sha256": "2f16d6d404d3b0dc74df9c230f40a9299ab2a9a08a4e94c94c3a889440e00419"
+    },
+    {
+      "stage": "03",
+      "path": "spec/plan/04-domain-model.md",
+      "kind": "markdown",
+      "sha256": "a25ff96df39c8e32e553698510a97a028c1a4a0ba2dd00530bb646bdbde07ff8"
+    },
+    {
+      "stage": "04",
+      "path": "spec/plan/05-anatomia-analysis.md",
+      "kind": "markdown",
+      "sha256": "26bae9bbe6845fd9f56c0309dd9717b78d23fe706fc60eb95bb1855a7cd95636"
+    },
+    {
+      "stage": "05",
+      "path": "spec/plan/06-spec-domain-code-map.md",
+      "kind": "markdown",
+      "sha256": "7a22f16e4df314adeb8e48bb750420217ddfa52e081e8fef856d6664cce9bcd7"
+    },
+    {
+      "stage": "05",
+      "path": "spec/plan/07-spec-gaps.md",
+      "kind": "markdown",
+      "sha256": "a630a410df9c16df7b25f4579fe4a3ecd22928800425ca9833bfe1364ea209db"
+    },
+    {
+      "stage": "06",
+      "path": "spec/plan/08-mechanics-economy.md",
+      "kind": "markdown",
+      "sha256": "46b04dc220b370ce4e118f946e2b1eeb5e4bc5862980aac721dba63759dab9bf"
+    },
+    {
+      "stage": "07",
+      "path": "spec/plan/09-aiformat-architecture-review.md",
+      "kind": "markdown",
+      "sha256": "7cd73852b0870a08bcb2c41b478818975f375b6b2a47575d0e075e1b65aff83e"
+    },
+    {
+      "stage": "08",
+      "path": "spec/plan/10-ux-review.md",
+      "kind": "markdown",
+      "sha256": "8cc96fcfaacfc6e55131ceff415ac041f1c156cf2c987b6580d36872f9f83900"
+    },
+    {
+      "stage": "09",
+      "path": "spec/plan/11-vitia-marketability.md",
+      "kind": "markdown",
+      "sha256": "e8202e022dca3005d9742657e7053c59197bd93d8bd4c5c9d3fab864d0914e3b"
+    },
+    {
+      "stage": "10",
+      "path": "spec/plan/12-di-discussion-paper.md",
+      "kind": "markdown",
+      "sha256": "d852907148f463724b5a5e154029d1872f80aa7fd8410f56d6eaf19344894d56"
+    },
+    {
+      "stage": "support",
+      "path": "spec/README.md",
+      "kind": "markdown",
+      "sha256": "e56f8161105c79a9a5b04379236324ff562a0793e4ff3ab834bc4cafbe5cd094"
+    },
+    {
+      "stage": "support",
+      "path": "spec/setup/reproducible-build.md",
+      "kind": "markdown",
+      "sha256": "cf061fd568f3c40671e71a30f3a1e16cc77e616d88729be550b9eb9125e744f3"
+    },
+    {
+      "stage": "support",
+      "path": "spec/test/review-test-plan.md",
+      "kind": "markdown",
+      "sha256": "0ede7a857d3e5f23ef2a563ad8802bb6c82c34a8f02dae143f431e97de06c7bc"
+    }
+  ],
+  "stageReports": [
+    {
+      "stageId": "00",
+      "path": "stages/00-最終まとめ.html"
+    },
+    {
+      "stageId": "01",
+      "path": "stages/01-プロダクトと仕様.html"
+    },
+    {
+      "stageId": "02",
+      "path": "stages/02-ludus-プレイ分類.html"
+    },
+    {
+      "stageId": "03",
+      "path": "stages/03-仕様起点ドメイン.html"
+    },
+    {
+      "stageId": "04",
+      "path": "stages/04-unity対応anatomia.html"
+    },
+    {
+      "stageId": "05",
+      "path": "stages/05-仕様-ドメイン-コード.html"
+    },
+    {
+      "stageId": "06",
+      "path": "stages/06-メカニクスと内部経済.html"
+    },
+    {
+      "stageId": "07",
+      "path": "stages/07-ai-formatとアーキテクチャ健全性.html"
+    },
+    {
+      "stageId": "08",
+      "path": "stages/08-ux-配信-tgs体験.html"
+    },
+    {
+      "stageId": "09",
+      "path": "stages/09-市場性.html"
+    },
+    {
+      "stageId": "10",
+      "path": "stages/10-di合議結果.html"
+    }
+  ]
+}

@@ -56,6 +56,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> プレイヤーが攻撃を実行したときに発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
 
+        /// <summary> プレイヤーが指定拍子の攻撃を実行したときに発火します。 </summary>
+        public event Action<BeatType> OnAttackBeatExecuted;
+
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
 
@@ -85,11 +88,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
-            bool hasTarget = TryUpdateCurrentTarget();
-
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType();
 
+            bool hasTarget = TryUpdateCurrentTarget();
             _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
@@ -98,6 +100,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             StartAttackInterval();
             StartAttackCooldown();
+            OnAttackBeatExecuted?.Invoke(beatType);
 
             if (!hasTarget)
             {
@@ -173,7 +176,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
         private bool TryUpdateCurrentTarget()
         {
-            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity))
+            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity)
+                && (!_targetingSystem.TryGetCurrentCandidateEntity(out targetEntity)
+                    || !_targetingSystem.TrySetCurrentTarget(targetEntity.Id)))
             {
                 _battleState.ClearTarget();
                 HasCurrentLockOnTarget = false;

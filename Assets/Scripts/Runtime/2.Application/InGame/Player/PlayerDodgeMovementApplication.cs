@@ -22,8 +22,8 @@ namespace KillChord.Runtime.Application.InGame.Player
         private bool _isDodging;
         private bool _hasNotifiedDodgeEnd;
 
-        /// <summary> 回避開始時に通知するイベント。 </summary>
-        public Action<float> OnDodgeStarted;
+        /// <summary> 回避開始時に通知するイベント。継続時間と回避方向(ワールド空間)を通知する。 </summary>
+        public Action<float, Vector3> OnDodgeStarted;
 
         /// <summary> 回避終了時に通知するイベント。 </summary>
         public Action OnDodgeEnded;
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Application.InGame.Player
             _isDodging = true;
             _hasNotifiedDodgeEnd = false;
 
-            OnDodgeStarted?.Invoke(_parameter.DodgeDuration.Value);
+            OnDodgeStarted?.Invoke(_parameter.DodgeDuration.Value, _direction);
             return true;
         }
 

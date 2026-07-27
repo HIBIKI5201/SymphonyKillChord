@@ -1,0 +1,41 @@
+{
+  "signals": {
+    "experience_promise_observable": 0.75,
+    "player_goal_clear": 0.7,
+    "core_action_available": 0.7,
+    "rule_obstacle_coherent": 0.75,
+    "action_feedback_traceable": 0.5,
+    "measurable_outcome_clear": 0.8,
+    "first_peak_continuity": 0.65,
+    "prerequisite_knowledge_matched": 0.65,
+    "challenge_skill_adjustable": 0.75,
+    "goal_and_feedback_clear": 0.55,
+    "safe_initial_attempt": 1.0,
+    "failure_informs_next_strategy": 0.6,
+    "recovery_path_available": 0.8,
+    "participation_voluntary": 0.8,
+    "meaningful_choice_preserved": 0.75,
+    "role_change_or_exit_proportionate": 0.75,
+    "strategic_variety_present": 0.8,
+    "choices_change_future_state": 0.8,
+    "opponent_or_system_variation_meaningful": 0.7,
+    "counterplay_or_alternative_paths": 0.75,
+    "repeat_value_without_obligation": 0.8,
+    "satiation_recovery_available": 0.5,
+    "stopping_cues_and_exit_easy": 0.75
+  },
+  "confidence": {
+    "global": 0.55,
+    "play_promise": 0.6,
+    "challenge_learning": 0.5,
+    "player_agency_fairness": 0.45,
+    "repeat_value": 0.5
+  },
+  "risk_flags": [],
+  "label_context": {
+    "artifact_name": "Symphony Kill Chord",
+    "category_name": "rhythm command action",
+    "declared_domain": "not supplied",
+    "source_frame": "public specification and deterministic static analysis"
+  }
+}

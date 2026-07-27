@@ -1,0 +1,122 @@
+{
+  "status": "ok",
+  "primary": "luxuria",
+  "secondary": "gula",
+  "cautions": [
+    "mandatory compulsion audit"
+  ],
+  "scores": [
+    {
+      "domain": "luxuria",
+      "score": 0.57,
+      "raw_score": 0.695,
+      "confidence": 0.55,
+      "signal_coverage": 1.0,
+      "observed_signals": {
+        "sensory_vividness": 0.8,
+        "affect_intensity": 0.75,
+        "immediacy": 0.7,
+        "trialability": 0.4,
+        "novelty": 0.8,
+        "reward_clarity": 0.65
+      },
+      "penalties": []
+    },
+    {
+      "domain": "gula",
+      "score": 0.502,
+      "raw_score": 0.628,
+      "confidence": 0.5,
+      "signal_coverage": 1.0,
+      "observed_signals": {
+        "repeat_frequency": 0.7,
+        "reward_clarity": 0.65,
+        "variety_potential": 0.8,
+        "habit_opportunity": 0.35,
+        "satiation_risk": 0.5,
+        "feedback_speed": 0.6
+      },
+      "penalties": []
+    },
+    {
+      "domain": "acedia",
+      "score": 0.462,
+      "raw_score": 0.608,
+      "confidence": 0.5,
+      "signal_coverage": 0.9,
+      "observed_signals": {
+        "decision_friction": 0.65,
+        "effort": 0.65,
+        "delay": 0.35,
+        "choice_complexity": 0.65,
+        "reversibility": 0.75,
+        "feedback_speed": 0.6
+      },
+      "penalties": []
+    },
+    {
+      "domain": "ira",
+      "score": 0.347,
+      "raw_score": 0.494,
+      "confidence": 0.45,
+      "signal_coverage": 0.8,
+      "observed_signals": {
+        "frustration": 0.55,
+        "blocked_goal": 0.5,
+        "autonomy_threat": 0.25,
+        "repairability": 0.75,
+        "evidence_of_problem": 0.45
+      },
+      "penalties": []
+    },
+    {
+      "domain": "superbia",
+      "score": 0.344,
+      "raw_score": 0.538,
+      "confidence": 0.5,
+      "signal_coverage": 0.6,
+      "observed_signals": {
+        "identity_relevance": 0.5,
+        "aspiration": 0.65,
+        "proof_strength": 0.45
+      },
+      "penalties": []
+    },
+    {
+      "domain": "invidia",
+      "score": 0.303,
+      "raw_score": 0.583,
+      "confidence": 0.5,
+      "signal_coverage": 0.3,
+      "observed_signals": {
+        "aspiration": 0.65,
+        "proof_strength": 0.45
+      },
+      "penalties": []
+    },
+    {
+      "domain": "avaritia",
+      "score": 0.198,
+      "raw_score": 0.45,
+      "confidence": 0.5,
+      "signal_coverage": 0.1,
+      "observed_signals": {
+        "proof_strength": 0.45
+      },
+      "penalties": []
+    }
+  ],
+  "unknown_risk_flags": [],
+  "label_neutrality": {
+    "status": "enforced",
+    "ignored_context_keys": [
+      "artifact_name",
+      "category_name",
+      "declared_domain",
+      "reputation_label",
+      "source_frame"
+    ],
+    "rule": "Names, category labels, and declared domains do not affect scores."
+  },
+  "note": "Scores route strategy work from observed signals; they do not diagnose people or prove causal effects."
+}

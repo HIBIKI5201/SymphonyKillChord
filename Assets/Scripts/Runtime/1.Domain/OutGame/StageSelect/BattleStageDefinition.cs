@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System;
 
@@ -19,7 +20,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="battleSceneName"> バトルパートのシーン名。 </param>
         /// <param name="missionDefinition"> ミッション定義。 </param>
         /// <param name="isTutorial"> チュートリアルステージの場合はtrue。 </param>
-        /// <param name="enemyWaveDefinitionAssetKey"> 敵Wave定義のAddressablesキー。 </param>
+        /// <param name="enemyWaveDefinitionId"> 敵Wave定義ID。 </param>
         public BattleStageDefinition(
             StageId stageId,
             string stageName,
@@ -29,7 +30,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             string battleSceneName,
             MissionDefinition missionDefinition,
             bool isTutorial,
-            string enemyWaveDefinitionAssetKey)
+            EnemyWaveDefinitionId enemyWaveDefinitionId)
             : base(stageId, stageName, flavorText, reward, targetSceneName)
         {
             if (string.IsNullOrWhiteSpace(battleSceneName))
@@ -42,17 +43,17 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 throw new ArgumentNullException(nameof(missionDefinition));
             }
 
-            if (string.IsNullOrWhiteSpace(enemyWaveDefinitionAssetKey))
+            if (enemyWaveDefinitionId.Value == 0)
             {
-                throw new ArgumentException(
-                    "Enemy wave definition asset key must not be empty.",
-                    nameof(enemyWaveDefinitionAssetKey));
+                throw new ArgumentOutOfRangeException(
+                    nameof(enemyWaveDefinitionId),
+                    "Enemy wave definition ID must not be zero.");
             }
 
             _battleSceneName = battleSceneName;
             _missionDefinition = missionDefinition;
             _isTutorial = isTutorial;
-            _enemyWaveDefinitionAssetKey = enemyWaveDefinitionAssetKey;
+            _enemyWaveDefinitionId = enemyWaveDefinitionId;
         }
 
         /// <summary> ステージの種類。 </summary>
@@ -63,12 +64,12 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public MissionDefinition MissionDefinition => _missionDefinition;
         /// <summary> チュートリアルステージの場合はtrue。 </summary>
         public override bool IsTutorial => _isTutorial;
-        /// <summary> 敵Wave定義のAddressablesキー。 </summary>
-        public string EnemyWaveDefinitionAssetKey => _enemyWaveDefinitionAssetKey;
+        /// <summary> 敵Wave定義ID。 </summary>
+        public EnemyWaveDefinitionId EnemyWaveDefinitionId => _enemyWaveDefinitionId;
 
         private readonly string _battleSceneName;
         private readonly MissionDefinition _missionDefinition;
         private readonly bool _isTutorial;
-        private readonly string _enemyWaveDefinitionAssetKey;
+        private readonly EnemyWaveDefinitionId _enemyWaveDefinitionId;
     }
 }
