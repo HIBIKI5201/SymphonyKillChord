@@ -593,6 +593,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
+          prerelease: ${{ env.BUILD_MODE == 'Development' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
