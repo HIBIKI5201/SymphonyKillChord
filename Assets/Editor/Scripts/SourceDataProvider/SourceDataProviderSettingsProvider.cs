@@ -137,6 +137,7 @@ namespace KillChord.Editor.SourceDataProvider
                 mapping.FindPropertyRelative(COLLECTION_KEY_PROPERTY).stringValue = string.Empty;
                 mapping.FindPropertyRelative(COLLECTION_SOURCE_ASSET_KEY_PROPERTY).stringValue = string.Empty;
                 mapping.FindPropertyRelative(COLLECTION_PROPERTY_PATH_PROPERTY).stringValue = string.Empty;
+                mapping.FindPropertyRelative(COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY).stringValue = string.Empty;
             }
         }
 
@@ -200,6 +201,8 @@ namespace KillChord.Editor.SourceDataProvider
             SerializedProperty collectionKey = mapping.FindPropertyRelative(COLLECTION_KEY_PROPERTY);
             SerializedProperty sourceAssetKey = mapping.FindPropertyRelative(COLLECTION_SOURCE_ASSET_KEY_PROPERTY);
             SerializedProperty propertyPath = mapping.FindPropertyRelative(COLLECTION_PROPERTY_PATH_PROPERTY);
+            SerializedProperty assetCreationDirectory =
+                mapping.FindPropertyRelative(COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY);
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Collection {index + 1}", EditorStyles.boldLabel);
@@ -235,6 +238,38 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             DrawCollectionPathSelector(propertyPath, availablePaths);
+            DrawAssetCreationDirectory(assetCreationDirectory);
+        }
+
+        /// <summary>
+        ///     Collectionへ追加するScriptableObjectの生成先ディレクトリを描画します。
+        /// </summary>
+        /// <param name="directoryProperty"> 生成先ディレクトリを保持するプロパティです。 </param>
+        private static void DrawAssetCreationDirectory(SerializedProperty directoryProperty)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(directoryProperty, new GUIContent("Asset Creation Directory"));
+            if (GUILayout.Button("選択", GUILayout.Width(48f)))
+            {
+                string selectedDirectory = EditorUtility.OpenFolderPanel(
+                    "アセット生成先を選択",
+                    Application.dataPath,
+                    string.Empty);
+                if (!string.IsNullOrWhiteSpace(selectedDirectory))
+                {
+                    directoryProperty.stringValue = FileUtil.GetProjectRelativePath(selectedDirectory);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (!string.IsNullOrWhiteSpace(directoryProperty.stringValue)
+                && (!directoryProperty.stringValue.StartsWith("Assets/", StringComparison.Ordinal)
+                    || !AssetDatabase.IsValidFolder(directoryProperty.stringValue)))
+            {
+                EditorGUILayout.HelpBox(
+                    "生成先には存在するAssets配下のフォルダを指定してください。",
+                    MessageType.Warning);
+            }
         }
 
         /// <summary>
@@ -325,5 +360,6 @@ namespace KillChord.Editor.SourceDataProvider
         private const string COLLECTION_KEY_PROPERTY = "_collectionKey";
         private const string COLLECTION_SOURCE_ASSET_KEY_PROPERTY = "_sourceAssetAddressableKey";
         private const string COLLECTION_PROPERTY_PATH_PROPERTY = "_propertyPath";
+        private const string COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY = "_assetCreationDirectory";
     }
 }

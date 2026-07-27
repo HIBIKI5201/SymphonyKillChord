@@ -1,4 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
 using System;
 using UnityEngine;
 
@@ -31,9 +33,20 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(attacker));
             if (defender == null)
                 throw new ArgumentNullException(nameof(defender));
+
+            CharacterEntity attackerEntity = attacker as CharacterEntity;
+            CharacterEntity defenderEntity = defender as CharacterEntity;
+
+            attacker.BuffSystem.Execute(new BuffContext(attackerEntity, defenderEntity), BuffExecuteTiming.Attack_Logic_Before);
+
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage);
-            
+
+            BuffContext buffContext = new BuffContext(attackerEntity, defenderEntity, result);
+            buffContext = attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_After);
+            buffContext = defender.BuffSystem.Execute(buffContext, BuffExecuteTiming.Defense_Logic_Before);
+            result = buffContext.AttackResult;
+
             defender.TakeDamage(result.FinalDamage);
 
             Debug.Log(

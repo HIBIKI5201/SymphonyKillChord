@@ -11,14 +11,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <summary>
         ///     遷移情報を初期化します。
         /// </summary>
-        /// <param name="actionType"> 実行するアクション種別です。 </param>
+        /// <param name="triggerStageId"> 遷移を発生させる接続元ステージIDです。 </param>
         /// <param name="targetStageDefinition"> 遷移先ステージ定義です。 </param>
         /// <param name="returnSceneName"> 戦闘終了後の帰還先シーン名です。 </param>
         public PendingNodeTransition(
-            NodeTransitionActionType actionType,
+            StageId triggerStageId,
             StageDefinition targetStageDefinition,
             string returnSceneName)
         {
+            if (triggerStageId.Value == 0)
+            {
+                throw new ArgumentException("Trigger stage id must not be empty.", nameof(triggerStageId));
+            }
+
             if (targetStageDefinition == null)
             {
                 throw new ArgumentNullException(nameof(targetStageDefinition));
@@ -29,13 +34,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 throw new ArgumentException("Return scene name must not be empty.", nameof(returnSceneName));
             }
 
-            ActionType = actionType;
+            TriggerStageId = triggerStageId;
             TargetStageDefinition = targetStageDefinition;
             ReturnSceneName = returnSceneName;
         }
 
-        /// <summary> 実行するアクション種別です。 </summary>
-        public NodeTransitionActionType ActionType { get; }
+        /// <summary> 遷移を発生させる接続元ステージIDです。 </summary>
+        public StageId TriggerStageId { get; }
 
         /// <summary> 遷移先ステージ定義です。 </summary>
         public StageDefinition TargetStageDefinition { get; }

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Utility.Identity;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
@@ -11,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     menuName = "KillChord/Character/CharacterDefinitionAsset")]
     public class CharacterDefinitionAsset : ScriptableObject
     {
+        /// <summary> キャラクター定義を一意に識別するIDを取得する。 </summary>
+        public CharacterDefinitionId Id => new CharacterDefinitionId(_id.Id);
+
         /// <summary> キャラクター名を取得する。 </summary>
         public string CharacterName => _characterName;
 
@@ -26,6 +31,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
 
         /// <summary> キャラクターの攻撃の基本ダメージを取得する。 </summary>
         public int BaseDamage => _baseDamage;
+
+        [SerializeField, SourceDataCollection("Character"), Tooltip("キャラクター定義を一意に識別するID。")]
+        private DataID _id;
 
         [SerializeField, Tooltip("キャラクターの名前。")]
         private string _characterName;

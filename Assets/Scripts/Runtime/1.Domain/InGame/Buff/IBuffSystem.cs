@@ -5,5 +5,6 @@ namespace KillChord.Runtime.Domain.InGame.Buff
     {
         BuffContext Execute(BuffContext context, BuffExecuteTiming state);
         void Add(IBuff buff);
+        void Remove(IBuff buff);
     }
 }

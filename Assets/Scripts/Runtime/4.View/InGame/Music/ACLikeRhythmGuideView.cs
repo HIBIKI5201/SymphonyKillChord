@@ -4,6 +4,8 @@ using LitMotion.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Music
@@ -59,13 +61,17 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
+            // normalizeOffsetは1小節基準の進捗(0～1)。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
+            // ゾーン・Just位置と同じ基準に揃えるためゲージ全長に対する位置へ変換する。
+            float gaugeNormalized = Mathf.Clamp01(normalizeOffset) / GUIDE_LENGTH_IN_BARS;
+
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
-                _beatPositionImages[i].fillAmount = Mathf.Clamp01(normalizeOffset);
+                _beatPositionImages[i].fillAmount = gaugeNormalized;
             }
 
             int activeIndex = Mathf.Clamp(
-                                (int)(_totalBeatBoxCount * Mathf.Clamp01(normalizeOffset)),
+                                (int)(_totalBeatBoxCount * gaugeNormalized),
                                 0,
                                 _totalBeatBoxCount - 1);
             if (activeIndex == _currentOpenIndex)
@@ -84,37 +90,75 @@ namespace KillChord.Runtime.View.InGame.Music
             SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
         }
+
+        /// <summary>
+        ///     指定した拍子（BeatTypeの整数値）に対応するジャストタイミング位置のX座標（中心からの距離。左右対称に±で使う）を取得する。
+        /// </summary>
+        /// <param name="beatType"> 対象の拍子（BeatTypeの整数値）。 </param>
+        /// <param name="xPosition"> 中心からの距離（絶対値）。取得できない場合は0。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
+        {
+            xPosition = 0f;
+
+            if (_zoneBeatCounts == null || _justTimingBeatBoxIndex == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _zoneBeatCounts.Length && i < _justTimingBeatBoxIndex.Length; i++)
+            {
+                if (_zoneBeatCounts[i] != beatType)
+                {
+                    continue;
+                }
+
+                xPosition = (_justTimingBeatBoxIndex[i] + 0.5f) * _beatWidth;
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         ///    ビートのアニメーションを更新する。
         /// </summary>
-        /// <param name="closeIndex"></param>
-        /// <param name="openIndex"></param>
-        /// <param name="isJustTiming"></param>
+        /// <param name="openIndex"> アニメーション対象のブロック番号。 </param>
+        /// <param name="isJustTiming"> ジャストタイミング位置か。 </param>
         public void SetBeatAnimation(int openIndex, bool isJustTiming)
         {
-            if (_handles == null || _leftBeatRectTransforms == null || _rightBeatRectTransforms == null)
+            if (_handles == null
+                || _leftBeatRectTransforms == null
+                || _rightBeatRectTransforms == null
+                || _leftBeatImages == null
+                || _rightBeatImages == null
+                || openIndex < 0
+                || openIndex >= _handles.Length)
             {
                 return;
             }
 
-            float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
-            if (openIndex != -1)
+            _handles[openIndex].TryComplete();
+            Color beatColor = _beatColor[GetBeatSectionIndex(openIndex, _scale, _beatWidth)];
+
+            if (isJustTiming && _effectConfig != null)
             {
-                _handles[openIndex].TryComplete();
-                _handles[openIndex] = LSequence.Create()
-                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .WithEase(Ease.OutCirc)
-                        .BindToSizeDeltaY(_leftBeatRectTransforms[openIndex]))
-                    .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
-                        .WithEase(Ease.OutCirc)
-                        .BindToSizeDeltaY(_rightBeatRectTransforms[openIndex]))
-                    .Run();
+                _handles[openIndex] = CreateJustTimingMotion(openIndex, beatColor);
+                PlayJustTimingVignette(beatColor);
+                return;
             }
+
+            float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
+            Ease ease = _effectConfig != null ? _effectConfig.NormalTimingEase : Ease.OutCirc;
+            _handles[openIndex] = CreateNormalTimingMotion(openIndex, targetSizeDelta, ease);
         }
 
 
 
         [Space]
+
+        [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
+        private ACLikeRhythmGuideEffectConfig _effectConfig;
 
         [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;
@@ -159,16 +203,28 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
+        private RectTransform[] _justTimingMarkers;
         private int[] _justTimingBeatBoxIndex;
         private MotionHandle[] _handles;
+        private MotionHandle _vignetteMotion;
+        private Volume _vignetteVolume;
+        private VolumeProfile _vignetteProfile;
+        private Vignette _justTimingVignette;
         private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
+        private float _lastVignetteTimestamp = float.NegativeInfinity;
         private float[] _zoneStarts = Array.Empty<float>();
         private float[] _zoneEnds = Array.Empty<float>();
         private int[] _zoneBeatCounts = Array.Empty<int>();
 
         private void Awake()
         {
+            if (_effectConfig == null)
+            {
+                Debug.LogWarning($"[{nameof(ACLikeRhythmGuideView)}] ジャストタイミング演出設定が未設定です。", this);
+            }
+
+            InitializeJustTimingVignette();
             RebuildBeatRectTransforms();
         }
 
@@ -176,19 +232,51 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             OnUpdate?.Invoke();
         }
+        /// <summary>
+        ///     破棄時にイベントと生成した演出リソースを解放する。
+        /// </summary>
         private void OnDestroy()
         {
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
-            if (_handles == null)
+            _vignetteMotion.TryCancel();
+
+            if (_handles != null)
             {
-                return;
+                for (int i = 0; i < _handles.Length; i++)
+                {
+                    _handles[i].TryCancel();
+                }
             }
 
-            for (int i = 0; i < _handles.Length; i++)
+            if (_vignetteVolume != null)
             {
-                _handles[i].TryCancel();
+                _vignetteVolume.profile = null;
+            }
+
+            if (_justTimingVignette != null)
+            {
+                if (UnityEngine.Application.isPlaying)
+                {
+                    Destroy(_justTimingVignette);
+                }
+                else
+                {
+                    DestroyImmediate(_justTimingVignette);
+                }
+            }
+
+            if (_vignetteProfile != null)
+            {
+                if (UnityEngine.Application.isPlaying)
+                {
+                    Destroy(_vignetteProfile);
+                }
+                else
+                {
+                    DestroyImmediate(_vignetteProfile);
+                }
             }
         }
 
@@ -209,6 +297,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _handles,
                 out _justTimingBeatBoxIndex);
 
+            CreateJustTimingMarkers();
             _currentOpenIndex = -1;
         }
 
@@ -217,6 +306,17 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         private void ClearGeneratedBeatObjects()
         {
+            if (_justTimingMarkers != null)
+            {
+                for (int i = 0; i < _justTimingMarkers.Length; i++)
+                {
+                    if (_justTimingMarkers[i] != null)
+                    {
+                        Destroy(_justTimingMarkers[i].gameObject);
+                    }
+                }
+            }
+
             if (_leftBeatRectTransforms != null)
             {
                 for (int i = 0; i < _leftBeatRectTransforms.Length; i++)
@@ -238,6 +338,177 @@ namespace KillChord.Runtime.View.InGame.Music
                     }
                 }
             }
+        }
+
+        /// <summary>
+        ///     通常タイミングの縮小モーションを生成する。
+        /// </summary>
+        /// <param name="index"> 対象ブロック番号。 </param>
+        /// <param name="targetSizeDelta"> モーション開始時の高さ。 </param>
+        /// <param name="ease"> 縮小イージング。 </param>
+        /// <returns> 生成したモーションのハンドル。 </returns>
+        private MotionHandle CreateNormalTimingMotion(int index, float targetSizeDelta, Ease ease)
+        {
+            return LSequence.Create()
+                .Append(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                    .WithEase(ease)
+                    .BindToSizeDeltaY(_leftBeatRectTransforms[index]))
+                .Join(LMotion.Create(targetSizeDelta, _outTimingSizeDelta, _outTimingDuration)
+                    .WithEase(ease)
+                    .BindToSizeDeltaY(_rightBeatRectTransforms[index]))
+                .Run(sequence => sequence.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
+        }
+
+        /// <summary>
+        ///     ジャストタイミング専用のオーバーシュートと色フラッシュを生成する。
+        /// </summary>
+        /// <param name="index"> 対象ブロック番号。 </param>
+        /// <param name="beatColor"> ブロックの通常色。 </param>
+        /// <returns> 生成したモーションのハンドル。 </returns>
+        private MotionHandle CreateJustTimingMotion(int index, Color beatColor)
+        {
+            float overshootSizeDelta = _justTimingSizeDelta + Mathf.Max(0f, _effectConfig.JustOvershootAmount);
+            float overshootDuration = Mathf.Max(0.01f, _effectConfig.JustOvershootDuration);
+            float returnDuration = Mathf.Max(0.01f, _effectConfig.JustReturnDuration);
+            float flashDuration = Mathf.Max(0.01f, _effectConfig.FlashDuration);
+
+            return LSequence.Create()
+                .Append(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
+                    .WithEase(_effectConfig.JustOvershootEase)
+                    .BindToSizeDeltaY(_leftBeatRectTransforms[index]))
+                .Join(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
+                    .WithEase(_effectConfig.JustOvershootEase)
+                    .BindToSizeDeltaY(_rightBeatRectTransforms[index]))
+                .Join(LMotion.Create(_effectConfig.FlashColor, beatColor, flashDuration)
+                    .WithEase(_effectConfig.FlashEase)
+                    .BindToColor(_leftBeatImages[index]))
+                .Join(LMotion.Create(_effectConfig.FlashColor, beatColor, flashDuration)
+                    .WithEase(_effectConfig.FlashEase)
+                    .BindToColor(_rightBeatImages[index]))
+                .Append(LMotion.Create(overshootSizeDelta, _outTimingSizeDelta, returnDuration)
+                    .WithEase(_effectConfig.JustReturnEase)
+                    .BindToSizeDeltaY(_leftBeatRectTransforms[index]))
+                .Join(LMotion.Create(overshootSizeDelta, _outTimingSizeDelta, returnDuration)
+                    .WithEase(_effectConfig.JustReturnEase)
+                    .BindToSizeDeltaY(_rightBeatRectTransforms[index]))
+                .Run(sequence => sequence.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
+        }
+
+        /// <summary>
+        ///     ジャストタイミング位置を事前表示する帯を生成する。
+        /// </summary>
+        private void CreateJustTimingMarkers()
+        {
+            if (_effectConfig == null || _justTimingBeatBoxIndex == null || _canvasGroup == null)
+            {
+                _justTimingMarkers = Array.Empty<RectTransform>();
+                return;
+            }
+
+            _justTimingMarkers = new RectTransform[_justTimingBeatBoxIndex.Length * 2];
+            for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
+            {
+                float horizontalPosition = (_justTimingBeatBoxIndex[i] + 0.5f) * _beatWidth;
+                _justTimingMarkers[i * 2] = CreateJustTimingMarker(
+                    $"JustTimingMarker_Left_{i}",
+                    Vector2.left * horizontalPosition);
+                _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
+                    $"JustTimingMarker_Right_{i}",
+                    Vector2.right * horizontalPosition);
+            }
+        }
+
+        /// <summary>
+        ///     指定位置へジャストタイミング表示用の帯を生成する。
+        /// </summary>
+        /// <param name="objectName"> 生成するオブジェクト名。 </param>
+        /// <param name="anchoredPosition"> 生成位置。 </param>
+        /// <returns> 生成した帯のRectTransform。 </returns>
+        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition)
+        {
+            GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
+            markerObject.layer = gameObject.layer;
+            markerObject.transform.SetParent(_canvasGroup.transform, false);
+            markerObject.transform.SetAsFirstSibling();
+
+            RectTransform markerRectTransform = markerObject.GetComponent<RectTransform>();
+            markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            markerRectTransform.anchoredPosition = anchoredPosition;
+            markerRectTransform.sizeDelta = new Vector2(
+                Mathf.Max(0.1f, _effectConfig.MarkerWidth),
+                Mathf.Max(0.1f, _effectConfig.MarkerHeight));
+
+            Image markerImage = markerObject.GetComponent<Image>();
+            markerImage.color = _effectConfig.MarkerColor;
+            markerImage.raycastTarget = false;
+            return markerRectTransform;
+        }
+
+        /// <summary>
+        ///     ジャストタイミング用の実行時Vignetteを初期化する。
+        /// </summary>
+        private void InitializeJustTimingVignette()
+        {
+            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled)
+            {
+                return;
+            }
+
+            GameObject volumeObject = new GameObject("JustTimingVignetteVolume", typeof(Volume));
+            volumeObject.transform.SetParent(transform, false);
+            volumeObject.layer = 0;
+
+            _vignetteVolume = volumeObject.GetComponent<Volume>();
+            _vignetteVolume.isGlobal = true;
+            _vignetteVolume.priority = _effectConfig.VignettePriority;
+            _vignetteVolume.weight = 1f;
+
+            _vignetteProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+            _vignetteProfile.name = "JustTimingVignetteProfile";
+            _vignetteProfile.hideFlags = HideFlags.DontSave;
+            _justTimingVignette = _vignetteProfile.Add<Vignette>(true);
+            _justTimingVignette.color.value = Color.black;
+            _justTimingVignette.intensity.value = 0f;
+            _justTimingVignette.smoothness.value = Mathf.Clamp01(_effectConfig.VignetteSmoothness);
+            _justTimingVignette.rounded.value = false;
+            _vignetteVolume.profile = _vignetteProfile;
+        }
+
+        /// <summary>
+        ///     ビート色に連動した全画面Vignetteを再生する。
+        /// </summary>
+        /// <param name="beatColor"> Vignetteへ反映するビート色。 </param>
+        private void PlayJustTimingVignette(Color beatColor)
+        {
+            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled || _justTimingVignette == null)
+            {
+                return;
+            }
+
+            float now = Time.unscaledTime;
+            if (now - _lastVignetteTimestamp < Mathf.Max(0f, _effectConfig.VignetteMinimumInterval))
+            {
+                return;
+            }
+
+            _lastVignetteTimestamp = now;
+            _vignetteMotion.TryCancel();
+
+            beatColor.a = 1f;
+            float intensity = Mathf.Clamp01(_effectConfig.VignetteIntensity);
+            _justTimingVignette.color.value = beatColor;
+            _justTimingVignette.smoothness.value = Mathf.Clamp01(_effectConfig.VignetteSmoothness);
+            _justTimingVignette.intensity.value = intensity;
+
+            _vignetteMotion = LMotion.Create(
+                    intensity,
+                    0f,
+                    Mathf.Max(0.01f, _effectConfig.VignetteDuration))
+                .WithEase(_effectConfig.VignetteEase)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                .Bind(_justTimingVignette, static (value, vignette) => vignette.intensity.value = value);
         }
 
         /// <summary>
@@ -373,7 +644,11 @@ namespace KillChord.Runtime.View.InGame.Music
 
             for (int i = 0; i < justTimingBeatBoxIndex.Length; i++)
             {
-                float position = ((_zoneStarts[i] + _zoneEnds[i]) * 0.5f) * _displayLength;
+                int beatCount = _zoneBeatCounts[i];
+                // Justは「1小節をBeatCount(拍種)で割った位置」。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分を表示しているため、
+                // 小節内正規化位置(1/beatCount)をGUIDE_LENGTH_IN_BARSで割ってゲージ全長に対する位置へ変換する。
+                float justNormalized = beatCount > 0 ? (1f / beatCount) / GUIDE_LENGTH_IN_BARS : 0f;
+                float position = justNormalized * _displayLength;
                 justTimingBeatBoxIndex[i] = Mathf.Clamp(
                     Mathf.FloorToInt(position * scale / beatWidth),
                     0,
@@ -392,10 +667,12 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             float position = (blockIndex * beatWidth) / scale;
 
+            // _zoneStarts/_zoneEndsは1小節基準（0～1）の正規化値のため、
+            // GUIDE_LENGTH_IN_BARS小節分を表すゲージ全長へ変換してから比較する。
             for (int i = 0; i < _zoneStarts.Length; i++)
             {
-                float start = _zoneStarts[i] * _displayLength;
-                float end = _zoneEnds[i] * _displayLength;
+                float start = (_zoneStarts[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
+                float end = (_zoneEnds[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
 
                 if (position >= start && position < end)
                 {
@@ -406,5 +683,7 @@ namespace KillChord.Runtime.View.InGame.Music
             return _zoneStarts.Length - 1;
         }
         private const float DEFAULT_DISPLAY_LENGTH = 120f;
+        /// <summary> ゲージ全長が表す小節数。Justは小節内正規化位置(1/BeatCount)をこの値で割った位置になる。 </summary>
+        private const float GUIDE_LENGTH_IN_BARS = 1.5f;
     }
 }

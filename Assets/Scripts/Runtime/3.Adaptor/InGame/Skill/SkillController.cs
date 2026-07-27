@@ -22,6 +22,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary> スキルの発動に成功したとき、対応するアニメーションを再生するためのイベント。 </summary>
         public event Action<string> OnSkillAnimationRequested;
 
+        /// <summary> スキルの発動に成功したとき、対応するボイスを再生するためのイベント。 </summary>
+        public event Action OnSkillVoiceRequested;
+
         /// <summary>
         ///     初期化処理。
         /// </summary>
@@ -39,7 +42,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="unscaledTime"> 現在時刻です。 </param>
         public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
         {
-            _musicSyncService.RegisterBattleActionHistory(actionType, beatType, unscaledTime);
+            _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
 
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
@@ -47,6 +50,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 if (result.ResultType == SkillExecutionResultType.Executed)
                 {
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);
+                    OnSkillVoiceRequested?.Invoke();
                 }
             }
         }

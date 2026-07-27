@@ -7,7 +7,7 @@
 | **モジュール名** | StageSelect |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み（一部TODO残存、既知の課題を参照） |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-07-22 |
 
 ---
 
@@ -19,12 +19,17 @@
 | **`StageType`** | Domain | `Battle`/`Scenario`を表すenum。出撃経路の分岐に使う |
 | **`StageStatus`** | Domain | `Locked`/`Unlocked`/`Cleared`を表すenum |
 | **`StageReward`** | Domain | クリア報酬（スキル構築/解放ポイント）を保持するreadonly struct |
-| **`StageNodeConnection`** | Domain | ステージ間の前提関係（`FromStageId`→`ToStageId`）を表すreadonly struct |
-| **`StageDefinition`** | Domain | ステージの不変メタデータ（名前・報酬・遷移先シーン・ミッション定義・チュートリアルフラグ・Wave定義キー等） |
+| **`StageAdvanceMode`** | Domain | 接続元完了後に手動選択を待つか、自動遷移するかを表すenum |
+| **`StageNodeConnection`** | Domain | ステージ間の前提関係と進行方法を表すreadonly struct |
+| **`StageDefinition`** | Domain | ステージの共通メタデータを保持する抽象基底クラス |
+| **`BattleStageDefinition`** | Domain | バトルシーン・ミッション・Wave定義・チュートリアル情報を保持する具象定義 |
+| **`ScenarioStageDefinition`** | Domain | 再生するシナリオIDを保持する具象定義 |
 | **`StageNode`** | Domain | `StageDefinition`+`StageStatus`を保持する可変Entity。`MarkAsCleared()`/`Unlock()`で状態遷移し`OnStatusChanged`を発火 |
 | **`IStageClearRepository`** | Domain | クリア済みステージID取得の抽象（実装はInfrastructure層） |
 | **`StageTree`** | Domain | 全ステージノードと接続関係を保持する集約。重複StageId・複数チュートリアルノードは`InvalidOperationException` |
 | **`StageProgressService`** | Application | ステージクリア時の状態更新（クリアマーク＋次ステージ解放判定） |
+| **`StageMapLayoutBuilder`** | Application | Bindをトポロジカル順に解析し、左から右へ並ぶ列・行位置を構築する |
+| **`StageMapNodePosition`** | Application | 自動配置されたノードの列・行を保持するreadonly struct |
 | **`StageSelectOpenUseCase`** | Application | 画面再オープン時のセーブデータ一括同期・新規クリア差分検出 |
 | **`IOutGameSortieOutputPort`** | Application | 出撃結果（戦闘準備画面表示/即時出撃/シナリオUI切替）の出力境界 |
 | **`OutGameSortieUseCase`** | Application | 出撃種別に応じた分岐処理（`RequestSortieAsync`/`RequestImmediateBattleSortie`） |
@@ -38,10 +43,13 @@
 | **`StageDetailScreenView`** | View | ステージ詳細画面（UI Toolkit）。出撃ボタン等を提供 |
 | **`StageNodeView`** | View | ステージノード1件の見た目・クリック検知 |
 | **`StageNodeConnectionView`** | View | ノード間接続線の解放アニメーション |
-| **`StageNodeAsset`** | Infrastructure | ステージノード定義のScriptableObject。`_stageId>0`とBattleステージの`EnemyWaveDefinitionAssetKey`必須を検証 |
-| **`StageTreeAsset`** | Infrastructure | 全ステージノード＋接続関係のScriptableObject。`OnValidate()`でエディタ時に重複IDを警告 |
+| **`StageAssetBase`** | Infrastructure | ステージ共通入力を保持し、Domainノードを生成する抽象基底ScriptableObject |
+| **`BattleStageAsset`** | Infrastructure | バトル固有入力から`BattleStageDefinition`を生成するScriptableObject |
+| **`ScenarioStageAsset`** | Infrastructure | シナリオ固有入力から`ScenarioStageDefinition`を生成するScriptableObject |
+| **`StageBindAsset`** | Infrastructure | From/Toステージと`ManualSelection`/`AutoAdvance`を保持するScriptableObject |
+| **`StageTreeAsset`** | Infrastructure | ステージとBindを集約し、`OnValidate()`でID・参照・接続重複を検証するScriptableObject |
 | **`SaveDataClearStageRepository`** | Infrastructure | `IStageClearRepository`実装。`StageProgressData.ClearDatas`から実データを返す（スタブではない） |
-| **`StageSelectInitializer`** | Composition | ステージマップの構築、出撃要求の仲介、チュートリアル自動出撃のトリガー |
+| **`StageSelectInitializer`** | Composition | StageTreeからノード・接続線を動的生成・配置し、出撃要求を仲介する |
 | **`OutGameSortieInitializer`** | Composition | `OutGameSortieUseCase`/`OutGameSortieController`の構築・登録 |
 | **`OutGameSortieOutputPort`** | Composition | `IOutGameSortieOutputPort`実装。`OutGameUIEvent`と`InputComposition`の両方に依存するためComposition層に配置 |
 
@@ -119,8 +127,8 @@ graph TD
 ### 📤 依存されているもの
 
 * **`Enemy`**
-  * *参照箇所*: `SelectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionAssetKey`
-  * *詳細*: `EnemyInitializer`（Order 700）がステージ固有のWave定義をAddressablesロードするために参照します。選択が無い場合は初期化に失敗します。
+  * *参照箇所*: `SelectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionId`
+  * *詳細*: `EnemyInitializer`（Order 700）が共通のWave定義リポジトリからステージ固有の定義をID検索するために参照します。選択が無い場合やIDが未登録の場合は初期化に失敗します。
 * **`InGame Bootstrap`**
   * *参照箇所*: `SelectedBattleStageState.HasSelectedBattleStage`, `BattleSceneName`
   * *詳細*: `IngameComposition`がInGameシーン起動時にこの状態を読み取り、バトルシーンを追加ロードします。選択が無い場合は初期化が失敗します。
@@ -143,13 +151,13 @@ graph TD
 ### ④ View
 ステージ詳細画面（`StageDetailScreenView`）、ノード（`StageNodeView`）、接続線アニメーション（`StageNodeConnectionView`）というUI Toolkitコンポーネント群を担当します。画面のコンテナ自体（表示/非表示の切り替え）はScreenモジュールが所有し、StageSelectはその中身を構築します。
 ### ⑤ Infrastructure
-`StageNodeAsset`/`StageTreeAsset`がステージ構成をScriptableObjectとして保持し、`SaveDataClearStageRepository`がクリア済みステージIDをセーブデータから取得します。
+`BattleStageAsset`/`ScenarioStageAsset`がステージ内容、`StageBindAsset`が接続と進行方法、`StageTreeAsset`が全体構成を保持します。`SaveDataClearStageRepository`はクリア済みステージIDをセーブデータから取得します。
 ### ⑥ Composition
 `StageSelectInitializer`（Order 110）がステージマップ構築・出撃仲介・チュートリアル自動出撃トリガーを担当し、`OutGameSortieInitializer`（Order 20）が出撃ユースケース一式を構築します。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しいステージを追加する場合は`StageNodeAsset`を新規作成し`StageTreeAsset`へ登録するデータ追加のみで対応できます（コード変更不要）。
+> 新しいバトルまたはシナリオステージは対応する具象Assetを作成し、`StageBindAsset`と`StageTreeAsset`へ登録するデータ追加のみで対応できます。接続元と接続先のステージ種別の組み合わせに制限はありません。
 
 ## 🔄処理フロー
 

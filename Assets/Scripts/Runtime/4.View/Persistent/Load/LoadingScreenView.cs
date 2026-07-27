@@ -119,16 +119,22 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// <param name="progress"> 0から1の進捗。 </param>
         private void ApplyProgress(float progress)
         {
-            float clampedProgress = Mathf.Clamp(
-                progress,
-                0f,
-                1f);
-
-            if (_progressSlider != null)
+            if (_progressFillArea == null || _progressFillRect == null)
             {
-                _progressSlider.normalizedValue =
-                    clampedProgress;
+                return;
             }
+
+            float normalizedProgress = Mathf.Clamp01(progress);
+            float fillWidth =
+                _progressFillArea.rect.width * normalizedProgress;
+
+            _progressFillRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                fillWidth);
+
+            // 幅が0のときにSliced画像の端だけが残るのを防ぐ。
+            _progressFillRect.gameObject.SetActive(
+                normalizedProgress > 0f);
         }
 
         /// <summary>
@@ -150,8 +156,11 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;
 
-        [SerializeField, Tooltip("ロード進捗を表示するSlider")]
-        private Slider _progressSlider;
+        [SerializeField, Tooltip("ロードゲージを表示する範囲です。")]
+        private RectTransform _progressFillArea;
+
+        [SerializeField, Tooltip("ロード進捗に合わせて横幅を変更するImageです。")]
+        private RectTransform _progressFillRect;
 
         private LoadingScreenController _controller;
         private bool _isSubscribed;
