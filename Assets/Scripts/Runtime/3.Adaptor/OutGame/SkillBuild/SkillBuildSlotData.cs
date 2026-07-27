@@ -1,21 +1,19 @@
 namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 {
     /// <summary>
-    ///     スキルの装備スロットの表示 DTO。
+    ///     Presenter から転送するスキル装備スロットデータ。
     /// </summary>
-    public readonly struct SkillBuildSlotDTO
+    public readonly struct SkillBuildSlotData
     {
         /// <summary>
-        ///     DTO を初期化する。
+        ///     スロットデータを初期化する。
         /// </summary>
         /// <param name="slotIndex"> スロット番号。 </param>
         /// <param name="skillId"> スキル ID。 </param>
-        /// <param name="skillLabel"> 表示ラベル。 </param>
-        public SkillBuildSlotDTO(int slotIndex, int skillId, string skillLabel)
+        public SkillBuildSlotData(int slotIndex, int skillId)
         {
             SlotIndex = slotIndex;
             SkillId = skillId;
-            SkillLabel = skillLabel;
         }
 
         /// <summary> スロット番号。 </summary>
@@ -23,8 +21,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 
         /// <summary> スキル ID。 </summary>
         public int SkillId { get; }
-
-        /// <summary> 表示ラベル。 </summary>
-        public string SkillLabel { get; }
     }
 }
