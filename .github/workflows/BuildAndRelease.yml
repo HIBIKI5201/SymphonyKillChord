@@ -643,7 +643,7 @@ jobs:
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
                   $VariableExists = $false
               } else {
-                  Write-Host "ERROR: BUILD_VERSION existence check failed: $_"
+                  Write-Host "ERROR: $VarName existence check failed: $_"
                   Write-Host "::endgroup::"
                   exit 1
               }
@@ -651,16 +651,16 @@ jobs:
 
           try {
               if ($VariableExists) {
-                  $Body = @{ "name" = "BUILD_VERSION"; "value" = [string]$NextCounter } | ConvertTo-Json
+                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
                   Invoke-RestMethod -Uri $GetUrl -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
               } else {
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = "BUILD_VERSION"; "value" = [string]$NextCounter } | ConvertTo-Json
+                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
                   Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
               }
-              Write-Host "OK: BUILD_VERSION updated to $NextCounter successfully."
+              Write-Host "OK: $VarName updated to $NextCounter successfully."
           } catch {
-              Write-Host "ERROR: BUILD_VERSION Failed to update: $_"
+              Write-Host "ERROR: $VarName Failed to update: $_"
               Write-Host "::endgroup::"
               exit 1
           }
