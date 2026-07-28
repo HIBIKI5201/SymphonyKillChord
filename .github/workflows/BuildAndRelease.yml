@@ -653,6 +653,12 @@ jobs:
                   exit 1
               }
           }
+              
+          if ($PatchNumber -notmatch '^\d+$') {
+              Write-Host "ERROR: '$PatchVarName' value '$PatchNumber' is not a non-negative integer."
+              Write-Host "::endgroup::"
+              exit 1
+          }
 
           if ($VersionString -match '^(.*\.)[Xx]$') {
               $VersionString = "$($Matches[1])$PatchNumber"
@@ -660,7 +666,7 @@ jobs:
               Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.X)"
               Write-Host "::endgroup::"
               exit 1
-          } 
+          }
 
           "PATCH_NUMBER_VAR_NAME=$PatchVarName" | Add-Content -Path $env:GITHUB_ENV
           "PATCH_NUMBER=$PatchNumber"            | Add-Content -Path $env:GITHUB_ENV
