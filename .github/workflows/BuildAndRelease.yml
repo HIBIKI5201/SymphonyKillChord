@@ -562,6 +562,61 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Resolve Current Build Version
+        run: |
+          Write-Host "::group::Resolve Current Build Version"
+
+          # BUILD_VERSION_{BuildMode} にバージョン文字列全体（例: v1.0.5）を格納する。
+          # 未設定時は v1.0.X として扱い、末尾を初回パッチ番号として解決する。
+          $VarName = "BUILD_VERSION_$env:BUILD_MODE"
+          $Headers = @{
+              "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
+              "Accept"        = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+
+          try {
+              $VarResponse = Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers
+              $VersionString = $VarResponse.value
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  Write-Host "WARNING: Repository variable '$VarName' not found. Creating with default value 'v1.0.X'..."
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $VarName; "value" = "v1.0.X" } | ConvertTo-Json
+                  try {
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $VersionString = "v1.0.X"
+                      Write-Host "OK: '$VarName' created with default value 'v1.0.X'."
+                  } catch {
+                      Write-Host "ERROR: Failed to create repository variable '$VarName': $_"
+                      Write-Host "::endgroup::"
+                      exit 1
+                  }
+              } else {
+                  Write-Host "ERROR: Failed to retrieve repository variable '$VarName': $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
+          }
+
+          if ($VersionString -match '^(.*\.)([Xx]|\d+)$') {
+              $VersionPrefix = $Matches[1]
+              $PatchToken    = $Matches[2]
+              $PatchNumber   = if ($PatchToken -match '^\d+$') { [int]$PatchToken } else { 0 }
+              $VersionString = "$VersionPrefix$PatchNumber"
+          } else {
+              Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.5 or v1.0.X)"
+              Write-Host "::endgroup::"
+              exit 1
+          }
+
+          "BUILD_VERSION_VAR_NAME=$VarName"       | Add-Content -Path $env:GITHUB_ENV
+          "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
+          Write-Host "OK: Current build version resolved: $VersionString"
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Generate Release Tag
         id: tag_gen
         run: |
@@ -590,17 +645,25 @@ jobs:
             exit 1
           }
           
-          try {
-            Write-Host "INFO: Compressing build artifacts..."
-            Compress-Archive -Path "$ResolvedOutputDir\*" -DestinationPath Builds.zip -ErrorAction Stop
-          
-            $ZipSize = (Get-Item "Builds.zip").Length
-            Write-Host "OK: Archive (Builds.zip) created successfully."
-            Write-Host "     File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
-          } catch {
-            Write-Host "ERROR: Failed to create archive: $_"
+          $TagName = "${{ steps.tag_gen.outputs.TAG_NAME }}"
+          $PlatformDirs = Get-ChildItem -Path $ResolvedOutputDir -Directory
+          if ($PlatformDirs.Count -eq 0) {
+            Write-Host "ERROR: No platform build output found under $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
+          }
+
+          foreach ($PlatformDir in $PlatformDirs) {
+            $ZipName = "$($PlatformDir.Name)-$TagName.zip"
+            try {
+              Compress-Archive -Path "$($PlatformDir.FullName)\*" -DestinationPath $ZipName -ErrorAction Stop
+              $ZipSize = (Get-Item $ZipName).Length
+              Write-Host "OK: Archive ($ZipName) created successfully. File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+            } catch {
+              Write-Host "ERROR: Failed to create archive for $($PlatformDir.Name): $_"
+              Write-Host "::endgroup::"
+              exit 1
+            }
           }
           Write-Host "::endgroup::"
         shell: powershell
@@ -630,7 +693,7 @@ jobs:
 
             **ビルド対象プロファイル:**
             ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
-          files: Builds.zip
+          files: "*.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
