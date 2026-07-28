@@ -1,11 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.Skill;
-using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
 {
@@ -18,14 +15,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
         ///     プレゼンターを初期化します。
         /// </summary>
         /// <param name="viewModel"> 出力先 ViewModel です。 </param>
-        /// <param name="descriptionFormatter"> 効果説明フォーマッターです。 </param>
+        /// <param name="textFormatter"> 共通表示文字列フォーマッターです。 </param>
         public BattlePreparationSkillPresenter(
             IBattlePreparationSkillViewModel viewModel,
-            SkillEffectDescriptionFormatter descriptionFormatter)
+            SkillDisplayTextFormatter textFormatter)
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-            _descriptionFormatter = descriptionFormatter ??
-                throw new ArgumentNullException(nameof(descriptionFormatter));
+            _textFormatter = textFormatter ??
+                throw new ArgumentNullException(nameof(textFormatter));
         }
 
         /// <summary>
@@ -56,13 +53,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
 
         private const string EMPTY_SKILL_LABEL = "未設定";
         private const string EMPTY_COMBO_LABEL = "発動コンボ: —";
-        private const string COMBO_LABEL_PREFIX = "発動コンボ: ";
-        private const string COMBO_SEPARATOR = " → ";
+        private const string EMPTY_VALUE_LABEL = "—";
 
         private readonly IBattlePreparationSkillViewModel _viewModel;
-        private readonly SkillEffectDescriptionFormatter _descriptionFormatter;
-        private readonly Dictionary<SkillTemplate, CachedSkillText> _textCache = new();
-        private readonly StringBuilder _comboBuilder = new();
+        private readonly SkillDisplayTextFormatter _textFormatter;
+        private readonly Dictionary<SkillTemplate, SkillDisplayText> _textCache = new();
         private BattlePreparationSkillDTO[] _skillBuffer =
             Array.Empty<BattlePreparationSkillDTO>();
 
@@ -76,7 +71,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
             int slotIndex,
             SkillTemplate skillTemplate)
         {
-            CachedSkillText text = GetOrCreateText(skillTemplate);
+            SkillDisplayText text = GetOrCreateText(skillTemplate);
 
             return new BattlePreparationSkillDTO(
                 slotIndex,
@@ -84,6 +79,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
                 skillTemplate.Icon,
                 skillTemplate.DisplayName,
                 text.ComboLabel,
+                text.SkillTypeLabel,
                 text.HasEffectDescription,
                 text.EffectDescription);
         }
@@ -101,35 +97,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
                 null,
                 EMPTY_SKILL_LABEL,
                 EMPTY_COMBO_LABEL,
+                EMPTY_VALUE_LABEL,
                 false,
                 string.Empty);
-        }
-
-        /// <summary>
-        ///     入力パターンから発動コンボ表示を構築します。
-        /// </summary>
-        /// <param name="pattern"> 入力パターンです。 </param>
-        /// <returns> 発動コンボ表示です。 </returns>
-        private string BuildComboLabel(IReadOnlyList<BeatType> pattern)
-        {
-            if (pattern == null || pattern.Count == 0)
-            {
-                return EMPTY_COMBO_LABEL;
-            }
-
-            _comboBuilder.Clear();
-            _comboBuilder.Append(COMBO_LABEL_PREFIX);
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                if (i > 0)
-                {
-                    _comboBuilder.Append(COMBO_SEPARATOR);
-                }
-
-                _comboBuilder.Append((int)pattern[i]);
-            }
-
-            return _comboBuilder.ToString();
         }
 
         /// <summary>
@@ -138,26 +108,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
         /// </summary>
         /// <param name="skillTemplate"> 表示対象のスキルテンプレートです。 </param>
         /// <returns> キャッシュされた表示文字列です。 </returns>
-        private CachedSkillText GetOrCreateText(SkillTemplate skillTemplate)
+        private SkillDisplayText GetOrCreateText(SkillTemplate skillTemplate)
         {
-            if (_textCache.TryGetValue(skillTemplate, out CachedSkillText cachedText))
+            if (_textCache.TryGetValue(skillTemplate, out SkillDisplayText cachedText))
             {
                 return cachedText;
             }
 
-            bool hasEffectDescription =
-                skillTemplate.EffectDisplayMode == SkillEffectDisplayMode.FullDescription &&
-                !string.IsNullOrWhiteSpace(skillTemplate.SkillDetail);
-            string effectDescription = hasEffectDescription
-                ? _descriptionFormatter.Format(
-                    skillTemplate.SkillDetail,
-                    skillTemplate.EffectSpec.Parameters)
-                : string.Empty;
-
-            CachedSkillText text = new(
-                BuildComboLabel(skillTemplate.Pattern),
-                hasEffectDescription,
-                effectDescription);
+            SkillDisplayText text = _textFormatter.Format(skillTemplate);
             _textCache.Add(skillTemplate, text);
             return text;
         }
@@ -175,27 +133,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
             }
         }
 
-        /// <summary>
-        ///     スキルテンプレートから一度だけ生成する表示文字列です。
-        /// </summary>
-        private readonly struct CachedSkillText
-        {
-            /// <summary>
-            ///     表示文字列を初期化します。
-            /// </summary>
-            public CachedSkillText(
-                string comboLabel,
-                bool hasEffectDescription,
-                string effectDescription)
-            {
-                ComboLabel = comboLabel;
-                HasEffectDescription = hasEffectDescription;
-                EffectDescription = effectDescription;
-            }
-
-            public string ComboLabel { get; }
-            public bool HasEffectDescription { get; }
-            public string EffectDescription { get; }
-        }
     }
 }

@@ -58,6 +58,39 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             return _equippedSkills.AsReadOnly();
         }
 
+        /// <summary>
+        ///     プレイヤーの装備スキル構成を保存する。
+        /// </summary>
+        /// <param name="equippedSkills"> 保存する装備スキル構成。 </param>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        public async Task SaveSkillBuildAsync(IReadOnlyList<EquippedSkill> equippedSkills)
+        {
+            if (equippedSkills == null)
+            {
+                throw new System.ArgumentNullException(nameof(equippedSkills));
+            }
+
+            ValidateSavedataSystem();
+            List<int> skillIds = BuildSkillIds(equippedSkills);
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            List<int> previousSkillIds = new(saveData.SkillBuild.EquipmentSkillIDs);
+
+            saveData.SkillBuild.SetEquipmentSkillIDs(skillIds);
+            try
+            {
+                await _savedataSystem.SaveAsync(saveData);
+            }
+            catch
+            {
+                // SavedataSystem は同一インスタンスをキャッシュするため、
+                // 書き込み失敗時はキャッシュ上の値も保存前へ戻す。
+                saveData.SkillBuild.SetEquipmentSkillIDs(previousSkillIds);
+                throw;
+            }
+
+            _equippedSkills = new List<EquippedSkill>(equippedSkills);
+        }
+
         [SerializeField, Tooltip("スキル ID から SkillTemplate を取得するリポジトリ。")]
         private SkillRepository _skillRepository;
 
@@ -117,6 +150,26 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
                 _equippedSkills.Add(new EquippedSkill(skillData));
             }
+        }
+
+        /// <summary>
+        ///     装備スキル構成から保存用スキル ID 一覧を構築する。
+        /// </summary>
+        /// <param name="equippedSkills"> 装備スキル構成。 </param>
+        /// <returns> 保存用スキル ID 一覧。 </returns>
+        private List<int> BuildSkillIds(IReadOnlyList<EquippedSkill> equippedSkills)
+        {
+            List<int> result = new List<int>(equippedSkills.Count);
+            for (int i = 0; i < equippedSkills.Count; i++)
+            {
+                EquippedSkill equippedSkill = equippedSkills[i];
+                result.Add(
+                    equippedSkill.HasSkill
+                        ? equippedSkill.SkillTemplate.Id.Value
+                        : EMPTY_SKILL_ID);
+            }
+
+            return result;
         }
     }
 }

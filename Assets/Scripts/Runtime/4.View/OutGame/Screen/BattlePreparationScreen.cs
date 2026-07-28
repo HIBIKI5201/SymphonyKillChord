@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
-using KillChord.Runtime.View.OutGame.BattlePreparation;
+using R3;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         /// <param name="viewModel"> 接続する ViewModel です。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void Bind(BattlePreparationSkillViewModel viewModel)
+        public void Bind(IBattlePreparationSkillViewModel viewModel)
         {
             if (viewModel == null)
             {
@@ -57,8 +57,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             Unbind();
             _viewModel = viewModel;
-            _viewModel.OnSkillsChanged += HandleSkillsChangedHandler;
-            RebuildSkills(_viewModel.Skills);
+            _subscriptions = new CompositeDisposable();
+            _viewModel.Skills
+                .Subscribe(HandleSkillsChangedHandler)
+                .AddTo(_subscriptions);
         }
 
         /// <summary>
@@ -66,12 +68,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void Unbind()
         {
-            if (_viewModel == null)
-            {
-                return;
-            }
-
-            _viewModel.OnSkillsChanged -= HandleSkillsChangedHandler;
+            _subscriptions?.Dispose();
+            _subscriptions = null;
             _viewModel = null;
         }
 
@@ -236,12 +234,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
             comboLabel.AddToClassList("battle-preparation-skill-item__combo");
             item.Add(comboLabel);
 
-            if (skill.HasEffectDescription)
-            {
-                Label descriptionLabel = new(skill.EffectDescription);
-                descriptionLabel.AddToClassList("battle-preparation-skill-item__description");
-                item.Add(descriptionLabel);
-            }
+            VisualElement skillTypeRow = new();
+            skillTypeRow.AddToClassList("battle-preparation-skill-item__type-row");
+            Label skillTypeHeading = new(SKILL_TYPE_HEADING);
+            skillTypeHeading.AddToClassList("battle-preparation-skill-item__type-heading");
+            Label skillTypeLabel = new(skill.SkillTypeLabel);
+            skillTypeLabel.AddToClassList("battle-preparation-skill-item__type");
+            skillTypeRow.Add(skillTypeHeading);
+            skillTypeRow.Add(skillTypeLabel);
+            item.Add(skillTypeRow);
+
+            Label effectHeading = new(SKILL_EFFECT_HEADING);
+            effectHeading.AddToClassList("battle-preparation-skill-item__effect-heading");
+            item.Add(effectHeading);
+
+            string description = skill.HasEffectDescription
+                ? skill.EffectDescription
+                : EMPTY_SLOT_SYMBOL;
+            Label descriptionLabel = new(description);
+            descriptionLabel.AddToClassList("battle-preparation-skill-item__description");
+            item.Add(descriptionLabel);
 
             return item;
         }
@@ -253,6 +265,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string EFFECT_SCROLL_VIEW_NAME = "EquippedSkillEffectScrollView";
         private const string EFFECT_LIST_NAME = "EquippedSkillEffectList";
         private const string EMPTY_SLOT_SYMBOL = "—";
+        private const string SKILL_TYPE_HEADING = "スキルの種類　：";
+        private const string SKILL_EFFECT_HEADING = "スキル効果";
 
         private readonly Button _backButton;
         private readonly Button _startButton;
@@ -261,7 +275,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
 
-        private BattlePreparationSkillViewModel _viewModel;
+        private IBattlePreparationSkillViewModel _viewModel;
+        private CompositeDisposable _subscriptions;
         private string _pendingTargetSceneName;
     }
 }

@@ -4,6 +4,7 @@
     padding-right: 3%;
     padding-bottom: 2%;
     padding-left: 3%;
+    flex-direction: row;
 }
 
 .battle-preparation-title {
@@ -20,6 +21,8 @@
     min-height: 0;
     align-items: flex-end;
     justify-content: center;
+    height: 100%;
+    width: 15%;
 }
 
 .battle-preparation-panel {
@@ -180,7 +183,33 @@
     white-space: normal;
 }
 
+.battle-preparation-skill-item__type-row {
+    flex-direction: row;
+    margin-top: 5px;
+}
+
+.battle-preparation-skill-item__type-heading,
+.battle-preparation-skill-item__type {
+    color: rgb(28, 35, 44);
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.battle-preparation-skill-item__type {
+    flex-grow: 1;
+}
+
+.battle-preparation-skill-item__effect-heading {
+    margin-top: 8px;
+    color: rgb(28, 35, 44);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
 .battle-preparation-skill-item__description {
+    margin-top: 2px;
+    margin-left: 24px;
     color: rgb(28, 35, 44);
     font-size: 20px;
     white-space: normal;
@@ -210,4 +239,19 @@
 
 .battle-preparation-start-button {
     background-color: rgb(197, 221, 170);
+}
+
+.battle-preparation-character-image {
+    background-color: rgb(0, 0, 0);
+    width: 49%;
+    height: 80%;
+    display: flex;
+}
+
+.battle-preparation-character-content {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    width: 5%;
 }

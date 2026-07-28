@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
+using R3;
 using System;
 using System.Collections.Generic;
 
@@ -7,13 +8,13 @@ namespace KillChord.Runtime.View.OutGame.BattlePreparation
     /// <summary>
     ///     戦闘準備画面の装備スキル表示状態を保持します。
     /// </summary>
-    public sealed class BattlePreparationSkillViewModel : IBattlePreparationSkillViewModel
+    public sealed class BattlePreparationSkillViewModel :
+        IBattlePreparationSkillViewModel,
+        IDisposable
     {
-        /// <summary> 装備スキル一覧が更新されたときに通知します。 </summary>
-        public event Action<IReadOnlyList<BattlePreparationSkillDTO>> OnSkillsChanged;
-
         /// <summary> 現在の装備スキル表示一覧です。 </summary>
-        public IReadOnlyList<BattlePreparationSkillDTO> Skills => _skills;
+        public ReadOnlyReactiveProperty<IReadOnlyList<BattlePreparationSkillDTO>> Skills =>
+            _skills;
 
         /// <summary>
         ///     DTO から装備スキル表示状態を反映します。
@@ -26,17 +27,22 @@ namespace KillChord.Runtime.View.OutGame.BattlePreparation
                 return;
             }
 
-            if (_skills.Length != dto.Skills.Length)
-            {
-                _skills = new BattlePreparationSkillDTO[dto.Skills.Length];
-            }
-
-            dto.Skills.CopyTo(_skills);
-            OnSkillsChanged?.Invoke(_skills);
+            BattlePreparationSkillDTO[] skills =
+                new BattlePreparationSkillDTO[dto.Skills.Length];
+            dto.Skills.CopyTo(skills);
+            _skills.Value = skills;
         }
 
-        private BattlePreparationSkillDTO[] _skills =
-            Array.Empty<BattlePreparationSkillDTO>();
+        /// <summary>
+        ///     ReactivePropertyを解放します。
+        /// </summary>
+        public void Dispose()
+        {
+            _skills.Dispose();
+        }
+
+        private readonly ReactiveProperty<IReadOnlyList<BattlePreparationSkillDTO>> _skills =
+            new(Array.Empty<BattlePreparationSkillDTO>());
 
         /// <summary>
         ///     現在の表示状態と受信した表示状態が同一か判定します。
@@ -46,14 +52,15 @@ namespace KillChord.Runtime.View.OutGame.BattlePreparation
         /// <returns> 全項目が同一の場合はtrue。 </returns>
         private bool HasSameSkills(ReadOnlySpan<BattlePreparationSkillDTO> skills)
         {
-            if (_skills.Length != skills.Length)
+            IReadOnlyList<BattlePreparationSkillDTO> currentSkills = _skills.Value;
+            if (currentSkills.Count != skills.Length)
             {
                 return false;
             }
 
             for (int i = 0; i < skills.Length; i++)
             {
-                BattlePreparationSkillDTO current = _skills[i];
+                BattlePreparationSkillDTO current = currentSkills[i];
                 BattlePreparationSkillDTO next = skills[i];
                 if (!current.Equals(next))
                 {

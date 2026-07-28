@@ -131,7 +131,7 @@ namespace KillChord.Editor.SinfoniaOperator
             string workLogChannelIdRaw = OperatorConfig.GetValue(OperatorConfigKeys.DISCORD_WORK_LOG_CHANNEL_ID);
 
             bool useBot = !string.IsNullOrWhiteSpace(botToken);
-            bool hasChannelId = ulong.TryParse(workLogChannelIdRaw?.Trim(), out ulong channelId);
+            bool hasChannelId = ulong.TryParse(workLogChannelIdRaw?.Trim(), out _);
             if (useBot && !hasChannelId)
             {
                 Debug.LogError($"[{nameof(SinfoniaOperatorWindow)}] {OperatorConfigKeys.DISCORD_WORK_LOG_CHANNEL_ID} が未設定か、数値として解釈できません。" +
@@ -158,18 +158,7 @@ namespace KillChord.Editor.SinfoniaOperator
                     : settings.WorkLogUserName;
                 string content = $"**[作業ログ] {userName}** {DateTimeUtility.JstNow():yyyy/MM/dd HH:mm}\n{message}";
 
-                // Botトークンが設定されていればボットアカウントとして送信し、なければWebhookで送信する。
-                bool isSucceeded;
-                if (useBot)
-                {
-                    DiscordBotRestClient client = new(botToken);
-                    isSucceeded = await client.SendMessageAsync(channelId, content);
-                }
-                else
-                {
-                    DiscordWebhookClient client = new(webhookUrl);
-                    isSucceeded = await client.SendMessageAsync(content);
-                }
+                bool isSucceeded = await DiscordNotifier.SendAsync(DiscordChannelKind.WorkLog, content);
 
                 if (isSucceeded)
                 {

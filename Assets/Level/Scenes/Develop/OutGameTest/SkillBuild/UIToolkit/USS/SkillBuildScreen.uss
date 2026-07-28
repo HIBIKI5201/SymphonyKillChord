@@ -1,10 +1,131 @@
 :root {
 }
 
+.owned-points {
+    position: absolute;
+    right: 240px;
+    top: 10px;
+    width: 280px;
+    height: 80px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(217, 217, 217);
+}
+
+.owned-points-heading {
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
+.owned-points-value {
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
 .skill-icon {
     height: 100%;
     margin-right: 1%;
     margin-left: 1%;
+}
+
+.skill-detail-top {
+    flex-grow: 0;
+    width: 100%;
+    height: 25%;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.skill-detail-icon {
+    width: 110px;
+    height: 110px;
+    min-width: 110px;
+    min-height: 110px;
+    background-color: rgb(145, 145, 145);
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.skill-detail-heading {
+    flex-grow: 1;
+    margin-left: 24px;
+    justify-content: center;
+}
+
+.skill-name-label {
+    font-size: 30px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.skill-combo-label {
+    margin-top: 8px;
+    font-size: 22px;
+    white-space: normal;
+}
+
+.skill-description {
+    flex-grow: 0;
+    width: 95%;
+    height: 50%;
+    align-self: center;
+    border-top-width: 6px;
+    border-right-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 6px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
+}
+
+.skill-type-row {
+    width: 95%;
+    align-self: center;
+    padding-top: 16px;
+    flex-direction: row;
+}
+
+.skill-type-heading {
+    font-size: 24px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.skill-type-label {
+    flex-grow: 1;
+    font-size: 24px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.skill-effect-heading {
+    width: 95%;
+    align-self: center;
+    margin-top: 12px;
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
+.skill-description-label {
+    width: 92%;
+    align-self: center;
+    padding-top: 4px;
+    padding-bottom: 16px;
+    padding-left: 24px;
+    font-size: 24px;
+    -unity-font-style: bold;
+    white-space: normal;
 }
 
 .skill-element-slot {

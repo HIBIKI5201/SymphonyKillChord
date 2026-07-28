@@ -19,5 +19,10 @@ namespace KillChord.Runtime.Domain.InGame.Buff
         ///     スキル発動時に発動。
         /// </summary>
         Skill,
+
+        /// <summary>
+        ///     被ダメージ計算前に発動。
+        /// </summary>
+        Defense_Logic_Before,
     }
 }

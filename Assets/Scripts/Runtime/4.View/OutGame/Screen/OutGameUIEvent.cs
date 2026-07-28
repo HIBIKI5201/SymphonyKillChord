@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace KillChord.Runtime.View.OutGame.Screen
 {
@@ -91,9 +90,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
-
-        /// <summary> スキル編成が保存されたときのイベント。 </summary>
-        public Func<Task<bool>> OnSkillBuildSaved;
 
         /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
         public Action OnSkillLevelUp;

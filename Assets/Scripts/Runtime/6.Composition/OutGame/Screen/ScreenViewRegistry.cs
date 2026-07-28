@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
     /// <summary>
     ///     画面 ID と View の対応表クラス。
     /// </summary>
-    public sealed class ScreenViewRegistry : IScreenViewRegistry, IDisposable
+    public sealed class ScreenViewRegistry : IScreenViewRegistry, IScreenLifecycleSignal, IDisposable
     {
         /// <summary> Registry を初期化します。 </summary>
         public ScreenViewRegistry(
@@ -33,6 +33,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             };
         }
 
+        /// <inheritdoc />
+        public event Action<ScreenId> OnScreenWillShow;
+
         /// <summary>
         ///    指定画面を即時表示します。
         /// </summary>
@@ -41,11 +44,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
         {
             ScreenViewBase view = _views[screenId];
-            if (view is BattlePreparationScreen battlePreparationScreen)
-            {
-                battlePreparationScreen.SetTargetSceneName(targetSceneName);
-            }
-            _views[screenId].ShowImmediately();
+            PrepareForShow(screenId, view, targetSceneName);
+            view.ShowImmediately();
         }
 
         /// <summary>
@@ -62,12 +62,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
             ScreenViewBase view = _views[screenId];
-            if (view is BattlePreparationScreen battlePreparationScreen)
-            {
-                battlePreparationScreen.SetTargetSceneName(targetSceneName);
-            }
-
-            await _views[screenId].Show(token);
+            PrepareForShow(screenId, view, targetSceneName);
+            await view.Show(token);
         }
 
         /// <summary>
@@ -94,10 +90,27 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Dispose()
         {
-            foreach(IDisposable disposable in _views.Values)
+            foreach (IDisposable disposable in _views.Values)
             {
                 disposable.Dispose();
             }
+        }
+
+        /// <summary>
+        ///     画面固有の表示準備を行い、表示直前を通知します。
+        /// </summary>
+        private void PrepareForShow(
+            ScreenId screenId,
+            ScreenViewBase view,
+            string targetSceneName)
+        {
+            if (view is BattlePreparationScreen battlePreparationScreen
+                && !string.IsNullOrEmpty(targetSceneName))
+            {
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+            }
+
+            OnScreenWillShow?.Invoke(screenId);
         }
 
         private readonly IReadOnlyDictionary<ScreenId, ScreenViewBase> _views;

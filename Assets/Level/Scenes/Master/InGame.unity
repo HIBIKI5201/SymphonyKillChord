@@ -1328,6 +1328,7 @@ GameObject:
   - component: {fileID: 438459094}
   - component: {fileID: 438459095}
   - component: {fileID: 438459097}
+  - component: {fileID: 438459098}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1377,6 +1378,7 @@ MonoBehaviour:
   _skillVisuals: []
   _inputProgressUIConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _equippedSkills: []
+  _skillBuildRepositoryKey: SkillBuildRepository
 --- !u!114 &438459092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1461,6 +1463,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.ReturnToTitleInitializer
   _titleSceneName: Title
+--- !u!114 &438459098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91c5e75a0d60489ab24abdf93344a8cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Player.PlayerStatusBonusInitializer
+  _skillNodeDataRepoKey: SkillNodeDataRepo
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
