@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class StageSelectScreenView : ScreenViewBase
     {
+
         /// <summary> View を初期化します。 </summary>
         public StageSelectScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
