@@ -275,6 +275,16 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void TryAutoAssignReferences()
         {
+            if (_canvasGroup == null)
+            {
+                // 未設定だとフェードが無反応になるため、自身または子から補完する。
+                _canvasGroup = GetComponent<CanvasGroup>();
+                if (_canvasGroup == null)
+                {
+                    _canvasGroup = GetComponentInChildren<CanvasGroup>(true);
+                }
+            }
+
             if (_chat == null)
             {
                 _chat = GetComponentInChildren<TMP_Text>(true);
