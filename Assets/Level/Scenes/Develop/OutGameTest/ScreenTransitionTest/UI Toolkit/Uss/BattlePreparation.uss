@@ -180,7 +180,33 @@
     white-space: normal;
 }
 
+.battle-preparation-skill-item__type-row {
+    flex-direction: row;
+    margin-top: 5px;
+}
+
+.battle-preparation-skill-item__type-heading,
+.battle-preparation-skill-item__type {
+    color: rgb(28, 35, 44);
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.battle-preparation-skill-item__type {
+    flex-grow: 1;
+}
+
+.battle-preparation-skill-item__effect-heading {
+    margin-top: 8px;
+    color: rgb(28, 35, 44);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
 .battle-preparation-skill-item__description {
+    margin-top: 2px;
+    margin-left: 24px;
     color: rgb(28, 35, 44);
     font-size: 20px;
     white-space: normal;

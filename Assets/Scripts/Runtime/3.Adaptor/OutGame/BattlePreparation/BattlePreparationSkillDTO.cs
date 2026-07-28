@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
         /// <param name="icon"> スキルアイコンです。 </param>
         /// <param name="displayName"> スキル表示名です。 </param>
         /// <param name="comboLabel"> 発動コンボ表示です。 </param>
+        /// <param name="skillTypeLabel"> スキル種類表示です。 </param>
         /// <param name="hasEffectDescription"> 効果説明を表示する場合はtrue。 </param>
         /// <param name="effectDescription"> 効果説明です。 </param>
         public BattlePreparationSkillDTO(
@@ -24,6 +25,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
             Sprite icon,
             string displayName,
             string comboLabel,
+            string skillTypeLabel,
             bool hasEffectDescription,
             string effectDescription)
         {
@@ -32,6 +34,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
             Icon = icon;
             DisplayName = displayName;
             ComboLabel = comboLabel;
+            SkillTypeLabel = skillTypeLabel;
             HasEffectDescription = hasEffectDescription;
             EffectDescription = effectDescription;
         }
@@ -51,6 +54,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
         /// <summary> 発動コンボ表示です。 </summary>
         public string ComboLabel { get; }
 
+        /// <summary> スキル種類表示です。 </summary>
+        public string SkillTypeLabel { get; }
+
         /// <summary> 効果説明を表示する場合はtrue。 </summary>
         public bool HasEffectDescription { get; }
 
@@ -69,6 +75,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
                    Icon == other.Icon &&
                    DisplayName == other.DisplayName &&
                    ComboLabel == other.ComboLabel &&
+                   SkillTypeLabel == other.SkillTypeLabel &&
                    HasEffectDescription == other.HasEffectDescription &&
                    EffectDescription == other.EffectDescription;
         }
@@ -95,6 +102,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
                 Icon,
                 DisplayName,
                 ComboLabel,
+                SkillTypeLabel,
                 HasEffectDescription,
                 EffectDescription);
         }
