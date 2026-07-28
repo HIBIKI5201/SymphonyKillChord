@@ -706,9 +706,24 @@ jobs:
 
           foreach ($PlatformDir in $PlatformDirs) {
             $ZipName = "$($PlatformDir.Name)-$TagName.zip"
+            $ZipPath = Join-Path -Path $PWD -ChildPath $ZipName
+
             try {
-              Compress-Archive -Path "$($PlatformDir.FullName)\*" -DestinationPath $ZipName -ErrorAction Stop
-              $ZipSize = (Get-Item $ZipName).Length
+              Write-Host "Creating archive for $($PlatformDir.Name)"
+              Write-Host "  Source:      $($PlatformDir.FullName)"
+              Write-Host "  Destination: $ZipPath"
+
+              Compress-Archive `
+                -Path "$($PlatformDir.FullName)\*" `
+                -DestinationPath $ZipPath `
+                -ErrorAction Stop
+
+              if (-not (Test-Path $ZipPath)) {
+                throw "ZIP file was not created: $ZipPath"
+              }
+
+              $ZipSize = (Get-Item $ZipPath).Length
+
               Write-Host "OK: Archive ($ZipName) created successfully. File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
             } catch {
               Write-Host "ERROR: Failed to create archive for $($PlatformDir.Name): $_"
