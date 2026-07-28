@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - GameSystem
+  - TouchArea
+  - ScenarioIgnore
   layers:
   - Default
   - TransparentFX
@@ -12,9 +14,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Obstacle
+  - Player
+  - Enemy
   - 
   - 
   - 

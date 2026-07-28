@@ -28,15 +28,7 @@ jobs:
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release
 
       - name: 実行
-        env: # 使用する環境変数を呼び出す。
+        env: # 秘密情報だけをGitHub Secretsから渡す。公開設定はリポジトリ内のenv JSONを使用する。
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          DISCORD_TASK_CHANNEL_ID: ${{ vars.DISCORD_TASK_CHANNEL_ID }}
-          DISCORD_SPRINT_CHANNEL_ID: ${{ vars.DISCORD_SPRINT_CHANNEL_ID }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_TASK_DATABASE_ID: ${{ vars.NOTION_TASK_DATABASE_ID }}
-          NOTION_SPRINT_DATABASE_ID : ${{ vars.NOTION_SPRINT_DATABASE_ID }}
-          NOTION_DATABASE_DATE_PROPERTY: ${{ vars.NOTION_DATABASE_DATE_PROPERTY }}
-          NOTION_DATABASE_NAME_PROPERTY: ${{ vars.NOTION_DATABASE_NAME_PROPERTY }}
-          NOTION_DATABASE_STATUS_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_PROPERTY }}
-          NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY: ${{ vars.NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY }}
         run: dotnet run --project ${{ env.PROJECT_PATH }} --configuration Release

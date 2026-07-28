@@ -1,0 +1,178 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Default Local Group
+  m_GUID: c521adcb33534f544ad957856080f76a
+  m_SerializeEntries:
+  - m_GUID: 02ac4acd11c13e94f951e778560963f3
+    m_Address: PlayerConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 03ab59b5cc1893e4eaf97352ba51df87
+    m_Address: BackgroundCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
+    m_Address: SkillInputProgressUIConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 134672bf4f515f4439a46323fff09e2a
+    m_Address: OwnedSkillRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c411bf35748d284584af4d0f16a0ccc
+    m_Address: TitleScreenRuleData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 258321da291460949a3505c9ef2f85fe
+    m_Address: StageTreeAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d1972e01a7a86243aac0caff66ff428
+    m_Address: ExampleBattleMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2efcc81dfd565a94a9110b488a8ec243
+    m_Address: SkillNodePhaseBindDataRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 358a8447b7fd7f54690a994853695aa1
+    m_Address: Player
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57ad1f17f7de2804a9744cf5cc3c4316
+    m_Address: SkillNodeDataRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
+    m_Address: RhythmJudgmentDefinitionAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71243b714fe682a479522c36402275ac
+    m_Address: ExampleEnemyMoveData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77438a4db85a96f4982b191e886666d5
+    m_Address: CharacterDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
+    m_Address: ShellAttackData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8353de4b09cc6674393d85367d46fcab
+    m_Address: EnemyMissionKeyRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 888c47664981fed459937f475b632964
+    m_Address: ScenarioSettingsAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bb92b8655a6f724b864e7dac88d6e70
+    m_Address: SkillNodeBindRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f8d7fb175cdb054bb9439f0d1bb8dda
+    m_Address: OutGameSkillRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f9f05cd27f2f3a4087a15acbe76d7c3
+    m_Address: OwnedSkillRepositoryDebug
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b244ab8c89d4230b98ee894aa815b0b
+    m_Address: EnemyWaveDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c44a325b8ad84f498216394b6a9d584
+    m_Address: AnimationCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b11f6152160bbfc42b59af15ef998adc
+    m_Address: InitialSkillLoadout
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bad017c822c5b8c4da79df297d30324c
+    m_Address: ExampleEncountMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd2baf74c95bbc545ac18bea3a467152
+    m_Address: CameraConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9264ef7716ed4f47bc258f02a4823b9
+    m_Address: BossAttackEntryRepo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2b760f47d977174fb177b0d0f9d2480
+    m_Address: SkillBuildRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d69421e5dc9278446a38b4415677e2aa
+    m_Address: ShellMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
+    m_Address: SkillBuildRepositoryDebug
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed3d6973f36d66844852d3391a8a18df
+    m_Address: OutGameScreenRuleData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
+    m_Address: PortraitCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa8820e093edab1489d8bbed0db664af
+    m_Address: SkillTreeTestInputData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d50a7120a39130c4f981d12c9d268c81, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c18663a88fce18b48a4edfb5796d1cc2, type: 2}
+    - {fileID: 11400000, guid: e6f7bce444657324ca04a1c343ef5104, type: 2}

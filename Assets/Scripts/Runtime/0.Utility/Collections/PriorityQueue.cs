@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Debug = UnityEngine.Debug;
 
-namespace KillChord.Runtime.Utility
+namespace KillChord.Runtime.Utility.Collections
 {
     /// <summary>
     ///     優先度付きQueue。

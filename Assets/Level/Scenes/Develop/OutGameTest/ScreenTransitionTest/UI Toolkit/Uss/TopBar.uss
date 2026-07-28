@@ -1,0 +1,13 @@
+:root {
+}
+
+.title {
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+}
+
+.back-button {
+    position: absolute;
+    left: 1%;
+}

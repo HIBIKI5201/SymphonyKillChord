@@ -1,0 +1,29 @@
+using KillChord.Runtime.View.InGame.Enemy.AIFacade;
+using System;
+using Unity.Behavior;
+using UnityEngine;
+
+namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition
+{
+    [Serializable, Unity.Properties.GeneratePropertyBag]
+    [Condition(name: "IsStunned", story: "スタン状態である [Bool] [State]", category: "Conditions", id: "842f5b1b693cb1d6b1e5202aa4bcfccc")]
+    public partial class IsStunnedCondition : Unity.Behavior.Condition
+    {
+        [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
+        [SerializeReference] public BlackboardVariable<bool> Bool;
+
+        public override bool IsTrue()
+        {
+            if (State?.Value == null) return false;
+            return State.Value.IsStunned == Bool.Value;
+        }
+
+        public override void OnStart()
+        {
+        }
+
+        public override void OnEnd()
+        {
+        }
+    }
+}

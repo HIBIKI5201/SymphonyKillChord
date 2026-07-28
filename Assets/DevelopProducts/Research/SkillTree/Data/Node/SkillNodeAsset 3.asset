@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a076d68b4d37684aa9b059994411634, type: 3}
+  m_Name: SkillNodeAsset 3
+  m_EditorClassIdentifier: DevelopProducts-SkillTree::DevelopProducts.SkillTree.SkillNodeAsset
+  _nodeUnlockEffets:
+  - rid: 5186415340246270061
+  _algorithmService:
+    rid: 6052115885326598301
+  _id: 3
+  _isUnlocked: 0
+  _isEnable: 1
+  _parents:
+  - {fileID: 11400000, guid: e23417f2508573040b64015703615fad, type: 2}
+  _cost: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 5186415340246270061
+      type: {class: HealthUp, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
+      data: 
+    - rid: 6052115885326598301
+      type: {class: AllNodeSearchService, ns: DevelopProducts.SkillTree, asm: DevelopProducts-SkillTree}
+      data: 

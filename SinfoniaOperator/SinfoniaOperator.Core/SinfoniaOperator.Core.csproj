@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- netstandard2.1はUnityエディタから参照するため。net10.0はBot(Exe)から参照するため。 -->
+    <TargetFrameworks>netstandard2.1;net10.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>SinfoniaStudio.SinfoniaOperator</RootNamespace>
+    <!-- NuGet依存DLLを出力へコピーし、Unityへの配置対象にする。 -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Notion.Net" Version="4.4.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Unityエディタ用DLLの配置先。Editorフォルダ配下のためビルドには含まれない。 -->
+    <UnityPluginDir>$(MSBuildThisFileDirectory)..\..\Assets\Editor\Plugins\SinfoniaOperator\</UnityPluginDir>
+  </PropertyGroup>
+
+  <!-- netstandard2.1ビルド後、UnityのAssetsへDLLを配置する。
+       Newtonsoft.JsonはUnityパッケージ(com.unity.nuget.newtonsoft-json)が提供するため除外する。 -->
+  <Target Name="CopyToUnity" AfterTargets="Build" Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <ItemGroup>
+      <UnityDeployFiles Include="$(TargetPath)" />
+      <UnityDeployFiles
+        Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(Extension)' == '.dll' And '%(Filename)' != 'Newtonsoft.Json'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UnityDeployFiles)" DestinationFolder="$(UnityPluginDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

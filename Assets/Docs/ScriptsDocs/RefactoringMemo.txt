@@ -1,0 +1,107 @@
+> ⚠️ このメモは過去の時点でのコードレビューによる指摘一覧（スナップショット）です。2026-07-16に全項目をコードと照合し、実装済みの項目（ParticleController・カメラのApplication層UnityEngine依存・CameraLockOnState・MusicTimingCalculatorのコメント・RhythmDefinition・PlayerMoveParameter/EnemyMoveSpecの命名統一・CameraSystemParameter→CameraConfig・IBuffのファイル分割・EventBusの静的リスナークリア・PriorityQueueの自作理由明記）は削除しました。残っているのは未対応の項目のみです。個別の指摘を参照する際は、対象クラスが現在も同名で存在するかをコードで確認してください。
+
+## シーン
+
+### オブジェクト混在状態
+
+空オブジェクトをもうちょい使って、見やすくしたい
+
+### インゲームシーンのStageオブジェクト
+
+NavMeshSurfaceのみがあり、NavMeshDataがミッシングのオブジェクトがある
+これは必要なものか？
+
+## スクリプト
+
+### Playerのモデル生成をスポナー経由でやるべきなのでは
+
+Playerのモデルをステージシーンに設置でやってるのはおかしい
+Playerのプレハブを生成するスポナーを作るべきなのでは？
+
+※2026-07-16時点: `PlayerInitializer`（Composition層）がランタイムで`PlayerView`プレハブを`Instantiate`する形にはなっており、シーンへの直接配置は解消済み。ただし専用の`PlayerSpawner`クラスへの分離はまだ行われていない。
+
+### RhythmState
+
+実装内容はリズム系の入力バッファなので、RhytmCommandBufferクラスに改名していいのでは
+
+### ServiceLocator（サービスロケーターパターン）への依存と依存関係のブラックボックス化
+
+`IngameComposition`（インゲームの起動エントリーポイント）等において、`ServiceLocator.TryGetInstance` を使った動的なインスタンス取得が多用されている。
+サービスロケーターパターンは「クラスの本来の依存関係が外部から見えなくなる（ブラックボックス化する）」というデメリットがあり、結合度の高いコードを招く原因となる。
+**対策：**
+可能な限りコンストラクタインジェクションや、VContainerやZenjectなどの純粋なDIフレームワークを導入し、エントリポイント（Composition Root）で明示的に依存関係をバインド・注入する設計へ移行すべきである。
+
+※2026-07-16時点: 137箇所・49ファイルで使用されており、その大半はComposition層の初期化クラスに集中している（Composition Rootでの利用に限定されている点は一貫している）。DIフレームワークへの移行は行われていないが、現状は意図的に許容されているパターンとして定着している可能性がある。対応するかどうかは方針判断が必要。
+
+### RingBuffer<T>.AsReadonlySpan() における危険な stackalloc と予期せぬ副作用
+
+`RingBuffer<T>` 内の `AsReadonlySpan()` メソッドにおいて、バッファの開始位置が `_head != 0` の場合に以下のような処理が行われている。
+- `stackalloc T[_buffer.Length]` でスタック上に配列サイズの一時バッファをアロケート
+- リングバッファの内容を古い順にコピーし、元の `_buffer` 配列にコピーし直した上で `_head = 0` にリセット
+**問題点：**
+1. **Getterライクなメソッドにおける重大な副作用（不変性の崩壊）:** 単にスパンを取得する目的の `AsReadonlySpan()` を呼ぶだけで、バッファ内部の格納位置（`_head`）がリセットされ、配列の並び替え＆コピーという重い破壊的処理が暗黙的に行われる。
+2. **スタックオーバーフロー（クラッシュ）の危険性:** もしバッファ容量が非常に大きい、または `T` のサイズが大きい場合、`stackalloc` は一瞬でコールスタックを食いつぶし、Unityをクラッシュ（強制終了）させる原因になる。
+**対策：**
+配列全体を無理に1枚の `ReadOnlySpan` として返すのではなく、順番通りに走査するためのカスタムなイテレータ（`IEnumerable<T>` や `IEnumerator<T>`）を提供するか、バッファを崩さずに全要素を走査する `ForEach(Action<T> action)` 等を設計すべきである。
+
+※2026-07-16時点: `RingBuffer.cs`は依然として同じ実装で、`RhythmState.cs`から使われ続けている。未対応。
+
+### HealthEntityとCharacterEntityの間の不変量管理・カプセル化の分散
+
+`CharacterEntity.cs` において、`TakeDamage` や `Heal` の際に「現在HPからダメージ値を差し引いて下限を0にする（`Math.Max(0, ...)`）」といった計算を行い、その結果を `HealthEntity.ChangeHealth(nextHealth)` に渡している。
+本来、HPが最大HPを超えないこと、および0未満にならないこと（体力の不変量・整合性）は `HealthEntity` がカプセル化して保証すべき役割である。
+しかし、上限判定（MaxHP）は `HealthEntity.ChangeHealth` 側で行われ、下限判定（0下限）や「ダメージを与える」「回復する」といった計算そのものは `CharacterEntity` 側に分散してしまっている。
+**対策：**
+`HealthEntity` に `TakeDamage(Damage)` や `Heal(Health)` といった明確なドメインアクションメソッドを定義し、HPの境界条件判定（0以下やMaxHP超過など）の計算・不変量の維持を `HealthEntity` 内部に完全にカプセル化すべきである。
+
+※2026-07-16時点: 未対応。現状のままの分担。
+
+### ScenarioCsvUtilityのゲーム中における文字列アロケーション（GC Alloc）の懸念
+
+シナリオCSVのパース処理 `ParseCsvLine` において、`StringBuilder` や `List<string>`、部分文字列が多用されており、何度もトリム（`headers[i]?.Trim()`）などが行われている。
+このCSVロード処理がゲームのプレイ中に走る場合、大量の `string` アロケーションが発生し、UnityのGC（Garbage Collector）を頻繁に刺激してフレーム落ち（スパイク）を発生させる大きな要因となる。
+**対策：**
+1. ロード時間をアロケーションフリーにするために、`ReadOnlySpan<char>` を使って文字列アロケーションなしでCSVをトークナイズするパーサーへの変更。
+2. そもそも実行時にCSVをパースするのではなく、Unityのビルドインまたはインフラ層の機能で事前に `ScriptableObject` やシリアライズドバイナリデータ（MessagePackなど）に変換しておき、実行時はアロケーションなしで直接読み込めるように設計を移行すべき。
+
+※2026-07-16時点: 未対応。現状のまま。
+
+## 設計理念（DesignPhilosophy.md）からの逸脱指摘
+
+`DesignPhilosophy.md` では、**Domain層**、**Application層**、**Adaptor層**はすべて**ピュアC#クラス（Pure C#）**として定義され、Unityフレームワークへの直接依存は避ける（またはインターフェースを介してComposition層でDIする）方針となっている。しかし、次の箇所ではAdaptor層へ `UnityEngine` の依存が漏れ出したままになっている。
+
+### Adaptor層（Controller / Presenter）への UnityEngine 依存の流出
+
+* **対象ファイル:**
+  * `PlayerController.cs`
+  * `EnemyAIController.cs`
+* **問題点:**
+  * `Adaptor` 層は「ピュアクラス。伝達層」と定義されているが、`PlayerController.cs` で `using UnityEngine;` し、`Vector2`, `Vector3`, `Quaternion` を直接やり取りしている。
+  * `EnemyAIController.cs` でも、`Vector3` を使って位置情報を取得し、`Debug.Log` を呼び出している。
+  * これにより、外部のUIやコントローラー入力とApplication層を仲介するはずのAdaptor層がUnity Engineと密結合してしまっている。
+* **対策:**
+  * ベクトルデータや回転データをそのまま渡すのではなく、必要最小限のピュアC#データ型（または自作のプリミティブな値型オブジェクト）に変換してやり取りするか、インターフェースを介してUnityフレームワークの型を隠蔽すべきである。
+
+※2026-07-16時点: 両ファイルとも同じ場所・同じ内容のまま。未対応。
+
+（Application層のカメラ位置計算、Domain層の`PlayerMoveParameter`/`CameraSystemParameter`のUnityEngine依存は、カメラの`View`層への移設・`PlayerMoveSpec`へのリネーム・`CameraConfig`（ScriptableObject Asset）化によりそれぞれ解消済みのため削除しました。）
+
+# 用語
+
+### リズムパターン（RhythmPattern）
+
+スキルのコマンド
+
+# 知らないこと
+
+### MulticastDelegate
+
+EventBusで使用
+
+### IProgress
+
+シーンロード系で使用
+
+### HashCode.Add
+
+RhythmPatternのGetHashCodeで使用

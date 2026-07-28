@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     入力の種類を表す列挙型。
@@ -14,5 +12,16 @@ namespace KillChord.Runtime.Adaptor
         Move = 100,
         Dodge = 101,
         Attack = 102,
+        Look = 103,
+        LockOn = 104,
+        LockOnSelect = 105,
+        ResetPosition = 106,
+        ReturnToTitle = 107,
+        ScenarioAdvance = 200,
+        ScenarioFastForward = 201,
+        ScenarioPause = 202,
+        ScenarioSkip = 203,
+        ScenarioAuto = 204,
+        ScenarioHideUI = 205,
     }
 }

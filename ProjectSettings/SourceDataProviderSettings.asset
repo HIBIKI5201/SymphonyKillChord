@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 53
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a949360001a4214bfa831c73dad4889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Editor::KillChord.Editor.SourceDataProvider.SourceDataProviderSettings
+  _sourceAssetMappings:
+  - _addressableKey: StageTreeAsset
+  - _addressableKey: OutGameSkillRepository
+  - _addressableKey: SkillNodeDataRepo
+  - _addressableKey: SkillNodeBindRepo
+  - _addressableKey: AnimationCatalogAsset
+  - _addressableKey: PortraitCatalogAsset
+  - _addressableKey: BackgroundCatalogAsset
+  - _addressableKey: EnemyWaveDefinitionRepository
+  - _addressableKey: PlayerConfig
+  - _addressableKey: SkillInputProgressViewConfigAsset
+  - _addressableKey: TestSkillData1
+  - _addressableKey: OwnedSkillRepository
+  - _addressableKey: TitleScreenRuleData
+  - _addressableKey: ExampleBattleMusicData
+  - _addressableKey: SkillNodePhaseBindDataRepo
+  - _addressableKey: Player
+  - _addressableKey: RhythmJudgmentDefinitionAsset
+  - _addressableKey: ExampleEnemyMoveData
+  - _addressableKey: ShellAttackData
+  - _addressableKey: TestSkillData2
+  - _addressableKey: ScenarioSettingsAsset
+  - _addressableKey: OwnedSkillRepositoryDebug
+  - _addressableKey: ExampleEncountMusicData
+  - _addressableKey: BossAttackEntryRepo
+  - _addressableKey: SkillBuildRepository
+  - _addressableKey: ShellMusicData
+  - _addressableKey: SkillBuildRepositoryDebug
+  - _addressableKey: OutGameScreenRuleData
+  - _addressableKey: SkillTreeTestInputData
+  - _addressableKey: CameraConfig
+  - _addressableKey: EnemyMissionKeyRepository
+  - _addressableKey: CharacterDefinitionRepository
+  _sourceCollectionMappings:
+  - _collectionKey: StageAsset
+    _sourceAssetAddressableKey: StageTreeAsset
+    _propertyPath: _stageAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Stages
+  - _collectionKey: Skill
+    _sourceAssetAddressableKey: OutGameSkillRepository
+    _propertyPath: _skillDataAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/Skill/Templates
+  - _collectionKey: SkillNode
+    _sourceAssetAddressableKey: SkillNodeDataRepo
+    _propertyPath: SkillNodes
+    _assetCreationDirectory:
+  - _collectionKey: SkillNodeBind
+    _sourceAssetAddressableKey: SkillNodeBindRepo
+    _propertyPath: SkillNodeBinds
+    _assetCreationDirectory:
+  - _collectionKey: ScenarioAnimation
+    _sourceAssetAddressableKey: AnimationCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory:
+  - _collectionKey: ScenarioPortrait
+    _sourceAssetAddressableKey: PortraitCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory:
+  - _collectionKey: ScenarioBackground
+    _sourceAssetAddressableKey: BackgroundCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory:
+  - _collectionKey: Wave
+    _sourceAssetAddressableKey: EnemyWaveDefinitionRepository
+    _propertyPath: _waveDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy
+  - _collectionKey: StageBind
+    _sourceAssetAddressableKey: StageTreeAsset
+    _propertyPath: _bindAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/StageBinds
+  - _collectionKey: BossAttackEntry
+    _sourceAssetAddressableKey: BossAttackEntryRepo
+    _propertyPath: _attackEntries
+    _assetCreationDirectory: Assets/Level/Data/Develop/Boss
+  - _collectionKey: PlayerAttack
+    _sourceAssetAddressableKey: Player
+    _propertyPath: _attackDifinitions
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
+  - _collectionKey: EnemyMissionKey
+    _sourceAssetAddressableKey: EnemyMissionKeyRepository
+    _propertyPath: _missionKeyAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
+  - _collectionKey: Character
+    _sourceAssetAddressableKey: CharacterDefinitionRepository
+    _propertyPath: _characterAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/Character
+  _repositoryMappings:
+  - _category: StageAsset
+    _addressableKey: StageTreeAsset
+    _arrayPropertyPath: _stageAssets
+  - _category: StageBind
+    _addressableKey: StageTreeAsset
+    _arrayPropertyPath: _bindAssets
+  - _category: Skill
+    _addressableKey: OutGameSkillRepository
+    _arrayPropertyPath: _skillDataAssets
+  - _category: SkillNode
+    _addressableKey: SkillNodeDataRepo
+    _arrayPropertyPath: SkillNodes
+  - _category: SkillNodeBind
+    _addressableKey: SkillNodeBindRepo
+    _arrayPropertyPath: SkillNodeBinds
+  - _category: ScenarioAnimation
+    _addressableKey: AnimationCatalogAsset
+    _arrayPropertyPath: _entries
+  - _category: ScenarioPortrait
+    _addressableKey: PortraitCatalogAsset
+    _arrayPropertyPath: _entries
+  - _category: ScenarioBackground
+    _addressableKey: BackgroundCatalogAsset
+    _arrayPropertyPath: _entries
+  - _category: Wave
+    _addressableKey: EnemyWaveDefinitionRepository
+    _arrayPropertyPath: _waveDefinitionAssets
+  _isInitialized: 1

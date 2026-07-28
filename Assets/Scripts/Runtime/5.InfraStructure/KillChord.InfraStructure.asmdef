@@ -1,0 +1,24 @@
+{
+    "name": "KillChord.Structure",
+    "rootNamespace": "KillChord.Runtime.InfraStructure",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:dd408af17d035564b957321d79adba1d",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74",
+        "GUID:9465426c1e0fea94a9e89064d2be4eb8",
+        "GUID:4307f53044263cf4b835bd812fc161a4",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b",
+        "GUID:33661e06c33d31b4c9223810bf503247"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

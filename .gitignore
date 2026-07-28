@@ -78,3 +78,12 @@ ExportedPackages/
 
 # JetBrains IDEs (IntelliJ, Rider, etc.)
 .idea/
+.utmp/
+
+/SinfoniaOperator/sinfonia-operator.secrets.json
+
+# CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
+# ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
+/[Aa]ssets/SymphonyKillChord/
+/[Aa]ssets/SymphonyKillChord.meta
+Docs/NotionSpecifications/

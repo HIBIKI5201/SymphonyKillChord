@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace KillChord.Runtime.Domain
+namespace KillChord.Runtime.Domain.Persistent.Input
 {
     /// <summary>
     ///     履歴に保存される入力データを表す構造体。
     /// </summary>
-    public readonly struct BufferedInput
+    public readonly struct BufferedInput : IComparable<BufferedInput>
     {
         public BufferedInput(InputActionId actionId,
             InputActionPhase phase,
@@ -27,6 +28,11 @@ namespace KillChord.Runtime.Domain
         public float Timestamp { get; }
         public Vector2 VectorValue { get; }
         public float FloatValue { get; }
+
+        public int CompareTo(BufferedInput other)
+        {
+            return Timestamp.CompareTo(other.Timestamp);
+        }
 
         public override string ToString()
         {

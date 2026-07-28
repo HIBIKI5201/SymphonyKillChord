@@ -343,7 +343,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.18.0",
+      "version": "1.19.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -392,6 +392,13 @@
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
+    },
+    "com.unity.playablegraph-visualizer": {
+      "version": "https://github.com/Unity-Technologies/graph-visualizer.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "cfb3a9f75dd2ef7cc4253b0439806646cdd79814"
     },
     "com.unity.postprocessing": {
       "version": "3.5.4",
@@ -575,14 +582,26 @@
       },
       "url": "https://packages.unity.com"
     },
+    "io.github.hatayama.uloopmcp": {
+      "version": "https://github.com/hatayama/unity-cli-loop.git?path=/Packages/src",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "ade043d5fecdbe4fc1926bb3bbbbbeed30e089cf"
+    },
     "symphonyframework": {
       "version": "https://github.com/HIBIKI5201/SymphonyFramework.git",
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.1"
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.unity.addressables": "1.21.19"
       },
-      "hash": "6d4b158f4152cb1502da585f41fb6dd6793ffdda"
+      "hash": "c71d6ae765cde35d10825956452270f61a6da4e9"
     },
     "taremin.copy-components-by-regex": {
       "version": "https://github.com/Taremin/CopyComponentsByRegex.git",

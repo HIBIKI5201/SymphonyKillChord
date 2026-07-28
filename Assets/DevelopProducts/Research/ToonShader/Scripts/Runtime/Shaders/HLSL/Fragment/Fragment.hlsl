@@ -1,16 +1,25 @@
+
 #ifndef FRAGMENT_INCLUDED
 #define FRAGMENT_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Lights.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\SilToonFresnel.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\FaceLight.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Lights.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SimplifiedSSS.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/ToonPBR.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/SilToonFresnel.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/FaceLight.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Fragment/NormalCombine.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/PerspectiveRemoval/PerspectiveRemoval.hlsl"
+#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Dither/Dither.hlsl"
+
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
+#ifdef _NORMALMAP
     float4 tangentOS : TANGENT;
+#endif
     float2 uv : TEXCOORD0;
 };
 
@@ -18,79 +27,95 @@ struct Varyings
 {
     float4 positionHCS : SV_POSITION;
     float2 uv : TEXCOORD0;
-    float3 positionOS : TEXCOORD1;
-    float3 normalWS : TEXCOORD2;
-    float3 tangentWS : TEXCOORD3;
-    float3 bitangentWS : TEXCOORD4;
+    float3 positionWS : TEXCOORD1;
+    half3 normalWS : TEXCOORD2;
+#ifdef _NORMALMAP
+    half3 tangentWS : TEXCOORD3;
+    half3 bitangentWS : TEXCOORD4;
+#endif
 };
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
-float4 _BaseMap_ST;
-
-TEXTURE2D(_NormalMap);
-SAMPLER(sampler_NormalMap);
-float4 _NormalMap_ST;
-
-float _NormalMapIntensity;
-
-float _PerspectiveRemovalRatio;
-float _PerspectiveRemovalRadius;
-float3 _Head;
-
-float _IsForFace;
-float3 _FaceUp;
-
-half4 _ColorLit;
-half4 _ColorMiddle;
-half4 _ColorShadow;
-
-float _FresnelBackLight;
-float _FresnelFrontRimLight;
-float _FresnelBackRimLight;
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\NormalCombine.hlsl"
 
 Varyings vert(Attributes IN)
 {
     Varyings OUT;
-    float3 perspectiveRemoval = GetPerspectiveRemoval(_Head, IN.positionOS.xyz, IN.normalOS, _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
-    
-    OUT.positionHCS = TransformObjectToHClip(perspectiveRemoval);
-    OUT.positionOS = IN.positionOS;
+#ifdef _PERSPECTIVE_REMOVAL_ON
+    float3 positionOS = GetPerspectiveRemoval(
+        _Head, IN.positionOS.xyz, IN.normalOS,
+        _PerspectiveRemovalRadius, _PerspectiveRemovalRatio);
+#else
+    float3 positionOS = IN.positionOS.xyz;
+#endif
+
+    OUT.positionHCS = TransformObjectToHClip(positionOS);
+
+    OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+
     OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
-    
-    
-    
-    OUT.normalWS = normalize(mul(float4(IN.normalOS, 0.0), unity_WorldToObject).xyz);
-    OUT.tangentWS = normalize(mul((float3x3) unity_ObjectToWorld, IN.tangentOS.xyz));
-    float sign = IN.tangentOS.w * unity_WorldTransformParams.w;
+
+    OUT.normalWS = (half3) TransformObjectToWorldNormal(IN.normalOS);
+
+#ifdef _NORMALMAP
+    OUT.tangentWS = (half3) TransformObjectToWorldDir(IN.tangentOS.xyz);
+
+    half sign = (half) (IN.tangentOS.w * unity_WorldTransformParams.w);
     OUT.bitangentWS = cross(OUT.normalWS, OUT.tangentWS) * sign;
-    
+#endif
+
     return OUT;
 }
 
 half4 frag(Varyings IN) : SV_Target
 {
-    float3 positionWS = mul(unity_ObjectToWorld, float4(IN.positionOS, 1.0)).xyz;
-    float3 normalWS = GetNormalCombine(
-        TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap), // ← マクロで渡す
+#ifdef _NORMALMAP
+    half3 normalWS = (half3) GetNormalCombine(
+        TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap),
         IN.uv,
         IN.normalWS,
         IN.tangentWS,
         IN.bitangentWS,
         _NormalMapIntensity
     );
-    
-    normalWS = _IsForFace ? GetFaceNormal(_FaceUp, normalWS) : normalWS;
-    
-    float3 color;
-    GetLights_float(_ColorLit, _ColorMiddle, _ColorShadow, positionWS, normalWS, color);
-    
-    float backLight, rimLightFront, rimLightBack;
-    GetFresnel(IN.normalWS, GetWorldSpaceNormalizeViewDir(positionWS), backLight, rimLightFront, rimLightBack);;
+#else
+    half3 normalWS = IN.normalWS;
+#endif
+
+#ifdef _ISFORFACE_ON
+    normalWS = (half3) GetFaceNormal(_FaceUp, (float3) normalWS);
+#endif
+
+    half3 color;
+#ifdef SSS_ON
+    GetSSSLights(normalWS, IN.positionWS, (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS),
+                 _SSSColor.rgb, _SSSWrap, _SSSIntensity, _SSSThickness, _SSSTransmissionPower,
+                 GetNormalizedScreenSpaceUV(IN.positionHCS), color);
+#else
+    GetToonLights(_ColorLit.rgb, _ColorMiddle.rgb, _ColorShadow.rgb, IN.positionWS, normalWS,
+                  GetNormalizedScreenSpaceUV(IN.positionHCS), color);
+#endif
+
+    half3 viewDirWS = (half3) GetWorldSpaceNormalizeViewDir(IN.positionWS);
+
+    half backLight, rimLightFront, rimLightBack;
+    GetFresnel(IN.normalWS, viewDirWS,
+               backLight, rimLightFront, rimLightBack);
+
     color += backLight * _FresnelBackLight;
     color += rimLightBack * _FresnelBackRimLight;
     color += rimLightFront * _FresnelFrontRimLight;
-    return (half4) (float4(color, 1.0)) * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+
+#ifdef FADE_ON
+    clip(_FadeAlpha - BayerDither(IN.positionHCS.xy * 0.5) - 0.0001);
+#endif
+
+    half4 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+
+#ifdef _PBR_ON
+    color = ApplyToonPBR(color, baseColor.rgb, IN.uv, IN.positionWS, normalWS, viewDirWS,
+                         GetNormalizedScreenSpaceUV(IN.positionHCS));
+#else
+    color *= baseColor.rgb;
+#endif
+
+    return half4(color, baseColor.a);
 }
 #endif

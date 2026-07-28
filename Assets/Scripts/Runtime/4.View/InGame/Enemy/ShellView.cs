@@ -1,0 +1,125 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Character;
+using System;
+using UnityEngine;
+using UnityEngine.Rendering.Universal;
+
+namespace KillChord.Runtime.View.InGame.Enemy
+{
+    /// <summary>
+    ///     砲弾のView。
+    /// </summary>
+    public class ShellView : MonoBehaviour, IShellView
+    {
+        /// <summary>
+        ///     初期化処理。
+        /// </summary>
+        /// <param name="detonatePosition"></param>
+        /// <param name="controller"></param>
+        /// <param name="shellSpecPresenter"></param>
+        public void Initialize(Transform targetTransform, ShellSpecPresenter shellSpecPresenter, Action dedonateCallback,ReusableParticleSystemView systemView)
+        {
+            if (shellSpecPresenter == null)
+                throw new ArgumentNullException(nameof(shellSpecPresenter), "ShellSpecPresenterがNULLです。");
+
+            if(systemView == null)
+                throw new ArgumentNullException(nameof(systemView), "ReusableParticleSystemViewがNULLです。");
+
+            _targetTransform = targetTransform;
+            _shellSpecPresenter = shellSpecPresenter;
+            _dedonateCallback = dedonateCallback;
+            _systemView = systemView;
+            _overlapResults = new Collider[1];
+            _material = new Material(_indicator.material);
+            _indicator.material = _material;
+
+            // TODO 一時的な攻撃予兆表示。今後素材を差し替える
+            ChangeShellColor(ShellColor.Green);
+            _indicator.size = new Vector3(_shellSpecPresenter.ExplosionRadius * 2, _shellSpecPresenter.ExplosionRadius * 2, 2);
+        }
+
+        /// <summary>
+        ///     有効化処理。
+        /// </summary>
+        public void Activate()
+        {
+            if (_targetTransform == null)
+            {
+                Debug.LogError("[ShellView] 攻撃対象を失っています。");
+                return;
+            }
+            ChangeShellColor(ShellColor.Green);
+            transform.position = _targetTransform.position;
+            _indicator.gameObject.SetActive(true);
+        }
+
+        /// <summary>
+        ///     無効化処理。
+        /// </summary>
+        public void Deactivate()
+        {
+            _indicator.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        ///     砲弾爆発の処理。
+        /// </summary>
+        public void Detonate()
+        {
+            // TODO 爆発エフェクトなど
+            _systemView?.PlayAt(transform.position);
+            _dedonateCallback?.Invoke();
+        }
+
+        public void ChangeShellColor(ShellColor color)
+        {
+            /*Color unityColor = color switch
+            {
+                ShellColor.Red => Color.red,
+                ShellColor.Blue => Color.blue,
+                ShellColor.Green => Color.green,
+                ShellColor.Yellow => Color.yellow,
+                _ => Color.white
+            };*/
+            _material.SetFloat("_Circle", color switch
+            {
+                ShellColor.Red => 1f,
+                ShellColor.Blue => 0f,
+                ShellColor.Green => 0.33f,
+                ShellColor.Yellow => 0.66f,
+                _ => 0f
+            });
+            //Debug.Log($"[ShellView] 砲弾の色を{color}に変更しました。");
+        }
+
+        /// <summary>
+        ///     爆発範囲内に攻撃目標がいるか判定する。
+        /// </summary>
+        /// <returns></returns>
+        public bool FindDamageTarget()
+        {
+            int hits = Physics.OverlapSphereNonAlloc(transform.position, _shellSpecPresenter.ExplosionRadius, _overlapResults, _damageLayer);
+            return hits > 0;
+        }
+        private void OnDestroy()
+        {
+            if (_material != null)
+            {
+                Destroy(_material);
+                _material = null;
+            }
+        }
+
+        [SerializeField, Tooltip("ダメージ判定のレイヤー")]
+        private LayerMask _damageLayer;
+        [SerializeField, Tooltip("爆発範囲表示用")]
+        private DecalProjector _indicator;
+
+        private Material _material;
+        private Transform _targetTransform;
+        private Collider[] _overlapResults;
+        private ShellSpecPresenter _shellSpecPresenter;
+        private ReusableParticleSystemView _systemView;
+        private Action _dedonateCallback;
+    }
+}

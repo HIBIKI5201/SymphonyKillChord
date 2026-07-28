@@ -1,7 +1,6 @@
-using UnityEngine;
-using KillChord.Runtime.Domain;
+using KillChord.Runtime.Domain.Persistent.Input;
 
-namespace KillChord.Runtime.Adaptor
+namespace KillChord.Runtime.Adaptor.Persistent.Input
 {
     /// <summary>
     ///     InputActionKindをInputActionIdに変換するためのクラス。
@@ -15,12 +14,13 @@ namespace KillChord.Runtime.Adaptor
                 InputActionKind.Option => InputActionId.Option,
                 InputActionKind.Submit => InputActionId.Submit,
                 InputActionKind.Cancel => InputActionId.Cancel,
-                InputActionKind.Move => InputActionId.Move,
                 InputActionKind.Dodge => InputActionId.Dodge,
                 InputActionKind.Attack => InputActionId.Attack,
+                InputActionKind.Move => InputActionId.Move,
+                InputActionKind.Look => InputActionId.Look,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(actionKind), $"Unsupported action kind: {actionKind}")
             };
-            
+
             return actionId;
         }
     }
