@@ -5,6 +5,9 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/BattlePreparation.uss?fileID=7433441132597879392&amp;guid=91f7fe503f514bc5b0c6c6dbdc0d4711&amp;type=3#BattlePreparation"/>
     <ui:VisualElement class="screen-visible battle-preparation-screen">
         <ui:Label text="戦闘準備" name="Title" class="title battle-preparation-title" style="display: none;"/>
+        <ui:VisualElement name="CharacterContent" class="battle-preparation-character-content">
+            <ui:Image name="ChracterImage" class="battle-preparation-character-image"/>
+        </ui:VisualElement>
         <ui:VisualElement name="PreparationContent" class="battle-preparation-content">
             <ui:VisualElement name="PreparationPanel" class="battle-preparation-panel">
                 <ui:Label text="装備中のスキル" class="battle-preparation-section-title"/>
