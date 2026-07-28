@@ -79,6 +79,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private bool _isPointerDown;
         private bool _isDragging;
+        private bool _isReparentingForDrag;
         private int _activePointerId = -1;
 
         // ドラッグ開始時のパネル・ワールド座標を保持するフィールド。
@@ -110,6 +111,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _pointerStartPanel = (Vector2)evt.position;
             _elementStartWorld = target.worldBound.position;
             _startParent = target.parent;
+            target.CapturePointer(evt.pointerId);
 
             // 親の ScrollView にポインター操作を渡すと、ドラッグ開始前に
             // スクロール操作として扱われるため、スキル要素側で処理を完結させる。
@@ -172,15 +174,25 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _isPointerDown = false;
                 _activePointerId = -1;
+
+                if (target.HasPointerCapture(evt.pointerId))
+                {
+                    target.ReleasePointer(evt.pointerId);
+                }
+
                 return;
             }
 
+            _isPointerDown = false;
+            _activePointerId = -1;
+
             if (target.HasPointerCapture(evt.pointerId))
             {
-                // ドラッグ中にポインターキャプチャを保持している場合、ドロップ処理を行う。
                 target.ReleasePointer(evt.pointerId);
             }
 
+            MarkDragCompleted();
+            CompleteDrag();
             evt.StopPropagation();
         }
 
@@ -190,7 +202,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="evt"></param>
         private void OnPointerCaptureOut(PointerCaptureOutEvent evt)
         {
-            if (!_isPointerDown) { return; }
+            if (!_isPointerDown ||
+                evt.pointerId != _activePointerId)
+            { return; }
+
+            // ドラッグ用ルートへの親変更で発生したキャプチャ解除は操作終了として扱わない。
+            // 再取得後に遅れて通知された場合も、現在キャプチャ中なら同様に無視する。
+            if (_isReparentingForDrag ||
+                target.HasPointerCapture(evt.pointerId))
+            { return; }
 
             bool wasDragging = _isDragging;
             _isPointerDown = false;
@@ -289,18 +309,35 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _isDragging = true;
             target.style.position = Position.Absolute;
 
-            // キャプチャ中の要素を別の親へ移すと PointerCaptureOutEvent が発生する。
-            // 先にドラッグ用ルートへ移し、その後でポインターをキャプチャする。
+            // キャプチャ中の要素を別の親へ移すと PointerCaptureOutEvent が発生するため、
+            // 親変更による通知を無視し、移動後にキャプチャを再取得する。
             if (_skillBuildScreen != null)
             {
-                _skillBuildScreen.Add(target);
-                Vector2 localPosition = _skillBuildScreen.WorldToLocal(_elementStartWorld);
-                target.style.left = localPosition.x;
-                target.style.top = localPosition.y;
+                _isReparentingForDrag = true;
+                try
+                {
+                    _skillBuildScreen.Add(target);
+                    Vector2 localPosition = _skillBuildScreen.WorldToLocal(_elementStartWorld);
+                    target.style.left = localPosition.x;
+                    target.style.top = localPosition.y;
+
+                    if (!target.HasPointerCapture(pointerId))
+                    {
+                        target.CapturePointer(pointerId);
+                    }
+                }
+                finally
+                {
+                    _isReparentingForDrag = false;
+                }
             }
 
             target.BringToFront();
-            target.CapturePointer(pointerId);
+
+            if (!target.HasPointerCapture(pointerId))
+            {
+                target.CapturePointer(pointerId);
+            }
         }
 
         /// <summary>

@@ -39,6 +39,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PREVIEW_VIDEO_CONTAINER = "PreviewVideoContainer";
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
+        private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
 
         [SerializeField]
         [Tooltip("スキルツリー画面のUIDocumentです。")]
@@ -340,13 +341,13 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <summary>
         ///     プレイヤーの先頭攻撃定義から基礎会心ダメージ倍率を取得します。
         /// </summary>
-        /// <returns> 基礎会心ダメージ倍率。攻撃定義がない場合は0。 </returns>
+        /// <returns> 基礎会心ダメージ倍率。攻撃定義がない場合は1。 </returns>
         private float GetBaseCriticalDamageMultiplier()
         {
             AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
             if (attackDefinitions == null)
             {
-                return 0f;
+                return DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
             }
 
             for (int i = 0; i < attackDefinitions.Length; i++)
@@ -357,7 +358,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 }
             }
 
-            return 0f;
+            return DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
         }
 
         /// <summary>

@@ -30,7 +30,12 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 SkillEffectParameterId.CriticalMultiplier);
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             //  武器なし攻撃を実装するための箱替え。
-            AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName, attackDefinition.AttackSpec, attackDefinition.AttackPipeline);
+            AttackDefinition unbulletDefinition = new AttackDefinition(
+                attackDefinition.AttackName,
+                attackDefinition.AttackSpec,
+                attackDefinition.AttackPipeline,
+                attackDefinition.BeatType,
+                attackDefinition.JustDamageMultiplier);
 
 
             for (int i = 0; i < attackCount; i++)

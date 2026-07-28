@@ -62,7 +62,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             {
                 ResetHitNumbers(targets.Length);
 
-                for (int i = 0; i < targets.Length; i++)
+                for (int i = 0; i < attackCount; i++)
                 {
                     int targetNumber = Random.Range(0, targets.Length);
                     _attackController.Execute((int)_beatType, targets[targetNumber]);
@@ -83,7 +83,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                         break;
                     }
 
-                    if (isAllhit)
+                    if (isAllhit && i + 1 < attackCount)
                     {
                         float maxValue = float.MinValue;
                         int maxHealthTarget = 0;
@@ -101,6 +101,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                         CharacterEntity targetCharacter = targets[maxHealthTarget];
                         _attackController.Execute((int)_beatType, targetCharacter);
                         targetCharacter.BuffSystem.Execute(buffcontext, BuffExecuteTiming.Skill);
+                        i++;
                     }
                 }
             }

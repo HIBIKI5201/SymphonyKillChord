@@ -18,10 +18,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             RootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             _icon = RootElement.Q<Image>(ICON_NAME)
-                ?? throw new ArgumentNullException(
+                ?? throw new InvalidOperationException(
                     $"[{nameof(SkillElementView)}] {ICON_NAME} が見つかりませんでした。");
             _nameLabel = RootElement.Q<Label>(NAME_LABEL_NAME)
-                ?? throw new ArgumentNullException(
+                ?? throw new InvalidOperationException(
                     $"[{nameof(SkillElementView)}] {NAME_LABEL_NAME} が見つかりませんでした。");
 
             RootElement.AddToClassList(DRAGGABLE_CLASS_NAME);

@@ -300,6 +300,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 int ownedPoints = await GetOwnedPointsAsync();
                 SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+                if (_skillBuildDefinition == null || !_isInitialized)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildDefinition が null です。", this);
+#endif
+                    return;
+                }
+
                 _skillBuildDefinition.UpdateEquippedSkills(ToArray(equippedSkills));
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(
