@@ -419,7 +419,6 @@ jobs:
           Write-Host "OK: NuGet packages restored."
           Write-Host "::endgroup::"
         shell: powershell
-
       - name: Execute Unity - Build
         run: |
           Write-Host "::group::Start Unity Build Process"
@@ -432,6 +431,18 @@ jobs:
           Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
           Write-Host ""
 
+          # CPUコア数の設定
+          $CpuCount = [Environment]::ProcessorCount
+          $UnityCpuCount = [Math]::Max(1, [Math]::Floor($CpuCount / 2))
+
+          # プロセッサアフィニティビットマスクの生成
+          $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
+
+          Write-Host "Detected logical CPU count: $CpuCount"
+          Write-Host "Unity CPU count: $UnityCpuCount"
+          Write-Host "Unity CPU affinity mask: 0x$('{0:X}' -f $AffinityMask)"
+          Write-Host ""
+
           $UnityArgs = @(
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
@@ -439,7 +450,22 @@ jobs:
             "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
-          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $UnityArgs -PassThru -NoNewWindow
+
+          $UnityProcess = Start-Process `
+            -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList $UnityArgs `
+            -PassThru `
+            -NoNewWindow
+
+          try {
+            $UnityProcess.ProcessorAffinity = $AffinityMask
+            Write-Host "OK: Unity processor affinity configured successfully."
+          } catch {
+            Write-Host "ERROR: Failed to configure Unity processor affinity: $_"
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 1
+          }
 
           if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
             Write-Host ""
@@ -459,6 +485,7 @@ jobs:
             Write-Host "WARNING: Unity build process returned a non-zero exit code ($UnityExitCode)."
             Write-Host "          See unity_build.log for details."
           }
+
           Write-Host "::endgroup::"
           exit $UnityExitCode
         shell: powershell
@@ -565,7 +592,7 @@ jobs:
       - name: Resolve Current Build Version
         run: |
           Write-Host "::group::Resolve Current Build Version"
-          
+
           # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
           # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
           $VarName = "VERSION_BASE_$env:BUILD_MODE"
