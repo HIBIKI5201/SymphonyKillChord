@@ -57,9 +57,11 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
             }
 
             _viewModel = new BattlePreparationSkillViewModel();
+            SkillEffectDescriptionFormatter effectDescriptionFormatter = new SkillEffectDescriptionFormatter();
+            SkillDisplayTextFormatter textFormatter = new SkillDisplayTextFormatter(effectDescriptionFormatter);
             _presenter = new BattlePreparationSkillPresenter(
                 _viewModel,
-                new SkillEffectDescriptionFormatter());
+                textFormatter);
             _battlePreparationScreen.Bind(_viewModel);
             PushCurrentSkills();
             _isInitialized = true;

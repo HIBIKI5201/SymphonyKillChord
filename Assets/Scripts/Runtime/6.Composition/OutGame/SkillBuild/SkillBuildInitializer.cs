@@ -198,8 +198,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 new(_skillBuildDefinition, _loadedSkillBuildRepository);
             _skillBuildController = new(skillBuildUseCase, _loadedOwnedSkillTemplates);
             _skillBuildViewModel = new(_skillBuildController);
+            SkillEffectDescriptionFormatter skillEffectDescriptionFormatter =
+                new SkillEffectDescriptionFormatter();
             SkillDisplayTextFormatter textFormatter =
-                new(new SkillEffectDescriptionFormatter());
+                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
             _skillBuildPresenter = new(_skillBuildViewModel, textFormatter);
 
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(_uiDocument, _skillBuildViewModel);
