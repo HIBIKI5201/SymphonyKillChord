@@ -590,17 +590,25 @@ jobs:
             exit 1
           }
           
-          try {
-            Write-Host "INFO: Compressing build artifacts..."
-            Compress-Archive -Path "$ResolvedOutputDir\*" -DestinationPath Builds.zip -ErrorAction Stop
-          
-            $ZipSize = (Get-Item "Builds.zip").Length
-            Write-Host "OK: Archive (Builds.zip) created successfully."
-            Write-Host "     File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
-          } catch {
-            Write-Host "ERROR: Failed to create archive: $_"
+          $TagName = "${{ steps.tag_gen.outputs.TAG_NAME }}"
+          $PlatformDirs = Get-ChildItem -Path $ResolvedOutputDir -Directory
+          if ($PlatformDirs.Count -eq 0) {
+            Write-Host "ERROR: No platform build output found under $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
+          }
+
+          foreach ($PlatformDir in $PlatformDirs) {
+            $ZipName = "$($PlatformDir.Name)-$TagName.zip"
+            try {
+              Compress-Archive -Path "$($PlatformDir.FullName)\*" -DestinationPath $ZipName -ErrorAction Stop
+              $ZipSize = (Get-Item $ZipName).Length
+              Write-Host "OK: Archive ($ZipName) created successfully. File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+            } catch {
+              Write-Host "ERROR: Failed to create archive for $($PlatformDir.Name): $_"
+              Write-Host "::endgroup::"
+              exit 1
+            }
           }
           Write-Host "::endgroup::"
         shell: powershell
@@ -630,7 +638,7 @@ jobs:
 
             **ビルド対象プロファイル:**
             ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
-          files: Builds.zip
+          files: "*.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
