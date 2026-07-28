@@ -653,7 +653,7 @@ jobs:
                   exit 1
               }
           }
-              
+
           if ($PatchNumber -notmatch '^\d+$') {
               Write-Host "ERROR: '$PatchVarName' value '$PatchNumber' is not a non-negative integer."
               Write-Host "::endgroup::"
@@ -810,7 +810,7 @@ jobs:
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
-            Write-Host "     Artifact: Builds.zip has been uploaded."
+            Write-Host "     Artifact: All Builds have been uploaded."
           } else {
             Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }
