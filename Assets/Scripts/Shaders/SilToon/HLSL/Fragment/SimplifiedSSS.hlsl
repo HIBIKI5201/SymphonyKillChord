@@ -1,10 +1,10 @@
-#ifndef SIMPLIFIED_SSS_INCLUDED
+﻿#ifndef SIMPLIFIED_SSS_INCLUDED
 #define SIMPLIFIED_SSS_INCLUDED
 
 #ifndef SHADERGRAPH_PREVIEW
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/CharacterShadow.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/CharacterShadow.hlsl"
 #endif
 
 half3 _SSSWrappedDiffuse(half NdotL, half sssWrap, half3 lightColor, half shadowAtten)

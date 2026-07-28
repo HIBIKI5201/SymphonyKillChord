@@ -1,4 +1,4 @@
-Shader "Custom/SilToon/FaceOverlay"
+﻿Shader "Custom/SilToon/FaceOverlay"
 {
     Properties
     {
@@ -62,7 +62,7 @@ Shader "Custom/SilToon/FaceOverlay"
                 #pragma shader_feature_local_fragment _ISFORFACE_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
                 #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
-                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\ThroughFragment.hlsl"
+                #include "Assets/Scripts/Shaders/SilToon/HLSL/Fragment/ThroughFragment.hlsl"
 
             ENDHLSL
         }

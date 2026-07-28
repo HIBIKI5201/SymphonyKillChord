@@ -1,4 +1,4 @@
-Shader "Custom/SilToon/Base"
+﻿Shader "Custom/SilToon/Base"
 {
     Properties
     {
@@ -115,7 +115,7 @@ Shader "Custom/SilToon/Base"
 
                 #pragma multi_compile           _ _CLUSTER_LIGHT_LOOP
 
-                #include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Fragment\Fragment.hlsl"
+                #include "Assets/Scripts/Shaders/SilToon/HLSL/Fragment/Fragment.hlsl"
 
             ENDHLSL
         }
@@ -137,7 +137,7 @@ Shader "Custom/SilToon/Base"
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_vertex _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-                #include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/OutLine/OutLine.hlsl"
+                #include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/OutLine.hlsl"
 
             ENDHLSL
         }
