@@ -1,11 +1,11 @@
-#ifndef LIGHTS_INCLUDED
+﻿#ifndef LIGHTS_INCLUDED
 #define LIGHTS_INCLUDED
 
 
 #ifndef SHADERGRAPH_PREVIEW
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/CharacterShadow.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/CharacterShadow.hlsl"
 
 
 #endif
