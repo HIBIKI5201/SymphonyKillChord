@@ -1,6 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
+using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.BattlePreparation;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -46,11 +48,11 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!ServiceLocator.TryGetInstance(out _screenLifecycleSignal))
             {
 #if UNITY_EDITOR
                 Debug.LogError(
-                    $"[{nameof(BattlePreparationSkillInitializer)}] {nameof(OutGameUIEvent)} が取得できませんでした。",
+                    $"[{nameof(BattlePreparationSkillInitializer)}] {nameof(IScreenLifecycleSignal)} が取得できませんでした。",
                     this);
 #endif
                 return false;
@@ -63,7 +65,6 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
                 _viewModel,
                 textFormatter);
             _battlePreparationScreen.Bind(_viewModel);
-            PushCurrentSkills();
             _isInitialized = true;
             return true;
         }
@@ -79,8 +80,7 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
                 return false;
             }
 
-            _outGameUIEvent.OnShownBattlePreparationScreen +=
-                HandleShownBattlePreparationScreenHandler;
+            _screenLifecycleSignal.OnScreenWillShow += HandleScreenWillShowHandler;
             _isSubscribed = true;
             return true;
         }
@@ -90,18 +90,18 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
         /// </summary>
         public override void Shutdown()
         {
-            if (_isSubscribed && _outGameUIEvent != null)
+            if (_isSubscribed && _screenLifecycleSignal != null)
             {
-                _outGameUIEvent.OnShownBattlePreparationScreen -=
-                    HandleShownBattlePreparationScreenHandler;
+                _screenLifecycleSignal.OnScreenWillShow -= HandleScreenWillShowHandler;
             }
 
             _battlePreparationScreen?.Unbind();
+            _viewModel?.Dispose();
             _viewModel = null;
             _presenter = null;
             _battlePreparationScreen = null;
             _skillBuildDefinition = null;
-            _outGameUIEvent = null;
+            _screenLifecycleSignal = null;
             _isInitialized = false;
             _isSubscribed = false;
         }
@@ -110,16 +110,17 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
         private BattlePreparationScreen _battlePreparationScreen;
         private BattlePreparationSkillViewModel _viewModel;
         private BattlePreparationSkillPresenter _presenter;
-        private OutGameUIEvent _outGameUIEvent;
+        private IScreenLifecycleSignal _screenLifecycleSignal;
         private bool _isInitialized;
         private bool _isSubscribed;
 
         /// <summary>
-        ///     戦闘準備画面の表示時に最新の装備状態を反映します。
+        ///     戦闘準備画面の表示直前に最新の装備状態を反映します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
-        private void HandleShownBattlePreparationScreenHandler(string targetSceneName)
+        private void HandleScreenWillShowHandler(ScreenId screenId)
         {
+            if (screenId != ScreenId.BattlePreparation) { return; }
+
             PushCurrentSkills();
         }
 
