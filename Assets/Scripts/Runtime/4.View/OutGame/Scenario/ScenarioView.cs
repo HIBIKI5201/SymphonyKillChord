@@ -11,12 +11,16 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// </summary>
     public class ScenarioView : MonoBehaviour
     {
+        // CanvasGroup.alpha が 0 だと配下がカリングされ、ignoreParentGroups の
+        // テキストも消える。実質不可視だがカリングは避けられる最小値。
+        private const float MinCanvasAlpha = 0.004f;
         private const string SlotLeft = "Left";
         private const string SlotCenter = "Center";
         private const string SlotRight = "Right";
         private const string PortraitObjectLeft = "PortraitLeft";
         private const string PortraitObjectCenter = "PortraitCenter";
         private const string PortraitObjectRight = "PortraitRight";
+        private const string TargetScreen = "Screen";
         private const string TargetCanvas = "Canvas";
         private const string TargetBackground = "Background";
         private const string TargetPortraitLeft = "PortraitLeft";
@@ -24,6 +28,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private const string TargetPortraitRight = "PortraitRight";
         private const string TargetText = "Text";
         [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
+        private CanvasGroup _nonFadingUi;
         [SerializeField] private TMP_Text _chat;
         [SerializeField] private Image _backgroundImage;
         [SerializeField] private Animation _animationPlayer;
@@ -31,11 +37,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField] private RectTransform _portraitRoot;
         [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
 
-        private bool _onFade;
-        private float _time;
-        private float _start;
-        private float _end;
-        private float _duration;
+        // 対象ごとに独立してフェードできるよう、進行中フェードを対象キーで保持する。
+        private readonly Dictionary<string, FadeState> _activeFades = new(System.StringComparer.OrdinalIgnoreCase);
+        private readonly List<string> _completedFadeKeys = new();
 
         private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
@@ -53,6 +57,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             IReadOnlyDictionary<string, Sprite> portraitByKey)
         {
             TryAutoAssignReferences();
+            EnsureNonFadingUi();
             UnsubscribeFromViewModel();
             _viewModel = viewModel;
             SubscribeToViewModel();
@@ -67,6 +72,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private void Awake()
         {
             TryAutoAssignReferences();
+            EnsureNonFadingUi();
             EnsurePortraitSlots();
         }
 
@@ -104,13 +110,39 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         /// フェード要求を受け取りアニメーション状態を更新する。
         /// </summary>
-        private void OnFadeReceived(float start, float end, float duration)
+        private void OnFadeReceived(string target, float start, float end, float duration)
         {
-            _onFade = true;
-            _time = 0f;
-            _start = start;
-            _end = end;
-            _duration = duration;
+            // フェード直前に、テキストを除外するCanvasGroup設定を確実に適用する。
+            EnsureNonFadingUi();
+
+            CanvasGroup group = ResolveFadeTarget(target, out bool floorAlpha);
+            if (group == null)
+            {
+                Debug.LogWarning($"ScenarioView: fade target '{target}' が見つかりません。");
+                return;
+            }
+
+            string key = string.IsNullOrWhiteSpace(target) ? TargetScreen : target.Trim();
+
+            if (duration <= 0f)
+            {
+                // 即時反映。進行中フェードがあれば打ち切る。
+                ApplyFadeAlpha(group, end, floorAlpha);
+                _activeFades.Remove(key);
+                return;
+            }
+
+            _activeFades[key] = new FadeState
+            {
+                Group = group,
+                Time = 0f,
+                Start = start,
+                End = end,
+                Duration = duration,
+                FloorAlpha = floorAlpha,
+            };
+            // 開始値を即時反映する。
+            ApplyFadeAlpha(group, start, floorAlpha);
         }
 
         /// <summary>
@@ -214,36 +246,160 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 進行中のフェード演出を 1 フレーム分更新する。
+        /// フェード対象から除外するUI（テキストボックス）を確保する。
+        /// CanvasGroup.ignoreParentGroups を有効にし、_canvasGroup のフェードで
+        /// テキストまで一緒に消えないようにする。
+        /// </summary>
+        private void EnsureNonFadingUi()
+        {
+            if (_nonFadingUi == null && _chat != null)
+            {
+                // 明示指定が無い場合はテキスト自身に CanvasGroup を用意する。
+                _nonFadingUi = _chat.GetComponent<CanvasGroup>();
+                if (_nonFadingUi == null)
+                {
+                    _nonFadingUi = _chat.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
+            if (_nonFadingUi != null)
+            {
+                // 親（_canvasGroup）のフェードを無視して常に不透明に保つ。
+                _nonFadingUi.ignoreParentGroups = true;
+                _nonFadingUi.alpha = 1f;
+            }
+        }
+
+        /// <summary>
+        /// フェードの alpha を対象の CanvasGroup へ反映する。
+        /// 画面全体（Screen）フェードでは alpha がちょうど 0 になると配下の
+        /// CanvasRenderer がカリングされ、ignoreParentGroups で除外したテキストまで
+        /// 消えてしまうため、僅かな最小値でクランプして完全な 0 にはしない。
+        /// 個別対象（背景・立ち絵）はテキストを含まないので 0 まで許容する。
+        /// </summary>
+        private void ApplyFadeAlpha(CanvasGroup group, float alpha, bool floorAlpha)
+        {
+            if (group == null)
+            {
+                return;
+            }
+
+            group.alpha = floorAlpha ? Mathf.Max(alpha, MinCanvasAlpha) : Mathf.Clamp01(alpha);
+        }
+
+        /// <summary>
+        /// 対象文字列から、フェードを適用する CanvasGroup を解決する。
+        /// テキストは対象に含めない（常にフェードしない）。
+        /// </summary>
+        /// <param name="target"> 対象名（Screen/Background/PortraitLeft/…）。 </param>
+        /// <param name="floorAlpha"> 画面全体フェードで alpha を 0 にしないか。 </param>
+        private CanvasGroup ResolveFadeTarget(string target, out bool floorAlpha)
+        {
+            floorAlpha = false;
+
+            // 未指定・Screen・Canvas は画面全体（ルート CanvasGroup）。
+            if (string.IsNullOrWhiteSpace(target)
+                || target.Equals(TargetScreen, System.StringComparison.OrdinalIgnoreCase)
+                || target.Equals(TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
+            {
+                floorAlpha = true;
+                return _canvasGroup;
+            }
+
+            if (target.Equals(TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return _backgroundImage != null ? EnsureCanvasGroup(_backgroundImage.gameObject) : null;
+            }
+
+            if (target.Equals(TargetPortraitLeft, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotLeft);
+            }
+
+            if (target.Equals(TargetPortraitCenter, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotCenter);
+            }
+
+            if (target.Equals(TargetPortraitRight, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotRight);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 指定 GameObject に CanvasGroup を確保する。
+        /// </summary>
+        private static CanvasGroup EnsureCanvasGroup(GameObject go)
+        {
+            CanvasGroup group = go.GetComponent<CanvasGroup>();
+            if (group == null)
+            {
+                group = go.AddComponent<CanvasGroup>();
+            }
+
+            return group;
+        }
+
+        /// <summary>
+        /// 指定スロットの立ち絵に CanvasGroup を確保する。
+        /// </summary>
+        private CanvasGroup EnsurePortraitCanvasGroup(string slot)
+        {
+            EnsurePortraitSlots();
+            return _portraitBySlot.TryGetValue(slot, out Image image) && image != null
+                ? EnsureCanvasGroup(image.gameObject)
+                : null;
+        }
+
+        /// <summary>
+        /// 進行中の各対象フェードを 1 フレーム分更新する。
         /// </summary>
         private void Fade()
         {
-            if (!_onFade)
+            if (_activeFades.Count == 0)
             {
                 return;
             }
 
-            _time += Time.deltaTime;
-            if ( _canvasGroup == null)
+            _completedFadeKeys.Clear();
+            foreach (KeyValuePair<string, FadeState> entry in _activeFades)
             {
-                Debug.LogWarning("ScenarioView: _canvasGroup is not assigned.");
-                _onFade = false;
-                return;
+                FadeState fade = entry.Value;
+                if (fade.Group == null)
+                {
+                    _completedFadeKeys.Add(entry.Key);
+                    continue;
+                }
+
+                fade.Time += Time.deltaTime;
+                float t = fade.Duration <= 0f ? 1f : Mathf.Clamp01(fade.Time / fade.Duration);
+                ApplyFadeAlpha(fade.Group, Mathf.Lerp(fade.Start, fade.End, t), fade.FloorAlpha);
+                if (t >= 1f)
+                {
+                    _completedFadeKeys.Add(entry.Key);
+                }
             }
 
-            if (_duration <= 0f)
+            for (int i = 0; i < _completedFadeKeys.Count; i++)
             {
-                 _canvasGroup.alpha = _end;
-                _onFade = false;
-                return;
+                _activeFades.Remove(_completedFadeKeys[i]);
             }
+        }
 
-            float t = Mathf.Clamp01(_time / _duration);
-            _canvasGroup.alpha = Mathf.Lerp(_start, _end, t);
-            if (t >= 1f)
-            {
-                _onFade = false;
-            }
+        /// <summary>
+        /// 1 つの対象に対する進行中フェードの状態。
+        /// </summary>
+        private sealed class FadeState
+        {
+            public CanvasGroup Group;
+            public float Time;
+            public float Start;
+            public float End;
+            public float Duration;
+            public bool FloorAlpha;
         }
 
         /// <summary>
@@ -454,11 +610,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void ResetFadeState()
         {
-            _onFade = false;
-            _time = 0f;
-            _start = 0f;
-            _end = 0f;
-            _duration = 0f;
+            _activeFades.Clear();
+            _completedFadeKeys.Clear();
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         public async ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
         {
-            await _fadeOutputPort.FadeAsync(e.Start, e.End, e.DurationSec, ct);
+            await _fadeOutputPort.FadeAsync(e.Target.ToString(), e.Start, e.End, e.DurationSec, ct);
 
             // フェード演出が完了するまで次イベントへ進めない。
             // これにより連続する Fade が同一フレームで上書きされず、順番に再生される。
