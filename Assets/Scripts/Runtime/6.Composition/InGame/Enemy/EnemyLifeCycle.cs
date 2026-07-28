@@ -10,6 +10,7 @@ using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -48,11 +49,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             try
             {
-                _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
+                CharacterDefinitionRepository characterRepository =
+                    await _characterRepositoryKey.LoadAssetAsync<CharacterDefinitionRepository>(this, cancellationToken);
+                characterRepository?.TryGetAsset(new CharacterDefinitionId(_characterId.Id), out _loadedEnemyData);
                 _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
                 _loadedEncounterMusicData = await _encounterMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
                 _loadedBattleMusicData = await _battleMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
-                _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
+                EnemyMissionKeyRepository missionKeyRepository =
+                    await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
+                missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
 
@@ -171,6 +176,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
+            _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
             if (_shellSpawner != null && shellPool != null)
             {
@@ -351,7 +357,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField, SourceDataAddress, Tooltip("敵定義の Addressables キーです。")] private string _enemyDataKey;
+        [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")] private string _characterRepositoryKey;
+        [SerializeField, SourceDataCollection("Character"), Tooltip("この敵が対応するキャラクター定義のIDです。")] private DataID _characterId;
         [SerializeField, SourceDataAddress, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
         [SerializeField, SourceDataAddress, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
         [SerializeField, SourceDataAddress, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
@@ -362,7 +369,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
+        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("この敵が対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -409,6 +417,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyBattleState _battleState;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
+
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMusicSpecAsset _loadedEncounterMusicData;
@@ -665,6 +674,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
+        ///     敵が攻撃を実行したことをMissionへ通知します。
+        /// </summary>
+        private void HandleEnemyAttackExecuted()
+        {
+            _missionEventController?.NotifyActionPerformed(MissionActionKind.EnemyAttack);
+        }
+
+        /// <summary>
         ///     ロード済みアセットを解放します。
         /// </summary>
         private void OnDestroy()
@@ -676,11 +693,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
-            _enemyDataKey.ReleaseLoadedAsset(this);
+            _characterRepositoryKey.ReleaseLoadedAsset(this);
             _moveDataKey.ReleaseLoadedAsset(this);
             _encounterMusicDataKey.ReleaseLoadedAsset(this);
             _battleMusicDataKey.ReleaseLoadedAsset(this);
-            _missionKeyAssetKey.ReleaseLoadedAsset(this);
+            _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _loadedEnemyData = null;
             _loadedMoveData = null;
             _loadedEncounterMusicData = null;
