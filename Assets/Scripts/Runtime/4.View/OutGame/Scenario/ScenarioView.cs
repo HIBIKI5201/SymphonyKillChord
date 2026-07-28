@@ -243,6 +243,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             int clampedOrder = Mathf.Clamp(order, 0, childCount - 1);
             targetRect.SetSiblingIndex(clampedOrder);
+
+            // テキスト自体の並びを明示指定した場合を除き、テキストは最前面に保つ。
+            if (!string.Equals(target, TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                EnsureTextInFront();
+            }
         }
 
         /// <summary>
@@ -267,6 +273,19 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 // 親（_canvasGroup）のフェードを無視して常に不透明に保つ。
                 _nonFadingUi.ignoreParentGroups = true;
                 _nonFadingUi.alpha = 1f;
+            }
+        }
+
+        /// <summary>
+        /// テキストを兄弟の最後（＝最前面）に移動する。
+        /// 立ち絵は実行時に生成されテキストより後ろの兄弟になり手前に描画されるため、
+        /// 常にテキストが前面に来るようにする。
+        /// </summary>
+        private void EnsureTextInFront()
+        {
+            if (_chat != null)
+            {
+                _chat.transform.SetAsLastSibling();
             }
         }
 
@@ -472,6 +491,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
             EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
             ApplyPortraitSizeToExistingSlots();
+            // 立ち絵生成でテキストが背面へ回るため、常に最前面へ戻す。
+            EnsureTextInFront();
         }
 
         /// <summary>
