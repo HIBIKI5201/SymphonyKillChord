@@ -17,6 +17,13 @@ MonoBehaviour:
     _hashId: -876453005
   _displayName: 0
   _pattern: 040000000400000004000000
+  _skillDetail: "ターゲットを行っている敵単体に攻撃力{DamageMultiplier}の一回攻撃を行う。"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 0
+    _value: 5
+    _displayFormat: 2
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

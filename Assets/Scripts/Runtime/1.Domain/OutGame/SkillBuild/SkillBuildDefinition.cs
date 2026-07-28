@@ -67,38 +67,24 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     プレイヤーが装備しているスキル配列の特定スロットを更新する。
+        ///     装備スキル構成が現在のスロット条件を満たすことを検証する。
         /// </summary>
-        /// <param name="slotIndex"> 更新するスロットのインデックス。 </param>
-        /// <param name="newEquippedSkill"> 新しい装備スキル。 </param>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void ChangeEquippedSkill(int slotIndex, EquippedSkill newEquippedSkill)
+        /// <param name="equippedSkills"> 検証する装備スキル構成。 </param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public void ValidateEquipment(IReadOnlyList<EquippedSkill> equippedSkills)
         {
-            if (slotIndex < 0 || slotIndex >= _equippedSkills.Length)
+            if (equippedSkills == null)
             {
-                throw new ArgumentOutOfRangeException(nameof(slotIndex), "スロットインデックスが範囲外です。");
+                throw new ArgumentNullException(nameof(equippedSkills));
             }
 
-            _equippedSkills[slotIndex] = newEquippedSkill;
-        }
-
-        /// <summary>
-        ///     プレイヤーが装備しているスキル配列の特定スロットを入れ替える。
-        /// </summary>
-        /// <param name="slotIndex1"> 入れ替え元のスロットインデックス。 </param>
-        /// <param name="slotIndex2"> 入れ替え先のスロットインデックス。 </param>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void SwapEquippedSkills(int slotIndex1, int slotIndex2)
-        {
-            if (slotIndex1 < 0 || slotIndex1 >= _equippedSkills.Length ||
-                slotIndex2 < 0 || slotIndex2 >= _equippedSkills.Length)
+            if (equippedSkills.Count != SlotCount)
             {
-                throw new ArgumentOutOfRangeException("スロットインデックスが範囲外です。");
+                throw new ArgumentException(
+                    $"装備スキル数は現在のスロット数と一致する必要があります。 slotCount={SlotCount}",
+                    nameof(equippedSkills));
             }
-
-            EquippedSkill temp = _equippedSkills[slotIndex1];
-            _equippedSkills[slotIndex1] = _equippedSkills[slotIndex2];
-            _equippedSkills[slotIndex2] = temp;
         }
 
         private EquippedSkill[] _equippedSkills;

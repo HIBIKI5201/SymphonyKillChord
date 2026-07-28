@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
-using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -77,6 +76,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
+            ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+            ServiceLocator.UnregisterInstance<IScreenLifecycleSignal>();
 
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
@@ -199,6 +200,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
+            ServiceLocator.RegisterInstance(battlePreparationScreen);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -209,6 +211,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 settingScreenView);
 
             _screenViewRegistry = screenViewRegistry;
+            ServiceLocator.RegisterInstance<IScreenLifecycleSignal>(screenViewRegistry);
             screenViewRegistry.HideAllImmediately();
 
             // InfraStructure 層

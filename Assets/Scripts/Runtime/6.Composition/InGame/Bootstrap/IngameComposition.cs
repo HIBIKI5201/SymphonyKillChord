@@ -104,13 +104,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     FailActiveLoadingSession();
                     return;
                 }
-
-                if (!await WaitForCameraSystemReadyAsync(destroyCancellationToken))
-                {
-                    Debug.LogError($"[{nameof(IngameComposition)}] カメラ初期化の完了待機に失敗しました。", this);
-                    isSuccess = false;
-                    FailActiveLoadingSession();
-                }
             }
             catch (OperationCanceledException)
             {
@@ -273,38 +266,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             return false;
         }
 
-        /// <summary>
-        ///     カメラがプレイヤー追従位置へ初回更新されるまで待機します。
-        /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> 準備完了した場合はtrue。 </returns>
-        private async Awaitable<bool> WaitForCameraSystemReadyAsync(
-            System.Threading.CancellationToken cancellationToken)
-        {
-            CameraSystemView cameraSystemView = FindFirstObjectByType<CameraSystemView>();
-            if (cameraSystemView == null)
-            {
-                Debug.LogError($"[{nameof(IngameComposition)}] {nameof(CameraSystemView)} が見つかりません。", this);
-                return false;
-            }
-
-            for (int retryCount = 0; retryCount < MAX_CAMERA_READY_WAIT_FRAME; retryCount++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (cameraSystemView.HasCompletedInitialUpdate)
-                {
-                    return true;
-                }
-
-                await Awaitable.NextFrameAsync(cancellationToken);
-            }
-
-            return false;
-        }
-
         private const int MAX_STAGE_READY_WAIT_FRAME = 120;
-        private const int MAX_CAMERA_READY_WAIT_FRAME = 120;
         private readonly InGameInitializationCoordinator _initializationCoordinator = new();
         private List<IInGameInitializationModule> _modules;
     }

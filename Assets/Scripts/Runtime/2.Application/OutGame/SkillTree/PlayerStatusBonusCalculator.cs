@@ -13,14 +13,14 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         ///     集計対象となるスキルノードを設定する。
         /// </summary>
         /// <param name="skillNodes"> スキルノード一覧。 </param>
-        public PlayerStatusBonusCalculator(IEnumerable<SkillNodeEntity> skillNodes)
+        public PlayerStatusBonusCalculator(IReadOnlyCollection<SkillNodeEntity> skillNodes)
         {
             if (skillNodes == null)
             {
                 throw new ArgumentNullException(nameof(skillNodes));
             }
 
-            _skillNodes = new Dictionary<SkillNodeId, SkillNodeEntity>();
+            _skillNodes = new Dictionary<SkillNodeId, SkillNodeEntity>(skillNodes.Count);
             foreach (SkillNodeEntity skillNode in skillNodes)
             {
                 if (skillNode == null)

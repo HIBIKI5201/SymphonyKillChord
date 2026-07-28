@@ -1,6 +1,8 @@
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using UnityEngine;
 
@@ -24,8 +26,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, SceneNameSelector, Tooltip("バトルパートで追加ロードするステージシーン名。")]
         private string _battleSceneName = "Stage_1";
 
-        [SerializeField, Tooltip("バトルパートで使用する敵Wave定義のAddressablesキー。")]
-        private string _enemyWaveDefinitionAssetKey;
+        [SerializeField, SourceDataCollection("Wave"), Tooltip("バトルパートで使用する敵Wave定義ID。")]
+        private DataID _enemyWaveDefinitionId;
 
         [SerializeField, Tooltip("バトルパートのミッション定義アセット。")]
         private MissionDefinitionAsset _missionDefinitionAsset;
@@ -61,7 +63,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 _battleSceneName,
                 _missionDefinitionAsset.Create(),
                 _isTutorial,
-                _enemyWaveDefinitionAssetKey);
+                new EnemyWaveDefinitionId(_enemyWaveDefinitionId.Id));
         }
     }
 }

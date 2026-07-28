@@ -17,6 +17,13 @@ MonoBehaviour:
     _hashId: -1306600489
   _displayName: 9
   _pattern: 02000000040000000800000008000000
+  _skillDetail: "n秒間、クリティカル判定が成功した敵に対して\nクリティカルダメージの倍率がx倍"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 0
+    _value: 5
+    _displayFormat: 3
   _skillType: 02000000
   _level: 0
   _cooldownNumerator: 1

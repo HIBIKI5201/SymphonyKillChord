@@ -7,12 +7,26 @@ on:
   pull_request:
     branches:
       - develop
+      - main 
     types: [ closed ]
 
-  workflow_dispatch:       # Manual execution is also supported.
+  workflow_dispatch:
+    inputs:
+      build_mode:
+        description: 'ビルドモード'
+        required: true
+        default: 'Development'
+        type: choice
+        options:
+          - Development
+          - Master
 
 permissions:
   contents: write      # Minimum permissions required for release creation and repository access
+
+concurrency:
+  group: build-release-${{ github.base_ref || github.run_id }}
+  cancel-in-progress: false
 
 # Note: If artifact uploads or additional operations are required,
 # verify whether additional permissions are needed.
@@ -35,19 +49,6 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "==========================================="
 
-          # Check for other running instances of the same workflow (prevent duplicate execution)
-          echo "INFO: Checking for other running instances of this workflow..."
-          ACTIVE_RUNS_JSON=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/BuildAndRelease.yml/runs?status=in_progress")
-          OTHER_RUNS_COUNT=$(echo "$ACTIVE_RUNS_JSON" | jq '[.workflow_runs[]? | select(.id != ${{ github.run_id }})] | length')
-          
-          if [ "$OTHER_RUNS_COUNT" -gt 0 ]; then
-            echo "SKIP: Another execution of this workflow is already in progress (Count: $OTHER_RUNS_COUNT). Exiting early..."
-            echo "days=0" >> $GITHUB_OUTPUT
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=false (Skipped due to duplicate execution)"
-            exit 0
-          fi
-
           # 不要なAPIコール 避けるため、手動実行時（workflow_dispatch）はリリース経過days数のチェック スキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             echo "SKIP: Manual execution detected. Skipping release age check."
@@ -57,29 +58,30 @@ jobs:
             exit 0
           fi
 
-          # GitHub APIから最新のリリース 取得します
-          echo "INFO: Retrieving latest release from GitHub API..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+          # ターゲットブランチに応じたタグプレフィックスを特定します
+          TAG_PREFIX="dev"
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            TAG_PREFIX="release"
+          fi
+
+          # GitHub APIからリリース一覧（最大100件）を取得します
+          echo "INFO: Retrieving releases list from GitHub API (Prefix: ${TAG_PREFIX}-)..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
-          if [ "$HTTP_CODE" = "404" ]; then
-            echo "INFO: No previous release found"
-            echo "days=999" >> $GITHUB_OUTPUT
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (New release)"
-            exit 0
-          elif [ "$HTTP_CODE" != "200" ]; then
+          if [ "$HTTP_CODE" != "200" ]; then
             echo "ERROR: GitHub API returned HTTP $HTTP_CODE"
             exit 1
           fi
 
-          RELEASE_DATE=$(echo "$RESPONSE" | jq -r '.published_at // empty')
+          # jqを使用して、TAG_PREFIXに合致するタグの中から最新のpublished_atを取得します
+          RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "INFO: Release date not found in API response"
+            echo "INFO: No previous release found with prefix ${TAG_PREFIX}-"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (Running because release date could not be determined)"
+            echo "SUCCESS: Decision: should_run=true (New release for prefix ${TAG_PREFIX})"
             exit 0
           fi
           
@@ -104,6 +106,9 @@ jobs:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
     runs-on: self-hosted
+    concurrency:
+      group: unity-self-hosted-build
+      cancel-in-progress: false
     timeout-minutes: 120  # Set timeout because build processing may take a long time
     environment: 'AutoBuildAndRelease'
     # Environment variables used throughout the job
@@ -112,6 +117,7 @@ jobs:
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
       UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
       UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+      BUILD_MODE: ''
 
     steps:
       - name: Checkout Repository
@@ -119,6 +125,33 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Determine Build Mode
+        id: determine_mode
+        run: |
+          # workflow_dispatch では github.base_ref が空のため、inputs.build_mode から分岐を決定
+          $BaseRef = "${{ github.base_ref }}"
+          if (-not $BaseRef) {
+            $InputMode = "${{ inputs.build_mode }}"
+            if ($InputMode -eq "Master") { $BaseRef = "main" } else { $BaseRef = "develop" }
+          }
+          if ($BaseRef -eq "main") {
+            $BuildMode = "Master"
+            $TagPrefix = "release"
+          } elseif ($BaseRef -eq "develop") {
+            $BuildMode = "Development"
+            $TagPrefix = "dev"
+          } else {
+             Write-Host "ERROR: Unsupported base branch: $BaseRef"
+             exit 1
+          }
+ 
+          Write-Host "Base Branch: $BaseRef -> BuildMode: $BuildMode, TagPrefix: $TagPrefix"
+          "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
+          "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
+          "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
+          "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
+          "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
+        shell: powershell
 
       - name: Display Environment Information
         run: |
@@ -157,6 +190,25 @@ jobs:
             Write-Host "::endgroup::"
             exit 1
           }
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Check .NET SDK / dotnet CLI Availability (Diagnostic)
+        run: |
+          Write-Host "::group::Check .NET SDK Availability"
+
+          $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($DotnetCmd) {
+            Write-Host "OK: dotnet command found at $($DotnetCmd.Source)"
+            & dotnet --version
+            Write-Host ""
+            Write-Host "Installed SDKs:"
+            & dotnet --list-sdks
+          } else {
+            Write-Host "WARNING: dotnet command not found on PATH."
+            Write-Host "         NuGetForUnity.Cli (dotnet tool) will not be usable without installing the .NET SDK."
+          }
+
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -245,55 +297,126 @@ jobs:
           Write-Host "::endgroup::"
 
           # ==========================================
-          # 3. 各 .unitypackage の順次インポート
+          # 3. .unitypackage を tar 展開してファイルを直接配置
           # ==========================================
-          Write-Host "::group::Sequential Unitypackage Import via CLI"
-          $Packages = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
-          Write-Host "Found $($Packages.Count) packages to import."
+          Write-Host "::group::Installing packages via direct tar extraction"
 
-          $TimeoutSec     = 1800
+          $ProjectRoot    = "${{ github.workspace }}"
+          $LongProjectRoot = "\\?\" + $ProjectRoot.TrimEnd("\")
+          $ResolvedRoot   = $LongProjectRoot + "\"
+          $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
+          $TotalPlaced    = 0
           $FailedPackages = @()
+
+          Write-Host "Found $($Packages.Count) package(s) to install."
 
           foreach ($Package in $Packages) {
             Write-Host "--------------------------------------------------"
-            Write-Host "Starting Import: $($Package.Name)"
+            Write-Host "Processing: $($Package.Name)"
 
-            $UnityArgs = @(
-              "-batchmode",
-              "-nographics",
-              "-quit",
-              "-ignorecompilererrors",
-              "-projectPath", "${{ github.workspace }}",
-              "-importPackage", "$($Package.FullName)",
-              "-logFile", "unity_import_$($Package.BaseName).log"
-            )
+            $PkgWorkDir = Join-Path $env:TEMP "pkg_$([System.IO.Path]::GetRandomFileName())"
+            New-Item -ItemType Directory -Path $PkgWorkDir -Force | Out-Null
 
-            $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
-                                          -ArgumentList $UnityArgs `
-                                          -PassThru -NoNewWindow
-
-            if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
-              Write-Host "ERROR: Timeout importing $($Package.Name) after $TimeoutSec seconds."
-              $UnityProcess.Kill()
-              Write-Host "::endgroup::"
-              exit 124
+            $TarOutput = & tar -xzf "$($Package.FullName)" -C "$PkgWorkDir" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "ERROR: tar extraction failed (exit $LASTEXITCODE): $TarOutput"
+              $FailedPackages += $Package.Name
+              Remove-Item -Path $PkgWorkDir -Recurse -Force -ErrorAction SilentlyContinue
+              continue
             }
 
-            $ExitCode = if ($null -eq $UnityProcess.ExitCode) { -1 } else { [int]$UnityProcess.ExitCode }
+            $GuidDirs    = Get-ChildItem -Path $PkgWorkDir -Directory
+            $PlacedCount = 0
+            $PackageFailed = $false
 
-            if ($ExitCode -ne 0) {
-              Write-Host "WARNING: Unity returned non-zero code ($ExitCode) for $($Package.Name)."
-              Write-Host "         See unity_import_$($Package.BaseName).log for details."
+            foreach ($GuidDir in $GuidDirs) {
+              $PathnameFi = Join-Path $GuidDir.FullName "pathname"
+              if (-not (Test-Path $PathnameFi)) { continue }
+
+              $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
+              if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
+
+              $DestRelNorm = $DestRelPath.Replace('/', '\').TrimStart('\')
+
+              if ($DestRelNorm -match '\.\.') {
+                Write-Host "WARNING: Path traversal detected, skipping: $DestRelPath"
+                continue
+              }
+
+              $DestAbs = $LongProjectRoot + "\" + $DestRelNorm
+
+              $AssetSrc = Join-Path $GuidDir.FullName "asset"
+              $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
+
+              try {
+                if (Test-Path $AssetSrc) {
+                  $DestDir = [System.IO.Path]::GetDirectoryName($DestAbs)
+                  # Create directories and copy files using .NET API to bypass 260-character path limit.
+                  [System.IO.Directory]::CreateDirectory($DestDir) | Out-Null
+                  [System.IO.File]::Copy($AssetSrc, $DestAbs, $true)
+                  $PlacedCount++
+                } else {
+                  [System.IO.Directory]::CreateDirectory($DestAbs) | Out-Null
+                }
+
+                if (Test-Path $MetaSrc) {
+                  $MetaDest = $DestAbs + ".meta"
+                  [System.IO.File]::Copy($MetaSrc, $MetaDest, $true)
+                }
+              } catch {
+                Write-Host "ERROR: Failed to write asset for $($Package.Name): $_"
+                $PackageFailed = $true
+                break
+              }
+            }
+
+            if ($PackageFailed) {
               $FailedPackages += $Package.Name
             } else {
-              Write-Host "SUCCESS: Completed import for $($Package.Name)"
+              Write-Host "  Placed $PlacedCount asset file(s)."
+              $TotalPlaced += $PlacedCount
             }
+            Remove-Item -Path $PkgWorkDir -Recurse -Force -ErrorAction SilentlyContinue
           }
 
           if ($FailedPackages.Count -gt 0) {
-            Write-Host "WARNING: $($FailedPackages.Count) package(s) returned non-zero exit codes:"
+            Write-Host "ERROR: $($FailedPackages.Count) package(s) failed to extract:"
             $FailedPackages | ForEach-Object { Write-Host "  - $_" }
+            Write-Host "::endgroup::"
+            exit 1
           }
+
+          Write-Host ""
+          Write-Host "OK: All packages installed. Total asset files placed: $TotalPlaced"
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Restore NuGet Packages (NuGetForUnity.Cli)
+        run: |
+          Write-Host "::group::Restoring NuGet packages via NuGetForUnity.Cli"
+
+          if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+            Write-Host "dotnet not found. Installing .NET SDK..."
+            Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
+            & "$env:TEMP\dotnet-install.ps1" -Channel LTS -InstallDir "$env:USERPROFILE\.dotnet"
+            $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
+          }
+
+          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
+
+          $ToolsPath = "$env:USERPROFILE\.dotnet\tools"
+          if (Test-Path $ToolsPath) {
+            $env:PATH = "$ToolsPath;$env:PATH"
+          }
+
+          & nugetforunity restore "${{ github.workspace }}"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: NuGet package restore failed (exit $LASTEXITCODE)."
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "OK: NuGet packages restored."
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -313,6 +436,7 @@ jobs:
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
             "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
           $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $UnityArgs -PassThru -NoNewWindow
@@ -472,10 +596,10 @@ jobs:
           Write-Host "::group::Generate Release Tag"
           
           # Get current counter from repository variable (default to 1 if not set)
-          $Counter = "${{ vars.BUILD_VERSION }}"
+          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
           if (-not $Counter) { $Counter = "1" }
           
-          $TagName = "dev-v1.0.$Counter"
+          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
@@ -486,22 +610,26 @@ jobs:
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
-          name: Release ${{ steps.tag_gen.outputs.TAG_NAME }}
+          name: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
           body: |
-            Workflow Run #${{ github.run_id }} から自動生成されたビルドArtifactです。
-            
-            **Trigger Event:** ${{ github.event_name }}
-            ${{ github.event_name == 'pull_request' && format('**PR:** #{0}', github.event.pull_request.number) || '**Trigger:** Manual Execution (workflow_dispatch)' }}
-            **Workflow Run詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            
-            **Build Process:**
-            1. Downloaded assets from Google Drive.
-            2. Automatically imported Unity packages.
-            3. Executed builds for multiple profiles (Development & Master).
-            
-            **Included Build Targets:**
-            - Development Profiles (Development profiles)
-            - Master Profiles (Master profiles)
+            Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
+
+            **トリガーイベント:** ${{ github.event_name }}
+            ${{ github.event_name == 'pull_request' && format('**対象PR:** #{0}', github.event.pull_request.number) || '**トリガー:** 手動実行 (workflow_dispatch)' }}
+            **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            **ビルドモード:** ${{ steps.determine_mode.outputs.build_mode }}
+
+            **実行プロセス:**
+            1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
+            2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
+            3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
+            4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
+            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
+
+            **ビルド対象プロファイル:**
+            ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
           files: Builds.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -510,7 +638,8 @@ jobs:
         if: success()
         run: |
           Write-Host "::group::Increment Release Counter"
-          $CurrentCounter = [int]"${{ vars.BUILD_VERSION }}"
+          $VarName = "BUILD_VERSION_$env:BUILD_MODE"
+          $CurrentCounter = [int]"${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
           if (-not $CurrentCounter) { $CurrentCounter = 1 }
           $NextCounter = $CurrentCounter + 1
           
@@ -518,22 +647,38 @@ jobs:
           Write-Host "Next Counter: $NextCounter"
           
           # Update repository variable using GitHub API
-          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/BUILD_VERSION"
           $Headers = @{
               "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
-          $Body = @{
-              "name" = "BUILD_VERSION"
-              "value" = [string]$NextCounter
-          } | ConvertTo-Json
-          
+
+          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+          $VariableExists = $true
           try {
-              $Response = Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json"
-              Write-Host "OK: BUILD_VERSION updated to $NextCounter successfully."
+              Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers | Out-Null
           } catch {
-              Write-Host "ERROR: BUILD_VERSION Failed to update: $_"
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  $VariableExists = $false
+              } else {
+                  Write-Host "ERROR: $VarName existence check failed: $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
+          }
+
+          try {
+              if ($VariableExists) {
+                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
+                  Invoke-RestMethod -Uri $GetUrl -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              } else {
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
+                  Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              }
+              Write-Host "OK: $VarName updated to $NextCounter successfully."
+          } catch {
+              Write-Host "ERROR: $VarName Failed to update: $_"
               Write-Host "::endgroup::"
               exit 1
           }

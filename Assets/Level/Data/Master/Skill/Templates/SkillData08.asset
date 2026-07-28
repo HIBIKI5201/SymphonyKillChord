@@ -17,6 +17,13 @@ MonoBehaviour:
     _hashId: -988157119
   _displayName: 8
   _pattern: 030000000300000003000000030000000300000003000000
+  _skillDetail: "3拍子の通常攻撃を行う。\nその通常攻撃が当たった敵とその敵の半径nメートル以内にいる敵に対して伝染状態を付与する。\n（伝染回数はs回で効果が消滅する。）\n\n【伝染状態】\n攻撃を受けたときすべての伝染状態の敵に対して、攻撃を受けた敵の被ダメージのn％のダメージを与える。\n他の伝染状態の敵に与えたときのダメージ判定は通常攻撃を受けたときと同じものを行う。\n（クリティカル判定やジャスト判定も行い、その倍率もかかる）"
+  _icon: {fileID: 0}
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 0
+    _value: 5
+    _displayFormat: 3
   _skillType: 0000000002000000
   _level: 0
   _cooldownNumerator: 1

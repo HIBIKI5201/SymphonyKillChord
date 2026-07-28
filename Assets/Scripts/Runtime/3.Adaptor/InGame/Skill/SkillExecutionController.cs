@@ -75,6 +75,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
 
             ApplyFailurePolicy(now);
+            Debug.LogWarning(
+                $"[{nameof(SkillExecutionController)}] 入力パターンは一致しましたが、" +
+                $"対象を解決できないためスキルを実行しませんでした。ID: {_skillDefinition.Id.Value}, " +
+                $"TargetingType: {_skillDefinition.EffectSpec.TargetingType}");
             return new SkillExecutionResult(SkillExecutionResultType.RejectedByTargetPolicy);
         }
 

@@ -14,5 +14,11 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
 
         /// <summary> プレイヤーの装備スキルのリストを取得する。 </summary>
         ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkills();
+
+        /// <summary>
+        ///     プレイヤーの装備スキル構成を保存する。
+        /// </summary>
+        /// <param name="equippedSkills"> 保存する装備スキル構成。 </param>
+        Task SaveSkillBuildAsync(IReadOnlyList<EquippedSkill> equippedSkills);
     }
 }

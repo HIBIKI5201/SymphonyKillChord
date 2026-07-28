@@ -39,7 +39,7 @@ void ApplySmear(
     out float3 smearOS,
     out float alpha)
 {
-    float3 smearDirectionOS =  TransformWorldToObject(smearDirectionWS);
+    float3 smearDirectionOS =  TransformWorldToObjectDir(smearDirectionWS);
 
     float offset = frac(_Time.y / 50) * 100;
     float noise = ValueNoise(uv * 100 + offset) * ValueNoise(uv * 10);

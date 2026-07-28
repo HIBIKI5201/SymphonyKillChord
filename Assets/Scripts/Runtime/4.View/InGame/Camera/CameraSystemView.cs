@@ -18,6 +18,12 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 初回カメラ更新が完了している場合はtrueです。 </summary>
         public bool HasCompletedInitialUpdate => _hasCompletedInitialUpdate;
 
+        /// <summary> カメラの Transform。 </summary>
+        public Transform CameraTransform => _cameraT;
+
+        /// <summary> 外部から制御されている場合はtrueです。 </summary>
+        public bool IsExternallyControlled => _isExternallyControlled;
+
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
@@ -73,6 +79,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
             _hasCompletedInitialUpdate = false;
+            _isExternallyControlled = false;
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
@@ -86,6 +93,78 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
             EventBus<EOnTakeDamage>.Register(OnTakeDamage);
+        }
+
+        /// <summary>
+        ///     現在のプレイヤー位置・カメラ前方方向を基に、カメラの状態を即時更新する。
+        /// </summary>
+        /// <returns> 更新が成功したかどうかを示す値。 </returns>
+        public bool RefreshImmediate()
+        {
+            if (_isExternallyControlled || _playerT == null || _cameraT == null || _viewSettings == null)
+            {
+                return false;
+            }
+
+            Tick(0f);
+            return _hasCompletedInitialUpdate;
+        }
+
+        /// <summary>
+        ///     ステージ演出などへカメラTransformの制御を委譲するため、外部制御モードへ切り替える。
+        /// </summary>
+        public void BeginExternalControl()
+        {
+            ClearInputState();
+            _isExternallyControlled = true;
+        }
+
+        /// <summary>
+        ///     外部制御モードを終了し、カメラシステムの制御へ戻す。
+        /// </summary>
+        public void EndExternalControl()
+        {
+            ClearInputState();
+            _isExternallyControlled = false;
+        }
+
+        /// <summary>
+        ///     カメラの向きを指定した前方へ向け直し、ロックオンや入力状態を初期化する。
+        ///     プレイヤーをスタート地点へ戻す際などに、カメラの向きも合わせて戻すために使用する。
+        /// </summary>
+        /// <param name="forward"> カメラを向けたい前方(ワールド空間)。プレイヤーのスタート時の前方などを指定する。</param>
+        public void ResetOrientation(Vector3 forward)
+        {
+            // ロックオン中の場合は解除する。
+            if (IsLockOn())
+            {
+                ClearLockOn();
+            }
+
+            ClearInputState();
+
+            // 水平成分からヨーを求め、ピッチは水平(0)へ戻す。
+            Vector3 flatForward = forward;
+            flatForward.y = 0f;
+            if (flatForward.sqrMagnitude > float.Epsilon)
+            {
+                float yaw = Quaternion.LookRotation(flatForward.normalized, Vector3.up).eulerAngles.y;
+                _cameraBoneRotation = Quaternion.Euler(0f, yaw, 0f);
+            }
+            else
+            {
+                _cameraBoneRotation = Quaternion.identity;
+            }
+
+            _cameraRotation = Quaternion.identity;
+
+            if (_viewSettings != null)
+            {
+                _currentDistance = _viewSettings.Distance;
+            }
+
+            // 反映を即時に行い、カメラ位置・回転を更新する。
+            RefreshImmediate();
         }
 
         /// <summary> カメラ距離の補間速度。 </summary>
@@ -136,13 +215,16 @@ namespace KillChord.Runtime.View.InGame.Camera
         private bool _hasCompletedInitialUpdate;
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
+        private bool _isExternallyControlled;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
         /// </summary>
         private void FixedUpdate()
         {
+            if (_isExternallyControlled || _playerT == null) { return; }
             if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
+
             Tick(Time.fixedDeltaTime);
         }
 
@@ -151,7 +233,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void Update()
         {
-            if (_playerT == null) { return; }
+            if (_isExternallyControlled || _playerT == null) { return; }
 
             if (_updateMode != UpdateModeEnum.Update)
             { return; }
@@ -163,7 +245,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void LateUpdate()
         {
-            if (_playerT == null) { return; }
+            if (_isExternallyControlled || _playerT == null) { return; }
 
             if (_updateMode != UpdateModeEnum.LateUpdate)
             { return; }
@@ -568,6 +650,15 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             return input;
+        }
+
+        /// <summary>
+        ///     カメラ操作に使用する入力値を初期化します。
+        /// </summary>
+        private void ClearInputState()
+        {
+            _input = Vector2.zero;
+            _moveInput = Vector2.zero;
         }
 
         /// <summary>
