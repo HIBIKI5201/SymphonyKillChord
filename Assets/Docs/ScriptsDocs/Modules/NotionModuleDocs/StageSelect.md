@@ -7,7 +7,7 @@
 | **モジュール名** | StageSelect |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み（一部TODO残存、既知の課題を参照） |
-| **最終更新日** | 2026-07-19 |
+| **最終更新日** | 2026-07-22 |
 
 ---
 
@@ -127,8 +127,8 @@ graph TD
 ### 📤 依存されているもの
 
 * **`Enemy`**
-  * *参照箇所*: `SelectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionAssetKey`
-  * *詳細*: `EnemyInitializer`（Order 700）がステージ固有のWave定義をAddressablesロードするために参照します。選択が無い場合は初期化に失敗します。
+  * *参照箇所*: `SelectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionId`
+  * *詳細*: `EnemyInitializer`（Order 700）が共通のWave定義リポジトリからステージ固有の定義をID検索するために参照します。選択が無い場合やIDが未登録の場合は初期化に失敗します。
 * **`InGame Bootstrap`**
   * *参照箇所*: `SelectedBattleStageState.HasSelectedBattleStage`, `BattleSceneName`
   * *詳細*: `IngameComposition`がInGameシーン起動時にこの状態を読み取り、バトルシーンを追加ロードします。選択が無い場合は初期化が失敗します。

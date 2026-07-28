@@ -168,6 +168,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "ResetPosition",
+                    "type": "Button",
+                    "id": "a1e6c2d4-3f5b-4c7a-9d8e-1b2c3d4e5f60",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ReturnToTitle",
+                    "type": "Button",
+                    "id": "b2f7d3e5-4a6c-4d8b-8e9f-2c3d4e5f6a71",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold(duration=1)",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -250,7 +268,18 @@
                 },
                 {
                     "name": "",
-                    "id": "f158be36-b74b-4bf0-82b5-d6a9cc30a3ba",
+                    "id": "b72ad35b-c5b1-4489-b58c-000096b55bb8",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94b7b630-617a-4b5b-9e5e-38886dbdc3a8",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
@@ -272,7 +301,18 @@
                 },
                 {
                     "name": "",
-                    "id": "9fe0a5d3-4e29-4047-b5e6-05bb94ae4d5a",
+                    "id": "391a9ec2-30a8-428e-a5b9-e9f1393f0190",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dodge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3c663c8d-d467-4846-bf4f-f38ecfe431ec",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
@@ -390,6 +430,28 @@
                     "action": "LockOnSelect",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "c3a8e4f6-5b7d-4e9c-9f0a-3d4e5f6a7b82",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ResetPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d4b9f5a7-6c8e-4f0d-8a1b-4e5f6a7b8c93",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ReturnToTitle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

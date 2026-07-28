@@ -2,6 +2,7 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,11 +12,18 @@ namespace KillChord.Runtime.InfraStructure
     /// <summary>
     ///    デバッグ用の入手済みスキルリポジトリ実装クラス。
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(OwnedSkillRepositoryDebug), 
-        menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" 
+    [CreateAssetMenu(fileName = nameof(OwnedSkillRepositoryDebug),
+        menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/"
         + nameof(OwnedSkillRepositoryDebug))]
     public class OwnedSkillRepositoryDebug : ScriptableObject, IOwnedSkillRepository
     {
+        /// <summary>
+        ///     デバッグ実装ではセーブデータを使用しないため何もしません。
+        /// </summary>
+        public void Initialize(SavedataSystem savedataSystem)
+        {
+        }
+
         public ValueTask<IReadOnlyList<EquippedSkill>> GetOwnedSkills()
         {
             RebuildEquippedSkills();

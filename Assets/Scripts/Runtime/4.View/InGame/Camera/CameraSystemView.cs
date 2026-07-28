@@ -128,6 +128,45 @@ namespace KillChord.Runtime.View.InGame.Camera
             _isExternallyControlled = false;
         }
 
+        /// <summary>
+        ///     カメラの向きを指定した前方へ向け直し、ロックオンや入力状態を初期化する。
+        ///     プレイヤーをスタート地点へ戻す際などに、カメラの向きも合わせて戻すために使用する。
+        /// </summary>
+        /// <param name="forward"> カメラを向けたい前方(ワールド空間)。プレイヤーのスタート時の前方などを指定する。</param>
+        public void ResetOrientation(Vector3 forward)
+        {
+            // ロックオン中の場合は解除する。
+            if (IsLockOn())
+            {
+                ClearLockOn();
+            }
+
+            ClearInputState();
+
+            // 水平成分からヨーを求め、ピッチは水平(0)へ戻す。
+            Vector3 flatForward = forward;
+            flatForward.y = 0f;
+            if (flatForward.sqrMagnitude > float.Epsilon)
+            {
+                float yaw = Quaternion.LookRotation(flatForward.normalized, Vector3.up).eulerAngles.y;
+                _cameraBoneRotation = Quaternion.Euler(0f, yaw, 0f);
+            }
+            else
+            {
+                _cameraBoneRotation = Quaternion.identity;
+            }
+
+            _cameraRotation = Quaternion.identity;
+
+            if (_viewSettings != null)
+            {
+                _currentDistance = _viewSettings.Distance;
+            }
+
+            // 反映を即時に行い、カメラ位置・回転を更新する。
+            RefreshImmediate();
+        }
+
         /// <summary> カメラ距離の補間速度。 </summary>
         private const float DISTANCE_LERP_SPEED = 4f;
 
