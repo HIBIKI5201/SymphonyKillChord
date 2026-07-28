@@ -433,7 +433,7 @@ jobs:
 
           # CPUコア数の設定
           $CpuCount = [Environment]::ProcessorCount
-          $UnityCpuCount = [Math]::Max(1, [Math]::Floor($CpuCount / 2))
+          $UnityCpuCount = [Math]::Min(63, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
 
           # プロセッサアフィニティビットマスクの生成
           $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
