@@ -118,16 +118,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
-            if (!TryInstantiatePlayerView(out Transform spawnPointTransform))
-            {
-                return false;
-            }
-
             if (!ServiceLocator.TryGetInstance(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
             {
                 Debug.LogError(
                     $"[{nameof(PlayerInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} が見つかりません。",
                     this);
+                return false;
+            }
+
+            if (!TryInstantiatePlayerView(out Transform spawnPointTransform))
+            {
                 return false;
             }
 

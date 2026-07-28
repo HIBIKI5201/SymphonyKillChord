@@ -29,6 +29,12 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         {
             float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.DamageMultiplier);
+            // ダメージ倍率が 0 の場合は、基本倍率を使用する。
+            if (damageMultiplier == 0f)
+            {
+                damageMultiplier = BASE_DAMAGE_MULTIPLIER;
+            }
+
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             AttackResult result = AttackCalculator.Calculate(
                 attackDefinition,
@@ -49,5 +55,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 target.TakeDamage(result.FinalDamage / damageMultiplier);
             }
         }
+
+        private const float BASE_DAMAGE_MULTIPLIER = 1f;
     }
 }

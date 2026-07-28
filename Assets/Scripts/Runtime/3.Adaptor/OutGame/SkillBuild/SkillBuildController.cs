@@ -56,10 +56,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <returns> 保存に成功した場合は true。 </returns>
         public async Task<bool> SaveAsync(ReadOnlyMemory<int> skillIds)
         {
-            EquippedSkill[] equippedSkills = BuildEquippedSkills(skillIds.Span);
-
             try
             {
+                EquippedSkill[] equippedSkills = BuildEquippedSkills(skillIds.Span);
                 await _skillBuildUseCase.SaveSkillBuildAsync(equippedSkills);
                 return true;
             }
