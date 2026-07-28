@@ -565,10 +565,10 @@ jobs:
       - name: Resolve Current Build Version
         run: |
           Write-Host "::group::Resolve Current Build Version"
-
-          # BUILD_VERSION_{BuildMode} にバージョン文字列全体（例: v1.0.5）を格納する。
-          # 未設定時は v1.0.X として扱い、末尾を初回パッチ番号として解決する。
-          $VarName = "BUILD_VERSION_$env:BUILD_MODE"
+          
+          # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
+          # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
+          $VarName = "VERSION_BASE_$env:BUILD_MODE"
           $Headers = @{
               "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
               "Accept"        = "application/vnd.github+json"
@@ -600,18 +600,43 @@ jobs:
               }
           }
 
-          if ($VersionString -match '^(.*\.)([Xx]|\d+)$') {
-              $VersionPrefix = $Matches[1]
-              $PatchToken    = $Matches[2]
-              $PatchNumber   = if ($PatchToken -match '^\d+$') { [int]$PatchToken } else { 0 }
-              $VersionString = "$VersionPrefix$PatchNumber"
-          } else {
-              Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.5 or v1.0.X)"
-              Write-Host "::endgroup::"
-              exit 1
+          # BUILD_VERSION_{BuildMode} にパッチ番号を格納する。          
+          $PatchVarName = "BUILD_VERSION_$env:BUILD_MODE"
+          $PatchGetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$PatchVarName"
+          try {
+              $PatchVarResponse = Invoke-RestMethod -Uri $PatchGetUrl -Method GET -Headers $Headers
+              $PatchNumber = $PatchVarResponse.value
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  Write-Host "WARNING: Repository variable '$PatchVarName' not found. Creating with default value '0'..."
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $PatchVarName; "value" = "0" } | ConvertTo-Json
+                  try {
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $PatchNumber = "0"
+                      Write-Host "OK: '$PatchVarName' created with default value '0'."
+                  } catch {
+                      Write-Host "ERROR: Failed to create repository variable '$PatchVarName': $_"
+                      Write-Host "::endgroup::"
+                      exit 1
+                  }
+              } else {
+                  Write-Host "ERROR: Failed to retrieve repository variable '$PatchVarName': $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
           }
 
-          "BUILD_VERSION_VAR_NAME=$VarName"       | Add-Content -Path $env:GITHUB_ENV
+          if ($VersionString -match '^(.*\.)[Xx]$') {
+              $VersionString = "$($Matches[1])$PatchNumber"
+          } else {
+              Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.X)"
+              Write-Host "::endgroup::"
+              exit 1
+          } 
+
+          "PATCH_NUMBER_VAR_NAME=$PatchVarName" | Add-Content -Path $env:GITHUB_ENV
+          "PATCH_NUMBER=$PatchNumber"            | Add-Content -Path $env:GITHUB_ENV
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "OK: Current build version resolved: $VersionString"
           Write-Host "::endgroup::"
@@ -696,28 +721,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Increment Release Counter
-        if: success()
+      - name: Increment Release Patch Number
         run: |
-          Write-Host "::group::Increment Release Counter"
-
-          $VarName = $env:BUILD_VERSION_VAR_NAME
-          $VersionString = $env:CURRENT_BUILD_VERSION
-
-          if ($VersionString -match '^(.*\.)(\d+)$') {
-            $VersionPrefix = $Matches[1]
-            $Counter       = [int]$Matches[2]
-            $NextCounter   = $Counter + 1
-            $NextVersion   = "$VersionPrefix$NextCounter"
-          } else {
-            Write-Host "ERROR: '$env:BUILD_VERSION_VAR_NAME' value '$VersionString' does not match expected format (e.g. v1.0.5)"
-            Write-Host "::endgroup::"
-            exit 1
-          }
+          Write-Host "::group::Increment Release Patch Number"
+          $VarName      = $env:PATCH_NUMBER_VAR_NAME
+          $PatchNumber  = [int]$env:PATCH_NUMBER
+          $NextPatchNumber = $PatchNumber + 1
 
           Write-Host "Variable Name: $VarName"
-          Write-Host "Current Version: $VersionString"
-          Write-Host "Next Version: $NextVersion"
+          Write-Host "Current Patch Number: $PatchNumber"
+          Write-Host "Next Patch Number: $NextPatchNumber"
           
           # Update repository variable using GitHub API
           $Headers = @{
@@ -727,11 +740,11 @@ jobs:
           }
 
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
+          $Body = @{ "name" = $VarName; "value" = "$NextPatchNumber" } | ConvertTo-Json
 
           try {
               Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              Write-Host "OK: $VarName updated to $NextVersion successfully."
+              Write-Host "OK: $VarName updated to $NextPatchNumber successfully."
           } catch {
               Write-Host "ERROR: $VarName Failed to update: $_"
               Write-Host "::endgroup::"
