@@ -14,15 +14,12 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <summary>
         ///     ユースケースを生成します。
         /// </summary>
-        /// <param name="skillNodeRepository"> スキルノード定義Repositoryです。 </param>
         /// <param name="skillUnlockRepository"> スキルノード解放状態Repositoryです。 </param>
+        /// <param name="calculator"> プレイヤーステータスボーナス計算クラスです。 </param>
         public LoadPlayerStatusBonusUseCase(
-            ISkillNodeRepository skillNodeRepository,
             ISkillUnlockRepository skillUnlockRepository,
             PlayerStatusBonusCalculator calculator)
         {
-            _skillNodeRepository = skillNodeRepository
-                ?? throw new ArgumentNullException(nameof(skillNodeRepository));
             _skillUnlockRepository = skillUnlockRepository
                 ?? throw new ArgumentNullException(nameof(skillUnlockRepository));
             _calculator = calculator
@@ -43,7 +40,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             return _calculator.Calculate(unlockedNodeIds);
         }
 
-        private readonly ISkillNodeRepository _skillNodeRepository;
         private readonly ISkillUnlockRepository _skillUnlockRepository;
         private readonly PlayerStatusBonusCalculator _calculator;
     }
