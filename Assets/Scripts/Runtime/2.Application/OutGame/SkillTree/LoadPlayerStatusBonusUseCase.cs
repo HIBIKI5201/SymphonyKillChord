@@ -18,12 +18,15 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="skillUnlockRepository"> スキルノード解放状態Repositoryです。 </param>
         public LoadPlayerStatusBonusUseCase(
             ISkillNodeRepository skillNodeRepository,
-            ISkillUnlockRepository skillUnlockRepository)
+            ISkillUnlockRepository skillUnlockRepository,
+            PlayerStatusBonusCalculator calculator)
         {
             _skillNodeRepository = skillNodeRepository
                 ?? throw new ArgumentNullException(nameof(skillNodeRepository));
             _skillUnlockRepository = skillUnlockRepository
                 ?? throw new ArgumentNullException(nameof(skillUnlockRepository));
+            _calculator = calculator
+                ?? throw new ArgumentNullException(nameof(calculator));
         }
 
         /// <summary>
@@ -37,12 +40,11 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 await _skillUnlockRepository.LoadUnlockedNodeIdsAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            PlayerStatusBonusCalculator calculator =
-                new PlayerStatusBonusCalculator(_skillNodeRepository.GetAll());
-            return calculator.Calculate(unlockedNodeIds);
+            return _calculator.Calculate(unlockedNodeIds);
         }
 
         private readonly ISkillNodeRepository _skillNodeRepository;
         private readonly ISkillUnlockRepository _skillUnlockRepository;
+        private readonly PlayerStatusBonusCalculator _calculator;
     }
 }

@@ -49,9 +49,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            var savedataSkillUnlockRepository = new SavedataSkillUnlockRepository(savedataSystem);
+            var calculator = new PlayerStatusBonusCalculator(_skillNodeDataRepo.GetAll());
+
             LoadPlayerStatusBonusUseCase useCase = new LoadPlayerStatusBonusUseCase(
                 _skillNodeDataRepo,
-                new SavedataSkillUnlockRepository(savedataSystem));
+                savedataSkillUnlockRepository,
+                calculator);
             _playerStatusBonus = await useCase.ExecuteAsync(cancellationToken);
             return true;
         }
