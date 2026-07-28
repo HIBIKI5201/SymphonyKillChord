@@ -562,6 +562,21 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Generate Release Tag
+        id: tag_gen
+        run: |
+          Write-Host "::group::Generate Release Tag"
+          
+          # Get current counter from repository variable (default to 1 if not set)
+          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
+          if (-not $Counter) { $Counter = "1" }
+          
+          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
+          "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
+          Write-Host "OK: Generated tag name: $TagName"
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Zip Build Artifacts
         run: |
           Write-Host "::group::Archive Build Artifacts (ZIP)"
@@ -587,21 +602,6 @@ jobs:
             Write-Host "::endgroup::"
             exit 1
           }
-          Write-Host "::endgroup::"
-        shell: powershell
-
-      - name: Generate Release Tag
-        id: tag_gen
-        run: |
-          Write-Host "::group::Generate Release Tag"
-          
-          # Get current counter from repository variable (default to 1 if not set)
-          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
-          if (-not $Counter) { $Counter = "1" }
-          
-          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
-          "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
-          Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
         shell: powershell
 
