@@ -34,8 +34,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
 
-            if (_missionDefinition.ClearCondition != null &&
-               _missionDefinition.ClearCondition.IsSatisfied(missionProgress))
+            if (_missionDefinition.ClearCondition.IsSatisfied(missionProgress))
             {
                 missionProgress.Finish(MissionEndReason.Clear);
             }

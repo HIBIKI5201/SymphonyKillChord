@@ -42,20 +42,11 @@ namespace KillChord.Runtime.View.InGame.Mission
                 }
             });
 
-            _resultDisposable = viewModel.ResultText.Subscribe(value =>
-            {
-                if (_resultText != null)
-                {
-                    _resultText.text = value;
-                }
-            });
-
             _viewModel.OnEvaluationItemsUpdated += ReBuildEvaluationItems;
         }
 
         [Header("メインミッション表示用UI")]
         [SerializeField, Tooltip("メインミッション表示用のテキスト。")] private TMP_Text _mainMissionText;
-        [SerializeField, Tooltip("ミッション結果表示用のテキスト。")] private TMP_Text _resultText;
 
         [Header("評価ミッション表示用UI")]
         [SerializeField, Tooltip("評価項目の親となるRectTransform。")] private RectTransform _evaluationRoot;
