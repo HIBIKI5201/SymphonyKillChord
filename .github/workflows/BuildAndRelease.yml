@@ -622,11 +622,10 @@ jobs:
         run: |
           Write-Host "::group::Generate Release Tag"
           
-          # Get current counter from repository variable (default to 1 if not set)
-          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
-          if (-not $Counter) { $Counter = "1" }
-          
-          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
+          $VersionString = $env:CURRENT_BUILD_VERSION
+
+          $TagName = "$env:TAG_PREFIX-$VersionString"
+
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
@@ -701,13 +700,24 @@ jobs:
         if: success()
         run: |
           Write-Host "::group::Increment Release Counter"
-          $VarName = "BUILD_VERSION_$env:BUILD_MODE"
-          $CurrentCounter = [int]"${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
-          if (-not $CurrentCounter) { $CurrentCounter = 1 }
-          $NextCounter = $CurrentCounter + 1
-          
-          Write-Host "Current Counter: $CurrentCounter"
-          Write-Host "Next Counter: $NextCounter"
+
+          $VarName = $env:BUILD_VERSION_VAR_NAME
+          $VersionString = $env:CURRENT_BUILD_VERSION
+
+          if ($VersionString -match '^(.*\.)(\d+)$') {
+            $VersionPrefix = $Matches[1]
+            $Counter       = [int]$Matches[2]
+            $NextCounter   = $Counter + 1
+            $NextVersion   = "$VersionPrefix$NextCounter"
+          } else {
+            Write-Host "ERROR: '$env:BUILD_VERSION_VAR_NAME' value '$VersionString' does not match expected format (e.g. v1.0.5)"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "Variable Name: $VarName"
+          Write-Host "Current Version: $VersionString"
+          Write-Host "Next Version: $NextVersion"
           
           # Update repository variable using GitHub API
           $Headers = @{
@@ -716,30 +726,12 @@ jobs:
               "X-GitHub-Api-Version" = "2022-11-28"
           }
 
-          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $VariableExists = $true
-          try {
-              Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers | Out-Null
-          } catch {
-              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  $VariableExists = $false
-              } else {
-                  Write-Host "ERROR: $VarName existence check failed: $_"
-                  Write-Host "::endgroup::"
-                  exit 1
-              }
-          }
+          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+          $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
 
           try {
-              if ($VariableExists) {
-                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
-                  Invoke-RestMethod -Uri $GetUrl -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              } else {
-                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
-                  Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              }
-              Write-Host "OK: $VarName updated to $NextCounter successfully."
+              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              Write-Host "OK: $VarName updated to $NextVersion successfully."
           } catch {
               Write-Host "ERROR: $VarName Failed to update: $_"
               Write-Host "::endgroup::"
