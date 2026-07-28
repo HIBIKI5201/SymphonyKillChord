@@ -212,7 +212,7 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Execute Unity - Download and Import Packages
+      - name: Download and Import Packages
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -433,7 +433,7 @@ jobs:
 
           # CPUコア数の設定
           $CpuCount = [Environment]::ProcessorCount
-          $UnityCpuCount = [Math]::Max(1, [Math]::Floor($CpuCount / 2))
+          $UnityCpuCount = [Math]::Min(63, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
 
           # プロセッサアフィニティビットマスクの生成
           $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
@@ -654,13 +654,19 @@ jobs:
               }
           }
 
+          if ($PatchNumber -notmatch '^\d+$') {
+              Write-Host "ERROR: '$PatchVarName' value '$PatchNumber' is not a non-negative integer."
+              Write-Host "::endgroup::"
+              exit 1
+          }
+
           if ($VersionString -match '^(.*\.)[Xx]$') {
               $VersionString = "$($Matches[1])$PatchNumber"
           } else {
               Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.X)"
               Write-Host "::endgroup::"
               exit 1
-          } 
+          }
 
           "PATCH_NUMBER_VAR_NAME=$PatchVarName" | Add-Content -Path $env:GITHUB_ENV
           "PATCH_NUMBER=$PatchNumber"            | Add-Content -Path $env:GITHUB_ENV
@@ -804,7 +810,7 @@ jobs:
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
-            Write-Host "     Artifact: Builds.zip has been uploaded."
+            Write-Host "     Artifact: All Builds have been uploaded."
           } else {
             Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }
