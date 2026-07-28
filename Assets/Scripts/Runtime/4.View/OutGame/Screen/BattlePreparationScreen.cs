@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
-using KillChord.Runtime.View.OutGame.BattlePreparation;
+using R3;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         /// <param name="viewModel"> 接続する ViewModel です。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void Bind(BattlePreparationSkillViewModel viewModel)
+        public void Bind(IBattlePreparationSkillViewModel viewModel)
         {
             if (viewModel == null)
             {
@@ -57,8 +57,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             Unbind();
             _viewModel = viewModel;
-            _viewModel.OnSkillsChanged += HandleSkillsChangedHandler;
-            RebuildSkills(_viewModel.Skills);
+            _subscriptions = new CompositeDisposable();
+            _viewModel.Skills
+                .Subscribe(HandleSkillsChangedHandler)
+                .AddTo(_subscriptions);
         }
 
         /// <summary>
@@ -66,12 +68,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void Unbind()
         {
-            if (_viewModel == null)
-            {
-                return;
-            }
-
-            _viewModel.OnSkillsChanged -= HandleSkillsChangedHandler;
+            _subscriptions?.Dispose();
+            _subscriptions = null;
             _viewModel = null;
         }
 
@@ -277,7 +275,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
 
-        private BattlePreparationSkillViewModel _viewModel;
+        private IBattlePreparationSkillViewModel _viewModel;
+        private CompositeDisposable _subscriptions;
         private string _pendingTargetSceneName;
     }
 }

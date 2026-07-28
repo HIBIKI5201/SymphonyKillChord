@@ -1,3 +1,6 @@
+using R3;
+using System.Collections.Generic;
+
 namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
 {
     /// <summary>
@@ -5,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.BattlePreparation
     /// </summary>
     public interface IBattlePreparationSkillViewModel
     {
+        /// <summary> 現在の装備スキル表示一覧です。 </summary>
+        ReadOnlyReactiveProperty<IReadOnlyList<BattlePreparationSkillDTO>> Skills { get; }
+
         /// <summary>
         ///     DTO から装備スキル表示状態を反映します。
         /// </summary>
