@@ -154,7 +154,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageNodeSelected(int stageIdValue)
         {
-            _stageSelectController.OnStageNodeSelected(stageIdValue);
+            _stageSelectController.OnStageNodeSelected(stageIdValue, _cts.Token);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
-            _detailScreenView.Hide();
+            _ = _detailScreenView.Hide(_cts.Token);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
-            _detailScreenView.Hide();
+            _detailScreenView.HideImmediately();
         }
 
         /// <summary>
@@ -349,7 +349,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _openUseCase.ApplySavedClearedStages();
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
-            _detailScreenView.Hide();
+            _detailScreenView.HideImmediately();
 
             // --- View 層（接続線・ノード）---
             var layoutBuilder = new StageMapLayoutBuilder();

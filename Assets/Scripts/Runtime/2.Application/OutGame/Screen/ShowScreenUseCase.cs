@@ -1,4 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Screen
 {
@@ -48,6 +50,36 @@ namespace KillChord.Runtime.Application.OutGame.Screen
                 command.TargetSceneName);
 
             _screenPresenter.Present(result);
+        }
+
+        /// <summary>
+        ///     指定された画面を表示します。
+        /// </summary>
+        public async Task Execute(ShowScreenCommand command, CancellationToken token)
+        {
+            ScreenTransitionState transitionState = _screenStateRepository.TransitionState;
+            ScreenId? previousScreenId = transitionState.CurrentScreenId;
+            ScreenTransitionRule rule = _screenRuleRepository.GetRule(command.TargetScreenId);
+
+            if (rule.TransitionType == ScreenTransitionType.Reset)
+            {
+                transitionState.Reset(command.TargetScreenId);
+            }
+            else
+            {
+                transitionState.MoveTo(command.TargetScreenId, rule.KeepInHistory);
+            }
+
+            bool hidePreviousScreen = rule.TransitionType == ScreenTransitionType.Replace ||
+                rule.TransitionType == ScreenTransitionType.Reset;
+
+            ScreenTransitionResult result = new(
+                hidePreviousScreen ? previousScreenId : null,
+                command.TargetScreenId,
+                rule.TransitionType == ScreenTransitionType.Reset,
+                command.TargetSceneName);
+
+            await _screenPresenter.Present(result, token);
         }
 
         private readonly IScreenPresenter _screenPresenter;

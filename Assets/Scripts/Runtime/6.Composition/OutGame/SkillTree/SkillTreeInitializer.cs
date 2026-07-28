@@ -259,10 +259,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             BuildVideoClipDict();
 
             _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent);
-            _skillDetailScreenView.Hide();
+            _skillDetailScreenView.HideImmediately();
             _playerStatusScreenView = new PlayerStatusScreenView(_playerStatusRoot, _outGameUIEvent);
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
-            _previewVideoScreenView.Hide();
+            _previewVideoScreenView.HideImmediately();
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,
@@ -514,7 +514,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillNodeSelected(string nodeName)
         {
             SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id);
+            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id, _cts.Token);
         }
 
         /// <summary>
@@ -524,7 +524,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillDetailClosed(int nodeId)
         {
             _skillTreeController.OnSkillDetailClosed();
-            _skillDetailScreenView.Hide();
+            _skillDetailScreenView.HideImmediately();
         }
 
         /// <summary>
@@ -540,7 +540,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandlePreviewButtonClicked()
         {
-            _skillTreeController.OnPreviewButtonClicked();
+            _skillTreeController.OnPreviewButtonClicked(_cts.Token);
         }
 
         /// <summary>
@@ -548,7 +548,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandlePreviewClosed()
         {
-            _previewVideoScreenView.Hide();
+            _previewVideoScreenView.HideImmediately();
         }
     }
 }

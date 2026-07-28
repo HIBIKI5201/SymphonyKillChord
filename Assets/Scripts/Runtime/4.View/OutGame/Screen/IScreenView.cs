@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.View.OutGame.Screen
 {
     /// <summary>
@@ -6,13 +9,23 @@ namespace KillChord.Runtime.View.OutGame.Screen
     public interface IScreenView
     {
         /// <summary>
-        ///    画面を表示状態にします。実際の見た目の変化は USS のトランジションに従います。
+        ///    画面を即座に表示します。
         /// </summary>
-        void Show();
+        void ShowImmediately();
 
         /// <summary>
-        ///     画面を非表示状態にします。実際の見た目の変化は USS のトランジションに従います。
+        ///     画面を即座に非表示にします。
         /// </summary>
-        void Hide();
+        void HideImmediately();
+
+        /// <summary>
+        ///     画面を表示します。
+        /// </summary>
+        Task Show(CancellationToken token);
+
+        /// <summary>
+        ///     画面を非表示にします。
+        /// </summary>
+        Task Hide(CancellationToken token);
     }
 }

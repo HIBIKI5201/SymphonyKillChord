@@ -3,6 +3,8 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
@@ -32,36 +34,58 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///    指定画面を表示状態にします。
+        ///    指定画面を即時表示します。
         /// </summary>
         /// <param name="screenId"></param>
         /// <param name="targetSceneName"></param>
-        public void Show(ScreenId screenId, string targetSceneName = null)
+        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
         {
             ScreenViewBase view = _views[screenId];
             if (view is BattlePreparationScreen battlePreparationScreen)
             {
                 battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
-            _views[screenId].Show();
+            _views[screenId].ShowImmediately();
         }
 
         /// <summary>
-        ///    指定画面を非表示状態にします。
+        ///    指定画面を即時非表示にします。
         /// </summary>
-        public void Hide(ScreenId screenId)
+        public void HideImmediately(ScreenId screenId)
         {
-            _views[screenId].Hide();
+            _views[screenId].HideImmediately();
         }
 
         /// <summary>
-        ///     全画面を非表示状態にします。
+        ///     指定画面を表示し、トランジションの完了を待機します。
         /// </summary>
-        public void HideAll()
+        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
+        {
+            ScreenViewBase view = _views[screenId];
+            if (view is BattlePreparationScreen battlePreparationScreen)
+            {
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+            }
+
+            await _views[screenId].Show(token);
+        }
+
+        /// <summary>
+        ///     指定画面を非表示にし、トランジションの完了を待機します。
+        /// </summary>
+        public async Task Hide(ScreenId screenId, CancellationToken token)
+        {
+            await _views[screenId].Hide(token);
+        }
+
+        /// <summary>
+        ///     全画面を即時非表示にします。
+        /// </summary>
+        public void HideAllImmediately()
         {
             foreach (IScreenView screenView in _views.Values)
             {
-                screenView.Hide();
+                screenView.HideImmediately();
             }
         }
 

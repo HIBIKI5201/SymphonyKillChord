@@ -399,7 +399,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void HandleScreenClosed()
         {
-            _screenController.CloseCurrent();
+            _screenController.CloseCurrentImmediately();
         }
 
         /// <summary>

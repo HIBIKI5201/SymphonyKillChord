@@ -7,9 +7,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class SettingScreenView : ScreenViewBase
     {
-        /// <summary> 非表示中もレイアウトに残し、フェードアウトを再生させます。 </summary>
-        protected override bool KeepLayoutWhileHidden => true;
-
         /// <summary> View を初期化します。 </summary>
         public SettingScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)

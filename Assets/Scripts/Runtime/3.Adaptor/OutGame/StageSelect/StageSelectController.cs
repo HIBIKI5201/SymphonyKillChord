@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System.Threading;
 
 namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 {
@@ -30,7 +31,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     ID に対応するノードのデータを詳細 Presenter へ渡し、詳細画面を表示します。
         /// </summary>
         /// <param name="stageIdValue"> 選択されたステージ ID の整数値。</param>
-        public void OnStageNodeSelected(int stageIdValue)
+        /// <param name="token"> キャンセルトークン。</param>
+        public void OnStageNodeSelected(int stageIdValue, CancellationToken token)
         {
             var stageId = new StageId(stageIdValue);
 
@@ -51,7 +53,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 
             // TODO: ノードのデータを渡す時に、セーブデータからミッションの達成状況を受け取るようにする
             _detailPresenter.Push(node);
-            _detailScreenView.Show();
+            _detailScreenView.Show(token);
         }
 
         /// <summary>

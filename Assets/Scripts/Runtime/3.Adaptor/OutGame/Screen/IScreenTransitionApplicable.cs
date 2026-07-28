@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
     /// <summary>
@@ -9,5 +12,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         ///    画面遷移結果を適用します。
         /// </summary>
         void Apply(in ScreenViewDTO screenViewDTO);
+
+        /// <summary>
+        ///     画面遷移結果を適用します。
+        /// </summary>
+        Task Apply(in ScreenViewDTO screenViewDTO, CancellationToken token);
     }
 }
