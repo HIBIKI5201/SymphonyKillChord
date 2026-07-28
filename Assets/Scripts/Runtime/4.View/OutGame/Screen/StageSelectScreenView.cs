@@ -7,6 +7,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class StageSelectScreenView : ScreenViewBase
     {
+        /// <summary> 非表示中もレイアウトに残し、フェードアウトを再生させます。 </summary>
+        protected override bool KeepLayoutWhileHidden => true;
+
         /// <summary> View を初期化します。 </summary>
         public StageSelectScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)

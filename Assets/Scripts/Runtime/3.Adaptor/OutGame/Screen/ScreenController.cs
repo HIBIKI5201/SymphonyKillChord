@@ -1,7 +1,6 @@
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.Screen;
-using System.Threading;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
@@ -26,102 +25,156 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///    タイトル画面を表示します。
         /// </summary>
-        public void ShowTitle()
+        public bool ShowTitle()
         {
+            if (!TryBeginTransition()) { return false; }
+
             _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Title));
+            return true;
         }
 
         /// <summary>
         ///    メニュー画面を表示します。
         /// </summary>
-        public void ShowMenu()
+        public bool ShowMenu()
         {
+            if (!TryBeginTransition()) { return false; }
+
             _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Menu));
+            return true;
         }
 
         /// <summary>
         ///     オプション画面を表示します。
         /// </summary>
-        public void ShowOptions()
+        public bool ShowOptions()
         {
+            if (!TryBeginTransition()) { return false; }
+
             _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Options));
+            return true;
         }
 
         /// <summary>
         ///    クレジット画面を表示します。
         /// </summary>
-        public void ShowCredit()
+        public bool ShowCredit()
         {
-            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Credit));
-        }
+            if (!TryBeginTransition()) { return false; }
 
-        /// <summary>
-        ///    現在画面を即座に閉じます。
-        /// </summary>
-        public void CloseCurrentImmediately()
-        {
-            _closeCurrentScreenUseCase.Execute();
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Credit));
+            return true;
         }
 
         /// <summary>
         ///     ホーム画面を表示します。
         /// </summary>
-        public async Task ShowHome(CancellationToken token)
+        public bool ShowHome()
         {
-            await _resetToHomeScreenUseCase.Execute(token);
+            if (!TryBeginTransition()) { return false; }
+
+            _resetToHomeScreenUseCase.Execute();
+            return true;
         }
 
         /// <summary>
         ///     作戦画面を表示します。
         /// </summary>
-        public async Task ShowStageSelect(CancellationToken token)
+        public bool ShowStageSelect()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.StageSelect), token);
+            if (!TryBeginTransition()) { return false; }
+
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.StageSelect));
+            return true;
         }
 
         /// <summary>
         ///     研究画面を表示します。
         /// </summary>
-        public async Task ShowSkillTree(CancellationToken token)
+        public bool ShowSkillTree()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillTree), token);
+            if (!TryBeginTransition()) { return false; }
+
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillTree));
+            return true;
         }
 
         /// <summary>
         ///     改造画面を表示します。
         /// </summary>
-        public async Task ShowSkillBuild(CancellationToken token)
+        public bool ShowSkillBuild()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillBuild), token);
+            if (!TryBeginTransition()) { return false; }
+
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillBuild));
+            return true;
         }
 
         /// <summary>
         ///     戦闘準備画面を表示します。
         /// </summary>
-        public async Task ShowBattlePreparation(string targetSceneName, CancellationToken token)
+        public bool ShowBattlePreparation(string targetSceneName)
         {
-            await _showScreenUseCase.Execute(
-                new ShowScreenCommand(ScreenId.BattlePreparation, targetSceneName), token);
+            if (!TryBeginTransition()) { return false; }
+
+            _showScreenUseCase.Execute(
+                new ShowScreenCommand(ScreenId.BattlePreparation, targetSceneName));
+            return true;
         }
 
         /// <summary>
         ///     設定画面を表示します。
         /// </summary>
-        public async Task ShowSetting(CancellationToken token)
+        public bool ShowSetting()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Setting), token);
+            if (!TryBeginTransition()) { return false; }
+
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Setting));
+            return true;
         }
 
         /// <summary>
         ///     現在画面を閉じます。
         /// </summary>
-        public async Task CloseCurrent(CancellationToken token)
+        public bool CloseCurrent()
         {
-            await _closeCurrentScreenUseCase.Execute(token);
+            if (!TryBeginTransition()) { return false; }
+
+            _closeCurrentScreenUseCase.Execute();
+            return true;
+        }
+
+        /// <summary>
+        ///     画面遷移の受付を再開するまでのクールダウン秒数。
+        ///     USS の transition-duration と揃えており、
+        ///     トランジション再生中の連打による多重遷移を防ぎます。
+        /// </summary>
+        private const float TRANSITION_COOLDOWN_SEC = 0.2f;
+
+        /// <summary>
+        ///     画面遷移要求を受け付けるかどうかを判定します。
+        ///     受け付ける場合はクールダウンを更新します。
+        /// </summary>
+        /// <returns> 受け付ける場合は true を返します。 </returns>
+        private bool TryBeginTransition()
+        {
+            // タイムスケールの影響を受けないよう実時間で判定する。
+            float now = Time.realtimeSinceStartup;
+
+            if (now < _acceptableTime)
+            {
+                return false;
+            }
+
+            _acceptableTime = now + TRANSITION_COOLDOWN_SEC;
+            return true;
         }
 
         private readonly CloseCurrentScreenUseCase _closeCurrentScreenUseCase;
         private readonly ResetToHomeScreenUseCase _resetToHomeScreenUseCase;
         private readonly ShowScreenUseCase _showScreenUseCase;
+
+        /// <summary> 次に画面遷移を受け付けられるようになる実時間。 </summary>
+        private float _acceptableTime;
     }
 }
