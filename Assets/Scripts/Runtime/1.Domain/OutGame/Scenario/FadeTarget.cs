@@ -15,5 +15,9 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         PortraitCenter,
         /// <summary> 右の立ち絵。 </summary>
         PortraitRight,
+        /// <summary> テキストボックス。 </summary>
+        Text,
+        /// <summary> 演出用の黒オーバーレイ（暗転/明転）。 </summary>
+        Black,
     }
 }
