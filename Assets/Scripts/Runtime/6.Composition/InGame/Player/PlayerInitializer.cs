@@ -24,7 +24,6 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
-using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View;
