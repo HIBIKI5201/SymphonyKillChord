@@ -1,12 +1,6 @@
 :root {
 }
 
-.screen-hidden {
-    position: absolute;
-    opacity: 0;
-    display: none;
-}
-
 .screen-visible {
     flex-grow: 1;
     background-color: rgb(53, 65, 72);
@@ -14,9 +8,6 @@
     height: 100%;
     position: absolute;
     opacity: 1;
-    transition-duration: 0.2s;
-    transition-property: opacity;
-    transition-timing-function: ease-out-circ;
     display: flex;
 }
 
