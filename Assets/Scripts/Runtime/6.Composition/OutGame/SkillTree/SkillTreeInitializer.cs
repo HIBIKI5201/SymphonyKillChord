@@ -301,7 +301,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeConnBinds = new();
             foreach (SkillNodeBindData bind in _loadedSkillNodeBindRepo.SkillNodeBinds)
             {
-                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId.Id, bind.FromConnNames);
+                _skillNodeConnBinds.Add(bind.SkillNodeId.Id, bind.FromConnNames);
             }
         }
 
@@ -317,7 +317,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             for (int i = 0; i < nodes.Count; i++)
             {
                 string nodeName = nodes[i].name;
-                SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
+                SkillNodeBindData bind = _loadedSkillNodeBindRepo.FindByName(nodeName);
+                SkillNodeData nodeData = bind != null ? _loadedSkillNodeDataRepo.FindNodeData(bind.SkillNodeId) : null;
                 if (nodeData == null)
                 {
                     throw new KeyNotFoundException($"SkillNodeBindDataが見つかりません：{nodeName}");
@@ -513,8 +514,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="nodeName"> 選択されたノード名です。 </param>
         private void HandleSkillNodeSelected(string nodeName)
         {
-            SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id, _cts.Token);
+            SkillNodeId nodeId = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeId;
+            _skillTreeController.OnSkillNodeSelected(nodeId.Id, _cts.Token);
         }
 
         /// <summary>
