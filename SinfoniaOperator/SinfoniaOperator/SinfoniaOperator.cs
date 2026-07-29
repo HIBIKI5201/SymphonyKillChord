@@ -8,6 +8,12 @@ namespace SinfoniaStudio.SinfoniaOperator
     {
         public static async Task Main(string[] args)
         {
+            if (args.Length > 0 && string.Equals(args[0], "send", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunSendCommandAsync(args[1..]);
+                return;
+            }
+
             Console.WriteLine("[Main] SinfoniaOperator 起動中...");
 
             // 設定ソースを選択する。JSON設定があれば優先し、なければ環境変数を使用する。
@@ -84,6 +90,17 @@ namespace SinfoniaStudio.SinfoniaOperator
                 return true;
             }
 
+            LoadConfigFromDefaultLocations();
+            return true;
+        }
+
+        /// <summary>
+        ///     カレントディレクトリと実行ファイル位置の祖先から公開・秘密JSON設定を探して読み込む。
+        ///     見つからない値は環境変数から取得する。
+        ///     `send`サブコマンドなど、引数をJSON設定パスとして扱わない呼び出し元からも利用する。
+        /// </summary>
+        private static void LoadConfigFromDefaultLocations()
+        {
             string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
             string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
             string? legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
@@ -118,8 +135,6 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 Console.WriteLine("[Main] JSON設定が見つからないため、環境変数を使用します。");
             }
-
-            return true;
         }
 
         /// <summary>
@@ -147,6 +162,67 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             return null;
+        }
+
+        /// <summary>
+        ///     自動ビルド等の外部プロセスから、Notionを読み込まずにDiscordへ1メッセージだけ送る軽量コマンド。
+        ///     使用法: send --channel &lt;Task|TaskAlert|Sprint|WorkLog&gt; --message &lt;本文&gt;
+        /// </summary>
+        /// <param name="args">"send"を除いた残りの引数。</param>
+        private static async Task RunSendCommandAsync(string[] args)
+        {
+            string? channelArg = null;
+            string? message = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "--channel" when i + 1 < args.Length:
+                        channelArg = args[++i];
+                        break;
+                    case "--message" when i + 1 < args.Length:
+                        message = args[++i];
+                        break;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(channelArg) || string.IsNullOrWhiteSpace(message))
+            {
+                Console.WriteLine("[Send] 使用法: send --channel <Task|TaskAlert|Sprint|WorkLog> --message <本文>");
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            if (!Enum.TryParse(channelArg, ignoreCase: true, out DiscordChannelKind channel))
+            {
+                string validValues = string.Join(", ", Enum.GetNames(typeof(DiscordChannelKind)));
+                Console.WriteLine($"[Send] チャンネル '{channelArg}' は無効です。有効な値: {validValues}");
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            OperatorConfig.ClearOverrides();
+            LoadConfigFromDefaultLocations();
+
+            try
+            {
+                bool isSucceeded = await DiscordNotifier.SendAsync(channel, message);
+                if (isSucceeded)
+                {
+                    Console.WriteLine($"[Send] {channel} チャンネルへの送信が完了しました。");
+                }
+                else
+                {
+                    Console.WriteLine($"[Send] {channel} チャンネルへの送信に失敗しました。");
+                    Environment.ExitCode = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Send] 送信中にエラーが発生しました: {ex.Message}");
+                Environment.ExitCode = 1;
+            }
         }
 
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)

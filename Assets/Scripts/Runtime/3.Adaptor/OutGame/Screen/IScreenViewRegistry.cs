@@ -1,6 +1,4 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
@@ -10,28 +8,23 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
     public interface IScreenViewRegistry
     {
         /// <summary>
-        ///    指定された画面を即座に表示します。
+        ///    指定された画面を表示状態にします。
         /// </summary>
-        void ShowImmediately(ScreenId screenId, string targetSceneName = null);
+        void Show(ScreenId screenId, string targetSceneName = null);
 
         /// <summary>
-        ///    指定された画面を即座に非表示にします。
+        ///    指定された画面を非表示状態にします。
         /// </summary>
-        void HideImmediately(ScreenId screenId);
+        void Hide(ScreenId screenId);
 
         /// <summary>
-        ///     すべての画面を即座に非表示にします。
+        ///     すべての画面を非表示状態にします。
+        /// </summary>
+        void HideAll();
+
+        /// <summary>
+        ///     すべての画面をフェードなしで即座に非表示状態にします。初期化時など、表示状態の保証が必要な場面で使用します。
         /// </summary>
         void HideAllImmediately();
-
-        /// <summary>
-        ///     指定された画面を表示します。
-        /// </summary>
-        Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null);
-
-        /// <summary>
-        ///     指定された画面を非表示にします。
-        /// </summary>
-        Task Hide(ScreenId screenId, CancellationToken token);
     }
 }
