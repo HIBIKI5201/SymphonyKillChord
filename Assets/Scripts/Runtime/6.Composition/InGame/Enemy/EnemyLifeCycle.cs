@@ -113,7 +113,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
             if (_targetTransform == null)
+            {
                 Debug.LogError("_targetTransformの参照がありません", this);
+                return;
+            }
 
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
