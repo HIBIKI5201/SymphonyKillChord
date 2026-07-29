@@ -1,6 +1,7 @@
+using KillChord.Runtime.Domain.InGame.Mission;
 using System.Collections.Generic;
 
-namespace KillChord.Runtime.Domain.InGame.Mission
+namespace KillChord.Runtime.Application.InGame.Mission
 {
     /// <summary>
     ///     ミッションのプレビュー表示テキストを解決するインターフェース。
