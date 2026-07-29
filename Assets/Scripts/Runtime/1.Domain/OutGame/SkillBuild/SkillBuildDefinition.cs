@@ -14,14 +14,14 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         /// <param name="equippedSkills"> プレイヤーが装備しているスキル配列。 </param>
         public SkillBuildDefinition(EquippedSkill[] equippedSkills = null)
         {
-            _equippedSkills = BuildSlotArray(equippedSkills);
+            ReplaceEquippedSkills(BuildSlotArray(equippedSkills));
         }
 
         /// <summary> 装備スキル構成が変更されたときに通知します。 </summary>
         public event Action<IReadOnlyList<EquippedSkill>> OnEquippedSkillsChanged;
 
         /// <summary> プレイヤーが装備しているスキルの配列を取得する。 </summary>
-        public IReadOnlyList<EquippedSkill> EquippedSkills => _equippedSkills;
+        public IReadOnlyList<EquippedSkill> EquippedSkills => _equippedSkillsSnapshot;
 
         /// <summary> 現在のスロット数を取得する。 </summary>
         public int SlotCount => _equippedSkills.Length;
@@ -42,8 +42,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
                 throw new ArgumentNullException(nameof(newEquippedSkills));
             }
 
-            _equippedSkills = BuildSlotArray(newEquippedSkills);
-            OnEquippedSkillsChanged?.Invoke(_equippedSkills);
+            ReplaceEquippedSkills(BuildSlotArray(newEquippedSkills));
+            OnEquippedSkillsChanged?.Invoke(_equippedSkillsSnapshot);
         }
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
 
             EquippedSkill[] expandedSkills = new EquippedSkill[slotCount];
             Array.Copy(_equippedSkills, expandedSkills, _equippedSkills.Length);
-            _equippedSkills = expandedSkills;
-            OnEquippedSkillsChanged?.Invoke(_equippedSkills);
+            ReplaceEquippedSkills(expandedSkills);
+            OnEquippedSkillsChanged?.Invoke(_equippedSkillsSnapshot);
         }
 
         /// <summary>
@@ -93,6 +93,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         }
 
         private EquippedSkill[] _equippedSkills;
+        private IReadOnlyList<EquippedSkill> _equippedSkillsSnapshot;
 
         /// <summary>
         ///     スロット配列を最小スロット数を満たす形で構築する。
@@ -115,6 +116,16 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///     内部配列を置き換え、外部公開用の読み取り専用スナップショットを更新する。
+        /// </summary>
+        /// <param name="equippedSkills"> 新しい内部配列。 </param>
+        private void ReplaceEquippedSkills(EquippedSkill[] equippedSkills)
+        {
+            _equippedSkills = equippedSkills;
+            _equippedSkillsSnapshot = Array.AsReadOnly(equippedSkills);
         }
     }
 }
