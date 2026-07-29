@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         }
 
         /// <summary>
-        ///     在在開いている画面を即座に閉じます。
+        ///     現在開いている画面を即座に閉じます。
         /// </summary>
         public void Execute()
         {
