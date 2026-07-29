@@ -3,15 +3,14 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
     /// <summary>
     ///     画面 ID と View の対応表クラス。
     /// </summary>
-    public sealed class ScreenViewRegistry : IScreenViewRegistry, IScreenLifecycleSignal, IDisposable
+    public sealed class ScreenViewRegistry : IScreenViewRegistry, IDisposable
     {
         /// <summary> Registry を初期化します。 </summary>
         public ScreenViewRegistry(
@@ -33,53 +32,55 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             };
         }
 
-        /// <inheritdoc />
-        public event Action<ScreenId> OnScreenWillShow;
-
         /// <summary>
-        ///    指定画面を即時表示します。
+        ///    指定画面を表示状態にします。
         /// </summary>
         /// <param name="screenId"></param>
         /// <param name="targetSceneName"></param>
-        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
+        public void Show(ScreenId screenId, string targetSceneName = null)
         {
-            ScreenViewBase view = _views[screenId];
-            PrepareForShow(screenId, view, targetSceneName);
-            view.ShowImmediately();
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
+            if (view is BattlePreparationScreen battlePreparationScreen)
+            {
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+            }
+            view.Show();
         }
 
         /// <summary>
-        ///    指定画面を即時非表示にします。
+        ///    指定画面を非表示状態にします。
         /// </summary>
-        public void HideImmediately(ScreenId screenId)
+        public void Hide(ScreenId screenId)
         {
-            _views[screenId].HideImmediately();
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
+            view.Hide();
         }
 
         /// <summary>
-        ///     指定画面を表示し、トランジションの完了を待機します。
+        ///     全画面を非表示状態にします。
         /// </summary>
-        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
+        public void HideAll()
         {
-            ScreenViewBase view = _views[screenId];
-            PrepareForShow(screenId, view, targetSceneName);
-            await view.Show(token);
+            foreach (IScreenView screenView in _views.Values)
+            {
+                screenView.Hide();
+            }
         }
 
         /// <summary>
-        ///     指定画面を非表示にし、トランジションの完了を待機します。
-        /// </summary>
-        public async Task Hide(ScreenId screenId, CancellationToken token)
-        {
-            await _views[screenId].Hide(token);
-        }
-
-        /// <summary>
-        ///     全画面を即時非表示にします。
+        ///     全画面をフェードなしで即座に非表示状態にします。
         /// </summary>
         public void HideAllImmediately()
         {
-            foreach (IScreenView screenView in _views.Values)
+            foreach (ScreenViewBase screenView in _views.Values)
             {
                 screenView.HideImmediately();
             }
@@ -90,27 +91,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Dispose()
         {
-            foreach (IDisposable disposable in _views.Values)
+            foreach(IDisposable disposable in _views.Values)
             {
                 disposable.Dispose();
             }
-        }
-
-        /// <summary>
-        ///     画面固有の表示準備を行い、表示直前を通知します。
-        /// </summary>
-        private void PrepareForShow(
-            ScreenId screenId,
-            ScreenViewBase view,
-            string targetSceneName)
-        {
-            if (view is BattlePreparationScreen battlePreparationScreen
-                && !string.IsNullOrEmpty(targetSceneName))
-            {
-                battlePreparationScreen.SetTargetSceneName(targetSceneName);
-            }
-
-            OnScreenWillShow?.Invoke(screenId);
         }
 
         private readonly IReadOnlyDictionary<ScreenId, ScreenViewBase> _views;
