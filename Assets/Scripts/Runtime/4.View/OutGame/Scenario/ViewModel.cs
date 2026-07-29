@@ -19,9 +19,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         /// フェード更新通知を購読先へ流す。
         /// </summary>
-        public void SetFade(float start, float end, float duration)
+        public void SetFade(string target, float start, float end, float duration)
         {
-            OnFade?.Invoke(start, end, duration);
+            OnFade?.Invoke(target, start, end, duration);
         }
 
         /// <summary>
@@ -72,8 +72,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
         /// <summary> OnChat を取得する。 </summary>
         public event Action<string> OnChat;
-        /// <summary> OnFade を取得する。 </summary>
-        public event Action<float, float, float> OnFade;
+        /// <summary> OnFade を取得する。（target, start, end, duration） </summary>
+        public event Action<string, float, float, float> OnFade;
         /// <summary> OnBackground を取得する。 </summary>
         public event Action<string> OnBackground;
         /// <summary> OnAnimation を取得する。 </summary>

@@ -130,7 +130,7 @@ DIの組み立て役である以上、ここで検出できなかったnullは�
 
 **修正方針**: Composition層の各 `Initialize` / コンストラクタに
 `ArgumentNullException` ガードを追加する。[08](08_緊密結合とレイヤー違反.md) で触れる
-`ServiceLocator.TryGetInstance` の定型ブロック（79箇所）をヘルパー化する際に、
+`ServiceLocator.TryGetInstance` の定型ブロック（85箇所）をヘルパー化する際に、
 同時にnull検証も集約できる。
 
 ---
@@ -169,3 +169,97 @@ if (!_musicSyncView)        _musicSyncView        = FindAnyObjectByType<MusicSyn
 ただし、**取得に失敗した場合（シーンに存在しない場合）のログが無い**ため、
 以降の処理で静かにnull参照する。`Find*` は毎回シーン全体を走査するため、
 失敗時は毎回フルスキャンのコストも払う（[05](05_不必要な繰り返し処理.md) 参照）。
+
+---
+
+# 付録: 該当箇所の全列挙
+
+## 付録A. `4.View` でSerializeFieldを持つがガードが無いファイル（全42件）
+
+`[SerializeField]` を持ちながら `LogError` / `LogWarning` / `ArgumentNullException` /
+`Assert` のいずれも含まないファイル。SerializeField数の降順。
+
+**重要な注意**: 42件すべてが問題というわけではない。以下の3分類で扱いが異なる。
+
+| 分類 | 対応 |
+| --- | --- |
+| **A. ScriptableObject設定クラス**（`*Config` 等） | Inspector上で必ず値が入る前提の設定値。ガードより `[Min]` / `[Range]` 属性による入力制約が適切 |
+| **B. MonoBehaviour View**（参照が必須） | **ガード追加が必要**。[ReticleHudView.cs:27-38](../../Assets/Scripts/Runtime/4.View/InGame/Reticle/ReticleHudView.cs) が模範 |
+| **C. データ保持のみ**（`*Entry` / `*Pair`） | 影響が小さい。優先度低 |
+
+### 分類B（ガード追加を推奨）— 20件
+
+| # | SF数 | ファイル | 備考 |
+| --- | --- | --- | --- |
+| 1 | 10 | [4.View/InGame/Enemy/EnemyMoveView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs) | 571行の大型View |
+| 2 | 9 | [4.View/InGame/Music/RhythmGuideView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideView.cs) | 旧実装の可能性（[04](04_GCAllocとメモリリーク.md) 参照） |
+| 3 | 7 | [4.View/OutGame/Scenario/CommandBarToggleView.cs](../../Assets/Scripts/Runtime/4.View/OutGame/Scenario/CommandBarToggleView.cs) | |
+| 4 | 6 | [4.View/InGame/Result/StageResultMissionItemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Result/StageResultMissionItemView.cs) | |
+| 5 | 5 | [4.View/InGame/Sequence/StageSequenceMessageView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceMessageView.cs) | |
+| 6 | 5 | [4.View/InGame/Mission/MissionEvaluationItemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Mission/MissionEvaluationItemView.cs) | |
+| 7 | 5 | [4.View/InGame/Camera/CameraSystemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs) | **毎フレーム13個のnullチェック**（本文参照） |
+| 8 | 4 | [4.View/InGame/UI/HUDEnemyHealthView.cs](../../Assets/Scripts/Runtime/4.View/InGame/UI/HUDEnemyHealthView.cs) | **`Awake` で `_sprites[^1]` に無検証アクセス**（本文参照） |
+| 9 | 4 | [4.View/InGame/Stage/StageEffectView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Stage/StageEffectView.cs) | |
+| 10 | 4 | [4.View/InGame/Enemy/NearestAttackPositionSearchView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs) | `_agent` / `_raycastView` 未検証 |
+| 11 | 3 | [4.View/Persistent/Load/LoadingScreenView.cs](../../Assets/Scripts/Runtime/4.View/Persistent/Load/LoadingScreenView.cs) | |
+| 12 | 3 | [4.View/Persistent/Input/MobileInput.cs](../../Assets/Scripts/Runtime/4.View/Persistent/Input/MobileInput.cs) | |
+| 13 | 3 | [4.View/InGame/Skill/SkillView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Skill/SkillView.cs) | |
+| 14 | 3 | [4.View/InGame/Mission/MissionStepPopupView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Mission/MissionStepPopupView.cs) | |
+| 15 | 2 | [4.View/InGame/UI/ParticleController.cs](../../Assets/Scripts/Runtime/4.View/InGame/UI/ParticleController.cs) | |
+| 16 | 2 | [4.View/InGame/Skill/SkillUI/SkillCrosshairStepView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillCrosshairStepView.cs) | |
+| 17 | 2 | [4.View/InGame/Music/RhythmGuideLabelView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideLabelView.cs) | |
+| 18 | 2 | [4.View/InGame/Enemy/Boss/BossMoveView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BossMoveView.cs) | |
+| 19 | 1 | [4.View/OutGame/Scenario/ScenarioUIHideView.cs](../../Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioUIHideView.cs) | |
+| 20 | 1 | [4.View/InGame/UI/IngameHudView.cs](../../Assets/Scripts/Runtime/4.View/InGame/UI/IngameHudView.cs) | `_healthBarImage` 未検証 |
+
+### 分類A（設定クラス。`[Min]`/`[Range]` 属性で対応）— 12件
+
+| # | SF数 | ファイル |
+| --- | --- | --- |
+| 21 | 25 | [4.View/InGame/Camera/CameraConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Camera/CameraConfig.cs) |
+| 22 | 19 | [4.View/InGame/Music/ACLikeRhythmGuideEffectConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideEffectConfig.cs) |
+| 23 | 18 | [4.View/InGame/Sequence/StageStartSequenceConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Sequence/StageStartSequenceConfig.cs) |
+| 24 | 12 | [4.View/InGame/Skill/SkillUI/SkillInputProgressUIConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressUIConfig.cs) |
+| 25 | 4 | [4.View/InGame/Skill/SkillUI/SkillBeatVisualSettingConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillBeatVisualSettingConfig.cs) |
+| 26 | 3 | [4.View/InGame/Animation/CharacterAnimationCatalogConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationCatalogConfig.cs) |
+| 27 | 2 | [4.View/OutGame/Setting/ScreenConfig.cs](../../Assets/Scripts/Runtime/4.View/OutGame/Setting/ScreenConfig.cs) |
+| 28 | 2 | [4.View/InGame/Player/PlayerAttackWeaponConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Player/PlayerAttackWeaponConfig.cs) |
+| 29 | 1 | [4.View/InGame/Player/PlayerAttackAnimationConfig.cs](../../Assets/Scripts/Runtime/4.View/InGame/Player/PlayerAttackAnimationConfig.cs) |
+| 30 | 3 | [4.View/InGame/Character/VisualEffectGraphOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/VisualEffectGraphOneShotVisualEffect.cs) |
+| 31 | 2 | [4.View/InGame/Stage/GameObjectActivationOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Stage/GameObjectActivationOneShotVisualEffect.cs) |
+| 32 | 2 | [4.View/InGame/Stage/AnimatorTriggerOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Stage/AnimatorTriggerOneShotVisualEffect.cs) |
+
+`ACLikeRhythmGuideEffectConfig`（#22）に `[Min(0.01f)]` を付ければ、
+[09. マジックナンバー](09_マジックナンバーと定数化.md) で指摘した
+`Mathf.Max(0.01f, ...)` のクランプ4箇所が実装から消える。
+
+### 分類C（データ保持のみ。優先度低）— 10件
+
+| # | SF数 | ファイル |
+| --- | --- | --- |
+| 33 | 4 | [4.View/InGame/Player/PlayerAttackAnimationEntry.cs](../../Assets/Scripts/Runtime/4.View/InGame/Player/PlayerAttackAnimationEntry.cs) |
+| 34 | 2 | [4.View/InGame/Enemy/SpawnPositionPair.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/SpawnPositionPair.cs) |
+| 35 | 2 | [4.View/InGame/Character/SoundEffectOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/SoundEffectOneShotVisualEffect.cs) |
+| 36 | 2 | [4.View/InGame/Character/ParticleSystemPoolView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemPoolView.cs) |
+| 37 | 1 | [4.View/InGame/Enemy/EnemyHealthBillboardView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyHealthBillboardView.cs) | 
+| 38 | 1 | [4.View/InGame/Character/ReusableParticleSystemView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/ReusableParticleSystemView.cs) |
+| 39 | 1 | [4.View/InGame/Character/PooledParticleSystemOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/PooledParticleSystemOneShotVisualEffect.cs) |
+| 40 | 1 | [4.View/InGame/Character/ParticleSystemRingBufferView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemRingBufferView.cs) |
+| 41 | 1 | [4.View/InGame/Character/ParticleSystemOneShotVisualEffect.cs](../../Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemOneShotVisualEffect.cs) |
+| 42 | 1 | [4.View/InGame/Animation/CharacterAnimationView.cs](../../Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationView.cs) |
+
+**着手順の推奨**: 分類Bの #7・#8・#10（既知の不具合または大型View）→ 残りの分類B →
+分類A（属性化）→ 分類C。
+
+## 付録B. `??=` によるUnity非対応のnull補完（全2件）
+
+Unityの「破棄済みオブジェクト」判定を通さないため、
+`if (x == null)` 形式へ書き換えるべき箇所。
+
+| # | 場所 | コード |
+| --- | --- | --- |
+| 1 | [4.View/Persistent/Voice/VoiceSource.cs:65](../../Assets/Scripts/Runtime/4.View/Persistent/Voice/VoiceSource.cs) | `_volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();` |
+| 2 | [4.View/Persistent/Music/SoundEffectSource.cs:72](../../Assets/Scripts/Runtime/4.View/Persistent/Music/SoundEffectSource.cs) | `_volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();` |
+
+なお `SaveBase.cs:101` の `_filePath ??= Path.Combine(...)` は
+`string` に対する `??=` であり **Unityのnull意味論と無関係なので問題ない**。

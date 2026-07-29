@@ -5,6 +5,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IFadeViewSink
     {
-        void SetFade(float start, float end, float duration);
+        void SetFade(string target, float start, float end, float duration);
     }
 }
