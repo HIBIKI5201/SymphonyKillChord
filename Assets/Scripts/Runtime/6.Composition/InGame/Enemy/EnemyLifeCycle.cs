@@ -112,6 +112,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+            if (_targetTransform == null)
+                Debug.LogError("_targetTransformの参照がありません", this);
 
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
@@ -162,7 +164,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
 
             // View接続
             var animationComposition = new AnimationComposition();
@@ -393,6 +395,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Renderer[] _deathEffectRenderers;
         [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
         private GameObject _deathSwampGameObject;
+
         /// <summary>
         ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
         /// </summary>
@@ -402,6 +405,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
         private float _deathSwampSinkDuration = 3f;
 
+        [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
+        private Transform _targetTransform;
 
         [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
