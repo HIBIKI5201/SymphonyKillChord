@@ -1,6 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
-using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
@@ -29,8 +29,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, SourceDataCollection("Wave"), Tooltip("バトルパートで使用する敵Wave定義ID。")]
         private DataID _enemyWaveDefinitionId;
 
-        [SerializeField, Tooltip("バトルパートのミッション定義アセット。")]
-        private MissionDefinitionAsset _missionDefinitionAsset;
+        [SerializeField, SourceDataCollection("Mission"), Tooltip("バトルパートのミッションID。")]
+        private DataID _missionDefinitionId;
 
         /// <summary>
         ///     バトルステージ定義を生成する。
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             StageReward reward,
             string targetSceneName)
         {
-            if (_missionDefinitionAsset == null)
+            if (_missionDefinitionId.Id == 0)
             {
                 throw new System.InvalidOperationException(
                     $"[{nameof(BattleStageAsset)}] ミッション定義が未設定です。StageId: {stageId.Value}");
@@ -61,7 +61,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 reward,
                 targetSceneName,
                 _battleSceneName,
-                _missionDefinitionAsset.Create(),
+                new MissionId(_missionDefinitionId.Id),
                 _isTutorial,
                 new EnemyWaveDefinitionId(_enemyWaveDefinitionId.Id));
         }

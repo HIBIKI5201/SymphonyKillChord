@@ -8,6 +8,7 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -73,6 +74,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
         private string _stageTreeAssetKey;
 
+        [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
+        private string _missionDefinitionRepositoryKey;
+
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
         private StageProgressService _progressService;
@@ -93,6 +97,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private BattleSortieSelectionService _battleSortieSelectionService;
         private StageTreeAsset _loadedStageTreeAsset;
+        private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private SaveData _loadedSaveData;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
@@ -119,6 +124,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             _loadedStageTreeAsset =
                 await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            _loadedMissionDefinitionRepository =
+                await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
             if (_loadedStageTreeAsset == null
                 || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
             {
@@ -406,6 +413,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _cts = null;
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _loadedStageTreeAsset = null;
+            _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedMissionDefinitionRepository = null;
             _loadedSaveData = null;
             _stageMapScrollView = null;
             _stageMapContent = null;
@@ -765,7 +774,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void BuildControllers()
         {
-            var detailPresenter = new StageDetailPresenter(_detailScreenView);
+            var detailPresenter = new StageDetailPresenter(_detailScreenView, _loadedMissionDefinitionRepository);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 
