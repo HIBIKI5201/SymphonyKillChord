@@ -212,7 +212,7 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Execute Unity - Download and Import Packages
+      - name: Download and Import Packages
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -419,7 +419,6 @@ jobs:
           Write-Host "OK: NuGet packages restored."
           Write-Host "::endgroup::"
         shell: powershell
-
       - name: Execute Unity - Build
         run: |
           Write-Host "::group::Start Unity Build Process"
@@ -432,6 +431,18 @@ jobs:
           Write-Host "Timeout: $TimeoutSec seconds ($($TimeoutSec / 60) minutes)"
           Write-Host ""
 
+          # CPUコア数の設定
+          $CpuCount = [Environment]::ProcessorCount
+          $UnityCpuCount = [Math]::Min(63, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+
+          # プロセッサアフィニティビットマスクの生成
+          $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
+
+          Write-Host "Detected logical CPU count: $CpuCount"
+          Write-Host "Unity CPU count: $UnityCpuCount"
+          Write-Host "Unity CPU affinity mask: 0x$('{0:X}' -f $AffinityMask)"
+          Write-Host ""
+
           $UnityArgs = @(
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
@@ -439,7 +450,22 @@ jobs:
             "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
-          $UnityProcess = Start-Process -FilePath "$env:UNITY_EXE_PATH" -ArgumentList $UnityArgs -PassThru -NoNewWindow
+
+          $UnityProcess = Start-Process `
+            -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList $UnityArgs `
+            -PassThru `
+            -NoNewWindow
+
+          try {
+            $UnityProcess.ProcessorAffinity = $AffinityMask
+            Write-Host "OK: Unity processor affinity configured successfully."
+          } catch {
+            Write-Host "ERROR: Failed to configure Unity processor affinity: $_"
+            $UnityProcess.Kill()
+            Write-Host "::endgroup::"
+            exit 1
+          }
 
           if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
             Write-Host ""
@@ -459,6 +485,7 @@ jobs:
             Write-Host "WARNING: Unity build process returned a non-zero exit code ($UnityExitCode)."
             Write-Host "          See unity_build.log for details."
           }
+
           Write-Host "::endgroup::"
           exit $UnityExitCode
         shell: powershell
@@ -562,7 +589,111 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
+      - name: Resolve Current Build Version
+        env:
+          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
+        run: |
+          Write-Host "::group::Resolve Current Build Version"
+
+          # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
+          # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
+          $VarName = "VERSION_BASE_$env:BUILD_MODE"
+          $Headers = @{
+              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
+              "Accept"        = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+
+          try {
+              $VarResponse = Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers
+              $VersionString = $VarResponse.value
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  Write-Host "WARNING: Repository variable '$VarName' not found. Creating with default value 'v1.0.X'..."
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $VarName; "value" = "v1.0.X" } | ConvertTo-Json
+                  try {
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $VersionString = "v1.0.X"
+                      Write-Host "OK: '$VarName' created with default value 'v1.0.X'."
+                  } catch {
+                      Write-Host "ERROR: Failed to create repository variable '$VarName': $_"
+                      Write-Host "::endgroup::"
+                      exit 1
+                  }
+              } else {
+                  Write-Host "ERROR: Failed to retrieve repository variable '$VarName': $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
+          }
+
+          # BUILD_VERSION_{BuildMode} にパッチ番号を格納する。          
+          $PatchVarName = "BUILD_VERSION_$env:BUILD_MODE"
+          $PatchGetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$PatchVarName"
+          try {
+              $PatchVarResponse = Invoke-RestMethod -Uri $PatchGetUrl -Method GET -Headers $Headers
+              $PatchNumber = $PatchVarResponse.value
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  Write-Host "WARNING: Repository variable '$PatchVarName' not found. Creating with default value '0'..."
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $PatchVarName; "value" = "0" } | ConvertTo-Json
+                  try {
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $PatchNumber = "0"
+                      Write-Host "OK: '$PatchVarName' created with default value '0'."
+                  } catch {
+                      Write-Host "ERROR: Failed to create repository variable '$PatchVarName': $_"
+                      Write-Host "::endgroup::"
+                      exit 1
+                  }
+              } else {
+                  Write-Host "ERROR: Failed to retrieve repository variable '$PatchVarName': $_"
+                  Write-Host "::endgroup::"
+                  exit 1
+              }
+          }
+
+          if ($PatchNumber -notmatch '^\d+$') {
+              Write-Host "ERROR: '$PatchVarName' value '$PatchNumber' is not a non-negative integer."
+              Write-Host "::endgroup::"
+              exit 1
+          }
+
+          if ($VersionString -match '^(.*\.)[Xx]$') {
+              $VersionString = "$($Matches[1])$PatchNumber"
+          } else {
+              Write-Host "ERROR: '$VarName' value '$VersionString' does not match expected format (e.g. v1.0.X)"
+              Write-Host "::endgroup::"
+              exit 1
+          }
+
+          "PATCH_NUMBER_VAR_NAME=$PatchVarName" | Add-Content -Path $env:GITHUB_ENV
+          "PATCH_NUMBER=$PatchNumber"            | Add-Content -Path $env:GITHUB_ENV
+          "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
+          Write-Host "OK: Current build version resolved: $VersionString"
+          Write-Host "::endgroup::"
+        shell: powershell
+
+      - name: Generate Release Tag
+        id: tag_gen
+        run: |
+          Write-Host "::group::Generate Release Tag"
+          
+          $VersionString = $env:CURRENT_BUILD_VERSION
+
+          $TagName = "$env:TAG_PREFIX-$VersionString"
+
+          "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
+          Write-Host "OK: Generated tag name: $TagName"
+          Write-Host "::endgroup::"
+        shell: powershell
+
       - name: Zip Build Artifacts
+        env:
+          TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           Write-Host "::group::Archive Build Artifacts (ZIP)"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -575,33 +706,41 @@ jobs:
             exit 1
           }
           
-          try {
-            Write-Host "INFO: Compressing build artifacts..."
-            Compress-Archive -Path "$ResolvedOutputDir\*" -DestinationPath Builds.zip -ErrorAction Stop
-          
-            $ZipSize = (Get-Item "Builds.zip").Length
-            Write-Host "OK: Archive (Builds.zip) created successfully."
-            Write-Host "     File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
-          } catch {
-            Write-Host "ERROR: Failed to create archive: $_"
+          $TagName = $env:TAG_NAME
+          $PlatformDirs = Get-ChildItem -Path $ResolvedOutputDir -Directory
+          if ($PlatformDirs.Count -eq 0) {
+            Write-Host "ERROR: No platform build output found under $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
           }
-          Write-Host "::endgroup::"
-        shell: powershell
 
-      - name: Generate Release Tag
-        id: tag_gen
-        run: |
-          Write-Host "::group::Generate Release Tag"
-          
-          # Get current counter from repository variable (default to 1 if not set)
-          $Counter = "${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
-          if (-not $Counter) { $Counter = "1" }
-          
-          $TagName = "${{ steps.determine_mode.outputs.tag_prefix }}-v1.0.$Counter"
-          "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
-          Write-Host "OK: Generated tag name: $TagName"
+          foreach ($PlatformDir in $PlatformDirs) {
+            $ZipName = "$($PlatformDir.Name)-$TagName.zip"
+            $ZipPath = Join-Path -Path $PWD -ChildPath $ZipName
+
+            try {
+              Write-Host "Creating archive for $($PlatformDir.Name)"
+              Write-Host "  Source:      $($PlatformDir.FullName)"
+              Write-Host "  Destination: $ZipPath"
+
+              Compress-Archive `
+                -Path "$($PlatformDir.FullName)\*" `
+                -DestinationPath $ZipPath `
+                -ErrorAction Stop
+
+              if (-not (Test-Path $ZipPath)) {
+                throw "ZIP file was not created: $ZipPath"
+              }
+
+              $ZipSize = (Get-Item $ZipPath).Length
+
+              Write-Host "OK: Archive ($ZipName) created successfully. File Size: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+            } catch {
+              Write-Host "ERROR: Failed to create archive for $($PlatformDir.Name): $_"
+              Write-Host "::endgroup::"
+              exit 1
+            }
+          }
           Write-Host "::endgroup::"
         shell: powershell
 
@@ -630,53 +769,36 @@ jobs:
 
             **ビルド対象プロファイル:**
             ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
-          files: Builds.zip
+          files: "*.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Increment Release Counter
-        if: success()
+      - name: Increment Release Patch Number
+        env:
+          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
-          Write-Host "::group::Increment Release Counter"
-          $VarName = "BUILD_VERSION_$env:BUILD_MODE"
-          $CurrentCounter = [int]"${{ vars[format('BUILD_VERSION_{0}', steps.determine_mode.outputs.build_mode)] }}"
-          if (-not $CurrentCounter) { $CurrentCounter = 1 }
-          $NextCounter = $CurrentCounter + 1
-          
-          Write-Host "Current Counter: $CurrentCounter"
-          Write-Host "Next Counter: $NextCounter"
+          Write-Host "::group::Increment Release Patch Number"
+          $VarName      = $env:PATCH_NUMBER_VAR_NAME
+          $PatchNumber  = [int]$env:PATCH_NUMBER
+          $NextPatchNumber = $PatchNumber + 1
+
+          Write-Host "Variable Name: $VarName"
+          Write-Host "Current Patch Number: $PatchNumber"
+          Write-Host "Next Patch Number: $NextPatchNumber"
           
           # Update repository variable using GitHub API
           $Headers = @{
-              "Authorization" = "Bearer ${{ secrets.VAR_UPDATE_TOKEN }}"
+              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
 
-          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $VariableExists = $true
-          try {
-              Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers | Out-Null
-          } catch {
-              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  $VariableExists = $false
-              } else {
-                  Write-Host "ERROR: $VarName existence check failed: $_"
-                  Write-Host "::endgroup::"
-                  exit 1
-              }
-          }
+          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+          $Body = @{ "name" = $VarName; "value" = "$NextPatchNumber" } | ConvertTo-Json
 
           try {
-              if ($VariableExists) {
-                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
-                  Invoke-RestMethod -Uri $GetUrl -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              } else {
-                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $VarName; "value" = [string]$NextCounter } | ConvertTo-Json
-                  Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              }
-              Write-Host "OK: $VarName updated to $NextCounter successfully."
+              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              Write-Host "OK: $VarName updated to $NextPatchNumber successfully."
           } catch {
               Write-Host "ERROR: $VarName Failed to update: $_"
               Write-Host "::endgroup::"
@@ -694,7 +816,7 @@ jobs:
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "OK: Release created successfully."
             Write-Host "     Tag: ${{ steps.tag_gen.outputs.TAG_NAME }}"
-            Write-Host "     Artifact: Builds.zip has been uploaded."
+            Write-Host "     Artifact: All Builds have been uploaded."
           } else {
             Write-Host "WARNING: Release creation did not complete (failed or skipped)."
           }
