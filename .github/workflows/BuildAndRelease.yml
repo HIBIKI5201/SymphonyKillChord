@@ -126,8 +126,8 @@ jobs:
       - name: ビルドモードの決定
         id: determine_mode
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           $BaseRef = "${{ github.base_ref }}"
           if (-not $BaseRef) {
@@ -151,14 +151,14 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: 環境情報の表示
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::ビルドワークフロー環境情報"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
@@ -170,14 +170,14 @@ jobs:
           Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: Unityのインストール検証
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::Unityのインストール検証"
           if (-not $env:UNITY_EXE_PATH) {
@@ -198,14 +198,14 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: .NET SDK / dotnet CLI の可用性チェック
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::.NET SDK の可用性チェック"
 
@@ -222,14 +222,14 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: パッケージのダウンロードとインポート
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           # ==========================================
           # 1. 準備 および Google Drive からの ZIP ダウンロード
@@ -403,14 +403,14 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: NuGetパッケージの復元
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
 
@@ -437,14 +437,14 @@ jobs:
 
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: Unityビルドの実行
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::Unity ビルドプロセスの開始"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
@@ -513,15 +513,15 @@ jobs:
 
           Write-Host "::endgroup::"
           exit $UnityExitCode
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
       - name: Unityビルドログの要約
         if: always()
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::Unity ビルドログ要約"
           if (Test-Path "unity_build.log") {
@@ -543,7 +543,7 @@ jobs:
             Write-Host "[WARN]: unity_build.log が見つかりませんでした。"
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -558,8 +558,8 @@ jobs:
 
       - name: ビルド成果物のチェック
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::ビルド成果物の検証"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -604,7 +604,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -612,8 +612,8 @@ jobs:
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::現行ビルドバージョンの解決"
 
@@ -697,15 +697,15 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
       - name: リリースタグの生成
         id: tag_gen
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::リリースタグの生成"
           
@@ -716,7 +716,7 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -724,8 +724,8 @@ jobs:
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::ビルド成果物のアーカイブ (ZIP)"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -774,7 +774,7 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -813,8 +813,8 @@ jobs:
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::リリースパッチ番号のインクリメント"
           $VarName      = $env:PATCH_NUMBER_VAR_NAME
@@ -844,15 +844,15 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
       - name: リリースの完了
         if: always()
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
-          $OutputEncoding = [System.Text.Encoding]::GetEncoding(932)
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::ワークフロー実行サマリー"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが完了しました。"
@@ -865,4 +865,4 @@ jobs:
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
