@@ -259,10 +259,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             BuildVideoClipDict();
 
             _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent);
-            _skillDetailScreenView.Hide();
+            _skillDetailScreenView.HideImmediately();
             _playerStatusScreenView = new PlayerStatusScreenView(_playerStatusRoot, _outGameUIEvent);
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
-            _previewVideoScreenView.Hide();
+            _previewVideoScreenView.HideImmediately();
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,

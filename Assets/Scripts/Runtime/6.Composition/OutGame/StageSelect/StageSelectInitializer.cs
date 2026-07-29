@@ -349,7 +349,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _openUseCase.ApplySavedClearedStages();
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
-            _detailScreenView.Hide();
+            _detailScreenView.HideImmediately();
 
             // --- View 層（接続線・ノード）---
             var layoutBuilder = new StageMapLayoutBuilder();

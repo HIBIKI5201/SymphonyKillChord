@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
@@ -38,12 +39,16 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <param name="targetSceneName"></param>
         public void Show(ScreenId screenId, string targetSceneName = null)
         {
-            ScreenViewBase view = _views[screenId];
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
             if (view is BattlePreparationScreen battlePreparationScreen)
             {
                 battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
-            _views[screenId].Show();
+            view.Show();
         }
 
         /// <summary>
@@ -51,7 +56,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Hide(ScreenId screenId)
         {
-            _views[screenId].Hide();
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
+            view.Hide();
         }
 
         /// <summary>
