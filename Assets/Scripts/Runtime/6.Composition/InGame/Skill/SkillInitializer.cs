@@ -40,11 +40,15 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillView[] _skillVisuals;
         [SerializeField, Tooltip("入力進捗UI設定です。未設定時はPlayer側設定を流用します。")]
         private SkillInputProgressUIConfig _inputProgressUIConfig;
-        [SerializeField, Tooltip("テスト用の装備スキル一覧です。未設定時はPlayer側設定を流用します。")]
-        private SkillTemplateAsset[] _equippedSkills;
+        [SerializeField, SourceDataCollection("Skill")]
+        [Tooltip("テスト用の装備スキルID一覧です。未設定時はPlayer側設定を流用します。")]
+        private DataID[] _equippedSkills;
         [SerializeField, SourceDataAddress]
         [Tooltip("改造画面を経由していない場合に、セーブデータから装備スキルを解決するためのリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
+        [SerializeField, SourceDataAddress]
+        [Tooltip("テスト用装備スキルIDの解決に使うスキルリポジトリの Addressables キーです。")]
+        private string _skillRepositoryKey;
 
         /// <summary>
         ///     改造画面を経由せずシーンへ入った場合に備え、セーブデータ由来の装備スキルを非同期で解決します。
@@ -78,6 +82,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             catch (Exception exception)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
+            {
+                _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
             }
 
             return true;
@@ -177,6 +186,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillController = null;
             _saveDataEquippedSkills = null;
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
+            _skillRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedSkillRepository = null;
 
             if (!_isRegistered)
             {
@@ -294,29 +305,53 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return _saveDataEquippedSkills;
             }
 
-            SkillTemplateAsset[] fallbackAssets = _equippedSkills;
-            if ((fallbackAssets == null || fallbackAssets.Length == 0) && playerInitializer != null)
+            SkillId[] fallbackIds = ConvertToSkillIds(_equippedSkills);
+            if ((fallbackIds == null || fallbackIds.Length == 0) && playerInitializer != null)
             {
-                fallbackAssets = playerInitializer.EquippedSkillAssets;
+                fallbackIds = playerInitializer.EquippedSkillIds;
             }
 
-            if (fallbackAssets == null || fallbackAssets.Length == 0)
+            if (fallbackIds == null || fallbackIds.Length == 0 || _loadedSkillRepository == null)
             {
                 return Array.Empty<SkillTemplate>();
             }
 
-            List<SkillTemplate> templates = new List<SkillTemplate>(fallbackAssets.Length);
-            for (int i = 0; i < fallbackAssets.Length; i++)
+            List<SkillTemplate> templates = new List<SkillTemplate>(fallbackIds.Length);
+            for (int i = 0; i < fallbackIds.Length; i++)
             {
-                if (fallbackAssets[i] == null)
+                if (_loadedSkillRepository.TryGetSkill(fallbackIds[i], out SkillTemplate template))
+                {
+                    templates.Add(template);
+                }
+            }
+
+            return templates.ToArray();
+        }
+
+        /// <summary>
+        ///     DataID配列をSkillId配列へ変換します。
+        /// </summary>
+        /// <param name="dataIds"> 変換元のDataID配列です。 </param>
+        /// <returns> 変換後のSkillId配列です。 </returns>
+        private static SkillId[] ConvertToSkillIds(DataID[] dataIds)
+        {
+            if (dataIds == null || dataIds.Length == 0)
+            {
+                return Array.Empty<SkillId>();
+            }
+
+            List<SkillId> ids = new List<SkillId>(dataIds.Length);
+            for (int i = 0; i < dataIds.Length; i++)
+            {
+                if (dataIds[i].Id == 0)
                 {
                     continue;
                 }
 
-                templates.Add(fallbackAssets[i].ToDomain());
+                ids.Add(new SkillId(dataIds[i].Id));
             }
 
-            return templates.ToArray();
+            return ids.ToArray();
         }
 
         /// <summary>
@@ -387,5 +422,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private PlayerView _boundPlayerView;
         private bool _isRegistered;
         private SkillTemplate[] _saveDataEquippedSkills;
+        private SkillRepository _loadedSkillRepository;
     }
 }
