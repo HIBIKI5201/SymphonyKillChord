@@ -151,7 +151,7 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -170,7 +170,7 @@ jobs:
           Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -198,7 +198,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -222,7 +222,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -403,7 +403,7 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -437,7 +437,7 @@ jobs:
 
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -513,7 +513,7 @@ jobs:
 
           Write-Host "::endgroup::"
           exit $UnityExitCode
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -543,7 +543,7 @@ jobs:
             Write-Host "[WARN]: unity_build.log が見つかりませんでした。"
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
 
 # ==================================================================================================
 
@@ -604,7 +604,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -697,7 +697,7 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -716,7 +716,7 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -774,7 +774,7 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -844,7 +844,7 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
         
 # ==================================================================================================
 
@@ -865,4 +865,4 @@ jobs:
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
           }
           Write-Host "::endgroup::"
-        shell: powershell
+        shell: pwsh
