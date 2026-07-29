@@ -527,14 +527,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aed2956d7ea5fc44abc8b90c67daec98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.BossLifeCycle
-  _enemyDataKey: BossCharacterData
+  _characterRepositoryKey: CharacterDefinitionRepository
+  _characterId:
+    _id: boss_character
+    _hashId: 980508342
   _moveDataKey: ExampleEnemyMoveData
   _view: {fileID: 6675541117173250289}
   _healthView: {fileID: 1235429572548650314}
   _raycastView: {fileID: 8457508100998247417}
   _tripleShotRaycastView: {fileID: 1663985275118639641}
   _attackPositionSearchView: {fileID: 7234215661414305059}
-  _missionKeyAssetKey: EnemyMissionKeyAsset
+  _missionKeyRepositoryKey: EnemyMissionKeyRepository
+  _missionKeyId:
+    _id: boss
+    _hashId: 606005395
   _attackEntryRepoKey: BossAttackEntryRepo
   _bossMovementAIFacade: {fileID: 6946616038599445502}
   _bossBattleAIFacade: {fileID: -9177679704855439460}
@@ -588,6 +594,7 @@ MonoBehaviour:
   _hitLayers:
     serializedVersion: 2
     m_Bits: 192
+  _attackWarningDecal: {fileID: 0}
 --- !u!114 &1663985275118639641
 MonoBehaviour:
   m_ObjectHideFlags: 0

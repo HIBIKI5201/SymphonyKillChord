@@ -582,6 +582,17 @@
       },
       "url": "https://packages.unity.com"
     },
+    "io.github.hatayama.uloopmcp": {
+      "version": "https://github.com/hatayama/unity-cli-loop.git?path=/Packages/src",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "ade043d5fecdbe4fc1926bb3bbbbbeed30e089cf"
+    },
     "symphonyframework": {
       "version": "https://github.com/HIBIKI5201/SymphonyFramework.git",
       "depth": 0,
@@ -591,6 +602,13 @@
         "com.unity.addressables": "1.21.19"
       },
       "hash": "c71d6ae765cde35d10825956452270f61a6da4e9"
+    },
+    "taremin.copy-components-by-regex": {
+      "version": "https://github.com/Taremin/CopyComponentsByRegex.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "8c31644257ed25cb6636aaa36af4540441568c86"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

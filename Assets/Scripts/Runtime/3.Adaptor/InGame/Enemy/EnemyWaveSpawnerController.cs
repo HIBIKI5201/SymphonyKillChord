@@ -9,14 +9,34 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyWaveSpawnerController : IDisposable
     {
-        public EnemyWaveSpawnerController(EnemyWaves waves, EnemyWaveSpawnerState state, IEnemySpawner infantrySpawner, IEnemySpawner artillerySpawner, IEnemyWaveTimerView waveTimer)
+        /// <summary>
+        ///     Wave生成を制御するControllerを生成する。
+        /// </summary>
+        /// <param name="waves">Wave定義。</param>
+        /// <param name="state">Wave進行状態。</param>
+        /// <param name="infantrySpawner">歩兵の生成処理。</param>
+        /// <param name="artillerySpawner">砲兵の生成処理。</param>
+        /// <param name="waveTimer">Waveタイマー表示。</param>
+        /// <param name="autoAdvanceWaves">Waveクリア時に次のWaveへ自動進行する場合はtrue。</param>
+        public EnemyWaveSpawnerController(
+            EnemyWaves waves,
+            EnemyWaveSpawnerState state,
+            IEnemySpawner infantrySpawner,
+            IEnemySpawner artillerySpawner,
+            IEnemyWaveTimerView waveTimer,
+            bool autoAdvanceWaves)
         {
             _waves = waves;
             _state = state;
             _infantrySpawner = infantrySpawner;
             _artillerySpawner = artillerySpawner;
             _waveTimer = waveTimer;
-            _state.OnWaveCleared += SpawnNextWave;
+            _autoAdvanceWaves = autoAdvanceWaves;
+
+            if (_autoAdvanceWaves)
+            {
+                _state.OnWaveCleared += SpawnNextWave;
+            }
         }
 
         /// <summary>
@@ -76,7 +96,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         public void Dispose()
         {
-            _state.OnWaveCleared -= SpawnNextWave;
+            if (_autoAdvanceWaves)
+            {
+                _state.OnWaveCleared -= SpawnNextWave;
+            }
         }
 
         private EnemyWaves _waves;
@@ -86,6 +109,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private IEnemyWaveTimerView _waveTimer;
         private bool _isSpawningWave;
         private int _lastSpawnFrame = -1;
+        private readonly bool _autoAdvanceWaves;
 
         /// <summary>
         ///     spawnerと数を指定して、敵生成処理を呼び出す。

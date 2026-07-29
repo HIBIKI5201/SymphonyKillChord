@@ -1,0 +1,224 @@
+{
+  "ExportTimestamp": "2026-07-24 20:33:23",
+  "Context": {
+    "sceneType": "runtime",
+    "sceneName": "Multiple(3): SymphonySystem, Persistent, DontDestroyOnLoad",
+    "nodeCount": 14,
+    "maxDepth": 1
+  },
+  "Hierarchy": [
+    {
+      "sceneName": "SymphonySystem",
+      "stats": {
+        "rootCount": 1,
+        "nodeCount": 1,
+        "maxDepth": 0
+      },
+      "roots": [
+        {
+          "name": "ServiceLocateData",
+          "isActive": true,
+          "components": [
+            "Transform"
+          ],
+          "siblingIndex": 0,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        }
+      ]
+    },
+    {
+      "sceneName": "Persistent",
+      "stats": {
+        "rootCount": 7,
+        "nodeCount": 8,
+        "maxDepth": 1
+      },
+      "roots": [
+        {
+          "name": "System",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "PersistentEntryPoint",
+            "SceneTransitionInitializer"
+          ],
+          "siblingIndex": 0,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "MusicPlayer",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "MusicPlayerInitializer",
+            "MusicPlayer",
+            "CriAtomSource"
+          ],
+          "siblingIndex": 1,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "InputBuffer",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "InputComposition",
+            "PlayerInputView",
+            "PlayerInput",
+            "EventSystem",
+            "InputSystemUIInputModule"
+          ],
+          "siblingIndex": 2,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "Main Camera",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "Camera",
+            "AudioListener",
+            "CriAtomListener",
+            "UniversalAdditionalCameraData",
+            "CinemachineBrain",
+            "CameraInitializer"
+          ],
+          "siblingIndex": 3,
+          "tag": "MainCamera",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "SoundEffectInitializer",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "SoundEffectInitializer",
+            "PersistentAudioVolumeRegistryView"
+          ],
+          "siblingIndex": 4,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "SavedataSystem",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "SavedataSystemInitializer"
+          ],
+          "siblingIndex": 5,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "Canvas",
+          "isActive": true,
+          "components": [
+            "RectTransform",
+            "Canvas",
+            "CanvasScaler",
+            "GraphicRaycaster"
+          ],
+          "siblingIndex": 6,
+          "tag": "Untagged",
+          "layer": 5,
+          "children": [
+            {
+              "name": "LoadingScreen",
+              "isActive": true,
+              "components": [
+                "RectTransform",
+                "CanvasGroup",
+                "LoadingScreenView"
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 5,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sceneName": "DontDestroyOnLoad",
+      "stats": {
+        "rootCount": 5,
+        "nodeCount": 5,
+        "maxDepth": 0
+      },
+      "roots": [
+        {
+          "name": "AppUIUpdater",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "AppUIManagerBehaviour"
+          ],
+          "siblingIndex": 0,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "[Debug Updater]",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "DebugUpdater"
+          ],
+          "siblingIndex": 1,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "CRIWARE",
+          "isActive": true,
+          "components": [
+            "Transform",
+            "CriAtom",
+            "CriMonoBehaviourManager"
+          ],
+          "siblingIndex": 2,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "__mcp_ddol_probe__",
+          "isActive": true,
+          "components": [
+            "Transform"
+          ],
+          "siblingIndex": 3,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "__mcp_ddol_probe__",
+          "isActive": true,
+          "components": [
+            "Transform"
+          ],
+          "siblingIndex": 4,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

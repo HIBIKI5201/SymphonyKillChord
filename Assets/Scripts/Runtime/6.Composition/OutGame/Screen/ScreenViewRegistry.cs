@@ -3,8 +3,7 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
@@ -34,56 +33,54 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///    指定画面を即時表示します。
+        ///    指定画面を表示状態にします。
         /// </summary>
         /// <param name="screenId"></param>
         /// <param name="targetSceneName"></param>
-        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
+        public void Show(ScreenId screenId, string targetSceneName = null)
         {
-            ScreenViewBase view = _views[screenId];
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
             if (view is BattlePreparationScreen battlePreparationScreen)
             {
                 battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
-            _views[screenId].ShowImmediately();
+            view.Show();
         }
 
         /// <summary>
-        ///    指定画面を即時非表示にします。
+        ///    指定画面を非表示状態にします。
         /// </summary>
-        public void HideImmediately(ScreenId screenId)
+        public void Hide(ScreenId screenId)
         {
-            _views[screenId].HideImmediately();
-        }
-
-        /// <summary>
-        ///     指定画面を表示し、トランジションの完了を待機します。
-        /// </summary>
-        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
-        {
-            ScreenViewBase view = _views[screenId];
-            if (view is BattlePreparationScreen battlePreparationScreen)
+            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
             {
-                battlePreparationScreen.SetTargetSceneName(targetSceneName);
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
-
-            await _views[screenId].Show(token);
+            view.Hide();
         }
 
         /// <summary>
-        ///     指定画面を非表示にし、トランジションの完了を待機します。
+        ///     全画面を非表示状態にします。
         /// </summary>
-        public async Task Hide(ScreenId screenId, CancellationToken token)
+        public void HideAll()
         {
-            await _views[screenId].Hide(token);
+            foreach (IScreenView screenView in _views.Values)
+            {
+                screenView.Hide();
+            }
         }
 
         /// <summary>
-        ///     全画面を即時非表示にします。
+        ///     全画面をフェードなしで即座に非表示状態にします。
         /// </summary>
         public void HideAllImmediately()
         {
-            foreach (IScreenView screenView in _views.Values)
+            foreach (ScreenViewBase screenView in _views.Values)
             {
                 screenView.HideImmediately();
             }

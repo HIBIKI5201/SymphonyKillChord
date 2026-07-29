@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using SymphonyFrameWork.Attribute;
 using System;
@@ -19,6 +20,24 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns> ミッション定義。 </returns>
         public MissionDefinition Create()
         {
+            List<ObjectiveSequenceStep> steps = new();
+
+            if (_clearConditionSteps != null)
+            {
+                for (int i = 0; i < _clearConditionSteps.Count; i++)
+                {
+                    if (_clearConditionSteps[i] == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"クリア条件ステップ[{i}]が未設定です。 MissionId: {_missionId}");
+                    }
+
+                    steps.Add(_clearConditionSteps[i].Create());
+                }
+            }
+
+            ObjectiveSequenceClearCondition clearCondition = new ObjectiveSequenceClearCondition(steps);
+
             List<IMissionEvaluationCondition> evaluations = new();
 
             HashSet<string> evaluationIds = new(StringComparer.Ordinal);
@@ -56,7 +75,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 new MissionId(_missionId),
                 _displayName,
                 _mainMissionText,
-                _clearCondition?.Create(),
+                clearCondition,
                 _failCondition?.Create(),
                 evaluations,
                 _defeatTips
@@ -76,8 +95,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [SerializeField, Tooltip("敗北時に表示する攻略Tips一覧。")] private List<string> _defeatTips = new();
 
         [Header("クリア条件")]
-        [SerializeReference, SubclassSelector, Tooltip("ミッションクリアとなる条件。")]
-        private MissionClearConditionAssetBase _clearCondition;
+        [SerializeField, Tooltip("ミッションクリアとなる目標の並び。単一の条件で済む場合は要素数1にする。")]
+        private List<ObjectiveSequenceStepAsset> _clearConditionSteps = new();
 
         [Header("失敗条件")]
         [SerializeReference, SubclassSelector, Tooltip("ミッション失敗となる条件。")]

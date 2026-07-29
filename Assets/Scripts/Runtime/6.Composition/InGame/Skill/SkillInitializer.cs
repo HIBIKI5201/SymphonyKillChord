@@ -10,12 +10,17 @@ using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Skill
@@ -37,6 +42,46 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressUIConfig _inputProgressUIConfig;
         [SerializeField, Tooltip("テスト用の装備スキル一覧です。未設定時はPlayer側設定を流用します。")]
         private SkillTemplateAsset[] _equippedSkills;
+        [SerializeField, SourceDataAddress]
+        [Tooltip("改造画面を経由していない場合に、セーブデータから装備スキルを解決するためのリポジトリの Addressables キーです。")]
+        private string _skillBuildRepositoryKey;
+
+        /// <summary>
+        ///     改造画面を経由せずシーンへ入った場合に備え、セーブデータ由来の装備スキルを非同期で解決します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition _)
+                || string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
+            {
+                // 改造画面経由で既にSkillBuildDefinitionが登録済み、
+                // またはキー未設定の場合はセーブデータの再ロードを行わない。
+                return true;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
+                return true;
+            }
+
+            try
+            {
+                SkillBuildRepository skillBuildRepository =
+                    await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
+                skillBuildRepository.Initialize(savedataSystem);
+                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
+                _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
+            }
+
+            return true;
+        }
 
         /// <summary>
         ///     スキルモジュールのContainerを登録します。
@@ -89,6 +134,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             _skillCrosshairProgressUIInitializer = ServiceLocator.GetInstance<SkillCrosshairProgressUIInitializer>();
+            _skillListUIInitializer = ServiceLocator.GetInstance<SkillListUIInitializer>();
 
             SkillTemplate[] equippedSkills = ResolveEquippedSkills(playerModuleContainer.PlayerInitializer);
             SkillResultPresenter skillResultPresenter = new SkillResultPresenter(_skillResultViewModel);
@@ -130,6 +176,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
             _boundPlayerView = null;
             _skillController = null;
+            _saveDataEquippedSkills = null;
+            _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
 
             if (!_isRegistered)
             {
@@ -206,11 +254,16 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 crosshairController = _skillCrosshairProgressUIInitializer.Controller;
             }
 
+            ISkillInputProgressRowView listRowView = _skillListUIInitializer != null
+                ? _skillListUIInitializer.CreateSkillListRow(definition)
+                : null;
+
             SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
                 rowView,
                 crosshairView,
                 crosshairController,
-                _skillInputProgressUIInitializer.GuideProgressController);
+                _skillInputProgressUIInitializer.GuideProgressController,
+                listRowView);
             SkillInputProgressState state = new SkillInputProgressState(definition);
             return new SkillInputProgressController(state, presenter);
         }
@@ -242,6 +295,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 }
             }
 
+            if (_saveDataEquippedSkills != null && _saveDataEquippedSkills.Length > 0)
+            {
+                return _saveDataEquippedSkills;
+            }
+
             SkillTemplateAsset[] fallbackAssets = _equippedSkills;
             if ((fallbackAssets == null || fallbackAssets.Length == 0) && playerInitializer != null)
             {
@@ -262,6 +320,32 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 }
 
                 templates.Add(fallbackAssets[i].ToDomain());
+            }
+
+            return templates.ToArray();
+        }
+
+        /// <summary>
+        ///     セーブデータから取得した装備スキル一覧を SkillTemplate の配列へ変換します。
+        /// </summary>
+        /// <param name="equippedSkills"> 変換元の装備スキル一覧です。 </param>
+        /// <returns> 変換後の SkillTemplate 配列です。 </returns>
+        private static SkillTemplate[] ToSkillTemplates(IReadOnlyList<EquippedSkill> equippedSkills)
+        {
+            if (equippedSkills == null || equippedSkills.Count == 0)
+            {
+                return Array.Empty<SkillTemplate>();
+            }
+
+            List<SkillTemplate> templates = new List<SkillTemplate>(equippedSkills.Count);
+            for (int i = 0; i < equippedSkills.Count; i++)
+            {
+                if (!equippedSkills[i].HasSkill)
+                {
+                    continue;
+                }
+
+                templates.Add(equippedSkills[i].SkillTemplate);
             }
 
             return templates.ToArray();
@@ -303,10 +387,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
         private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
+        private SkillListUIInitializer _skillListUIInitializer;
         private SkillController _skillController;
         private SkillResultViewModel _skillResultViewModel;
         private SkillModuleContainer _moduleContainer;
         private PlayerView _boundPlayerView;
         private bool _isRegistered;
+        private SkillTemplate[] _saveDataEquippedSkills;
     }
 }

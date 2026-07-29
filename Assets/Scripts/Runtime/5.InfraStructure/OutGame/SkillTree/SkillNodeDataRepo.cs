@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.InfraStructure.Repository;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -8,7 +9,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     ///     スキルノードデータを纏めたリポジトリー。
     /// </summary>
     [CreateAssetMenu(fileName = "SkillNodeDataRepo", menuName = "SymphonyDev/SkillTree/SkillNodeDataRepo")]
-    public class SkillNodeDataRepo : ScriptableObject
+    public class SkillNodeDataRepo : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeData, SkillNodeData>
     {
         public SkillNodeData[] SkillNodes;
 
@@ -24,21 +25,23 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 Debug.LogError($"[SkillNodeDataRepo] スキルノード情報リポジトリーが空です。");
                 return null;
             }
-            for(int i = 0; i < SkillNodes.Length; i++)
+
+            if (!TryFind(id, out SkillNodeData node))
             {
-                var node = SkillNodes[i];
-                if (node == null)
-                {
-                    continue;
-                }
-                if (node.NodeId == id)
-                {
-                    return node;
-                }
+                Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");
+                return null;
             }
-            Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");
-            return null;
+
+            return node;
         }
 
+        protected override IReadOnlyList<SkillNodeData> GetEntries() => SkillNodes;
+
+        protected override bool TryBuild(SkillNodeData entry, out SkillNodeId id, out SkillNodeData value)
+        {
+            id = entry.NodeId;
+            value = entry;
+            return true;
+        }
     }
 }

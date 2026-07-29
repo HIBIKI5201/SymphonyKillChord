@@ -19,8 +19,10 @@ MonoBehaviour:
   _defeatTips:
   - "\u5371\u967A\u306A\u653B\u6483\u306F\u8DDD\u96E2\u3092\u53D6\u3063\u3066\u56DE\u907F\u3057\u3088\u3046"
   - "\u30B9\u30AD\u30EB\u306E\u6539\u9020\u3092\u3057\u3066\u307F\u3088\u3046\uFF01"
-  _clearCondition:
-    rid: 4420335376793716
+  _clearConditionSteps:
+  - _condition:
+      rid: 4420578705146118
+    _guideMessageText: 
   _failCondition:
     rid: 8885031662707802242
   _evaluationConditions:
@@ -29,20 +31,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4420335376793716
+    - rid: 4420578705146118
       type: {class: AndClearConditionGroupAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "\u3059\u3079\u3066\u6E80\u305F\u3059\u30AF\u30EA\u30A2\u6761\u4EF6\r\n-
           ElapsedTimeClearConditionAsset\r\n- EnemyKillCountClearConditionAsset\r\n"
         _childConditionAssets:
-        - rid: 4420335376793718
-        - rid: 4420335376793719
-    - rid: 4420335376793718
+        - rid: 4420578705146119
+        - rid: 4420578705146120
+    - rid: 4420578705146119
       type: {class: ElapsedTimeClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "2\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
-        _requiredElapsedTime: 2
-    - rid: 4420335376793719
+        _inspectorSummary: "10\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 10
+    - rid: 4420578705146120
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "Boss\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
