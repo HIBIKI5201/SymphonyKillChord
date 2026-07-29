@@ -58,11 +58,24 @@
         _PerspectiveRemovalRadius("Radius",Float) = 1
         _Head("HeadPosition", Vector,3) = (0,0,0)
 
+        [Header(FakeShadow)]
+        [Toggle(_FAKE_SHADOW_ON)] _FakeShadowOn("Fake Shadow On", Float) = 0
+        _FakeShadowColor("Color (Multiply)", Color) = (0.6, 0.55, 0.6, 1)
+        _FakeShadowDistance("Distance", Float) = 0.1
+        _FakeShadowDepthBias("Depth Bias", Float) = 0.01
+
         [Header(RenderState)]
-        
+
         [IntRange]
         _StencilRef ("Stencil ID", Range(0, 255)) = 1
-        
+
+        // 用途ごとにビットを分けるためのマスク。bit0:目の透け / bit1:顔領域(FakeShadow用)
+        [IntRange]
+        _StencilReadMask ("Stencil Read Mask", Range(0, 255)) = 255
+
+        [IntRange]
+        _StencilWriteMask ("Stencil Write Mask", Range(0, 255)) = 255
+
         [Enum(UnityEngine.Rendering.CompareFunction)]
         _StencilComp ("Stencil Comp", Float) = 8
 
@@ -87,6 +100,8 @@
 
             Stencil{
                 Ref [_StencilRef]
+                ReadMask [_StencilReadMask]
+                WriteMask [_StencilWriteMask]
 
                 Comp [_StencilComp] //Hair:Always, Eye:Always, EyeThrouth:Equal
                 Pass [_StencilPass] //Hair:Keep, Eye:Replace, EyeThrouth: Zero Keep
@@ -138,6 +153,54 @@
 
                 #pragma multi_compile_vertex _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
                 #include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/OutLine.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "FAKE_SHADOW"
+            // URP標準の不透明描画が拾わない独自タグ。RenderObjects機能で不透明描画後に明示的に実行する。
+            Tags { "LightMode" = "SilToonFakeShadow" }
+
+            // 髪カードは両面のことがあるため、シルエットを埋めるようCullしない
+            Cull Off
+
+            ZWrite Off
+            // LEqualにすることで、頭の後ろ側の髪ポリゴンが顔より奥と判定され弾かれる。
+            // (Alwaysだと後頭部の髪まで顔に落ちてしまう)
+            ZTest LEqual
+
+            // 乗算合成。顔の陰影を保ったまま暗くする
+            Blend DstColor Zero
+
+            // ステンシルの用途はStencilBits.csと対応する。ここは意味が固定なのでリテラルで持つ。
+            //   Ref 2      : bit1 = 顔領域 (顔マテリアルが書き込む)
+            //   ReadMask 6 : bit1(顔領域) と bit2(描画済みマーク) を見る
+            //   WriteMask 4 / Pass Invert : 最初の1フラグメントだけ bit2 を立てる
+            //   → 髪の重なりで同じピクセルが多重に暗くなるのを防ぐ
+            Stencil{
+                Ref 2
+                ReadMask 6
+                WriteMask 4
+
+                Comp Equal
+                Pass Invert
+                // 「描画済みマーク」を消すとそのピクセルが再度描けてしまい多重に暗くなるため、
+                // 失敗時は必ず現状維持にする
+                Fail Keep
+                ZFail Keep
+            }
+
+            HLSLPROGRAM
+
+                #pragma vertex vert
+                #pragma fragment frag
+
+                #pragma multi_compile _ FADE_ON
+                #pragma shader_feature_local _FAKE_SHADOW_ON
+
+                #include "Assets/Scripts/Shaders/SilToon/HLSL/FakeShadow/FakeShadow.hlsl"
 
             ENDHLSL
         }
