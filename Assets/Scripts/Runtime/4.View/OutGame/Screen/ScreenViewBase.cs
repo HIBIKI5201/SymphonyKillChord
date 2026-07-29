@@ -30,7 +30,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual ValueTask Show(CancellationToken cancellationToken = default)
         {
-            CancelOpacityMotion();
+            _opacityMotionHandle.TryComplete();
 
             RootElement.style.display = DisplayStyle.Flex;
             RootElement.BringToFront();
@@ -57,7 +57,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </remarks>
         public virtual ValueTask Hide(CancellationToken cancellationToken = default)
         {
-            CancelOpacityMotion();
+            _opacityMotionHandle.TryComplete();
 
             // フェード中は入力を受け付けないようブロッカーを最前面に配置する。
             RootElement.Add(_brocker);
@@ -72,20 +72,24 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///     画面をフェードなしで即座に非表示状態にします。初期化時など、表示状態の保証が必要な場面で使用します。
+        /// </summary>
+        public virtual void HideImmediately()
+        {
+            _opacityMotionHandle.TryComplete();
+
+            RootElement.style.opacity = 0f;
+            RootElement.style.display = DisplayStyle.None;
+            RemoveBrocker();
+        }
+
+        /// <summary>
         ///     リソースを解放します。
         /// </summary>
         public virtual void Dispose()
         {
-            CancelOpacityMotion();
-            _brocker.RemoveFromHierarchy();
-        }
-
-        /// <summary>
-        ///     再生中の opacity アニメーションを停止します。
-        /// </summary>
-        private void CancelOpacityMotion()
-        {
             _opacityMotionHandle.TryCancel();
+            _brocker.RemoveFromHierarchy();
         }
 
         /// <summary>
