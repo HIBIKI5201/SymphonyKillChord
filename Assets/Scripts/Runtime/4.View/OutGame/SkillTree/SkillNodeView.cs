@@ -37,6 +37,16 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキルノードを未解放にする。
+        /// </summary>
+        public void SetLocked()
+        {
+            _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_UNLOCKED);
+            _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_SELECTED);
+            _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_LOCKED);
+        }
+
+        /// <summary>
         ///     スキルノードを選択済みにする。
         /// </summary>
         public void SetSelected()
@@ -66,12 +76,5 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected?.Invoke(_root.name);
         }
 
-        /// <summary>
-        ///     スキルノードを未開放にする。
-        /// </summary>
-        private void SetLocked()
-        {
-            _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_LOCKED);
-        }
     }
 }

@@ -19,12 +19,12 @@ using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.InfraStructure.Addressables;
-using KillChord.Runtime.InfraStructure.Player;
-using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View;
@@ -146,18 +146,35 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
+            {
+                Debug.LogError(
+                    $"[{nameof(PlayerInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} が見つかりません。",
+                    this);
+                return false;
+            }
+
             if (!TryInstantiatePlayerView(out Transform spawnPointTransform))
             {
                 return false;
             }
 
-            _playerEntity = CharacterFactory.Create(_loadedPlayerData);
+            _playerEntity = CharacterFactory.Create(
+                _loadedPlayerData,
+                playerStatusBonusContainer.PlayerStatusBonus.MaxHealthMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.AttackPowerMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalChanceAddition,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalMultiplierAddition);
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
 
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
-            _moduleContainer = new PlayerModuleContainer(this, _player, _playerEntity);
+            _moduleContainer = new PlayerModuleContainer(
+                this,
+                _player,
+                _playerEntity,
+                playerStatusBonusContainer.PlayerStatusBonus);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;

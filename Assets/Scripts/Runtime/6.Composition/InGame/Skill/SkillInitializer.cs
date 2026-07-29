@@ -150,7 +150,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillTargetResolver targetResolver = new SkillTargetResolver(
                 targetSystemContainer.TargetSystemViewModel,
                 targetSystemContainer.TargetEntityRegistry,
-                playerModuleContainer.PlayerView.transform);
+                playerModuleContainer.PlayerView.transform,
+                playerModuleContainer.PlayerStatusBonus.AreaAttackRangeAddition);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
             SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController);

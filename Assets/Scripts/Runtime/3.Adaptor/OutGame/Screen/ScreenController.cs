@@ -88,10 +88,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///     戦闘準備画面を表示します。
         /// </summary>
-        public void ShowBattlePreparation(string targetSceneName)
+        public void ShowBattlePreparation()
         {
-            _showScreenUseCase.Execute(
-                new ShowScreenCommand(ScreenId.BattlePreparation, targetSceneName));
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.BattlePreparation));
         }
 
         /// <summary>
