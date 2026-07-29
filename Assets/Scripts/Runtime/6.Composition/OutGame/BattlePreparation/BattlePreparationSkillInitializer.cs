@@ -1,12 +1,11 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
-using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
-using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.BattlePreparation;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
@@ -48,16 +47,6 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _screenLifecycleSignal))
-            {
-#if UNITY_EDITOR
-                Debug.LogError(
-                    $"[{nameof(BattlePreparationSkillInitializer)}] {nameof(IScreenLifecycleSignal)} が取得できませんでした。",
-                    this);
-#endif
-                return false;
-            }
-
             _viewModel = new BattlePreparationSkillViewModel();
             SkillEffectDescriptionFormatter effectDescriptionFormatter = new SkillEffectDescriptionFormatter();
             SkillDisplayTextFormatter textFormatter = new SkillDisplayTextFormatter(effectDescriptionFormatter);
@@ -70,7 +59,7 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
         }
 
         /// <summary>
-        ///     画面表示イベントを購読します。
+        ///     装備スキル構成の変更を購読し、現在値を表示へ反映します。
         /// </summary>
         /// <returns> 購読に成功した場合はtrue。 </returns>
         public override bool Ready()
@@ -80,8 +69,9 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
                 return false;
             }
 
-            _screenLifecycleSignal.OnScreenWillShow += HandleScreenWillShowHandler;
+            _skillBuildDefinition.OnEquippedSkillsChanged += HandleEquippedSkillsChangedHandler;
             _isSubscribed = true;
+            PushCurrentSkills();
             return true;
         }
 
@@ -90,9 +80,9 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
         /// </summary>
         public override void Shutdown()
         {
-            if (_isSubscribed && _screenLifecycleSignal != null)
+            if (_isSubscribed && _skillBuildDefinition != null)
             {
-                _screenLifecycleSignal.OnScreenWillShow -= HandleScreenWillShowHandler;
+                _skillBuildDefinition.OnEquippedSkillsChanged -= HandleEquippedSkillsChangedHandler;
             }
 
             _battlePreparationScreen?.Unbind();
@@ -101,7 +91,6 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
             _presenter = null;
             _battlePreparationScreen = null;
             _skillBuildDefinition = null;
-            _screenLifecycleSignal = null;
             _isInitialized = false;
             _isSubscribed = false;
         }
@@ -110,18 +99,17 @@ namespace KillChord.Runtime.Composition.OutGame.BattlePreparation
         private BattlePreparationScreen _battlePreparationScreen;
         private BattlePreparationSkillViewModel _viewModel;
         private BattlePreparationSkillPresenter _presenter;
-        private IScreenLifecycleSignal _screenLifecycleSignal;
         private bool _isInitialized;
         private bool _isSubscribed;
 
         /// <summary>
-        ///     戦闘準備画面の表示直前に最新の装備状態を反映します。
+        ///     装備スキル構成の変更を表示へ反映します。
         /// </summary>
-        private void HandleScreenWillShowHandler(ScreenId screenId)
+        /// <param name="equippedSkills"> 変更後の装備スキル構成です。 </param>
+        private void HandleEquippedSkillsChangedHandler(
+            IReadOnlyList<EquippedSkill> equippedSkills)
         {
-            if (screenId != ScreenId.BattlePreparation) { return; }
-
-            PushCurrentSkills();
+            _presenter?.Push(equippedSkills);
         }
 
         /// <summary>

@@ -17,6 +17,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             _equippedSkills = BuildSlotArray(equippedSkills);
         }
 
+        /// <summary> 装備スキル構成が変更されたときに通知します。 </summary>
+        public event Action<IReadOnlyList<EquippedSkill>> OnEquippedSkillsChanged;
+
         /// <summary> プレイヤーが装備しているスキルの配列を取得する。 </summary>
         public IReadOnlyList<EquippedSkill> EquippedSkills => _equippedSkills;
 
@@ -40,6 +43,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             }
 
             _equippedSkills = BuildSlotArray(newEquippedSkills);
+            OnEquippedSkillsChanged?.Invoke(_equippedSkills);
         }
 
         /// <summary>
@@ -64,6 +68,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             EquippedSkill[] expandedSkills = new EquippedSkill[slotCount];
             Array.Copy(_equippedSkills, expandedSkills, _equippedSkills.Length);
             _equippedSkills = expandedSkills;
+            OnEquippedSkillsChanged?.Invoke(_equippedSkills);
         }
 
         /// <summary>
