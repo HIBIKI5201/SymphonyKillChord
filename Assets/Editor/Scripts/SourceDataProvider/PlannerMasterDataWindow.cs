@@ -260,6 +260,7 @@ namespace KillChord.Editor.SourceDataProvider
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(72f)))
             {
                 SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+                BattleSceneDataReader.ClearCache();
                 ClearCachedEditor();
                 Repaint();
             }
