@@ -27,4 +27,6 @@ MonoBehaviour:
   _enemyWaveDefinitionId:
     _id: enemy_wave_01
     _hashId: 480330467
-  _missionDefinitionAsset: {fileID: 11400000, guid: 7a763e2e21d5e054eb19b399faf764dd, type: 2}
+  _missionDefinitionId:
+    _id: AllKill
+    _hashId: 1531565721
