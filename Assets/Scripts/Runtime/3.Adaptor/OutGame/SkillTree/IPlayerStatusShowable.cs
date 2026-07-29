@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 {
     /// <summary>
@@ -6,8 +9,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     public interface IPlayerStatusShowable
     {
         /// <summary>
-        ///     面面を即座に表示します。
+        ///     面面を表示します。
         /// </summary>
-        void Show();
+        ValueTask Show(CancellationToken cancellationToken = default);
     }
 }

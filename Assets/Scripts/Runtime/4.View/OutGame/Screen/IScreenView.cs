@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.View.OutGame.Screen
 {
     /// <summary>
@@ -6,13 +9,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
     public interface IScreenView
     {
         /// <summary>
-        ///    画面を表示状態にします。実際の見た目の変化は USS のトランジションに従います。
+        ///    画面を表示状態にします。opacity のフェードは LitMotion で再生します。
+        ///    フェード完了(または cancellationToken のキャンセル)まで待機できます。
         /// </summary>
-        void Show();
+        ValueTask Show(CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     画面を非表示状態にします。実際の見た目の変化は USS のトランジションに従います。
+        ///     画面を非表示状態にします。opacity のフェードは LitMotion で再生します。
+        ///     フェード完了(または cancellationToken のキャンセル)まで待機できます。
         /// </summary>
-        void Hide();
+        ValueTask Hide(CancellationToken cancellationToken = default);
     }
 }

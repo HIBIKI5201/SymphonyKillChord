@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 {
     /// <summary>
@@ -6,8 +9,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
     public interface IStageDetailScreenShowable
     {
         /// <summary>
-        ///     細細画面を即座に表示します。
+        ///     細細画面を表示します。
         /// </summary>
-        void Show();
+        ValueTask Show(CancellationToken cancellationToken = default);
     }
 }
