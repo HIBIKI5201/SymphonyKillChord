@@ -126,14 +126,38 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
             _loadedMissionDefinitionRepository =
                 await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
-            if (_loadedStageTreeAsset == null
-                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            if (_loadedStageTreeAsset == null)
             {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] {nameof(StageTreeAsset)} のロードに失敗しました。"
+                        + $" Key: {_stageTreeAssetKey}",
+                    this);
+                return false;
+            }
+
+            if (_loadedMissionDefinitionRepository == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] {nameof(MissionDefinitionRepository)} のロードに失敗しました。"
+                        + $" Key: {_missionDefinitionRepositoryKey}",
+                    this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
                 return false;
             }
 
             _loadedSaveData = await savedataSystem.LoadAsync<SaveData>();
-            return _loadedSaveData != null;
+            if (_loadedSaveData == null)
+            {
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SaveData)} が取得できませんでした。", this);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
