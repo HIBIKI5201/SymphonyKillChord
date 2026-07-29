@@ -22,14 +22,11 @@ on:
           - Master
 
 permissions:
-  contents: write      # Minimum permissions required for release creation and repository access
+  contents: write
 
 concurrency:
   group: build-release-${{ github.base_ref || github.run_id }}
   cancel-in-progress: false
-
-# Note: If artifact uploads or additional operations are required,
-# verify whether additional permissions are needed.
 
 jobs:
   check:
@@ -39,7 +36,7 @@ jobs:
       days: ${{ steps.release_age.outputs.days }}
 
     steps:
-      - name: Check Latest Release Age
+      - name: 最終リリースからの経過日数をチェック
         id: release_age
         run: |
           set -e
@@ -109,9 +106,8 @@ jobs:
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
-    timeout-minutes: 120  # Set timeout because build processing may take a long time
+    timeout-minutes: 120
     environment: 'AutoBuildAndRelease'
-    # Environment variables used throughout the job
     env:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
@@ -120,15 +116,16 @@ jobs:
       BUILD_MODE: ''
 
     steps:
-      - name: Checkout Repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
-      - name: Determine Build Mode
+# ==================================================================================================
+
+      - name: ビルドモードの決定
         id: determine_mode
         run: |
-          # workflow_dispatch では github.base_ref が空のため、inputs.build_mode から分岐を決定
           $BaseRef = "${{ github.base_ref }}"
           if (-not $BaseRef) {
             $InputMode = "${{ inputs.build_mode }}"
@@ -153,7 +150,9 @@ jobs:
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
         shell: powershell
 
-      - name: Display Environment Information
+# ==================================================================================================
+
+      - name: 環境情報の表示
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -170,7 +169,9 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Validate Unity Installation
+# ==================================================================================================
+
+      - name: Unityのインストール検証
         run: |
           Write-Host "::group::Validate Unity Installation"
           if (-not $env:UNITY_EXE_PATH) {
@@ -193,7 +194,9 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Check .NET SDK / dotnet CLI Availability (Diagnostic)
+# ==================================================================================================
+
+      - name: .NET SDK / dotnet CLI の可用性チェック
         run: |
           Write-Host "::group::Check .NET SDK Availability"
 
@@ -212,7 +215,9 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Download and Import Packages
+# ==================================================================================================
+
+      - name: パッケージのダウンロードとインポート
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -391,7 +396,9 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Restore NuGet Packages (NuGetForUnity.Cli)
+# ==================================================================================================
+
+      - name: NuGetパッケージの復元
         run: |
           Write-Host "::group::Restoring NuGet packages via NuGetForUnity.Cli"
 
@@ -419,7 +426,10 @@ jobs:
           Write-Host "OK: NuGet packages restored."
           Write-Host "::endgroup::"
         shell: powershell
-      - name: Execute Unity - Build
+
+# ==================================================================================================
+
+      - name: Unityビルドの実行
         run: |
           Write-Host "::group::Start Unity Build Process"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Launching Unity for build..."
@@ -490,7 +500,9 @@ jobs:
           exit $UnityExitCode
         shell: powershell
 
-      - name: Extract Unity Log Summary
+# ==================================================================================================
+
+      - name: Unityインポートログの要約
         if: always()
         run: |
           Write-Host "::group::Unity Import Log Summary"
@@ -533,7 +545,9 @@ jobs:
           Write-Host "::endgroup::"
         shell: powershell
 
-      - name: Upload Unity Log
+# ==================================================================================================
+
+      - name: Unityログのアップロード
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -542,7 +556,9 @@ jobs:
             unity_import_*.log
             unity_build.log
 
-      - name: Check Build Output
+# ==================================================================================================
+
+      - name: ビルド出力のチェック
         run: |
           Write-Host "::group::Validate Build Output"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -588,8 +604,10 @@ jobs:
           }
           Write-Host "::endgroup::"
         shell: powershell
+        
+# ==================================================================================================
 
-      - name: Resolve Current Build Version
+      - name: 現行ビルドバージョンの解決
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
@@ -676,8 +694,10 @@ jobs:
           Write-Host "OK: Current build version resolved: $VersionString"
           Write-Host "::endgroup::"
         shell: powershell
+        
+# ==================================================================================================
 
-      - name: Generate Release Tag
+      - name: リリースタグの生成
         id: tag_gen
         run: |
           Write-Host "::group::Generate Release Tag"
@@ -690,8 +710,10 @@ jobs:
           Write-Host "OK: Generated tag name: $TagName"
           Write-Host "::endgroup::"
         shell: powershell
+        
+# ==================================================================================================
 
-      - name: Zip Build Artifacts
+      - name: ビルド成果物のZIP圧縮
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
@@ -743,8 +765,10 @@ jobs:
           }
           Write-Host "::endgroup::"
         shell: powershell
+        
+# ==================================================================================================
 
-      - name: Create Release and Upload Asset
+      - name: リリース作成とアセットのアップロード
         id: create_release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
@@ -773,7 +797,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Increment Release Patch Number
+# ==================================================================================================
+
+      - name: リリースのパッチ番号のインクリメント
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
@@ -806,8 +832,10 @@ jobs:
           }
           Write-Host "::endgroup::"
         shell: powershell
+        
+# ==================================================================================================
 
-      - name: Release Completion Summary
+      - name: リリースの完了
         if: always()
         run: |
           Write-Host "::group::Workflow Execution Summary"
