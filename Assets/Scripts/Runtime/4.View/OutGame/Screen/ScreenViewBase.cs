@@ -1,5 +1,4 @@
 using LitMotion;
-using LitMotion.Extensions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +21,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent = outGameUIEvent;
 
             _brocker = CreateBrocker();
+            _currentOpacity = RootElement.resolvedStyle.opacity;
         }
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.Add(_brocker);
             _brocker.BringToFront();
 
-            _opacityMotionHandle = LMotion.Create(RootElement.resolvedStyle.opacity, 1f, FADE_DURATION)
+            _opacityMotionHandle = LMotion.Create(_currentOpacity, 1f, FADE_DURATION)
                 .WithEase(FADE_IN_EASE)
                 .WithOnComplete(RemoveBrocker)
-                .BindToStyleOpacity(RootElement);
+                .Bind(this, static (opacity, state) => state.SetOpacity(opacity));
 
             return _opacityMotionHandle.ToValueTask(cancellationToken);
         }
@@ -63,10 +63,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.Add(_brocker);
             _brocker.BringToFront();
 
-            _opacityMotionHandle = LMotion.Create(RootElement.resolvedStyle.opacity, 0f, FADE_DURATION)
+            _opacityMotionHandle = LMotion.Create(_currentOpacity, 0f, FADE_DURATION)
                 .WithEase(FADE_OUT_EASE)
                 .WithOnComplete(HideRootElement)
-                .BindToStyleOpacity(RootElement);
+                .Bind(this, static (opacity, state) => state.SetOpacity(opacity));
 
             return _opacityMotionHandle.ToValueTask(cancellationToken);
         }
@@ -78,7 +78,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _opacityMotionHandle.TryComplete();
 
-            RootElement.style.opacity = 0f;
+            SetOpacity(0f);
             RootElement.style.display = DisplayStyle.None;
             RemoveBrocker();
         }
@@ -107,6 +107,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void RemoveBrocker()
         {
             _brocker.RemoveFromHierarchy();
+        }
+
+        /// <summary>
+        ///     opacity を書き込み、直近の値として保持します。
+        /// </summary>
+        /// <remarks>
+        ///     resolvedStyle.opacity は UI Toolkit のスタイル解決パスを経てから反映されるため、
+        ///     同フレームで再度フェードを開始する際の始点として使うと古い値を読んでしまいます。
+        ///     そのため実際に書き込んだ値をこのフィールドで自前管理します。
+        /// </remarks>
+        private void SetOpacity(float opacity)
+        {
+            RootElement.style.opacity = opacity;
+            _currentOpacity = opacity;
         }
 
         /// <summary>
@@ -147,5 +161,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly VisualElement _brocker;
 
         private MotionHandle _opacityMotionHandle;
+        /// <summary> 直近に書き込んだ opacity。フェード再開時の始点として使用します。 </summary>
+        private float _currentOpacity;
     }
 }

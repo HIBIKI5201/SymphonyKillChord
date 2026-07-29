@@ -21,5 +21,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         ///     すべての画面を非表示状態にします。
         /// </summary>
         void HideAll();
+
+        /// <summary>
+        ///     すべての画面をフェードなしで即座に非表示状態にします。初期化時など、表示状態の保証が必要な場面で使用します。
+        /// </summary>
+        void HideAllImmediately();
     }
 }
