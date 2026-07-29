@@ -23,6 +23,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -30,6 +31,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -37,6 +39,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -44,6 +47,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -51,6 +55,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -58,6 +63,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 2
@@ -65,6 +71,7 @@ MonoBehaviour:
       EnemyAmount: 2
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   _loop: 1
   _loopStart: 5
   references:

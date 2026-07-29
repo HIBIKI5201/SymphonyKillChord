@@ -49,10 +49,19 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                     }
                 }
 
+                DataID[] sourceSpawnPointCandidates =
+                    sourceWaves[i].SpawnPointCandidates ?? Array.Empty<DataID>();
+                List<int> spawnPointCandidateHashes = new(sourceSpawnPointCandidates.Length);
+                for (int j = 0; j < sourceSpawnPointCandidates.Length; j++)
+                {
+                    spawnPointCandidateHashes.Add(sourceSpawnPointCandidates[j].Id);
+                }
+
                 EnemyWaveDefinition wave = new EnemyWaveDefinition(
                     details,
                     sourceWaves[i].WaveDuration,
-                    stageEffectIds);
+                    stageEffectIds,
+                    spawnPointCandidateHashes);
                 waves[i] = wave;
             }
 
@@ -120,6 +129,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             /// <summary> Wave開始時に予約するステージ演出です。 </summary>
             [SerializeReference, SubclassSelector, Tooltip("Wave開始時に音楽同期で実行するステージ演出です。")]
             public List<StageEffectAssetBase> StageEffects = new();
+            /// <summary> このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。 </summary>
+            [Tooltip("このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。")]
+            public DataID[] SpawnPointCandidates = Array.Empty<DataID>();
         }
     }
 }
