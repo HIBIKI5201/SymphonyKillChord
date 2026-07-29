@@ -278,7 +278,83 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            string navMeshDataGuid = null;
+            List<NavMeshSurfaceInfo> surfaces = ReadNavMeshSurfaces(documents, navMeshSurfaceScriptGuid);
+            if (surfaces.Count == 0)
+            {
+                error = "シーンにNavMeshSurfaceが見つかりません。";
+                return false;
+            }
+
+            List<NavMeshData> navMeshDataAssets = new(surfaces.Count);
+            List<NavMeshSurfaceInfo> resolvedSurfaces = new(surfaces.Count);
+            for (int i = 0; i < surfaces.Count; i++)
+            {
+                string navMeshDataPath = AssetDatabase.GUIDToAssetPath(surfaces[i].NavMeshDataGuid);
+                NavMeshData navMeshDataAsset = AssetDatabase.LoadAssetAtPath<NavMeshData>(navMeshDataPath);
+                if (navMeshDataAsset == null)
+                {
+                    error = $"NavMeshDataアセットを読み込めません。Path: {navMeshDataPath}";
+                    return false;
+                }
+
+                navMeshDataAssets.Add(navMeshDataAsset);
+                resolvedSurfaces.Add(surfaces[i]);
+            }
+
+            // CalculateTriangulationは現在ロード中の全NavMeshを返すため、
+            // 追加前後の差分を取って対象シーン分だけを抽出する。
+            NavMeshTriangulation before = NavMesh.CalculateTriangulation();
+            int baseVertexCount = before.vertices == null ? 0 : before.vertices.Length;
+            int baseIndexCount = before.indices == null ? 0 : before.indices.Length;
+
+            List<NavMeshDataInstance> instances = new(navMeshDataAssets.Count);
+            try
+            {
+                for (int i = 0; i < navMeshDataAssets.Count; i++)
+                {
+                    // NavMeshSurfaceはSurfaceのTransformを基準にベイク結果を配置するため、同じ変換を適用する。
+                    instances.Add(NavMesh.AddNavMeshData(
+                        navMeshDataAssets[i],
+                        resolvedSurfaces[i].Position,
+                        resolvedSurfaces[i].Rotation));
+                }
+
+                NavMeshTriangulation after = NavMesh.CalculateTriangulation();
+                if (!TryExtractAddedTriangulation(after, baseVertexCount, baseIndexCount, out navMesh))
+                {
+                    error = "対象シーンのNavMeshを取得できませんでした。"
+                        + "NavMeshが未ベイクであるか、対象シーンを既に開いている可能性があります。";
+                    return false;
+                }
+
+                return true;
+            }
+            finally
+            {
+                for (int i = 0; i < instances.Count; i++)
+                {
+                    if (instances[i].valid)
+                    {
+                        NavMesh.RemoveNavMeshData(instances[i]);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     シーンテキストからNavMeshSurfaceの情報を収集します。
+        /// </summary>
+        /// <param name="documents"> パース済みドキュメント一覧です。 </param>
+        /// <param name="navMeshSurfaceScriptGuid"> NavMeshSurfaceスクリプトのGUIDです。 </param>
+        /// <returns> NavMeshDataを持つNavMeshSurface一覧です。 </returns>
+        private static List<NavMeshSurfaceInfo> ReadNavMeshSurfaces(
+            List<SceneDocument> documents,
+            string navMeshSurfaceScriptGuid)
+        {
+            List<NavMeshSurfaceInfo> result = new();
+            Dictionary<long, PlainTransform> plainTransforms = BuildPlainTransforms(documents);
+            Dictionary<long, long> gameObjectToTransform = BuildGameObjectToTransformMap(documents);
+
             for (int i = 0; i < documents.Count; i++)
             {
                 SceneDocument doc = documents[i];
@@ -293,39 +369,107 @@ namespace KillChord.Editor.SourceDataProvider
                     continue;
                 }
 
-                navMeshDataGuid = ParseGuid(doc.Body, NAV_MESH_DATA_FIELD_NAME);
-                break;
-            }
-
-            if (string.IsNullOrEmpty(navMeshDataGuid))
-            {
-                error = "シーンにNavMeshSurfaceが見つかりません。";
-                return false;
-            }
-
-            string navMeshDataPath = AssetDatabase.GUIDToAssetPath(navMeshDataGuid);
-            NavMeshData navMeshDataAsset = AssetDatabase.LoadAssetAtPath<NavMeshData>(navMeshDataPath);
-            if (navMeshDataAsset == null)
-            {
-                error = $"NavMeshDataアセットを読み込めません。Path: {navMeshDataPath}";
-                return false;
-            }
-
-            NavMeshDataInstance instance = default;
-            try
-            {
-                instance = NavMesh.AddNavMeshData(navMeshDataAsset);
-                NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
-                navMesh = new NavMeshMapData(triangulation.vertices, triangulation.indices);
-                return true;
-            }
-            finally
-            {
-                if (instance.valid)
+                string navMeshDataGuid = ParseGuid(doc.Body, NAV_MESH_DATA_FIELD_NAME);
+                if (string.IsNullOrEmpty(navMeshDataGuid))
                 {
-                    NavMesh.RemoveNavMeshData(instance);
+                    continue;
                 }
+
+                Vector3 position = Vector3.zero;
+                Quaternion rotation = Quaternion.identity;
+                long gameObjectFileId = ParseFileId(doc.Body, GAME_OBJECT_FIELD_NAME) ?? 0;
+                if (gameObjectToTransform.TryGetValue(gameObjectFileId, out long transformFileId))
+                {
+                    Matrix4x4 world = ResolveWorldMatrix(transformFileId, plainTransforms, MAX_PARENT_DEPTH);
+                    position = world.GetColumn(3);
+                    rotation = world.rotation;
+                }
+
+                result.Add(new NavMeshSurfaceInfo(navMeshDataGuid, position, rotation));
             }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     GameObjectのfileIDから、そのGameObjectが持つTransformのfileIDへの対応表を作成します。
+        /// </summary>
+        /// <param name="documents"> パース済みドキュメント一覧です。 </param>
+        /// <returns> GameObject fileIDをキーとしたTransform fileID一覧です。 </returns>
+        private static Dictionary<long, long> BuildGameObjectToTransformMap(List<SceneDocument> documents)
+        {
+            Dictionary<long, long> result = new();
+            for (int i = 0; i < documents.Count; i++)
+            {
+                SceneDocument doc = documents[i];
+                if (doc.TypeId != TRANSFORM_TYPE_ID || doc.Stripped)
+                {
+                    continue;
+                }
+
+                long gameObjectFileId = ParseFileId(doc.Body, GAME_OBJECT_FIELD_NAME) ?? 0;
+                if (gameObjectFileId == 0)
+                {
+                    continue;
+                }
+
+                result[gameObjectFileId] = doc.Anchor;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     追加前後のトライアンギュレーション差分から、追加分のみを抽出します。
+        /// </summary>
+        /// <param name="after"> NavMeshData追加後のトライアンギュレーションです。 </param>
+        /// <param name="baseVertexCount"> 追加前の頂点数です。 </param>
+        /// <param name="baseIndexCount"> 追加前のインデックス数です。 </param>
+        /// <param name="navMesh"> 抽出したNavMeshデータです。 </param>
+        /// <returns> 抽出できた場合はtrueです。 </returns>
+        private static bool TryExtractAddedTriangulation(
+            NavMeshTriangulation after,
+            int baseVertexCount,
+            int baseIndexCount,
+            out NavMeshMapData navMesh)
+        {
+            navMesh = default;
+
+            Vector3[] afterVertices = after.vertices;
+            int[] afterIndices = after.indices;
+            if (afterVertices == null
+                || afterIndices == null
+                || afterVertices.Length < baseVertexCount
+                || afterIndices.Length < baseIndexCount)
+            {
+                return false;
+            }
+
+            int addedVertexCount = afterVertices.Length - baseVertexCount;
+            int addedIndexCount = afterIndices.Length - baseIndexCount;
+            if (addedVertexCount == 0 || addedIndexCount == 0)
+            {
+                return false;
+            }
+
+            Vector3[] vertices = new Vector3[addedVertexCount];
+            Array.Copy(afterVertices, baseVertexCount, vertices, 0, addedVertexCount);
+
+            int[] indices = new int[addedIndexCount];
+            for (int i = 0; i < addedIndexCount; i++)
+            {
+                int rebased = afterIndices[baseIndexCount + i] - baseVertexCount;
+                if (rebased < 0 || rebased >= addedVertexCount)
+                {
+                    // 追加分が末尾へ追記されていない場合は分離できないため、誤った形状を返さず失敗させる。
+                    return false;
+                }
+
+                indices[i] = rebased;
+            }
+
+            navMesh = new NavMeshMapData(vertices, indices);
+            return true;
         }
 
         /// <summary>
@@ -669,6 +813,23 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
+        ///     シーン内のNavMeshSurface1件分です。
+        /// </summary>
+        private readonly struct NavMeshSurfaceInfo
+        {
+            public readonly string NavMeshDataGuid;
+            public readonly Vector3 Position;
+            public readonly Quaternion Rotation;
+
+            public NavMeshSurfaceInfo(string navMeshDataGuid, Vector3 position, Quaternion rotation)
+            {
+                NavMeshDataGuid = navMeshDataGuid;
+                Position = position;
+                Rotation = rotation;
+            }
+        }
+
+        /// <summary>
         ///     PositionPairプレハブのPrefabInstance1件分です。
         /// </summary>
         private readonly struct PrefabInstanceDoc
@@ -712,5 +873,6 @@ namespace KillChord.Editor.SourceDataProvider
         private const string SOURCE_PREFAB_FIELD_NAME = "m_SourcePrefab";
         private const string SCRIPT_FIELD_NAME = "m_Script";
         private const string NAV_MESH_DATA_FIELD_NAME = "m_NavMeshData";
+        private const string GAME_OBJECT_FIELD_NAME = "m_GameObject";
     }
 }
