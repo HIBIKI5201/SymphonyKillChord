@@ -55,8 +55,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         ///     スキルノードが選択された時の処理。
         /// </summary>
         /// <param name="nodeId"></param>
-        /// <param name="token"></param>
-        public void OnSkillNodeSelected(int nodeId, CancellationToken token)
+        public void OnSkillNodeSelected(int nodeId)
         {
             if (_selectedNodeId != -1)
             {
@@ -80,7 +79,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 entity.IsUnlocked,
                 hasVideo);
             _skillDetailPresenter.Push(dto);
-            _skillDetailView.Show(token);
+            _skillDetailView.Show();
             view.SetSelected();
         }
 
@@ -187,11 +186,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <summary>
         ///     スキルプレビューボタンを押した時の処理。
         /// </summary>
-        /// <param name="token"></param>
-        public void OnPreviewButtonClicked(CancellationToken token)
+        public void OnPreviewButtonClicked()
         {
             if (_selectedNodeId == -1) return;
-            _previewVideoScreenViewShowable.Show(token);
+            _previewVideoScreenViewShowable.Show();
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
 

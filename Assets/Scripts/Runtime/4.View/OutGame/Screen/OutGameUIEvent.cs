@@ -37,11 +37,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
 
-        /// <summary>
-        ///     戦闘準備画面を表示するイベントです。
-        ///     引数は遷移先のシーン名です。
-        /// </summary>
-        public Action<string> OnShownBattlePreparationScreen;
+        /// <summary> 戦闘準備画面を表示するイベントです。 </summary>
+        public Action OnShownBattlePreparationScreen;
 
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
@@ -94,10 +91,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
         public Action OnSkillLevelUp;
 
-        /// <summary>
-        ///     インゲームへ遷移するイベントです。
-        ///     引数は遷移先のシーン名です。
-        /// </summary>
-        public Action<string> OnStartGame;
+        /// <summary> 選択中のバトルステージへ遷移するイベントです。 </summary>
+        public Action OnStartGame;
     }
 }

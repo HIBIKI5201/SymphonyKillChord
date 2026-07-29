@@ -590,7 +590,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillNodeSelected(string nodeName)
         {
             SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id, _cts.Token);
+            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id);
         }
 
         /// <summary>
@@ -600,7 +600,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillDetailClosed(int nodeId)
         {
             _skillTreeController.OnSkillDetailClosed();
-            _skillDetailScreenView.HideImmediately();
+            _skillDetailScreenView.Hide();
         }
 
         /// <summary>
@@ -668,7 +668,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandlePreviewButtonClicked()
         {
-            _skillTreeController.OnPreviewButtonClicked(_cts.Token);
+            _skillTreeController.OnPreviewButtonClicked();
         }
 
         /// <summary>
@@ -676,7 +676,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandlePreviewClosed()
         {
-            _previewVideoScreenView.HideImmediately();
+            _previewVideoScreenView.Hide();
         }
     }
 }

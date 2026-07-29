@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public class BattlePreparationScreen : ScreenViewBase
     {
+
         /// <summary> View を初期化します。 </summary>
         public BattlePreparationScreen(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
@@ -104,14 +105,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     遷移先のシーン名を設定します。
-        /// </summary>
-        public void SetTargetSceneName(string targetSceneName)
-        {
-            _pendingTargetSceneName = targetSceneName;
-        }
-
-        /// <summary>
         ///     画面を閉じるボタンがクリックされたときの処理です。
         /// </summary>
         private void OnBackButtonClicked(ClickEvent evt)
@@ -124,7 +117,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void OnStartButtonClicked(ClickEvent evt)
         {
-            OutGameUIEvent.OnStartGame?.Invoke(_pendingTargetSceneName);
+            OutGameUIEvent.OnStartGame?.Invoke();
         }
 
         /// <summary>
@@ -277,6 +270,5 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private IBattlePreparationSkillViewModel _viewModel;
         private CompositeDisposable _subscriptions;
-        private string _pendingTargetSceneName;
     }
 }
