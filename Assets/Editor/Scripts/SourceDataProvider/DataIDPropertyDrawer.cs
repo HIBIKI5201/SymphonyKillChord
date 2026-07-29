@@ -31,7 +31,16 @@ namespace KillChord.Editor.SourceDataProvider
             SerializedProperty hashProperty = property.FindPropertyRelative(
                 SourceDataProviderRepositoryResolver.HASH_PROPERTY_NAME);
 
-            Rect idRect = new(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+            Rect idRect = new(
+                position.x,
+                position.y,
+                position.width - JUMP_BUTTON_WIDTH - EditorGUIUtility.standardVerticalSpacing,
+                EditorGUIUtility.singleLineHeight);
+            Rect jumpRect = new(
+                idRect.xMax + EditorGUIUtility.standardVerticalSpacing,
+                position.y,
+                JUMP_BUTTON_WIDTH,
+                EditorGUIUtility.singleLineHeight);
             Rect hashRect = new(
                 position.x,
                 idRect.yMax + EditorGUIUtility.standardVerticalSpacing,
@@ -65,6 +74,16 @@ namespace KillChord.Editor.SourceDataProvider
             if (EditorGUI.EndChangeCheck() && (isAuthoring || options.Count == 0))
             {
                 hashProperty.intValue = DataIDHasher.Compute(collectionKey, idProperty.stringValue);
+            }
+
+            using (new EditorGUI.DisabledScope(
+                string.IsNullOrWhiteSpace(collectionKey) || string.IsNullOrWhiteSpace(idProperty.stringValue)))
+            {
+                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton)
+                    && PlannerMasterDataWindow.TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                {
+                    window.NavigateToCollectionItem(collectionKey, idProperty.stringValue);
+                }
             }
 
             DrawHash(hashRect, hashProperty);
@@ -222,9 +241,11 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         private const float COPY_BUTTON_WIDTH = 52f;
+        private const float JUMP_BUTTON_WIDTH = 56f;
         private const float WARNING_LINE_COUNT = 2f;
         private const string HASH_LABEL = "Hash";
         private const string COPY_LABEL = "Copy";
+        private const string JUMP_LABEL = "Planner";
         private const string UNASSIGNED_LABEL = "<未設定>";
     }
 }
