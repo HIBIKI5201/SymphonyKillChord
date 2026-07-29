@@ -548,6 +548,7 @@ MonoBehaviour:
   _bossSharedFacade: {fileID: -212700547227930963}
   _behaviorGraphAgent: {fileID: 7745163353530437078}
   _navMeshAgent: {fileID: 1548434053652605411}
+  _targetTransform: {fileID: 4381861589023682040}
   _shellSpawner: {fileID: 2569668197576462334}
 --- !u!114 &6675541117173250289
 MonoBehaviour:
