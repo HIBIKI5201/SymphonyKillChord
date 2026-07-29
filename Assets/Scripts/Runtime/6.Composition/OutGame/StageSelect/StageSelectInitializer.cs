@@ -866,8 +866,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return false;
                 }
 
-                return _outGameSortieController.RequestImmediateBattleSortie(
-                    battleStageDefinition.TargetSceneName);
+                return _outGameSortieController.RequestImmediateBattleSortie();
             }
 
             if (pendingNodeTransition.TargetStageDefinition
