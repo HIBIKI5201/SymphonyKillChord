@@ -126,6 +126,9 @@ jobs:
       - name: ビルドモードの決定
         id: determine_mode
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           $BaseRef = "${{ github.base_ref }}"
           if (-not $BaseRef) {
             $InputMode = "${{ inputs.build_mode }}"
@@ -173,6 +176,9 @@ jobs:
 
       - name: Unityのインストール検証
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::Unityのインストール検証"
           if (-not $env:UNITY_EXE_PATH) {
             Write-Host "[Error]: UNITY_EXE_PATH が設定されていません。"
@@ -198,6 +204,9 @@ jobs:
 
       - name: .NET SDK / dotnet CLI の可用性チェック
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::.NET SDK の可用性チェック"
 
           $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
@@ -400,6 +409,9 @@ jobs:
 
       - name: NuGetパッケージの復元
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
 
           if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
@@ -431,6 +443,9 @@ jobs:
 
       - name: Unityビルドの実行
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::Unity ビルドプロセスの開始"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
           Write-Host "実行メソッド: KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
@@ -505,6 +520,9 @@ jobs:
       - name: Unityビルドログの要約
         if: always()
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::Unity ビルドログ要約"
           if (Test-Path "unity_build.log") {
             Write-Host "[INFO]: unity_build.log から主要情報を抽出中..."
@@ -538,8 +556,11 @@ jobs:
 
 # ==================================================================================================
 
-      - name: ビルド出力のチェック
+      - name: ビルド成果物のチェック
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::ビルド成果物の検証"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
           Write-Host "環境変数からの raw UNITY_BUILD_OUTPUT_DIR: $RawOutputDir"
@@ -591,6 +612,9 @@ jobs:
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::現行ビルドバージョンの解決"
 
           # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
@@ -680,6 +704,9 @@ jobs:
       - name: リリースタグの生成
         id: tag_gen
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::リリースタグの生成"
           
           $VersionString = $env:CURRENT_BUILD_VERSION
@@ -697,6 +724,9 @@ jobs:
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::ビルド成果物のアーカイブ (ZIP)"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
           $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
@@ -783,6 +813,9 @@ jobs:
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::リリースパッチ番号のインクリメント"
           $VarName      = $env:PATCH_NUMBER_VAR_NAME
           $PatchNumber  = [int]$env:PATCH_NUMBER
@@ -818,6 +851,9 @@ jobs:
       - name: リリースの完了
         if: always()
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
           Write-Host "::group::ワークフロー実行サマリー"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが完了しました。"
           
