@@ -75,6 +75,17 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
+        ///     すべての View をフェードなしで即座に非表示状態にします。
+        /// </summary>
+        public void HideAllImmediately()
+        {
+            foreach (ScreenViewBase view in _views.Values)
+            {
+                view.HideImmediately();
+            }
+        }
+
+        /// <summary>
         ///     レジストリに登録されている全ての画面のリソースを解放します。
         /// </summary>
         public void Dispose()

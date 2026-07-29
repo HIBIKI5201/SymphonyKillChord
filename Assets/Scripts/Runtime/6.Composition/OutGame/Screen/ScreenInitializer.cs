@@ -205,7 +205,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 settingScreenView);
 
             _screenViewRegistry = screenViewRegistry;
-            screenViewRegistry.HideAll();
+            screenViewRegistry.HideAllImmediately();
 
             // InfraStructure 層
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
@@ -287,14 +287,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
         /// <summary>
         ///     ステージ選択表示イベントを処理します。
-        ///     画面表示後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
+        /// <remarks>
+        ///     OnStageSelectScreenCompleted はフェード完了のタイミングで StageSelectScreenView 自身が発火します。
+        /// </remarks>
         private void HandleStageSelectionScreenShown()
         {
             _screenController.ShowStageSelect();
-
-            // 作戦画面の表示完了を通知する
-            _outGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
         /// <summary>
