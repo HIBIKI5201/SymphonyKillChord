@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public class BattlePreparationScreen : ScreenViewBase
     {
+
         /// <summary> View を初期化します。 </summary>
         public BattlePreparationScreen(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)

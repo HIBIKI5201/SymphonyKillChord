@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -7,6 +10,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class StageSelectScreenView : ScreenViewBase
     {
+
         /// <summary> View を初期化します。 </summary>
         public StageSelectScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
@@ -16,6 +20,23 @@ namespace KillChord.Runtime.View.OutGame.Screen
                     $"[{nameof(StageSelectScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
             RegisterButtonCallback();
+        }
+
+        /// <summary>
+        ///     画面を表示状態にします。フェード完了後に OnStageSelectScreenCompleted を発火します。
+        /// </summary>
+        public override async ValueTask Show(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await base.Show(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            OutGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
         public override void Dispose()

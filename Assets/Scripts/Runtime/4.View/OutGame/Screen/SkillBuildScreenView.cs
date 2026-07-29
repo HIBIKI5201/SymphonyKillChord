@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class SkillBuildScreenView : ScreenViewBase
     {
+
         /// <summary>
         ///     View を初期化します。
         /// </summary>
