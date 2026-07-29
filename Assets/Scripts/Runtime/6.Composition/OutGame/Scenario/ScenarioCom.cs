@@ -158,12 +158,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            _scenarioView.Initialize(
-                _viewModel,
-                backgroundMap,
-                animationMap,
-                portraitMap,
-                _loadedScenarioSettings.LayerBackToFront);
+            _scenarioView.Initialize(_viewModel, backgroundMap, animationMap, portraitMap);
             _isInitialized = true;
             return true;
         }
