@@ -65,7 +65,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     既定位置がフォールバックとして使用できるか判定する。
         /// </summary>
         /// <param name="candidates"> 探索対象の生成位置配列です。 </param>
-        /// <returns> 候補内かつプレイヤーとの距離条件を満たす場合はtrue。 </returns>
+        /// <returns> 候補内かつ未使用で、プレイヤーとの距離条件を満たす場合はtrue。 </returns>
         private bool IsUsableFallback(SpawnPositionPair[] candidates)
         {
             if (_defaultPositionPair == null)
@@ -79,7 +79,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
-            return !IsPositionNearPlayer(_defaultPositionPair);
+            // 使用中の位置を返すと入場演出が重複するため、通常探索と同じ条件で判定する。
+            return !_defaultPositionPair.IsInUse && !IsPositionNearPlayer(_defaultPositionPair);
         }
 
         /// <summary>
