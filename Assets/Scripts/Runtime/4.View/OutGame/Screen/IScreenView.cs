@@ -9,23 +9,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
     public interface IScreenView
     {
         /// <summary>
-        ///    画面を即座に表示します。
+        ///    画面を表示状態にします。opacity のフェードは LitMotion で再生します。
+        ///    フェード完了(または cancellationToken のキャンセル)まで待機できます。
         /// </summary>
-        void ShowImmediately();
+        ValueTask Show(CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     画面を即座に非表示にします。
+        ///     画面を非表示状態にします。opacity のフェードは LitMotion で再生します。
+        ///     フェード完了(または cancellationToken のキャンセル)まで待機できます。
         /// </summary>
-        void HideImmediately();
-
-        /// <summary>
-        ///     画面を表示します。
-        /// </summary>
-        Task Show(CancellationToken token);
-
-        /// <summary>
-        ///     画面を非表示にします。
-        /// </summary>
-        Task Hide(CancellationToken token);
+        ValueTask Hide(CancellationToken cancellationToken = default);
     }
 }
