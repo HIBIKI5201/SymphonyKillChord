@@ -59,6 +59,7 @@ namespace KillChord.Editor.SourceDataProvider
         private void OnEnable()
         {
             SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            BattleSceneDataReader.ClearCache();
             EnsureSelection();
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
         }
