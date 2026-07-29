@@ -16,15 +16,16 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary>
         ///     ステップを生成します。
         /// </summary>
+        /// <param name="missionKeyRepository"> 敵ミッションキーの解決に使うリポジトリです。 </param>
         /// <returns> ステップ。 </returns>
-        public ObjectiveSequenceStep Create()
+        public ObjectiveSequenceStep Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (_condition == null)
             {
                 throw new InvalidOperationException($"{nameof(_condition)} is required.");
             }
 
-            return new ObjectiveSequenceStep(_condition.Create(), _guideMessageText);
+            return new ObjectiveSequenceStep(_condition.Create(missionKeyRepository), _guideMessageText);
         }
 
         [SerializeReference, SubclassSelector, Tooltip("このステップの達成条件。")]

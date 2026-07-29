@@ -12,14 +12,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     public sealed class PopupClearConditionAsset : MissionClearConditionAssetBase
     {
         /// <inheritdoc />
-        public override IMissionClearCondition Create()
+        public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (_innerCondition == null)
             {
                 throw new InvalidOperationException($"{nameof(_innerCondition)} is required.");
             }
 
-            return new PopupClearCondition(_innerCondition.Create(), _popupImage);
+            return new PopupClearCondition(_innerCondition.Create(missionKeyRepository), _popupImage);
         }
 
         /// <inheritdoc />
