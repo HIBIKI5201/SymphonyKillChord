@@ -89,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
             if (!_isSkillCoolingDown)
             {
