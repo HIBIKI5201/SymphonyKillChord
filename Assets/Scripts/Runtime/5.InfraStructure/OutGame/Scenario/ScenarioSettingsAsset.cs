@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using KillChord.Runtime.Domain.OutGame.Scenario;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -26,19 +24,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         public bool SkipClosesImmediately => _skipClosesImmediately;
         /// <summary> WaitForInputOnLastText を取得する。 </summary>
         public bool WaitForInputOnLastText => _waitForInputOnLastText;
-        /// <summary> UI要素の背面→前面の重ね順を取得する。未設定時は既定順を返す。 </summary>
-        public IReadOnlyList<ScenarioLayer> LayerBackToFront =>
-            _layerBackToFront != null && _layerBackToFront.Count > 0
-                ? _layerBackToFront
-                : DEFAULT_LAYER_ORDER;
-
-        private static readonly ScenarioLayer[] DEFAULT_LAYER_ORDER =
-        {
-            ScenarioLayer.Background,
-            ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
-            ScenarioLayer.Effect,
-        };
 
         [Header("Timing")]
         [Tooltip("通常再生時の1文字あたりの表示間隔（秒）です。")]
@@ -64,15 +49,5 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         [Tooltip("有効な場合、最後のテキストでも入力待ちを行います。無効な場合は最後の表示後に終了へ進みます。")]
         [SerializeField]
         private bool _waitForInputOnLastText = false;
-
-        [Header("Layer")]
-        [SerializeField, Tooltip("UI要素の重ね順。先頭が最背面・末尾が最前面。生成時にこの順へ並べ替えます。")]
-        private List<ScenarioLayer> _layerBackToFront = new()
-        {
-            ScenarioLayer.Background,
-            ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
-            ScenarioLayer.Effect,
-        };
     }
 }
