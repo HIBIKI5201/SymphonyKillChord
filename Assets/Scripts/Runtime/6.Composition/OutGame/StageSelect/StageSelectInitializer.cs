@@ -161,7 +161,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageNodeSelected(int stageIdValue)
         {
-            _stageSelectController.OnStageNodeSelected(stageIdValue, _cts.Token);
+            _stageSelectController.OnStageNodeSelected(stageIdValue);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
-            _ = _detailScreenView.Hide(_cts.Token);
+            _detailScreenView.Hide();
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
-            _detailScreenView.HideImmediately();
+            _detailScreenView.Hide();
         }
 
         /// <summary>
