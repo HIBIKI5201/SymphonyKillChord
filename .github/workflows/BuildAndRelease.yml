@@ -40,18 +40,18 @@ jobs:
         id: release_age
         run: |
           set -e
-          echo "========== Release Age Check =========="
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting release age validation..."
-          echo "Trigger Event: ${GITHUB_EVENT_NAME}"
-          echo "Repository: ${{ github.repository }}"
+          echo "========== リリース経過日数チェック =========="
+          echo "リリース経過日数の検証を開始します..."
+          echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
+          echo "リポジトリ: ${{ github.repository }}"
           echo "==========================================="
 
-          # 不要なAPIコール 避けるため、手動実行時（workflow_dispatch）はリリース経過days数のチェック スキップします。
+          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "SKIP: Manual execution detected. Skipping release age check."
+            echo "[Skip]: 手動実行を検出しました。リリース経過日数のチェックをスキップします。"
             echo "days=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (Manual trigger)"
+            echo "[Decision]: should_run=true (手動実行)"
             exit 0
           fi
 
@@ -62,7 +62,7 @@ jobs:
           fi
 
           # GitHub APIからリリース一覧（最大100件）を取得します
-          echo "INFO: Retrieving releases list from GitHub API (Prefix: ${TAG_PREFIX}-)..."
+          echo "INFO: GitHub APIからリリース一覧（最大100件）を取得します (Prefix: ${TAG_PREFIX}-)..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
@@ -75,28 +75,28 @@ jobs:
           # jqを使用して、TAG_PREFIXに合致するタグの中から最新のpublished_atを取得します
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "INFO: No previous release found with prefix ${TAG_PREFIX}-"
+            echo "[Info]: ${TAG_PREFIX}- の条件に合致するリリースが検出されませんでした。"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "SUCCESS: Decision: should_run=true (New release for prefix ${TAG_PREFIX})"
+            echo "[Decision]: should_run=true (${TAG_PREFIX} の条件に合致するリリースが未検出)"
             exit 0
           fi
           
-          echo "INFO: Latest release published at: $RELEASE_DATE"
+          echo "INFO: 最新リリースの公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
           
-          echo "INFO: Days since last release: $DAYS days"
+          echo "INFO: 最終リリースからの経過日数: $DAYS days"
           echo "INFO: Threshold: 3 days (3days以内のリリースはスキップされます)"
           
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "DECISION: should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
+            echo "[Decision]: should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "DECISION: should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
+            echo "[Decision]: should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
           fi
 
   build-and-release:
