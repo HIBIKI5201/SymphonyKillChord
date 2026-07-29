@@ -278,7 +278,15 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            List<NavMeshSurfaceInfo> surfaces = ReadNavMeshSurfaces(documents, navMeshSurfaceScriptGuid);
+            List<NavMeshSurfaceInfo> surfaces =
+                ReadNavMeshSurfaces(documents, navMeshSurfaceScriptGuid, out int unresolvedSurfaceCount);
+            if (unresolvedSurfaceCount > 0)
+            {
+                error = $"Transformを解決できないNavMeshSurfaceが{unresolvedSurfaceCount}件あります。"
+                    + "prefabインスタンス配下のNavMeshSurfaceには対応していません。";
+                return false;
+            }
+
             if (surfaces.Count == 0)
             {
                 error = "シーンにNavMeshSurfaceが見つかりません。";
@@ -304,8 +312,6 @@ namespace KillChord.Editor.SourceDataProvider
             // CalculateTriangulationは現在ロード中の全NavMeshを返すため、
             // 追加前後の差分を取って対象シーン分だけを抽出する。
             NavMeshTriangulation before = NavMesh.CalculateTriangulation();
-            int baseVertexCount = before.vertices == null ? 0 : before.vertices.Length;
-            int baseIndexCount = before.indices == null ? 0 : before.indices.Length;
 
             List<NavMeshDataInstance> instances = new(navMeshDataAssets.Count);
             try
@@ -320,7 +326,7 @@ namespace KillChord.Editor.SourceDataProvider
                 }
 
                 NavMeshTriangulation after = NavMesh.CalculateTriangulation();
-                if (!TryExtractAddedTriangulation(after, baseVertexCount, baseIndexCount, out navMesh))
+                if (!TryExtractAddedTriangulation(before, after, out navMesh))
                 {
                     error = "対象シーンのNavMeshを取得できませんでした。"
                         + "NavMeshが未ベイクであるか、対象シーンを既に開いている可能性があります。";
@@ -346,11 +352,14 @@ namespace KillChord.Editor.SourceDataProvider
         /// </summary>
         /// <param name="documents"> パース済みドキュメント一覧です。 </param>
         /// <param name="navMeshSurfaceScriptGuid"> NavMeshSurfaceスクリプトのGUIDです。 </param>
-        /// <returns> NavMeshDataを持つNavMeshSurface一覧です。 </returns>
+        /// <param name="unresolvedSurfaceCount"> Transformを解決できず除外したSurface数です。 </param>
+        /// <returns> NavMeshDataを持ち、Transformを解決できたNavMeshSurface一覧です。 </returns>
         private static List<NavMeshSurfaceInfo> ReadNavMeshSurfaces(
             List<SceneDocument> documents,
-            string navMeshSurfaceScriptGuid)
+            string navMeshSurfaceScriptGuid,
+            out int unresolvedSurfaceCount)
         {
+            unresolvedSurfaceCount = 0;
             List<NavMeshSurfaceInfo> result = new();
             Dictionary<long, PlainTransform> plainTransforms = BuildPlainTransforms(documents);
             Dictionary<long, long> gameObjectToTransform = BuildGameObjectToTransformMap(documents);
@@ -375,17 +384,16 @@ namespace KillChord.Editor.SourceDataProvider
                     continue;
                 }
 
-                Vector3 position = Vector3.zero;
-                Quaternion rotation = Quaternion.identity;
                 long gameObjectFileId = ParseFileId(doc.Body, GAME_OBJECT_FIELD_NAME) ?? 0;
-                if (gameObjectToTransform.TryGetValue(gameObjectFileId, out long transformFileId))
+                if (!gameObjectToTransform.TryGetValue(gameObjectFileId, out long transformFileId)
+                    || !TryResolveWorldMatrix(transformFileId, plainTransforms, MAX_PARENT_DEPTH, out Matrix4x4 world))
                 {
-                    Matrix4x4 world = ResolveWorldMatrix(transformFileId, plainTransforms, MAX_PARENT_DEPTH);
-                    position = world.GetColumn(3);
-                    rotation = world.rotation;
+                    // Transformを解決できないSurfaceは、誤配置のNavMeshを描画しないよう除外する。
+                    unresolvedSurfaceCount++;
+                    continue;
                 }
 
-                result.Add(new NavMeshSurfaceInfo(navMeshDataGuid, position, rotation));
+                result.Add(new NavMeshSurfaceInfo(navMeshDataGuid, world.GetColumn(3), world.rotation));
             }
 
             return result;
@@ -422,18 +430,21 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     追加前後のトライアンギュレーション差分から、追加分のみを抽出します。
         /// </summary>
+        /// <param name="before"> NavMeshData追加前のトライアンギュレーションです。 </param>
         /// <param name="after"> NavMeshData追加後のトライアンギュレーションです。 </param>
-        /// <param name="baseVertexCount"> 追加前の頂点数です。 </param>
-        /// <param name="baseIndexCount"> 追加前のインデックス数です。 </param>
         /// <param name="navMesh"> 抽出したNavMeshデータです。 </param>
         /// <returns> 抽出できた場合はtrueです。 </returns>
         private static bool TryExtractAddedTriangulation(
+            NavMeshTriangulation before,
             NavMeshTriangulation after,
-            int baseVertexCount,
-            int baseIndexCount,
             out NavMeshMapData navMesh)
         {
             navMesh = default;
+
+            Vector3[] beforeVertices = before.vertices ?? Array.Empty<Vector3>();
+            int[] beforeIndices = before.indices ?? Array.Empty<int>();
+            int baseVertexCount = beforeVertices.Length;
+            int baseIndexCount = beforeIndices.Length;
 
             Vector3[] afterVertices = after.vertices;
             int[] afterIndices = after.indices;
@@ -441,6 +452,13 @@ namespace KillChord.Editor.SourceDataProvider
                 || afterIndices == null
                 || afterVertices.Length < baseVertexCount
                 || afterIndices.Length < baseIndexCount)
+            {
+                return false;
+            }
+
+            // 追加分が末尾へ追記されるというAPI上の保証はないため、
+            // 先頭が追加前と完全に一致することを確認できた場合のみ末尾を追加分として扱う。
+            if (!HasSamePrefix(beforeVertices, afterVertices) || !HasSamePrefix(beforeIndices, afterIndices))
             {
                 return false;
             }
@@ -469,6 +487,27 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             navMesh = new NavMeshMapData(vertices, indices);
+            return true;
+        }
+
+        /// <summary>
+        ///     配列の先頭が、指定した配列と完全に一致するか判定します。
+        /// </summary>
+        /// <typeparam name="T"> 要素型です。 </typeparam>
+        /// <param name="prefix"> 先頭に一致することを期待する配列です。 </param>
+        /// <param name="source"> 判定対象の配列です。 </param>
+        /// <returns> 一致する場合はtrueです。 </returns>
+        private static bool HasSamePrefix<T>(T[] prefix, T[] source)
+            where T : IEquatable<T>
+        {
+            for (int i = 0; i < prefix.Length; i++)
+            {
+                if (!prefix[i].Equals(source[i]))
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -510,9 +549,48 @@ namespace KillChord.Editor.SourceDataProvider
                 return Matrix4x4.identity;
             }
 
-            Matrix4x4 local = Matrix4x4.TRS(t.LocalPosition, t.LocalRotation, Vector3.one);
+            Matrix4x4 local = Matrix4x4.TRS(t.LocalPosition, t.LocalRotation, t.LocalScale);
             Matrix4x4 parentWorld = ResolveWorldMatrix(t.FatherFileId, plainTransforms, depthGuard - 1);
             return parentWorld * local;
+        }
+
+        /// <summary>
+        ///     指定fileIDのワールド行列を、親チェーンを辿って合成します。
+        ///     途中のTransformを解決できない場合は失敗させます。
+        /// </summary>
+        /// <param name="fileId"> 対象のfileIDです。0はシーンルートを表します。 </param>
+        /// <param name="plainTransforms"> シーン内のプレーンTransform一覧です。 </param>
+        /// <param name="depthGuard"> 循環参照防止用の残り探索深さです。 </param>
+        /// <param name="world"> 解決したワールド行列です。 </param>
+        /// <returns> 解決できた場合はtrueです。 </returns>
+        private static bool TryResolveWorldMatrix(
+            long fileId,
+            Dictionary<long, PlainTransform> plainTransforms,
+            int depthGuard,
+            out Matrix4x4 world)
+        {
+            world = Matrix4x4.identity;
+
+            // シーンルートへ到達したため、これ以上の合成は不要。
+            if (fileId == 0)
+            {
+                return true;
+            }
+
+            // prefabインスタンス由来のstripped Transformなどは解決できないため、
+            // 誤った座標のNavMeshを返さないよう失敗させる。
+            if (depthGuard <= 0 || !plainTransforms.TryGetValue(fileId, out PlainTransform t))
+            {
+                return false;
+            }
+
+            if (!TryResolveWorldMatrix(t.FatherFileId, plainTransforms, depthGuard - 1, out Matrix4x4 parentWorld))
+            {
+                return false;
+            }
+
+            world = parentWorld * Matrix4x4.TRS(t.LocalPosition, t.LocalRotation, t.LocalScale);
+            return true;
         }
 
         /// <summary>
@@ -533,8 +611,9 @@ namespace KillChord.Editor.SourceDataProvider
 
                 Vector3 localPosition = ParseVector3(doc.Body, LOCAL_POSITION_FIELD_NAME) ?? Vector3.zero;
                 Quaternion localRotation = ParseQuaternion(doc.Body, LOCAL_ROTATION_FIELD_NAME) ?? Quaternion.identity;
+                Vector3 localScale = ParseVector3(doc.Body, LOCAL_SCALE_FIELD_NAME) ?? Vector3.one;
                 long fatherFileId = ParseFileId(doc.Body, FATHER_FIELD_NAME) ?? 0;
-                result[doc.Anchor] = new PlainTransform(localPosition, localRotation, fatherFileId);
+                result[doc.Anchor] = new PlainTransform(localPosition, localRotation, localScale, fatherFileId);
             }
 
             return result;
@@ -785,12 +864,18 @@ namespace KillChord.Editor.SourceDataProvider
         {
             public readonly Vector3 LocalPosition;
             public readonly Quaternion LocalRotation;
+            public readonly Vector3 LocalScale;
             public readonly long FatherFileId;
 
-            public PlainTransform(Vector3 localPosition, Quaternion localRotation, long fatherFileId)
+            public PlainTransform(
+                Vector3 localPosition,
+                Quaternion localRotation,
+                Vector3 localScale,
+                long fatherFileId)
             {
                 LocalPosition = localPosition;
                 LocalRotation = localRotation;
+                LocalScale = localScale;
                 FatherFileId = fatherFileId;
             }
         }
@@ -868,6 +953,7 @@ namespace KillChord.Editor.SourceDataProvider
         private const string LOCAL_ROTATION_PROPERTY_PREFIX = "m_LocalRotation";
         private const string LOCAL_POSITION_FIELD_NAME = "m_LocalPosition";
         private const string LOCAL_ROTATION_FIELD_NAME = "m_LocalRotation";
+        private const string LOCAL_SCALE_FIELD_NAME = "m_LocalScale";
         private const string FATHER_FIELD_NAME = "m_Father";
         private const string TRANSFORM_PARENT_FIELD_NAME = "m_TransformParent";
         private const string SOURCE_PREFAB_FIELD_NAME = "m_SourcePrefab";
