@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -23,10 +24,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, Tooltip("初回起動時に自動出撃するチュートリアルステージの場合はオンにする。")]
         private bool _isTutorial;
 
-        [SerializeField, SceneNameSelector, Tooltip("バトルパートで追加ロードするステージシーン名。")]
-        private string _battleSceneName = "Stage_1";
-
-        [SerializeField, SourceDataCollection("Wave"), Tooltip("バトルパートで使用する敵Wave定義ID。")]
+        [SerializeField, SourceDataCollection("Wave"), Tooltip("バトルパートで使用する敵Wave定義ID。スポーン候補地の都合により、ステージシーン名もこの定義が保持する。")]
         private DataID _enemyWaveDefinitionId;
 
         [SerializeField, SourceDataCollection("Mission"), Tooltip("バトルパートのミッションID。")]
@@ -40,18 +38,36 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <param name="flavorText"> フレーバーテキスト。</param>
         /// <param name="reward"> クリア報酬。</param>
         /// <param name="targetSceneName"> 遷移先シーン名。</param>
+        /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したバトルステージ定義。</returns>
         protected override StageDefinition CreateDefinition(
             StageId stageId,
             string stageName,
             string flavorText,
             StageReward reward,
-            string targetSceneName)
+            string targetSceneName,
+            IEnemyWaveDefinitionRepository waveDefinitionRepository)
         {
             if (_missionDefinitionId.Id == 0)
             {
                 throw new System.InvalidOperationException(
                     $"[{nameof(BattleStageAsset)}] ミッション定義が未設定です。StageId: {stageId.Value}");
+            }
+
+            if (waveDefinitionRepository == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"[{nameof(BattleStageAsset)}] 敵Wave定義リポジトリが未指定です。StageId: {stageId.Value}");
+            }
+
+            EnemyWaveDefinitionId enemyWaveDefinitionId = new(_enemyWaveDefinitionId.Id);
+            if (!waveDefinitionRepository.TryGetBattleSceneName(
+                    enemyWaveDefinitionId,
+                    out string battleSceneName))
+            {
+                throw new System.InvalidOperationException(
+                    $"[{nameof(BattleStageAsset)}] 敵Wave定義からバトルシーン名を解決できません。"
+                        + $" StageId: {stageId.Value}, EnemyWaveDefinitionId: {_enemyWaveDefinitionId.Id}");
             }
 
             return new BattleStageDefinition(
@@ -60,10 +76,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 flavorText,
                 reward,
                 targetSceneName,
-                _battleSceneName,
+                battleSceneName,
                 new MissionId(_missionDefinitionId.Id),
                 _isTutorial,
-                new EnemyWaveDefinitionId(_enemyWaveDefinitionId.Id));
+                enemyWaveDefinitionId);
         }
     }
 }

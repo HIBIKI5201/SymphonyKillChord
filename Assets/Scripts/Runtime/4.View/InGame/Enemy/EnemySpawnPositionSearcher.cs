@@ -50,13 +50,37 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 await Task.Delay(_searchDelay);
                 loopCnt++;
             }
-            // 一定回数探索しても生成位置が見つからない場合、明示された既定位置を使う
-            Debug.LogWarning("[EnemySpawnPositionSearcher] 予期せぬ原因により、敵生成位置取得が失敗しました。初期位置で敵を生成します。");
-            if (_defaultPositionPair != null)
+            // 一定回数探索しても生成位置が見つからない場合、候補内かつ距離条件を満たす既定位置に限り使用する
+            if (IsUsableFallback(candidates))
             {
+                Debug.LogWarning(
+                    "[EnemySpawnPositionSearcher] 敵生成位置取得が失敗したため、既定位置で敵を生成します。");
                 return _defaultPositionPair;
             }
+
             throw new Exception("[EnemySpawnPositionSearcher] 使用可能な敵生成位置が見つかりませんでした。");
+        }
+
+        /// <summary>
+        ///     既定位置がフォールバックとして使用できるか判定する。
+        /// </summary>
+        /// <param name="candidates"> 探索対象の生成位置配列です。 </param>
+        /// <returns> 候補内かつ未使用で、プレイヤーとの距離条件を満たす場合はtrue。 </returns>
+        private bool IsUsableFallback(SpawnPositionPair[] candidates)
+        {
+            if (_defaultPositionPair == null)
+            {
+                return false;
+            }
+
+            // 候補外の既定位置を使うとステップごとの出現位置制御を破るため、候補内に限定する。
+            if (Array.IndexOf(candidates, _defaultPositionPair) < 0)
+            {
+                return false;
+            }
+
+            // 使用中の位置を返すと入場演出が重複するため、通常探索と同じ条件で判定する。
+            return !_defaultPositionPair.IsInUse && !IsPositionNearPlayer(_defaultPositionPair);
         }
 
         /// <summary>
@@ -86,9 +110,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             if (filtered.Count == 0)
             {
-                Debug.LogWarning(
-                    "[EnemySpawnPositionSearcher] 指定された候補スポーンポイントが見つかりませんでした。全スポーンポイントから生成します。");
-                return (SpawnPositionPair[])_positionPairs.Clone();
+                // 全スポーンポイントへ広げるとステップごとの出現位置制御を破るため、設定エラーとして失敗させる。
+                throw new Exception(
+                    "[EnemySpawnPositionSearcher] 指定された候補スポーンポイントがシーン内に1件も見つかりませんでした。"
+                        + $" 指定ID: {string.Join(", ", candidateSpawnPointHashes)}");
             }
 
             return filtered.ToArray();

@@ -10,6 +10,12 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     /// </summary>
     public class SkillTreeStatusEntity
     {
+        /// <summary>
+        ///     スキルツリー状態を初期化する。
+        /// </summary>
+        /// <param name="currentPoints"> 現在の研究ポイント。 </param>
+        /// <param name="unlockedNodes"> 解放済みノード。 </param>
+        /// <param name="unlockedSkills"> 解放済みスキル。 </param>
         public SkillTreeStatusEntity(int currentPoints, SkillNodeId[] unlockedNodes, SkillId[] unlockedSkills)
         {
             _currentPoints = currentPoints;
@@ -58,6 +64,39 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public void AddUnlockedSkillIds(SkillId[] skillIds)
         {
             _unlockedSkillIds.AddRange(skillIds);
+        }
+
+        /// <summary>
+        ///     スキルツリーの解放状態と所持ポイントをリセット結果で置き換えます。
+        /// </summary>
+        /// <param name="currentPoints"> リセット後の研究ポイント。 </param>
+        /// <param name="unlockedNodes"> リセット後も解放済みとして維持するノード。 </param>
+        /// <param name="unlockedSkills"> リセット後も所持するスキル。 </param>
+        public void Reset(
+            int currentPoints,
+            ReadOnlyMemory<SkillNodeId> unlockedNodes,
+            ReadOnlyMemory<SkillId> unlockedSkills)
+        {
+            if (currentPoints < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(currentPoints));
+            }
+
+            _currentPoints = currentPoints;
+
+            _unlockedNodes.Clear();
+            ReadOnlySpan<SkillNodeId> unlockedNodeSpan = unlockedNodes.Span;
+            for (int i = 0; i < unlockedNodeSpan.Length; i++)
+            {
+                _unlockedNodes.Add(unlockedNodeSpan[i]);
+            }
+
+            _unlockedSkillIds.Clear();
+            ReadOnlySpan<SkillId> unlockedSkillSpan = unlockedSkills.Span;
+            for (int i = 0; i < unlockedSkillSpan.Length; i++)
+            {
+                _unlockedSkillIds.Add(unlockedSkillSpan[i]);
+            }
         }
 
         private int _currentPoints;

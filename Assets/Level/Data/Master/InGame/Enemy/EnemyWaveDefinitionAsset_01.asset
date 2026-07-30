@@ -15,6 +15,7 @@ MonoBehaviour:
   _id:
     _id: enemy_wave_01
     _hashId: 480330467
+  _battleSceneName: Stage_01
   _waves:
   - Details:
     - EnemyType: 0

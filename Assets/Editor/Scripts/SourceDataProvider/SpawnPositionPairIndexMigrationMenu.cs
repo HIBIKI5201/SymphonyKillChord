@@ -48,6 +48,9 @@ namespace KillChord.Editor.SourceDataProvider
                 {
                     EditorSceneManager.RestoreSceneManagerSetup(originalSceneSetup);
                 }
+
+                // シーンのIDや座標が変化するため、Plannerが参照するマップキャッシュを破棄する。
+                BattleSceneDataReader.ClearCache();
             }
 
             string message =

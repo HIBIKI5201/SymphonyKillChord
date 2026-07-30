@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Player;
 
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
@@ -15,10 +16,10 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         }
         public override void Execute(in SkillEffectContext context)
         {
-            Damage damage = new Damage(context.TargetEntity.CurrentHealth.Value * _multiplier);
+            float currentHealthRatio = (float)context.EffectSpec.GetRequiredValue(
+                SkillEffectParameterId.CurrentHealthRatio);
+            Damage damage = new Damage(context.TargetEntity.CurrentHealth.Value * currentHealthRatio);
             context.TargetEntity.TakeDamage(damage);
         }
-
-        private float _multiplier = 0.9f; //強力な一回攻撃。
     }
 }

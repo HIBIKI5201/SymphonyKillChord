@@ -26,7 +26,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("場外の出現位置")] private Transform _spawnPosition;
         [SerializeField, Tooltip("入場演出の移動目的地")] private Transform _entryPosition;
-        [SerializeField, SourceDataCollection(SPAWN_POINT_COLLECTION_KEY)]
+        [SerializeField, SourceDataCollection(SPAWN_POINT_COLLECTION_KEY, isSceneScoped: true)]
         [Tooltip("シーン内でこの生成位置を一意に識別するID。Wave設定から候補地として参照されます。")]
         private DataID _spawnPointId;
 

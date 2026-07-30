@@ -1,7 +1,5 @@
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.Screen;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
@@ -56,68 +54,59 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
-        ///    現在画面を即座に閉じます。
-        /// </summary>
-        public void CloseCurrentImmediately()
-        {
-            _closeCurrentScreenUseCase.Execute();
-        }
-
-        /// <summary>
         ///     ホーム画面を表示します。
         /// </summary>
-        public async Task ShowHome(CancellationToken token)
+        public void ShowHome()
         {
-            await _resetToHomeScreenUseCase.Execute(token);
+            _resetToHomeScreenUseCase.Execute();
         }
 
         /// <summary>
         ///     作戦画面を表示します。
         /// </summary>
-        public async Task ShowStageSelect(CancellationToken token)
+        public void ShowStageSelect()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.StageSelect), token);
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.StageSelect));
         }
 
         /// <summary>
         ///     研究画面を表示します。
         /// </summary>
-        public async Task ShowSkillTree(CancellationToken token)
+        public void ShowSkillTree()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillTree), token);
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillTree));
         }
 
         /// <summary>
         ///     改造画面を表示します。
         /// </summary>
-        public async Task ShowSkillBuild(CancellationToken token)
+        public void ShowSkillBuild()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillBuild), token);
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillBuild));
         }
 
         /// <summary>
         ///     戦闘準備画面を表示します。
         /// </summary>
-        public async Task ShowBattlePreparation(string targetSceneName, CancellationToken token)
+        public void ShowBattlePreparation()
         {
-            await _showScreenUseCase.Execute(
-                new ShowScreenCommand(ScreenId.BattlePreparation, targetSceneName), token);
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.BattlePreparation));
         }
 
         /// <summary>
         ///     設定画面を表示します。
         /// </summary>
-        public async Task ShowSetting(CancellationToken token)
+        public void ShowSetting()
         {
-            await _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Setting), token);
+            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Setting));
         }
 
         /// <summary>
         ///     現在画面を閉じます。
         /// </summary>
-        public async Task CloseCurrent(CancellationToken token)
+        public void CloseCurrent()
         {
-            await _closeCurrentScreenUseCase.Execute(token);
+            _closeCurrentScreenUseCase.Execute();
         }
 
         private readonly CloseCurrentScreenUseCase _closeCurrentScreenUseCase;

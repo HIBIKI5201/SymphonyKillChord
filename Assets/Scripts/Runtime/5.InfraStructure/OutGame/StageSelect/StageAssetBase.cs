@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
@@ -18,8 +19,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <summary>
         ///     ステージノードを生成する。
         /// </summary>
+        /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したステージノード。</returns>
-        public StageNode Create()
+        public StageNode Create(IEnemyWaveDefinitionRepository waveDefinitionRepository)
         {
             if (_stageId.Id == 0)
             {
@@ -32,7 +34,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 _stageName,
                 _flavorText,
                 new StageReward(_rewardSkillBuildPoint, _rewardSkillUnlockPoint),
-                _targetSceneName);
+                _targetSceneName,
+                waveDefinitionRepository);
             StageStatus initialStatus = _isInitiallyUnlocked
                 ? StageStatus.Unlocked
                 : StageStatus.Locked;
@@ -80,12 +83,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <param name="flavorText"> フレーバーテキスト。</param>
         /// <param name="reward"> クリア報酬。</param>
         /// <param name="targetSceneName"> 遷移先シーン名。</param>
+        /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したステージ定義。</returns>
         protected abstract StageDefinition CreateDefinition(
             StageId stageId,
             string stageName,
             string flavorText,
             StageReward reward,
-            string targetSceneName);
+            string targetSceneName,
+            IEnemyWaveDefinitionRepository waveDefinitionRepository);
     }
 }
