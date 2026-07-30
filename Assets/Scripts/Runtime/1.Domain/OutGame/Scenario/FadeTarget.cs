@@ -1,7 +1,7 @@
 namespace KillChord.Runtime.Domain.OutGame.Scenario
 {
     /// <summary>
-    /// フェード演出の対象を表す。テキストは対象に含めない（常にフェードしない）。
+    /// フェード演出の対象を表す。テキストは対象に含めない（Blackオーバーレイのみフェード）。
     /// </summary>
     public enum FadeTarget
     {

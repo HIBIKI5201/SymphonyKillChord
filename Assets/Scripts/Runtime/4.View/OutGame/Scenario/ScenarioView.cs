@@ -5,10 +5,10 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
-    [DefaultExecutionOrder(10)]
     /// <summary>
     /// シナリオの表示状態を Unity UI に反映するビュー。
     /// </summary>
+    [DefaultExecutionOrder(10)]
     public class ScenarioView : MonoBehaviour
     {
         /// <summary>
