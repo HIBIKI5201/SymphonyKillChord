@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using KillChord.Runtime.Domain.OutGame.Scenario;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,7 +19,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
             IReadOnlyDictionary<string, Sprite> portraitByKey,
-            IReadOnlyList<ScenarioLayer> layerBackToFront)
+            IReadOnlyList<string> layerBackToFront)
         {
             _layerBackToFront = layerBackToFront;
             TryAutoAssignReferences();
@@ -53,14 +52,16 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private const string TargetText = "Text";
         private const string TargetBlack = "Black";
         private const string BlackOverlayObject = "BlackOverlay";
+        private const string LayerPortrait = "Portrait";
+        private const string LayerEffect = "Effect";
 
-        // 並び順アセットが未設定のときに使う既定の背面→前面順。
-        private static readonly ScenarioLayer[] DEFAULT_LAYER_ORDER =
+        // 並び順が未指定のときに使う既定の背面→前面順（レイヤー名）。
+        private static readonly string[] DEFAULT_LAYER_ORDER =
         {
-            ScenarioLayer.Background,
-            ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
-            ScenarioLayer.Effect,
+            TargetBackground,
+            LayerPortrait,
+            TargetText,
+            LayerEffect,
         };
 
         [SerializeField] private CanvasGroup _canvasGroup;
@@ -82,7 +83,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
         private ViewModel _viewModel;
-        private IReadOnlyList<ScenarioLayer> _layerBackToFront;
+        private IReadOnlyList<string> _layerBackToFront;
         private Image _blackOverlay;
 
         /// <summary>
@@ -572,10 +573,10 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void ApplyLayerOrder()
         {
-            IReadOnlyList<ScenarioLayer> order =
+            IReadOnlyList<string> order =
                 _layerBackToFront != null && _layerBackToFront.Count > 0 ? _layerBackToFront : DEFAULT_LAYER_ORDER;
 
-            foreach (ScenarioLayer layer in order)
+            foreach (string layer in order)
             {
                 BringLayerToFront(layer);
             }
@@ -584,33 +585,34 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         /// 指定レイヤーに属する要素を最前面へ移動する。
         /// </summary>
-        private void BringLayerToFront(ScenarioLayer layer)
+        private void BringLayerToFront(string layer)
         {
-            switch (layer)
+            if (string.Equals(layer, TargetBackground, System.StringComparison.OrdinalIgnoreCase))
             {
-                case ScenarioLayer.Background:
-                    if (_backgroundImage != null)
-                    {
-                        _backgroundImage.transform.SetAsLastSibling();
-                    }
-                    break;
-                case ScenarioLayer.Portrait:
-                    BringPortraitToFront(SlotLeft);
-                    BringPortraitToFront(SlotCenter);
-                    BringPortraitToFront(SlotRight);
-                    break;
-                case ScenarioLayer.Text:
-                    if (_chat != null)
-                    {
-                        _chat.transform.SetAsLastSibling();
-                    }
-                    break;
-                case ScenarioLayer.Effect:
-                    if (_blackOverlay != null)
-                    {
-                        _blackOverlay.transform.SetAsLastSibling();
-                    }
-                    break;
+                if (_backgroundImage != null)
+                {
+                    _backgroundImage.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerPortrait, System.StringComparison.OrdinalIgnoreCase))
+            {
+                BringPortraitToFront(SlotLeft);
+                BringPortraitToFront(SlotCenter);
+                BringPortraitToFront(SlotRight);
+            }
+            else if (string.Equals(layer, TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_chat != null)
+                {
+                    _chat.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerEffect, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_blackOverlay != null)
+                {
+                    _blackOverlay.transform.SetAsLastSibling();
+                }
             }
         }
 
