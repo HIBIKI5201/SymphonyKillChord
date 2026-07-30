@@ -485,6 +485,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _attackReservationUsecase?.Deactivate();
             _aiController?.CancelAttack();
+            _raycastView?.HideWarning();
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
