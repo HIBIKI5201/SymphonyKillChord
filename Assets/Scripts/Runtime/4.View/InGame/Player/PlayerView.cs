@@ -102,6 +102,8 @@ namespace KillChord.Runtime.View.InGame.Player
         private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
         private Vector2 _dogeVector;
+        private Vector3 _cacheVelocity;
+        private Quaternion _cacheRotation;
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
@@ -131,6 +133,14 @@ namespace KillChord.Runtime.View.InGame.Player
             }
             PlayerAttackController?.UpdateAttackCooldown(Time.deltaTime);
             UpdateMovement();
+        }
+        private void FixedUpdate()
+        {
+            if (!_isInitialized || !_isPlaying || _controller == null)
+            {
+                return;
+            }
+            UpdateRigidbody();
         }
 
         private void OnDestroy()
@@ -515,6 +525,12 @@ namespace KillChord.Runtime.View.InGame.Player
             }
         }
 
+        private void UpdateRigidbody()
+        {
+            _rb.linearVelocity = _cacheVelocity;
+            _rb.MoveRotation(_cacheRotation);
+        }
+
         /// <summary> 入力に基づいて移動と向きを更新する。 </summary>
         private void UpdateMovement()
         {
@@ -568,9 +584,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 rotation = _rotation;
             }
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
-            _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
-            _rb.MoveRotation(rotation);
+            _cacheVelocity = velocity;
+            _cacheRotation = rotation;
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
         }
