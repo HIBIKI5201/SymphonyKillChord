@@ -158,7 +158,19 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            _scenarioView.Initialize(_viewModel, backgroundMap, animationMap, portraitMap);
+            // レイヤー順は View が Domain を参照しないよう、文字列名へ変換して渡す。
+            var layerOrder = new List<string>(_loadedScenarioSettings.LayerBackToFront.Count);
+            foreach (ScenarioLayer layer in _loadedScenarioSettings.LayerBackToFront)
+            {
+                layerOrder.Add(layer.ToString());
+            }
+
+            _scenarioView.Initialize(
+                _viewModel,
+                backgroundMap,
+                animationMap,
+                portraitMap,
+                layerOrder);
             _isInitialized = true;
             return true;
         }

@@ -5,10 +5,10 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
-    [DefaultExecutionOrder(10)]
     /// <summary>
     /// シナリオの表示状態を Unity UI に反映するビュー。
     /// </summary>
+    [DefaultExecutionOrder(10)]
     public class ScenarioView : MonoBehaviour
     {
         /// <summary>
@@ -18,8 +18,10 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
-            IReadOnlyDictionary<string, Sprite> portraitByKey)
+            IReadOnlyDictionary<string, Sprite> portraitByKey,
+            IReadOnlyList<string> layerBackToFront)
         {
+            _layerBackToFront = layerBackToFront;
             TryAutoAssignReferences();
             EnsureNonFadingUi();
             UnsubscribeFromViewModel();
@@ -33,6 +35,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         // CanvasGroup.alpha が 0 だと配下がカリングされ、ignoreParentGroups の
         // テキストも消える。実質不可視だがカリングは避けられる最小値。
         private const float MinCanvasAlpha = 0.004f;
+        // 黒フェードが「完全に暗転した」とみなす alpha のしきい値。
+        private const float FullyOpaqueThreshold = 0.99f;
         private const string SlotLeft = "Left";
         private const string SlotCenter = "Center";
         private const string SlotRight = "Right";
@@ -46,6 +50,19 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private const string TargetPortraitCenter = "PortraitCenter";
         private const string TargetPortraitRight = "PortraitRight";
         private const string TargetText = "Text";
+        private const string TargetBlack = "Black";
+        private const string BlackOverlayObject = "BlackOverlay";
+        private const string LayerPortrait = "Portrait";
+        private const string LayerEffect = "Effect";
+
+        // 並び順が未指定のときに使う既定の背面→前面順（レイヤー名）。
+        private static readonly string[] DEFAULT_LAYER_ORDER =
+        {
+            TargetBackground,
+            LayerPortrait,
+            TargetText,
+            LayerEffect,
+        };
 
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
@@ -66,6 +83,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
         private ViewModel _viewModel;
+        private IReadOnlyList<string> _layerBackToFront;
+        private Image _blackOverlay;
 
         /// <summary>
         /// 表示に必要な参照を初期化する。
@@ -252,12 +271,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             int clampedOrder = Mathf.Clamp(order, 0, childCount - 1);
             targetRect.SetSiblingIndex(clampedOrder);
-
-            // テキスト自体の並びを明示指定した場合を除き、テキストは最前面に保つ。
-            if (!string.Equals(target, TargetText, System.StringComparison.OrdinalIgnoreCase))
-            {
-                EnsureTextInFront();
-            }
         }
 
         /// <summary>
@@ -336,6 +349,14 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 if (t >= 1f)
                 {
                     _completedFadeKeys.Add(entry.Key);
+                    // 黒フェードで完全に暗転したら、下のテキストを消しておく。
+                    // 明転時に前のテキストが残って見えるのを防ぐ。
+                    if (string.Equals(entry.Key, TargetBlack, System.StringComparison.OrdinalIgnoreCase)
+                        && fade.End >= FullyOpaqueThreshold
+                        && _chat != null)
+                    {
+                        _chat.text = string.Empty;
+                    }
                 }
             }
 
@@ -401,6 +422,18 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return EnsurePortraitCanvasGroup(SlotRight);
             }
 
+            if (target.Equals(TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                // テキスト自身の CanvasGroup を明示的にフェードする。
+                EnsureNonFadingUi();
+                return _nonFadingUi;
+            }
+
+            if (target.Equals(TargetBlack, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsureBlackOverlay();
+            }
+
             return null;
         }
 
@@ -436,6 +469,30 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             _activeFades.Clear();
             _completedFadeKeys.Clear();
+
+            // 各要素を既定の可視状態へ戻す（次のシナリオを綺麗な状態で開始する）。
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = 1f;
+            }
+
+            if (_nonFadingUi != null)
+            {
+                _nonFadingUi.alpha = 1f;
+            }
+
+            foreach (Image portraitImage in _portraitBySlot.Values)
+            {
+                if (portraitImage != null && portraitImage.TryGetComponent(out CanvasGroup portraitGroup))
+                {
+                    portraitGroup.alpha = 1f;
+                }
+            }
+
+            if (_blackOverlay != null && _blackOverlay.TryGetComponent(out CanvasGroup overlayGroup))
+            {
+                overlayGroup.alpha = 0f;
+            }
         }
 
         /// <summary>
@@ -457,22 +514,116 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             if (_nonFadingUi != null)
             {
-                // 親（_canvasGroup）のフェードを無視して常に不透明に保つ。
+                // 親（Screenフェード）を無視する。alpha は Text フェードでのみ変化させる。
                 _nonFadingUi.ignoreParentGroups = true;
-                _nonFadingUi.alpha = 1f;
             }
         }
 
         /// <summary>
-        /// テキストを兄弟の最後（＝最前面）に移動する。
-        /// 立ち絵は実行時に生成されテキストより後ろの兄弟になり手前に描画されるため、
-        /// 常にテキストが前面に来るようにする。
+        /// 演出用の黒オーバーレイ（全画面）を確保し、その CanvasGroup を返す。
         /// </summary>
-        private void EnsureTextInFront()
+        private CanvasGroup EnsureBlackOverlay()
         {
-            if (_chat != null)
+            if (_blackOverlay == null)
             {
-                _chat.transform.SetAsLastSibling();
+                RectTransform root = _portraitRoot != null ? _portraitRoot : transform as RectTransform;
+                if (root == null)
+                {
+                    return null;
+                }
+
+                Transform existing = root.Find(BlackOverlayObject);
+                GameObject go = existing != null
+                    ? existing.gameObject
+                    : new GameObject(
+                        BlackOverlayObject,
+                        typeof(RectTransform),
+                        typeof(CanvasRenderer),
+                        typeof(Image),
+                        typeof(CanvasGroup));
+                RectTransform rectTransform = go.GetComponent<RectTransform>();
+                if (existing == null)
+                {
+                    // 全画面を覆うように配置する。
+                    rectTransform.SetParent(root, false);
+                    rectTransform.anchorMin = Vector2.zero;
+                    rectTransform.anchorMax = Vector2.one;
+                    rectTransform.offsetMin = Vector2.zero;
+                    rectTransform.offsetMax = Vector2.zero;
+                }
+
+                Image image = go.GetComponent<Image>();
+                image.color = Color.black;
+                image.raycastTarget = false;
+                _blackOverlay = image;
+
+                CanvasGroup overlayGroup = go.GetComponent<CanvasGroup>();
+                overlayGroup.alpha = 0f;
+
+                // 生成した演出要素を優先度順へ並べ直す。
+                ApplyLayerOrder();
+            }
+
+            return EnsureCanvasGroup(_blackOverlay.gameObject);
+        }
+
+        /// <summary>
+        /// UI 要素を並び順アセットの背面→前面順に並べ替える。
+        /// 背面から順に SetAsLastSibling することで、末尾の要素が最前面になる。
+        /// </summary>
+        private void ApplyLayerOrder()
+        {
+            IReadOnlyList<string> order =
+                _layerBackToFront != null && _layerBackToFront.Count > 0 ? _layerBackToFront : DEFAULT_LAYER_ORDER;
+
+            foreach (string layer in order)
+            {
+                BringLayerToFront(layer);
+            }
+        }
+
+        /// <summary>
+        /// 指定レイヤーに属する要素を最前面へ移動する。
+        /// </summary>
+        private void BringLayerToFront(string layer)
+        {
+            if (string.Equals(layer, TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_backgroundImage != null)
+                {
+                    _backgroundImage.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerPortrait, System.StringComparison.OrdinalIgnoreCase))
+            {
+                BringPortraitToFront(SlotLeft);
+                BringPortraitToFront(SlotCenter);
+                BringPortraitToFront(SlotRight);
+            }
+            else if (string.Equals(layer, TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_chat != null)
+                {
+                    _chat.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerEffect, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_blackOverlay != null)
+                {
+                    _blackOverlay.transform.SetAsLastSibling();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定スロットの立ち絵を最前面へ移動する。
+        /// </summary>
+        private void BringPortraitToFront(string slot)
+        {
+            if (_portraitBySlot.TryGetValue(slot, out Image image) && image != null)
+            {
+                image.transform.SetAsLastSibling();
             }
         }
 
@@ -485,8 +636,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
             EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
             ApplyPortraitSizeToExistingSlots();
-            // 立ち絵生成でテキストが背面へ回るため、常に最前面へ戻す。
-            EnsureTextInFront();
+            // 立ち絵生成で重なり順が変わるため、優先度順へ並べ直す。
+            ApplyLayerOrder();
         }
 
         /// <summary>
