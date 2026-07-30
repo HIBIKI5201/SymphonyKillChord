@@ -8,6 +8,7 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
@@ -78,6 +79,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
         private string _missionDefinitionRepositoryKey;
 
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
+        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
         private StageProgressService _progressService;
@@ -99,6 +103,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private BattleSortieSelectionService _battleSortieSelectionService;
         private StageTreeAsset _loadedStageTreeAsset;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
+        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
@@ -130,6 +135,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
                 _loadedMissionDefinitionRepository =
                     await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
+                _loadedEnemyWaveDefinitionRepository =
+                    await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(this, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -140,7 +147,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             {
                 string failedKey = _loadedStageTreeAsset == null
                     ? _stageTreeAssetKey
-                    : _missionDefinitionRepositoryKey;
+                    : _loadedMissionDefinitionRepository == null
+                        ? _missionDefinitionRepositoryKey
+                        : _enemyWaveDefinitionRepositoryKey;
                 Debug.LogError(
                     $"[{nameof(StageSelectInitializer)}] ステージ選択リソースのロードに失敗しました。"
                         + $" Key: {failedKey} / {exception}",
@@ -149,12 +158,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
-            if (_loadedStageTreeAsset == null || _loadedMissionDefinitionRepository == null)
+            if (_loadedStageTreeAsset == null
+                || _loadedMissionDefinitionRepository == null
+                || _loadedEnemyWaveDefinitionRepository == null)
             {
                 Debug.LogError(
                     $"[{nameof(StageSelectInitializer)}] ステージ選択リソースを解決できませんでした。"
                         + $" {nameof(StageTreeAsset)}: {_stageTreeAssetKey},"
-                        + $" {nameof(MissionDefinitionRepository)}: {_missionDefinitionRepositoryKey}",
+                        + $" {nameof(MissionDefinitionRepository)}: {_missionDefinitionRepositoryKey},"
+                        + $" {nameof(EnemyWaveDefinitionRepository)}: {_enemyWaveDefinitionRepositoryKey}",
                     this);
                 ReleaseLoadedResources();
                 return false;
@@ -207,6 +219,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _loadedStageTreeAsset = null;
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedMissionDefinitionRepository = null;
+            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
         }
 
@@ -396,7 +410,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             // --- Domain 層 ---
-            _stageTree = _loadedStageTreeAsset.Create();
+            _stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
 
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);

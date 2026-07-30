@@ -19,6 +19,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// <summary> 敵Wave定義IDです。 </summary>
         public EnemyWaveDefinitionId Id => new EnemyWaveDefinitionId(_id.Id);
 
+        /// <summary> このWave定義が対象とするバトルシーン名です。 </summary>
+        public string BattleSceneName => _battleSceneName;
+
         /// <summary>
         ///     1ステージ分の敵Wave定義を生成する。
         /// </summary>
@@ -109,6 +112,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 
         [SerializeField, SourceDataCollection("Wave"), Tooltip("敵Wave定義を一意に識別するIDです。")]
         private DataID _id;
+
+        // スポーン候補地はシーン内のオブジェクトを指すため、対象シーンはWave定義側が保持する。
+        [SerializeField, SceneNameSelector, Tooltip("このWave定義が対象とするバトルステージシーン名です。")]
+        private string _battleSceneName = "Stage_01";
 
         [SerializeField, Tooltip("1Wave分の定義")]
         private SingleWaveDefinition[] _waves;

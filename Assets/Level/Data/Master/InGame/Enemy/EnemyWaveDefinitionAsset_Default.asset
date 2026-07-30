@@ -15,6 +15,7 @@ MonoBehaviour:
   _id:
     _id: enemy_wave_default
     _hashId: -1074717099
+  _battleSceneName: Stage_01
   _waves:
   - Details:
     - EnemyType: 0
@@ -23,7 +24,9 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
-    SpawnPointCandidates: []
+    SpawnPointCandidates:
+    - _id: 
+      _hashId: 0
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -39,7 +42,9 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
-    SpawnPointCandidates: []
+    SpawnPointCandidates:
+    - _id: 
+      _hashId: 0
   - Details:
     - EnemyType: 0
       EnemyAmount: 1

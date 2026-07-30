@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Constant;
 using System.Collections.Generic;
@@ -16,8 +17,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <summary>
         ///     ステージツリーを生成する。
         /// </summary>
+        /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したステージツリー。</returns>
-        public StageTree Create()
+        public StageTree Create(IEnemyWaveDefinitionRepository waveDefinitionRepository)
         {
             List<StageNode> nodes = new(_stageAssets.Count);
             for (int i = 0; i < _stageAssets.Count; i++)
@@ -29,7 +31,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                         $"[{nameof(StageTreeAsset)}] ステージアセットが未設定です。Index: {i}");
                 }
 
-                nodes.Add(stageAsset.Create());
+                nodes.Add(stageAsset.Create(waveDefinitionRepository));
             }
 
             List<StageNodeConnection> connections = new(_bindAssets.Count);
