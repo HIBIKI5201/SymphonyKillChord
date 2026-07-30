@@ -810,6 +810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 2119823347}
   _stageTreeAssetKey: StageTreeAsset
+  _missionDefinitionRepositoryKey: MissionDefinitionRepository
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0

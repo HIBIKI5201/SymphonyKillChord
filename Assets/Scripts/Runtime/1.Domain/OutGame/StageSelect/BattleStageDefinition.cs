@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="reward"> ステージの報酬情報。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
         /// <param name="battleSceneName"> バトルパートのシーン名。 </param>
-        /// <param name="missionDefinition"> ミッション定義。 </param>
+        /// <param name="missionId"> ミッションID。 </param>
         /// <param name="isTutorial"> チュートリアルステージの場合はtrue。 </param>
         /// <param name="enemyWaveDefinitionId"> 敵Wave定義ID。 </param>
         public BattleStageDefinition(
@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             StageReward reward,
             string targetSceneName,
             string battleSceneName,
-            MissionDefinition missionDefinition,
+            MissionId missionId,
             bool isTutorial,
             EnemyWaveDefinitionId enemyWaveDefinitionId)
             : base(stageId, stageName, flavorText, reward, targetSceneName)
@@ -38,9 +38,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 throw new ArgumentException("Battle scene name must not be empty.", nameof(battleSceneName));
             }
 
-            if (missionDefinition == null)
+            if (missionId.Value == 0)
             {
-                throw new ArgumentNullException(nameof(missionDefinition));
+                throw new ArgumentOutOfRangeException(nameof(missionId), "Mission ID must not be zero.");
             }
 
             if (enemyWaveDefinitionId.Value == 0)
@@ -51,7 +51,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             }
 
             _battleSceneName = battleSceneName;
-            _missionDefinition = missionDefinition;
+            _missionId = missionId;
             _isTutorial = isTutorial;
             _enemyWaveDefinitionId = enemyWaveDefinitionId;
         }
@@ -60,15 +60,15 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public override StageType StageType => StageType.Battle;
         /// <summary> バトルパートのシーン名。 </summary>
         public string BattleSceneName => _battleSceneName;
-        /// <summary> ステージのミッション定義。 </summary>
-        public MissionDefinition MissionDefinition => _missionDefinition;
+        /// <summary> ステージのミッションID。 </summary>
+        public MissionId MissionId => _missionId;
         /// <summary> チュートリアルステージの場合はtrue。 </summary>
         public override bool IsTutorial => _isTutorial;
         /// <summary> 敵Wave定義ID。 </summary>
         public EnemyWaveDefinitionId EnemyWaveDefinitionId => _enemyWaveDefinitionId;
 
         private readonly string _battleSceneName;
-        private readonly MissionDefinition _missionDefinition;
+        private readonly MissionId _missionId;
         private readonly bool _isTutorial;
         private readonly EnemyWaveDefinitionId _enemyWaveDefinitionId;
     }
