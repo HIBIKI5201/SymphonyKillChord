@@ -1,26 +1,18 @@
-1,Background,background
-2,Portrait,Left,hello,-460,-120,1,true
-3,Portrait,Center,hello,0,-120,1,true
-4,Portrait,Right,hello,460,-120,1,true
-5,Text,Test,対象別フェードのテストです。各対象だけが消えるか確認します。クリックで進みます。
-6,Text,,① 背景だけフェードアウトします。
-7,Fade,1,0,1.5,Background
-8,Text,,背景だけ消えて、立ち絵とテキストは残っていますか？
-9,Fade,0,1,1.5,Background
-10,Text,,② 左の立ち絵だけフェードアウトします。
-11,Fade,1,0,1.5,PortraitLeft
-12,Text,,左だけ消えて、中央・右・背景は残っていますか？
-13,Fade,0,1,1.5,PortraitLeft
-14,Text,,③ 中央の立ち絵だけフェードアウトします。
-15,Fade,1,0,1.5,PortraitCenter
-16,Text,,中央だけ消えましたか？
-17,Fade,0,1,1.5,PortraitCenter
-18,Text,,④ 右の立ち絵だけフェードアウトします。
-19,Fade,1,0,1.5,PortraitRight
-20,Text,,右だけ消えましたか？
-21,Fade,0,1,1.5,PortraitRight
-22,Text,,⑤ 最後に画面全体をフェードします（テキストは残る）。
-23,Fade,1,0,1.5,Screen
-24,Text,,画面全体が暗転してもテキストは残っていますか？
-25,Fade,0,1,1.5,Screen
-26,Text,Name,テスト完了。
+1,Background,Outdoor
+2,Portrait,Left,face,-460,-120,1,true
+3,Portrait,Center,body,0,-120,1,true
+4,Portrait,Right,face,460,-120,1,true
+5,Text,Test,新機能テストです。クリックで進みます。
+6,Text,,① テキストだけをフェードアウト→フェードインします。
+7,Fade,1,0,1,Text
+8,Fade,0,1,1,Text
+9,Text,,テキストが一瞬消えて戻りましたか？
+10,Text,,② 演出用の黒フェードで暗転→明転します。
+11,Fade,0,1,1,Black
+12,Fade,1,0,1,Black
+13,Text,,暗転から戻りました。背景・立ち絵は健在ですか？
+14,Text,,③ 背景だけフェード（テキスト・立ち絵は残る）。
+15,Fade,1,0,1.5,Background
+16,Text,,背景だけ消えましたか？
+17,Fade,0,1,1.5,Background
+18,Text,Name,テスト完了。
