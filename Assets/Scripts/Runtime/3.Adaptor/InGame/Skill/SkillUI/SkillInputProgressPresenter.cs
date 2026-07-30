@@ -14,16 +14,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="crosshairView"> クロスヘア上のリズムコマンドUI。未使用の場合はnull可。 </param>
         /// <param name="crosshairController"> クロスヘア上の表示権を管理するコントローラー。未使用の場合はnull可。 </param>
         /// <param name="guideController"> 下部のスキルコマンド表示を横断的に制御するコントローラー。未使用の場合はnull可。 </param>
+        /// <param name="listRowView"> コマンド全拍を並べる一覧UIの行View。未使用の場合はnull可。 </param>
         public SkillInputProgressPresenter(
             ISkillInputProgressRowView rowView,
             ISkillCrosshairProgressView crosshairView = null,
             SkillCrosshairProgressController crosshairController = null,
-            SkillGuideProgressController guideController = null)
+            SkillGuideProgressController guideController = null,
+            ISkillInputProgressRowView listRowView = null)
         {
             _rowView = rowView ?? throw new ArgumentNullException(nameof(rowView));
             _crosshairView = crosshairView;
             _crosshairController = crosshairController;
             _guideController = guideController;
+            _listRowView = listRowView;
         }
 
         /// <summary>
@@ -34,6 +37,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _rowView.UpdateSteps(dto);
             _guideController?.ReportProgress(dto.PatternMatchCount, _rowView);
+            _listRowView?.UpdateSteps(dto);
 
             if (_crosshairView == null)
             {
@@ -48,5 +52,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly ISkillCrosshairProgressView _crosshairView;
         private readonly SkillCrosshairProgressController _crosshairController;
         private readonly SkillGuideProgressController _guideController;
+        private readonly ISkillInputProgressRowView _listRowView;
     }
 }
