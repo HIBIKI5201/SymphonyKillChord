@@ -52,14 +52,28 @@ namespace KillChord.Editor.SourceDataProvider
                 position.width,
                 EditorGUIUtility.singleLineHeight * WARNING_LINE_COUNT);
 
-            IReadOnlyList<SourceDataIDOption> options = string.IsNullOrWhiteSpace(collectionKey)
-                ? Array.Empty<SourceDataIDOption>()
-                : SourceDataProviderRepositoryResolver.GetOptions(collectionKey);
+            bool isSceneScoped = collectionAttribute is { IsSceneScoped: true };
+            IReadOnlyList<SourceDataIDOption> options;
+            if (string.IsNullOrWhiteSpace(collectionKey))
+            {
+                options = Array.Empty<SourceDataIDOption>();
+            }
+            else if (isSceneScoped)
+            {
+                options = SceneScopedDataIDOptionResolver.GetOptions(collectionKey, property.serializedObject);
+            }
+            else
+            {
+                options = SourceDataProviderRepositoryResolver.GetOptions(collectionKey);
+            }
+
+            // シーン内完結のCollectionKeyはSourceDataProviderに登録がなく、生成側判定が成立しない。
             bool isAuthoring = string.IsNullOrWhiteSpace(collectionKey)
-                || SourceDataProviderRepositoryResolver.IsAuthoringProperty(
-                    collectionKey,
-                    property.serializedObject.targetObject,
-                    property.propertyPath);
+                || (!isSceneScoped
+                    && SourceDataProviderRepositoryResolver.IsAuthoringProperty(
+                        collectionKey,
+                        property.serializedObject.targetObject,
+                        property.propertyPath));
 
             EditorGUI.BeginChangeCheck();
             if (isAuthoring || options.Count == 0)
@@ -76,8 +90,11 @@ namespace KillChord.Editor.SourceDataProvider
                 hashProperty.intValue = DataIDHasher.Compute(collectionKey, idProperty.stringValue);
             }
 
+            // シーン内完結のCollectionKeyはPlannerに対応ページがないためジャンプできない。
             using (new EditorGUI.DisabledScope(
-                string.IsNullOrWhiteSpace(collectionKey) || string.IsNullOrWhiteSpace(idProperty.stringValue)))
+                isSceneScoped
+                || string.IsNullOrWhiteSpace(collectionKey)
+                || string.IsNullOrWhiteSpace(idProperty.stringValue)))
             {
                 if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton)
                     && PlannerMasterDataWindow.TryGetOrOpenWindow(out PlannerMasterDataWindow window))
@@ -90,7 +107,7 @@ namespace KillChord.Editor.SourceDataProvider
 
             string warning = BuildWarning(
                 collectionKey,
-                collectionAttribute is { IsSceneScoped: true },
+                isSceneScoped,
                 idProperty.stringValue,
                 hashProperty.intValue,
                 options,
@@ -227,8 +244,15 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (isSceneScoped)
             {
-                // 参照先はシーン内のオブジェクトであり、collectionの登録一覧では検証できない。
-                return string.Empty;
+                // 対象シーンを解決できない場合は候補を列挙できないため、存在検証は行わない。
+                if (options.Count == 0)
+                {
+                    return string.Empty;
+                }
+
+                return ContainsId(options, id)
+                    ? string.Empty
+                    : "選択したIDが対象シーン内に存在しません。";
             }
 
             if (isAuthoring)
@@ -236,18 +260,33 @@ namespace KillChord.Editor.SourceDataProvider
                 return DataIDCollisionDetector.FindWarning(id, hashId, options);
             }
 
-            if (!string.IsNullOrWhiteSpace(id))
+            return ContainsId(options, id)
+                ? string.Empty
+                : "選択したIDがcollectionへ登録されていません。";
+        }
+
+        /// <summary>
+        ///     候補一覧に指定IDが含まれるか判定します。
+        /// </summary>
+        /// <param name="options"> 候補一覧です。 </param>
+        /// <param name="id"> 判定する文字列IDです。 </param>
+        /// <returns> 含まれる場合はtrueです。 </returns>
+        private static bool ContainsId(IReadOnlyList<SourceDataIDOption> options, string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
             {
-                for (int i = 0; i < options.Count; i++)
+                return false;
+            }
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (string.Equals(options[i].Id, id, StringComparison.Ordinal))
                 {
-                    if (string.Equals(options[i].Id, id, StringComparison.Ordinal))
-                    {
-                        return string.Empty;
-                    }
+                    return true;
                 }
             }
 
-            return "選択したIDがcollectionへ登録されていません。";
+            return false;
         }
 
         private const float COPY_BUTTON_WIDTH = 52f;
