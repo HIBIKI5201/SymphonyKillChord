@@ -1,0 +1,69 @@
+{
+  "sections": [
+    {
+      "id": "00",
+      "title": "00. 最終まとめ",
+      "sources": [
+        "spec/plan/01-final-summary.md",
+        "spec/plan/00-source-manifest.md"
+      ]
+    },
+    {
+      "id": "01",
+      "title": "01. プロダクトと仕様",
+      "sources": [
+        "spec/feature/product-brief.md",
+        "spec/feature/game-spec.md"
+      ]
+    },
+    {
+      "id": "02",
+      "title": "02. Ludus プレイ分類",
+      "sources": ["spec/plan/03-ludus-analysis.md"]
+    },
+    {
+      "id": "03",
+      "title": "03. 仕様起点ドメイン",
+      "sources": ["spec/plan/04-domain-model.md"]
+    },
+    {
+      "id": "04",
+      "title": "04. Unity対応Anatomia",
+      "sources": ["spec/plan/05-anatomia-analysis.md"],
+      "artifacts": ["report/architecture-review-unity.html"]
+    },
+    {
+      "id": "05",
+      "title": "05. 仕様・ドメイン・コード",
+      "sources": [
+        "spec/plan/06-spec-domain-code-map.md",
+        "spec/plan/07-spec-gaps.md"
+      ]
+    },
+    {
+      "id": "06",
+      "title": "06. メカニクスと内部経済",
+      "sources": ["spec/plan/08-mechanics-economy.md"]
+    },
+    {
+      "id": "07",
+      "title": "07. AI Formatとアーキテクチャ健全性",
+      "sources": ["spec/plan/09-aiformat-architecture-review.md"]
+    },
+    {
+      "id": "08",
+      "title": "08. UX・配信・TGS体験",
+      "sources": ["spec/plan/10-ux-review.md"]
+    },
+    {
+      "id": "09",
+      "title": "09. 市場性",
+      "sources": ["spec/plan/11-vitia-marketability.md"]
+    },
+    {
+      "id": "10",
+      "title": "10. Di合議結果",
+      "sources": ["spec/plan/12-di-discussion-paper.md"]
+    }
+  ]
+}

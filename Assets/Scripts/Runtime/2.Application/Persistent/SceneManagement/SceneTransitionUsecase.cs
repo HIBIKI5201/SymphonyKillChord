@@ -208,8 +208,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                                 .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS);
 
                     bool additiveUnloadSuccess =
-                        await _service.UnloadAsync(
+                        await _service.UnloadAndSetActiveAsync(
                             additiveSceneName,
+                            fromSceneName,
                             additiveUnloadProgress,
                             cancellationToken);
 
@@ -270,8 +271,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                                 .RESULT_BATTLE_SCENE_UNLOAD_END_PROGRESS);
 
                     bool unloadSuccess =
-                        await _service.UnloadAsync(
+                        await _service.UnloadAndSetActiveAsync(
                             additiveSceneName,
+                            reloadSceneName,
                             unloadProgress,
                             cancellationToken);
 

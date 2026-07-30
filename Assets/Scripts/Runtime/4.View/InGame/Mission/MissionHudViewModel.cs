@@ -12,8 +12,6 @@ namespace KillChord.Runtime.View.InGame.Mission
     {
         /// <summary> メインミッションのテキスト。 </summary>
         public ReactiveProperty<string> MainMissionText { get; } = new(string.Empty);
-        /// <summary> ミッション結果のテキスト。 </summary>
-        public ReactiveProperty<string> ResultText { get; } = new(string.Empty);
 
         /// <summary> 評価項目のリストが更新された際のイベント。 </summary>
         public event Action<IReadOnlyList<MissionEvaluationItemViewModel>> OnEvaluationItemsUpdated;
@@ -25,7 +23,6 @@ namespace KillChord.Runtime.View.InGame.Mission
         public void Apply(in MissionHudDTO dto)
         {
             MainMissionText.Value = dto.MainMissionText;
-            ResultText.Value = dto.ResultText;
 
             _evaluationItems.Clear();
 

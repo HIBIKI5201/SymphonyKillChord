@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cda25d1a215c5d14581507734743b293, type: 3}
   m_Name: Player
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.CharacterData
+  _id:
+    _id: character_player
+    _hashId: -2048347455
   _characterName: Player
   _attackInterval: 0.2
   _maxHealth: 100

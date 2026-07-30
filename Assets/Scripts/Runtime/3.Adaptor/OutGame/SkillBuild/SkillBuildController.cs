@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -11,23 +11,20 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
     /// <summary>
     ///     改造画面の保存要求をユースケースへ伝えるコントローラー。
     /// </summary>
-    public sealed class SkillBuildController : IDisposable
+    public sealed class SkillBuildController : ISkillBuildCommand
     {
         /// <summary>
         ///     コントローラーを初期化する。
         /// </summary>
         /// <param name="skillBuildUseCase"> スキル編成ユースケース。 </param>
-        /// <param name="viewModel"> 監視対象 ViewModel。 </param>
         /// <param name="ownedSkills"> 入手済みスキル一覧。 </param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         public SkillBuildController(
             SkillBuildUseCase skillBuildUseCase,
-            ISkillBuildViewModel viewModel,
             IReadOnlyList<SkillTemplate> ownedSkills)
         {
             _skillBuildUseCase = skillBuildUseCase ?? throw new ArgumentNullException(nameof(skillBuildUseCase));
-            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
 
             if (ownedSkills == null)
             {
@@ -35,21 +32,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             }
 
             BuildSkillDataMap(ownedSkills);
-            _viewModel.OnSaveRequested += HandleSaveRequestedHandler;
-        }
-
-        /// <summary>
-        ///     リソースを解放する。
-        /// </summary>
-        public void Dispose()
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            _viewModel.OnSaveRequested -= HandleSaveRequestedHandler;
-            _isDisposed = true;
         }
 
         /// <summary>
@@ -67,25 +49,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             BuildSkillDataMap(ownedSkills);
         }
 
-        private const int EMPTY_SKILL_ID = -1;
-
-        private readonly SkillBuildUseCase _skillBuildUseCase;
-        private readonly ISkillBuildViewModel _viewModel;
-        private Dictionary<SkillId, SkillTemplate> _skillDataMap;
-        private bool _isDisposed;
-
         /// <summary>
         ///     保存要求を受け取り、ユースケースへ反映する。
         /// </summary>
         /// <param name="skillIds"> 保存対象のスキル ID 一覧。 </param>
-        private async Task<bool> HandleSaveRequestedHandler(ReadOnlyMemory<int> skillIds)
+        /// <returns> 保存に成功した場合は true。 </returns>
+        public async Task<bool> SaveAsync(ReadOnlyMemory<int> skillIds)
         {
-            EquippedSkill[] equippedSkills = BuildEquippedSkills(skillIds.Span);
-            _skillBuildUseCase.UpdateEquippedSkills(equippedSkills);
-
             try
             {
-                await _skillBuildUseCase.SaveSkillBuildAsync(new List<int>(skillIds.ToArray()));
+                EquippedSkill[] equippedSkills = BuildEquippedSkills(skillIds.Span);
+                await _skillBuildUseCase.SaveSkillBuildAsync(equippedSkills);
                 return true;
             }
             catch (Exception ex)
@@ -94,6 +68,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 return false;
             }
         }
+
+        private const int EMPTY_SKILL_ID = -1;
+
+        private readonly SkillBuildUseCase _skillBuildUseCase;
+        private Dictionary<SkillId, SkillTemplate> _skillDataMap;
 
         /// <summary>
         ///     スキル ID 一覧から装備スキル配列を構築する。

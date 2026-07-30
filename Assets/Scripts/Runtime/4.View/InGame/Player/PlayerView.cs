@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Animation;
+using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
@@ -9,6 +9,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
+using LitMotion;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -29,19 +30,45 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
+
+        [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
+        private Transform _damageEffectPoint;
+
         [SerializeField, Tooltip("回避成功時の仮エフェクト")]
         private ParticleSystem _dodgeEffect;
+
+        [SerializeField, Tooltip("回避中にMaterialエフェクトを適用するRenderer一覧。")]
+        private Renderer[] _dodgeEffectRenderers;
+
+        [SerializeField, Tooltip("回避中に到達させるSmearsPowerの最大値。")]
+        private float _dodgeSmearsPower = 1f;
         [Space]
 
-        [SerializeField, Tooltip("被弾SE用Source。")]
-        private SoundEffectSource _damageSoundSource;
-        [Space]
-
-        [SerializeField, Tooltip("仮Voice用Source。")]
+        [Header("Voice")]
+        [SerializeField, Tooltip("Voice用Source。")]
         private VoiceSource _voiceSource;
+
         [SerializeField, Tooltip("被弾時VoiceのCueName。空の場合はSource側のCueを再生します。")]
         private string _damageVoiceCueName;
+
+        [SerializeField, Tooltip("ステージ開始時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageStartVoiceCueName;
+
+        [SerializeField, Tooltip("ステージクリア時VoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueName;
+
+        [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
+        private string _gameOverVoiceCueName;
+
+        [SerializeField, Tooltip("スキル発動時VoiceのCueName。空の場合は再生しない。")]
+        private string _skillVoiceCueName;
         [Space]
+
+        [Header("SE")]
+        [SerializeField, Tooltip("被弾SE用Source。")]
+        private SoundEffectSource _damageSoundSource;
 
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
@@ -65,6 +92,10 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
+        private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
+        private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
+        private static readonly int SmearsDirectionPropertyId = Shader.PropertyToID("_SmearsDirection");
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
@@ -83,9 +114,13 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
+        private MotionHandle _dodgeMaterialEffectHandle;
+        private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
+
+        private PlayerInputSuppressionState _inputSuppressionState;
 
         /// <summary> 毎フレーム移動更新を行う。 </summary>
         private void Update()
@@ -107,9 +142,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_healthHudPresenter != null)
             {
-                _healthHudPresenter.OnDamaged -= PlayDamageFeedbackSound;
+                _healthHudPresenter.OnDamaged -= PlayDamageFeedback;
                 _healthHudPresenter?.Dispose();
             }
+
+            _dodgeMaterialEffectHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -120,10 +157,12 @@ namespace KillChord.Runtime.View.InGame.Player
             MusicSyncState musicSyncState,
             Transform cameraTransform,
             PlayerInputView playerInputView,
-            PlayerHealthHudPresenter healthHudPresenter)
+            PlayerHealthHudPresenter healthHudPresenter,
+            PlayerInputSuppressionState inputSuppressionState = null)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _inputSuppressionState = inputSuppressionState;
             _characterAnimationViewModel = animationContext.ViewModel;
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
@@ -131,7 +170,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
-            _healthHudPresenter.OnDamaged += PlayDamageFeedbackSound;
+            _healthHudPresenter.OnDamaged += PlayDamageFeedback;
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -179,12 +218,97 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーを指定したスタート地点へ戻し、移動・物理・進行中の演出状態をリセットします。
+        /// </summary>
+        /// <param name="position"> 戻す位置です。 </param>
+        /// <param name="rotation"> 戻す回転です。 </param>
+        public void ResetToSpawn(Vector3 position, Quaternion rotation)
+        {
+            // 攻撃時の回転補間を停止する。
+            CancelAttackRotate();
+
+            // 回避関連の状態と演出をリセットする。
+            _dodgeMaterialEffectHandle.TryCancel();
+            ResetDodgeMaterialEffect();
+
+            // 位置と回転をスタート地点へ戻す。
+            if (_cacheTransform != null)
+            {
+                _cacheTransform.SetPositionAndRotation(position, rotation);
+            }
+            else
+            {
+                transform.SetPositionAndRotation(position, rotation);
+            }
+
+            // Rigidbodyの位置・回転・速度を同期してリセットする。
+            if (_rb != null)
+            {
+                _rb.position = position;
+                _rb.rotation = rotation;
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+
+            // 入力由来の移動・回避要求をクリアする。
+            _moveVector = Vector2.zero;
+            _dogeVector = Vector2.zero;
+            _isDodge = false;
+
+            _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            SyncFootstepTiming();
+        }
+
+        /// <summary>
         ///     被弾時のSEと仮Voiceを再生します。
         /// </summary>
-        public void PlayDamageFeedbackSound()
+        public void PlayDamageFeedback()
         {
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
+
+            if (_damageEffectView == null)
+            {
+                return;
+            }
+
+            Vector3 effectPosition = _damageEffectPoint != null
+                ? _damageEffectPoint.position
+                : transform.position;
+
+            _damageEffectView.PlayAt(effectPosition);
+        }
+
+        /// <summary>
+        ///     ステージ開始時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageStartVoice()
+        {
+            PlayPriorityVoice(_stageStartVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ステージクリア時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayStageClearVoice()
+        {
+            PlayPriorityVoice(_stageClearVoiceCueName);
+        }
+
+        /// <summary>
+        ///     ゲームオーバー時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlayGameOverVoice()
+        {
+            PlayPriorityVoice(_gameOverVoiceCueName);
+        }
+
+        /// <summary>
+        ///     スキル発動時のPlayer Voiceを再生します。
+        /// </summary>
+        public void PlaySkillVoice()
+        {
+            PlayPriorityVoice(_skillVoiceCueName);
         }
 
         public void PlaySkillAnimation(string animationKey)
@@ -209,6 +333,87 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _dodgeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _dodgeEffect.Play();
+        }
+
+        /// <summary>
+        ///     回避中のMaterialエフェクト(Smears)を再生します。
+        /// </summary>
+        /// <param name="duration"> 回避の継続時間です。 </param>
+        /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
+        public void PlayDodgeMaterialEffect(float duration, Vector3 direction)
+        {
+            direction.Normalize();
+
+            if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
+            {
+                return;
+            }
+
+            _dodgeMaterialPropertyBlock ??= new MaterialPropertyBlock();
+
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                // MaterialPropertyBlockはKeywordを切り替えられないため、shader_feature_localの有効化はMaterial側で行う。
+                renderer.material.EnableKeyword(SMEARS_ON_KEYWORD);
+
+                renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
+                _dodgeMaterialPropertyBlock.SetFloat(SmearsOnPropertyId, 0f);
+                _dodgeMaterialPropertyBlock.SetVector(SmearsDirectionPropertyId, -direction);
+                renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
+            }
+
+            _dodgeMaterialEffectHandle.TryCancel();
+
+            _dodgeMaterialEffectHandle = LMotion.Create(_dodgeSmearsPower, 0f, duration)
+                .WithEase(Ease.InQuad)
+                .Bind(this, static (value, state) => state.ApplySmearsPower(value));
+        }
+
+        /// <summary>
+        ///     キャッシュ済みのRenderer配列とMaterialPropertyBlockを使い回して_SmearsPowerを反映します。
+        /// </summary>
+        private void ApplySmearsPower(float value)
+        {
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
+                _dodgeMaterialPropertyBlock.SetFloat(SmearsPowerPropertyId, value);
+                renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
+            }
+        }
+
+        /// <summary>
+        ///     回避終了時にMaterialエフェクト(Smears)を既定値へ戻します。
+        /// </summary>
+        public void ResetDodgeMaterialEffect()
+        {
+            if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
+            {
+                return;
+            }
+
+            _dodgeMaterialEffectHandle.TryCancel();
+
+            foreach (Renderer renderer in _dodgeEffectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.material.DisableKeyword(SMEARS_ON_KEYWORD);
+                renderer.SetPropertyBlock(null);
+            }
         }
 
         /// <summary> 入力イベントを購読する。 </summary>
@@ -236,6 +441,11 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 回避入力を受け取ったら回避要求フラグを立てる。 </summary>
         private void OnDodge(InputContext<float> input)
         {
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            {
+                return;
+            }
+
             if (input.Phase == InputActionPhase.Started)
             {
                 if (_controller.IsDodging)
@@ -244,9 +454,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
                 _dogeVector = _moveVector;
                 _isDodge = true;
-
-                PlaySound(_dodgeSoundSource, null);
-                _characterAnimationSignal?.RequestDodge();
             }
         }
 
@@ -256,6 +463,11 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnAttack(InputContext<float> input)
         {
             if (input.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
             {
                 return;
             }
@@ -319,6 +531,12 @@ namespace KillChord.Runtime.View.InGame.Player
                 dir = Vector2.zero;
             }
 
+            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            {
+                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
+                dir = Vector2.zero;
+            }
+
             //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
             dir = Rotate(dir, -_cameraTransform.eulerAngles.y);
 
@@ -333,7 +551,14 @@ namespace KillChord.Runtime.View.InGame.Player
                     dodgeDir.y = fwd.z;
                 }
                 dodgeDir = Rotate(dodgeDir, -_cameraTransform.eulerAngles.y);
-                _controller.TryDodge(dodgeDir, Time.time);
+                bool dodgeSucceeded = _controller.TryDodge(dodgeDir, Time.time);
+
+                if (dodgeSucceeded)
+                {
+                    PlaySound(_dodgeSoundSource, null);
+                    _characterAnimationSignal?.RequestDodge();
+                }
+
                 _isDodge = false;
             }
 
@@ -445,6 +670,23 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             source.Play(cueName);
+        }
+
+        /// <summary>
+        ///     優先度の高いVoiceを再生します。再生中のVoiceがある場合は停止してから再生します。
+        /// </summary>
+        /// <param name="cueName"> 再生するVoiceのCue名。 </param>
+        private void PlayPriorityVoice(string cueName)
+        {
+            if (_voiceSource == null
+                || string.IsNullOrWhiteSpace(cueName))
+            {
+                return;
+            }
+
+            // 再生中のVoiceがある場合は停止してから再生する。
+            _voiceSource.Stop();
+            _voiceSource.Play(cueName);
         }
 
         /// <summary>

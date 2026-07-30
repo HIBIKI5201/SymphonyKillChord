@@ -14,5 +14,7 @@ namespace KillChord.Runtime.Domain.Persistent.Input
         Dodge = 101,
         Attack = 102,
         Look = 103,
+        ResetPosition = 106,
+        ReturnToTitle = 107,
     }
 }

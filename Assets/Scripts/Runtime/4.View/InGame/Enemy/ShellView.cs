@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.View.InGame.Character;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -16,14 +17,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="detonatePosition"></param>
         /// <param name="controller"></param>
         /// <param name="shellSpecPresenter"></param>
-        public void Initialize(Transform targetTransform, ShellSpecPresenter shellSpecPresenter, Action dedonateCallback)
+        public void Initialize(Transform targetTransform, ShellSpecPresenter shellSpecPresenter, Action dedonateCallback,ReusableParticleSystemView systemView)
         {
             if (shellSpecPresenter == null)
                 throw new ArgumentNullException(nameof(shellSpecPresenter), "ShellSpecPresenterがNULLです。");
 
+            if(systemView == null)
+                throw new ArgumentNullException(nameof(systemView), "ReusableParticleSystemViewがNULLです。");
+
             _targetTransform = targetTransform;
             _shellSpecPresenter = shellSpecPresenter;
             _dedonateCallback = dedonateCallback;
+            _systemView = systemView;
             _overlapResults = new Collider[1];
             _material = new Material(_indicator.material);
             _indicator.material = _material;
@@ -62,6 +67,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         public void Detonate()
         {
             // TODO 爆発エフェクトなど
+            _systemView?.PlayAt(transform.position);
             _dedonateCallback?.Invoke();
         }
 
@@ -113,6 +119,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Transform _targetTransform;
         private Collider[] _overlapResults;
         private ShellSpecPresenter _shellSpecPresenter;
+        private ReusableParticleSystemView _systemView;
         private Action _dedonateCallback;
     }
 }

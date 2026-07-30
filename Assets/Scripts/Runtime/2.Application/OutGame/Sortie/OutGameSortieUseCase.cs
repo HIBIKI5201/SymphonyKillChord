@@ -42,7 +42,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         {
             if (stageType == StageType.Battle)
             {
-                _outputPort.ShowBattlePreparationScreen(targetSceneName);
+                _outputPort.ShowBattlePreparationScreen();
                 return true;
             }
 
@@ -71,16 +71,10 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// <summary>
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
         /// <returns> 要求を受理した場合はtrueです。 </returns>
-        public bool RequestImmediateBattleSortie(string targetSceneName)
+        public bool RequestImmediateBattleSortie()
         {
-            if (string.IsNullOrWhiteSpace(targetSceneName))
-            {
-                return false;
-            }
-
-            _outputPort.StartBattle(targetSceneName);
+            _outputPort.StartBattle();
             return true;
         }
 

@@ -19,14 +19,6 @@ MonoBehaviour:
       _hashId: -1127918619
     _selectorLabel: SelectorLabel_S01
   - _skillId:
-      _id: skill_03
-      _hashId: 1389048521
-    _selectorLabel: SelectorLabel_S03
-  - _skillId:
       _id: skill_02
       _hashId: 634126943
     _selectorLabel: SelectorLabel_S03
-  - _skillId:
-      _id: skill_00
-      _hashId: -876453005
-    _selectorLabel: SelectorLabel_S01

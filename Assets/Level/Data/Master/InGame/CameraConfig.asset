@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f493faec32964b408a5d39fb94fc16f, type: 3}
   m_Name: CameraConfig
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Structure.CameraMovementConfig
-  _cameraOffset: {x: 0, y: 2.5, z: 0}
+  _cameraOffset: {x: 0, y: 1.7, z: 0}
   _characterCenterOffset: {x: 0, y: 0, z: 0}
-  _distance: 7
+  _distance: 6
   _followOffsetPower: 1
   _followLerpSpeed: 2
   _boneRotateSpeed: 10
@@ -24,7 +24,7 @@ MonoBehaviour:
   _followRotationSpeed: 1.5
   _moveFollowRotationSpeed: 90
   _moveFollowIdleLookThreshold: 0.01
-  _moveFollowAngleDeadZone: 1
+  _moveFollowAngleDeadZone: 20
   _lockOnLookAtRatio: 1
   _lockOnRotationSpeed: 20
   _lockOnViewportMargin: 0.05
