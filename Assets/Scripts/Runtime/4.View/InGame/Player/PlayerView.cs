@@ -570,6 +570,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _rb.linearVelocity = velocity;
             _cacheTransform.rotation = rotation;
+            _rb.MoveRotation(rotation);
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
         }
