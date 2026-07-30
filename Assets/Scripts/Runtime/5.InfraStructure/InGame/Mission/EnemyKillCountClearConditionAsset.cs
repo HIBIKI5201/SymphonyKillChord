@@ -20,6 +20,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (missionKeyRepository == null
+                || _enemyMissionKeyId.Id == 0
                 || !missionKeyRepository.TryGetAsset(new EnemyMissionKey(_enemyMissionKeyId.Id), out EnemyMissionKeyAsset asset))
             {
                 throw new InvalidOperationException($"{nameof(_enemyMissionKeyId)} に対応する EnemyMissionKeyAsset が見つかりません。");
