@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
@@ -61,8 +61,7 @@ namespace KillChord.Runtime.Composition
             Debug.Assert(_rhythmJudgmentDefinitionAsset != null, "RhythmJudgmentDefinitionAsset の参照が未設定です。RhythmJudgmentDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
-            MusicSyncModuleContainer musicSyncModuleContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
-            IMusicSyncService musicSyncService = musicSyncModuleContainer?.MusicSyncService;
+            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
 
             if (musicSyncService == null)
             {
@@ -70,8 +69,7 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-            TargetSystemModuleContainer targetSystemModuleContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
-            TargetSystemController targetingSystem = targetSystemModuleContainer?.TargetSystemController;
+            TargetSystemController targetingSystem = ServiceLocator.GetInstance<TargetSystemModuleContainer>()?.TargetSystemController;
 
             if (targetingSystem == null)
             {
@@ -79,15 +77,15 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-            RhythmGuideUsecase usecase = new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition());
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
-                usecase,
+                new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
                 targetingSystem
             );
 
-            _viewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+            new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+
             return true;
         }
 
@@ -117,7 +115,6 @@ namespace KillChord.Runtime.Composition
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
 
-        private ACLikeRhythmGuideViewModel _viewModel;
         private bool _isRegisteredToPlayDirector;
     }
 }
