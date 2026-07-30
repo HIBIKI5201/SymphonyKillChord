@@ -2,6 +2,7 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Enemy;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
@@ -54,6 +55,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 List<int> spawnPointCandidateHashes = new(sourceSpawnPointCandidates.Length);
                 for (int j = 0; j < sourceSpawnPointCandidates.Length; j++)
                 {
+                    // 未設定の要素は候補指定とみなさない。
+                    if (sourceSpawnPointCandidates[j].Id == 0)
+                    {
+                        continue;
+                    }
+
                     spawnPointCandidateHashes.Add(sourceSpawnPointCandidates[j].Id);
                 }
 
@@ -130,6 +137,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             [SerializeReference, SubclassSelector, Tooltip("Wave開始時に音楽同期で実行するステージ演出です。")]
             public List<StageEffectAssetBase> StageEffects = new();
             /// <summary> このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。 </summary>
+            [SourceDataCollection(SpawnPositionPair.SPAWN_POINT_COLLECTION_KEY, isSceneScoped: true)]
             [Tooltip("このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。")]
             public DataID[] SpawnPointCandidates = Array.Empty<DataID>();
         }
