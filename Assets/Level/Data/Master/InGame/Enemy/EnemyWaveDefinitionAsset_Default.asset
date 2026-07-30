@@ -25,8 +25,10 @@ MonoBehaviour:
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates:
-    - _id: 
-      _hashId: 0
+    - _id: PositionPair_10
+      _hashId: -2071637137
+    - _id: PositionPair_16
+      _hashId: 1843852890
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
