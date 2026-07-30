@@ -126,7 +126,11 @@ namespace KillChord.Editor.SourceDataProvider
                 NavMesh = navMesh,
                 HasNavMesh = hasNavMesh,
             };
-            _cache[sceneName] = mapData;
+            if (hasNavMesh || !EditorApplication.isPlaying)
+            {
+                _cache[sceneName] = mapData;
+            }
+
             return true;
         }
 
