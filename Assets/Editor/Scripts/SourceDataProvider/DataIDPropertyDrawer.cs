@@ -90,6 +90,7 @@ namespace KillChord.Editor.SourceDataProvider
 
             string warning = BuildWarning(
                 collectionKey,
+                collectionAttribute is { IsSceneScoped: true },
                 idProperty.stringValue,
                 hashProperty.intValue,
                 options,
@@ -193,6 +194,7 @@ namespace KillChord.Editor.SourceDataProvider
         ///     DataID設定に対する警告文を生成します。
         /// </summary>
         /// <param name="collectionKey"> DataIDのCollectionKeyです。 </param>
+        /// <param name="isSceneScoped"> SourceDataProviderへ登録しないシーン内完結のCollectionKeyの場合はtrueです。 </param>
         /// <param name="id"> 人間可読な文字列IDです。 </param>
         /// <param name="hashId"> 焼き込み済み数値IDです。 </param>
         /// <param name="options"> 同一カテゴリの登録済みID一覧です。 </param>
@@ -200,6 +202,7 @@ namespace KillChord.Editor.SourceDataProvider
         /// <returns> 警告がある場合は警告文、それ以外は空文字列です。 </returns>
         private static string BuildWarning(
             string collectionKey,
+            bool isSceneScoped,
             string id,
             int hashId,
             IReadOnlyList<SourceDataIDOption> options,
@@ -210,7 +213,8 @@ namespace KillChord.Editor.SourceDataProvider
                 return "SourceDataCollection属性が設定されていません。";
             }
 
-            if (!SourceDataProviderRepositoryResolver.ContainsCollectionKey(collectionKey))
+            // シーン内完結のCollectionKeyはSourceDataProviderへ登録しないため、登録有無は検証しない。
+            if (!isSceneScoped && !SourceDataProviderRepositoryResolver.ContainsCollectionKey(collectionKey))
             {
                 return $"SourceDataProviderにCollectionKey「{collectionKey}」が登録されていません。";
             }
@@ -219,6 +223,12 @@ namespace KillChord.Editor.SourceDataProvider
             if (hashId != expectedHash)
             {
                 return $"ハッシュが未更新です。Expected: {expectedHash}";
+            }
+
+            if (isSceneScoped)
+            {
+                // 参照先はシーン内のオブジェクトであり、collectionの登録一覧では検証できない。
+                return string.Empty;
             }
 
             if (isAuthoring)
