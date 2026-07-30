@@ -10,8 +10,6 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -109,7 +107,9 @@ namespace KillChord.Runtime.View.InGame.Player
         private ICharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
-        private CancellationTokenSource _cancellationTokenSource;
+        private bool _isAttackRotating;
+        private Vector3 _attackRotationTargetPosition;
+        private float _attackRotationSpeed;
         private Quaternion _rotation;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
@@ -505,12 +505,9 @@ namespace KillChord.Runtime.View.InGame.Player
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
-                    CancelAttackRotate();
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(
+                    StartAttackRotate(
                         PlayerAttackController.CurrentLockOnTargetPosition,
-                        PlayerAttackController.AttackRotationSpeed,
-                        _cancellationTokenSource.Token);
+                        PlayerAttackController.AttackRotationSpeed);
                 }
             }
         }
@@ -562,8 +559,10 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = false;
             }
 
+            TickAttackRotate();
+
             Quaternion rotation = _cacheTransform.rotation;
-            if (_cancellationTokenSource != null)
+            if (_isAttackRotating)
             {
                 rotation = _rotation;
             }
@@ -574,64 +573,56 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayFootstepSound(velocity);
         }
 
-        /// <summary>
-        ///     攻撃時にターゲット方向へ滑らかに回転する Task 実装。
-        ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
-        /// </summary>
-        private async Task RotateToTargetAsync(Vector3 targetPosition, float speed, CancellationToken ct)
+        /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>
+        private void StartAttackRotate(Vector3 targetPosition, float speed)
         {
             _rotation = _cacheTransform.rotation;
+            _attackRotationTargetPosition = targetPosition;
+            _attackRotationSpeed = speed;
+            _isAttackRotating = true;
+        }
 
-            try
+        /// <summary>
+        ///     攻撃時にターゲット方向へ滑らかに回転させる。毎フレーム Update から呼び出す。
+        ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
+        /// </summary>
+        private void TickAttackRotate()
+        {
+            if (!_isAttackRotating)
             {
-                while (!ct.IsCancellationRequested
-                    && PlayerAttackController != null
-                    && PlayerAttackController.IsAttacking
-                    && PlayerAttackController.HasCurrentLockOnTarget)
-                {
-                    Vector3 dirToTarget = targetPosition - _cacheTransform.position;
-                    dirToTarget.y = 0f;
-                    if (dirToTarget.sqrMagnitude <= float.Epsilon) break;
-
-                    Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
-                    float t = 1f - Mathf.Exp(-Mathf.Max(0f, speed) * Time.deltaTime);
-                    _rotation = Quaternion.Slerp(_rotation, targetRot, t);
-
-                    if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
-                    {
-                        _rotation = targetRot;
-                        break;
-                    }
-
-                    await Task.Yield();
-                }
+                return;
             }
-            catch (System.Exception ex)
+
+            if (PlayerAttackController == null
+                || !PlayerAttackController.IsAttacking
+                || !PlayerAttackController.HasCurrentLockOnTarget)
             {
-                Debug.LogException(ex);
+                _isAttackRotating = false;
+                return;
             }
-            finally
+
+            Vector3 dirToTarget = _attackRotationTargetPosition - _cacheTransform.position;
+            dirToTarget.y = 0f;
+            if (dirToTarget.sqrMagnitude <= float.Epsilon)
             {
-                if (_cancellationTokenSource != null && _cancellationTokenSource.Token == ct)
-                {
-                    try { _cancellationTokenSource.Dispose(); } catch { }
-                    _cancellationTokenSource = null;
-                }
+                _isAttackRotating = false;
+                return;
+            }
+
+            Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
+            float t = 1f - Mathf.Exp(-Mathf.Max(0f, _attackRotationSpeed) * Time.deltaTime);
+            _rotation = Quaternion.Slerp(_rotation, targetRot, t);
+
+            if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
+            {
+                _rotation = targetRot;
+                _isAttackRotating = false;
             }
         }
 
         private void CancelAttackRotate()
         {
-            if (_cancellationTokenSource != null)
-            {
-                try
-                {
-                    _cancellationTokenSource.Cancel();
-                }
-                catch { }
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
+            _isAttackRotating = false;
         }
 
         /// <summary>
