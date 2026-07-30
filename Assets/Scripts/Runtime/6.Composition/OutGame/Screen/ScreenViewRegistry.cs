@@ -36,17 +36,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         ///    指定画面を表示状態にします。
         /// </summary>
         /// <param name="screenId"></param>
-        /// <param name="targetSceneName"></param>
-        public void Show(ScreenId screenId, string targetSceneName = null)
+        public void Show(ScreenId screenId)
         {
             if (!_views.TryGetValue(screenId, out ScreenViewBase view))
             {
                 Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
                 return;
-            }
-            if (view is BattlePreparationScreen battlePreparationScreen)
-            {
-                battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
             view.Show();
         }
@@ -91,7 +86,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Dispose()
         {
-            foreach(IDisposable disposable in _views.Values)
+            foreach (IDisposable disposable in _views.Values)
             {
                 disposable.Dispose();
             }

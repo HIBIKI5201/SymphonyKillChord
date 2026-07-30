@@ -1,5 +1,5 @@
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
-using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -76,7 +76,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
-
+            ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
 
@@ -195,6 +195,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
+            ServiceLocator.RegisterInstance(battlePreparationScreen);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -323,9 +324,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     戦闘準備画面表示イベントを処理します。
         /// </summary>
-        private void HandleBattlePreparationScreenShown(string targetSceneName)
+        private void HandleBattlePreparationScreenShown()
         {
-            _screenController.ShowBattlePreparation(targetSceneName);
+            _screenController.ShowBattlePreparation();
         }
 
         /// <summary>
@@ -339,12 +340,22 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <summary>
         ///     インゲームへの遷移イベントを処理します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
-        private async void HandleStartGame(string targetSceneName)
+        private async void HandleStartGame()
         {
             // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
             if (_isStartGame) { return; }
 
+            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !selectedBattleStageState.HasSelectedBattleStage
+                || string.IsNullOrWhiteSpace(selectedBattleStageState.InGameSceneName))
+            {
+                Debug.LogError(
+                    $"[{nameof(ScreenInitializer)}] 出撃対象のバトルステージが選択されていません。",
+                    this);
+                return;
+            }
+
+            string targetSceneName = selectedBattleStageState.InGameSceneName;
             _isStartGame = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             try

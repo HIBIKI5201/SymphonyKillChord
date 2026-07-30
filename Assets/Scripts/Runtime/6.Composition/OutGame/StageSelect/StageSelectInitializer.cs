@@ -8,12 +8,15 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
 using KillChord.Runtime.Utility.OutGame.Savedata;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +76,12 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
         private string _stageTreeAssetKey;
 
+        [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
+        private string _missionDefinitionRepositoryKey;
+
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
+        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
         private StageProgressService _progressService;
@@ -93,6 +102,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private BattleSortieSelectionService _battleSortieSelectionService;
         private StageTreeAsset _loadedStageTreeAsset;
+        private MissionDefinitionRepository _loadedMissionDefinitionRepository;
+        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
@@ -117,16 +128,66 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedStageTreeAsset =
-                await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
-            if (_loadedStageTreeAsset == null
-                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            // LoadAssetAsyncはキー未設定・ロード失敗のいずれでも例外を投げるため、nullチェックだけでは検出できない。
+            try
             {
+                _loadedStageTreeAsset =
+                    await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+                _loadedMissionDefinitionRepository =
+                    await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
+                _loadedEnemyWaveDefinitionRepository =
+                    await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(this, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                ReleaseLoadedResources();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                string failedKey = _loadedStageTreeAsset == null
+                    ? _stageTreeAssetKey
+                    : _loadedMissionDefinitionRepository == null
+                        ? _missionDefinitionRepositoryKey
+                        : _enemyWaveDefinitionRepositoryKey;
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] ステージ選択リソースのロードに失敗しました。"
+                        + $" Key: {failedKey} / {exception}",
+                    this);
+                ReleaseLoadedResources();
+                return false;
+            }
+
+            if (_loadedStageTreeAsset == null
+                || _loadedMissionDefinitionRepository == null
+                || _loadedEnemyWaveDefinitionRepository == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] ステージ選択リソースを解決できませんでした。"
+                        + $" {nameof(StageTreeAsset)}: {_stageTreeAssetKey},"
+                        + $" {nameof(MissionDefinitionRepository)}: {_missionDefinitionRepositoryKey},"
+                        + $" {nameof(EnemyWaveDefinitionRepository)}: {_enemyWaveDefinitionRepositoryKey}",
+                    this);
+                ReleaseLoadedResources();
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            {
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
+                ReleaseLoadedResources();
                 return false;
             }
 
             _loadedSaveData = await savedataSystem.LoadAsync<SaveData>();
-            return _loadedSaveData != null;
+            if (_loadedSaveData == null)
+            {
+                Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SaveData)} が取得できませんでした。", this);
+                ReleaseLoadedResources();
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -147,6 +208,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Subscribe();
             TryExecutePendingNodeTransitionAfterReturn();
             return _isInitialized;
+        }
+
+        /// <summary>
+        ///     ロード済みのAddressablesハンドルを解放します。
+        /// </summary>
+        private void ReleaseLoadedResources()
+        {
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _loadedStageTreeAsset = null;
+            _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedMissionDefinitionRepository = null;
+            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedEnemyWaveDefinitionRepository = null;
+            _loadedSaveData = null;
         }
 
         /// <summary>
@@ -335,7 +410,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             // --- Domain 層 ---
-            _stageTree = _loadedStageTreeAsset.Create();
+            _stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
 
             // --- Application 層 ---
             _progressService = new StageProgressService(_stageTree);
@@ -404,9 +479,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             DisposeNodeComponents();
             _cts?.Dispose();
             _cts = null;
-            _stageTreeAssetKey.ReleaseLoadedAsset(this);
-            _loadedStageTreeAsset = null;
-            _loadedSaveData = null;
+            ReleaseLoadedResources();
             _stageMapScrollView = null;
             _stageMapContent = null;
             _stageMapCanvas = null;
@@ -765,7 +838,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void BuildControllers()
         {
-            var detailPresenter = new StageDetailPresenter(_detailScreenView);
+            var detailPresenter = new StageDetailPresenter(_detailScreenView, _loadedMissionDefinitionRepository);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 
@@ -866,8 +939,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return false;
                 }
 
-                return _outGameSortieController.RequestImmediateBattleSortie(
-                    battleStageDefinition.TargetSceneName);
+                return _outGameSortieController.RequestImmediateBattleSortie();
             }
 
             if (pendingNodeTransition.TargetStageDefinition
