@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Music;
@@ -11,24 +12,30 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// <summary>
     ///     リズムGUI下部のスキル入力進行UIを初期化するクラス。
     /// </summary>
-    public class SkillInputProgressUIInitializer : MonoBehaviour
+    public class SkillInputProgressUIInitializer : InGameInitializationModuleBase
     {
         /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>
         public SkillGuideProgressController GuideProgressController => _guideProgressController;
 
-        private void Awake()
+        public override string ModuleName => nameof(SkillInputProgressUIInitializer);
+
+        public override int Order => 442;
+
+        public override bool Build()
         {
             if (_skillInputProgressUIConfig == null)
             {
-                Debug.LogError("スキル入力進行UIの表示設定が未設定です。");
-                return;
+                Debug.LogError("スキル入力進行UIの表示設定が未設定です。", this);
+                return false;
             }
+
             _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
             ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
-        }
 
-        private void OnDestroy()
+            return true;
+        }
+        public override void Shutdown()
         {
             if (_isRegistered)
                 ServiceLocator.UnregisterInstance(this);
