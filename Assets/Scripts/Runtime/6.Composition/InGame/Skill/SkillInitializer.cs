@@ -57,6 +57,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
+            {
+                _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
+            }
+
             if (ServiceLocator.TryGetInstance(out SkillBuildDefinition _)
                 || string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
             {
@@ -82,11 +87,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             catch (Exception exception)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
-            }
-
-            if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
-            {
-                _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
             }
 
             return true;
