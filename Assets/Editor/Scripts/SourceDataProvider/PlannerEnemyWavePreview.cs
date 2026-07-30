@@ -95,10 +95,8 @@ namespace KillChord.Editor.SourceDataProvider
                 : "なし";
             EditorGUILayout.LabelField($"ループ: {loopLabel}");
 
-            int waveDefinitionIdHash = idProperty?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME)?.intValue ?? 0;
             DrawDefinition(
                 target,
-                waveDefinitionIdHash,
                 serializedDefinition,
                 serializedDefinition.FindProperty(WAVES_PROPERTY_NAME),
                 elementLimit);
@@ -133,13 +131,11 @@ namespace KillChord.Editor.SourceDataProvider
         ///     1つの敵Wave定義アセットが持つWave構成を描画します。
         /// </summary>
         /// <param name="target"> Wave定義アセットです。 </param>
-        /// <param name="waveDefinitionIdHash"> Wave定義アセット自体のIDハッシュです。 </param>
         /// <param name="serializedDefinition"> Wave定義アセットのSerializedObjectです。 </param>
         /// <param name="wavesProperty"> Wave配列プロパティです。 </param>
         /// <param name="elementLimit"> 表示する最大Wave数です。 </param>
         private static void DrawDefinition(
             UnityEngine.Object target,
-            int waveDefinitionIdHash,
             SerializedObject serializedDefinition,
             SerializedProperty wavesProperty,
             int elementLimit)
@@ -187,7 +183,7 @@ namespace KillChord.Editor.SourceDataProvider
                 Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
                 EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
 
-                DrawSpawnPointCandidates(target, waveDefinitionIdHash, serializedDefinition, wave, i);
+                DrawSpawnPointCandidates(target, serializedDefinition, wave);
             }
 
             if (wavesProperty.arraySize > elementLimit)
@@ -202,16 +198,12 @@ namespace KillChord.Editor.SourceDataProvider
         ///     Waveのスポーン候補地マップと編集UIを描画します。
         /// </summary>
         /// <param name="target"> Wave定義アセットです。 </param>
-        /// <param name="waveDefinitionIdHash"> Wave定義アセット自体のIDハッシュです。 </param>
         /// <param name="serializedDefinition"> Wave定義アセットのSerializedObjectです。 </param>
         /// <param name="waveProperty"> 対象Waveのプロパティです。 </param>
-        /// <param name="waveIndex"> 対象WaveのCollectionインデックスです。 </param>
         private static void DrawSpawnPointCandidates(
             UnityEngine.Object target,
-            int waveDefinitionIdHash,
             SerializedObject serializedDefinition,
-            SerializedProperty waveProperty,
-            int waveIndex)
+            SerializedProperty waveProperty)
         {
             SerializedProperty candidatesProperty = waveProperty.FindPropertyRelative(
                 SPAWN_POINT_CANDIDATES_PROPERTY_NAME);
@@ -233,32 +225,20 @@ namespace KillChord.Editor.SourceDataProvider
                 }
             }
 
-            if (!TryFindBattleSceneNames(waveDefinitionIdHash, out List<string> sceneNames))
+            // 対象シーンはWave定義自身が保持するため、ステージ側からの逆引きは不要。
+            SerializedProperty battleSceneNameProperty =
+                serializedDefinition.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
+            string resolvedSceneName = battleSceneNameProperty == null
+                ? string.Empty
+                : battleSceneNameProperty.stringValue;
+            if (string.IsNullOrWhiteSpace(resolvedSceneName))
             {
                 EditorGUILayout.HelpBox(
-                    "対応するステージシーンを特定できません。"
-                    + "BattleStageAssetのEnemyWaveDefinitionIdを確認してください。",
+                    "対象のステージシーンが未設定です。"
+                    + "Wave定義アセットのBattle Scene Nameを設定してください。",
                     MessageType.Warning);
                 DrawReadOnlyCandidateList(candidatesProperty);
                 return;
-            }
-
-            string resolvedSceneName;
-            if (sceneNames.Count == 1)
-            {
-                resolvedSceneName = sceneNames[0];
-            }
-            else
-            {
-                EditorGUILayout.HelpBox(
-                    $"複数のステージシーンが見つかりました（{sceneNames.Count}件）。プレビューするシーンを選択してください。",
-                    MessageType.Warning);
-                (int, int) selectionKey = (target.GetInstanceID(), waveIndex);
-                _sceneSelectionByWave.TryGetValue(selectionKey, out int selectedIndex);
-                selectedIndex = Mathf.Clamp(selectedIndex, 0, sceneNames.Count - 1);
-                selectedIndex = EditorGUILayout.Popup("プレビュー対象シーン", selectedIndex, sceneNames.ToArray());
-                _sceneSelectionByWave[selectionKey] = selectedIndex;
-                resolvedSceneName = sceneNames[selectedIndex];
             }
 
             bool mapDrawn = PlannerBattleSceneMapRenderer.Draw(
@@ -338,55 +318,6 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     指定Wave定義IDを使用しているBattleStageAssetのシーン名一覧を取得します。
-        /// </summary>
-        /// <param name="waveDefinitionIdHash"> Wave定義アセットのIDハッシュです。 </param>
-        /// <param name="sceneNames"> 取得したシーン名一覧（重複なし、昇順）です。 </param>
-        /// <returns> 1件以上見つかった場合はtrueです。 </returns>
-        private static bool TryFindBattleSceneNames(int waveDefinitionIdHash, out List<string> sceneNames)
-        {
-            sceneNames = new List<string>();
-            if (waveDefinitionIdHash == 0)
-            {
-                return false;
-            }
-
-            IReadOnlyList<SourceDataIDOption> stageOptions =
-                SourceDataProviderRepositoryResolver.GetOptions(STAGE_ASSET_COLLECTION_KEY);
-            HashSet<int> visitedStageInstanceIds = new();
-            HashSet<string> distinctSceneNames = new(StringComparer.Ordinal);
-            for (int i = 0; i < stageOptions.Count; i++)
-            {
-                UnityEngine.Object stageAsset = stageOptions[i].Source;
-                if (stageAsset == null || !visitedStageInstanceIds.Add(stageAsset.GetInstanceID()))
-                {
-                    continue;
-                }
-
-                SerializedObject serializedStage = new(stageAsset);
-                SerializedProperty stageWaveHashProperty = serializedStage
-                    .FindProperty(ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME)
-                    ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
-                if (stageWaveHashProperty == null || stageWaveHashProperty.intValue != waveDefinitionIdHash)
-                {
-                    continue;
-                }
-
-                SerializedProperty sceneNameProperty = serializedStage.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
-                if (sceneNameProperty != null
-                    && sceneNameProperty.propertyType == SerializedPropertyType.String
-                    && !string.IsNullOrEmpty(sceneNameProperty.stringValue))
-                {
-                    distinctSceneNames.Add(sceneNameProperty.stringValue);
-                }
-            }
-
-            sceneNames.AddRange(distinctSceneNames);
-            sceneNames.Sort(StringComparer.Ordinal);
-            return sceneNames.Count > 0;
-        }
-
-        /// <summary>
         ///     Wave定義アセットのSerializedObjectを生成します。
         /// </summary>
         /// <param name="target"> Wave定義アセット候補です。 </param>
@@ -451,10 +382,6 @@ namespace KillChord.Editor.SourceDataProvider
         private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
         private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
         private const string SPAWN_POINT_CANDIDATES_PROPERTY_NAME = "SpawnPointCandidates";
-        private const string STAGE_ASSET_COLLECTION_KEY = "StageAsset";
-        private const string ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME = "_enemyWaveDefinitionId";
         private const string BATTLE_SCENE_NAME_PROPERTY_NAME = "_battleSceneName";
-
-        private static readonly Dictionary<(int, int), int> _sceneSelectionByWave = new();
     }
 }

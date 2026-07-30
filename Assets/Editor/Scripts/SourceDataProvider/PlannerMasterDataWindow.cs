@@ -1503,6 +1503,7 @@ namespace KillChord.Editor.SourceDataProvider
 
         /// <summary>
         ///     対象がバトルステージシーン名を持つか判定し、値を取得します。
+        ///     シーン名はWave定義側が保持するため、ステージアセットの場合はWave定義を経由して解決します。
         /// </summary>
         /// <param name="target"> 対象アセットです。 </param>
         /// <param name="battleSceneName"> 取得したシーン名です。 </param>
@@ -1515,8 +1516,47 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            SerializedProperty sceneNameProperty = new SerializedObject(target)
-                .FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
+            SerializedObject serializedTarget = new(target);
+            if (TryReadBattleSceneName(serializedTarget, out battleSceneName))
+            {
+                return true;
+            }
+
+            SerializedProperty waveIdHashProperty = serializedTarget
+                .FindProperty(ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME)
+                ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
+            if (waveIdHashProperty == null || waveIdHashProperty.intValue == 0)
+            {
+                return false;
+            }
+
+            IReadOnlyList<SourceDataIDOption> waveOptions =
+                SourceDataProviderRepositoryResolver.GetOptions(WAVE_COLLECTION_KEY);
+            for (int i = 0; i < waveOptions.Count; i++)
+            {
+                if (waveOptions[i].HashId != waveIdHashProperty.intValue || waveOptions[i].Source == null)
+                {
+                    continue;
+                }
+
+                return TryReadBattleSceneName(new SerializedObject(waveOptions[i].Source), out battleSceneName);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     SerializedObjectからバトルステージシーン名を読み取ります。
+        /// </summary>
+        /// <param name="serializedObject"> 読み取り対象です。 </param>
+        /// <param name="battleSceneName"> 取得したシーン名です。 </param>
+        /// <returns> シーン名を取得できた場合はtrueです。 </returns>
+        private static bool TryReadBattleSceneName(
+            SerializedObject serializedObject,
+            out string battleSceneName)
+        {
+            battleSceneName = null;
+            SerializedProperty sceneNameProperty = serializedObject.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
             if (sceneNameProperty == null
                 || sceneNameProperty.propertyType != SerializedPropertyType.String
                 || string.IsNullOrEmpty(sceneNameProperty.stringValue))
@@ -1551,6 +1591,8 @@ namespace KillChord.Editor.SourceDataProvider
         private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
         private const string STAGE_ID_PROPERTY_NAME = "_stageId";
         private const string BATTLE_SCENE_NAME_PROPERTY_NAME = "_battleSceneName";
+        private const string ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME = "_enemyWaveDefinitionId";
+        private const string DATA_ID_HASH_PROPERTY_NAME = "_hashId";
         private const string STAGE_ASSET_COLLECTION_KEY = "StageAsset";
         private const string STAGE_BIND_COLLECTION_KEY = "StageBind";
         private const string WAVE_COLLECTION_KEY = "Wave";
