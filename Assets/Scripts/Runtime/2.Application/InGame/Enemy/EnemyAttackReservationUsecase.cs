@@ -32,6 +32,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
+        /// <summary> 攻撃の3拍前に発火するイベント </summary>
+        public event Action On3BeatBefore;
         public event Action On2BeatBefore;
         public event Action On1BeatBefore;
 
@@ -113,20 +115,56 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            if(musicSpec.TargetBeat >= 3) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
+            Schedule3BeatBefore(musicSpec);
+
+            if (musicSpec.TargetBeat >= TWO_BEAT_LEAD + FIRST_BEAT) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
             {
-            
-            _musicActionScheduler.Schedule(
-                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
-                Handle2BeatBefore,
-                _cancellationTokenSource.Token);
+
+                _musicActionScheduler.Schedule(
+                    new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - TWO_BEAT_LEAD),
+                    Handle2BeatBefore,
+                    _cancellationTokenSource.Token);
+
+                _musicActionScheduler.Schedule(
+                    new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - ONE_BEAT_LEAD),
+                    Handle1BeatBefore,
+                    _cancellationTokenSource.Token);
+            }
+
+        }
+
+        /// <summary>
+        ///     攻撃の3拍前にあたる予告タイミングを予約する。
+        ///     遡った結果が小節の頭を跨ぐ場合は、小節フラグを繰り下げて前の小節へ割り当てる。
+        /// </summary>
+        /// <param name="musicSpec"> 攻撃本体のタイミング。 </param>
+        private void Schedule3BeatBefore(in MusicSyncSpec musicSpec)
+        {
+            if (musicSpec.TimeSignature <= 0d)
+            {
+                return;
+            }
+
+            double targetBeat = musicSpec.TargetBeat - THREE_BEAT_LEAD;
+            int barFlag = musicSpec.BarFlag;
+
+            // 1拍目より前にある間は、拍子1小節分だけ戻して前の小節へ送る。
+            while (targetBeat < FIRST_BEAT)
+            {
+                targetBeat += musicSpec.TimeSignature;
+                barFlag--;
+            }
+
+            // 現在の小節より前や、拍子の範囲外へはみ出す場合は予約しない。
+            if (barFlag < 0 || targetBeat > musicSpec.TimeSignature)
+            {
+                return;
+            }
 
             _musicActionScheduler.Schedule(
-                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
-                Handle1BeatBefore,
+                new MusicSyncSpec((byte)barFlag, musicSpec.TimeSignature, targetBeat),
+                Handle3BeatBefore,
                 _cancellationTokenSource.Token);
-            }
-           
         }
 
         /// <summary>
@@ -137,6 +175,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             Debug.Log("予約されたタイミングに到達しました。");
             _hasReservation = false;
             OnReservedTimingReached?.Invoke();
+        }
+
+        /// <summary>
+        ///    攻撃の3拍前に到達したときの処理。
+        /// </summary>
+        private void Handle3BeatBefore()
+        {
+            Debug.Log("攻撃の3拍前に到達しました。");
+            On3BeatBefore?.Invoke();
         }
 
         /// <summary>
@@ -156,6 +203,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             On1BeatBefore?.Invoke();
         }
         
+
+        /// <summary> 小節内の最初の拍。 </summary>
+        private const double FIRST_BEAT = 1d;
+        /// <summary> 3拍前の予告に使う遡り量。 </summary>
+        private const double THREE_BEAT_LEAD = 3d;
+        /// <summary> 2拍前の予告に使う遡り量。 </summary>
+        private const double TWO_BEAT_LEAD = 2d;
+        /// <summary> 1拍前の予告に使う遡り量。 </summary>
+        private const double ONE_BEAT_LEAD = 1d;
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;
