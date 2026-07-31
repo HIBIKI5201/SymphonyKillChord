@@ -64,7 +64,7 @@ jobs:
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: GitHub API returned HTTP $HTTP_CODE"
+            echo "[ERROR]: GitHub API returned HTTP $HTTP_CODE"
             exit 1
           fi
 
