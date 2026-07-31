@@ -1,4 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using LitMotion;
+using LitMotion.Extensions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Load
     /// <summary>
     ///     ロード画面をロード進捗を表示するViewクラス。
     /// </summary>
-    public class LoadingScreenView : MonoBehaviour
+    public sealed class LoadingScreenView : MonoBehaviour
     {
         /// <summary>
         ///     ロード画面コントローラーを設定する。
@@ -35,6 +38,7 @@ namespace KillChord.Runtime.View.Persistent.Load
         private void OnDestroy()
         {
             Unsubscribe();
+            _handle.TryCancel();
         }
 
         /// <summary>
@@ -119,22 +123,18 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// <param name="progress"> 0から1の進捗。 </param>
         private void ApplyProgress(float progress)
         {
-            if (_progressFillArea == null || _progressFillRect == null)
+            progress = Mathf.Clamp01(progress);
+            if (_progressImage == null)
+            {
+                return;
+            }
+            if (_progressImage.fillAmount == progress)
             {
                 return;
             }
 
-            float normalizedProgress = Mathf.Clamp01(progress);
-            float fillWidth =
-                _progressFillArea.rect.width * normalizedProgress;
-
-            _progressFillRect.SetSizeWithCurrentAnchors(
-                RectTransform.Axis.Horizontal,
-                fillWidth);
-
-            // 幅が0のときにSliced画像の端だけが残るのを防ぐ。
-            _progressFillRect.gameObject.SetActive(
-                normalizedProgress > 0f);
+            _progressImage.fillAmount = progress;
+            _progressText.SetText(((int)(progress * 100f)).ToString("00") + '%');
         }
 
         /// <summary>
@@ -151,18 +151,30 @@ namespace KillChord.Runtime.View.Persistent.Load
             _canvasGroup.alpha = isVisible ? 1f : 0f;
             _canvasGroup.interactable = isVisible;
             _canvasGroup.blocksRaycasts = isVisible;
+
+            if (isVisible)
+            {
+                _handle.TryComplete();
+                _handle = LMotion.Create(1f, 0f, 0.3f)
+                    .WithEase(Ease.OutCirc)
+                    .BindToFillAmount(_fadeImage);
+            }
         }
 
         [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;
 
-        [SerializeField, Tooltip("ロードゲージを表示する範囲です。")]
-        private RectTransform _progressFillArea;
+        [SerializeField, Tooltip("伸縮するロードゲージのImage（FillAmountに使う）")]
+        private Image _progressImage;
 
-        [SerializeField, Tooltip("ロード進捗に合わせて横幅を変更するImageです。")]
-        private RectTransform _progressFillRect;
+        [SerializeField]
+        private TMP_Text _progressText;
+
+        [SerializeField]
+        private Image _fadeImage;
 
         private LoadingScreenController _controller;
         private bool _isSubscribed;
+        private MotionHandle _handle;
     }
 }
