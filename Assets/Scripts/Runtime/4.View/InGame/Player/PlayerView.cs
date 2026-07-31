@@ -10,8 +10,6 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -111,13 +109,12 @@ namespace KillChord.Runtime.View.InGame.Player
         private ICharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
-        private CancellationTokenSource _cancellationTokenSource;
-        private Quaternion _rotation;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
         private MotionHandle _dodgeMaterialEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
+        private MotionHandle _attackRotateHandle;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -157,6 +154,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _dodgeMaterialEffectHandle.TryCancel();
+            _attackRotateHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -234,11 +232,9 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="rotation"> 戻す回転です。 </param>
         public void ResetToSpawn(Vector3 position, Quaternion rotation)
         {
-            // 攻撃時の回転補間を停止する。
-            CancelAttackRotate();
-
             // 回避関連の状態と演出をリセットする。
             _dodgeMaterialEffectHandle.TryCancel();
+            _attackRotateHandle.TryCancel();
             ResetDodgeMaterialEffect();
 
             // 位置と回転をスタート地点へ戻す。
@@ -350,7 +346,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         /// <param name="duration"> 回避の継続時間です。 </param>
         /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
-        public void PlayDodgeMaterialEffect(float duration, Vector3 direction)
+        public void PlayDodgeMaterialEffect(float duration, in Vector3 direction)
         {
             direction.Normalize();
 
@@ -515,12 +511,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
-                    CancelAttackRotate();
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(
-                        PlayerAttackController.CurrentLockOnTargetPosition,
-                        PlayerAttackController.AttackRotationSpeed,
-                        _cancellationTokenSource.Token);
+                    StartAttackRotate();
                 }
             }
         }
@@ -578,11 +569,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = false;
             }
 
+
             Quaternion rotation = _cacheTransform.rotation;
-            if (_cancellationTokenSource != null)
-            {
-                rotation = _rotation;
-            }
+
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _cacheTransform.rotation = rotation;
             _cacheVelocity = velocity;
@@ -591,64 +580,17 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayFootstepSound(velocity);
         }
 
-        /// <summary>
-        ///     攻撃時にターゲット方向へ滑らかに回転する Task 実装。
-        ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
-        /// </summary>
-        private async Task RotateToTargetAsync(Vector3 targetPosition, float speed, CancellationToken ct)
+        /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>
+        private void StartAttackRotate()
         {
-            _rotation = _cacheTransform.rotation;
+            Vector3 dir = PlayerAttackController.CurrentLockOnTargetPosition - _cacheTransform.position;
+            dir.y = 0;
+            Quaternion rotation = Quaternion.LookRotation(dir, Vector3.up);
 
-            try
-            {
-                while (!ct.IsCancellationRequested
-                    && PlayerAttackController != null
-                    && PlayerAttackController.IsAttacking
-                    && PlayerAttackController.HasCurrentLockOnTarget)
-                {
-                    Vector3 dirToTarget = targetPosition - _cacheTransform.position;
-                    dirToTarget.y = 0f;
-                    if (dirToTarget.sqrMagnitude <= float.Epsilon) break;
-
-                    Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
-                    float t = 1f - Mathf.Exp(-Mathf.Max(0f, speed) * Time.deltaTime);
-                    _rotation = Quaternion.Slerp(_rotation, targetRot, t);
-
-                    if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
-                    {
-                        _rotation = targetRot;
-                        break;
-                    }
-
-                    await Task.Yield();
-                }
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-            finally
-            {
-                if (_cancellationTokenSource != null && _cancellationTokenSource.Token == ct)
-                {
-                    try { _cancellationTokenSource.Dispose(); } catch { }
-                    _cancellationTokenSource = null;
-                }
-            }
-        }
-
-        private void CancelAttackRotate()
-        {
-            if (_cancellationTokenSource != null)
-            {
-                try
-                {
-                    _cancellationTokenSource.Cancel();
-                }
-                catch { }
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
+            _attackRotateHandle.TryCancel();
+            _attackRotateHandle = LMotion.Create(rotation, rotation, 0.1f)
+                .WithScheduler(MotionScheduler.PreLateUpdate)
+                .Bind(this, (value, state) => state._cacheTransform.rotation = value);
         }
 
         /// <summary>
@@ -739,7 +681,7 @@ namespace KillChord.Runtime.View.InGame.Player
         ///     足音SEをテンポ同期で再生します。
         /// </summary>
         /// <param name="velocity"> 現在速度です。 </param>
-        private void PlayFootstepSound(Vector3 velocity)
+        private void PlayFootstepSound(in Vector3 velocity)
         {
             if (_controller == null || _controller.IsDodging)
             {
