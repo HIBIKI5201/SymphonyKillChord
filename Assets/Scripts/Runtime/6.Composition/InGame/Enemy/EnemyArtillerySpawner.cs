@@ -78,13 +78,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        public async void SpawnEnemy(int amount, Action callback)
+        public async void SpawnEnemy(int amount, IReadOnlyList<int> candidateSpawnPointHashes, Action callback)
         {
             for (int i = 0;  i < amount; i++)
             {
                 try
                 {
-                    SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
+                    SpawnPositionPair positionPair =
+                        await _spawnPositionSearcher.GetRandomSpawnPositionAsync(candidateSpawnPointHashes);
                     EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
                     SpawnEnemyAsync(lifeCycle, positionPair, callback);
                 }

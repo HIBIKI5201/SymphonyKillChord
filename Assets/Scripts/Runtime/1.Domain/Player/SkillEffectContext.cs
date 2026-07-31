@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using System;
 
 namespace KillChord.Runtime.Domain.Player
@@ -16,16 +17,19 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="playerEntity"> 発動者です。 </param>
         /// <param name="currentBeatType"> 現在ビートです。 </param>
         /// <param name="targetEntities"> 解決済み対象一覧です。 </param>
+        /// <param name="effectSpec"> 発動するスキルの効果定義です。 </param>
         public SkillEffectContext(
             CharacterEntity targetEntity,
             CharacterEntity playerEntity,
             BeatType currentBeatType,
-            ReadOnlyMemory<CharacterEntity> targetEntities)
+            ReadOnlyMemory<CharacterEntity> targetEntities,
+            SkillEffectSpec effectSpec)
         {
             TargetEntity = targetEntity;
             PlayerEntity = playerEntity;
             CurrentBeatType = currentBeatType;
             TargetEntities = targetEntities;
+            EffectSpec = effectSpec;
         }
 
         /// <summary> 被スキル者です。 </summary>
@@ -39,5 +43,8 @@ namespace KillChord.Runtime.Domain.Player
 
         /// <summary> 解決済み対象一覧です。 </summary>
         public ReadOnlyMemory<CharacterEntity> TargetEntities { get; }
+
+        /// <summary> 発動するスキルの効果定義です。 </summary>
+        public SkillEffectSpec EffectSpec { get; }
     }
 }

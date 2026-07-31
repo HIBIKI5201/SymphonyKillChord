@@ -15,6 +15,7 @@ MonoBehaviour:
   _id:
     _id: enemy_wave_default
     _hashId: -1074717099
+  _battleSceneName: Stage_01
   _waves:
   - Details:
     - EnemyType: 0
@@ -23,6 +24,11 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_10
+      _hashId: -2071637137
+    - _id: PositionPair_16
+      _hashId: 1843852890
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -30,6 +36,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -37,6 +44,9 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates:
+    - _id: 
+      _hashId: 0
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -44,6 +54,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -51,6 +62,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 1
@@ -58,6 +70,7 @@ MonoBehaviour:
       EnemyAmount: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   - Details:
     - EnemyType: 0
       EnemyAmount: 2
@@ -65,6 +78,7 @@ MonoBehaviour:
       EnemyAmount: 2
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   _loop: 1
   _loopStart: 5
   references:

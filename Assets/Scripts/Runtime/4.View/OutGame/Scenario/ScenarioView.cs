@@ -5,44 +5,12 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
-    [DefaultExecutionOrder(10)]
     /// <summary>
     /// シナリオの表示状態を Unity UI に反映するビュー。
     /// </summary>
+    [DefaultExecutionOrder(10)]
     public class ScenarioView : MonoBehaviour
     {
-        private const string SlotLeft = "Left";
-        private const string SlotCenter = "Center";
-        private const string SlotRight = "Right";
-        private const string PortraitObjectLeft = "PortraitLeft";
-        private const string PortraitObjectCenter = "PortraitCenter";
-        private const string PortraitObjectRight = "PortraitRight";
-        private const string TargetCanvas = "Canvas";
-        private const string TargetBackground = "Background";
-        private const string TargetPortraitLeft = "PortraitLeft";
-        private const string TargetPortraitCenter = "PortraitCenter";
-        private const string TargetPortraitRight = "PortraitRight";
-        private const string TargetText = "Text";
-        [SerializeField] private CanvasGroup _canvasGroup;
-        [SerializeField] private TMP_Text _chat;
-        [SerializeField] private Image _backgroundImage;
-        [SerializeField] private Animation _animationPlayer;
-        [SerializeField] private GameObject _fadeObj;
-        [SerializeField] private RectTransform _portraitRoot;
-        [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
-
-        private bool _onFade;
-        private float _time;
-        private float _start;
-        private float _end;
-        private float _duration;
-
-        private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
-        private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
-        private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
-        private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
-        private ViewModel _viewModel;
-
         /// <summary>
         /// 依存先を受け取りシナリオ表示を初期化する。
         /// </summary>
@@ -50,9 +18,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
-            IReadOnlyDictionary<string, Sprite> portraitByKey)
+            IReadOnlyDictionary<string, Sprite> portraitByKey,
+            IReadOnlyList<string> layerBackToFront)
         {
+            _layerBackToFront = layerBackToFront;
             TryAutoAssignReferences();
+            EnsureNonFadingUi();
             UnsubscribeFromViewModel();
             _viewModel = viewModel;
             SubscribeToViewModel();
@@ -61,12 +32,67 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ResetFadeState();
         }
 
+        // CanvasGroup.alpha が 0 だと配下がカリングされ、ignoreParentGroups の
+        // テキストも消える。実質不可視だがカリングは避けられる最小値。
+        private const float MinCanvasAlpha = 0.004f;
+        // 黒フェードが「完全に暗転した」とみなす alpha のしきい値。
+        private const float FullyOpaqueThreshold = 0.99f;
+        private const string SlotLeft = "Left";
+        private const string SlotCenter = "Center";
+        private const string SlotRight = "Right";
+        private const string PortraitObjectLeft = "PortraitLeft";
+        private const string PortraitObjectCenter = "PortraitCenter";
+        private const string PortraitObjectRight = "PortraitRight";
+        private const string TargetScreen = "Screen";
+        private const string TargetCanvas = "Canvas";
+        private const string TargetBackground = "Background";
+        private const string TargetPortraitLeft = "PortraitLeft";
+        private const string TargetPortraitCenter = "PortraitCenter";
+        private const string TargetPortraitRight = "PortraitRight";
+        private const string TargetText = "Text";
+        private const string TargetBlack = "Black";
+        private const string BlackOverlayObject = "BlackOverlay";
+        private const string LayerPortrait = "Portrait";
+        private const string LayerEffect = "Effect";
+
+        // 並び順が未指定のときに使う既定の背面→前面順（レイヤー名）。
+        private static readonly string[] DEFAULT_LAYER_ORDER =
+        {
+            TargetBackground,
+            LayerPortrait,
+            TargetText,
+            LayerEffect,
+        };
+
+        [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
+        private CanvasGroup _nonFadingUi;
+        [SerializeField] private TMP_Text _chat;
+        [SerializeField] private Image _backgroundImage;
+        [SerializeField] private Animation _animationPlayer;
+        [SerializeField] private GameObject _fadeObj;
+        [SerializeField] private RectTransform _portraitRoot;
+        [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
+
+        // 対象ごとに独立してフェードできるよう、進行中フェードを対象キーで保持する。
+        private readonly Dictionary<string, FadeState> _activeFades = new(System.StringComparer.OrdinalIgnoreCase);
+        private readonly List<string> _completedFadeKeys = new();
+
+        private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
+        private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
+        private ViewModel _viewModel;
+        private IReadOnlyList<string> _layerBackToFront;
+        private Image _blackOverlay;
+
         /// <summary>
         /// 表示に必要な参照を初期化する。
         /// </summary>
         private void Awake()
         {
             TryAutoAssignReferences();
+            EnsureNonFadingUi();
             EnsurePortraitSlots();
         }
 
@@ -88,6 +114,14 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
+        /// 破棄時に進行中のシナリオ再生を停止する。
+        /// </summary>
+        private void OnDestroy()
+        {
+            UnsubscribeFromViewModel();
+        }
+
+        /// <summary>
         /// 受け取ったテキストを表示へ反映する。
         /// </summary>
         private void OnTextReceived(string chat)
@@ -104,13 +138,39 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary>
         /// フェード要求を受け取りアニメーション状態を更新する。
         /// </summary>
-        private void OnFadeReceived(float start, float end, float duration)
+        private void OnFadeReceived(string target, float start, float end, float duration)
         {
-            _onFade = true;
-            _time = 0f;
-            _start = start;
-            _end = end;
-            _duration = duration;
+            // フェード直前に、テキストを除外するCanvasGroup設定を確実に適用する。
+            EnsureNonFadingUi();
+
+            CanvasGroup group = ResolveFadeTarget(target, out bool floorAlpha);
+            if (group == null)
+            {
+                Debug.LogWarning($"ScenarioView: fade target '{target}' が見つかりません。");
+                return;
+            }
+
+            string key = string.IsNullOrWhiteSpace(target) ? TargetScreen : target.Trim();
+
+            if (duration <= 0f)
+            {
+                // 即時反映。進行中フェードがあれば打ち切る。
+                ApplyFadeAlpha(group, end, floorAlpha);
+                _activeFades.Remove(key);
+                return;
+            }
+
+            _activeFades[key] = new FadeState
+            {
+                Group = group,
+                Time = 0f,
+                Start = start,
+                End = end,
+                Duration = duration,
+                FloorAlpha = floorAlpha,
+            };
+            // 開始値を即時反映する。
+            ApplyFadeAlpha(group, start, floorAlpha);
         }
 
         /// <summary>
@@ -214,39 +274,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 進行中のフェード演出を 1 フレーム分更新する。
-        /// </summary>
-        private void Fade()
-        {
-            if (!_onFade)
-            {
-                return;
-            }
-
-            _time += Time.deltaTime;
-            if ( _canvasGroup == null)
-            {
-                Debug.LogWarning("ScenarioView: _canvasGroup is not assigned.");
-                _onFade = false;
-                return;
-            }
-
-            if (_duration <= 0f)
-            {
-                 _canvasGroup.alpha = _end;
-                _onFade = false;
-                return;
-            }
-
-            float t = Mathf.Clamp01(_time / _duration);
-            _canvasGroup.alpha = Mathf.Lerp(_start, _end, t);
-            if (t >= 1f)
-            {
-                _onFade = false;
-            }
-        }
-
-        /// <summary>
         /// シナリオ完了時の後処理を表示へ反映する。
         /// </summary>
         private void InputScenarioCompleted(bool skipped)
@@ -258,42 +285,345 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 表示用カタログ辞書を構築する。
+        /// ViewModel の通知を購読する。
         /// </summary>
-        private void BuildCatalogMaps(
-            IReadOnlyDictionary<string, Sprite> backgroundByKey,
-            IReadOnlyDictionary<string, AnimationClip> animationByKey,
-            IReadOnlyDictionary<string, Sprite> portraitByKey)
+        private void SubscribeToViewModel()
         {
-            CopyCatalogEntries(backgroundByKey, _backgroundByKey);
-            CopyCatalogEntries(animationByKey, _animationByKey);
-            CopyCatalogEntries(portraitByKey, _portraitByKey);
+            if (_viewModel == null)
+            {
+                return;
+            }
+
+            _viewModel.OnChat += OnTextReceived;
+            _viewModel.OnFade += OnFadeReceived;
+            _viewModel.OnBackground += InputBackground;
+            _viewModel.OnAnimation += InputAnimation;
+            _viewModel.OnPortrait += InputPortrait;
+            _viewModel.OnLayerOrder += InputLayerOrder;
+            _viewModel.OnScenarioCompleted += InputScenarioCompleted;
         }
 
         /// <summary>
-        /// 未設定の参照を自動で補完する。
+        /// ViewModel の通知購読を解除する。
         /// </summary>
-        private void TryAutoAssignReferences()
+        private void UnsubscribeFromViewModel()
         {
-            if (_chat == null)
+            if (_viewModel == null)
             {
-                _chat = GetComponentInChildren<TMP_Text>(true);
+                return;
             }
 
-            if (_backgroundImage == null)
+            _viewModel.OnChat -= OnTextReceived;
+            _viewModel.OnFade -= OnFadeReceived;
+            _viewModel.OnBackground -= InputBackground;
+            _viewModel.OnAnimation -= InputAnimation;
+            _viewModel.OnPortrait -= InputPortrait;
+            _viewModel.OnLayerOrder -= InputLayerOrder;
+            _viewModel.OnScenarioCompleted -= InputScenarioCompleted;
+            _viewModel = null;
+        }
+
+        /// <summary>
+        /// 進行中の各対象フェードを 1 フレーム分更新する。
+        /// </summary>
+        private void Fade()
+        {
+            if (_activeFades.Count == 0)
             {
-                Transform panel = transform.Find("Panel");
-                _backgroundImage = panel != null ? panel.GetComponent<Image>() : GetComponentInChildren<Image>(true);
+                return;
             }
 
-            if (_fadeObj == null)
+            _completedFadeKeys.Clear();
+            foreach (KeyValuePair<string, FadeState> entry in _activeFades)
             {
-                _fadeObj = gameObject;
+                FadeState fade = entry.Value;
+                if (fade.Group == null)
+                {
+                    _completedFadeKeys.Add(entry.Key);
+                    continue;
+                }
+
+                fade.Time += Time.deltaTime;
+                float t = fade.Duration <= 0f ? 1f : Mathf.Clamp01(fade.Time / fade.Duration);
+                ApplyFadeAlpha(fade.Group, Mathf.Lerp(fade.Start, fade.End, t), fade.FloorAlpha);
+                if (t >= 1f)
+                {
+                    _completedFadeKeys.Add(entry.Key);
+                    // 黒フェードで完全に暗転したら、下のテキストを消しておく。
+                    // 明転時に前のテキストが残って見えるのを防ぐ。
+                    if (string.Equals(entry.Key, TargetBlack, System.StringComparison.OrdinalIgnoreCase)
+                        && fade.End >= FullyOpaqueThreshold
+                        && _chat != null)
+                    {
+                        _chat.text = string.Empty;
+                    }
+                }
             }
 
-            if (_portraitRoot == null)
+            for (int i = 0; i < _completedFadeKeys.Count; i++)
             {
-                _portraitRoot = transform as RectTransform;
+                _activeFades.Remove(_completedFadeKeys[i]);
+            }
+        }
+
+        /// <summary>
+        /// フェードの alpha を対象の CanvasGroup へ反映する。
+        /// 画面全体（Screen）フェードでは alpha がちょうど 0 になると配下の
+        /// CanvasRenderer がカリングされ、ignoreParentGroups で除外したテキストまで
+        /// 消えてしまうため、僅かな最小値でクランプして完全な 0 にはしない。
+        /// 個別対象（背景・立ち絵）はテキストを含まないので 0 まで許容する。
+        /// </summary>
+        private void ApplyFadeAlpha(CanvasGroup group, float alpha, bool floorAlpha)
+        {
+            if (group == null)
+            {
+                return;
+            }
+
+            group.alpha = floorAlpha ? Mathf.Max(alpha, MinCanvasAlpha) : Mathf.Clamp01(alpha);
+        }
+
+        /// <summary>
+        /// 対象文字列から、フェードを適用する CanvasGroup を解決する。
+        /// テキストは対象に含めない（常にフェードしない）。
+        /// </summary>
+        /// <param name="target"> 対象名（Screen/Background/PortraitLeft/…）。 </param>
+        /// <param name="floorAlpha"> 画面全体フェードで alpha を 0 にしないか。 </param>
+        private CanvasGroup ResolveFadeTarget(string target, out bool floorAlpha)
+        {
+            floorAlpha = false;
+
+            // 未指定・Screen・Canvas は画面全体（ルート CanvasGroup）。
+            if (string.IsNullOrWhiteSpace(target)
+                || target.Equals(TargetScreen, System.StringComparison.OrdinalIgnoreCase)
+                || target.Equals(TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
+            {
+                floorAlpha = true;
+                return _canvasGroup;
+            }
+
+            if (target.Equals(TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return _backgroundImage != null ? EnsureCanvasGroup(_backgroundImage.gameObject) : null;
+            }
+
+            if (target.Equals(TargetPortraitLeft, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotLeft);
+            }
+
+            if (target.Equals(TargetPortraitCenter, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotCenter);
+            }
+
+            if (target.Equals(TargetPortraitRight, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsurePortraitCanvasGroup(SlotRight);
+            }
+
+            if (target.Equals(TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                // テキスト自身の CanvasGroup を明示的にフェードする。
+                EnsureNonFadingUi();
+                return _nonFadingUi;
+            }
+
+            if (target.Equals(TargetBlack, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return EnsureBlackOverlay();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 指定 GameObject に CanvasGroup を確保する。
+        /// </summary>
+        private static CanvasGroup EnsureCanvasGroup(GameObject go)
+        {
+            CanvasGroup group = go.GetComponent<CanvasGroup>();
+            if (group == null)
+            {
+                group = go.AddComponent<CanvasGroup>();
+            }
+
+            return group;
+        }
+
+        /// <summary>
+        /// 指定スロットの立ち絵に CanvasGroup を確保する。
+        /// </summary>
+        private CanvasGroup EnsurePortraitCanvasGroup(string slot)
+        {
+            EnsurePortraitSlots();
+            return _portraitBySlot.TryGetValue(slot, out Image image) && image != null
+                ? EnsureCanvasGroup(image.gameObject)
+                : null;
+        }
+
+        /// <summary>
+        /// フェード演出の内部状態を初期化する。
+        /// </summary>
+        private void ResetFadeState()
+        {
+            _activeFades.Clear();
+            _completedFadeKeys.Clear();
+
+            // 各要素を既定の可視状態へ戻す（次のシナリオを綺麗な状態で開始する）。
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = 1f;
+            }
+
+            if (_nonFadingUi != null)
+            {
+                _nonFadingUi.alpha = 1f;
+            }
+
+            foreach (Image portraitImage in _portraitBySlot.Values)
+            {
+                if (portraitImage != null && portraitImage.TryGetComponent(out CanvasGroup portraitGroup))
+                {
+                    portraitGroup.alpha = 1f;
+                }
+            }
+
+            if (_blackOverlay != null && _blackOverlay.TryGetComponent(out CanvasGroup overlayGroup))
+            {
+                overlayGroup.alpha = 0f;
+            }
+        }
+
+        /// <summary>
+        /// フェード対象から除外するUI（テキストボックス）を確保する。
+        /// CanvasGroup.ignoreParentGroups を有効にし、_canvasGroup のフェードで
+        /// テキストまで一緒に消えないようにする。
+        /// </summary>
+        private void EnsureNonFadingUi()
+        {
+            if (_nonFadingUi == null && _chat != null)
+            {
+                // 明示指定が無い場合はテキスト自身に CanvasGroup を用意する。
+                _nonFadingUi = _chat.GetComponent<CanvasGroup>();
+                if (_nonFadingUi == null)
+                {
+                    _nonFadingUi = _chat.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
+            if (_nonFadingUi != null)
+            {
+                // 親（Screenフェード）を無視する。alpha は Text フェードでのみ変化させる。
+                _nonFadingUi.ignoreParentGroups = true;
+            }
+        }
+
+        /// <summary>
+        /// 演出用の黒オーバーレイ（全画面）を確保し、その CanvasGroup を返す。
+        /// </summary>
+        private CanvasGroup EnsureBlackOverlay()
+        {
+            if (_blackOverlay == null)
+            {
+                RectTransform root = _portraitRoot != null ? _portraitRoot : transform as RectTransform;
+                if (root == null)
+                {
+                    return null;
+                }
+
+                Transform existing = root.Find(BlackOverlayObject);
+                GameObject go = existing != null
+                    ? existing.gameObject
+                    : new GameObject(
+                        BlackOverlayObject,
+                        typeof(RectTransform),
+                        typeof(CanvasRenderer),
+                        typeof(Image),
+                        typeof(CanvasGroup));
+                RectTransform rectTransform = go.GetComponent<RectTransform>();
+                if (existing == null)
+                {
+                    // 全画面を覆うように配置する。
+                    rectTransform.SetParent(root, false);
+                    rectTransform.anchorMin = Vector2.zero;
+                    rectTransform.anchorMax = Vector2.one;
+                    rectTransform.offsetMin = Vector2.zero;
+                    rectTransform.offsetMax = Vector2.zero;
+                }
+
+                Image image = go.GetComponent<Image>();
+                image.color = Color.black;
+                image.raycastTarget = false;
+                _blackOverlay = image;
+
+                CanvasGroup overlayGroup = go.GetComponent<CanvasGroup>();
+                overlayGroup.alpha = 0f;
+
+                // 生成した演出要素を優先度順へ並べ直す。
+                ApplyLayerOrder();
+            }
+
+            return EnsureCanvasGroup(_blackOverlay.gameObject);
+        }
+
+        /// <summary>
+        /// UI 要素を並び順アセットの背面→前面順に並べ替える。
+        /// 背面から順に SetAsLastSibling することで、末尾の要素が最前面になる。
+        /// </summary>
+        private void ApplyLayerOrder()
+        {
+            IReadOnlyList<string> order =
+                _layerBackToFront != null && _layerBackToFront.Count > 0 ? _layerBackToFront : DEFAULT_LAYER_ORDER;
+
+            foreach (string layer in order)
+            {
+                BringLayerToFront(layer);
+            }
+        }
+
+        /// <summary>
+        /// 指定レイヤーに属する要素を最前面へ移動する。
+        /// </summary>
+        private void BringLayerToFront(string layer)
+        {
+            if (string.Equals(layer, TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_backgroundImage != null)
+                {
+                    _backgroundImage.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerPortrait, System.StringComparison.OrdinalIgnoreCase))
+            {
+                BringPortraitToFront(SlotLeft);
+                BringPortraitToFront(SlotCenter);
+                BringPortraitToFront(SlotRight);
+            }
+            else if (string.Equals(layer, TargetText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_chat != null)
+                {
+                    _chat.transform.SetAsLastSibling();
+                }
+            }
+            else if (string.Equals(layer, LayerEffect, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (_blackOverlay != null)
+                {
+                    _blackOverlay.transform.SetAsLastSibling();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定スロットの立ち絵を最前面へ移動する。
+        /// </summary>
+        private void BringPortraitToFront(string slot)
+        {
+            if (_portraitBySlot.TryGetValue(slot, out Image image) && image != null)
+            {
+                image.transform.SetAsLastSibling();
             }
         }
 
@@ -306,6 +636,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
             EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
             ApplyPortraitSizeToExistingSlots();
+            // 立ち絵生成で重なり順が変わるため、優先度順へ並べ直す。
+            ApplyLayerOrder();
         }
 
         /// <summary>
@@ -417,6 +749,22 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             return null;
         }
 
+        /// <summary>
+        /// 表示用カタログ辞書を構築する。
+        /// </summary>
+        private void BuildCatalogMaps(
+            IReadOnlyDictionary<string, Sprite> backgroundByKey,
+            IReadOnlyDictionary<string, AnimationClip> animationByKey,
+            IReadOnlyDictionary<string, Sprite> portraitByKey)
+        {
+            CopyCatalogEntries(backgroundByKey, _backgroundByKey);
+            CopyCatalogEntries(animationByKey, _animationByKey);
+            CopyCatalogEntries(portraitByKey, _portraitByKey);
+        }
+
+        /// <summary>
+        /// カタログ辞書のエントリを検証しつつ複製する。
+        /// </summary>
         private static void CopyCatalogEntries<T>(
             IReadOnlyDictionary<string, T> source,
             Dictionary<string, T> destination)
@@ -440,62 +788,53 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// フェード演出の内部状態を初期化する。
+        /// 未設定の参照を自動で補完する。
         /// </summary>
-        private void ResetFadeState()
+        private void TryAutoAssignReferences()
         {
-            _onFade = false;
-            _time = 0f;
-            _start = 0f;
-            _end = 0f;
-            _duration = 0f;
-        }
-
-        /// <summary>
-        /// 破棄時に進行中のシナリオ再生を停止する。
-        /// </summary>
-        private void OnDestroy()
-        {
-            UnsubscribeFromViewModel();
-        }
-
-        /// <summary>
-        /// ViewModel の通知を購読する。
-        /// </summary>
-        private void SubscribeToViewModel()
-        {
-            if (_viewModel == null)
+            if (_canvasGroup == null)
             {
-                return;
+                // 未設定だとフェードが無反応になるため、自身または子から補完する。
+                _canvasGroup = GetComponent<CanvasGroup>();
+                if (_canvasGroup == null)
+                {
+                    _canvasGroup = GetComponentInChildren<CanvasGroup>(true);
+                }
             }
 
-            _viewModel.OnChat += OnTextReceived;
-            _viewModel.OnFade += OnFadeReceived;
-            _viewModel.OnBackground += InputBackground;
-            _viewModel.OnAnimation += InputAnimation;
-            _viewModel.OnPortrait += InputPortrait;
-            _viewModel.OnLayerOrder += InputLayerOrder;
-            _viewModel.OnScenarioCompleted += InputScenarioCompleted;
+            if (_chat == null)
+            {
+                _chat = GetComponentInChildren<TMP_Text>(true);
+            }
+
+            if (_backgroundImage == null)
+            {
+                Transform panel = transform.Find("Panel");
+                _backgroundImage = panel != null ? panel.GetComponent<Image>() : GetComponentInChildren<Image>(true);
+            }
+
+            if (_fadeObj == null)
+            {
+                _fadeObj = gameObject;
+            }
+
+            if (_portraitRoot == null)
+            {
+                _portraitRoot = transform as RectTransform;
+            }
         }
 
         /// <summary>
-        /// ViewModel の通知購読を解除する。
+        /// 1 つの対象に対する進行中フェードの状態。
         /// </summary>
-        private void UnsubscribeFromViewModel()
+        private sealed class FadeState
         {
-            if (_viewModel == null)
-            {
-                return;
-            }
-
-            _viewModel.OnChat -= OnTextReceived;
-            _viewModel.OnFade -= OnFadeReceived;
-            _viewModel.OnBackground -= InputBackground;
-            _viewModel.OnAnimation -= InputAnimation;
-            _viewModel.OnPortrait -= InputPortrait;
-            _viewModel.OnLayerOrder -= InputLayerOrder;
-            _viewModel.OnScenarioCompleted -= InputScenarioCompleted;
-            _viewModel = null;
+            public CanvasGroup Group;
+            public float Time;
+            public float Start;
+            public float End;
+            public float Duration;
+            public bool FloorAlpha;
         }
     }
 }

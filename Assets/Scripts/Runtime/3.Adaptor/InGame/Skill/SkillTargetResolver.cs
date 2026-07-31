@@ -24,14 +24,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="targetSystemViewModel"> ターゲットViewModelです。 </param>
         /// <param name="targetEntityRegistry"> ターゲットEntityレジストリです。 </param>
         /// <param name="playerTransform"> プレイヤーTransformです。 </param>
+        /// <param name="areaAttackRangeAddition"> 前方範囲攻撃の追加射程です。 </param>
         public SkillTargetResolver(
             ITargetSystemViewModel targetSystemViewModel,
             TargetEntityRegistry targetEntityRegistry,
-            Transform playerTransform)
+            Transform playerTransform,
+            float areaAttackRangeAddition)
         {
             _targetSystemViewModel = targetSystemViewModel;
             _targetEntityRegistry = targetEntityRegistry;
             _playerTransform = playerTransform;
+            _forwardAreaRange = Mathf.Max(0f, FORWARD_AREA_RANGE + areaAttackRangeAddition);
         }
 
         /// <summary>
@@ -108,7 +111,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
                 Vector3 toTarget = target.Position - origin;
                 float sqrDistance = toTarget.sqrMagnitude;
-                if (sqrDistance > FORWARD_AREA_RANGE * FORWARD_AREA_RANGE)
+                if (sqrDistance > _forwardAreaRange * _forwardAreaRange)
                 {
                     continue;
                 }
@@ -241,5 +244,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly ITargetSystemViewModel _targetSystemViewModel;
         private readonly TargetEntityRegistry _targetEntityRegistry;
         private readonly Transform _playerTransform;
+        private readonly float _forwardAreaRange;
     }
 }

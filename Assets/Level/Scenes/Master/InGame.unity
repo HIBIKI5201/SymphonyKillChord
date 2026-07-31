@@ -1328,6 +1328,7 @@ GameObject:
   - component: {fileID: 438459094}
   - component: {fileID: 438459095}
   - component: {fileID: 438459097}
+  - component: {fileID: 438459098}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1378,6 +1379,7 @@ MonoBehaviour:
   _inputProgressUIConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _equippedSkills: []
   _skillBuildRepositoryKey: SkillBuildRepository
+  _skillRepositoryKey: 
 --- !u!114 &438459092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1443,12 +1445,19 @@ MonoBehaviour:
   _inputProgressUIConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _characterAnimationConfig: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerAttackAnimationConfig: {fileID: 11400000, guid: 1db9fea642254577a56f08077cf48952, type: 2}
-  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
+  _characterRepositoryKey: CharacterDefinitionRepository
+  _playerCharacterId:
+    _id: character_player
+    _hashId: -2048347455
   _equippedSkills:
-  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
-  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
-  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
-  - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
+  - _id: skill_00
+    _hashId: -876453005
+  - _id: skill_01
+    _hashId: -1127918619
+  - _id: skill_02
+    _hashId: 634126943
+  - _id: skill_03
+    _hashId: 1389048521
 --- !u!114 &438459097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1462,6 +1471,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.ReturnToTitleInitializer
   _titleSceneName: Title
+--- !u!114 &438459098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91c5e75a0d60489ab24abdf93344a8cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Player.PlayerStatusBonusInitializer
+  _skillNodeDataRepoKey: SkillNodeDataRepo
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2132,6 +2154,9 @@ MonoBehaviour:
   _missionHudView: {fileID: 866643816}
   _missionLoopView: {fileID: 866643815}
   _missionStepPopupView: {fileID: 1218204388}
+  _popupInputSuppressionDuration: 1.5
+  _missionDefinitionRepositoryKey: MissionDefinitionRepository
+  _enemyMissionKeyRepositoryKey: EnemyMissionKeyRepository
 --- !u!4 &866643818
 Transform:
   m_ObjectHideFlags: 0

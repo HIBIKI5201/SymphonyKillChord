@@ -43,11 +43,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Sortie
         /// <summary>
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
         /// <returns> 要求を受理した場合はtrueです。 </returns>
-        public bool RequestImmediateBattleSortie(string targetSceneName)
+        public bool RequestImmediateBattleSortie()
         {
-            return _useCase.RequestImmediateBattleSortie(targetSceneName);
+            return _useCase.RequestImmediateBattleSortie();
         }
 
         private readonly OutGameSortieUseCase _useCase;
