@@ -715,6 +715,7 @@ GameObject:
   - component: {fileID: -4916133229582652887}
   - component: {fileID: 1192430313035069498}
   - component: {fileID: 7852414029176531134}
+  - component: {fileID: 7690309592388756721}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -745,6 +746,7 @@ Transform:
   - {fileID: 3995544741731007589}
   - {fileID: 5890332583008626860}
   - {fileID: 553895010777146882}
+  - {fileID: 583479539431759966}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7750579596343814766
@@ -978,6 +980,25 @@ MonoBehaviour:
     _hashId: 1389048521
   _source: {fileID: 1111706688092235554}
   _cueName: Slash
+--- !u!114 &7690309592388756721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339157675331060313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7adc452c61caa544bf1083a0aebb0a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.PlayerGroundOffsetView
+  _rayStartTransform: {fileID: 583479539431759966}
+  _rayLength: 0.7
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  _rendererTransform: {fileID: 4482732434491403476}
+  _offsetY: -0.04
 --- !u!1 &4013961017132544157
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,6 +1376,37 @@ MonoBehaviour:
     _weaponItem: {fileID: 5651158032206325677}
   - _beatType: 8
     _weaponItem: {fileID: 3812245489367547144}
+--- !u!1 &5348700849946158285
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 583479539431759966}
+  m_Layer: 7
+  m_Name: FootGroundedRayCenter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &583479539431759966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5348700849946158285}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4877291778978284914}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5516291387323451389
 GameObject:
   m_ObjectHideFlags: 0
