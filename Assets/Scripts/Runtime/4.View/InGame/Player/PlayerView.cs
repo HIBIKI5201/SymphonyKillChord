@@ -347,7 +347,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         /// <param name="duration"> 回避の継続時間です。 </param>
         /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
-        public void PlayDodgeMaterialEffect(float duration, Vector3 direction)
+        public void PlayDodgeMaterialEffect(float duration, in Vector3 direction)
         {
             direction.Normalize();
 
@@ -723,7 +723,7 @@ namespace KillChord.Runtime.View.InGame.Player
         ///     足音SEをテンポ同期で再生します。
         /// </summary>
         /// <param name="velocity"> 現在速度です。 </param>
-        private void PlayFootstepSound(Vector3 velocity)
+        private void PlayFootstepSound(in Vector3 velocity)
         {
             if (_controller == null || _controller.IsDodging)
             {
