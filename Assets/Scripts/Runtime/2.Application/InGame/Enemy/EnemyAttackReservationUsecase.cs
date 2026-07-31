@@ -115,37 +115,27 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            Schedule3BeatBefore(musicSpec);
-
-            if (musicSpec.TargetBeat >= TWO_BEAT_LEAD + FIRST_BEAT) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
-            {
-
-                _musicActionScheduler.Schedule(
-                    new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - TWO_BEAT_LEAD),
-                    Handle2BeatBefore,
-                    _cancellationTokenSource.Token);
-
-                _musicActionScheduler.Schedule(
-                    new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - ONE_BEAT_LEAD),
-                    Handle1BeatBefore,
-                    _cancellationTokenSource.Token);
-            }
-
+            ScheduleLeadNotification(musicSpec, THREE_BEAT_LEAD, Handle3BeatBefore);
+            ScheduleLeadNotification(musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore);
+            ScheduleLeadNotification(musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore);
         }
 
         /// <summary>
-        ///     攻撃の3拍前にあたる予告タイミングを予約する。
+        ///     攻撃タイミングから指定拍だけ遡った予告を予約する。
         ///     遡った結果が小節の頭を跨ぐ場合は、小節フラグを繰り下げて前の小節へ割り当てる。
         /// </summary>
         /// <param name="musicSpec"> 攻撃本体のタイミング。 </param>
-        private void Schedule3BeatBefore(in MusicSyncSpec musicSpec)
+        /// <param name="leadCount"> 遡る量。拍子と同じ単位で指定する。 </param>
+        /// <param name="handler"> 予告タイミングで実行する処理。 </param>
+        private void ScheduleLeadNotification(in MusicSyncSpec musicSpec, double leadCount, Action handler)
         {
+            // 拍子が不正な場合は遡り量を決められないため予約しない。
             if (musicSpec.TimeSignature <= 0d)
             {
                 return;
             }
 
-            double targetBeat = musicSpec.TargetBeat - THREE_BEAT_LEAD;
+            double targetBeat = musicSpec.TargetBeat - leadCount;
             int barFlag = musicSpec.BarFlag;
 
             // 1拍目より前にある間は、拍子1小節分だけ戻して前の小節へ送る。
@@ -163,7 +153,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             _musicActionScheduler.Schedule(
                 new MusicSyncSpec((byte)barFlag, musicSpec.TimeSignature, targetBeat),
-                Handle3BeatBefore,
+                handler,
                 _cancellationTokenSource.Token);
         }
 
