@@ -848,6 +848,8 @@ jobs:
 
       - name: リリースの完了
         if: always()
+        env:
+          TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -857,7 +859,7 @@ jobs:
           
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "[INFO]: リリースが正常に作成されました。"
-            Write-Host "     タグ: ${{ steps.tag_gen.outputs.TAG_NAME }}"
+            Write-Host "     タグ: $env:TAG_NAME"
             Write-Host "     成果物: すべてのビルドがアップロードされました。"
           } else {
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
