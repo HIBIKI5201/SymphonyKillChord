@@ -112,7 +112,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _isAttackRotating;
         private Vector3 _attackRotationTargetPosition;
         private float _attackRotationSpeed;
-        private Quaternion _rotation;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
@@ -575,12 +574,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = false;
             }
 
-            TickAttackRotate();
 
             Quaternion rotation = _cacheTransform.rotation;
             if (_isAttackRotating)
             {
-                rotation = _rotation;
+                TickAttackRotate(ref rotation);
             }
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
             _cacheTransform.rotation = rotation;
@@ -593,7 +591,6 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>
         private void StartAttackRotate(Vector3 targetPosition, float speed)
         {
-            _rotation = _cacheTransform.rotation;
             _attackRotationTargetPosition = targetPosition;
             _attackRotationSpeed = speed;
             _isAttackRotating = true;
@@ -603,7 +600,7 @@ namespace KillChord.Runtime.View.InGame.Player
         ///     攻撃時にターゲット方向へ滑らかに回転させる。毎フレーム Update から呼び出す。
         ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
         /// </summary>
-        private void TickAttackRotate()
+        private void TickAttackRotate(ref Quaternion rotation)
         {
             if (!_isAttackRotating)
             {
@@ -628,11 +625,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
             float t = 1f - Mathf.Exp(-Mathf.Max(0f, _attackRotationSpeed) * Time.deltaTime);
-            _rotation = Quaternion.Slerp(_rotation, targetRot, t);
+            rotation = Quaternion.Slerp(rotation, targetRot, t);
 
-            if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
+            if (Quaternion.Angle(rotation, targetRot) < 0.5f)
             {
-                _rotation = targetRot;
+                rotation = targetRot;
                 _isAttackRotating = false;
             }
         }
