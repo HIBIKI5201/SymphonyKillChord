@@ -1,9 +1,11 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using LitMotion;
 using R3;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
 {
@@ -48,6 +50,8 @@ namespace KillChord.Runtime.View.InGame.Result
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
+            PlayTextSlideIn();
         }
 
         /// <summary>
@@ -55,6 +59,8 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         public void Hide()
         {
+            StopTextSlideIn();
+
             if (_canvasGroup != null)
             {
                 _canvasGroup.alpha = 0f;
@@ -188,6 +194,13 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("敗北時に表示するリザルトタイトル。")]
         private string _defeatTitle = "Mission Failed";
 
+        [Header("Animation")]
+        [SerializeField, Tooltip("テキストを左から右方向へスライドインさせる演出の設定。")]
+        private ResultTextSlideInSetting _textSlideIn = new();
+
+        [SerializeField, Tooltip("スライドイン演出から除外するUI。指定した対象と、その配下のTextをまとめて除外する。")]
+        private Transform[] _textSlideInExcludes;
+
         private StageResultViewModel _viewModel;
         private StageResultController _controller;
         private bool _isTransitioning;
@@ -200,6 +213,11 @@ namespace KillChord.Runtime.View.InGame.Result
         private IDisposable _tipsDisposable;
         private IDisposable _resultTypeDisposable;
         private readonly List<StageResultMissionItemView> _spawnedSubMissionItems = new();
+        private readonly List<MotionHandle> _slideInHandles = new();
+        private readonly Dictionary<RectTransform, Vector2> _slideInOriginalPositions = new();
+        private readonly List<TMP_Text> _slideInTexts = new();
+        private readonly List<TMP_Text> _slideInTextBuffer = new();
+        private readonly List<RectTransform> _releasedSlideInTargets = new();
 
         private void Awake()
         {
@@ -209,6 +227,176 @@ namespace KillChord.Runtime.View.InGame.Result
         private void OnDestroy()
         {
             UnsubscribeViewModel();
+
+            ResultTextSlideIn.Stop(_slideInHandles);
+        }
+
+        /// <summary>
+        ///     表示中のテキストを左から右方向へスライドインさせる。
+        /// </summary>
+        private void PlayTextSlideIn()
+        {
+            StopTextSlideIn();
+
+            if (_textSlideIn == null || !_textSlideIn.IsEnabled)
+            {
+                return;
+            }
+
+            CollectSlideInTexts();
+
+            for (int i = 0; i < _slideInTexts.Count; i++)
+            {
+                RectTransform rectTransform = _slideInTexts[i].rectTransform;
+
+                ResultTextSlideIn.Play(
+                    rectTransform,
+                    GetSlideInOriginalPosition(rectTransform),
+                    _textSlideIn,
+                    i * _textSlideIn.Interval,
+                    _slideInHandles);
+            }
+        }
+
+        /// <summary>
+        ///     再生中のスライドインを停止し、本来の表示状態へ戻す。
+        /// </summary>
+        private void StopTextSlideIn()
+        {
+            ResultTextSlideIn.Stop(_slideInHandles);
+
+            _releasedSlideInTargets.Clear();
+
+            foreach (KeyValuePair<RectTransform, Vector2> entry in _slideInOriginalPositions)
+            {
+                // サブミッション項目は作り直されるため、破棄済みの対象を溜め込まない。
+                if (entry.Key == null)
+                {
+                    _releasedSlideInTargets.Add(entry.Key);
+                    continue;
+                }
+
+                entry.Key.TryGetComponent(out CanvasGroup canvasGroup);
+
+                ResultTextSlideIn.ApplyEndState(entry.Key, entry.Value, canvasGroup);
+            }
+
+            for (int i = 0; i < _releasedSlideInTargets.Count; i++)
+            {
+                _slideInOriginalPositions.Remove(_releasedSlideInTargets[i]);
+            }
+
+            _releasedSlideInTargets.Clear();
+        }
+
+        /// <summary>
+        ///     リザルト画面配下の表示中のTextを、画面上側から順に集める。
+        /// </summary>
+        private void CollectSlideInTexts()
+        {
+            _slideInTexts.Clear();
+
+            Transform root = _canvasGroup != null ? _canvasGroup.transform : transform;
+
+            root.GetComponentsInChildren(true, _slideInTextBuffer);
+
+            for (int i = 0; i < _slideInTextBuffer.Count; i++)
+            {
+                TMP_Text text = _slideInTextBuffer[i];
+
+                // 勝敗で片方のルートが非表示になるため、表示中のTextだけ動かす。
+                if (text == null || !text.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                if (IsExcludedFromSlideIn(text.transform))
+                {
+                    continue;
+                }
+
+                if (IsLayoutControlled(text.rectTransform))
+                {
+                    continue;
+                }
+
+                _slideInTexts.Add(text);
+            }
+
+            // ヒエラルキー順は見た目の並びと一致しないため、画面上側から順に流す。
+            _slideInTexts.Sort(CompareByScreenTopToBottom);
+        }
+
+        /// <summary>
+        ///     スライドイン演出の除外指定に含まれるかを判定する。
+        /// </summary>
+        /// <param name="target"> 判定対象のTransform。 </param>
+        /// <returns> 除外対象ならtrue。 </returns>
+        private bool IsExcludedFromSlideIn(Transform target)
+        {
+            if (_textSlideInExcludes == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _textSlideInExcludes.Length; i++)
+            {
+                Transform exclude = _textSlideInExcludes[i];
+
+                if (exclude == null)
+                {
+                    continue;
+                }
+
+                if (target.IsChildOf(exclude))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     親のLayoutGroupにanchoredPositionを制御されるかを判定する。
+        ///     制御される要素を動かすとレイアウト更新と競合するため、演出対象から外す。
+        /// </summary>
+        /// <param name="rectTransform"> 判定対象のRectTransform。 </param>
+        /// <returns> レイアウト制御下ならtrue。 </returns>
+        private static bool IsLayoutControlled(RectTransform rectTransform)
+        {
+            return rectTransform.parent != null
+                   && rectTransform.parent.TryGetComponent(out LayoutGroup _);
+        }
+
+        /// <summary>
+        ///     画面上側のTextが先に来るように比較する。
+        /// </summary>
+        /// <param name="left"> 比較元のText。 </param>
+        /// <param name="right"> 比較先のText。 </param>
+        /// <returns> 並び順の比較結果。 </returns>
+        private static int CompareByScreenTopToBottom(TMP_Text left, TMP_Text right)
+        {
+            return right.rectTransform.position.y.CompareTo(
+                left.rectTransform.position.y);
+        }
+
+        /// <summary>
+        ///     スライドインの終点となる本来のanchoredPositionを取得する。
+        ///     演出で位置を書き換えるため、初回の値をそのまま保持し続ける。
+        /// </summary>
+        /// <param name="rectTransform"> 対象のRectTransform。 </param>
+        /// <returns> 本来のanchoredPosition。 </returns>
+        private Vector2 GetSlideInOriginalPosition(RectTransform rectTransform)
+        {
+            if (!_slideInOriginalPositions.TryGetValue(rectTransform, out Vector2 original))
+            {
+                original = rectTransform.anchoredPosition;
+
+                _slideInOriginalPositions[rectTransform] = original;
+            }
+
+            return original;
         }
 
 
@@ -324,6 +512,12 @@ namespace KillChord.Runtime.View.InGame.Result
                 itemView.Apply(items[i]);
 
                 _spawnedSubMissionItems.Add(itemView);
+            }
+
+            // 表示後に一覧が差し替わった場合も、生成し直した項目を演出へ乗せる。
+            if (_canvasGroup != null && _canvasGroup.alpha > 0f)
+            {
+                PlayTextSlideIn();
             }
         }
 
