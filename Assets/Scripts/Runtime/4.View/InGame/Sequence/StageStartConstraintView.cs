@@ -16,7 +16,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         {
             if (_sourceIndex != -1 || _constraint == null || playerTransform == null)
             {
-                Debug.LogError($"{nameof(StageStartConstraintView)}の{nameof(AddConstraintSource)}でエラーが発生しました。", this);
+                Debug.LogError($"[{nameof(StageStartConstraintView)}]の[{nameof(AddConstraintSource)}]でエラーが発生しました。", this);
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         {
             if (_constraint == null)
             {
-                Debug.LogError($"{nameof(StageStartConstraintView)}{nameof(_constraint)}がnullです。", this);
+                Debug.LogError($"[{nameof(StageStartConstraintView)}]の[{nameof(_constraint)}]がnullです。", this);
             }
         }
     }
