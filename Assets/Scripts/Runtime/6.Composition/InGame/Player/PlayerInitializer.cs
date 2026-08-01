@@ -67,6 +67,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("プレイヤーの攻撃種別ごとのアニメーション設定です。")]
         private PlayerAttackAnimationConfig _playerAttackAnimationConfig;
 
+        [SerializeField, Tooltip("モバイルスティックフリック入力です。")]
+        private MobileStickFlickInput _mobileStickFlickInput;
+
         [Space]
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")]
@@ -338,6 +341,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 healthHudPresenter,
                 inputSuppressionState);
 
+            InitializeMobileStickFlickInput(inputView);
+
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
 #if UNITY_EDITOR
@@ -428,6 +433,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
+            UninitializeMobileStickFlickInput();
+
             if (_playerInputView != null)
             {
                 _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
@@ -461,6 +468,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            UninitializeMobileStickFlickInput();
             _characterRepositoryKey.ReleaseLoadedAsset(this);
             _loadedPlayerData = null;
 
@@ -472,6 +480,37 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
+        }
+
+        /// <summary>
+        ///     Androidの仮想スティックフリック入力を入力Viewへ接続する。
+        /// </summary>
+        /// <param name="inputView"> フリック入力の通知先。 </param>
+        private void InitializeMobileStickFlickInput(PlayerInputView inputView)
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            if (_mobileStickFlickInput == null)
+            {
+#if UNITY_ANDROID
+                Debug.LogWarning(
+                    $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInput)} が設定されていません。",
+                    this);
+#endif
+                return;
+            }
+
+            _mobileStickFlickInput.Initialize(inputView);
+#endif
+        }
+
+        /// <summary>
+        ///     仮想スティックフリック入力と入力Viewの接続を解除する。
+        /// </summary>
+        private void UninitializeMobileStickFlickInput()
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInput?.Uninitialize();
+#endif
         }
 
         /// <summary>
