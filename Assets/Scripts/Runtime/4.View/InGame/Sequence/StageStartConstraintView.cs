@@ -14,7 +14,11 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// <param name="playerTransform"> プレイヤーの座標。 </param>
         public void AddConstraintSource(Transform playerTransform)
         {
-            if (_sourceIndex != -1) { return; }
+            if (_sourceIndex != -1 || _constraint == null || playerTransform == null)
+            {
+                Debug.LogError($"{nameof(StageStartConstraintView)}の{nameof(AddConstraintSource)}でエラーが発生しました。", this);
+                return;
+            }
 
             ConstraintSource constraintSource = new()
             {
@@ -31,10 +35,11 @@ namespace KillChord.Runtime.View.InGame.Sequence
         {
             if (_sourceIndex < 0 || _sourceIndex >= _constraint.sourceCount) { return; }
             _constraint.RemoveSource(_sourceIndex);
+            _constraint.constraintActive = false;
             _sourceIndex = -1;
         }
         private const float SOURCE_WEIGHT = 1.0f;
-        [SerializeField,Tooltip("Playerのステージ開始時に動かすオブジェクトのSourceを持っているObject")]private PositionConstraint _constraint;
+        [SerializeField, Tooltip("Playerのステージ開始時に動かすオブジェクトのSourceを持っているObject")] private PositionConstraint _constraint;
         private int _sourceIndex = -1;
         private void Awake()
         {

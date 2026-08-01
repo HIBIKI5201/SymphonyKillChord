@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
-using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.InGame.Result;
@@ -30,7 +29,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             StageStartCameraView stageStartCameraView,
             StageResultView resultView,
             StageResultPresenter resultPresenter,
-            StageStartConstraintView constraintView,
             IGameplayControllable gameplayControllable)
         {
             _stageSequenceView = stageSequenceView ?? throw new ArgumentNullException(nameof(stageSequenceView));
@@ -39,7 +37,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartCameraView = stageStartCameraView ?? throw new ArgumentNullException(nameof(stageStartCameraView));
             _stageResultView = resultView ?? throw new ArgumentNullException(nameof(resultView));
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
-            _stageStartConstraintView = constraintView ?? throw new ArgumentNullException(nameof(constraintView));
             _gameplayControllable = gameplayControllable ?? throw new ArgumentNullException(nameof(gameplayControllable));
         }
 
@@ -146,7 +143,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly StageStartCameraView _stageStartCameraView;
         private readonly StageResultView _stageResultView;
         private readonly StageResultPresenter _stageResultPresenter;
-        private readonly StageStartConstraintView _stageStartConstraintView;
         private readonly IGameplayControllable _gameplayControllable;
 
         private bool _isStartPlaying;

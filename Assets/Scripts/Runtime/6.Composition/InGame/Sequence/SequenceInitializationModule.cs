@@ -141,7 +141,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageStartCameraView,
                 _stageResultView,
                 stageResultContainer.Presenter,
-                _stageStartConstraintView,
                 _inGamePlayDirector);
 
             _missionRuntimeService = missionContainer.MissionRuntimeService;
