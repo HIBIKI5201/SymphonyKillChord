@@ -424,8 +424,6 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Input.MobileStickFlickInput
   _onScreenStick: {fileID: 1483291918172049056}
-  _minimumFlickDistanceRate: 0.8
-  _maximumFlickDuration: 0.2
 --- !u!1 &9017162878079355475
 GameObject:
   m_ObjectHideFlags: 0

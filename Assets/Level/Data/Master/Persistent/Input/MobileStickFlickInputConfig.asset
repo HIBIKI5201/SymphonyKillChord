@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f47e031acbc1dc43a8ec2f6423c5229, type: 3}
   m_Name: MobileStickFlickInputConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Input.MobileStickFlickInputConfig
-  _minimumFlickDistanceRate: 0.8
-  _maximumFlickDuration: 0.2
+  _minFlickDistanceRate: 0.8
+  _maxFlickDuration: 0.2
