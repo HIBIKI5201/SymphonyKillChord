@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         ///     クリア条件を生成します。
         /// </summary>
         /// <returns>クリア条件。</returns>
-        public override IMissionClearCondition Create()
+        public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (_requiredCount <= 0)
             {

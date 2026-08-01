@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     public sealed class PlayerBuffClearConditionAsset : MissionClearConditionAssetBase
     {
         /// <inheritdoc />
-        public override IMissionClearCondition Create()
+        public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (_innerCondition == null)
             {
@@ -34,7 +34,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
-            return new PlayerBuffClearCondition(_innerCondition.Create(), buffs);
+            return new PlayerBuffClearCondition(_innerCondition.Create(missionKeyRepository), buffs);
         }
 
         /// <inheritdoc />
