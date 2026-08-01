@@ -70,6 +70,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("モバイルスティックフリック入力です。")]
         private MobileStickFlickInput _mobileStickFlickInput;
 
+        [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
+        private string _mobileStickFlickInputConfigKey;
+
         [Space]
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")]
@@ -81,6 +84,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private DataID[] _equippedSkills;
 
         private CharacterDefinitionAsset _loadedPlayerData;
+        private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
         private ICharacterAnimationSignal _characterAnimationSignal;
@@ -119,7 +123,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     プレイヤーキャラクター定義を非同期でロードします。
+        ///     プレイヤーキャラクター定義とモバイル入力設定を非同期でロードします。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 成功した場合はtrue。 </returns>
@@ -133,6 +137,18 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤーキャラクター定義の解決に失敗しました。", this);
                 return false;
             }
+
+#if UNITY_ANDROID || UNITY_EDITOR
+            _loadedMobileStickFlickInputConfig =
+                await _mobileStickFlickInputConfigKey.LoadAssetAsync<MobileStickFlickInputConfig>(this, cancellationToken);
+            if (_loadedMobileStickFlickInputConfig == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInputConfig)} のロードに失敗しました。",
+                    this);
+                return false;
+            }
+#endif
 
             return true;
         }
@@ -469,6 +485,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public override void Shutdown()
         {
             UninitializeMobileStickFlickInput();
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
+            _loadedMobileStickFlickInputConfig = null;
+#endif
             _characterRepositoryKey.ReleaseLoadedAsset(this);
             _loadedPlayerData = null;
 
@@ -499,7 +519,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
-            _mobileStickFlickInput.Initialize(inputView);
+            _mobileStickFlickInput.Initialize(inputView, _loadedMobileStickFlickInputConfig);
 #endif
         }
 

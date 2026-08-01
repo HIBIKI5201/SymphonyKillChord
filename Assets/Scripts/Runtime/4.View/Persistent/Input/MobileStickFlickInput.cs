@@ -15,9 +15,11 @@ namespace KillChord.Runtime.View.Persistent.Input
         ///     フリック入力の通知先を設定する。
         /// </summary>
         /// <param name="playerInputView"> フリック入力の通知先。 </param>
-        public void Initialize(PlayerInputView playerInputView)
+        /// <param name="config"> フリック判定設定。 </param>
+        public void Initialize(PlayerInputView playerInputView, MobileStickFlickInputConfig config)
         {
             _playerInputView = playerInputView;
+            _mobileStickFlickInputConfig = config;
             CacheReferences();
             ResetTracking();
         }
@@ -28,6 +30,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         public void Uninitialize()
         {
             _playerInputView = null;
+            _mobileStickFlickInputConfig = null;
             ResetTracking();
         }
 
@@ -91,6 +94,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             ResetTracking();
 
             if (_playerInputView == null
+                || _mobileStickFlickInputConfig == null
                 || movementRange <= float.Epsilon
                 || duration > _mobileStickFlickInputConfig.MaxFlickDuration
                 || displacement.sqrMagnitude <= float.Epsilon)
@@ -112,10 +116,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         [SerializeField, Tooltip("フリック距離の正規化基準となるオンスクリーンスティック。")]
         private OnScreenStick _onScreenStick;
 
-        [SerializeField, Tooltip("フリック判定条件を設定するScriptableObject。")]
-        private MobileStickFlickInputConfig _mobileStickFlickInputConfig;
-
         private PlayerInputView _playerInputView;
+        private MobileStickFlickInputConfig _mobileStickFlickInputConfig;
         private RectTransform _interactionRectTransform;
         private bool _isTracking;
         private int _trackedPointerId = INVALID_POINTER_ID;
