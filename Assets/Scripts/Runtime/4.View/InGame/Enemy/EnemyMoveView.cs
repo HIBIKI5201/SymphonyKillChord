@@ -256,7 +256,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void Awake()
         {
             _navMeshAgent = GetComponent<NavMeshAgent>();
-            InitializeAttackEffects();
         }
 
         /// <summary>
@@ -465,15 +464,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void On2BeatBefore()
         {
 
-        }
-
-        /// <summary>
-        ///     敵専用の攻撃エフェクトを生成します。
-        /// </summary>
-        private void InitializeAttackEffects()
-        {
-            _attackHitEffectInstance = CreateAttackEffectInstance(_attackHitEffectPrefab);
-            _attackReserveEffectInstance = CreateAttackEffectInstance(_attackReserveEffectPrefab);
         }
 
         /// <summary>
