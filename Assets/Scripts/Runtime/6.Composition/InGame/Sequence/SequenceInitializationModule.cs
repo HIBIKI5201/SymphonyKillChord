@@ -140,6 +140,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageStartFadeView,
                 _stageStartCameraView,
                 _stageResultView,
+                _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _inGamePlayDirector);
 
