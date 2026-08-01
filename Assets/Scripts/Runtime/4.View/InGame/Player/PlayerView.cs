@@ -198,6 +198,8 @@ namespace KillChord.Runtime.View.InGame.Player
             RegisterActions();
             SyncFootstepTiming();
             _isPlaying = true;
+            _cacheRotation = _cacheTransform.rotation;
+            _cacheVelocity = Vector3.zero;
         }
 
         /// <summary> ゲームプレイを停止し、入力イベントの購読を解除する。 </summary>
