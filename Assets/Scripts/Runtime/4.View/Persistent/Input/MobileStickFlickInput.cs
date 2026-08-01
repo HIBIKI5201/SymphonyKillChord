@@ -92,13 +92,13 @@ namespace KillChord.Runtime.View.Persistent.Input
 
             if (_playerInputView == null
                 || movementRange <= float.Epsilon
-                || duration > _maximumFlickDuration
+                || duration > _mobileStickFlickInputConfig.MaxFlickDuration
                 || displacement.sqrMagnitude <= float.Epsilon)
             {
                 return;
             }
 
-            float minimumDistance = movementRange * _minimumFlickDistanceRate;
+            float minimumDistance = movementRange * _mobileStickFlickInputConfig.MinFlickDistanceRate;
             if (displacement.sqrMagnitude < minimumDistance * minimumDistance)
             {
                 return;
@@ -112,12 +112,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         [SerializeField, Tooltip("フリック距離の正規化基準となるオンスクリーンスティック。")]
         private OnScreenStick _onScreenStick;
 
-        [Header("フリック判定条件")]
-        [SerializeField, Range(0f, 1f), Tooltip("フリックとして扱う最小距離をスティック可動範囲に対する割合で指定する。")]
-        private float _minimumFlickDistanceRate = 0.8f;
-
-        [SerializeField, Min(0f), Tooltip("フリックとして扱う押下から解放までの最大秒数。")]
-        private float _maximumFlickDuration = 0.2f;
+        [SerializeField, Tooltip("フリック判定条件を設定するScriptableObject。")]
+        private MobileStickFlickInputConfig _mobileStickFlickInputConfig;
 
         private PlayerInputView _playerInputView;
         private RectTransform _interactionRectTransform;
