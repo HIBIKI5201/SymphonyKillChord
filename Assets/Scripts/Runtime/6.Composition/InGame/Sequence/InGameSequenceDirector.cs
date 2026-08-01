@@ -19,8 +19,11 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// </summary>
         /// <param name="stageSequenceView"> ステージのシーケンスを表示するビュー。 </param>
         /// <param name="stageSequenceMessageView"> ステージの結果を表示するビュー。 </param>
+        /// <param name="stageStartFadeView"> ステージ開始時のフェードを表示するビュー。 </param>
+        /// <param name="stageStartCameraView"> ステージ開始時のカメラを表示するビュー。 </param>
         /// <param name="resultView"> ステージリザルトを表示するビュー。 </param>
         /// <param name="resultPresenter"> ステージリザルトのPresenter。 </param>
+        /// <param name="stageStartConstraintView"> ステージ開始時の制約を表示するビュー。 </param>
         /// <param name="gameplayControllable"> ゲームプレイの開始と終了を制御するオブジェクト。 </param>
         public InGameSequenceDirector(
             StageSequenceView stageSequenceView,
@@ -28,6 +31,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             StageStartFadeView stageStartFadeView,
             StageStartCameraView stageStartCameraView,
             StageResultView resultView,
+            StageStartConstraintView stageStartConstraintView,
             StageResultPresenter resultPresenter,
             IGameplayControllable gameplayControllable)
         {
@@ -35,6 +39,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView = stageSequenceMessageView ?? throw new ArgumentNullException(nameof(stageSequenceMessageView));
             _stageStartFadeView = stageStartFadeView ?? throw new ArgumentNullException(nameof(stageStartFadeView));
             _stageStartCameraView = stageStartCameraView ?? throw new ArgumentNullException(nameof(stageStartCameraView));
+            _stageStartConstraintView = stageStartConstraintView ?? throw new ArgumentNullException(nameof(stageStartConstraintView));
             _stageResultView = resultView ?? throw new ArgumentNullException(nameof(resultView));
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
             _gameplayControllable = gameplayControllable ?? throw new ArgumentNullException(nameof(gameplayControllable));
@@ -89,6 +94,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartCameraView.Cancel();
             _stageSequenceView.CancelStageStart();
             _stageSequenceMessageView?.Hide();
+
+            // SourceのAddはModule(Ready)で行う。開始演出を中断したのでここで解放する。
+            _stageStartConstraintView.RemoveSource();
         }
 
         /// <summary>
@@ -143,6 +151,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly StageStartCameraView _stageStartCameraView;
         private readonly StageResultView _stageResultView;
         private readonly StageResultPresenter _stageResultPresenter;
+        private readonly StageStartConstraintView _stageStartConstraintView;
         private readonly IGameplayControllable _gameplayControllable;
 
         private bool _isStartPlaying;
@@ -167,6 +176,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartFadeView.HideImmediate();
             _stageSequenceMessageView.Hide();
             _gameplayControllable.StartGameplay();
+
+            // SourceのAddはModule(Ready)で行う。開始演出が完了したのでここで解放する。
+            _stageStartConstraintView.RemoveSource();
         }
 
         /// <summary>
