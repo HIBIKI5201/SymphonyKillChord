@@ -99,7 +99,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _isDodge;
         private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
-        private Vector2 _dogeVector;
+        private Vector2 _dodgeVector;
         private Vector3 _cacheVelocity;
         private Quaternion _cacheRotation;
         private Transform _cacheTransform;
@@ -211,7 +211,7 @@ namespace KillChord.Runtime.View.InGame.Player
             UnRegisterActions();
 
             _moveVector = Vector2.zero;
-            _dogeVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
             _isPlaying = false;
 
@@ -259,7 +259,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
-            _dogeVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
 
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
@@ -545,7 +545,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
-                Vector2 dodgeDir = _dogeVector;
+                Vector2 dodgeDir = _dodgeVector;
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
@@ -591,7 +591,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _dogeVector = direction;
+            _dodgeVector = direction;
             _isDodge = true;
         }
 
