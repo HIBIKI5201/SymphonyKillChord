@@ -6,6 +6,7 @@ using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
@@ -56,6 +57,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private string _stageTreeAssetKey = "StageTreeAsset";
 
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
+        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
@@ -65,6 +69,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
         private StageTreeAsset _loadedStageTreeAsset;
+        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
 
         private bool _isInitialized;
@@ -87,8 +92,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            _loadedEnemyWaveDefinitionRepository =
+                await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
+                    this,
+                    cancellationToken);
             _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
-            return _loadedRuleData != null && _loadedStageTreeAsset != null && _loadedSaveData != null;
+            return _loadedRuleData != null
+                && _loadedStageTreeAsset != null
+                && _loadedEnemyWaveDefinitionRepository != null
+                && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -257,8 +269,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _ruleDataKey.ReleaseLoadedAsset(this);
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
             _loadedStageTreeAsset = null;
+            _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
@@ -444,12 +458,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             tutorialTargetSceneName = string.Empty;
 
-            if (_loadedStageTreeAsset == null || _battleSortieSelectionService == null)
+            if (_loadedStageTreeAsset == null
+                || _loadedEnemyWaveDefinitionRepository == null
+                || _battleSortieSelectionService == null)
             {
                 return false;
             }
 
-            StageTree stageTree = _loadedStageTreeAsset.Create();
+            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
             if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
                 || tutorialNode?.Definition == null)
             {

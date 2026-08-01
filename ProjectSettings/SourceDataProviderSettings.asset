@@ -98,6 +98,22 @@ MonoBehaviour:
     _sourceAssetAddressableKey: CharacterDefinitionRepository
     _propertyPath: _characterAssets
     _assetCreationDirectory: Assets/Level/Data/Master/Character
+  - _collectionKey: TitleScreenRule
+    _sourceAssetAddressableKey: TitleScreenRuleData
+    _propertyPath: _entries
+    _assetCreationDirectory:
+  - _collectionKey: OutGameScreenRule
+    _sourceAssetAddressableKey: OutGameScreenRuleData
+    _propertyPath: _entries
+    _assetCreationDirectory:
+  - _collectionKey: SkillNodePhaseBind
+    _sourceAssetAddressableKey: SkillNodePhaseBindDataRepo
+    _propertyPath: PhaseBindData
+    _assetCreationDirectory:
+  - _collectionKey: Mission
+    _sourceAssetAddressableKey: MissionDefinitionRepository
+    _propertyPath: _missionDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset

@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 811ade3eb9c044fcb1b02f50cee40a23, type: 3}
   m_Name: StageBind_01b
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset
-  _fromStage: {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
-  _toStage: {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
+  _fromStageId:
+    _id: battle_stage_01
+    _hashId: 718734217
+  _toStageId:
+    _id: battle_stage_02
+    _hashId: -1277275597
   _advanceMode: 0

@@ -1,8 +1,5 @@
 name: Unity Build and Release
 
-# This workflow runs a Unity build and uploads artifacts as a release when a PR is merged into develop or when triggered manually
-# Build artifacts are uploaded as a GitHub Release.
-
 on:
   pull_request:
     branches:
@@ -21,8 +18,7 @@ on:
           - Development
           - Master
 
-permissions:
-  contents: write
+permissions: {}
 
 concurrency:
   group: build-release-${{ github.base_ref || github.run_id }}
@@ -62,33 +58,33 @@ jobs:
           fi
 
           # GitHub APIからリリース一覧（最大100件）を取得します
-          echo "INFO: GitHub APIからリリース一覧（最大100件）を取得します (Prefix: ${TAG_PREFIX}-)..."
+          echo "[INFO]: GitHub APIからリリース一覧（最大100件）を取得します (Prefix: ${TAG_PREFIX}-)..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
           RESPONSE=$(echo "$RESPONSE" | head -n -1)
           
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: GitHub API returned HTTP $HTTP_CODE"
+            echo "[ERROR]: GitHub API returned HTTP $HTTP_CODE"
             exit 1
           fi
 
           # jqを使用して、TAG_PREFIXに合致するタグの中から最新のpublished_atを取得します
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
-            echo "[Info]: ${TAG_PREFIX}- の条件に合致するリリースが検出されませんでした。"
+            echo "[INFO]: ${TAG_PREFIX}- の条件に合致するリリースが検出されませんでした。"
             echo "days=999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (${TAG_PREFIX} の条件に合致するリリースが未検出)"
             exit 0
           fi
           
-          echo "INFO: 最新リリースの公開日時: $RELEASE_DATE"
+          echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
           
-          echo "INFO: 最終リリースからの経過日数: $DAYS days"
-          echo "INFO: Threshold: 3 days (3days以内のリリースはスキップされます)"
+          echo "[INFO]: 最終リリースからの経過日数: $DAYS days"
+          echo "[INFO]: Threshold: 3 days (3days以内のリリースはスキップされます)"
           
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 3 ]; then
@@ -108,6 +104,8 @@ jobs:
       cancel-in-progress: false
     timeout-minutes: 120
     environment: 'AutoBuildAndRelease'
+    permissions:
+      contents: write
     env:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
@@ -181,7 +179,7 @@ jobs:
 
           Write-Host "::group::Unityのインストール検証"
           if (-not $env:UNITY_EXE_PATH) {
-            Write-Host "[Error]: UNITY_EXE_PATH が設定されていません。"
+            Write-Host "[ERROR]: UNITY_EXE_PATH が設定されていません。"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -850,6 +848,8 @@ jobs:
 
       - name: リリースの完了
         if: always()
+        env:
+          TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -859,7 +859,7 @@ jobs:
           
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             Write-Host "[INFO]: リリースが正常に作成されました。"
-            Write-Host "     タグ: ${{ steps.tag_gen.outputs.TAG_NAME }}"
+            Write-Host "     タグ: $env:TAG_NAME"
             Write-Host "     成果物: すべてのビルドがアップロードされました。"
           } else {
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"

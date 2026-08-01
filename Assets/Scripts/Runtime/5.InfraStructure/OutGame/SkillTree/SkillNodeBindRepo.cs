@@ -50,14 +50,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         protected override bool TryBuild(SkillNodeBindData entry, out SkillNodeId id, out SkillNodeBindData value)
         {
             value = entry;
-
-            if (entry.SkillNodeData == null)
-            {
-                id = default;
-                return false;
-            }
-
-            id = entry.SkillNodeData.NodeId;
+            id = entry.SkillNodeId;
             return true;
         }
     }

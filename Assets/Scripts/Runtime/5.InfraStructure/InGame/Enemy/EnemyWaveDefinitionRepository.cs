@@ -38,6 +38,27 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         }
 
         /// <summary>
+        ///     IDに対応する敵Wave定義が使用するバトルシーン名を取得します。
+        /// </summary>
+        /// <param name="id"> 取得する敵Wave定義IDです。 </param>
+        /// <param name="battleSceneName"> 取得したバトルシーン名です。 </param>
+        /// <returns> IDに対応する定義が存在し、シーン名が設定されている場合はtrueです。 </returns>
+        public bool TryGetBattleSceneName(
+            EnemyWaveDefinitionId id,
+            out string battleSceneName)
+        {
+            if (TryFind(id, out EnemyWaveDefinitionAsset definitionAsset)
+                && !string.IsNullOrWhiteSpace(definitionAsset.BattleSceneName))
+            {
+                battleSceneName = definitionAsset.BattleSceneName;
+                return true;
+            }
+
+            battleSceneName = null;
+            return false;
+        }
+
+        /// <summary>
         ///     IDに対応するステージ演出カタログを生成します。
         /// </summary>
         /// <param name="id"> 取得する敵Wave定義IDです。 </param>
