@@ -1585,6 +1585,8 @@ MonoBehaviour:
   _inputProgressUIConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _characterAnimationConfig: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerAttackAnimationConfig: {fileID: 11400000, guid: 1db9fea642254577a56f08077cf48952, type: 2}
+  _mobileStickFlickInput: {fileID: 1660467405200683239}
+  _mobileStickFlickInputConfigKey: MobileStickFlickInput
   _characterRepositoryKey: CharacterDefinitionRepository
   _playerCharacterId:
     _id: character_player
@@ -6027,6 +6029,17 @@ Canvas:
   m_CorrespondingSourceObject: {fileID: 6185956037473379585, guid: d2a8e10c660fdb24eb95e8a3849bc98f, type: 3}
   m_PrefabInstance: {fileID: 1660467405200683236}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1660467405200683239 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6352480008864750271, guid: d2a8e10c660fdb24eb95e8a3849bc98f, type: 3}
+  m_PrefabInstance: {fileID: 1660467405200683236}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d54f4d0b6faec6647b9fd5b6977ac49d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Input.MobileStickFlickInput
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
