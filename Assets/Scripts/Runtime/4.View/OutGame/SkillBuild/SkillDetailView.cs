@@ -31,6 +31,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {SKILL_TYPE_LABEL_NAME} が見つかりませんでした。");
             _descriptionLabel = rootElement.Q<Label>(DESCRIPTION_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {DESCRIPTION_LABEL_NAME} が見つかりませんでした。");
+            _tipsHeadingLabel = rootElement.Q<Label>(TIPS_HEADING_LABEL_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {TIPS_HEADING_LABEL_NAME} が見つかりませんでした。");
+            _tipsLabel = rootElement.Q<Label>(TIPS_LABEL_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {TIPS_LABEL_NAME} が見つかりませんでした。");
             _levelLabel = rootElement.Q<Label>(LEVEL_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {LEVEL_LABEL_NAME} が見つかりませんでした。");
         }
@@ -48,6 +52,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _descriptionLabel.text = data.HasEffectDescription
                 ? data.EffectDescription
                 : EMPTY_VALUE_LABEL;
+            bool hasTips = !string.IsNullOrWhiteSpace(data.Tips);
+            _tipsLabel.text = hasTips ? data.Tips : string.Empty;
+            DisplayStyle tipsDisplay = hasTips ? DisplayStyle.Flex : DisplayStyle.None;
+            _tipsHeadingLabel.style.display = tipsDisplay;
+            _tipsLabel.style.display = tipsDisplay;
             _levelLabel.text = $"{LEVEL_LABEL_PREFIX}{data.Level}";
         }
 
@@ -61,6 +70,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _comboLabel.text = string.Empty;
             _skillTypeLabel.text = string.Empty;
             _descriptionLabel.text = string.Empty;
+            _tipsLabel.text = string.Empty;
+            _tipsHeadingLabel.style.display = DisplayStyle.None;
+            _tipsLabel.style.display = DisplayStyle.None;
             _levelLabel.text = string.Empty;
         }
 
@@ -69,6 +81,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string COMBO_LABEL_NAME = "skill-combo-label";
         private const string SKILL_TYPE_LABEL_NAME = "skill-type-label";
         private const string DESCRIPTION_LABEL_NAME = "skill-description-label";
+        private const string TIPS_HEADING_LABEL_NAME = "skill-tips-heading";
+        private const string TIPS_LABEL_NAME = "skill-tips-label";
         private const string LEVEL_LABEL_NAME = "skill-level-label";
         private const string EMPTY_SELECTION_LABEL = "スキルを選択してください";
         private const string EMPTY_VALUE_LABEL = "—";
@@ -79,6 +93,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Label _comboLabel;
         private readonly Label _skillTypeLabel;
         private readonly Label _descriptionLabel;
+        private readonly Label _tipsHeadingLabel;
+        private readonly Label _tipsLabel;
         private readonly Label _levelLabel;
     }
 }
