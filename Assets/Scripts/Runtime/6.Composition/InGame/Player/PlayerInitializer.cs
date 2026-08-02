@@ -139,14 +139,17 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
 #if UNITY_ANDROID || UNITY_EDITOR
-            _loadedMobileStickFlickInputConfig =
-                await _mobileStickFlickInputConfigKey.LoadAssetAsync<MobileStickFlickInputConfig>(this, cancellationToken);
-            if (_loadedMobileStickFlickInputConfig == null)
+            if (_mobileStickFlickInput != null)
             {
-                Debug.LogError(
-                    $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInputConfig)} のロードに失敗しました。",
-                    this);
-                return false;
+                _loadedMobileStickFlickInputConfig =
+                    await _mobileStickFlickInputConfigKey.LoadAssetAsync<MobileStickFlickInputConfig>(this, cancellationToken);
+                if (_loadedMobileStickFlickInputConfig == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInputConfig)} のロードに失敗しました。",
+                        this);
+                    return false;
+                }
             }
 #endif
 
