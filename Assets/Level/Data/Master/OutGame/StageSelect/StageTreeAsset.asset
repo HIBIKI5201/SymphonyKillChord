@@ -15,5 +15,13 @@ MonoBehaviour:
   _stageAssets:
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   - {fileID: 11400000, guid: 312205736429ccf4891c016ca3d8c168, type: 2}
+  - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
+  - {fileID: 11400000, guid: 04123e05c10c54f40b481e84e40d29eb, type: 2}
+  - {fileID: 11400000, guid: 4821ac1dab24aec45bdaa99f61322c14, type: 2}
+  - {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
   _bindAssets:
-  - {fileID: 11400000, guid: 2b4ffb5827214de2b66a6c028957ec4f, type: 2}
+  - {fileID: 11400000, guid: 694e9657f9a24ba68c1a9e883f466917, type: 2}
+  - {fileID: 11400000, guid: dd2e8c55b6355f44bb52b973ae4819ff, type: 2}
+  - {fileID: 11400000, guid: 2b0ddfb4236443ef9d74dda0077404d6, type: 2}
+  - {fileID: 11400000, guid: a36afe7a83c64daeaed10a502b9dfb45, type: 2}
+  - {fileID: 11400000, guid: d2f67ec89a57aba4297a7b72977ea7e9, type: 2}

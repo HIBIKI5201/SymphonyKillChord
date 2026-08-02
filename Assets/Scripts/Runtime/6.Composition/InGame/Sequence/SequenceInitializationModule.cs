@@ -46,6 +46,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
+            _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -54,7 +55,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _cameraSystemView == null
                 || _stageResultView == null
                 || _inGamePlayDirector == null
-                || _stageSequenceVoiceView == null)
+                || _stageSequenceVoiceView == null
+                || _stageStartConstraintView == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
@@ -129,12 +131,16 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _cameraSystemView,
                 playerContainer.PlayerView.transform);
 
+            _stageStartConstraintView.AddConstraintSource(
+                playerContainer.PlayerView.transform);
+
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
                 _stageStartCameraView,
                 _stageResultView,
+                _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _inGamePlayDirector);
 
@@ -394,6 +400,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
+        private StageStartConstraintView _stageStartConstraintView;
         private bool _isWaitingForLoadingCompleted;
         private bool _isRegistered;
         private bool _hasStarted;
