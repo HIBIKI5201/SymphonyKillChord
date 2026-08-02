@@ -25,6 +25,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnCancelInput;
 
         public event Action<InputContext<float>> OnDodgeInput;
+        /// <summary> モバイル仮想スティックの方向付き回避入力を通知するイベント。 </summary>
+        public event Action<InputContext<Vector2>> OnMobileDodgeFlickInput;
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
         public event Action<InputContext<Vector2>> OnLookMouseInput;
@@ -244,6 +246,21 @@ namespace KillChord.Runtime.View.Persistent.Input
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, value, phase, time);
             OnMobileLookInput?.Invoke(inputContext);
+        }
+
+        /// <summary>
+        ///     モバイル仮想スティックの方向付き回避入力を通知する。
+        /// </summary>
+        /// <param name="direction"> 仮想スティック上のフリック方向。 </param>
+        public void OnMobileDodgeFlick(in Vector2 direction)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<Vector2> inputContext = new InputContext<Vector2>(
+                InputActionKind.Dodge,
+                direction,
+                InputActionPhase.Started,
+                time);
+            OnMobileDodgeFlickInput?.Invoke(inputContext);
         }
 
         /// <summary>
