@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using LitMotion;
 using R3;
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             SubscribeViewModel();
             _isTransitioning = false;
+            _isUiSlided = false;
         }
 
         /// <summary>
@@ -45,11 +47,13 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             _isTransitioning = false;
+            _isUiSlided = false;
 
             SetInteractionEnabled(true);
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
 
             PlayTextSlideIn();
         }
@@ -60,6 +64,7 @@ namespace KillChord.Runtime.View.InGame.Result
         public void Hide()
         {
             StopTextSlideIn();
+            StopCountUps(true);
 
             if (_canvasGroup != null)
             {
@@ -201,6 +206,15 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("スライドイン演出から除外するUI。指定した対象と、その配下のTextをまとめて除外する。")]
         private Transform[] _textSlideInExcludes;
 
+        [SerializeField, Tooltip("数値をカウントアップ表示させる演出の設定。")]
+        private ResultCountUpSetting _countUpSetting = new();
+        private bool _isUiSlided;
+
+        private const int SECOND_PER_MINUTE = 60;
+
+        private readonly Dictionary<TMP_Text, (float Value, Func<float, string> Formatter)> _pendingCountUpValues = new();
+        private readonly Dictionary<TMP_Text, (MotionHandle Handle, float Value, Func<float, string> Formatter)> _countUpHandles = new();
+        private readonly List<TMP_Text> _countUpKeysBuffer = new();
         private StageResultViewModel _viewModel;
         private StageResultController _controller;
         private bool _isTransitioning;
@@ -229,6 +243,7 @@ namespace KillChord.Runtime.View.InGame.Result
             UnsubscribeViewModel();
 
             ResultTextSlideIn.Stop(_slideInHandles);
+            StopCountUps(false);
         }
 
         /// <summary>
@@ -237,13 +252,25 @@ namespace KillChord.Runtime.View.InGame.Result
         private void PlayTextSlideIn()
         {
             StopTextSlideIn();
+            StopCountUps(true);
+            _isUiSlided = false;
 
             if (_textSlideIn == null || !_textSlideIn.IsEnabled)
             {
+                OnTextSlideInCompleted();
                 return;
             }
 
             CollectSlideInTexts();
+
+            if (_slideInTexts.Count == 0)
+            {
+                OnTextSlideInCompleted();
+                return;
+            }
+
+            // 全テキストのスライドインが完了した時点でカウントアップを開始する。
+            int remainingSlideIns = _slideInTexts.Count;
 
             for (int i = 0; i < _slideInTexts.Count; i++)
             {
@@ -254,7 +281,16 @@ namespace KillChord.Runtime.View.InGame.Result
                     GetSlideInOriginalPosition(rectTransform),
                     _textSlideIn,
                     i * _textSlideIn.Interval,
-                    _slideInHandles);
+                    _slideInHandles,
+                    () =>
+                    {
+                        remainingSlideIns--;
+
+                        if (remainingSlideIns <= 0)
+                        {
+                            OnTextSlideInCompleted();
+                        }
+                    });
             }
         }
 
@@ -418,12 +454,12 @@ namespace KillChord.Runtime.View.InGame.Result
                     value => SetText(_mainMissionStateText, value));
 
             _battleTimeDisposable =
-                _viewModel.BattleTimeText.Subscribe(
-                    value => SetText(_battleTimeText, value));
+                _viewModel.BattleTimeSeconds.Subscribe(
+                    value => SetCountUp(_battleTimeText, value, FormatBattleTime));
 
             _maxComboDisposable =
-                _viewModel.MaxComboText.Subscribe(
-                    value => SetText(_maxComboText, value));
+                _viewModel.MaxCombo.Subscribe(
+                    value => SetCountUp(_maxComboText, value, FormatMaxCombo));
 
             _rankDisposable =
                 _viewModel.RankText.Subscribe(
@@ -602,6 +638,147 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             text.text = value ?? string.Empty;
+        }
+
+        /// <summary>
+        ///     数値をカウントアップ表示する。スライドイン演出が完了するまでは値を保留する。
+        /// </summary>
+        /// <param name="text"> 設定対象のText。 </param>
+        /// <param name="value"> 表示する最終値。 </param>
+        /// <param name="formatter"> 値を表示文字列へ変換する関数。 </param>
+        private void SetCountUp(TMP_Text text, float value, Func<float, string> formatter)
+        {
+            if (text == null || formatter == null)
+            {
+                return;
+            }
+
+            if (!_isUiSlided)
+            {
+                _pendingCountUpValues[text] = (value, formatter);
+                return;
+            }
+
+            PlayCountUp(text, value, formatter);
+        }
+
+        /// <summary>
+        ///     0から目標値までカウントアップさせる。同じTextに対する再生中の演出は打ち切って上書きする。
+        /// </summary>
+        /// <param name="text"> 設定対象のText。 </param>
+        /// <param name="targetValue"> カウントアップの最終値。 </param>
+        /// <param name="formatter"> 値を表示文字列へ変換する関数。 </param>
+        private void PlayCountUp(TMP_Text text, float targetValue, Func<float, string> formatter)
+        {
+            CancelCountUp(text, false);
+
+            if (_countUpSetting == null || !_countUpSetting.IsEnabled || _countUpSetting.Duration <= 0f)
+            {
+                text.text = formatter(targetValue);
+                return;
+            }
+
+            text.text = formatter(0f);
+
+            MotionHandle handle = LMotion.Create(0f, targetValue, _countUpSetting.Duration)
+                .WithEase(_countUpSetting.Ease)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                .WithOnComplete(() => _countUpHandles.Remove(text))
+                .Bind(currentValue => text.text = formatter(currentValue))
+                .AddTo(text.gameObject);
+
+            _countUpHandles[text] = (handle, targetValue, formatter);
+        }
+
+        /// <summary>
+        ///     指定Textのカウントアップ演出を打ち切る。
+        /// </summary>
+        /// <param name="text"> 対象のText。 </param>
+        /// <param name="snapToFinal"> 打ち切り時に最終値を表示へ反映するか。 </param>
+        private void CancelCountUp(TMP_Text text, bool snapToFinal)
+        {
+            if (text == null || !_countUpHandles.TryGetValue(text, out var entry))
+            {
+                return;
+            }
+
+            entry.Handle.TryCancel();
+            _countUpHandles.Remove(text);
+
+            if (snapToFinal)
+            {
+                text.text = entry.Formatter(entry.Value);
+            }
+        }
+
+        /// <summary>
+        ///     再生中の全カウントアップ演出を打ち切る。
+        /// </summary>
+        /// <param name="snapToFinal"> 打ち切り時に各Textへ最終値を反映するか。 </param>
+        private void StopCountUps(bool snapToFinal)
+        {
+            if (_countUpHandles.Count == 0)
+            {
+                return;
+            }
+
+            _countUpKeysBuffer.Clear();
+            _countUpKeysBuffer.AddRange(_countUpHandles.Keys);
+
+            for (int i = 0; i < _countUpKeysBuffer.Count; i++)
+            {
+                CancelCountUp(_countUpKeysBuffer[i], snapToFinal);
+            }
+
+            _countUpKeysBuffer.Clear();
+        }
+
+        /// <summary>
+        ///     経過時間を「mm:ss」形式の文字列へ変換する。
+        /// </summary>
+        /// <param name="elapsedSeconds"> 経過時間（秒）。 </param>
+        /// <returns> 「mm:ss」形式の文字列。 </returns>
+        private static string FormatBattleTime(float elapsedSeconds)
+        {
+            int totalSeconds = Mathf.Max(0, Mathf.RoundToInt(elapsedSeconds));
+
+            int minutes = totalSeconds / SECOND_PER_MINUTE;
+            int seconds = totalSeconds % SECOND_PER_MINUTE;
+
+            return $"{minutes:00}:{seconds:00}";
+        }
+
+        /// <summary>
+        ///     最大コンボ数を表示文字列へ変換する。
+        /// </summary>
+        /// <param name="value"> コンボ数。 </param>
+        /// <returns> 表示文字列。 </returns>
+        private static string FormatMaxCombo(float value)
+        {
+            return Mathf.Max(0, Mathf.RoundToInt(value)).ToString();
+        }
+
+        /// <summary>
+        ///     スライドイン演出の完了を受けて、保留していたカウントアップを開始する。
+        /// </summary>
+        private void OnTextSlideInCompleted()
+        {
+            if (_isUiSlided)
+            {
+                return;
+            }
+
+            _isUiSlided = true;
+
+            foreach (KeyValuePair<TMP_Text, (float Value, Func<float, string> Formatter)> pair in _pendingCountUpValues)
+            {
+                if (pair.Key != null)
+                {
+                    PlayCountUp(pair.Key, pair.Value.Value, pair.Value.Formatter);
+                }
+            }
+
+            _pendingCountUpValues.Clear();
         }
     }
 }

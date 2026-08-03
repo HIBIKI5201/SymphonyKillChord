@@ -20,14 +20,16 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="delay"> 再生開始までの遅延（秒）。 </param>
         /// <param name="handles"> 生成したモーションハンドルの追加先。 </param>
         public static void Play(
-            RectTransform target,
-            Vector2 endAnchoredPosition,
-            ResultTextSlideInSetting setting,
-            float delay,
-            List<MotionHandle> handles)
+    RectTransform target,
+    Vector2 endAnchoredPosition,
+    ResultTextSlideInSetting setting,
+    float delay,
+    List<MotionHandle> handles,
+    System.Action onCompleted = null) 
         {
             if (target == null || setting == null || !setting.IsEnabled)
             {
+                onCompleted?.Invoke();
                 return;
             }
 
@@ -37,6 +39,7 @@ namespace KillChord.Runtime.View.InGame.Result
             if (setting.Duration <= 0f)
             {
                 ApplyEndState(target, endAnchoredPosition, canvasGroup);
+                onCompleted?.Invoke();
                 return;
             }
 
@@ -60,11 +63,11 @@ namespace KillChord.Runtime.View.InGame.Result
                     .WithDelay(delay)
                     .WithEase(setting.Ease)
                     .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(() => onCompleted?.Invoke())
                     .BindToAnchoredPosition(target)
                     .AddTo(target.gameObject);
 
             handles?.Add(positionHandle);
-
             if (canvasGroup == null)
             {
                 return;
