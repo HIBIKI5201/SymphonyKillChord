@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using LitMotion;
 using R3;
@@ -138,6 +137,8 @@ namespace KillChord.Runtime.View.InGame.Result
             }
         }
 
+        private const int SECOND_PER_MINUTE = 60;
+
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
         private CanvasGroup _canvasGroup;
@@ -208,9 +209,6 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("数値をカウントアップ表示させる演出の設定。")]
         private ResultCountUpSetting _countUpSetting = new();
-        private bool _isUiSlided;
-
-        private const int SECOND_PER_MINUTE = 60;
 
         private readonly Dictionary<TMP_Text, (float Value, Func<float, string> Formatter)> _pendingCountUpValues = new();
         private readonly Dictionary<TMP_Text, (MotionHandle Handle, float Value, Func<float, string> Formatter)> _countUpHandles = new();
@@ -218,6 +216,7 @@ namespace KillChord.Runtime.View.InGame.Result
         private StageResultViewModel _viewModel;
         private StageResultController _controller;
         private bool _isTransitioning;
+        private bool _isUiSlided;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;

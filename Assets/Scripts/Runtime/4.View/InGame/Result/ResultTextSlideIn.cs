@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using LitMotion;
 using LitMotion.Extensions;
@@ -20,12 +21,12 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="delay"> 再生開始までの遅延（秒）。 </param>
         /// <param name="handles"> 生成したモーションハンドルの追加先。 </param>
         public static void Play(
-    RectTransform target,
-    Vector2 endAnchoredPosition,
-    ResultTextSlideInSetting setting,
-    float delay,
-    List<MotionHandle> handles,
-    System.Action onCompleted = null) 
+            RectTransform target,
+            Vector2 endAnchoredPosition,
+            ResultTextSlideInSetting setting,
+            float delay,
+            List<MotionHandle> handles,
+            Action onCompleted = null)
         {
             if (target == null || setting == null || !setting.IsEnabled)
             {

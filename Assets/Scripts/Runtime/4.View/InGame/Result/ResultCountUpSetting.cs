@@ -10,19 +10,13 @@ namespace KillChord.Runtime.View.InGame.Result
     [Serializable]
     public sealed class ResultCountUpSetting
     {
-        /// <summary>
-        ///     演出を再生するかどうか。
-        /// </summary>
+        /// <summary> 演出を再生するかどうか。 </summary>
         public bool IsEnabled => _isEnabled;
 
-        /// <summary>
-        ///     カウントアップにかける時間（秒）。
-        /// </summary>
+        /// <summary> カウントアップにかける時間（秒）。 </summary>
         public float Duration => Mathf.Max(0f, _duration);
 
-        /// <summary>
-        ///     カウントアップのイージング。
-        /// </summary>
+        /// <summary> カウントアップのイージング。 </summary>
         public Ease Ease => _ease;
 
         [SerializeField, Tooltip("数値のカウントアップ演出を再生するか。")]
