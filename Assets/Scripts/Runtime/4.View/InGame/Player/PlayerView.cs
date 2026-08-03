@@ -90,6 +90,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
         private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
         private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
@@ -529,17 +530,16 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             Vector2 dir = _moveVector;
+            bool isInputSuppressed = _inputSuppressionState != null && _inputSuppressionState.IsSuppressed;
 
             if (PlayerAttackController.IsAttacking)
             {
-                // 攻撃時、入力をキャンセルする。
+                // 入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
-
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR)
             {
-                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
-                dir = Vector2.zero;
+                _characterAnimationSignal?.CancelOneShot();
             }
 
             //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));

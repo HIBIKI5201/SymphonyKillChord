@@ -38,6 +38,7 @@ namespace KillChord.Runtime.View
             if (_context?.Signal is CharacterAnimationSignal signal)
             {
                 signal.OnRequested += HandleRequestedHandler;
+                signal.OnCancelRequested += HandleCancelRequestedHandler;
             }
             _isInitialized = true;
         }
@@ -78,6 +79,7 @@ namespace KillChord.Runtime.View
             if (_context?.Signal is CharacterAnimationSignal signal)
             {
                 signal.OnRequested -= HandleRequestedHandler;
+                signal.OnCancelRequested -= HandleCancelRequestedHandler;
             }
 
             _playableController?.Dispose();
@@ -103,6 +105,22 @@ namespace KillChord.Runtime.View
             _overlayElapsedBaseTime = 0f;
             _shouldNotifyDodgeEnded = request.ShouldNotifyDodgeEnded;
             _hasNotifiedOneShotEnded = false;
+        }
+
+        /// <summary>
+        ///     再生中のワンショットを途中終了させ、ロコモーションへ戻す。
+        /// </summary>
+        private void HandleCancelRequestedHandler()
+        {
+            if (!HasActiveOverlay())
+            {
+                return;
+            }
+
+            // 経過時間をexitブレンド開始位置まで進め、既存の終了補間でロコモーションへ戻す。
+            float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendStart = Mathf.Max(0f, _overlayBaseDuration - exitBlendDuration);
+            _overlayElapsedBaseTime = Mathf.Max(_overlayElapsedBaseTime, exitBlendStart);
         }
 
         /// <summary>
