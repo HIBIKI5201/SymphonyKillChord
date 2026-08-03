@@ -41,7 +41,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceView = FindFirstObjectByType<StageSequenceView>();
             _stageSequenceMessageView = FindFirstObjectByType<StageSequenceMessageView>();
             _stageStartFadeView = FindFirstObjectByType<StageStartFadeView>();
-            _stageStartCameraView = FindFirstObjectByType<StageStartCameraView>();
             _cameraSystemView = FindFirstObjectByType<CameraSystemView>();
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
@@ -51,7 +50,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
                 || _stageStartFadeView == null
-                || _stageStartCameraView == null
                 || _cameraSystemView == null
                 || _stageResultView == null
                 || _inGamePlayDirector == null
@@ -127,9 +125,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _stageResultController = stageResultContainer.Controller;
 
-            _stageStartCameraView.Initialize(
-                _cameraSystemView,
-                playerContainer.PlayerView.transform);
 
             _stageStartConstraintView.AddConstraintSource(
                 playerContainer.PlayerView.transform);
@@ -138,7 +133,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageSequenceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
-                _stageStartCameraView,
                 _stageResultView,
                 _stageStartConstraintView,
                 stageResultContainer.Presenter,
@@ -390,7 +384,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageSequenceView _stageSequenceView;
         private StageSequenceMessageView _stageSequenceMessageView;
         private StageStartFadeView _stageStartFadeView;
-        private StageStartCameraView _stageStartCameraView;
         private CameraSystemView _cameraSystemView;
         private StageResultView _stageResultView;
         private StageResultController _stageResultController;
