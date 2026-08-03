@@ -44,8 +44,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <summary>
         ///    ゲームプレイの開始演出を開始する。
         /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        /// <returns> 非同期操作の完了を表すAwaitable。 </returns>
         public void Start()
         {
             if (_isStartPlaying)
@@ -55,8 +53,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _isStartPlaying = true;
             _isTimelineCompleted = false;
-            _isCameraCompleted = false;
-            _isCameraPrepared = false;
 
             _gameplayControllable.StopGameplay();
             _stageResultView.Hide();
@@ -64,11 +60,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView?.SetStageStartMessage();
             _stageStartFadeView.ShowBlackImmediate();
 
-            _isCameraCompleted =
-                !_isCameraPrepared;
 
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
-            _stageStartFadeView.PlayFadeOut(HandleFadeCompleted);
+            _stageStartFadeView.PlayFadeOut();
         }
 
         /// <summary>
@@ -146,8 +140,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly IGameplayControllable _gameplayControllable;
 
         private bool _isStartPlaying;
-        private bool _isCameraPrepared;
-        private bool _isCameraCompleted;
         private bool _isTimelineCompleted;
 
         /// <summary>
@@ -156,7 +148,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private void TryCompleteStart()
         {
             if (!_isStartPlaying
-                || !_isCameraCompleted
                 || !_isTimelineCompleted)
             {
                 return;
@@ -185,38 +176,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _isTimelineCompleted = true;
             TryCompleteStart();
 
-        }
-
-        /// <summary>
-        ///     フェードアウト完了後にカメラ周回を開始します。
-        /// </summary>
-        private void HandleFadeCompleted()
-        {
-            if (!_isStartPlaying)
-            {
-                return;
-            }
-
-            if (!_isCameraPrepared)
-            {
-                _isCameraCompleted = true;
-                TryCompleteStart();
-                return;
-            }
-        }
-
-        /// <summary>
-        ///     カメラ演出の完了を記録します。
-        /// </summary>
-        private void HandleCameraCompleted()
-        {
-            if (!_isStartPlaying)
-            {
-                return;
-            }
-
-            _isCameraCompleted = true;
-            TryCompleteStart();
         }
     }
 }
