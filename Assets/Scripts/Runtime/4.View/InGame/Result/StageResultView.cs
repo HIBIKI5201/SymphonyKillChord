@@ -739,7 +739,8 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <returns> 「mm:ss」形式の文字列。 </returns>
         private static string FormatBattleTime(float elapsedSeconds)
         {
-            int totalSeconds = Mathf.Max(0, Mathf.RoundToInt(elapsedSeconds));
+            // 経過時間は繰り上げずに切り捨てる。
+            int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(elapsedSeconds));
 
             int minutes = totalSeconds / SECOND_PER_MINUTE;
             int seconds = totalSeconds % SECOND_PER_MINUTE;
