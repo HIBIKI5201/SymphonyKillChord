@@ -90,6 +90,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
         private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
         private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
@@ -99,7 +100,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _isDodge;
         private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
-        private Vector2 _dogeVector;
+        private Vector2 _dodgeVector;
         private Vector3 _cacheVelocity;
         private Quaternion _cacheRotation;
         private Transform _cacheTransform;
@@ -198,6 +199,8 @@ namespace KillChord.Runtime.View.InGame.Player
             RegisterActions();
             SyncFootstepTiming();
             _isPlaying = true;
+            _cacheRotation = _cacheTransform.rotation;
+            _cacheVelocity = Vector3.zero;
         }
 
         /// <summary> ゲームプレイを停止し、入力イベントの購読を解除する。 </summary>
@@ -211,6 +214,7 @@ namespace KillChord.Runtime.View.InGame.Player
             UnRegisterActions();
 
             _moveVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
             _isPlaying = false;
 
@@ -258,7 +262,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
-            _dogeVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
 
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
@@ -428,6 +432,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView.OnMoveInput += OnMove;
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
+            _playerInputView.OnMobileDodgeFlickInput += OnMobileDodgeFlick;
         }
 
         /// <summary> 入力イベントの購読を解除する。 </summary>
@@ -436,6 +441,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView.OnMoveInput -= OnMove;
             _playerInputView.OnAttackInput -= OnAttack;
             _playerInputView.OnDodgeInput -= OnDodge;
+            _playerInputView.OnMobileDodgeFlickInput -= OnMobileDodgeFlick;
         }
 
         /// <summary> 移動入力を保持する。 </summary>
@@ -447,20 +453,13 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 回避入力を受け取ったら回避要求フラグを立てる。 </summary>
         private void OnDodge(InputContext<float> input)
         {
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
-            {
-                return;
-            }
+            RequestDodge(input.Phase, _moveVector);
+        }
 
-            if (input.Phase == InputActionPhase.Started)
-            {
-                if (_controller.IsDodging)
-                {
-                    return;
-                }
-                _dogeVector = _moveVector;
-                _isDodge = true;
-            }
+        /// <summary> モバイル仮想スティックの方向付き回避入力を受け取る。 </summary>
+        private void OnMobileDodgeFlick(InputContext<Vector2> input)
+        {
+            RequestDodge(input.Phase, input.Value);
         }
 
         /// <summary>
@@ -532,16 +531,17 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Vector2 dir = _moveVector;
 
-            if (PlayerAttackController.IsAttacking)
+            if (PlayerAttackController.IsAttacking
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed))
             {
-                // 攻撃時、入力をキャンセルする。
+                // 攻撃中・入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
-
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR
+                && !_isDodge
+                && !_controller.IsDodging)
             {
-                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
-                dir = Vector2.zero;
+                _characterAnimationSignal?.CancelOneShot();
             }
 
             //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
@@ -549,7 +549,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
-                Vector2 dodgeDir = _dogeVector;
+                Vector2 dodgeDir = _dodgeVector;
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
@@ -578,6 +578,25 @@ namespace KillChord.Runtime.View.InGame.Player
             _cacheRotation = rotation;
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
+        }
+
+        /// <summary>
+        ///     入力状態を確認し、次の移動更新へ回避を要求する。
+        /// </summary>
+        /// <param name="phase"> 入力フェーズ。 </param>
+        /// <param name="direction"> 要求する回避方向。 </param>
+        private void RequestDodge(InputActionPhase phase, in Vector2 direction)
+        {
+            if (phase != InputActionPhase.Started
+                || _isDodge
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+                || _controller.IsDodging)
+            {
+                return;
+            }
+
+            _dodgeVector = direction;
+            _isDodge = true;
         }
 
         /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>

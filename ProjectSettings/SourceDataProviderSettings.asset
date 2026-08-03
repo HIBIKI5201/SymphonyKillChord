@@ -45,6 +45,10 @@ MonoBehaviour:
   - _addressableKey: CameraConfig
   - _addressableKey: EnemyMissionKeyRepository
   - _addressableKey: CharacterDefinitionRepository
+  - _addressableKey: SkillInputProgressUIConfig
+  - _addressableKey: InitialSkillLoadout
+  - _addressableKey: MissionDefinitionRepository
+  - _addressableKey: MobileStickFlickInput
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
@@ -57,23 +61,23 @@ MonoBehaviour:
   - _collectionKey: SkillNode
     _sourceAssetAddressableKey: SkillNodeDataRepo
     _propertyPath: SkillNodes
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: SkillNodeBind
     _sourceAssetAddressableKey: SkillNodeBindRepo
     _propertyPath: SkillNodeBinds
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioAnimation
     _sourceAssetAddressableKey: AnimationCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioPortrait
     _sourceAssetAddressableKey: PortraitCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioBackground
     _sourceAssetAddressableKey: BackgroundCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: Wave
     _sourceAssetAddressableKey: EnemyWaveDefinitionRepository
     _propertyPath: _waveDefinitionAssets
@@ -101,15 +105,15 @@ MonoBehaviour:
   - _collectionKey: TitleScreenRule
     _sourceAssetAddressableKey: TitleScreenRuleData
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: OutGameScreenRule
     _sourceAssetAddressableKey: OutGameScreenRuleData
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: SkillNodePhaseBind
     _sourceAssetAddressableKey: SkillNodePhaseBindDataRepo
     _propertyPath: PhaseBindData
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: Mission
     _sourceAssetAddressableKey: MissionDefinitionRepository
     _propertyPath: _missionDefinitionAssets
