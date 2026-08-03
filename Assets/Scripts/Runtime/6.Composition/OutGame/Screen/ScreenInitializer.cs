@@ -283,6 +283,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleHomeScreenShown()
         {
+            VisualElement rootElement = _uiDocument?.rootVisualElement;
+            if (rootElement != null
+                && rootElement.resolvedStyle.display == DisplayStyle.None)
+            {
+                // OutGame UIが非表示なら、復帰前の画面を描画せず即時に破棄する。
+                _screenViewRegistry.HideAllImmediately();
+            }
+
             _screenController.ShowHome();
         }
 

@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -39,6 +38,14 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         public void StartBattle()
         {
             _outGameUIEvent.OnStartGame?.Invoke();
+        }
+
+        /// <summary>
+        ///     ホーム画面の表示を要求します。
+        /// </summary>
+        public void ShowHomeScreen()
+        {
+            _outGameUIEvent.OnShownHomeScreen?.Invoke();
         }
 
         /// <summary>
