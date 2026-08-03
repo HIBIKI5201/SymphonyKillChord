@@ -530,7 +530,6 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             Vector2 dir = _moveVector;
-            bool isInputSuppressed = _inputSuppressionState != null && _inputSuppressionState.IsSuppressed;
 
             if (PlayerAttackController.IsAttacking)
             {
