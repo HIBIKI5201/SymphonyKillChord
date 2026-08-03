@@ -119,7 +119,7 @@ namespace KillChord.Runtime.View
 
             // 経過時間をexitブレンド開始位置まで進め、既存の終了補間でロコモーションへ戻す。
             float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
-            float exitBlendStart = Mathf.Max(0f, _overlayBaseDuration - exitBlendDuration);
+            float exitBlendStart = Mathf.Clamp(_overlayBaseDuration - exitBlendDuration, 0f, _overlayBaseDuration);
             _overlayElapsedBaseTime = Mathf.Max(_overlayElapsedBaseTime, exitBlendStart);
         }
 
