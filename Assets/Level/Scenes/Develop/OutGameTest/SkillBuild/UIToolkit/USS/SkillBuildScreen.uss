@@ -128,6 +128,25 @@
     white-space: normal;
 }
 
+.skill-tips-heading {
+    width: 95%;
+    align-self: center;
+    margin-top: 12px;
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
+.skill-tips-label {
+    width: 92%;
+    align-self: center;
+    padding-top: 4px;
+    padding-bottom: 16px;
+    padding-left: 24px;
+    font-size: 24px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
 .skill-element-slot {
 }
 

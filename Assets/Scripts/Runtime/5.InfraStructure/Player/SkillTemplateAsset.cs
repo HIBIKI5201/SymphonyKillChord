@@ -24,6 +24,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         /// <summary> スキル詳細です。 </summary>
         public string SkillDetail => _skillDetail;
 
+        /// <summary> 改造画面に表示するスキルTipsです。 </summary>
+        public string Tips => _tips;
+
         /// <summary> アウトゲーム画面で表示するスキルアイコンです。 </summary>
         public Sprite Icon => _icon;
 
@@ -62,7 +65,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillTemplate(
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
-                EffectSpec, _animationKey, _displayName, _skillDetail, _icon, _effectDisplayMode);
+                EffectSpec, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
         }
 
         private const string EFFECT_PARAMETER_PLACEHOLDER_PATTERN = "\\{([^{}]+)\\}";
@@ -76,10 +79,13 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("入力パターンです。")] private BeatType[] _pattern;
 
-        [SerializeField, TextArea, Tooltip("スキル詳細です。")] private string _skillDetail;
-
         [SerializeField, Tooltip("アウトゲーム画面で表示するスキルアイコンです。")]
         private Sprite _icon;
+
+        [SerializeField, TextArea, Tooltip("スキル詳細です。")] private string _skillDetail;
+
+        [SerializeField, TextArea, Tooltip("改造画面に表示するスキルTipsです。空欄の場合は表示しません。")]
+        private string _tips;
 
         [SerializeField, Tooltip("アウトゲーム画面でのスキル効果表示モードです。")]
         private SkillEffectDisplayMode _effectDisplayMode;
