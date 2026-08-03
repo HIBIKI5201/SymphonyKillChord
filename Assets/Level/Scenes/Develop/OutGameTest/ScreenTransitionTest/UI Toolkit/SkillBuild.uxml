@@ -31,7 +31,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 0; width: 100%; height: 20%; justify-content: center; top: 5%;">
-                        <ui:Button text="保存" name="SkillBuildSaveButton" class="button" style="position: relative; flex-shrink: 1; flex-grow: 0; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; width: 40%; height: 100%; align-self: center; font-size: 24px; -unity-font-style: normal; background-color: rgb(229, 229, 229); min-height: 100px; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
+                        <ui:Button text="保存" name="SkillBuildSaveButton" style="position: relative; flex-shrink: 1; flex-grow: 0; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; width: 40%; height: 100%; align-self: center; font-size: 24px; -unity-font-style: normal; min-height: 100px; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -51,11 +51,13 @@
                         </ui:VisualElement>
                         <ui:Label text="スキル効果" class="skill-effect-heading" style="color: rgb(229, 229, 229); -unity-font-style: normal;"/>
                         <ui:Label name="skill-description-label" class="skill-description-label" style="color: rgb(204, 204, 204); -unity-font-style: normal;"/>
+                        <ui:Label name="skill-tips-heading" text="Tips" class="skill-tips-heading"/>
+                        <ui:Label name="skill-tips-label" class="skill-tips-label"/>
                     </ui:ScrollView>
                     <ui:VisualElement name="SkillLevel" style="flex-grow: 1; width: 100%; flex-direction: row; -unity-material: url(&quot;&quot;);">
                         <ui:Label text="" name="skill-level-label" style="background-color: rgb(217, 217, 217); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; width: 35%; height: 55%; min-width: 200px; min-height: 100px; -unity-text-align: middle-center; -unity-font-style: normal; font-size: 24px; align-self: center; left: 2%;"/>
                         <ui:VisualElement style="flex-grow: 0; width: 15%; height: 55%; flex-shrink: 0;"/>
-                        <ui:Button text="レベルアップ" name="SkillLevelUpButton" class="button" style="width: 45%; height: 55%; align-self: center; min-width: 200px; min-height: 100px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; background-color: rgb(229, 229, 229); font-size: 24px; -unity-font-style: normal; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
+                        <ui:Button text="レベルアップ" name="SkillLevelUpButton" style="width: 45%; height: 55%; align-self: center; min-width: 200px; min-height: 100px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 24px; -unity-font-style: normal; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
