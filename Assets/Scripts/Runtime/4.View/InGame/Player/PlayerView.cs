@@ -531,12 +531,15 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Vector2 dir = _moveVector;
 
-            if (PlayerAttackController.IsAttacking)
+            if (PlayerAttackController.IsAttacking
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed))
             {
-                // 入力抑制中は移動入力をキャンセルする。
+                // 攻撃中・入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
-            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR)
+            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR
+                && !_isDodge
+                && !_controller.IsDodging)
             {
                 _characterAnimationSignal?.CancelOneShot();
             }
