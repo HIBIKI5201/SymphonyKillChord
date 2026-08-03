@@ -1586,7 +1586,7 @@ MonoBehaviour:
   _characterAnimationConfig: {fileID: 11400000, guid: 2cee708fc7c125b4da0f98ba5b7b994f, type: 2}
   _playerAttackAnimationConfig: {fileID: 11400000, guid: 1db9fea642254577a56f08077cf48952, type: 2}
   _mobileStickFlickInput: {fileID: 1660467405200683239}
-  _mobileStickFlickInputConfigKey: MobileStickFlickInput
+  _mobileStickFlickInputConfigKey: MobileStickFlickInputConfig
   _characterRepositoryKey: CharacterDefinitionRepository
   _playerCharacterId:
     _id: character_player
