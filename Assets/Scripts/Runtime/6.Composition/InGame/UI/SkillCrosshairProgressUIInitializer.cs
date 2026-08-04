@@ -1,9 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -13,36 +13,45 @@ namespace KillChord.Runtime.Composition.InGame.UI
     ///     下部の入力進捗UI（<see cref="Skill.SkillInputProgressUIInitializer"/>）とはViewを完全に分離しており、
     ///     クールダウン表現やリセット演出などクロスヘアに不要な責務を持ち込まない。
     /// </summary>
-    public sealed class SkillCrosshairProgressUIInitializer : MonoBehaviour
+    public sealed class SkillCrosshairProgressUIInitializer : InGameInitializationModuleBase
     {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(SkillCrosshairProgressUIInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 440;
+
         /// <summary> クロスヘア上のView群の表示権を管理するコントローラー。 </summary>
         public SkillCrosshairProgressController Controller => _controller;
 
-        private void Awake()
+        /// <summary>
+        ///     クロスヘア用のViewSettingとControllerを生成し、サービスとして登録します。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
             if (_uiConfig == null)
             {
                 Debug.LogError($"[{nameof(SkillCrosshairProgressUIInitializer)}] {nameof(_uiConfig)} が未設定です。", this);
-                return;
+                return false;
             }
-            if (_viewPrefab == null || _stepViewPrefab == null || _viewRoots == null || _viewRoots.Length == 0)
+            if (_viewPrefab == null || _stepViewPrefab == null || _viewRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillCrosshairProgressUIInitializer)}] Prefabまたは配置先Transformが未設定です。", this);
-                return;
+                return false;
             }
 
             _viewSetting = _uiConfig.Create();
             _controller = new SkillCrosshairProgressController();
             ServiceLocator.RegisterInstance(this, LocateType.Locator);
             _isRegistered = true;
+            return true;
         }
 
-        private void Update()
-        {
-            _controller?.Tick();
-        }
-
-        private void OnDestroy()
+        /// <summary>
+        ///     登録済みサービスを解除します。
+        /// </summary>
+        public override void Shutdown()
         {
             if (_isRegistered)
                 ServiceLocator.UnregisterInstance(this);
@@ -55,35 +64,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 生成した全Viewを束ねたView。生成できるViewが無い場合はnull。 </returns>
         public ISkillCrosshairProgressView CreateCrosshairProgressView(SkillDefinition definition)
         {
-            List<ISkillCrosshairProgressView> views = new List<ISkillCrosshairProgressView>(_viewRoots.Length);
-            for (int rootIndex = 0; rootIndex < _viewRoots.Length; rootIndex++)
-            {
-                Transform viewRoot = _viewRoots[rootIndex];
-                if (viewRoot == null)
-                {
-                    continue;
-                }
-
-                views.Add(CreateView(definition, viewRoot));
-            }
-
-            if (views.Count == 0)
-            {
+            if (_viewRoot == null)
                 return null;
-            }
 
-            return new SkillCrosshairProgressViewGroup(views.ToArray());
-        }
-
-        /// <summary>
-        ///     指定した配置先へリズムコマンドUIを1つ生成する。
-        /// </summary>
-        /// <param name="definition"> 対象のスキル定義。 </param>
-        /// <param name="viewRoot"> 生成先の親Transform。 </param>
-        /// <returns> 生成したView。 </returns>
-        private SkillCrosshairProgressView CreateView(SkillDefinition definition, Transform viewRoot)
-        {
-            SkillCrosshairProgressView view = Instantiate(_viewPrefab, viewRoot);
+            SkillCrosshairProgressView view = Instantiate(_viewPrefab, _viewRoot);
             SkillCrosshairStepView[] stepViews = new SkillCrosshairStepView[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
             {
@@ -96,6 +80,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
             view.SetSteps(stepViews);
             view.SetVisible(false);
+
+
+            if (_progressView is null)
+            {
+                _progressView = view;
+                _progressView.OnUpdate += _controller.Tick;
+            }
+
+
             return view;
         }
 
@@ -106,10 +99,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
         [SerializeField, Tooltip("クロスヘア専用の拍子表示Prefab。")]
         private SkillCrosshairStepView _stepViewPrefab;
         [SerializeField, Tooltip("クロスヘア上のViewを配置する親Transform（HUDEnemyHealthViewの子想定）。指定した数だけ同じ表示を生成する。")]
-        private Transform[] _viewRoots;
+        private Transform _viewRoot;
 
         private SkillInputProgressViewSetting _viewSetting;
         private SkillCrosshairProgressController _controller;
+        private SkillCrosshairProgressView _progressView = null;
         private bool _isRegistered;
     }
 }

@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -28,19 +27,25 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         /// <summary>
         ///     戦闘準備画面の表示を要求します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
-        public void ShowBattlePreparationScreen(string targetSceneName)
+        public void ShowBattlePreparationScreen()
         {
-            _outGameUIEvent.OnShownBattlePreparationScreen?.Invoke(targetSceneName);
+            _outGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
         }
 
         /// <summary>
         ///     バトル開始イベントを通知します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
-        public void StartBattle(string targetSceneName)
+        public void StartBattle()
         {
-            _outGameUIEvent.OnStartGame?.Invoke(targetSceneName);
+            _outGameUIEvent.OnStartGame?.Invoke();
+        }
+
+        /// <summary>
+        ///     ホーム画面の表示を要求します。
+        /// </summary>
+        public void ShowHomeScreen()
+        {
+            _outGameUIEvent.OnShownHomeScreen?.Invoke();
         }
 
         /// <summary>

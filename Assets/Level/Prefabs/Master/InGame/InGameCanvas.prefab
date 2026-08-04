@@ -1725,8 +1725,7 @@ MonoBehaviour:
   _uiConfig: {fileID: 11400000, guid: 0753d520cf0a2da46b77d63680e46d9b, type: 2}
   _viewPrefab: {fileID: 3884559395399551324, guid: 4863cd63879c93042ba097240c312c9c, type: 3}
   _stepViewPrefab: {fileID: 6288447880981826847, guid: 36a8fbab202445f498a0bd2183434b53, type: 3}
-  _viewRoots:
-  - {fileID: 8267115781701377488}
+  _viewRoot: {fileID: 8267115781701377488}
 --- !u!114 &278959643822293115
 MonoBehaviour:
   m_ObjectHideFlags: 0

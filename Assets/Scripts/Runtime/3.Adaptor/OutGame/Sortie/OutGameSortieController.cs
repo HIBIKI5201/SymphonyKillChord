@@ -43,11 +43,25 @@ namespace KillChord.Runtime.Adaptor.OutGame.Sortie
         /// <summary>
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
         /// <returns> 要求を受理した場合はtrueです。 </returns>
-        public bool RequestImmediateBattleSortie(string targetSceneName)
+        public bool RequestImmediateBattleSortie()
         {
-            return _useCase.RequestImmediateBattleSortie(targetSceneName);
+            return _useCase.RequestImmediateBattleSortie();
+        }
+
+        /// <summary>
+        ///     シナリオシーンを終了してOutGameのホーム画面へ復帰します。
+        /// </summary>
+        /// <param name="scenarioSceneName"> 終了するシナリオシーン名。 </param>
+        /// <param name="returnSceneName"> 復帰先のOutGameシーン名。 </param>
+        /// <returns> シーン復帰に成功した場合はtrue。 </returns>
+        public Task<bool> ReturnFromScenarioAsync(
+            string scenarioSceneName,
+            string returnSceneName)
+        {
+            return _useCase.ReturnFromScenarioAsync(
+                scenarioSceneName,
+                returnSceneName);
         }
 
         private readonly OutGameSortieUseCase _useCase;

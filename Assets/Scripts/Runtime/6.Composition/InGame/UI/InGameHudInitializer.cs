@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -8,8 +9,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     InGameのHUDを初期化するクラス。
     /// </summary>
-    public class InGameHudInitializer : MonoBehaviour
+    public sealed class InGameHudInitializer : InGameInitializationModuleBase
     {
+        public override string ModuleName => nameof(InGameHudInitializer);
+
+        public override int Order => 495;
         /// <summary>
         ///     HPバーHUDの初期化。
         /// </summary>
@@ -19,17 +23,16 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _playerHealthHudView.Bind(healthHudViewModel);
         }
-
-        [SerializeField] private HealthHudView _playerHealthHudView;
-
-        private void Awake()
+        public override bool Build()
         {
             ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateType.Locator);
+            return true;
         }
-
-        private void OnDestroy()
+        public override void Shutdown()
         {
             ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
         }
+
+        [SerializeField] private HealthHudView _playerHealthHudView;
     }
 }

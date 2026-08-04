@@ -10,11 +10,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary>
         ///     DTO を初期化します。
         /// </summary>
-        public ScreenViewDTO(ScreenId? screenToHideId, ScreenId screenToShowId, string targetSceneName = null)
+        public ScreenViewDTO(ScreenId? screenToHideId, ScreenId screenToShowId)
         {
             ScreenToHideId = screenToHideId;
             ScreenToShowId = screenToShowId;
-            TargetSceneName = targetSceneName;
         }
 
         /// <summary> 非表示対象画面 ID を取得します。 </summary>
@@ -22,8 +21,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
 
         /// <summary> 表示対象画面 ID を取得します。 </summary>
         public ScreenId ScreenToShowId { get; }
-
-        /// <summary> 遷移先シーン名を取得します。 </summary>
-        public string TargetSceneName { get; }
     }
 }

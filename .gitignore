@@ -87,3 +87,9 @@ ExportedPackages/
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/
+Docs/DiscordLog/
+
+
+# Python (scripts/)
+__pycache__/
+*.py[cod]

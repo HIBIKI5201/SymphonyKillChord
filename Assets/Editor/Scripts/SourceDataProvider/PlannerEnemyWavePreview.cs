@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -92,7 +94,10 @@ namespace KillChord.Editor.SourceDataProvider
                 ? $"あり（開始Index: {loopStartProperty?.intValue ?? 0}）"
                 : "なし";
             EditorGUILayout.LabelField($"ループ: {loopLabel}");
+
             DrawDefinition(
+                target,
+                serializedDefinition,
                 serializedDefinition.FindProperty(WAVES_PROPERTY_NAME),
                 elementLimit);
         }
@@ -125,9 +130,13 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     1つの敵Wave定義アセットが持つWave構成を描画します。
         /// </summary>
+        /// <param name="target"> Wave定義アセットです。 </param>
+        /// <param name="serializedDefinition"> Wave定義アセットのSerializedObjectです。 </param>
         /// <param name="wavesProperty"> Wave配列プロパティです。 </param>
         /// <param name="elementLimit"> 表示する最大Wave数です。 </param>
         private static void DrawDefinition(
+            UnityEngine.Object target,
+            SerializedObject serializedDefinition,
             SerializedProperty wavesProperty,
             int elementLimit)
         {
@@ -173,6 +182,8 @@ namespace KillChord.Editor.SourceDataProvider
                     $"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
                 Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
                 EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+
+                DrawSpawnPointCandidates(target, serializedDefinition, wave);
             }
 
             if (wavesProperty.arraySize > elementLimit)
@@ -181,6 +192,129 @@ namespace KillChord.Editor.SourceDataProvider
                     $"残り {wavesProperty.arraySize - elementLimit} WaveはInspector側で確認してください。",
                     MessageType.None);
             }
+        }
+
+        /// <summary>
+        ///     Waveのスポーン候補地マップと編集UIを描画します。
+        /// </summary>
+        /// <param name="target"> Wave定義アセットです。 </param>
+        /// <param name="serializedDefinition"> Wave定義アセットのSerializedObjectです。 </param>
+        /// <param name="waveProperty"> 対象Waveのプロパティです。 </param>
+        private static void DrawSpawnPointCandidates(
+            UnityEngine.Object target,
+            SerializedObject serializedDefinition,
+            SerializedProperty waveProperty)
+        {
+            SerializedProperty candidatesProperty = waveProperty.FindPropertyRelative(
+                SPAWN_POINT_CANDIDATES_PROPERTY_NAME);
+            if (candidatesProperty == null || !candidatesProperty.isArray)
+            {
+                return;
+            }
+
+            EditorGUILayout.LabelField("スポーン候補地", EditorStyles.miniBoldLabel);
+
+            HashSet<int> currentHashes = new();
+            for (int i = 0; i < candidatesProperty.arraySize; i++)
+            {
+                SerializedProperty hashProperty = candidatesProperty.GetArrayElementAtIndex(i)
+                    .FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
+                if (hashProperty != null)
+                {
+                    currentHashes.Add(hashProperty.intValue);
+                }
+            }
+
+            // 対象シーンはWave定義自身が保持するため、ステージ側からの逆引きは不要。
+            SerializedProperty battleSceneNameProperty =
+                serializedDefinition.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
+            string resolvedSceneName = battleSceneNameProperty == null
+                ? string.Empty
+                : battleSceneNameProperty.stringValue;
+            if (string.IsNullOrWhiteSpace(resolvedSceneName))
+            {
+                EditorGUILayout.HelpBox(
+                    "対象のステージシーンが未設定です。"
+                    + "Wave定義アセットのBattle Scene Nameを設定してください。",
+                    MessageType.Warning);
+                DrawReadOnlyCandidateList(candidatesProperty);
+                return;
+            }
+
+            bool mapDrawn = PlannerBattleSceneMapRenderer.Draw(
+                resolvedSceneName,
+                currentHashes,
+                spawnPoint => ToggleCandidate(serializedDefinition, target, candidatesProperty, spawnPoint));
+            if (!mapDrawn)
+            {
+                DrawReadOnlyCandidateList(candidatesProperty);
+            }
+        }
+
+        /// <summary>
+        ///     スポーン候補地の選択状態をトグルし、保存します。
+        /// </summary>
+        /// <param name="serializedDefinition"> Wave定義アセットのSerializedObjectです。 </param>
+        /// <param name="target"> Wave定義アセットです。 </param>
+        /// <param name="candidatesProperty"> スポーン候補地配列プロパティです。 </param>
+        /// <param name="spawnPoint"> クリックされたスポーンポイントです。 </param>
+        private static void ToggleCandidate(
+            SerializedObject serializedDefinition,
+            UnityEngine.Object target,
+            SerializedProperty candidatesProperty,
+            BattleSceneDataReader.SpawnPointInfo spawnPoint)
+        {
+            int existingIndex = -1;
+            for (int i = 0; i < candidatesProperty.arraySize; i++)
+            {
+                SerializedProperty hashProperty = candidatesProperty.GetArrayElementAtIndex(i)
+                    .FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
+                if (hashProperty != null && hashProperty.intValue == spawnPoint.HashId)
+                {
+                    existingIndex = i;
+                    break;
+                }
+            }
+
+            if (existingIndex >= 0)
+            {
+                candidatesProperty.DeleteArrayElementAtIndex(existingIndex);
+            }
+            else
+            {
+                int newIndex = candidatesProperty.arraySize;
+                candidatesProperty.InsertArrayElementAtIndex(newIndex);
+                SerializedProperty newElement = candidatesProperty.GetArrayElementAtIndex(newIndex);
+                newElement.FindPropertyRelative(DATA_ID_VALUE_PROPERTY_NAME).stringValue = spawnPoint.Id;
+                newElement.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME).intValue = spawnPoint.HashId;
+            }
+
+            serializedDefinition.ApplyModifiedProperties();
+            EditorUtility.SetDirty(target);
+            AssetDatabase.SaveAssetIfDirty(target);
+        }
+
+        /// <summary>
+        ///     選択中のスポーン候補地を読み取り専用テキストで表示します。
+        /// </summary>
+        /// <param name="candidatesProperty"> スポーン候補地配列プロパティです。 </param>
+        private static void DrawReadOnlyCandidateList(SerializedProperty candidatesProperty)
+        {
+            if (candidatesProperty.arraySize == 0)
+            {
+                EditorGUILayout.LabelField("選択中の候補地: なし（全スポーンポイント対象）");
+                return;
+            }
+
+            List<string> ids = new();
+            for (int i = 0; i < candidatesProperty.arraySize; i++)
+            {
+                SerializedProperty idProperty = candidatesProperty.GetArrayElementAtIndex(i)
+                    .FindPropertyRelative(DATA_ID_VALUE_PROPERTY_NAME);
+                ids.Add(string.IsNullOrEmpty(idProperty?.stringValue) ? "<不明>" : idProperty.stringValue);
+            }
+
+            EditorGUILayout.LabelField($"選択中の候補地: {string.Join(", ", ids)}");
         }
 
         /// <summary>
@@ -239,6 +373,7 @@ namespace KillChord.Editor.SourceDataProvider
 
         private const string ID_PROPERTY_NAME = "_id";
         private const string DATA_ID_VALUE_PROPERTY_NAME = "_id";
+        private const string DATA_ID_HASH_PROPERTY_NAME = "_hashId";
         private const string WAVES_PROPERTY_NAME = "_waves";
         private const string LOOP_PROPERTY_NAME = "_loop";
         private const string LOOP_START_PROPERTY_NAME = "_loopStart";
@@ -246,5 +381,7 @@ namespace KillChord.Editor.SourceDataProvider
         private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
         private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
         private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
+        private const string SPAWN_POINT_CANDIDATES_PROPERTY_NAME = "SpawnPointCandidates";
+        private const string BATTLE_SCENE_NAME_PROPERTY_NAME = "_battleSceneName";
     }
 }
