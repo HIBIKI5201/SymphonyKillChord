@@ -20,6 +20,7 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             _view = view;
             _mainCamera = Camera.main;
+            _cameraTransform = _mainCamera.transform;
 
             _currentHealth
                 .CombineLatest(_maxHealth, (current, max) => current / max)
@@ -51,17 +52,20 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="dto"> 反映する表示情報。 </param>
         public void Update(in HUDEnemyHealthDTO dto)
         {
+            bool isBehindCamera = Vector3.Dot(_cameraTransform.forward, dto.TargetPosition - _cameraTransform.position) < 0f;
+
             _maxHealth.Value = dto.MaxHealth;
             _currentHealth.Value = dto.CurrentHealth;
-            _displayState.Value = dto.DisplayState;
+            _displayState.Value = isBehindCamera ? LockOnDisplayState.Hidden : dto.DisplayState;
 
-            if (dto.DisplayState != LockOnDisplayState.Hidden && _mainCamera != null)
+            if (dto.DisplayState != LockOnDisplayState.Hidden && !isBehindCamera)
             {
                 _uiPosition.Value = _mainCamera.WorldToScreenPoint(dto.TargetPosition);
             }
         }
 
         private readonly Camera _mainCamera;
+        private readonly Transform _cameraTransform;
         private readonly ReactiveProperty<Vector2> _uiPosition = new();
         private readonly ReactiveProperty<float> _maxHealth = new();
         private readonly ReactiveProperty<float> _currentHealth = new();
