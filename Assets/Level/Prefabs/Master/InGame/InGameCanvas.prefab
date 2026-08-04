@@ -857,7 +857,7 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0.9529412, a: 1}
   - {r: 0.015686275, g: 0, b: 1, a: 1}
   - {r: 0.8627451, g: 0, b: 1, a: 1}
-  _beatWidth: 5
+  _beatWidth: 10
   _scale: 5
   _displayLength: 120
   _beatPositionImages:
@@ -872,7 +872,7 @@ MonoBehaviour:
   - {fileID: 1104842962939741797}
   _canvasGroup: {fileID: 2386361446383230203}
   _targetAlpha: 1
-  _noTargetAlpha: 0.5
+  _noTargetAlpha: 1
   _justTimingSizeDelta: 256
   _inTimingSizeDelta: 128
   _outTimingSizeDelta: 16
