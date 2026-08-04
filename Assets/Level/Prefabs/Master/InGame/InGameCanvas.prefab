@@ -785,6 +785,7 @@ GameObject:
   - component: {fileID: 777005180118405881}
   - component: {fileID: 1685621779565100248}
   - component: {fileID: 3310711898840515315}
+  - component: {fileID: 7679647516716562303}
   m_Layer: 5
   m_Name: RhythmGuideRoot
   m_TagString: Untagged
@@ -876,6 +877,20 @@ MonoBehaviour:
   _inTimingSizeDelta: 128
   _outTimingSizeDelta: 16
   _outTimingDuration: 1
+  _rhythmGuidePostEffectView: {fileID: 7679647516716562303}
+--- !u!114 &7679647516716562303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2886541587710375486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e97f493b2fe7ac64289bbb34918550fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.PostEffect.RhythmGuidePostEffectView
+  _material: {fileID: 2100000, guid: affa8f80b2232fe4d9dd4af9d2a55ebd, type: 2}
 --- !u!1 &3060440080734711733
 GameObject:
   m_ObjectHideFlags: 0
