@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 yaw += context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
             }
-            else if (context.MoveInput.sqrMagnitude > float.Epsilon)
+            else if (context.MoveInput.sqrMagnitude > float.Epsilon && context.MoveInput.y >= 0f)
             {
                 Vector3 playerForward = context.PlayerForward;
                 playerForward.y = 0f;
