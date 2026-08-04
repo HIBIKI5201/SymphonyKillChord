@@ -16,7 +16,7 @@ namespace KillChord.Editor
         /// <summary>
         ///     CSVが置かれているGoogleDriveフォルダのIDでリスト取得を行う。
         /// </summary>
-        [MenuItem("KillChord/Import CSV")]
+        [MenuItem("Tools/Import CSV")]
         private static void ImportCsv()
         {
             Debug.Log("Importing CSV...");
