@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using KillChord.Editor.Utility;
 using UnityEditor;
@@ -97,7 +98,7 @@ namespace KillChord.Editor.AssetManagement
                             "DriveImportSecretsを読み込みました。",
                             "OK");
                     }
-                    catch
+                    catch(ArgumentException)
                     {
                         EditorUtility.DisplayDialog(
                             "Drive Import",
@@ -131,10 +132,10 @@ namespace KillChord.Editor.AssetManagement
                 new GUIContent("Exclude File Patterns"), true);
             var changed = EditorGUI.EndChangeCheck();
 
-            serialized.ApplyModifiedProperties();
 
             if (changed)
             {
+                serialized.ApplyModifiedProperties();
                 settings.Persist();
             }
         }
