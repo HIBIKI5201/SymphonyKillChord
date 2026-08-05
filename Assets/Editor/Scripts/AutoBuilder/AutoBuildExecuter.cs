@@ -17,7 +17,8 @@ namespace KillChord.Editor.AutoBuilder
     {
         /// <summary> 自動ビルドセッションが実行中の場合はtrueです。 </summary>
         public static bool IsRunning => BuildSession.LoadSession().Running;
-
+        
+        private static Action<bool> _onCompleteCallback;
         [Serializable]
         private struct BuildSession
         {
@@ -38,6 +39,9 @@ namespace KillChord.Editor.AutoBuilder
 
             /// <summary> いずれかのビルドが失敗した場合はtrueです。 </summary>
             public bool HasFailure;
+            
+            /// <summary> バッチモードフラグをセッションに保持します。 </summary>
+            public bool ForceBatchMode;
 
             /// <summary>
             ///     保存済みの自動ビルドセッションを読み込みます。
@@ -121,20 +125,24 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         /// <param name="path"> ビルド出力先です。 </param>
         /// <param name="profiles"> 実行対象のビルドプロファイル一覧です。 </param>
-        public static void Run(string path, params BuildProfile[] profiles)
+        /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
+        /// <param name="onComplete"> ビルド完了時に呼び出されるコールバックです。引数はビルド成功時はtrue、失敗時はfalseです。 </param>
+        public static void Run(string path, BuildProfile[] profiles, bool isBatchMode = false, Action<bool> onComplete = null)
         {
             if (profiles == null || profiles.Length == 0)
             {
-                Debug.LogError(
-                    "Build Profiles are not set.");
-
+                Debug.LogError("Build Profiles are not set.");
+                onComplete?.Invoke(false);
                 return;
             }
 
             if (!TryGetActiveBuildProfileGuid(out string originalProfileGuid))
             {
+                onComplete?.Invoke(false);
                 return;
             }
+
+            _onCompleteCallback = onComplete;
 
             BuildSession session = new()
             {
@@ -155,7 +163,8 @@ namespace KillChord.Editor.AutoBuilder
 
                 Running = true,
 
-                HasFailure = false
+                HasFailure = false,
+                ForceBatchMode = isBatchMode
             };
 
             BuildSession.SaveSession(session);
@@ -461,6 +470,7 @@ namespace KillChord.Editor.AutoBuilder
                 bool hasFailure;
                 try
                 {
+                    BuildProfile.SetActiveBuildProfile(profile);
                     BuildReport report = BuildPipeline.BuildPlayer(options);
                     hasFailure = report.summary.result != BuildResult.Succeeded;
 
@@ -610,10 +620,14 @@ namespace KillChord.Editor.AutoBuilder
                 Debug.LogError($"[{nameof(AutoBuildExecuter)}] {message}");
             }
 
-            if (!Application.isBatchMode)
+            if (!Application.isBatchMode && !session.ForceBatchMode)
             {
                 EditorUtility.DisplayDialog("AutoBuilder", message, "OK");
             }
+
+            // コールバック経由で終了結果をAutoBuilderに返却
+            _onCompleteCallback?.Invoke(succeeded);
+            _onCompleteCallback = null;
         }
 
         /// <summary>
