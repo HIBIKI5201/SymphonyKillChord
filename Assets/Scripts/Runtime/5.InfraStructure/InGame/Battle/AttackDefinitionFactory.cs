@@ -12,27 +12,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     public static class AttackDefinitionFactory
     {
         /// <summary>
-        ///     攻撃定義データを受け取り、攻撃定義オブジェクトを生成するメソッド。
+        ///     会心ダメージボーナスを適用して攻撃定義オブジェクトを生成する。
+        ///     会心率は武器ではなくキャラクターが持つため、ここでは扱わない。
         /// </summary>
         /// <param name="data"> 攻撃定義データ。 </param>
-        /// <returns> 生成された攻撃定義オブジェクト。 </returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        public static AttackDefinition Create(AttackDefinitionAsset data)
-        {
-            return Create(data, 0f, 0f);
-        }
-
-        /// <summary>
-        ///     会心ボーナスを適用して攻撃定義オブジェクトを生成する。
-        /// </summary>
-        /// <param name="data"> 攻撃定義データ。 </param>
-        /// <param name="criticalChanceAddition"> 会心率の加算値。 </param>
         /// <param name="criticalMultiplierAddition"> 会心ダメージ倍率の加算値。 </param>
         /// <returns> 生成された攻撃定義オブジェクト。 </returns>
         public static AttackDefinition Create(
             AttackDefinitionAsset data,
-            float criticalChanceAddition,
             float criticalMultiplierAddition)
         {
             if (data == null)
@@ -51,10 +38,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
             }
 
             AttackSpec attackSpec = new AttackSpec(
-                new CriticalChance(Mathf.Clamp01(
-                    data.AttackSpecAsset.CriticalChance + criticalChanceAddition)),
                 new CriticalMultiplier(
-                    data.AttackSpecAsset.CriticalDamageMultiplier + criticalMultiplierAddition),
+                    data.CriticalDamageMultiplier + criticalMultiplierAddition),
                 new Damage(data.AttackSpecAsset.ConfirmedDamage)
             );
 
@@ -77,7 +62,20 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 attackSpec,
                 data.AttackPipelineAsset.Create(),
                 resolvedBeatType,
-                data.JustDamageMultiplier
+                data.JustDamageMultiplier,
+                Mathf.Max(0f, data.WeaponDamageMultiplier),
+                Mathf.Max(0f, data.Range),
+                Mathf.Clamp(
+                    data.HalfAngleDegrees,
+                    AttackDefinition.MIN_HALF_ANGLE_DEGREES,
+                    AttackDefinition.MAX_HALF_ANGLE_DEGREES),
+                data.IsMultiTarget,
+                Mathf.Max(AttackDefinition.MIN_HIT_COUNT, data.HitCount),
+                Mathf.Max(0f, data.HitInterval),
+                Mathf.Clamp(
+                    data.OutOfRangeDamageMultiplier,
+                    AttackDefinition.MIN_OUT_OF_RANGE_DAMAGE_MULTIPLIER,
+                    AttackDefinition.MAX_OUT_OF_RANGE_DAMAGE_MULTIPLIER)
             );
         }
     }

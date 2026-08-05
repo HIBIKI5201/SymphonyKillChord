@@ -10,17 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 908da08c532dd0a44ae50903947a5b90, type: 3}
-  m_Name: ExamplePlayerAttackPipeline
-  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Battle.AttackPipelineAsset
+  m_Name: PlayerAttackPipeline
+  m_EditorClassIdentifier: 
   _attackSteps:
-  - rid: 3714306555944894570
-  - rid: 3714306694461522030
+  - rid: 7100000000000000001
+  - rid: 7100000000000000002
+  - rid: 7100000000000000003
   references:
     version: 2
     RefIds:
-    - rid: 3714306555944894570
+    - rid: 7100000000000000001
       type: {class: CriticalStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
-      data: 
-    - rid: 3714306694461522030
+      data:
+    - rid: 7100000000000000002
       type: {class: WeaponDamageStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
-      data: 
+      data:
+    - rid: 7100000000000000003
+      type: {class: OutOfRangeDamageStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
+      data:
