@@ -136,6 +136,10 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するDither値。 </param>
         private void ApplyDither(float value)
         {
+            if (_effectRenderers == null)
+            {
+                return;
+            }
             foreach (Renderer renderer in _effectRenderers)
             {
                 if (renderer == null)
@@ -155,6 +159,10 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するFlash値。 </param>
         private void ApplyFlash(float value)
         {
+            if (_effectRenderers == null)
+            {
+                return;
+            }
             foreach (Renderer renderer in _effectRenderers)
             {
                 if (renderer == null)
