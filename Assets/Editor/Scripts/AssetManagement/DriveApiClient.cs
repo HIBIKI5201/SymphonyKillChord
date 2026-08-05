@@ -83,6 +83,7 @@ namespace KillChord.Editor.AssetManagement
                 }
 
                 using var request = UnityWebRequest.Get(url);
+                request.timeout = 60;
                 request.SetRequestHeader("Authorization", $"Bearer {accessToken}");
                 var asyncOp = request.SendWebRequest();
                 while (!asyncOp.isDone)
