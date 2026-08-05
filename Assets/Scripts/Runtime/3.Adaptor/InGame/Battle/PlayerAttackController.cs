@@ -102,7 +102,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
-            if (attackDefinition == null) return false;
+            if (attackDefinition == null)
+            {
+                return false;
+            }
 
             StartAttackInterval();
             StartAttackCooldown();
@@ -356,6 +359,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             return true;
         }
 
+        /// <summary>
+        ///     拍子に対応する攻撃定義を取得する。
+        /// </summary>
+        /// <param name="beatType"> 拍子。 </param>
+        /// <returns> 攻撃定義。見つからない場合はnull。 </returns>
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
         {
             try

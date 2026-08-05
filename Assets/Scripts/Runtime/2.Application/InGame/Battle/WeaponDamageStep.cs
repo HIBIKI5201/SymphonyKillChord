@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using System;
 
 namespace KillChord.Runtime.Application.InGame.Battle
 {
@@ -6,6 +7,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
     ///     武器ごとのダメージ倍率を適用する攻撃処理ステップ。
     ///     拍子ごとの倍率は攻撃定義データが持つため、このステップは拍子の数値を参照しない。
     /// </summary>
+    [Serializable]
     public class WeaponDamageStep : IAttackStep
     {
         /// <summary>

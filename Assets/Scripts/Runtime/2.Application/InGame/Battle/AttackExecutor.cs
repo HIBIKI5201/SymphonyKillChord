@@ -29,11 +29,19 @@ namespace KillChord.Runtime.Application.InGame.Battle
                )
         {
             if (attackDefinition == null)
+            {
                 throw new ArgumentNullException(nameof(attackDefinition));
+            }
+
             if (attacker == null)
+            {
                 throw new ArgumentNullException(nameof(attacker));
+            }
+
             if (defender == null)
+            {
                 throw new ArgumentNullException(nameof(defender));
+            }
 
             ExecuteBuffBeforeAttack(attacker, defender);
 
@@ -73,9 +81,14 @@ namespace KillChord.Runtime.Application.InGame.Battle
                )
         {
             if (defenders == null)
+            {
                 throw new ArgumentNullException(nameof(defenders));
+            }
+
             if (results == null)
+            {
                 throw new ArgumentNullException(nameof(results));
+            }
 
             results.Clear();
 

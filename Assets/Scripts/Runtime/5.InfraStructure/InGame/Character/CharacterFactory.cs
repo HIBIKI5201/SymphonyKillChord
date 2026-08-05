@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
@@ -60,7 +61,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
 
             // 会心率はキャラクターが持つため、加算値もここで適用する。
             CriticalChance criticalChance = new CriticalChance(
-                UnityEngine.Mathf.Clamp01(data.CriticalChance + criticalChanceAddition));
+                Mathf.Clamp01(data.CriticalChance + criticalChanceAddition));
 
             return new CharacterEntity(
                 new CharacterName(data.CharacterName),

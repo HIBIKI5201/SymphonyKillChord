@@ -36,6 +36,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         /// <summary> クリティカルダメージの倍率を取得する。 </summary>
         public float CriticalDamageMultiplier => _criticalDamageMultiplier;
 
+        private const float DEFAULT_WEAPON_DAMAGE_MULTIPLIER = 1f;
+        private const float DEFAULT_RANGE = 10f;
+        private const float DEFAULT_HALF_ANGLE_DEGREES = 1f;
+        private const int DEFAULT_HIT_COUNT = 1;
+        private const float DEFAULT_HIT_INTERVAL = 0.05f;
+        private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 2f;
+
         [SerializeField, Tooltip("攻撃名")] private string _attackName;
         [SerializeField, Tooltip("攻撃パラメーターセット")] private AttackSpecAsset _attackParameterSetData;
         [SerializeField, Tooltip("攻撃パイプラインアセット")] private AttackPipelineAsset _attackPipelineAsset;
@@ -63,12 +70,5 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
 
         [SerializeField, Tooltip("クリティカルダメージの倍率。武器ごとに設定する。会心率はキャラクター側で設定する")]
         private float _criticalDamageMultiplier = DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
-
-        private const float DEFAULT_WEAPON_DAMAGE_MULTIPLIER = 1f;
-        private const float DEFAULT_RANGE = 10f;
-        private const float DEFAULT_HALF_ANGLE_DEGREES = 1f;
-        private const int DEFAULT_HIT_COUNT = 1;
-        private const float DEFAULT_HIT_INTERVAL = 0.05f;
-        private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 2f;
     }
 }
