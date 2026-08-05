@@ -12,10 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 036788cd86b83fd4690819241763c0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Editor::DriveImport.DriveImportSettings
+  basePath: 
   excludeFolderNames:
+  - ' Document'
   - Document
   excludeExtensions:
-  - 
-  excludeFilePatterns:
-  - pattern: 
-    type: 0
+  - tmp
+  - temp
+  - bak
+  - old
+  - orig
+  - swp
+  - swo
+  - lock
+  - log
+  - md
+  - pdf
+  - doc
+  - docx
+  - xls
+  - xlsx
+  - ppt
+  - pptx
+  - zip
+  - 7z
+  - rar
+  - blend1
+  - blend2
+  - blend3
+  excludeFilePatterns: []
