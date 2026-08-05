@@ -302,6 +302,11 @@ namespace KillChord.Editor.AssetManagement
         /// <returns> 除外対象であれば true。 </returns>
         private static bool IsFolderExcluded(string folderName, DriveImportSettings settings)
         {
+            if (string.IsNullOrEmpty(folderName))
+            {
+                return false;
+            }
+            
             foreach (var excludedName in settings.excludeFolderNames)
             {
                 if (!string.IsNullOrEmpty(excludedName)
@@ -322,6 +327,11 @@ namespace KillChord.Editor.AssetManagement
         /// <returns> 除外対象であれば true。 </returns>
         private static bool IsFileExcluded(string fileName, DriveImportSettings settings)
         {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+            
             var ext = Path.GetExtension(fileName).TrimStart('.').ToLowerInvariant();
             foreach (var e in settings.excludeExtensions)
             {
