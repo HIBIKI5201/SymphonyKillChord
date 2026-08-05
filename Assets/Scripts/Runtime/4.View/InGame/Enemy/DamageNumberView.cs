@@ -22,9 +22,7 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            // AttackPipeline は MidpointRounding.AwayFromZero で丸める。
-            // Mathf.RoundToInt は偶数丸めなので、非負前提で同じ規則になる式を使う。
-            _damageText.text = Mathf.FloorToInt(damage + HALF).ToString();
+            _damageText.text = Mathf.CeilToInt(damage).ToString();
 
             ApplyRandomOffset();
 
@@ -39,7 +37,6 @@ namespace KillChord.Runtime.View
 
         private const float DEFAULT_HORIZONTAL_OFFSET_RANGE = 0.3f;
         private const float DEFAULT_UPWARD_OFFSET_RANGE = 0.5f;
-        private const float HALF = 0.5f;
 
         /// <summary>
         ///     表示演出専用の乱数生成器。

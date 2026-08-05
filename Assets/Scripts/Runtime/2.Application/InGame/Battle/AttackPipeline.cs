@@ -44,11 +44,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 currentContext = _attackSteps[i].Execute(currentContext);
             }
 
-            // 最終ダメージの端数は四捨五入する。Mathf.Roundは偶数丸めのため使用しない。
-            Damage roundedDamage = new Damage(
-                (float)Math.Round(currentContext.Damage.Value, MidpointRounding.AwayFromZero));
-
-            return new AttackResult(roundedDamage, currentContext.CriticalCount > 0);
+            // ダメージの内部値は丸めない。端数の処理は表示側の責務とする。
+            return new AttackResult(currentContext);
         }
 
         private readonly IAttackStep[] _attackSteps;
