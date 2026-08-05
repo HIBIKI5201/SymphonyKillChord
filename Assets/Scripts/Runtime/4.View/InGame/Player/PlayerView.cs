@@ -116,6 +116,9 @@ namespace KillChord.Runtime.View.InGame.Player
         private MotionHandle _dodgeMaterialEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
 
+        private float _attackFacingRemaining = 0f;
+        private Quaternion _attackFacingRotation;
+
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
 
@@ -259,6 +262,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _cacheRotation = rotation;
             _cacheVelocity = Vector3.zero;
+            _attackFacingRemaining = 0f;
+            _attackFacingRotation = rotation;
 
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
@@ -553,7 +558,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
-                    var fwd = _cacheTransform.forward;
+                    Vector3 fwd = _cacheRotation * Vector3.forward;
                     dodgeDir.x = fwd.x;
                     dodgeDir.y = fwd.z;
                 }
@@ -610,6 +615,14 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             Vector3 dir = PlayerAttackController.CurrentLockOnTargetPosition - _cacheTransform.position;
             dir.y = 0;
+
+            if (dir.sqrMagnitude <= float.Epsilon)
+            {
+                _attackFacingRotation = _cacheRotation;
+                _attackFacingRemaining = 0f;
+                return;
+            }
+
             _attackFacingRotation = Quaternion.LookRotation(dir, Vector3.up);
             _attackFacingRemaining = 0.1f;
             _cacheRotation = _attackFacingRotation;
@@ -818,9 +831,6 @@ namespace KillChord.Runtime.View.InGame.Player
             [Tooltip("この床で再生するCueName。空の場合は共通Cueを使用します。")]
             public string CueName;
         }
-
-        private float _attackFacingRemaining = 0f;
-        private Quaternion _attackFacingRotation;
     }
 }
 
