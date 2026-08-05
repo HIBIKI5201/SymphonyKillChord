@@ -19,7 +19,7 @@ MonoBehaviour:
   _useBeatType: 1
   _beatType: 4
   _weaponDamageMultiplier: 0.8
-  _range: 12
+  _range: 30
   _halfAngleDegrees: 1
   _isMultiTarget: 0
   _hitCount: 1

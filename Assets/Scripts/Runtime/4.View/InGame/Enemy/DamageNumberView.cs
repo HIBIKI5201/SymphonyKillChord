@@ -35,8 +35,8 @@ namespace KillChord.Runtime.View
                 .BindToColorA(_damageText);
         }
 
-        private const float DEFAULT_OFFSET_RANGE_X = 8f;
-        private const float DEFAULT_OFFSET_RANGE_Y = 5f;
+        private const float DEFAULT_HORIZONTAL_OFFSET_RANGE = 0.3f;
+        private const float DEFAULT_UPWARD_OFFSET_RANGE = 0.5f;
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
@@ -44,24 +44,28 @@ namespace KillChord.Runtime.View
         [SerializeField, Tooltip("ダメージ演出の継続時間")]
         private float _duration;
 
-        [SerializeField, Tooltip("生成位置のランダムオフセットの範囲。自身のローカル座標での±値。0にするとずらさない")]
-        private Vector2 _randomOffsetRange = new Vector2(DEFAULT_OFFSET_RANGE_X, DEFAULT_OFFSET_RANGE_Y);
+        [SerializeField, Tooltip("生成位置の横方向のランダム幅（メートル）。±この値の範囲でずらす。0でずらさない")]
+        private float _randomHorizontalOffsetRange = DEFAULT_HORIZONTAL_OFFSET_RANGE;
+
+        [SerializeField, Tooltip("生成位置の上方向のランダム幅（メートル）。0からこの値の範囲で上にだけずらす。下へは動かさない")]
+        private float _randomUpwardOffsetRange = DEFAULT_UPWARD_OFFSET_RANGE;
 
         /// <summary>
         ///     生成位置をランダムにずらす。
         ///     多段ヒットや複数対象で同時に表示された数値が重なって読めなくなるのを防ぐ。
+        ///     生成位置が敵の足元にあるため、縦方向は上にのみずらして地面へ潜らせない。
         /// </summary>
         private void ApplyRandomOffset()
         {
-            if (_randomOffsetRange == Vector2.zero)
-            {
-                return;
-            }
+            float horizontal = _randomHorizontalOffsetRange <= 0f
+                ? 0f
+                : Random.Range(-_randomHorizontalOffsetRange, _randomHorizontalOffsetRange);
 
-            transform.localPosition += new Vector3(
-                Random.Range(-_randomOffsetRange.x, _randomOffsetRange.x),
-                Random.Range(-_randomOffsetRange.y, _randomOffsetRange.y),
-                0f);
+            float upward = _randomUpwardOffsetRange <= 0f
+                ? 0f
+                : Random.Range(0f, _randomUpwardOffsetRange);
+
+            transform.localPosition += new Vector3(horizontal, upward, 0f);
         }
     }
 }
