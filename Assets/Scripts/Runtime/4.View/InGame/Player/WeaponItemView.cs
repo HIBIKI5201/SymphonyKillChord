@@ -96,7 +96,8 @@ namespace KillChord.Runtime.View.InGame.Player
                     .Bind(this, (value, state) => state.ApplyDither(value)))
                 .Join(LMotion.Create(1f, 0f, 0.4f)
                     .Bind(this, (value, state) => state.ApplyFlash(value)))
-                .Run();
+                .AppendInterval(2f)
+                .Run(x => x.WithOnComplete(HideWeapon));
             _weaponModel.SetActive(true);
         }
 
