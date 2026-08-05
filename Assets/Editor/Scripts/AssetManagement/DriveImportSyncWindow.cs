@@ -34,22 +34,16 @@ namespace KillChord.Editor.AssetManagement
         private bool scrollToBottom;
 
         /// <summary>
-        /// 同期実行中はウィンドウを閉じられないようにする。
+        ///     ログ表示用のウィンドウを開く。
         /// </summary>
-        public override bool hasUnsavedChanges => isRunning;
-
-        /// <summary>
-        /// Drive Import Sync ウィンドウを開く。
-        /// </summary>
-        [MenuItem("Window/Drive Import/Sync")]
-        public static void Open()
+        private static void Open()
         {
             window = GetWindow<DriveImportSyncWindow>("Drive Import");
             window.minSize = new Vector2(600, 400);
         }
 
         /// <summary>
-        /// 同期を開始し、ウィンドウを初期化する。
+        ///     同期を開始し、ウィンドウを初期化する。
         /// </summary>
         public static void StartSync()
         {
@@ -64,7 +58,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 同期完了をマークしてウィンドウを更新する。
+        ///     同期完了をマークしてウィンドウを更新する。
         /// </summary>
         public static void Finish()
         {
@@ -77,7 +71,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 進捗状況 (現在数/総数) と処理中ファイル名を更新する。
+        ///     進捗状況 (現在数/総数) と処理中ファイル名を更新する。
         /// </summary>
         /// <param name="current"> 現在処理済みファイル数。 </param>
         /// <param name="total"> 総処理対象ファイル数。 </param>
@@ -95,17 +89,34 @@ namespace KillChord.Editor.AssetManagement
             };
         }
 
+        /// <summary> 情報ログを追加する。 </summary>
+        public static void Log(string message)    => AddLog(LogType.Info, message);
+        /// <summary> 警告ログを追加する。 </summary>
+        public static void Warning(string message) => AddLog(LogType.Warning, message);
+        /// <summary> エラーログを追加する。 </summary>
+        public static void Error(string message)   => AddLog(LogType.Error, message);
+
         /// <summary>
-        /// ウィンドウにログエントリを追加する。
+        ///     ウィンドウにログエントリを追加する。
+        ///     ウィンドウが既に閉じられている場合は、Unityのコンソールにフォールバックして出力する。
         /// </summary>
         /// <param name="type"> ログタイプ (情報/警告/エラー)。 </param>
         /// <param name="message"> ログメッセージ。 </param>
         private static void AddLog(LogType type, string message)
         {
-            if (window == null) return;
+            if (window == null)
+            {
+                FallbackToConsoleLog(type, message);
+                return;
+            }
+            
             EditorApplication.delayCall += () =>
             {
-                if (window == null) return;
+                if (window == null)
+                {
+                    FallbackToConsoleLog(type, message);
+                    return;
+                }
                 window.logs.Add(new LogEntry(type, message));
                 if (window.logs.Count > MaxLogEntries)
                 {
@@ -118,22 +129,33 @@ namespace KillChord.Editor.AssetManagement
             };
         }
 
-        /// <summary> 情報ログを追加する。 </summary>
-        public static void Log(string message)    => AddLog(LogType.Info, message);
-        /// <summary> 警告ログを追加する。 </summary>
-        public static void Warning(string message) => AddLog(LogType.Warning, message);
-        /// <summary> エラーログを追加する。 </summary>
-        public static void Error(string message)   => AddLog(LogType.Error, message);
+        /// <summary>
+        ///     ウィンドウが閉じられている場合に、LogEntryをUnityのコンソールにフォールバックしてログを出力する。
+        /// </summary>
+        /// <param name="type"> ログタイプ (情報/警告/エラー)。 </param>
+        /// <param name="message"> ログメッセージ。 </param>
+        private static void FallbackToConsoleLog(LogType type, string message)
+        {
+            switch (type)
+            {
+                case LogType.Info:
+                    Debug.Log(message);
+                    break;
+                case LogType.Warning:
+                    Debug.LogWarning(message);
+                    break;
+                case LogType.Error:
+                    Debug.LogError(message);
+                    break;
+            }
+        }
 
         private void OnGUI()
         {
-            // 状態
             EditorGUILayout.LabelField("状態", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(status);
 
             EditorGUILayout.Space();
-
-            // 進捗バー
             Rect rect = GUILayoutUtility.GetRect(1, 20);
 
             EditorGUI.ProgressBar(
@@ -142,14 +164,10 @@ namespace KillChord.Editor.AssetManagement
                 $"{currentCount}/{totalCount}");
 
             EditorGUILayout.Space();
-
-            // 現在処理中
             EditorGUILayout.LabelField("現在処理中", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(string.IsNullOrEmpty(current) ? "-" : current);
 
             EditorGUILayout.Space();
-
-            // ログ
             EditorGUILayout.LabelField("ログ", EditorStyles.boldLabel);
 
             scroll = EditorGUILayout.BeginScrollView(
@@ -160,7 +178,7 @@ namespace KillChord.Editor.AssetManagement
             {
                 if (entry.Type == LogType.Info)
                 {
-                    EditorGUILayout.LabelField(entry.Message); // HelpBoxより大幅に軽い
+                    EditorGUILayout.LabelField(entry.Message);
                 }
                 else
                 {
@@ -196,12 +214,6 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.EndHorizontal();
         }
 
-        /// <summary>
-        /// ウィンドウを閉じる際の保存確認メッセージを表示する。
-        /// </summary>
-        /// <returns> 閉じる操作をキャンセルする場合のダイアログメッセージ。 </returns>
-        public override string saveChangesMessage => "同期完了までウィンドウを閉じられません。";
-
         private void OnDestroy()
         {
             if (window == this)
@@ -226,12 +238,12 @@ namespace KillChord.Editor.AssetManagement
         /// <summary>
         /// ログエントリ。
         /// </summary>
-        private struct LogEntry
+        private readonly struct LogEntry
         {
             /// <summary> ログの種類。 </summary>
-            public LogType Type;
+            public readonly LogType Type;
             /// <summary> ログメッセージ。 </summary>
-            public string Message;
+            public readonly string Message;
 
             public LogEntry(LogType type, string message)
             {
