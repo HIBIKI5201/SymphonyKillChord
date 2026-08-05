@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 05914eb9c35ddf14497e3bc124bf8c6a
-    m_Address: MobileStickFlickInput
+    m_Address: MobileStickFlickInputConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -12,9 +12,9 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -285,14 +285,40 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _selectedScenarioState.SelectScenario(scenarioStageDefinition);
             }
 
-            bool requested = await _outGameSortieController.RequestSortieAsync(
-                stageDefinition.StageType,
-                _currentSceneName,
-                stageDefinition.TargetSceneName,
-                _cts.Token);
+            bool isScenarioStage = stageDefinition is ScenarioStageDefinition;
+            if (isScenarioStage)
+            {
+                _detailScreenView.HideImmediately();
+            }
+
+            bool requested;
+            try
+            {
+                requested = await _outGameSortieController.RequestSortieAsync(
+                    stageDefinition.StageType,
+                    _currentSceneName,
+                    stageDefinition.TargetSceneName,
+                    _cts.Token);
+            }
+            catch
+            {
+                if (isScenarioStage)
+                {
+                    _ = _detailScreenView.Show();
+                }
+
+                throw;
+            }
+
             if (!requested)
             {
+                if (isScenarioStage)
+                {
+                    _ = _detailScreenView.Show();
+                }
+
                 _pendingNodeTransitionState?.Clear();
+                return;
             }
         }
 
