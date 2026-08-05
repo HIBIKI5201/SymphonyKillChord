@@ -311,6 +311,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 attackIntervalEvaluator,
                 musicSyncService,
                 musicSyncState,
+                targetSystemContainer.TargetAreaQuery,
+                _player.transform,
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value,
                 (int)_playerEntity.BaseDamage.Value);

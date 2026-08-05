@@ -2,6 +2,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
@@ -34,18 +35,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
             if (defender == null)
                 throw new ArgumentNullException(nameof(defender));
 
-            CharacterEntity attackerEntity = attacker as CharacterEntity;
-            CharacterEntity defenderEntity = defender as CharacterEntity;
-
-            attacker.BuffSystem.Execute(new BuffContext(attackerEntity, defenderEntity), BuffExecuteTiming.Attack_Logic_Before);
+            ExecuteBuffBeforeAttack(attacker, defender);
 
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage);
 
-            BuffContext buffContext = new BuffContext(attackerEntity, defenderEntity, result);
-            buffContext = attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_After);
-            buffContext = defender.BuffSystem.Execute(buffContext, BuffExecuteTiming.Defense_Logic_Before);
-            result = buffContext.AttackResult;
+            result = ExecuteBuffAfterAttack(attacker, defender, result);
 
             defender.TakeDamage(result.FinalDamage);
 
@@ -56,6 +51,74 @@ namespace KillChord.Runtime.Application.InGame.Battle
                  $"Critical:{result.IsCritical}");
 
             return result;
+        }
+
+        /// <summary>
+        ///     複数の対象へ攻撃を実行する。
+        ///     結果は <paramref name="defenders"/> と同じ順序で <paramref name="results"/> へ格納する。
+        /// </summary>
+        /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <param name="attacker"> 攻撃者。 </param>
+        /// <param name="defenders"> 攻撃対象の一覧。 </param>
+        /// <param name="isJustHit"> ジャスト入力かどうか。 </param>
+        /// <param name="baseDamage"> 基礎ダメージ。 </param>
+        /// <param name="results"> 攻撃結果の格納先。呼び出し時に内容がクリアされる。 </param>
+        public static void Execute(
+            AttackDefinition attackDefinition,
+            IAttacker attacker,
+            IReadOnlyList<IDefender> defenders,
+            bool isJustHit,
+            Damage baseDamage,
+            List<AttackResult> results
+               )
+        {
+            if (defenders == null)
+                throw new ArgumentNullException(nameof(defenders));
+            if (results == null)
+                throw new ArgumentNullException(nameof(results));
+
+            results.Clear();
+
+            // バフは現状「対象ごと」に実行される。命中数を参照するバフを入れる際は
+            // ExecuteBuffBeforeAttack をこのループの外へ出す想定でメソッドを分けてある。
+            for (int i = 0; i < defenders.Count; i++)
+            {
+                results.Add(Execute(attackDefinition, attacker, defenders[i], isJustHit, baseDamage));
+            }
+        }
+
+        /// <summary>
+        ///     攻撃計算前のバフを実行する。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者。 </param>
+        /// <param name="defender"> 攻撃対象。 </param>
+        private static void ExecuteBuffBeforeAttack(IAttacker attacker, IDefender defender)
+        {
+            CharacterEntity attackerEntity = attacker as CharacterEntity;
+            CharacterEntity defenderEntity = defender as CharacterEntity;
+
+            attacker.BuffSystem.Execute(
+                new BuffContext(attackerEntity, defenderEntity),
+                BuffExecuteTiming.Attack_Logic_Before);
+        }
+
+        /// <summary>
+        ///     攻撃計算後のバフを実行し、補正済みの攻撃結果を返す。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者。 </param>
+        /// <param name="defender"> 攻撃対象。 </param>
+        /// <param name="result"> 補正前の攻撃結果。 </param>
+        /// <returns> 補正後の攻撃結果。 </returns>
+        private static AttackResult ExecuteBuffAfterAttack(IAttacker attacker, IDefender defender, AttackResult result)
+        {
+            CharacterEntity attackerEntity = attacker as CharacterEntity;
+            CharacterEntity defenderEntity = defender as CharacterEntity;
+
+            BuffContext buffContext = new BuffContext(attackerEntity, defenderEntity, result);
+            buffContext = attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_After);
+            buffContext = defender.BuffSystem.Execute(buffContext, BuffExecuteTiming.Defense_Logic_Before);
+
+            return buffContext.AttackResult;
         }
     }
 }
