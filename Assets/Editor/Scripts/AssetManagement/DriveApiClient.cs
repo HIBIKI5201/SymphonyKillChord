@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,7 +13,6 @@ namespace KillChord.Editor.AssetManagement
     /// Google Drive API v3への通信をService Accountのアクセストークン(Bearer認証)で行う。
     /// 前提: 対象フォルダ/ファイルがService Accountのメールアドレスに対して共有されていること。
     /// Unity 6.3(UnityWebRequestAsyncOperationのネイティブGetAwaiterに対応)を前提にasync/awaitで実装。
-    /// </summary>
     /// </summary>
     internal static class DriveApiClient
     {
@@ -62,10 +62,10 @@ namespace KillChord.Editor.AssetManagement
         /// 指定フォルダ内の全ファイル/フォルダをリストアップする。ページネーションに対応。
         /// </summary>
         /// <param name="folderId"> リストアップ対象の Google Drive フォルダ ID。 </param>
-        /// <param name="accessToken"> Drive API へのアクセストークン。 </param>
+        /// <param name="credential"> Drive API への認証情報。 </param>
         /// <param name="ct"> 操作をキャンセルするためのトークン。 </param>
         /// <returns> フォルダ内のファイル/フォルダのリスト。 </returns>
-        public static async Task<List<DriveNode>> ListChildrenAsync(string folderId, string accessToken, CancellationToken ct = default)
+        public static async Task<List<DriveNode>> ListChildrenAsync(string folderId, ServiceAccountCredential credential, CancellationToken ct = default)
         {
             var result = new List<DriveNode>();
             string pageToken = null;
@@ -82,6 +82,7 @@ namespace KillChord.Editor.AssetManagement
                     url += $"&pageToken={Uri.EscapeDataString(pageToken)}";
                 }
 
+                var accessToken = await credential.GetAccessTokenForRequestAsync();
                 using var request = UnityWebRequest.Get(url);
                 request.timeout = 60;
                 request.SetRequestHeader("Authorization", $"Bearer {accessToken}");
@@ -123,10 +124,10 @@ namespace KillChord.Editor.AssetManagement
         /// Google Drive からファイルをダウンロードして、ローカルパスに保存する。
         /// </summary>
         /// <param name="fileId"> ダウンロード対象の Google Drive ファイル ID。 </param>
-        /// <param name="accessToken"> Drive API へのアクセストークン。 </param>
+        /// <param name="credential"> Drive API への認証情報。 </param>
         /// <param name="destinationAbsolutePath"> 保存先の絶対パス。ディレクトリが存在しない場合は自動作成する。 </param>
         /// <param name="ct"> 操作をキャンセルするためのトークン。 </param>
-        public static async Task DownloadFileAsync(string fileId, string accessToken, string destinationAbsolutePath, CancellationToken ct = default)
+        public static async Task DownloadFileAsync(string fileId, ServiceAccountCredential credential, string destinationAbsolutePath, CancellationToken ct = default)
         {
             var dir = Path.GetDirectoryName(destinationAbsolutePath);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
@@ -134,10 +135,14 @@ namespace KillChord.Editor.AssetManagement
                 Directory.CreateDirectory(dir);
             }
 
+            var accessToken = await credential.GetAccessTokenForRequestAsync();
             var url = $"{FILES_ENDPOINT}/{fileId}?alt=media&supportsAllDrives=true";
             using var request = UnityWebRequest.Get(url);
             request.SetRequestHeader("Authorization", $"Bearer {accessToken}");
-            request.downloadHandler = new DownloadHandlerFile(destinationAbsolutePath);
+            request.downloadHandler = new DownloadHandlerFile(destinationAbsolutePath)
+            {
+                removeFileOnAbort = true
+            };
 
             var asyncOp = request.SendWebRequest();
             while (!asyncOp.isDone)
@@ -148,6 +153,10 @@ namespace KillChord.Editor.AssetManagement
 
             if (request.result != UnityWebRequest.Result.Success)
             {
+                if (File.Exists(destinationAbsolutePath))
+                {
+                    File.Delete(destinationAbsolutePath);
+                }
                 throw new Exception($"Drive API download failed ({request.responseCode}): {request.error}");
             }
         }

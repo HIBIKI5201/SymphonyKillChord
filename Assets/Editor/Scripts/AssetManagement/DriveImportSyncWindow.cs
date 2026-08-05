@@ -34,6 +34,11 @@ namespace KillChord.Editor.AssetManagement
         private bool scrollToBottom;
 
         /// <summary>
+        /// 同期実行中はウィンドウを閉じられないようにする。
+        /// </summary>
+        public override bool hasUnsavedChanges => isRunning;
+
+        /// <summary>
         /// Drive Import Sync ウィンドウを開く。
         /// </summary>
         [MenuItem("Window/Drive Import/Sync")]
@@ -165,37 +170,46 @@ namespace KillChord.Editor.AssetManagement
             }
 
             EditorGUILayout.EndScrollView();
-            
+
             if (scrollToBottom)
             {
                 scroll.y = float.MaxValue;
                 scrollToBottom = false;
             }
-            
-            EditorGUI.BeginDisabledGroup(isRunning);
 
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUI.BeginDisabledGroup(!isRunning);
+            if (GUILayout.Button("Cancel"))
+            {
+                DriveImportSync.Cancel();
+            }
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUI.BeginDisabledGroup(isRunning);
             if (GUILayout.Button("Close"))
             {
                 Close();
             }
-
             EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.EndHorizontal();
         }
-        
+
         /// <summary>
-        /// ウィンドウを閉じるかどうかを判定する。実行中は閉じられない。
+        /// ウィンドウを閉じる際の保存確認メッセージを表示する。
         /// </summary>
-        /// <returns> 閉じて問題がない場合 true。 </returns>
-        private bool WantsToClose()
+        /// <returns> 閉じる操作をキャンセルする場合のダイアログメッセージ。 </returns>
+        public override string saveChangesMessage => "同期完了までウィンドウを閉じられません。";
+
+        private void OnDestroy()
         {
-            if (isRunning)
+            if (window == this)
             {
-                EditorUtility.DisplayDialog("Drive Import", "同期完了までウィンドウを閉じられません。", "OK");
-                return false;
+                window = null;
             }
-            return true;
         }
-        
+
         /// <summary>
         /// ログエントリの種類。
         /// </summary>

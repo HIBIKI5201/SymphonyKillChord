@@ -29,12 +29,12 @@ namespace KillChord.Editor.AssetManagement
         };
 
         /// <summary>
-        /// Service Account JSON 鍵を使用して Google Drive API のアクセストークンを取得する。
+        /// Service Account JSON 鍵を使用して Google Drive API の認証情報を取得する。
         /// </summary>
         /// <param name="serviceAccountJsonKey"> Service Account JSON 鍵の文字列。 </param>
-        /// <returns> 有効期間内のアクセストークン。 </returns>
+        /// <returns> Service Account 認証情報。 </returns>
         /// <exception cref="InvalidOperationException"> JSON 解析失敗またはフィールド不足。 </exception>
-        public static async Task<string> GetAccessTokenAsync(string serviceAccountJsonKey)
+        public static ServiceAccountCredential GetCredential(string serviceAccountJsonKey)
         {
             if (string.IsNullOrEmpty(serviceAccountJsonKey))
             {
@@ -64,8 +64,7 @@ namespace KillChord.Editor.AssetManagement
                 Scopes = Scopes
             }.FromPrivateKey(keyFile.private_key);
 
-            var credential = new ServiceAccountCredential(initializer);
-            return await credential.GetAccessTokenForRequestAsync();
+            return new ServiceAccountCredential(initializer);
         }
     }
 }

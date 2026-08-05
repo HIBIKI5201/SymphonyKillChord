@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
 using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
@@ -15,6 +16,17 @@ namespace KillChord.Editor.AssetManagement
     {
         private static bool isRunning;
         private static CancellationTokenSource cts;
+
+        /// <summary>
+        /// 実行中の同期をキャンセルする。
+        /// </summary>
+        public static void Cancel()
+        {
+            if (isRunning && cts != null)
+            {
+                cts.Cancel();
+            }
+        }
 
         [MenuItem(ToolConst.TOOLS_PATH + "/" + nameof(DriveImportSync) + "/Sync Now")]
         public static async void SyncNow()
@@ -59,22 +71,22 @@ namespace KillChord.Editor.AssetManagement
                     return;
                 }
 
-                string accessToken;
+                ServiceAccountCredential credential;
                 try
                 {
-                    accessToken = await DriveAuthProvider.GetAccessTokenAsync(secrets.serviceAccountJsonKey);
+                    credential = DriveAuthProvider.GetCredential(secrets.serviceAccountJsonKey);
                 }
                 catch (InvalidOperationException e)
                 {
                     const string prefix = "[DriveImport]";
-                    Debug.LogError($"{prefix} アクセストークンの取得に失敗しました: {e.Message}\n{e.StackTrace}");
-                    DriveImportSyncWindow.Error($"{prefix} アクセストークンの取得に失敗しました: {e.Message}");
+                    Debug.LogError($"{prefix} 認証情報の取得に失敗しました: {e.Message}\n{e.StackTrace}");
+                    DriveImportSyncWindow.Error($"{prefix} 認証情報の取得に失敗しました: {e.Message}");
                     return;
                 }
                 catch (Exception e)
                 {
                     const string prefix = "[DriveImport]";
-                    Debug.LogError($"{prefix} 予期しないエラーでトークン取得に失敗しました: {e.Message}\n{e.StackTrace}");
+                    Debug.LogError($"{prefix} 予期しないエラーで認証に失敗しました: {e.Message}\n{e.StackTrace}");
                     DriveImportSyncWindow.Error($"{prefix} 予期しないエラーが発生しました: {e.Message}");
                     return;
                 }
@@ -108,7 +120,7 @@ namespace KillChord.Editor.AssetManagement
 
                     try
                     {
-                        await CollectFilesAsync(sourceFolder.folderId, destinationAbsRoot, settings, accessToken, queue, cts.Token);
+                        await CollectFilesAsync(sourceFolder.folderId, destinationAbsRoot, settings, credential, queue, cts.Token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -151,7 +163,7 @@ namespace KillChord.Editor.AssetManagement
                         try
                         {
                             cts.Token.ThrowIfCancellationRequested();
-                            await DriveApiClient.DownloadFileAsync(node.Id, accessToken, absPath, cts.Token);
+                            await DriveApiClient.DownloadFileAsync(node.Id, credential, absPath, cts.Token);
                             manifest.SetModifiedTime(node.Id, node.ModifiedTime);
                             string assetPath = FileUtil.GetProjectRelativePath(absPath);
 
@@ -244,18 +256,18 @@ namespace KillChord.Editor.AssetManagement
         /// <param name="folderId"> 走査開始フォルダの Drive ID。 </param>
         /// <param name="localFolderAbsPath"> ローカル保存先の絶対パス。 </param>
         /// <param name="settings"> 除外パターンなどの同期設定。 </param>
-        /// <param name="accessToken"> Drive API アクセストークン。 </param>
+        /// <param name="credential"> Drive API 認証情報。 </param>
         /// <param name="queue"> ダウンロード対象ファイル (ノード, ローカルパス) のリスト。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
         private static async Task CollectFilesAsync(
             string folderId,
             string localFolderAbsPath,
             DriveImportSettings settings,
-            string accessToken,
+            ServiceAccountCredential credential,
             List<(DriveApiClient.DriveNode, string)> queue,
             CancellationToken ct = default)
         {
-            List<DriveApiClient.DriveNode> children = await DriveApiClient.ListChildrenAsync(folderId, accessToken, ct);
+            List<DriveApiClient.DriveNode> children = await DriveApiClient.ListChildrenAsync(folderId, credential, ct);
 
             foreach (var node in children)
             {
@@ -267,7 +279,7 @@ namespace KillChord.Editor.AssetManagement
                     }
 
                     var subPath = Path.Combine(localFolderAbsPath, SanitizeLocalName(node.Name));
-                    await CollectFilesAsync(node.Id, subPath, settings, accessToken, queue, ct);
+                    await CollectFilesAsync(node.Id, subPath, settings, credential, queue, ct);
                 }
                 else
                 {
