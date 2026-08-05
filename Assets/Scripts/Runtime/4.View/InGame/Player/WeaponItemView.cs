@@ -44,6 +44,18 @@ namespace KillChord.Runtime.View.InGame.Player
                 .WithOnComplete(() => _weaponModel.SetActive(false))
                 .Bind(this, (value, state) => state.ApplyDither(value));
         }
+        /// <summary>
+        ///     武器を即座に非表示にします。
+        /// </summary>
+        public void HideWeaponImmidiate()
+        {
+            if (_weaponModel == null)
+            {
+                return;
+            }
+            _handle.TryCancel();
+            _weaponModel.SetActive(false);
+        }
         private void OnDestroy()
         {
             _handle.TryCancel();
@@ -67,12 +79,12 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary>
         ///     武器を表示します。
         /// </summary>
-        private void ShowWeapon()
+        private MotionHandle ShowWeapon()
         {
             if (_weaponModel == null)
             {
                 Debug.LogError($"WeaponModel が未設定です。{name}", this);
-                return;
+                return default;
             }
 
             _materialPropertyBlock ??= new MaterialPropertyBlock();
@@ -85,6 +97,7 @@ namespace KillChord.Runtime.View.InGame.Player
                     .Bind(this, (value, state) => state.ApplyFlash(value)))
                 .Run();
             _weaponModel.SetActive(true);
+            return _handle;
         }
 
         /// <summary>
