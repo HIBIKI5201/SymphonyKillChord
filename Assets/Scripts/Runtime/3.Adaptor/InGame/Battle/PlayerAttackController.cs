@@ -40,8 +40,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             TargetAreaQuery targetAreaQuery,
             Transform playerTransform,
             float attackRotationSpeed,
-            float attackCooldown,
-            int baseDamage
+            float attackCooldown
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -53,7 +52,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
             AttackRotationSpeed = attackRotationSpeed;
-            _baseDamage = baseDamage;
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
             _attackCooldownRemainig = 0d;
@@ -71,13 +69,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> 攻撃クールダウン中かどうかを表すプロパティ。 </summary>
         public bool IsAttackCooldown => _attackCooldownRemainig > 0f;
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> ロックオン対象が存在する場合はtrue。 </summary>
         public bool HasCurrentLockOnTarget { get; private set; }
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> ロックオン対象の座標。対象がない場合は <see cref="Vector3.zero"/>。 </summary>
         public Vector3 CurrentLockOnTargetPosition { get; private set; }
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> 攻撃時に対象へ向き直る回転速度。 </summary>
         public float AttackRotationSpeed { get; }
 
         /// <summary>
@@ -171,6 +169,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
 
             UpdatePendingHits(deltaTime);
+        }
+
+        /// <summary>
+        ///     保留中の多段ヒットの状態を初期化する。
+        ///     ゲームプレイ停止時にも呼び、残りヒットを次のプレイへ持ち越さないようにする。
+        /// </summary>
+        public void ClearPendingHits()
+        {
+            _pendingHitCount = 0;
+            _pendingHitTimer = 0d;
+            _pendingAttackDefinition = null;
         }
 
         /// <summary>
@@ -318,16 +327,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         }
 
         /// <summary>
-        ///     保留中の多段ヒットの状態を初期化する。
-        /// </summary>
-        private void ClearPendingHits()
-        {
-            _pendingHitCount = 0;
-            _pendingHitTimer = 0d;
-            _pendingAttackDefinition = null;
-        }
-
-        /// <summary>
         ///     現在のターゲット状態を更新します。
         /// </summary>
         /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
@@ -388,7 +387,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
         private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
-        private readonly int _baseDamage;
         private double _attackCooldownRemainig;
         private double _attackCooldown;
         private AttackDefinition _pendingAttackDefinition;

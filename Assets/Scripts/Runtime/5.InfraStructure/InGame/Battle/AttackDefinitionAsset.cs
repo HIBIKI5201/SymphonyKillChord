@@ -68,7 +68,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         [SerializeField, Tooltip("多段ヒット時の1ヒットあたりの間隔（秒）。攻撃硬直より短い値にすること")]
         private float _hitInterval = DEFAULT_HIT_INTERVAL;
 
-        [SerializeField, Tooltip("クリティカルダメージの倍率。武器ごとに設定する。会心率はキャラクター側で設定する")]
+        [SerializeField,
+        Tooltip("クリティカルダメージの倍率。武器ごとに設定する。仕様書の「上昇率％」とは単位が違うので注意（仕様書の「クリティカルダメージ50」は 1.5 を指定）。" +
+            "会心率はキャラクター側で設定する")]
         private float _criticalDamageMultiplier = DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
     }
 }

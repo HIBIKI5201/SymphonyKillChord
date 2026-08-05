@@ -6,6 +6,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// <summary>
     ///     武器ごとのダメージ倍率を適用する攻撃処理ステップ。
     ///     拍子ごとの倍率は攻撃定義データが持つため、このステップは拍子の数値を参照しない。
+    ///     ジャスト入力時のダメージ倍率もこのステップで適用する。
     /// </summary>
     [Serializable]
     public class WeaponDamageStep : IAttackStep

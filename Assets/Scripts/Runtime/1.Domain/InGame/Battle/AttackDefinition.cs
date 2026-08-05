@@ -78,5 +78,14 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 多段ヒット時の1ヒットあたりの間隔（秒）。 </summary>
         public float HitInterval { get; }
+
+        /// <summary> 指定できる半角の最小値（度）。 </summary>
+        public const float MIN_HALF_ANGLE_DEGREES = 0f;
+
+        /// <summary> 指定できる半角の最大値（度）。全方位を表す。 </summary>
+        public const float MAX_HALF_ANGLE_DEGREES = 180f;
+
+        /// <summary> 指定できるヒット数の最小値。 </summary>
+        public const int MIN_HIT_COUNT = 1;
     }
 }

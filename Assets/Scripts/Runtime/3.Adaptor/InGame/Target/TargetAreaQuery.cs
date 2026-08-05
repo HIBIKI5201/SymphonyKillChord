@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using System;
 using System.Collections.Generic;
@@ -23,12 +24,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
             _targetSystemViewModel = targetSystemViewModel;
             _targetEntityRegistry = targetEntityRegistry;
         }
-
-        /// <summary> 指定できる半角の最小値（度）。 </summary>
-        public const float MIN_HALF_ANGLE_DEGREES = 0f;
-
-        /// <summary> 指定できる半角の最大値（度）。全方位を表す。 </summary>
-        public const float MAX_HALF_ANGLE_DEGREES = 180f;
 
         /// <summary>
         ///     扇形範囲に含まれる対象を、原点からの水平距離の昇順で取得します。
@@ -74,7 +69,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
 
             axis /= axisLength;
 
-            float clampedHalfAngle = Mathf.Clamp(halfAngleDegrees, MIN_HALF_ANGLE_DEGREES, MAX_HALF_ANGLE_DEGREES);
+            float clampedHalfAngle = Mathf.Clamp(
+                halfAngleDegrees,
+                AttackDefinition.MIN_HALF_ANGLE_DEGREES,
+                AttackDefinition.MAX_HALF_ANGLE_DEGREES);
             float cosThreshold = Mathf.Cos(clampedHalfAngle * Mathf.Deg2Rad);
             float sqrRange = range * range;
 
@@ -98,10 +96,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
                 }
 
                 float distance = Mathf.Sqrt(sqrDistance);
-                if (distance <= Mathf.Epsilon)
+                if (distance < MIN_JUDGEABLE_DISTANCE)
                 {
-                    // 原点と水平位置が一致する対象は角度を定義できないため、常に範囲内として扱う。
-                    results.Add(new TargetAreaHit(target, entity, 0f));
+                    // 原点とほぼ同じ水平位置にある対象は角度を定義できないため範囲外として扱う。
+                    // 当たり判定の半径があるため、この距離まで重なることは実際には起こらない。
                     continue;
                 }
 
@@ -115,6 +113,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
 
             results.Sort(DISTANCE_ASCENDING_COMPARISON);
         }
+
+        /// <summary> 角度を判定できる最小の水平距離（メートル）。これ未満は方向を決められない。 </summary>
+        private const float MIN_JUDGEABLE_DISTANCE = 0.01f;
 
         /// <summary> 水平距離の昇順で比較する比較子。 </summary>
         private static readonly Comparison<TargetAreaHit> DISTANCE_ASCENDING_COMPARISON =

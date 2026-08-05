@@ -24,4 +24,4 @@ MonoBehaviour:
   _isMultiTarget: 1
   _hitCount: 1
   _hitInterval: 0.05
-  _criticalDamageMultiplier: 2
+  _criticalDamageMultiplier: 1.5

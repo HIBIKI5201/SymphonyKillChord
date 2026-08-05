@@ -12,18 +12,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     public static class AttackDefinitionFactory
     {
         /// <summary>
-        ///     攻撃定義データを受け取り、攻撃定義オブジェクトを生成するメソッド。
-        /// </summary>
-        /// <param name="data"> 攻撃定義データ。 </param>
-        /// <returns> 生成された攻撃定義オブジェクト。 </returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        public static AttackDefinition Create(AttackDefinitionAsset data)
-        {
-            return Create(data, 0f);
-        }
-
-        /// <summary>
         ///     会心ダメージボーナスを適用して攻撃定義オブジェクトを生成する。
         ///     会心率は武器ではなくキャラクターが持つため、ここでは扱わない。
         /// </summary>
@@ -77,15 +65,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 data.JustDamageMultiplier,
                 Mathf.Max(0f, data.WeaponDamageMultiplier),
                 Mathf.Max(0f, data.Range),
-                Mathf.Clamp(data.HalfAngleDegrees, MIN_HALF_ANGLE_DEGREES, MAX_HALF_ANGLE_DEGREES),
+                Mathf.Clamp(
+                    data.HalfAngleDegrees,
+                    AttackDefinition.MIN_HALF_ANGLE_DEGREES,
+                    AttackDefinition.MAX_HALF_ANGLE_DEGREES),
                 data.IsMultiTarget,
-                Mathf.Max(MIN_HIT_COUNT, data.HitCount),
+                Mathf.Max(AttackDefinition.MIN_HIT_COUNT, data.HitCount),
                 Mathf.Max(0f, data.HitInterval)
             );
         }
-
-        private const float MIN_HALF_ANGLE_DEGREES = 0f;
-        private const float MAX_HALF_ANGLE_DEGREES = 180f;
-        private const int MIN_HIT_COUNT = 1;
     }
 }

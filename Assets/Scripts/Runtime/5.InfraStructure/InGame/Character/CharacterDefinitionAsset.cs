@@ -52,7 +52,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         [SerializeField, Tooltip("キャラクターの攻撃の基本ダメージ。")]
         private int _baseDamage;
 
-        [SerializeField, Range(0f, 1f), Tooltip("キャラクターの会心率。0〜1で指定する。会心ダメージ倍率は武器ごとに攻撃定義側で設定する。")]
+        [SerializeField, Range(0f, 1f),
+        Tooltip("キャラクターの会心率。0〜1で指定する。仕様書の％表記とは単位が違うので注意（仕様書の「クリティカル率5」は 0.05 を指定）。" +
+            "会心ダメージ倍率は武器ごとに攻撃定義側で設定する。")]
         private float _criticalChance;
     }
 }
