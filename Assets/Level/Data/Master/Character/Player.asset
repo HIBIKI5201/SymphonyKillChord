@@ -26,3 +26,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5178ef70675b7ce458b25b4b20912e86, type: 2}
   - {fileID: 11400000, guid: 76d96cd6c886b214bae3e375e97b1274, type: 2}
   _baseDamage: 5
+  _criticalChance: 0.1
