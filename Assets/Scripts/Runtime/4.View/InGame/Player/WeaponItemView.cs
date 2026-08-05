@@ -1,7 +1,5 @@
 using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
-using System;
-using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
@@ -9,22 +7,16 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     武器一つのSE再生、表示切替、Effect再生などを行うクラス。
     /// </summary>
-    public class WeaponItemView : MonoBehaviour
+    public sealed class WeaponItemView : MonoBehaviour
     {
         /// <summary>
         ///     攻撃によるSEやEffect、モデル切り替えを行います。
         /// </summary>
-        /// <param name="clipSeconds"> クリップの長さ。 </param>
-        /// <param name="ct"> CancellationToken。 </param>
-        /// <returns></returns>
-        public async Awaitable PlayAsync(float clipSeconds, CancellationToken ct)
+        public void Play()
         {
             ShowWeapon();
             PlayAttackSound();
-            PlayEffectAsync(ct);
-            await Awaitable.WaitForSecondsAsync(clipSeconds, ct);
-
-            HideWeapon();
+            PlayEffect();
         }
 
         /// <summary>
@@ -39,26 +31,29 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
-            _handle.TryCancel();
-            _handle = LMotion.Create(1f, 0f, 0.5f)
+            _effectHandle.TryCancel();
+            _weaponHandle.TryCancel();
+            _weaponHandle = LMotion.Create(1f, 0f, 0.5f)
                 .WithOnComplete(() => _weaponModel.SetActive(false))
                 .Bind(this, (value, state) => state.ApplyDither(value));
         }
         /// <summary>
         ///     武器を即座に非表示にします。
         /// </summary>
-        public void HideWeaponImmidiate()
+        public void HideWeaponImmediate()
         {
             if (_weaponModel == null)
             {
                 return;
             }
-            _handle.TryCancel();
+            _effectHandle.TryCancel();
+            _weaponHandle.TryCancel();
             _weaponModel.SetActive(false);
         }
         private void OnDestroy()
         {
-            _handle.TryCancel();
+            _weaponHandle.TryCancel();
+            _effectHandle.TryCancel();
         }
 
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
@@ -79,25 +74,24 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary>
         ///     武器を表示します。
         /// </summary>
-        private MotionHandle ShowWeapon()
+        private void ShowWeapon()
         {
             if (_weaponModel == null)
             {
                 Debug.LogError($"WeaponModel が未設定です。{name}", this);
-                return default;
+                return;
             }
 
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
-            _handle.TryCancel();
-            _handle = LSequence.Create()
+            _weaponHandle.TryCancel();
+            _weaponHandle = LSequence.Create()
                 .Join(LMotion.Create(0f, 1f, 0.2f)
                     .Bind(this, (value, state) => state.ApplyDither(value)))
                 .Join(LMotion.Create(1f, 0f, 0.4f)
                     .Bind(this, (value, state) => state.ApplyFlash(value)))
                 .Run();
             _weaponModel.SetActive(true);
-            return _handle;
         }
 
         /// <summary>
@@ -115,30 +109,17 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary>
         ///     遅延後に攻撃Effectを再生します。
         /// </summary>
-        private async Awaitable PlayEffectAsync(CancellationToken cancellationToken)
+        private void PlayEffect()
         {
-            try
+            if (_attackEffect == null)
             {
-                if (_attackEffect == null)
-                {
-                    return;
-                }
-
-                if (_effectDelaySeconds > 0f)
-                {
-                    await Awaitable.WaitForSecondsAsync(_effectDelaySeconds, cancellationToken);
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                _attackEffect.Play();
+                return;
             }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
+            _effectHandle.TryCancel();
+            _effectHandle = LMotion.Create(0, 0, _effectDelaySeconds)
+                .WithOnComplete(() => _attackEffect.Play())
+                .WithOnCancel(() => _attackEffect.Stop(true))
+                .RunWithoutBinding();
         }
 
         private void ApplyDither(float value)
@@ -171,7 +152,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
 
         private MaterialPropertyBlock _materialPropertyBlock;
-        private MotionHandle _handle;
+        private MotionHandle _weaponHandle;
+        private MotionHandle _effectHandle;
         private readonly static int DitherId = Shader.PropertyToID("_Ratio");
         private readonly static int FlashId = Shader.PropertyToID("_Flash");
     }
