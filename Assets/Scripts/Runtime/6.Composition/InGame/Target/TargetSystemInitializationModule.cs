@@ -25,12 +25,14 @@ namespace KillChord.Runtime.Composition.InGame.Target
             _container = new TargetSystemModuleContainer(
                 _initializer.TargetSystemController,
                 _initializer.TargetingSystemViewModel,
-                _initializer.TargetEntityRegistry);
+                _initializer.TargetEntityRegistry,
+                _initializer.TargetAreaQuery);
             ServiceLocator.RegisterInstance(_container);
             _isRegistered = true;
             return _container.TargetSystemController != null
                 && _container.TargetSystemViewModel != null
-                && _container.TargetEntityRegistry != null;
+                && _container.TargetEntityRegistry != null
+                && _container.TargetAreaQuery != null;
         }
 
         /// <summary>
