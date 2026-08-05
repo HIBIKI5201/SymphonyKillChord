@@ -71,7 +71,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                     AttackDefinition.MAX_HALF_ANGLE_DEGREES),
                 data.IsMultiTarget,
                 Mathf.Max(AttackDefinition.MIN_HIT_COUNT, data.HitCount),
-                Mathf.Max(0f, data.HitInterval)
+                Mathf.Max(0f, data.HitInterval),
+                Mathf.Clamp(
+                    data.OutOfRangeDamageMultiplier,
+                    AttackDefinition.MIN_OUT_OF_RANGE_DAMAGE_MULTIPLIER,
+                    AttackDefinition.MAX_OUT_OF_RANGE_DAMAGE_MULTIPLIER)
             );
         }
     }

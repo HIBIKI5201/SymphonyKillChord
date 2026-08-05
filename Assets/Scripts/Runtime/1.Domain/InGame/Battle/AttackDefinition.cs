@@ -22,6 +22,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="isMultiTarget"> 範囲内の複数対象へ同時に命中する場合はtrue。 </param>
         /// <param name="hitCount"> 1回の攻撃で発生するヒット数。 </param>
         /// <param name="hitInterval"> 多段ヒット時の1ヒットあたりの間隔（秒）。 </param>
+        /// <param name="outOfRangeDamageMultiplier"> 射程外の対象へ命中したときのダメージ倍率。 </param>
         public AttackDefinition(string attackName,
             AttackSpec attackSpec,
             IAttackPipeline attackPipeline,
@@ -32,7 +33,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             float halfAngleDegrees = 0f,
             bool isMultiTarget = false,
             int hitCount = 1,
-            float hitInterval = 0f
+            float hitInterval = 0f,
+            float outOfRangeDamageMultiplier = 0f
             )
         {
             AttackName = attackName;
@@ -46,6 +48,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             IsMultiTarget = isMultiTarget;
             HitCount = hitCount;
             HitInterval = hitInterval;
+            OutOfRangeDamageMultiplier = outOfRangeDamageMultiplier;
         }
 
         /// <summary> 攻撃の名前を表すプロパティ。 </summary>
@@ -78,6 +81,17 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 多段ヒット時の1ヒットあたりの間隔（秒）。 </summary>
         public float HitInterval { get; }
+
+        /// <summary>
+        ///     射程外の対象へ命中したときのダメージ倍率。0で射程外は無効化、1で減衰なし。
+        /// </summary>
+        public float OutOfRangeDamageMultiplier { get; }
+
+        /// <summary> 射程外ダメージ倍率の最小値。 </summary>
+        public const float MIN_OUT_OF_RANGE_DAMAGE_MULTIPLIER = 0f;
+
+        /// <summary> 射程外ダメージ倍率の最大値。 </summary>
+        public const float MAX_OUT_OF_RANGE_DAMAGE_MULTIPLIER = 1f;
 
         /// <summary> 指定できる半角の最小値（度）。 </summary>
         public const float MIN_HALF_ANGLE_DEGREES = 0f;

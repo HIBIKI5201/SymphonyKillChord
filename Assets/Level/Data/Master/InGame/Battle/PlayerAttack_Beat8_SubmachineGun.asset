@@ -25,3 +25,4 @@ MonoBehaviour:
   _hitCount: 3
   _hitInterval: 0.05
   _criticalDamageMultiplier: 1.5
+  _outOfRangeDamageMultiplier: 0.5

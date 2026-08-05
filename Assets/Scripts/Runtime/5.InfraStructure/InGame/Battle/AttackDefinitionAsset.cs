@@ -35,6 +35,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         public float HitInterval => _hitInterval;
         /// <summary> クリティカルダメージの倍率を取得する。 </summary>
         public float CriticalDamageMultiplier => _criticalDamageMultiplier;
+        /// <summary> 射程外の対象へ命中したときのダメージ倍率を取得する。 </summary>
+        public float OutOfRangeDamageMultiplier => _outOfRangeDamageMultiplier;
 
         private const float DEFAULT_WEAPON_DAMAGE_MULTIPLIER = 1f;
         private const float DEFAULT_RANGE = 10f;
@@ -42,6 +44,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         private const int DEFAULT_HIT_COUNT = 1;
         private const float DEFAULT_HIT_INTERVAL = 0.05f;
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 2f;
+        private const float DEFAULT_OUT_OF_RANGE_DAMAGE_MULTIPLIER = 0.5f;
 
         [SerializeField, Tooltip("攻撃名")] private string _attackName;
         [SerializeField, Tooltip("攻撃パラメーターセット")] private AttackSpecAsset _attackParameterSetData;
@@ -72,5 +75,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
         Tooltip("クリティカルダメージの倍率。武器ごとに設定する。仕様書の「上昇率％」とは単位が違うので注意（仕様書の「クリティカルダメージ50」は 1.5 を指定）。" +
             "会心率はキャラクター側で設定する")]
         private float _criticalDamageMultiplier = DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
+
+        [SerializeField, Range(0f, 1f),
+        Tooltip("射程外の敵へ命中したときのダメージ倍率。射程内は減衰なし。" +
+            "1で減衰なし、0.5で半減。0にしてもヒット自体は成立し、ダメージ0が表示される")]
+        private float _outOfRangeDamageMultiplier = DEFAULT_OUT_OF_RANGE_DAMAGE_MULTIPLIER;
     }
 }

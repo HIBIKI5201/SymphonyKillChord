@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false, Damage baseDamage = default)
+        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false, Damage baseDamage = default, bool isOutOfRange = false)
         {
             _attackDefinition = attackDefinition;
             _baseDamage = baseDamage;
@@ -21,6 +21,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _attacker = attacker;
             _defender = defender;
             _isJustHit = isJustHit;
+            _isOutOfRange = isOutOfRange;
         }
 
         /// <summary>
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _defender = attackStepContext._defender;
             _isJustHit = attackStepContext._isJustHit;
             _baseDamage = attackStepContext._baseDamage;
+            _isOutOfRange = attackStepContext._isOutOfRange;
         }
 
         /// <summary> 攻撃定義を取得する。 </summary>
@@ -60,6 +62,10 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         
         /// <summary> リズムゲームのジャストタイミングで攻撃がヒットしたかを取得する。</summary>
         public bool IsJustHit => _isJustHit;
+
+        /// <summary> 攻撃対象が射程外にいるかを取得する。 </summary>
+        public bool IsOutOfRange => _isOutOfRange;
+
         private readonly AttackDefinition _attackDefinition;
         private readonly Damage _damage;
         private readonly Damage _baseDamage;
@@ -67,5 +73,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         private readonly IAttacker _attacker;
         private readonly IDefender _defender;
         private readonly bool _isJustHit;
+        private readonly bool _isOutOfRange;
     }
 }

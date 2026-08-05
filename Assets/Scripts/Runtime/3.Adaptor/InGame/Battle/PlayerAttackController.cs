@@ -231,10 +231,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             Vector3 origin = _playerTransform.position;
             Vector3 direction = CurrentLockOnTargetPosition - origin;
 
+            // 射程外にもダメージ減衰付きで命中させるため、探索距離は射程ではなく上限距離を使う。
+            // 減衰率が0でもヒット自体は成立させる。当たらないとプレイヤーには不具合に見えるため、
+            // ダメージ0の表示を出して「当たったが効いていない」ことを伝える。
             _targetAreaQuery.QueryFanArea(
                 origin,
                 direction,
-                attackDefinition.Range,
+                OUT_OF_RANGE_QUERY_DISTANCE,
                 attackDefinition.HalfAngleDegrees,
                 _hitTargets);
 
@@ -250,6 +253,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private bool ApplyHit(AttackDefinition attackDefinition)
         {
             _hitDefenders.Clear();
+            _attackTargets.Clear();
 
             // 一覧は水平距離の昇順。多段ヒットの途中で対象が倒れた場合は次に近い対象へ移る。
             for (int i = 0; i < _hitTargets.Count; i++)
@@ -260,7 +264,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                     continue;
                 }
 
+                bool isOutOfRange = hit.Distance > attackDefinition.Range;
                 _hitDefenders.Add(hit.Entity);
+                _attackTargets.Add(new AttackTarget(hit.Entity, isOutOfRange));
 
                 if (!attackDefinition.IsMultiTarget)
                 {
@@ -268,7 +274,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 }
             }
 
-            if (_hitDefenders.Count == 0)
+            if (_attackTargets.Count == 0)
             {
                 return false;
             }
@@ -276,7 +282,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             AttackExecutor.Execute(
                 attackDefinition,
                 _battleState.Attacker,
-                _hitDefenders,
+                _attackTargets,
                 false,
                 _battleState.Attacker.BaseDamage,
                 _hitResults);
@@ -325,6 +331,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             ClearPendingHits();
         }
+
+        /// <summary>
+        ///     射程外の対象まで探索する際の最大距離（メートル）。
+        ///     射程外にも減衰付きで命中させる仕様のため、実質的な上限として使う。
+        /// </summary>
+        private const float OUT_OF_RANGE_QUERY_DISTANCE = 1000f;
 
         /// <summary>
         ///     現在のターゲット状態を更新します。
@@ -386,6 +398,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly Transform _playerTransform;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
         private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
+        private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
         private double _attackCooldownRemainig;
         private double _attackCooldown;

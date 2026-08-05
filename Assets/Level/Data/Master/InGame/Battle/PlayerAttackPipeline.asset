@@ -15,12 +15,16 @@ MonoBehaviour:
   _attackSteps:
   - rid: 7100000000000000001
   - rid: 7100000000000000002
+  - rid: 7100000000000000003
   references:
     version: 2
     RefIds:
     - rid: 7100000000000000001
       type: {class: CriticalStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
-      data: 
+      data:
     - rid: 7100000000000000002
       type: {class: WeaponDamageStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
-      data: 
+      data:
+    - rid: 7100000000000000003
+      type: {class: OutOfRangeDamageStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
+      data:

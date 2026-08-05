@@ -25,7 +25,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             IAttacker attacker,
             IDefender defender,
             bool isJustHit,
-            Damage baseDamage
+            Damage baseDamage,
+            bool isOutOfRange = false
                )
         {
             if (attackDefinition == null)
@@ -46,7 +47,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             ExecuteBuffBeforeAttack(attacker, defender);
 
             // 計算を行い、ダメージを適用する。
-            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage);
+            AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
 
             result = ExecuteBuffAfterAttack(attacker, defender, result);
 
@@ -67,22 +68,22 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
         /// <param name="attacker"> 攻撃者。 </param>
-        /// <param name="defenders"> 攻撃対象の一覧。 </param>
+        /// <param name="targets"> 攻撃対象の一覧。射程外かどうかを対象ごとに持つ。 </param>
         /// <param name="isJustHit"> ジャスト入力かどうか。 </param>
         /// <param name="baseDamage"> 基礎ダメージ。 </param>
         /// <param name="results"> 攻撃結果の格納先。呼び出し時に内容がクリアされる。 </param>
         public static void Execute(
             AttackDefinition attackDefinition,
             IAttacker attacker,
-            IReadOnlyList<IDefender> defenders,
+            IReadOnlyList<AttackTarget> targets,
             bool isJustHit,
             Damage baseDamage,
             List<AttackResult> results
                )
         {
-            if (defenders == null)
+            if (targets == null)
             {
-                throw new ArgumentNullException(nameof(defenders));
+                throw new ArgumentNullException(nameof(targets));
             }
 
             if (results == null)
@@ -94,9 +95,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
             // バフは現状「対象ごと」に実行される。命中数を参照するバフを入れる際は
             // ExecuteBuffBeforeAttack をこのループの外へ出す想定でメソッドを分けてある。
-            for (int i = 0; i < defenders.Count; i++)
+            for (int i = 0; i < targets.Count; i++)
             {
-                results.Add(Execute(attackDefinition, attacker, defenders[i], isJustHit, baseDamage));
+                AttackTarget target = targets[i];
+                results.Add(Execute(
+                    attackDefinition, attacker, target.Defender, isJustHit, baseDamage, target.IsOutOfRange));
             }
         }
 
