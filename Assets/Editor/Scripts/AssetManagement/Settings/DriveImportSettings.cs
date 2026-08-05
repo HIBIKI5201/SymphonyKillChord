@@ -12,8 +12,6 @@ namespace KillChord.Editor.AssetManagement
     [FilePath(ProviderConst.PROJECT_SETTINGS_PATH + nameof(DriveImportSettings), FilePathAttribute.Location.ProjectFolder)]
     internal class DriveImportSettings : ScriptableSingleton<DriveImportSettings>
     {
-        /// <summary> ベースパス (未使用)。 </summary>
-        public string basePath = "";
         /// <summary> 除外対象フォルダ名のリスト。大文字小文字を区別しない。 </summary>
         public List<string> excludeFolderNames = new();
         /// <summary> 除外対象ファイル拡張子のリスト。 </summary>

@@ -68,15 +68,6 @@ namespace KillChord.Editor.AssetManagement
         public void SetModifiedTime(string fileId, string modifiedTime)
         {
             Cache[fileId] = modifiedTime;
-            var index = entries.FindIndex(e => e.fileId == fileId);
-            if (index >= 0)
-            {
-                entries[index].modifiedTime = modifiedTime;
-            }
-            else
-            {
-                entries.Add(new Entry { fileId = fileId, modifiedTime = modifiedTime });
-            }
         }
 
         /// <summary>
