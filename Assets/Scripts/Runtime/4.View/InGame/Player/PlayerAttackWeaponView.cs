@@ -17,7 +17,7 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Play(int beatType, float clipSeconds)
         {
             CancelPlayingWeapon();
-            HideAllWeapons();
+            HideAllWeaponsImmidiate();
 
             if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
@@ -68,6 +68,23 @@ namespace KillChord.Runtime.View.InGame.Player
                 _definitions[i].WeaponItem?.HideWeapon();
             }
 
+            _currentWeaponView = null;
+        }
+        public void HideAllWeaponsImmidiate()
+        {
+            if (_definitions == null)
+            {
+                _currentWeaponView = null;
+                return;
+            }
+            for (int i = 0; i < _definitions.Length; i++)
+            {
+                if (_definitions[i].WeaponItem == null)
+                {
+                    continue;
+                }
+                _definitions[i].WeaponItem?.HideWeaponImmidiate();
+            }
             _currentWeaponView = null;
         }
 
