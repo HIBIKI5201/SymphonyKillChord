@@ -181,7 +181,7 @@ namespace KillChord.Editor.AssetManagement
                             const string prefix = "[DriveImport]";
                             Debug.LogWarning($"{prefix} ダウンロード中断: {node.Name}");
                             DriveImportSyncWindow.Warning($"{prefix} ダウンロード中断: {node.Name}");
-                            totalFailed++;
+                            return;
                         }
                         catch (Exception e)
                         {
