@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.Persistent.Music;
+using LitMotion;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -36,7 +37,16 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _weaponModel.SetActive(false);
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+
+            _handle.TryCancel();
+            _handle = LMotion.Create(1f, 0f, 0.5f)
+                .WithOnComplete(() => _weaponModel.SetActive(false))
+                .Bind(this, (value, state) => state.ApplyDither(value));
+        }
+        private void OnDestroy()
+        {
+            _handle.TryCancel();
         }
 
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
@@ -51,6 +61,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Min(0f), Tooltip("攻撃Effectを再生するまでの遅延時間。")]
         private float _effectDelaySeconds;
 
+        [SerializeField, Tooltip("DitherのMaterialエフェクトを適用するRenderer一覧。")]
+        private Renderer[] _effectRenderers;
+
         /// <summary>
         ///     武器を表示します。
         /// </summary>
@@ -62,6 +75,15 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+
+            _handle.TryCancel();
+            _handle = LSequence.Create()
+                .Join(LMotion.Create(0f, 1f, 0.2f)
+                    .Bind(this, (value, state) => state.ApplyDither(value)))
+                .Join(LMotion.Create(1f, 0f, 0.4f)
+                    .Bind(this, (value, state) => state.ApplyFlash(value)))
+                .Run();
             _weaponModel.SetActive(true);
         }
 
@@ -105,5 +127,39 @@ namespace KillChord.Runtime.View.InGame.Player
                 Debug.LogException(exception, this);
             }
         }
+
+        private void ApplyDither(float value)
+        {
+            foreach (Renderer renderer in _effectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.GetPropertyBlock(_materialPropertyBlock);
+                _materialPropertyBlock.SetFloat(DitherId, value);
+                renderer.SetPropertyBlock(_materialPropertyBlock);
+            }
+        }
+        private void ApplyFlash(float value)
+        {
+            foreach (Renderer renderer in _effectRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+                renderer.GetPropertyBlock(_materialPropertyBlock);
+                _materialPropertyBlock.SetFloat(FlashId, value);
+                renderer.SetPropertyBlock(_materialPropertyBlock);
+            }
+        }
+
+
+        private MaterialPropertyBlock _materialPropertyBlock;
+        private MotionHandle _handle;
+        private readonly static int DitherId = Shader.PropertyToID("_Ratio");
+        private readonly static int FlashId = Shader.PropertyToID("_Flash");
     }
 }
