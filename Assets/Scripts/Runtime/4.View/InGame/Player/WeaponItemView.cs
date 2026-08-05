@@ -31,6 +31,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
+            // 遅延待ちのEffectが非表示後に発火しないよう、Dither開始前に打ち消す。
             _effectHandle.TryCancel();
             _weaponHandle.TryCancel();
             _weaponHandle = LMotion.Create(1f, 0f, 0.5f)
@@ -46,10 +47,15 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
+            // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
             _effectHandle.TryCancel();
             _weaponHandle.TryCancel();
             _weaponModel.SetActive(false);
         }
+
+        /// <summary>
+        ///     破棄時に再生中のMotionを全て打ち消します。
+        /// </summary>
         private void OnDestroy()
         {
             _weaponHandle.TryCancel();
@@ -78,7 +84,7 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             if (_weaponModel == null)
             {
-                Debug.LogError($"WeaponModel が未設定です。{name}", this);
+                Debug.LogError($"{nameof(WeaponItemView)}が未設定です。", this);
                 return;
             }
 
@@ -116,12 +122,17 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
             _effectHandle.TryCancel();
+            // 値を使わないMotionを遅延タイマーとして扱い、完了コールバックでEffectを再生する。
             _effectHandle = LMotion.Create(0, 0, _effectDelaySeconds)
                 .WithOnComplete(() => _attackEffect.Play())
                 .WithOnCancel(() => _attackEffect.Stop(true))
                 .RunWithoutBinding();
         }
 
+        /// <summary>
+        ///     全Rendererに現在のDither値を適用します。
+        /// </summary>
+        /// <param name="value"> 適用するDither値。 </param>
         private void ApplyDither(float value)
         {
             foreach (Renderer renderer in _effectRenderers)
@@ -132,10 +143,15 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
 
                 renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(DitherId, value);
+                _materialPropertyBlock.SetFloat(DITHER_ID, value);
                 renderer.SetPropertyBlock(_materialPropertyBlock);
             }
         }
+
+        /// <summary>
+        ///     全Rendererに現在のFlash値を適用します。
+        /// </summary>
+        /// <param name="value"> 適用するFlash値。 </param>
         private void ApplyFlash(float value)
         {
             foreach (Renderer renderer in _effectRenderers)
@@ -145,7 +161,7 @@ namespace KillChord.Runtime.View.InGame.Player
                     continue;
                 }
                 renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(FlashId, value);
+                _materialPropertyBlock.SetFloat(FLASH_ID, value);
                 renderer.SetPropertyBlock(_materialPropertyBlock);
             }
         }
@@ -154,7 +170,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private MaterialPropertyBlock _materialPropertyBlock;
         private MotionHandle _weaponHandle;
         private MotionHandle _effectHandle;
-        private readonly static int DitherId = Shader.PropertyToID("_Ratio");
-        private readonly static int FlashId = Shader.PropertyToID("_Flash");
+        private readonly static int DITHER_ID = Shader.PropertyToID("_Ratio");
+        private readonly static int FLASH_ID = Shader.PropertyToID("_Flash");
     }
 }

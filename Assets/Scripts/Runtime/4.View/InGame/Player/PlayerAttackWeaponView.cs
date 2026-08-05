@@ -3,7 +3,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Player
 {
     /// <summary>
-    ///    攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
+    ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
     public sealed class PlayerAttackWeaponView : MonoBehaviour
     {
@@ -13,7 +13,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="beatType"> 拍子。 </param>
         public void Play(int beatType)
         {
-            HideAllWeaponsImmidiate();
+            HideAllWeaponsImmediate();
 
             if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
@@ -64,7 +64,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
             _currentWeaponView = null;
         }
-        public void HideAllWeaponsImmidiate()
+
+        /// <summary>
+        ///     全武器をフェードを挟まずに即座に非表示にする。
+        /// </summary>
+        public void HideAllWeaponsImmediate()
         {
             if (_definitions == null)
             {
@@ -87,14 +91,20 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private WeaponItemView _currentWeaponView;
 
+        /// <summary>
+        ///     初期状態では武器を表示しないため、全武器を即座に非表示にする。
+        /// </summary>
         private void Awake()
         {
-            HideAllWeaponsImmidiate();
+            HideAllWeaponsImmediate();
         }
 
+        /// <summary>
+        ///     無効化中はMotionの更新が見えないため、フェードを挟まず全武器を非表示にする。
+        /// </summary>
         private void OnDisable()
         {
-            HideAllWeaponsImmidiate();
+            HideAllWeaponsImmediate();
         }
 
         /// <summary>
