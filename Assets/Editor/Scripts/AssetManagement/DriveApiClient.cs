@@ -9,9 +9,10 @@ using UnityEngine.Networking;
 namespace KillChord.Editor.AssetManagement
 {
     /// <summary>
-    /// Google Drive API v3への通信をAPIキー認証で行う。
-    /// 前提: 対象フォルダ/ファイルは「リンクを知っている全員が閲覧可」で共有されていること。
+    /// Google Drive API v3への通信をService Accountのアクセストークン(Bearer認証)で行う。
+    /// 前提: 対象フォルダ/ファイルがService Accountのメールアドレスに対して共有されていること。
     /// Unity 6.3(UnityWebRequestAsyncOperationのネイティブGetAwaiterに対応)を前提にasync/awaitで実装。
+    /// </summary>
     /// </summary>
     internal static class DriveApiClient
     {
