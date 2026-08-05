@@ -11,6 +11,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     /// </summary>
     public static class AttackDefinitionFactory
     {
+        private const float MIN_HALF_ANGLE_DEGREES = 0f;
+        private const float MAX_HALF_ANGLE_DEGREES = 180f;
+        private const int MIN_HIT_COUNT = 1;
+
         /// <summary>
         ///     攻撃定義データを受け取り、攻撃定義オブジェクトを生成するメソッド。
         /// </summary>
@@ -77,7 +81,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 attackSpec,
                 data.AttackPipelineAsset.Create(),
                 resolvedBeatType,
-                data.JustDamageMultiplier
+                data.JustDamageMultiplier,
+                Mathf.Max(0f, data.WeaponDamageMultiplier),
+                Mathf.Max(0f, data.Range),
+                Mathf.Clamp(data.HalfAngleDegrees, MIN_HALF_ANGLE_DEGREES, MAX_HALF_ANGLE_DEGREES),
+                data.IsMultiTarget,
+                Mathf.Max(MIN_HIT_COUNT, data.HitCount),
+                Mathf.Max(0f, data.HitInterval)
             );
         }
     }
