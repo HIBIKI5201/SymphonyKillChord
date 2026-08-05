@@ -22,7 +22,7 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            _damageText.text = Mathf.RoundToInt(damage).ToString();
+            _damageText.text = Mathf.CeilToInt(damage).ToString();
 
             ApplyRandomOffset();
 
@@ -37,6 +37,13 @@ namespace KillChord.Runtime.View
 
         private const float DEFAULT_HORIZONTAL_OFFSET_RANGE = 0.3f;
         private const float DEFAULT_UPWARD_OFFSET_RANGE = 0.5f;
+
+        /// <summary>
+        ///     表示演出専用の乱数生成器。
+        ///     UnityEngine.Random はクリティカル抽選が使うため、共有すると表示の乱数消費が
+        ///     戦闘結果へ影響してしまう。表示側は独立した生成器を使う。
+        /// </summary>
+        private static readonly System.Random PRESENTATION_RANDOM = new System.Random();
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
@@ -59,13 +66,24 @@ namespace KillChord.Runtime.View
         {
             float horizontal = _randomHorizontalOffsetRange <= 0f
                 ? 0f
-                : Random.Range(-_randomHorizontalOffsetRange, _randomHorizontalOffsetRange);
+                : NextRange(-_randomHorizontalOffsetRange, _randomHorizontalOffsetRange);
 
             float upward = _randomUpwardOffsetRange <= 0f
                 ? 0f
-                : Random.Range(0f, _randomUpwardOffsetRange);
+                : NextRange(0f, _randomUpwardOffsetRange);
 
             transform.localPosition += new Vector3(horizontal, upward, 0f);
+        }
+
+        /// <summary>
+        ///     表示演出専用の乱数生成器から、指定範囲の値を取得する。
+        /// </summary>
+        /// <param name="min"> 最小値。 </param>
+        /// <param name="max"> 最大値。 </param>
+        /// <returns> min以上max未満の値。 </returns>
+        private static float NextRange(float min, float max)
+        {
+            return min + (float)PRESENTATION_RANDOM.NextDouble() * (max - min);
         }
     }
 }
