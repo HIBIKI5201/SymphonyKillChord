@@ -1,11 +1,10 @@
+using KillChord.Runtime.View.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Sequence;
 using LitMotion;
 using LitMotion.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Music
@@ -199,6 +198,10 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("ビートのアニメーションのDuration")]
         [SerializeField] private float _outTimingDuration;
 
+        [Space]
+        [SerializeField]
+        private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
+
         private RectTransform[] _leftBeatRectTransforms;
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
@@ -206,10 +209,6 @@ namespace KillChord.Runtime.View.InGame.Music
         private RectTransform[] _justTimingMarkers;
         private int[] _justTimingBeatBoxIndex;
         private MotionHandle[] _handles;
-        private MotionHandle _vignetteMotion;
-        private Volume _vignetteVolume;
-        private VolumeProfile _vignetteProfile;
-        private Vignette _justTimingVignette;
         private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
         private float _lastVignetteTimestamp = float.NegativeInfinity;
@@ -224,7 +223,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 Debug.LogWarning($"[{nameof(ACLikeRhythmGuideView)}] ジャストタイミング演出設定が未設定です。", this);
             }
 
-            InitializeJustTimingVignette();
             RebuildBeatRectTransforms();
         }
 
@@ -240,42 +238,12 @@ namespace KillChord.Runtime.View.InGame.Music
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
-            _vignetteMotion.TryCancel();
 
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
                 {
                     _handles[i].TryCancel();
-                }
-            }
-
-            if (_vignetteVolume != null)
-            {
-                _vignetteVolume.profile = null;
-            }
-
-            if (_justTimingVignette != null)
-            {
-                if (UnityEngine.Application.isPlaying)
-                {
-                    Destroy(_justTimingVignette);
-                }
-                else
-                {
-                    DestroyImmediate(_justTimingVignette);
-                }
-            }
-
-            if (_vignetteProfile != null)
-            {
-                if (UnityEngine.Application.isPlaying)
-                {
-                    Destroy(_vignetteProfile);
-                }
-                else
-                {
-                    DestroyImmediate(_vignetteProfile);
                 }
             }
         }
@@ -447,42 +415,12 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストタイミング用の実行時Vignetteを初期化する。
-        /// </summary>
-        private void InitializeJustTimingVignette()
-        {
-            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled)
-            {
-                return;
-            }
-
-            GameObject volumeObject = new GameObject("JustTimingVignetteVolume", typeof(Volume));
-            volumeObject.transform.SetParent(transform, false);
-            volumeObject.layer = 0;
-
-            _vignetteVolume = volumeObject.GetComponent<Volume>();
-            _vignetteVolume.isGlobal = true;
-            _vignetteVolume.priority = _effectConfig.VignettePriority;
-            _vignetteVolume.weight = 1f;
-
-            _vignetteProfile = ScriptableObject.CreateInstance<VolumeProfile>();
-            _vignetteProfile.name = "JustTimingVignetteProfile";
-            _vignetteProfile.hideFlags = HideFlags.DontSave;
-            _justTimingVignette = _vignetteProfile.Add<Vignette>(true);
-            _justTimingVignette.color.value = Color.black;
-            _justTimingVignette.intensity.value = 0f;
-            _justTimingVignette.smoothness.value = Mathf.Clamp01(_effectConfig.VignetteSmoothness);
-            _justTimingVignette.rounded.value = false;
-            _vignetteVolume.profile = _vignetteProfile;
-        }
-
-        /// <summary>
         ///     ビート色に連動した全画面Vignetteを再生する。
         /// </summary>
         /// <param name="beatColor"> Vignetteへ反映するビート色。 </param>
         private void PlayJustTimingVignette(Color beatColor)
         {
-            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled || _justTimingVignette == null)
+            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled)
             {
                 return;
             }
@@ -493,22 +431,8 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            _lastVignetteTimestamp = now;
-            _vignetteMotion.TryCancel();
-
-            beatColor.a = 1f;
-            float intensity = Mathf.Clamp01(_effectConfig.VignetteIntensity);
-            _justTimingVignette.color.value = beatColor;
-            _justTimingVignette.smoothness.value = Mathf.Clamp01(_effectConfig.VignetteSmoothness);
-            _justTimingVignette.intensity.value = intensity;
-
-            _vignetteMotion = LMotion.Create(
-                    intensity,
-                    0f,
-                    Mathf.Max(0.01f, _effectConfig.VignetteDuration))
-                .WithEase(_effectConfig.VignetteEase)
-                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                .Bind(_justTimingVignette, static (value, vignette) => vignette.intensity.value = value);
+            _rhythmGuidePostEffectView.SetColor(beatColor);
+            _rhythmGuidePostEffectView.OneShotRatio(_effectConfig.FlashEase, _effectConfig.FlashDuration);
         }
 
         /// <summary>
