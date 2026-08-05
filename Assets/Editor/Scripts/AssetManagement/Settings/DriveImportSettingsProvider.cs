@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
@@ -9,12 +7,12 @@ using UnityEngine;
 namespace KillChord.Editor.AssetManagement
 {
     /// <summary>
-    /// Project Settings UI の Drive Import ページを提供する。
+    ///     Project Settings UI の Drive Import ページを提供する。
     /// </summary>
     internal static class DriveImportSettingsProvider
     {
         /// <summary>
-        /// Project Settings に Drive Import ページを登録する。
+        ///     Project Settings に Drive Import ページを登録する。
         /// </summary>
         /// <returns> 設定ページプロバイダー。 </returns>
         [SettingsProvider]
@@ -36,7 +34,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 機密情報セクション (Service Account JSON Key と取得元フォルダ) を描画する。
+        ///     機密情報セクション (Service Account JSON Key と取得元フォルダ) を描画する。
         /// </summary>
         private static void DrawSecretsSection()
         {
@@ -100,7 +98,7 @@ namespace KillChord.Editor.AssetManagement
                             "DriveImportSecretsを読み込みました。",
                             "OK");
                     }
-                    catch
+                    catch(ArgumentException)
                     {
                         EditorUtility.DisplayDialog(
                             "Drive Import",
@@ -112,7 +110,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 共有設定セクション (除外パターン) を描画する。
+        ///     共有設定セクション (除外パターン) を描画する。
         /// </summary>
         private static void DrawSharedSettingsSection()
         {
@@ -134,10 +132,10 @@ namespace KillChord.Editor.AssetManagement
                 new GUIContent("Exclude File Patterns"), true);
             var changed = EditorGUI.EndChangeCheck();
 
-            serialized.ApplyModifiedProperties();
 
             if (changed)
             {
+                serialized.ApplyModifiedProperties();
                 settings.Persist();
             }
         }

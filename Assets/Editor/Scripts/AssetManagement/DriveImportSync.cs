@@ -18,7 +18,7 @@ namespace KillChord.Editor.AssetManagement
         private static CancellationTokenSource cts;
 
         /// <summary>
-        /// 実行中の同期をキャンセルする。
+        ///     実行中の同期をキャンセルする。
         /// </summary>
         public static void Cancel()
         {
@@ -236,7 +236,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 配置先パスが妥当か検証する (Assets/ 配下であることを確認)。
+        ///     配置先パスが妥当か検証する (Assets/ 配下であることを確認)。
         /// </summary>
         /// <param name="destinationPath"> 検証対象のパス。 </param>
         /// <returns> 妥当なパスであれば true。 </returns>
@@ -251,7 +251,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// Google Drive フォルダを再帰的に走査し、ダウンロード対象ファイルをキューに追加する。
+        ///     Google Drive フォルダを再帰的に走査し、ダウンロード対象ファイルをキューに追加する。
         /// </summary>
         /// <param name="folderId"> 走査開始フォルダの Drive ID。 </param>
         /// <param name="localFolderAbsPath"> ローカル保存先の絶対パス。 </param>
@@ -295,13 +295,18 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// フォルダ名が除外リストに含まれるか判定する。
+        ///     フォルダ名が除外リストに含まれるか判定する。
         /// </summary>
         /// <param name="folderName"> 判定対象のフォルダ名。 </param>
         /// <param name="settings"> 除外設定。 </param>
         /// <returns> 除外対象であれば true。 </returns>
         private static bool IsFolderExcluded(string folderName, DriveImportSettings settings)
         {
+            if (string.IsNullOrEmpty(folderName))
+            {
+                return false;
+            }
+            
             foreach (var excludedName in settings.excludeFolderNames)
             {
                 if (!string.IsNullOrEmpty(excludedName)
@@ -315,13 +320,18 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// ファイル名が除外対象か判定する (拡張子・パターンで判定)。
+        ///     ファイル名が除外対象か判定する (拡張子・パターンで判定)。
         /// </summary>
         /// <param name="fileName"> 判定対象のファイル名。 </param>
         /// <param name="settings"> 除外設定。 </param>
         /// <returns> 除外対象であれば true。 </returns>
         private static bool IsFileExcluded(string fileName, DriveImportSettings settings)
         {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+            
             var ext = Path.GetExtension(fileName).TrimStart('.').ToLowerInvariant();
             foreach (var e in settings.excludeExtensions)
             {
@@ -359,7 +369,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// ワイルドカードパターンを正規表現に変換する。
+        ///     ワイルドカードパターンを正規表現に変換する。
         /// </summary>
         /// <param name="wildcard"> ワイルドカードパターン (* と ? を使用)。 </param>
         /// <returns> 対応する正規表現文字列。 </returns>
@@ -369,7 +379,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// ファイル/フォルダ名から無効な文字を削除し、ローカルファイルシステムに適合させる。
+        ///     ファイル/フォルダ名から無効な文字を削除し、ローカルファイルシステムに適合させる。
         /// </summary>
         /// <param name="name"> サニタイズ前の名前。 </param>
         /// <returns> 無効な文字が '_' に置換された名前。 </returns>
