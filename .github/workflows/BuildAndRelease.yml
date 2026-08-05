@@ -481,7 +481,7 @@ jobs:
             $TimeoutSec = [int]$env:UNITY_BUILD_TIMEOUT_SEC
             Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値を使用します: $TimeoutSec 秒"
           } else {
-            $TimeoutSec = 5400
+            $TimeoutSec = 21600
             Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' が未設定です。デフォルト値 '$TimeoutSec 秒' を使用します。"
           }
 
