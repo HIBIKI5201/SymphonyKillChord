@@ -144,6 +144,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                 playerModuleContainer.PlayerEntity);
 
+            _stepEntryActionController = new MissionStepEntryActionController(
+                _moduleContainer.MissionRuntimeService,
+                _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
+                new IMissionStepEntryActionExecutor[]
+                {
+                    new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
+                });
+
             return true;
         }
 
@@ -214,6 +222,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _recorderController?.Dispose();
             _popupController?.Dispose();
             _playerBuffController?.Dispose();
+            _stepEntryActionController?.Dispose();
 
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _enemyMissionKeyRepositoryKey.ReleaseLoadedAsset(this);
@@ -247,6 +256,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionProgressRecorderController _recorderController;
         private MissionStepPopupController _popupController;
         private MissionPlayerBuffController _playerBuffController;
+        private MissionStepEntryActionController _stepEntryActionController;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyMissionKeyRepository _loadedEnemyMissionKeyRepository;
         private MissionDefinition _resolvedMissionDefinition;

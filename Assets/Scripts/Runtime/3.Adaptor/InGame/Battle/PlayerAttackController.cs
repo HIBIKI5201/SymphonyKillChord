@@ -29,6 +29,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
+            PlayerActionRestrictionState actionRestrictionState,
             SkillController skillController,
             TargetSystemController targetingSystem,
             AttackIntervalEvaluator attackIntervalEvaluator,
@@ -42,6 +43,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _attackIntervalEvaluator = attackIntervalEvaluator;
             _presenter = presenter;
             _battleState = battleState;
+            _actionRestrictionState = actionRestrictionState;
             _skillController = skillController;
             _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
@@ -91,7 +93,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             BeatType beatType = _musicSyncService.GetCurrentBeatType();
 
             bool hasTarget = TryUpdateCurrentTarget();
-            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+
+            // スキル発動不可の場合、処理を飛ばす
+            if (_actionRestrictionState.CanUseSkill)
+            {
+                _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+            }
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
@@ -211,6 +218,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
         private readonly AttackResultPresenter _presenter;
         private readonly PlayerBattleState _battleState;
+        private readonly PlayerActionRestrictionState _actionRestrictionState;
         private readonly SkillController _skillController;
         private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
