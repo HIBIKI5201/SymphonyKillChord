@@ -6,13 +6,13 @@ using UnityEditor;
 namespace KillChord.Editor.AssetManagement
 {
     /// <summary>
-    /// 差分検出用のローカルキャッシュ。端末ローカルの状態であり、UserSettings配下に保存する(Git管理対象外)。
+    ///     差分検出用のローカルキャッシュ。端末ローカルの状態であり、UserSettings配下に保存する(Git管理対象外)。
     /// </summary>
     [FilePath(ProviderConst.USER_SETTINGS_PATH + nameof(DriveImportManifest), FilePathAttribute.Location.ProjectFolder)]
     internal class DriveImportManifest : ScriptableSingleton<DriveImportManifest>
     {
         /// <summary>
-        /// ファイルの同期状態を表現するエントリ。
+        ///     ファイルの同期状態を表現するエントリ。
         /// </summary>
         [Serializable]
         public class Entry
@@ -50,7 +50,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 指定ファイルID の最終更新日時を取得する。
+        ///     指定ファイルID の最終更新日時を取得する。
         /// </summary>
         /// <param name="fileId"> 検索対象のファイル ID。 </param>
         /// <param name="modifiedTime"> 見つかった場合の最終更新日時。 </param>
@@ -61,7 +61,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// 指定ファイルID の最終更新日時を記録する。既存エントリは更新、なければ新規追加される。
+        ///     指定ファイルID の最終更新日時を記録する。既存エントリは更新、なければ新規追加される。
         /// </summary>
         /// <param name="fileId"> ファイル ID。 </param>
         /// <param name="modifiedTime"> ファイルの最終更新日時。 </param>
@@ -80,7 +80,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// メモリ上のキャッシュをディスクに永続化する。
+        ///     メモリ上のキャッシュをディスクに永続化する。
         /// </summary>
         public void Persist()
         {

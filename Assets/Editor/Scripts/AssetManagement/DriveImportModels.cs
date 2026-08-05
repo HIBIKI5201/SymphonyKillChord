@@ -12,7 +12,7 @@ namespace KillChord.Editor.AssetManagement
     }
 
     /// <summary>
-    /// ファイル除外パターンの定義。
+    ///     ファイル除外パターンの定義。
     /// </summary>
     [Serializable]
     public class FilePattern
@@ -24,8 +24,8 @@ namespace KillChord.Editor.AssetManagement
     }
 
     /// <summary>
-    /// 取得元フォルダIDと配置先パスの組。フォルダIDは外部から参照/推測される危険性があるため機密扱い。
-    /// DriveImportSecrets側で管理する。
+    ///     取得元フォルダ ID と配置先パスの組。フォルダ ID は外部から参照/推測される危険性があるため機密扱い。
+    ///     DriveImportSecrets側で管理する。
     /// </summary>
     [Serializable]
     public class DriveSourceFolder

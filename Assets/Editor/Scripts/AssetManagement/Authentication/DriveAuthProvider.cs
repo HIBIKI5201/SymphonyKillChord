@@ -1,12 +1,11 @@
 using System;
-using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using UnityEngine;
 
 namespace KillChord.Editor.AssetManagement
 {
     /// <summary>
-    /// Service Account JSON 鍵ファイルから認証に必要なフィールドを抽出する DTO。
+    ///     Service Account JSON 鍵ファイルから認証に必要なフィールドを抽出する DTO。
     /// </summary>
     [Serializable]
     internal class ServiceAccountKeyFile
@@ -18,7 +17,7 @@ namespace KillChord.Editor.AssetManagement
     }
 
     /// <summary>
-    /// Google Drive API v3 への認証処理を行うユーティリティ。Service Account 認証に対応。
+    ///     Google Drive API v3 への認証処理を行うユーティリティ。Service Account 認証に対応。
     /// </summary>
     internal static class DriveAuthProvider
     {
@@ -29,7 +28,7 @@ namespace KillChord.Editor.AssetManagement
         };
 
         /// <summary>
-        /// Service Account JSON 鍵を使用して Google Drive API の認証情報を取得する。
+        ///     Service Account JSON 鍵を使用して Google Drive API の認証情報を取得する。
         /// </summary>
         /// <param name="serviceAccountJsonKey"> Service Account JSON 鍵の文字列。 </param>
         /// <returns> Service Account 認証情報。 </returns>

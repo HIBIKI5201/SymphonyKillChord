@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -98,7 +97,7 @@ namespace KillChord.Editor.AssetManagement
 
         /// <summary>
         ///     ウィンドウにログエントリを追加する。
-        ///     ウィンドウが既に閉じられている場合は、Unityのコンソールにフォールバックして出力する。
+        ///     ウィンドウが既に閉じられている場合は、Unity のコンソールにフォールバックして出力する。
         /// </summary>
         /// <param name="type"> ログタイプ (情報/警告/エラー)。 </param>
         /// <param name="message"> ログメッセージ。 </param>
@@ -130,7 +129,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        ///     ウィンドウが閉じられている場合に、LogEntryをUnityのコンソールにフォールバックしてログを出力する。
+        ///     ウィンドウが閉じられている場合に、LogEntry を Unity のコンソールにフォールバックしてログを出力する。
         /// </summary>
         /// <param name="type"> ログタイプ (情報/警告/エラー)。 </param>
         /// <param name="message"> ログメッセージ。 </param>
@@ -223,7 +222,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// ログエントリの種類。
+        ///     ログエントリの種類。
         /// </summary>
         private enum LogType
         {
@@ -236,7 +235,7 @@ namespace KillChord.Editor.AssetManagement
         }
 
         /// <summary>
-        /// ログエントリ。
+        ///     ログエントリ。
         /// </summary>
         private readonly struct LogEntry
         {
