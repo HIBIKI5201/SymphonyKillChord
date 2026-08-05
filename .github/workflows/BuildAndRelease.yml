@@ -29,23 +29,25 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.release_age.outputs.should_run }}
-      days: ${{ steps.release_age.outputs.days }}
+      hours: ${{ steps.release_age.outputs.hours }}
+    env:
+      RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
 
     steps:
-      - name: 最終リリースからの経過日数をチェック
+      - name: 最終リリースからの経過時間をチェック
         id: release_age
         run: |
           set -e
-          echo "========== リリース経過日数チェック =========="
-          echo "リリース経過日数の検証を開始します..."
+          echo "========== リリース経過時間チェック =========="
+          echo "リリース経過時間の検証を開始します..."
           echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
           echo "リポジトリ: ${{ github.repository }}"
           echo "==========================================="
 
-          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
+          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過時間のチェックをスキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "[Skip]: 手動実行を検出しました。リリース経過日数のチェックをスキップします。"
-            echo "days=0" >> $GITHUB_OUTPUT
+            echo "[Skip]: 手動実行を検出しました。リリース経過時間のチェックをスキップします。"
+            echo "hours=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (手動実行)"
             exit 0
@@ -72,7 +74,7 @@ jobs:
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
             echo "[INFO]: ${TAG_PREFIX}- の条件に合致するリリースが検出されませんでした。"
-            echo "days=999" >> $GITHUB_OUTPUT
+            echo "hours=9999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (${TAG_PREFIX} の条件に合致するリリースが未検出)"
             exit 0
@@ -81,18 +83,25 @@ jobs:
           echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
-          DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
+          HOURS=$(( (NOW_TS - RELEASE_TS) / 3600 ))
+
+          if [ -z "${RELEASE_THRESHOLD_HOURS}" ]; then
+            RELEASE_THRESHOLD_HOURS=72
+            echo "[WARN]: リポジトリ変数 'RELEASE_THRESHOLD_HOURS' が未設定です。デフォルト値 (72時間) を使用します。"
+          else
+            echo "[INFO]: リポジトリ変数 'RELEASE_THRESHOLD_HOURS' を使用します: ${RELEASE_THRESHOLD_HOURS} hours"
+          fi
           
-          echo "[INFO]: 最終リリースからの経過日数: $DAYS days"
-          echo "[INFO]: Threshold: 3 days (3days以内のリリースはスキップされます)"
+          echo "[INFO]: 最終リリースからの経過時間: $HOURS hours"
+          echo "[INFO]: Threshold: ${RELEASE_THRESHOLD_HOURS} hours (${RELEASE_THRESHOLD_HOURS}hours以内のリリースはスキップされます)"
           
-          echo "days=$DAYS" >> $GITHUB_OUTPUT
-          if [ "$DAYS" -le 3 ]; then
+          echo "hours=$HOURS" >> $GITHUB_OUTPUT
+          if [ "$HOURS" -le "${RELEASE_THRESHOLD_HOURS}" ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[Decision]: should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
+            echo "[Decision]: should_run=false (最終リリースが $HOURS hours前のため、Threshold ${RELEASE_THRESHOLD_HOURS}hours以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[Decision]: should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
+            echo "[Decision]: should_run=true (最終リリースが $HOURS hours前の分、Threshold ${RELEASE_THRESHOLD_HOURS}hours 超過)"
           fi
 
   build-and-release:
@@ -109,8 +118,11 @@ jobs:
     env:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+      GDRIVE_ASSET_SEARCH_QUERY: ${{ vars.GDRIVE_ASSET_SEARCH_QUERY }}
       UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
       UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+      UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
+      UNITY_BUILD_TIMEOUT_SEC: ${{ vars.UNITY_BUILD_TIMEOUT_SEC }}
       BUILD_MODE: ''
 
     steps:
@@ -165,8 +177,11 @@ jobs:
           Write-Host ""
           Write-Host "Google Drive APIキー設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
           Write-Host "Google Drive フォルダID設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
+          Write-Host "アセット検索クエリ: $(if ($env:GDRIVE_ASSET_SEARCH_QUERY) { $env:GDRIVE_ASSET_SEARCH_QUERY } else { '未設定 (デフォルト使用)' })"
           Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
+          Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
+          Write-Host "Unityビルドタイムアウト: $(if ($env:UNITY_BUILD_TIMEOUT_SEC) { "$env:UNITY_BUILD_TIMEOUT_SEC 秒" } else { '未設定 (デフォルト使用)' })"
           Write-Host "::endgroup::"
         shell: pwsh
 
@@ -242,8 +257,15 @@ jobs:
           if (Test-Path $ExtractDir) { Remove-Item $ExtractDir -Recurse -Force }
           New-Item -ItemType Directory -Path $ExtractDir -Force | Out-Null
 
-          # （name contains '.zip' / trashed = false / modifiedTime desc / pageSize=1）
-          $RawQuery       = "name contains '.zip' and trashed = false and '$FolderId' in parents"
+          # （GDRIVE_ASSET_SEARCH_QUERY / modifiedTime desc / pageSize=1）
+          if ($env:GDRIVE_ASSET_SEARCH_QUERY) {
+            $BaseQuery = $env:GDRIVE_ASSET_SEARCH_QUERY
+            Write-Host "[INFO]: リポジトリ変数 'GDRIVE_ASSET_SEARCH_QUERY' の値を使用します: $BaseQuery"
+          } else {
+            $BaseQuery = "name contains '.zip' and trashed = false"
+            Write-Host "[WARN]: リポジトリ変数 'GDRIVE_ASSET_SEARCH_QUERY' が未設定です。デフォルト値 '$BaseQuery' を使用します。"
+          }
+          $RawQuery       = "$BaseQuery and '$FolderId' in parents"
           $EncodedQuery   = [Uri]::EscapeDataString($RawQuery)
           $EncodedOrderBy = [Uri]::EscapeDataString("modifiedTime desc")
           $EncodedFields  = [Uri]::EscapeDataString("files(id,name)")
@@ -446,12 +468,27 @@ jobs:
 
           Write-Host "::group::Unity ビルドプロセスの開始"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
-          Write-Host "実行メソッド: KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
+
+          if ($env:UNITY_BUILD_EXECUTE_METHOD) {
+            $ExecuteMethod = $env:UNITY_BUILD_EXECUTE_METHOD
+            Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' の値を使用します: $ExecuteMethod"
+          } else {
+            $ExecuteMethod = "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
+            Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' が未設定です。デフォルト値 '$ExecuteMethod' を使用します。"
+          }
+
+          if ($env:UNITY_BUILD_TIMEOUT_SEC) {
+            $TimeoutSec = [int]$env:UNITY_BUILD_TIMEOUT_SEC
+            Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値を使用します: $TimeoutSec 秒"
+          } else {
+            $TimeoutSec = 21600
+            Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' が未設定です。デフォルト値 '$TimeoutSec 秒' を使用します。"
+          }
+
+          Write-Host "実行メソッド: $ExecuteMethod"
           Write-Host "ログ出力先: unity_build.log"
           Write-Host ""
-
-          $TimeoutSec = 5400
-          Write-Host "タイムアウト: $TimeoutSec 秒 ($($TimeoutSec / 60) 分)"
+          Write-Host "タイムアウト: $TimeoutSec 秒 ($([Math]::Round($TimeoutSec / 60, 1)) 分)"
           Write-Host ""
 
           # CPUコア数の設定
@@ -469,7 +506,7 @@ jobs:
           $UnityArgs = @(
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
-            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-executeMethod", "$ExecuteMethod",
             "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
