@@ -64,7 +64,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
         /// <summary>
         ///     複数の対象へ攻撃を実行する。
-        ///     結果は <paramref name="defenders"/> と同じ順序で <paramref name="results"/> へ格納する。
+        ///     結果は <paramref name="targets"/> と同じ順序で <paramref name="results"/> へ格納する。
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
         /// <param name="attacker"> 攻撃者。 </param>

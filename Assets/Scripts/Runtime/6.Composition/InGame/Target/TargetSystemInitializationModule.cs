@@ -1,5 +1,6 @@
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using SymphonyFrameWork.System.ServiceLocate;
+using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Target
 {
@@ -22,6 +23,20 @@ namespace KillChord.Runtime.Composition.InGame.Target
         {
             _initializer = new TargetSystemInitializer();
             _initializer.Initialize();
+
+            // 登録前に検証する。欠けたままServiceLocatorへ載せると、後続のSkillInitializerが
+            // nullを含むContainerを取得してしまい、原因の分かりにくい失敗になるため。
+            if (_initializer.TargetSystemController == null
+                || _initializer.TargetingSystemViewModel == null
+                || _initializer.TargetEntityRegistry == null
+                || _initializer.TargetAreaQuery == null)
+            {
+                Debug.LogError($"[{nameof(TargetSystemInitializationModule)}] ターゲットシステムの依存解決に失敗しました。");
+                _initializer.Dispose();
+                _initializer = null;
+                return false;
+            }
+
             _container = new TargetSystemModuleContainer(
                 _initializer.TargetSystemController,
                 _initializer.TargetingSystemViewModel,
@@ -29,10 +44,7 @@ namespace KillChord.Runtime.Composition.InGame.Target
                 _initializer.TargetAreaQuery);
             ServiceLocator.RegisterInstance(_container);
             _isRegistered = true;
-            return _container.TargetSystemController != null
-                && _container.TargetSystemViewModel != null
-                && _container.TargetEntityRegistry != null
-                && _container.TargetAreaQuery != null;
+            return true;
         }
 
         /// <summary>
