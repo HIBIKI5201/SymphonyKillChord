@@ -217,7 +217,7 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             Array.Resize(ref entries, entries.Length + 1);
-            entries[entries.Length - 1] = new CapturedLogEntry
+            entries[^1] = new CapturedLogEntry
             {
                 Type = type.ToString(),
                 Message = message,
@@ -437,7 +437,7 @@ namespace KillChord.Editor.AutoBuilder
             string fileName = Application.productName + GetExtension(target);
             string locationPath = Path.Combine(buildDir, fileName);
 
-            BuildPlayerOptions options = CreateBuildPlayerOptions(profile, locationPath);
+            BuildPlayerWithProfileOptions options = CreateBuildPlayerOptions(profile, locationPath);
 
             // フォルダ生成。
             if (Directory.Exists(buildDir))
@@ -458,7 +458,7 @@ namespace KillChord.Editor.AutoBuilder
             {
                 EditorApplication.delayCall -= ExecutePlayerBuild;
 
-                bool hasFailure = false;
+                bool hasFailure;
                 try
                 {
                     BuildReport report = BuildPipeline.BuildPlayer(options);
@@ -544,31 +544,15 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
-        /// BuildProfileの情報からBuildPlayerOptionsを生成する静的メソッド
+        ///     指定したビルドプロファイルに対応するBuildPlayerWithProfileOptionsを作成します。
         /// </summary>
-        public static BuildPlayerOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
+        public static BuildPlayerWithProfileOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
         {
             BuildProfile.SetActiveBuildProfile(profile);
-            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
-            // 有効なシーンの抽出
-            string[] scenes = profile.GetScenesForBuild()
-                .Where(s => s.enabled)
-                .Select(s => s.path)
-                .ToArray();
-
-            if (scenes.Length == 0)
+            return new BuildPlayerWithProfileOptions
             {
-                scenes = EditorBuildSettings.scenes
-                    .Where(s => s.enabled)
-                    .Select(s => s.path)
-                    .ToArray();
-            }
-
-            return new BuildPlayerOptions()
-            {
-                scenes = scenes,
-                target = target,
+                buildProfile = profile,
                 locationPathName = path,
             };
         }
