@@ -43,11 +43,11 @@ namespace KillChord.Runtime.Domain.InGame.Music
         }
 
         /// <summary>
-        ///     装備スキルID列から小節ループ用のシーケンスを構築する。
+        ///     ソートされたスキルID列から小節ループ用のシーケンスを構築する。
         ///     対応ラベルが登録されていないスキルはシーケンスから除外されるため、
         ///     設定漏れを呼び出し側が検知できるよう対象IDを併せて返す。
         /// </summary>
-        /// <param name="equippedSkillIds"> 装備スキルのID列（スロット順）。 </param>
+        /// <param name="equippedSkillIds"> ソートされたスキルのID列（スロット順）。 </param>
         /// <param name="unmappedSkillIds"> 対応ラベルが見つからなかったスキルID一覧。 </param>
         /// <returns> 構築したシーケンス。対応ラベルが1つも無い場合は空のシーケンス。 </returns>
         public BgmSelectorSequence CreateSequence(
