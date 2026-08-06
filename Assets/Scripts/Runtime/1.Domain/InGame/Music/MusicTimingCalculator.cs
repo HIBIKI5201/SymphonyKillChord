@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
 using System;
 
@@ -54,10 +53,14 @@ namespace KillChord.Runtime.Domain.InGame.Music
             double targetBeat,
             double leadCount)
         {
-            if (timeSignature <= 0d
+            if (double.IsNaN(accurateBeat)
+                || double.IsInfinity(accurateBeat)
+                || double.IsNaN(leadCount)
+                || double.IsInfinity(leadCount)
                 || leadCount <= 0d
-                || double.IsNaN(accurateBeat)
-                || double.IsInfinity(accurateBeat))
+                || double.IsNaN(timeSignature)
+                || double.IsInfinity(timeSignature)
+                || timeSignature <= 0d)
             {
                 return 0f;
             }
