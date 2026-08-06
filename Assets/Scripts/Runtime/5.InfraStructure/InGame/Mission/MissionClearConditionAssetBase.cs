@@ -14,8 +14,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary>
         ///     クリア条件を生成します。
         /// </summary>
+        /// <param name="missionKeyRepository"> 敵ミッションキーの解決に使うリポジトリです。 </param>
         /// <returns>クリア条件。</returns>
-        public abstract IMissionClearCondition Create();
+        public abstract IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository);
 
         /// <summary>
         ///     シリアライズ前の処理を行います。

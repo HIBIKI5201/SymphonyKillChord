@@ -2,10 +2,10 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
@@ -31,6 +31,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="context"> 実行コンテキストです。 </param>
         public override void Execute(in SkillEffectContext context)
         {
+            int attackCount = (int)context.EffectSpec.GetRequiredValue(
+                SkillEffectParameterId.HitCount);
             ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
             if (targets.Length == 0)
             {
@@ -45,10 +47,10 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             Damage beforeTargetsTotalDamage = new Damage(beforeTargetsTotalDamageValue);
 
-            if (_attackCount <= targets.Length)
+            if (attackCount <= targets.Length)
             {
                 int targetNumber = Random.Range(0, targets.Length);
-                for (int i = 0; i < _attackCount; i++)
+                for (int i = 0; i < attackCount; i++)
                 {
                     _attackController.Execute((int)_beatType, targets[targetNumber]);
                     targets[targetNumber].BuffSystem.Add(_buff);
@@ -60,7 +62,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             {
                 ResetHitNumbers(targets.Length);
 
-                for (int i = 0; i < targets.Length; i++)
+                for (int i = 0; i < attackCount; i++)
                 {
                     int targetNumber = Random.Range(0, targets.Length);
                     _attackController.Execute((int)_beatType, targets[targetNumber]);
@@ -81,7 +83,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                         break;
                     }
 
-                    if (isAllhit)
+                    if (isAllhit && i + 1 < attackCount)
                     {
                         float maxValue = float.MinValue;
                         int maxHealthTarget = 0;
@@ -99,6 +101,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                         CharacterEntity targetCharacter = targets[maxHealthTarget];
                         _attackController.Execute((int)_beatType, targetCharacter);
                         targetCharacter.BuffSystem.Execute(buffcontext, BuffExecuteTiming.Skill);
+                        i++;
                     }
                 }
             }
@@ -116,7 +119,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
         private readonly IAttackController _attackController;
         private readonly BeatType _beatType = BeatType.Four;
-        private readonly int _attackCount = 3;
         private readonly List<int> _hitNumbers = new();
 
         /// <summary>

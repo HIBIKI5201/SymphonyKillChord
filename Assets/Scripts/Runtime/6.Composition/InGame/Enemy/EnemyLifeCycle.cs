@@ -11,6 +11,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -112,6 +113,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+            if (_targetTransform == null)
+            {
+                Debug.LogError("_targetTransformの参照がありません", this);
+                return;
+            }
 
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
@@ -162,7 +168,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
 
             // View接続
             var animationComposition = new AnimationComposition();
@@ -172,7 +178,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view.Initialize(aiController, target, animationContext, musicSyncState);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
-            _raycastView.Initialize(target, spec.AttackRangeMax.Value);
+            // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
+            MusicSyncSpec warningTiming = attackMusicSpec.BattleTiming;
+            _raycastView.Initialize(
+                target,
+                spec.AttackRangeMax.Value,
+                () => musicSyncState.GetNormalizedApproach(warningTiming, WARNING_LEAD_BEAT_COUNT));
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
@@ -353,6 +364,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view?.StopGameplay();
         }
 
+        /// <summary> 警告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
+        private const double WARNING_LEAD_BEAT_COUNT = 2d;
+
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
@@ -393,6 +407,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Renderer[] _deathEffectRenderers;
         [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
         private GameObject _deathSwampGameObject;
+
         /// <summary>
         ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
         /// </summary>
@@ -402,6 +417,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
         private float _deathSwampSinkDuration = 3f;
 
+        [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
+        private Transform _targetTransform;
 
         [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
@@ -485,6 +502,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _attackReservationUsecase?.Deactivate();
             _aiController?.CancelAttack();
+            _raycastView?.HideWarning();
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();

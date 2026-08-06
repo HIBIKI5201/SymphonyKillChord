@@ -1,6 +1,6 @@
-using System;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Music;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -38,6 +38,7 @@ namespace KillChord.Runtime.View
             if (_context?.Signal is CharacterAnimationSignal signal)
             {
                 signal.OnRequested += HandleRequestedHandler;
+                signal.OnCancelRequested += HandleCancelRequestedHandler;
             }
             _isInitialized = true;
         }
@@ -78,6 +79,7 @@ namespace KillChord.Runtime.View
             if (_context?.Signal is CharacterAnimationSignal signal)
             {
                 signal.OnRequested -= HandleRequestedHandler;
+                signal.OnCancelRequested -= HandleCancelRequestedHandler;
             }
 
             _playableController?.Dispose();
@@ -103,6 +105,50 @@ namespace KillChord.Runtime.View
             _overlayElapsedBaseTime = 0f;
             _shouldNotifyDodgeEnded = request.ShouldNotifyDodgeEnded;
             _hasNotifiedOneShotEnded = false;
+        }
+
+        /// <summary>
+        ///     再生中のワンショットを途中終了させ、ロコモーションへ戻す。
+        /// </summary>
+        private void HandleCancelRequestedHandler()
+        {
+            if (!HasActiveOverlay())
+            {
+                return;
+            }
+
+            // 経過時間をexitブレンド開始位置まで進め、既存の終了補間でロコモーションへ戻す。
+            float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
+
+            if (exitBlendDuration <= 0f)
+            {
+                CompleteOverlay();
+                return;
+            }
+
+            float exitBlendStart = Mathf.Clamp(_overlayBaseDuration - exitBlendDuration, 0f, _overlayBaseDuration);
+            _overlayElapsedBaseTime = Mathf.Max(_overlayElapsedBaseTime, exitBlendStart);
+        }
+
+        /// <summary>
+        ///     ワンショットの終了処理を行い、オーバーレイ状態を解除する。
+        /// </summary>
+        private void CompleteOverlay()
+        {
+            _overlayElapsedBaseTime = _overlayBaseDuration;
+
+            if (_hasNotifiedOneShotEnded)
+            {
+                return;
+            }
+
+            _hasNotifiedOneShotEnded = true;
+            if (_shouldNotifyDodgeEnded && _context.Signal is CharacterAnimationSignal signal)
+            {
+                signal.NotifyDodgeEnded();
+            }
+
+            _overlayIndex = -1;
         }
 
         /// <summary>

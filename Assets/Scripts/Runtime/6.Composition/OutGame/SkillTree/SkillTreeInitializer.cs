@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -6,17 +5,18 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Battle;
+using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.Utility.OutGame.Savedata;
-using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
@@ -39,10 +39,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PREVIEW_VIDEO_CONTAINER = "PreviewVideoContainer";
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
+        private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
 
         [SerializeField]
         [Tooltip("スキルツリー画面のUIDocumentです。")]
         private UIDocument _uiDocument;
+
+        [SerializeField, Tooltip("表示するプレイヤーの基礎ステータス定義です。")]
+        private CharacterDefinitionAsset _playerData;
 
         [SerializeField, SourceDataAddress]
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
@@ -69,6 +73,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillDetailScreenView _skillDetailScreenView;
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
+        private SkillTreeResetDialogView _skillTreeResetDialogView;
         private SkillTreeController _skillTreeController;
         private SkillDetailPresenter _skillDetailPresenter;
         private PlayerStatusPresenter _playerStatusPresenter;
@@ -223,6 +228,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
+            if (_playerData == null)
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] プレイヤー定義アセットが設定されていません。", this);
+                return false;
+            }
+
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -263,15 +274,26 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _playerStatusScreenView = new PlayerStatusScreenView(_playerStatusRoot, _outGameUIEvent);
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
+            _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
+            PlayerStatusBonusCalculator playerStatusBonusCalculator =
+                new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
-            _playerStatusPresenter = new PlayerStatusPresenter();
+            _playerStatusPresenter = new PlayerStatusPresenter(
+                _playerStatusScreenView,
+                playerStatusBonusCalculator,
+                skillTreeEntity,
+                _playerData.MaxHealth,
+                _playerData.BaseDamage,
+                GetBaseCriticalChance(),
+                GetBaseCriticalDamageMultiplier());
+            _playerStatusPresenter.Push();
             _skillTreeController = new SkillTreeController(
                 _skillDetailScreenView,
                 _skillDetailPresenter,
@@ -294,6 +316,38 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     プレイヤーの基礎会心率を取得します。
+        /// </summary>
+        /// <returns> 基礎会心率。 </returns>
+        private float GetBaseCriticalChance()
+        {
+            return _playerData == null ? 0f : _playerData.CriticalChance;
+        }
+
+        /// <summary>
+        ///     プレイヤーの先頭攻撃定義から基礎会心ダメージ倍率を取得します。
+        /// </summary>
+        /// <returns> 基礎会心ダメージ倍率。攻撃定義がない場合は1。 </returns>
+        private float GetBaseCriticalDamageMultiplier()
+        {
+            AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
+            if (attackDefinitions == null)
+            {
+                return DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
+            }
+
+            for (int i = 0; i < attackDefinitions.Length; i++)
+            {
+                if (attackDefinitions[i] != null)
+                {
+                    return attackDefinitions[i].CriticalDamageMultiplier;
+                }
+            }
+
+            return DEFAULT_CRITICAL_DAMAGE_MULTIPLIER;
+        }
+
+        /// <summary>
         ///     スキルノードと接続線の紐づきを作成します。
         /// </summary>
         private void BuildConnBinds()
@@ -301,7 +355,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeConnBinds = new();
             foreach (SkillNodeBindData bind in _loadedSkillNodeBindRepo.SkillNodeBinds)
             {
-                _skillNodeConnBinds.Add(bind.SkillNodeData.NodeId.Id, bind.FromConnNames);
+                _skillNodeConnBinds.Add(bind.SkillNodeId.Id, bind.FromConnNames);
             }
         }
 
@@ -317,7 +371,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             for (int i = 0; i < nodes.Count; i++)
             {
                 string nodeName = nodes[i].name;
-                SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName)?.SkillNodeData;
+                SkillNodeBindData bind = _loadedSkillNodeBindRepo.FindByName(nodeName);
+                SkillNodeData nodeData = bind != null ? _loadedSkillNodeDataRepo.FindNodeData(bind.SkillNodeId) : null;
                 if (nodeData == null)
                 {
                     throw new KeyNotFoundException($"SkillNodeBindDataが見つかりません：{nodeName}");
@@ -441,6 +496,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected += HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed += HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked += HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillTreeResetRequested += HandleSkillTreeResetRequested;
+            _outGameUIEvent.OnSkillTreeResetConfirmed += HandleSkillTreeResetConfirmed;
+            _outGameUIEvent.OnSkillTreeResetCancelled += HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked += HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked += HandlePreviewClosed;
             _isSubscribed = true;
@@ -459,6 +517,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected -= HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed -= HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked -= HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillTreeResetRequested -= HandleSkillTreeResetRequested;
+            _outGameUIEvent.OnSkillTreeResetConfirmed -= HandleSkillTreeResetConfirmed;
+            _outGameUIEvent.OnSkillTreeResetCancelled -= HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked -= HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked -= HandlePreviewClosed;
             _isSubscribed = false;
@@ -471,6 +532,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             _previewVideoScreenView?.Dispose();
             _previewVideoScreenView = null;
+            _skillTreeResetDialogView?.Dispose();
+            _skillTreeResetDialogView = null;
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
             _playerStatusScreenView = null;
@@ -513,8 +576,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="nodeName"> 選択されたノード名です。 </param>
         private void HandleSkillNodeSelected(string nodeName)
         {
-            SkillNodeData nodeData = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeData;
-            _skillTreeController.OnSkillNodeSelected(nodeData.NodeId.Id);
+            SkillNodeId nodeId = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeId;
+            _skillTreeController.OnSkillNodeSelected(nodeId.Id);
         }
 
         /// <summary>
@@ -533,6 +596,58 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillUnlocked()
         {
             _skillTreeController.OnSkillUnlocked();
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットの確認ダイアログを表示する。
+        /// </summary>
+        private void HandleSkillTreeResetRequested()
+        {
+            int refundPoints = _skillTreeController.GetResetRefundPoints();
+            _skillTreeResetDialogView.Show(refundPoints);
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットを確定して保存する。
+        /// </summary>
+        private async void HandleSkillTreeResetConfirmed()
+        {
+            SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
+            SkillTreeController controller = _skillTreeController;
+            if (dialogView == null || controller == null || _cts == null)
+            {
+                return;
+            }
+
+            dialogView.SetInteractionEnabled(false);
+            bool isSucceeded;
+            try
+            {
+                isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
+            }
+            finally
+            {
+                if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                {
+                    dialogView.SetInteractionEnabled(true);
+                }
+            }
+
+            if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+            {
+                return;
+            }
+
+            dialogView.Hide();
+            _skillDetailScreenView?.HideImmediately();
+        }
+
+        /// <summary>
+        ///     スキルツリーリセットをキャンセルする。
+        /// </summary>
+        private void HandleSkillTreeResetCancelled()
+        {
+            _skillTreeResetDialogView.Hide();
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
@@ -75,10 +76,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                     switch (waveDefinition.Details[i].EnemyType)
                     {
                         case EnemyType.Infantry:
-                            SpawnEnemies(_infantrySpawner, waveDefinition.Details[i].EnemyAmount);
+                            SpawnEnemies(
+                                _infantrySpawner,
+                                waveDefinition.Details[i].EnemyAmount,
+                                waveDefinition.SpawnPointCandidateHashes);
                             break;
                         case EnemyType.Artillery:
-                            SpawnEnemies(_artillerySpawner, waveDefinition.Details[i].EnemyAmount);
+                            SpawnEnemies(
+                                _artillerySpawner,
+                                waveDefinition.Details[i].EnemyAmount,
+                                waveDefinition.SpawnPointCandidateHashes);
                             break;
                         default:
                             throw new Exception("[EnemyWaveSpawnerController] 敵種類が不正です。");
@@ -116,9 +123,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         /// <param name="spawner"></param>
         /// <param name="amount"></param>
-        private void SpawnEnemies(IEnemySpawner spawner, int amount)
+        /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。 </param>
+        private void SpawnEnemies(
+            IEnemySpawner spawner,
+            int amount,
+            IReadOnlyList<int> candidateSpawnPointHashes)
         {
-            spawner.SpawnEnemy(amount, AddStateEnemyCount);
+            spawner.SpawnEnemy(amount, candidateSpawnPointHashes, AddStateEnemyCount);
         }
 
         private void AddStateEnemyCount()

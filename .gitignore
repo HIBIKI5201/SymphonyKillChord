@@ -87,3 +87,12 @@ ExportedPackages/
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/
+Docs/DiscordLog/
+
+
+# Python (scripts/)
+__pycache__/
+*.py[cod]
+
+# Claude Code のローカル設定（各自の環境依存のため共有しない）
+.claude/settings.local.json

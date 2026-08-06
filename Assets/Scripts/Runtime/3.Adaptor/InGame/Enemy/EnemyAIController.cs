@@ -36,6 +36,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
+            _enemyAttackReservationUsecase.On3BeatBefore += Handle3BeatBefore;
             _enemyAttackReservationUsecase.On2BeatBefore += Handle2BeatBefore;
             _enemyAttackReservationUsecase.On1BeatBefore += Handle1BeatBefore;
             EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
@@ -49,6 +50,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (!_isActive) return;
             _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _enemyAttackReservationUsecase.On3BeatBefore -= Handle3BeatBefore;
             _enemyAttackReservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _enemyAttackReservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _enemyAttackReservationUsecase.Deactivate();
@@ -61,6 +63,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public event Action OnAttackReserved;
         /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
+        /// <summary>   攻撃の3拍前に発火するイベント   </summary>
+        public event Action On3BeatBefore;
         /// <summary>   攻撃の2拍前に発火するイベント   </summary>
         public event Action On2BeatBefore;
         /// <summary>   攻撃の1拍前に発火するイベント </summary>
@@ -160,6 +164,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _attackController.ExecuteAttack();
             _enemyBattleState.AttackExcuted();
             OnAttack?.Invoke();
+        }
+
+        /// <summary>
+        ///     攻撃の3拍前に到達した時に実行される処理。
+        /// </summary>
+        private void Handle3BeatBefore()
+        {
+            Debug.Log("[EnemyAIController] 攻撃の3拍前");
+            On3BeatBefore?.Invoke();
         }
 
         private void Handle2BeatBefore()

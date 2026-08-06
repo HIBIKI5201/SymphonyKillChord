@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -24,7 +25,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 Debug.LogError($"[{nameof(SkillCrosshairProgressUIInitializer)}] {nameof(_uiConfig)} が未設定です。", this);
                 return;
             }
-            if (_viewPrefab == null || _stepViewPrefab == null || _viewRoot == null)
+            if (_viewPrefab == null || _stepViewPrefab == null || _viewRoots == null || _viewRoots.Length == 0)
             {
                 Debug.LogError($"[{nameof(SkillCrosshairProgressUIInitializer)}] Prefabまたは配置先Transformが未設定です。", this);
                 return;
@@ -48,13 +49,41 @@ namespace KillChord.Runtime.Composition.InGame.UI
         }
 
         /// <summary>
-        ///     スキル定義データを指定し、クロスヘア上に表示するリズムコマンドUIを生成する。
+        ///     スキル定義データを指定し、クロスヘア上に表示するリズムコマンドUIを配置先ごとに生成する。
         /// </summary>
         /// <param name="definition"> 対象のスキル定義。 </param>
-        /// <returns> 生成したView。 </returns>
+        /// <returns> 生成した全Viewを束ねたView。生成できるViewが無い場合はnull。 </returns>
         public ISkillCrosshairProgressView CreateCrosshairProgressView(SkillDefinition definition)
         {
-            SkillCrosshairProgressView view = Instantiate(_viewPrefab, _viewRoot);
+            List<ISkillCrosshairProgressView> views = new List<ISkillCrosshairProgressView>(_viewRoots.Length);
+            for (int rootIndex = 0; rootIndex < _viewRoots.Length; rootIndex++)
+            {
+                Transform viewRoot = _viewRoots[rootIndex];
+                if (viewRoot == null)
+                {
+                    continue;
+                }
+
+                views.Add(CreateView(definition, viewRoot));
+            }
+
+            if (views.Count == 0)
+            {
+                return null;
+            }
+
+            return new SkillCrosshairProgressViewGroup(views.ToArray());
+        }
+
+        /// <summary>
+        ///     指定した配置先へリズムコマンドUIを1つ生成する。
+        /// </summary>
+        /// <param name="definition"> 対象のスキル定義。 </param>
+        /// <param name="viewRoot"> 生成先の親Transform。 </param>
+        /// <returns> 生成したView。 </returns>
+        private SkillCrosshairProgressView CreateView(SkillDefinition definition, Transform viewRoot)
+        {
+            SkillCrosshairProgressView view = Instantiate(_viewPrefab, viewRoot);
             SkillCrosshairStepView[] stepViews = new SkillCrosshairStepView[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
             {
@@ -76,8 +105,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private SkillCrosshairProgressView _viewPrefab;
         [SerializeField, Tooltip("クロスヘア専用の拍子表示Prefab。")]
         private SkillCrosshairStepView _stepViewPrefab;
-        [SerializeField, Tooltip("クロスヘア上のViewを配置する親Transform（HUDEnemyHealthViewの子想定）。")]
-        private Transform _viewRoot;
+        [SerializeField, Tooltip("クロスヘア上のViewを配置する親Transform（HUDEnemyHealthViewの子想定）。指定した数だけ同じ表示を生成する。")]
+        private Transform[] _viewRoots;
 
         private SkillInputProgressViewSetting _viewSetting;
         private SkillCrosshairProgressController _controller;
