@@ -184,9 +184,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 小節内の最初の拍。 </summary>
         private const double FIRST_BEAT = 1d;
         /// <summary> 2拍前の予告に使う遡り量。 </summary>
-        private const double TWO_BEAT_LEAD = 3d;
+        private const double TWO_BEAT_LEAD = 2d;
         /// <summary> 1拍前の予告に使う遡り量。 </summary>
-        private const double ONE_BEAT_LEAD = 2d;
+        private const double ONE_BEAT_LEAD = 1d;
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;
