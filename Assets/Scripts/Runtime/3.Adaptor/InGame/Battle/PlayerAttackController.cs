@@ -127,7 +127,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
             Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
             EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical,
-                targetEntity.Id));
+                targetEntity.Id, DamageAttackType.Normal));
 
             _battleState.Attacker.SetDamage(result.FinalDamage);
             _presenter.Push(result);
