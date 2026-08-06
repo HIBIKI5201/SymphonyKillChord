@@ -19,6 +19,9 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary> スキル詳細です。 </summary>
         public string SkillDetail { get; }
 
+        /// <summary> 改造画面に表示するスキルTipsです。 </summary>
+        public string Tips { get; }
+
         /// <summary> アウトゲーム画面で表示するスキルアイコンです。 </summary>
         public Sprite Icon { get; }
 
@@ -56,6 +59,7 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="animationKey"> アニメーションキーです。 </param>
         /// <param name="displayName"> スキルの表示名です </param>
         /// <param name="skillDetail"> スキルの詳細です </param>
+        /// <param name="tips"> 改造画面に表示するスキルTipsです。 </param>
         /// <param name="icon"> アウトゲーム画面で表示するアイコンです。 </param>
         /// <param name="effectDisplayMode"> アウトゲーム画面でのスキル効果表示モードです。 </param>
         public SkillTemplate(
@@ -69,6 +73,7 @@ namespace KillChord.Runtime.Domain.Player
             string animationKey,
             string displayName,
             string skillDetail,
+            string tips,
             Sprite icon,
             SkillEffectDisplayMode effectDisplayMode)
         {
@@ -91,6 +96,7 @@ namespace KillChord.Runtime.Domain.Player
             AnimationKey = animationKey;
             DisplayName = displayName;
             SkillDetail = skillDetail;
+            Tips = tips ?? string.Empty;
             Icon = icon;
             EffectDisplayMode = effectDisplayMode;
         }
