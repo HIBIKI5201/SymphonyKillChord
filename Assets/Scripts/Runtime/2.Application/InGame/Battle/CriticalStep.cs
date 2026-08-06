@@ -1,4 +1,5 @@
 ﻿using KillChord.Runtime.Domain.InGame.Battle;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
@@ -6,6 +7,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// <summary>
     ///     クリティカルヒットを処理する攻撃処理ステップ。
     /// </summary>
+    [Serializable]
     public class CriticalStep : IAttackStep
     {
         /// <summary>
@@ -15,10 +17,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            float chance = context.AttackDefinition.AttackSpec.CriticalChance.Value;
+            // 会心率は攻撃者、会心ダメージ倍率は武器（攻撃定義）が持つ。
+            float chance = context.Attacker == null ? 0f : context.Attacker.CriticalChance.Value;
             float multiplier = context.AttackDefinition.AttackSpec.CriticalMultiplier.Value;
 
-            if (Random.value >= chance)
+            if (UnityEngine.Random.value >= chance)
             {
                 return context;
             }

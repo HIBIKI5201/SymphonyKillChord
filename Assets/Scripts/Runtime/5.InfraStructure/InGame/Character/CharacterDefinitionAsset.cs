@@ -32,6 +32,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         /// <summary> キャラクターの攻撃の基本ダメージを取得する。 </summary>
         public int BaseDamage => _baseDamage;
 
+        /// <summary> キャラクターの会心率を取得する。 </summary>
+        public float CriticalChance => _criticalChance;
+
         [SerializeField, SourceDataCollection("Character"), Tooltip("キャラクター定義を一意に識別するID。")]
         private DataID _id;
 
@@ -48,6 +51,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         private AttackDefinitionAsset[] _attackDifinitions;
         [SerializeField, Tooltip("キャラクターの攻撃の基本ダメージ。")]
         private int _baseDamage;
+
+        [SerializeField, Range(0f, 1f),
+        Tooltip("キャラクターの会心率。0〜1で指定する。仕様書の％表記とは単位が違うので注意（仕様書の「クリティカル率5」は 0.05 を指定）。" +
+            "会心ダメージ倍率は武器ごとに攻撃定義側で設定する。")]
+        private float _criticalChance;
     }
 }
 
