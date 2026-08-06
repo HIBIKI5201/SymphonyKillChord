@@ -509,7 +509,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
-                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
+                _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
