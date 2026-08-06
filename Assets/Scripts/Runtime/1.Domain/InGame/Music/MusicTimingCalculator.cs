@@ -55,12 +55,16 @@ namespace KillChord.Runtime.Domain.InGame.Music
         {
             if (double.IsNaN(accurateBeat)
                 || double.IsInfinity(accurateBeat)
+                || double.IsNaN(targetBeat)
+                || double.IsInfinity(targetBeat)
+                || targetBeat <= 1d
                 || double.IsNaN(leadCount)
                 || double.IsInfinity(leadCount)
                 || leadCount <= 0d
                 || double.IsNaN(timeSignature)
                 || double.IsInfinity(timeSignature)
-                || timeSignature <= 0d)
+                || timeSignature <= 0d
+                || targetBeat > timeSignature)
             {
                 return 0f;
             }
