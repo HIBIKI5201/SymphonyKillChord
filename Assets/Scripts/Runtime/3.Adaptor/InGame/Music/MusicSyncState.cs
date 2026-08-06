@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
 using R3;
 using System;
@@ -89,6 +90,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             // ReactivePropertyは同値を弾くため、拍が変わったフレームだけ購読者へ通知される。
             _currentBeat.Value = (int)Math.Floor(AccurateBeat);
+        }
+
+        /// <summary>
+        ///     指定したタイミングのターゲット拍へ向かう進捗を取得する。
+        ///     区間に入る前は0で、ターゲット拍の直前に1へ近づき、跨いだ時点で0へ戻る。
+        /// </summary>
+        /// <param name="musicSpec"> 対象となる音楽同期タイミング。 </param>
+        /// <param name="leadCount"> 0から1へ変化させる区間の長さ。拍子と同じ単位で指定する。 </param>
+        /// <returns> 0〜1の値。BPM未設定の場合は0。 </returns>
+        public float GetNormalizedApproach(in MusicSyncSpec musicSpec, double leadCount)
+        {
+            if (BeatLength <= 0d)
+            {
+                return 0f;
+            }
+
+            return MusicTimingCalculator.CalculateNormalizedApproach(
+                AccurateBeat,
+                musicSpec.TimeSignature,
+                musicSpec.TargetBeat,
+                leadCount);
         }
 
         /// <summary>
