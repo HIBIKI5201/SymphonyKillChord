@@ -74,10 +74,15 @@ namespace KillChord.Runtime.View.InGame.Skill
             if (dto.SkillTriggeredFlg)
             {
                 ProcessSkillTriggered(dto);
+                PlayFlareTriggered();
             }
             else if (isProgressReset)
             {
                 PlayProgressResetAnimation();
+            }
+            else if (dto.PatternMatchCount > _patternMatchCount)
+            {
+                PlayFlareStep();
             }
 
             _patternMatchCount = dto.PatternMatchCount;
@@ -120,23 +125,40 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Transform _stepRoot;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image _cooldownBackgroundImage;
+        [SerializeField]
+        private Material _material;
+        [SerializeField]
+        private Image _rhythmResetFlareImage;
+        [SerializeField]
+        private Image _rhythmStepFlareImage;
+        [SerializeField]
+        private Image _rhythmTriggerdFlareImage;
 
         private SkillListStepView[] _stepViews;
         private SkillInputProgressAnimationSetting _animationSetting;
         private RectTransform _stepRootRectTransform;
-        private MotionHandle _progressResetMotion;
+        private MotionHandle _progressResetHandle;
+        private MotionHandle _progressFlareHandle;
         private bool _isSkillCoolingDown;
         private int _patternMatchCount;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;
         private float _stepRootBaseAnchoredPositionX;
 
+        private void Awake()
+        {
+            _rhythmStepFlareImage.enabled = false;
+            _rhythmResetFlareImage.enabled = false;
+            _rhythmTriggerdFlareImage.enabled = false;
+        }
+
         /// <summary>
         ///     破棄時に再生中のアニメーションを停止する。
         /// </summary>
         private void OnDestroy()
         {
-            _progressResetMotion.TryCancel();
+            _progressResetHandle.TryCancel();
+            _progressFlareHandle.TryCancel();
         }
 
         /// <summary>
@@ -177,20 +199,53 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// </summary>
         private void PlayProgressResetAnimation()
         {
-            _progressResetMotion.TryCancel();
+            _progressResetHandle.TryComplete();
             Vector2 anchoredPosition = _stepRootRectTransform.anchoredPosition;
             anchoredPosition.x = _stepRootBaseAnchoredPositionX;
             _stepRootRectTransform.anchoredPosition = anchoredPosition;
 
-            _progressResetMotion = LMotion.Punch.Create(
-                    _stepRootBaseAnchoredPositionX,
-                    _animationSetting.ResetShakeDistance,
-                    _animationSetting.ResetShakeDuration)
-                .WithEase(_animationSetting.ResetShakeEase)
-                .WithFrequency(_animationSetting.ResetShakeFrequency)
-                .WithDampingRatio(_animationSetting.ResetShakeDampingRatio)
-                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                .BindToAnchoredPositionX(_stepRootRectTransform);
+            _progressResetHandle = LMotion.Punch.Create(
+                        _stepRootBaseAnchoredPositionX,
+                        _animationSetting.ResetShakeDistance,
+                        _animationSetting.ResetShakeDuration)
+                    .WithEase(_animationSetting.ResetShakeEase)
+                    .WithFrequency(_animationSetting.ResetShakeFrequency)
+                    .WithDampingRatio(_animationSetting.ResetShakeDampingRatio)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .BindToAnchoredPositionX(_stepRootRectTransform);
+            PlayFlareReset();
+        }
+
+
+        private void PlayFlareStep()
+        {
+            _progressFlareHandle.TryComplete();
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.2f)
+                    .WithEase(Ease.InQuad)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(() => _rhythmStepFlareImage.enabled = false)
+                    .BindToColorA(_rhythmStepFlareImage);
+            _rhythmStepFlareImage.enabled = true;
+        }
+        private void PlayFlareTriggered()
+        {
+            _progressFlareHandle.TryComplete();
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.4f)
+                    .WithEase(Ease.InQuad)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(() => _rhythmTriggerdFlareImage.enabled = false)
+                    .BindToColorA(_rhythmTriggerdFlareImage);
+            _rhythmTriggerdFlareImage.enabled = true;
+        }
+        private void PlayFlareReset()
+        {
+            _progressFlareHandle.TryComplete();
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.2f)
+                    .WithEase(Ease.InQuad)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(() => _rhythmResetFlareImage.enabled = false)
+                    .BindToColorA(_rhythmResetFlareImage);
+            _rhythmResetFlareImage.enabled = true;
         }
     }
 }
