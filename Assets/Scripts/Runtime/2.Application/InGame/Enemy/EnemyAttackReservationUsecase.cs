@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -32,8 +31,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
-        /// <summary> 攻撃の3拍前に発火するイベント </summary>
-        public event Action On3BeatBefore;
         public event Action On2BeatBefore;
         public event Action On1BeatBefore;
 
@@ -115,7 +112,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            ScheduleLeadNotification(musicSpec, THREE_BEAT_LEAD, Handle3BeatBefore);
             ScheduleLeadNotification(musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore);
             ScheduleLeadNotification(musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore);
         }
@@ -168,15 +164,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         /// <summary>
-        ///    攻撃の3拍前に到達したときの処理。
-        /// </summary>
-        private void Handle3BeatBefore()
-        {
-            Debug.Log("攻撃の3拍前に到達しました。");
-            On3BeatBefore?.Invoke();
-        }
-
-        /// <summary>
         ///    攻撃の2拍前に到達したときの処理。
         /// </summary>
         private void Handle2BeatBefore()
@@ -192,16 +179,14 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             Debug.Log("攻撃の1拍前に到達しました。");
             On1BeatBefore?.Invoke();
         }
-        
+
 
         /// <summary> 小節内の最初の拍。 </summary>
         private const double FIRST_BEAT = 1d;
-        /// <summary> 3拍前の予告に使う遡り量。 </summary>
-        private const double THREE_BEAT_LEAD = 3d;
         /// <summary> 2拍前の予告に使う遡り量。 </summary>
-        private const double TWO_BEAT_LEAD = 2d;
+        private const double TWO_BEAT_LEAD = 3d;
         /// <summary> 1拍前の予告に使う遡り量。 </summary>
-        private const double ONE_BEAT_LEAD = 1d;
+        private const double ONE_BEAT_LEAD = 2d;
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;

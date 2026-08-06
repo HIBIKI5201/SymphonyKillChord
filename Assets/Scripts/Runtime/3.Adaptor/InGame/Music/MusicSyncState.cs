@@ -93,24 +93,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         /// <summary>
-        ///     指定した拍子のジャストに対する、現在位置の符号付きオフセットを取得する。
-        ///     0がジャスト、±1が裏拍を表し、絶対値がジャストからの距離になる。
-        /// </summary>
-        /// <param name="timeSignature"> 小節の拍子。小節をいくつに分割するかを表す。 </param>
-        /// <returns> -1〜1の値。BPM未設定の場合は0。 </returns>
-        public float GetSignedJustOffset(double timeSignature)
-        {
-            if (BeatLength <= 0d)
-            {
-                return 0f;
-            }
-
-            return MusicTimingCalculator.CalculateSignedJustOffset(AccurateBeat, timeSignature);
-        }
-
-        /// <summary>
         ///     指定したタイミングのターゲット拍へ向かう進捗を取得する。
-        ///     区間に入る前は0で、ターゲット拍の到達時に1へ達する。
+        ///     区間に入る前は0で、ターゲット拍の直前に1へ近づき、跨いだ時点で0へ戻る。
         /// </summary>
         /// <param name="musicSpec"> 対象となる音楽同期タイミング。 </param>
         /// <param name="leadCount"> 0から1へ変化させる区間の長さ。拍子と同じ単位で指定する。 </param>
