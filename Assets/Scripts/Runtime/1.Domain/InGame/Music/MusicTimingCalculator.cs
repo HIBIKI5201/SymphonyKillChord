@@ -55,12 +55,16 @@ namespace KillChord.Runtime.Domain.InGame.Music
         {
             if (double.IsNaN(accurateBeat)
                 || double.IsInfinity(accurateBeat)
+                || double.IsNaN(targetBeat)
+                || double.IsInfinity(targetBeat)
+                || targetBeat <= 1d
                 || double.IsNaN(leadCount)
                 || double.IsInfinity(leadCount)
                 || leadCount <= 0d
                 || double.IsNaN(timeSignature)
                 || double.IsInfinity(timeSignature)
-                || timeSignature <= 0d)
+                || timeSignature <= 0d
+                || targetBeat > timeSignature)
             {
                 return 0f;
             }
@@ -85,11 +89,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return (float)(FULL_PHASE - beatsRemaining / leadBeats);
         }
 
-        /// <summary> ジャスト間位相の中間点。裏拍にあたる。 </summary>
-        private const double PHASE_MIDPOINT = 0.5d;
         /// <summary> ジャスト間位相の全体長。 </summary>
         private const double FULL_PHASE = 1d;
-        /// <summary> 位相を-1〜1の範囲へ拡大する係数。 </summary>
-        private const double SIGNED_OFFSET_SCALE = 2d;
     }
 }

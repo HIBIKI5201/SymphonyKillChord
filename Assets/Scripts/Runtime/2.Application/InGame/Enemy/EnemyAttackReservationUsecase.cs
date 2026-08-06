@@ -134,11 +134,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             double targetBeat = musicSpec.TargetBeat - leadCount;
             int barFlag = musicSpec.BarFlag;
 
-            // 1拍目より前にある間は、拍子1小節分だけ戻して前の小節へ送る。
-            while (targetBeat < FIRST_BEAT)
+            if (double.IsNegativeInfinity(targetBeat))
             {
-                targetBeat += musicSpec.TimeSignature;
-                barFlag--;
+                return;
+            }
+
+            // 1拍目より前にある間は、拍子1小節分だけ戻して前の小節へ送る。
+            int barsBack = (int)Math.Ceiling((FIRST_BEAT - targetBeat) / musicSpec.TimeSignature);
+            if (barsBack > 0)
+            {
+                targetBeat += barsBack * musicSpec.TimeSignature;
+                barFlag -= barsBack;
             }
 
             // 現在の小節より前や、拍子の範囲外へはみ出す場合は予約しない。
@@ -184,9 +190,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 小節内の最初の拍。 </summary>
         private const double FIRST_BEAT = 1d;
         /// <summary> 2拍前の予告に使う遡り量。 </summary>
-        private const double TWO_BEAT_LEAD = 3d;
+        private const double TWO_BEAT_LEAD = 2d;
         /// <summary> 1拍前の予告に使う遡り量。 </summary>
-        private const double ONE_BEAT_LEAD = 2d;
+        private const double ONE_BEAT_LEAD = 1d;
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;

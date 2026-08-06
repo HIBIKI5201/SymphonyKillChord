@@ -183,7 +183,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _raycastView.Initialize(
                 target,
                 spec.AttackRangeMax.Value,
-                () => musicSyncState.GetNormalizedApproach(warningTiming, WARNING_LEAD_BEAT_COUNT));
+                () => musicSyncState.GetNormalizedApproach(
+                        battleState.FirstAttack ? attackMusicSpec.EncounterTiming : attackMusicSpec.BattleTiming,
+                        WARNING_LEAD_BEAT_COUNT));
+
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
