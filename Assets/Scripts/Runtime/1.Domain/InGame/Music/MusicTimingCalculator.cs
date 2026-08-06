@@ -85,11 +85,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return (float)(FULL_PHASE - beatsRemaining / leadBeats);
         }
 
-        /// <summary> ジャスト間位相の中間点。裏拍にあたる。 </summary>
-        private const double PHASE_MIDPOINT = 0.5d;
         /// <summary> ジャスト間位相の全体長。 </summary>
         private const double FULL_PHASE = 1d;
-        /// <summary> 位相を-1〜1の範囲へ拡大する係数。 </summary>
-        private const double SIGNED_OFFSET_SCALE = 2d;
     }
 }
