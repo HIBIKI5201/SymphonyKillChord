@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 yaw += context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
             }
-            else if (context.MoveInput.sqrMagnitude > float.Epsilon && context.MoveInput.y >= 0f)
+            else if (context.MoveInput.sqrMagnitude > float.Epsilon && !IsMovingStraightBackward(context.MoveInput))
             {
                 Vector3 playerForward = context.PlayerForward;
                 playerForward.y = 0f;
@@ -65,5 +65,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private const float EULER_ANGLE_FULL = 360f;
 
         private readonly CameraConfig _parameter;
+
+        /// <summary>
+        ///     カメラの自動回転追従を停止する真後ろ入力かどうかを判定する。
+        /// </summary>
+        /// <param name="moveInput"> 移動操作の入力値。</param>
+        /// <returns> 横方向の入力がなく、後方へ入力されている場合は true。</returns>
+        private static bool IsMovingStraightBackward(in Vector2 moveInput)
+        {
+            return Mathf.Abs(moveInput.x) <= float.Epsilon && moveInput.y < 0f;
+        }
     }
 }
