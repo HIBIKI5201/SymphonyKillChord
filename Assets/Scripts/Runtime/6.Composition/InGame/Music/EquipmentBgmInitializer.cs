@@ -8,6 +8,7 @@ using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -231,6 +232,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         }
 
         /// <summary>
+        ///     装備スキル構成からスキルID列を収集し、スキル番号(ID)の昇順で返す。
         ///     装備スキル構成からスキルID列（スロット順）を収集する。
         ///     SkillBuildDefinitionはOutGameで登録されるため、Title→InGame直行等では
         ///     未登録の場合がある。その場合は装備なしとして扱う。
@@ -261,8 +263,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 skillIds.Add(skillId);
                 _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
-
-            return skillIds;
+            return skillIds.OrderBy(x => x).ToList();
         }
 
         /// <summary>
