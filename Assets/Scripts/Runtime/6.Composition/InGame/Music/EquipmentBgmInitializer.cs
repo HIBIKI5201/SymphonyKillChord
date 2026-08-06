@@ -8,6 +8,7 @@ using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -261,8 +262,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 skillIds.Add(skillId);
                 _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
-
-            return skillIds;
+            // スキルIDの昇順で並べ替えて返す
+            return skillIds.OrderBy(x => x).ToList();
         }
 
         /// <summary>
