@@ -316,26 +316,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     プレイヤーの先頭攻撃定義から基礎会心率を取得します。
+        ///     プレイヤーの基礎会心率を取得します。
         /// </summary>
-        /// <returns> 基礎会心率。攻撃定義がない場合は0。 </returns>
+        /// <returns> 基礎会心率。 </returns>
         private float GetBaseCriticalChance()
         {
-            AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
-            if (attackDefinitions == null)
-            {
-                return 0f;
-            }
-
-            for (int i = 0; i < attackDefinitions.Length; i++)
-            {
-                if (attackDefinitions[i] != null && attackDefinitions[i].AttackSpecAsset != null)
-                {
-                    return attackDefinitions[i].AttackSpecAsset.CriticalChance;
-                }
-            }
-
-            return 0f;
+            return _playerData == null ? 0f : _playerData.CriticalChance;
         }
 
         /// <summary>
@@ -352,9 +338,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             for (int i = 0; i < attackDefinitions.Length; i++)
             {
-                if (attackDefinitions[i] != null && attackDefinitions[i].AttackSpecAsset != null)
+                if (attackDefinitions[i] != null)
                 {
-                    return attackDefinitions[i].AttackSpecAsset.CriticalDamageMultiplier;
+                    return attackDefinitions[i].CriticalDamageMultiplier;
                 }
             }
 

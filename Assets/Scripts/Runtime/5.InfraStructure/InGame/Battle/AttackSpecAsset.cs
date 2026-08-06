@@ -8,15 +8,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     [CreateAssetMenu(fileName = "AttackSpecAsset", menuName = "KillChord/Attack/" + nameof(AttackSpecAsset))]
     public class AttackSpecAsset : ScriptableObject
     {
-        /// <summary> クリティカルヒットの確率を取得する。 </summary>
-        public float CriticalChance => _criticalChance;
-        /// <summary> クリティカルダメージの倍率を取得する。 </summary>
-        public float CriticalDamageMultiplier => _criticalDamageMultiplier;
         /// <summary> 確定ダメージを取得する。 </summary>
         public float ConfirmedDamage => _confirmedDamage;
 
-        [SerializeField, Tooltip("クリティカルヒットの確率")] private float _criticalChance;
-        [SerializeField, Tooltip("クリティカルダメージの倍率")] private float _criticalDamageMultiplier;
         [SerializeField, Tooltip("確定ダメージ")] private float _confirmedDamage;
     }
 }
