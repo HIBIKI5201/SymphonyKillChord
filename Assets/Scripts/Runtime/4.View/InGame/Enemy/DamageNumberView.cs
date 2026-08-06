@@ -13,9 +13,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
     public class DamageNumberView : MonoBehaviour
     {
         /// <summary>
-        ///     ダメージ演出を再生する。
+        ///     ダメージ数値の表示を開始する。
         /// </summary>
-        /// <param name="damage"></param>
+        /// <param name="dTO">ダメージ数値DTO</param>
         public void Play(in DamageNumberDTO dTO)
         {
             if (_damageText == null)
@@ -24,7 +24,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            _damageText.text = Mathf.CeilToInt(dTO.Damage).ToString();
+            _damageText.SetText("{0}", Mathf.CeilToInt(dTO.Damage));
 
             ApplyRandomPosition();
             ApplyStyle(dTO.Type);
