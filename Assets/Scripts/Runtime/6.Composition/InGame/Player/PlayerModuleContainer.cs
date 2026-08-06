@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Player
@@ -16,11 +17,17 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <param name="playerInitializer"> プレイヤー初期化クラスです。 </param>
         /// <param name="playerView"> プレイヤーViewです。 </param>
         /// <param name="playerEntity"> プレイヤーEntityです。 </param>
-        public PlayerModuleContainer(PlayerInitializer playerInitializer, PlayerView playerView, CharacterEntity playerEntity)
+        /// <param name="playerStatusBonus"> プレイヤーステータスボーナスです。 </param>
+        public PlayerModuleContainer(
+            PlayerInitializer playerInitializer,
+            PlayerView playerView,
+            CharacterEntity playerEntity,
+            PlayerStatusBonus playerStatusBonus)
         {
             PlayerInitializer = playerInitializer;
             PlayerView = playerView;
             PlayerEntity = playerEntity;
+            PlayerStatusBonus = playerStatusBonus;
         }
 
         /// <summary> プレイヤー初期化クラスです。 </summary>
@@ -31,6 +38,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> プレイヤーEntityです。 </summary>
         public CharacterEntity PlayerEntity { get; }
+
+        /// <summary> プレイヤーステータスボーナスです。 </summary>
+        public PlayerStatusBonus PlayerStatusBonus { get; }
 
         /// <summary> プレイヤー攻撃Controllerです。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }

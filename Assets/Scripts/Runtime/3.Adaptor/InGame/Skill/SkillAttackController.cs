@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
@@ -63,7 +64,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             try
             {
                 AttackDefinition attackDefinition = _playerEntity.CombatSpec.GetAttackDefinitionByBeatType(beatType);
-                AttackExecutor.Execute(attackDefinition, _playerEntity, target, false, _playerEntity.BaseDamage);
+                AttackResult result = AttackExecutor.Execute(attackDefinition, _playerEntity, target, false, _playerEntity.BaseDamage);
+                EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, target.Id, DamageAttackType.Skill));
             }
             catch (System.InvalidOperationException ex)
             {

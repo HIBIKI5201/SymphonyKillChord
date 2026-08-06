@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ee99fd40337244b7963aeef8c21a2, type: 3}
   m_Name: SkillNodeData-N1
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
+  UnlockCost: 0
+  SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF11"
+  PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects: []
+  _unlockSkills:
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
   _nodeId:
     _id: node_n1
     _hashId: -92305930
   _parentNodeIds: []
-  UnlockCost: 0
-  SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF11"
-  PreviewVideoClip: {fileID: 0}
-  _unlockSkills:
-  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
+  references:
+    version: 2
+    RefIds: []

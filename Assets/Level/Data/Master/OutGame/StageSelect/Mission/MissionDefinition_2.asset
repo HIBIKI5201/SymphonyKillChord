@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: MissionDefinition_2
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.MissionDefinitionAsset
   _plannerMemo: 
-  _missionId: Test
+  _missionId:
+    _id: Test
+    _hashId: 418143992
   _displayName: 
   _mainMissionText: "\u3059\u3079\u3066\u306E\u8D64\u3044\u5175\u58EB\u3092\u6BB2\u6EC5\u3059\u308B"
   _defeatTips:
@@ -47,8 +49,10 @@ MonoBehaviour:
     - rid: 4420578705146120
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "Boss\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
-        _enemyMissionKeyAsset: {fileID: 11400000, guid: 5f7d0445e780f7d4388f8a3fa59e25be, type: 2}
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1910175038)\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyId:
+          _id: boss_research
+          _hashId: 1910175038
         _requiredKillCount: 1
     - rid: 8885031662707802230
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}

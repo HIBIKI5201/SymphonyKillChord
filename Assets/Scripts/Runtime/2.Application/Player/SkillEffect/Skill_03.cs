@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using System;
 
@@ -26,13 +27,21 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="context"> 実行コンテキストです。 </param>
         public override void Execute(in SkillEffectContext context)
         {
+            float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
+                SkillEffectParameterId.DamageMultiplier);
+            // ダメージ倍率が 0 の場合は、基本倍率を使用する。
+            if (damageMultiplier == 0f)
+            {
+                damageMultiplier = BASE_DAMAGE_MULTIPLIER;
+            }
+
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
             AttackResult result = AttackCalculator.Calculate(
                 attackDefinition,
                 context.PlayerEntity,
                 context.TargetEntity,
                 false,
-                context.PlayerEntity.BaseDamage * _damageMultiPlier);
+                context.PlayerEntity.BaseDamage * damageMultiplier);
 
             ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
             for (int i = 0; i < targets.Length; i++)
@@ -43,10 +52,10 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     continue;
                 }
 
-                target.TakeDamage(result.FinalDamage / _damageMultiPlier);
+                target.TakeDamage(result.FinalDamage / damageMultiplier);
             }
         }
 
-        private readonly float _damageMultiPlier = 2f;
+        private const float BASE_DAMAGE_MULTIPLIER = 1f;
     }
 }
