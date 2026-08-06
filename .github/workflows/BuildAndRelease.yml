@@ -217,12 +217,37 @@ jobs:
 
       - name: Unityライセンス状態の事前確認
         run: |
-          & "$env:UNITY_EXE_PATH" -batchmode -quit -logFile unity_license_check.log
-          $LicenseOk = Select-String -Path unity_license_check.log -Pattern "No valid Unity Editor license found" -Quiet
-          if ($LicenseOk) {
-            Write-Host "::error::Unity Personal のライセンスが無効です。ランナー機でUnity Hubから再ログインしてください。"
+          $LogPath = "unity_license_check.log"
+          if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
+
+          $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList @("-batchmode", "-quit", "-nographics", "-logFile", $LogPath) `
+            -PassThru -Wait -NoNewWindow
+
+          Write-Host "Unity終了コード: $($Process.ExitCode)"
+
+          if (-not (Test-Path $LogPath)) {
+            Write-Host "::error::ログファイルが生成されていません。Unityが起動自体に失敗している可能性があります。"
             exit 1
           }
+
+          # ライセンス検証は非同期のバックグラウンドスレッドで完了するため、
+          # ログファイルへの書き込み完了を待ってから判定する
+          Start-Sleep -Seconds 5
+
+          $LogContent = Get-Content -Path $LogPath -Raw
+          Write-Host "---- unity_license_check.log 全文 ----"
+          Write-Host $LogContent
+          Write-Host "--------------------------------------"
+
+          $HasLicenseError = $LogContent -match "No valid Unity Editor license found"
+
+          if ($HasLicenseError -or $Process.ExitCode -ne 0) {
+            Write-Host "::error::Unityライセンスが無効です。終了コード: $($Process.ExitCode)、ランナー機でUnity Hubから再ログインしてください。"
+            exit 1
+          }
+
+          Write-Host "Unityライセンス: 有効"
         shell: pwsh
   
 # ==================================================================================================
