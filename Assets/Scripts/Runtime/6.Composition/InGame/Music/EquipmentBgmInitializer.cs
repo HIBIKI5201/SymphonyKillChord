@@ -262,7 +262,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 skillIds.Add(skillId);
                 _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
-            // スキルIDの昇順で並べ替えて返す
+            // スキルIDを昇順で並べ替えて返す
             return skillIds.OrderBy(x => x).ToList();
         }
 
