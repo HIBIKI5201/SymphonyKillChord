@@ -471,9 +471,6 @@ namespace KillChord.Editor.AutoBuilder
                     bool hasFailure;
                     try
                     {
-                        BuildProfile.SetActiveBuildProfile(profile);
-                        
-                        // 診断ログ：BuildPipeline.BuildPlayer 呼び出し直前
                         Debug.Log(
                             $"[{nameof(AutoBuildExecuter)}] About to call BuildPipeline.BuildPlayer for profile: {profile.name}");
                         
