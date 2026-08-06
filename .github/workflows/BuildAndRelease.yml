@@ -215,6 +215,18 @@ jobs:
 
 # ==================================================================================================
 
+      - name: Unityライセンス状態の事前確認
+        run: |
+          & "$env:UNITY_EXE_PATH" -batchmode -quit -logFile unity_license_check.log
+          $LicenseOk = Select-String -Path unity_license_check.log -Pattern "No valid Unity Editor license found" -Quiet
+          if ($LicenseOk) {
+            Write-Host "::error::Unity Personal のライセンスが無効です。ランナー機でUnity Hubから再ログインしてください。"
+            exit 1
+          }
+        shell: pwsh
+  
+# ==================================================================================================
+
       - name: .NET SDK / dotnet CLI の可用性チェック
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
