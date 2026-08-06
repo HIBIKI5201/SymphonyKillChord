@@ -166,6 +166,8 @@ MonoBehaviour:
   _exitType: 2
   _duration: 1.5
   _moveDistance: 1
+  _randomPositionMin: {x: 0.3, y: 0.5}
+  _randomPositionMax: {x: 0.6, y: 1}
   _easeType: 5
 --- !u!1 &5357613158200450206
 GameObject:
