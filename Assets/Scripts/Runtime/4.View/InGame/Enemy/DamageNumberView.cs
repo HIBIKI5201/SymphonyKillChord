@@ -1,9 +1,11 @@
+using KillChord.Runtime.Adaptor.InGame.Enemy;
 using LitMotion;
 using LitMotion.Extensions;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace KillChord.Runtime.View
+namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     ダメージ数値を表示するクラス。
@@ -14,7 +16,7 @@ namespace KillChord.Runtime.View
         ///     ダメージ演出を再生する。
         /// </summary>
         /// <param name="damage"></param>
-        public void Play(float damage)
+        public void Play(in  DamageNumberDTO dTO)
         {
             if (_damageText == null)
             {
@@ -22,22 +24,166 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            _damageText.text = Mathf.CeilToInt(damage).ToString();
+            _damageText.text = Mathf.CeilToInt(dTO.Damage).ToString();
 
-            LMotion.Create(1f, 0f, _duration)
-                .WithEase(Ease.OutQuad)
-                .WithOnComplete(() =>
-                {
-                    Destroy(gameObject);
-                })
-                .BindToColorA(_damageText);
+            ApplyStyle(dTO.Type);
+            PlayMovement();
+            PlayFade();
         }
 
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
 
+        [SerializeField, Tooltip("ダメージ数値の背景画像")]
+        private Image _backGroundImage;
+
+        [SerializeField, Tooltip("ダメージ種類ごとの表示設定")]
+        private DamageNumberStyle[] _styles;
+
+        [SerializeField, Tooltip("ダメージ数値の移動方向")]
+        private DamageNumberExitType _exitType;
+
         [SerializeField, Tooltip("ダメージ演出の継続時間")]
         private float _duration;
+
+        [SerializeField, Tooltip("ダメージ数値の移動距離")]
+        private float _moveDistance;
+
+        [SerializeField, Tooltip("イージングタイプ")]
+        private Ease _easeType = Ease.OutQuad;
+
+        /// <summary>
+        ///     ダメージ種類に応じた表示スタイルを適用する。
+        /// </summary>
+        /// <param name="type">ダメージ種類</param>
+        private void ApplyStyle(DamageNumberType type)
+        {
+            DamageNumberStyle style = FindStyle(type);
+
+            if (style == null)
+            {
+                Debug.LogError($"[DamageNumberView] ダメージ種類 {type} に対応するスタイルが設定されていません。", this);
+                HideBackground();
+                return;
+            }
+
+            _damageText.color = style.TextColor;
+
+            if (_backGroundImage == null)
+            {
+                return;
+            }
+
+            Sprite backgroundSprite = style.BackGroundSprite;
+
+            // 通常時等表示しない場合は背景画像を非表示にする。
+            bool hasBackground = backgroundSprite != null;
+
+            _backGroundImage.sprite = backgroundSprite;
+            _backGroundImage.enabled = hasBackground;
+        }
+
+        /// <summary>
+        ///     背景画像を非表示にする。
+        /// </summary>
+        private void HideBackground()
+        {
+            if(_backGroundImage == null)
+            {
+                return;
+            }
+
+            _backGroundImage.sprite = null;
+            _backGroundImage.enabled = false;
+        }
+
+        /// <summary>
+        ///     ダメージ種類に対応するスタイルを取得する。
+        /// </summary>
+        /// <param name="type">ダメージ種類</param>
+        /// <returns>対応するダメージスタイル、存在しない場合は null</returns>
+        private DamageNumberStyle FindStyle(DamageNumberType type)
+        {
+            if(_styles == null)
+            {
+                return null;
+            }
+
+            for(int i = 0; i < _styles.Length; i++)
+            {
+                DamageNumberStyle style = _styles[i];
+
+                if(style != null && style.Type == type)
+                {
+                    return style;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        ///     ダメージ数値の移動演出を再生する。
+        /// </summary>
+        private void PlayMovement()
+        {
+            switch (_exitType)
+            {
+                case DamageNumberExitType.MoveUp:
+                    PlayVecticalMovement(_moveDistance);
+                    break;
+
+                case DamageNumberExitType.MoveDown:
+                    PlayVecticalMovement(-_moveDistance);
+                    break;
+
+                case DamageNumberExitType.Stay:
+                    break;
+
+                default:
+                    Debug.LogError($"[DamageNumberView] 不正な ExitType が設定されています。: {_exitType}", this);
+                    break;
+            }
+        }
+
+        /// <summary>
+        ///    ダメージ数値の縦方向の移動演出を再生する。
+        /// </summary>
+        /// <param name="distance">移動距離</param>
+        private void PlayVecticalMovement(float distance)
+        {
+            float startY = transform.localPosition.y;
+            float endY = startY + distance;
+
+            LMotion.Create(startY, endY, _duration)
+                .WithEase(_easeType)
+                .Bind(value =>
+                {
+                    Vector3 pos = transform.localPosition;
+                    pos.y = value;
+                    transform.localPosition = pos;
+                });
+        }
+
+        /// <summary>
+        ///     ダメージ数値のフェードアウト演出を再生する。
+        /// </summary>
+        private void PlayFade()
+        {
+            LMotion.Create(_damageText.color.a, 0f, _duration)
+                .WithEase(_easeType)
+                .WithOnComplete(() => Destroy(gameObject))
+                .BindToColorA(_damageText);
+
+            if (_backGroundImage == null || !_backGroundImage.enabled)
+            {
+                return;
+            }
+
+            // 背景画像のフェードアウト演出
+            LMotion.Create(_backGroundImage.color.a, 0f, _duration)
+                .WithEase(_easeType)
+                .BindToColorA(_backGroundImage);
+        }
     }
 }
