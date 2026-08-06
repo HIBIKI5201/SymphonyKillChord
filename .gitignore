@@ -93,3 +93,4 @@ Docs/DiscordLog/
 # Python (scripts/)
 __pycache__/
 *.py[cod]
+Assets/UnityGoogleDrive/
