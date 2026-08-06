@@ -76,7 +76,10 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="timeSignature"> 小節の拍子。小節をいくつに分割するかを表す。 </param>
         /// <param name="targetBeat"> ターゲットとなる拍目。1始まり。 </param>
         /// <param name="leadCount"> 0から1へ変化させる区間の長さ。拍子と同じ単位で指定する。 </param>
-        /// <returns> 0〜1の値。区間に入る前は0、ターゲット拍の到達時に1。 </returns>
+        /// <returns>
+        ///     0〜1の値。区間に入る前は0で、ターゲット拍の直前に1へ近づく。
+        ///     ターゲット拍を跨いだ時点で0へ戻り、次の小節の区間まで0のままとなる。
+        /// </returns>
         public static float CalculateNormalizedApproach(
             double accurateBeat,
             double timeSignature,
