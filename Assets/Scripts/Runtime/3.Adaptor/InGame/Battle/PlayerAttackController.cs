@@ -99,11 +99,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             bool hasTarget = TryUpdateCurrentTarget();
 
-            // スキル発動不可の場合、処理を飛ばす
-            if (_actionRestrictionState.CanUseSkill)
-            {
-                _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
-            }
+            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, _actionRestrictionState.CanUseSkill);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 

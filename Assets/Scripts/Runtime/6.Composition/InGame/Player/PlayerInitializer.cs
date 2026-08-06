@@ -317,8 +317,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 targetSystemContainer.TargetAreaQuery,
                 _player.transform,
                 (float)parameter.AttackRotationSpeed,
-                (float)parameter.AttackCooldown.Value,
-                (int)_playerEntity.BaseDamage.Value);
+                (float)parameter.AttackCooldown.Value);
             _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
