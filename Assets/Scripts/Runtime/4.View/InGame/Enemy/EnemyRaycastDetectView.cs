@@ -123,6 +123,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
         private Func<float> _justOffsetProvider;
+        private static readonly int DECAL_COLOR = Shader.PropertyToID("_BaseColor");
+        private static readonly int DECAL_EMISSION = Shader.PropertyToID("_BaseEmission");
 
 #if UNITY_EDITOR
         private bool _initializedFlg;
@@ -367,16 +369,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 appliedColor.a = 1f;
             }
-
-            if (_decalMaterial.HasProperty("_BaseColor"))
-            {
-                _decalMaterial.SetColor("_BaseColor", appliedColor);
-            }
-
-            if (_decalMaterial.HasProperty("_Color"))
-            {
-                _decalMaterial.SetColor("_Color", appliedColor);
-            }
+            _decalMaterial.SetColor(DECAL_COLOR, appliedColor);
+            _decalMaterial.SetColor(DECAL_EMISSION, appliedColor);
         }
 
         /// <summary>
