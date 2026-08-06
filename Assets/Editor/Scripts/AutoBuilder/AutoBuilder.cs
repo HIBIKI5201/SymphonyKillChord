@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Profile;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
@@ -54,7 +53,7 @@ namespace KillChord.Editor.AutoBuilder
             if (settings == null)
             {
                 Debug.LogError($"[{nameof(AutoBuilder)}] AutoBuilderSettings not found.");
-                ExitIfBatchMode(isBatchMode, exitCode: 1);
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
@@ -75,14 +74,14 @@ namespace KillChord.Editor.AutoBuilder
                     break;
                 default:
                     Debug.LogError($"[{nameof(AutoBuilder)}] Unknown buildMode: {buildMode}");
-                    ExitIfBatchMode(isBatchMode, exitCode: 1);
+                    AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                     return;
             }
 
             if (profiles == null || profiles.Length == 0)
             {
                 Debug.LogError($"[{nameof(AutoBuilder)}] No build profiles found for buildMode: {buildMode ?? "All"}");
-                ExitIfBatchMode(isBatchMode, exitCode: 1);
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
@@ -105,36 +104,7 @@ namespace KillChord.Editor.AutoBuilder
                 baseOutputDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), baseOutputDir));
             }
 
-            // 実行プロセスをAutoBuildExecuterへ委譲し、コールバックで終了判定を受け取る
-            AutoBuildExecuter.Run(baseOutputDir, profiles, isBatchMode, (success) =>
-            {
-                if (success)
-                {
-                    Debug.Log($"[{nameof(AutoBuilder)}] All builds completed successfully.");
-                    ExitIfBatchMode(isBatchMode, exitCode: 0);
-                }
-                else
-                {
-                    Debug.LogError($"[{nameof(AutoBuilder)}] One or more builds failed.");
-                    ExitIfBatchMode(isBatchMode, exitCode: 1);
-                }
-            });
-        }
-
-        /// <summary>
-        ///     バッチモード、または isBatchMode が true の場合のみ、エディタプロセスを指定されたコードで終了する。
-        ///     これにより、手動での CI/CD トリガー時のエディタ強制終了を回避できる。
-        /// </summary>
-        /// <param name="isBatchMode">強制的にバッチモード判定を行うかどうか（通常は Application.isBatchMode と組み合わせる）</param>
-        /// <param name="exitCode">終了コード（0: 成功、1: 失敗）</param>
-        private static void ExitIfBatchMode(bool isBatchMode, int exitCode)
-        {
-            bool shouldExit = Application.isBatchMode || isBatchMode;
-            if (shouldExit)
-            {
-                Debug.Log($"Exiting Unity editor with code {exitCode} (Batch Mode)");
-                EditorApplication.Exit(exitCode);
-            }
-        }
+            // 実行プロセスをAutoBuildExecuterへ委譲する。
+            AutoBuildExecuter.Run(baseOutputDir, profiles, isBatchMode);
     }
 }

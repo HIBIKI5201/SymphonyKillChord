@@ -111,7 +111,7 @@ jobs:
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
-    timeout-minutes: 120
+    timeout-minutes: 1440
     environment: 'AutoBuildAndRelease'
     permissions:
       contents: write
