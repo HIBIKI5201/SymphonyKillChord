@@ -641,12 +641,35 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="session"> 終了する自動ビルドセッションです。 </param>
         private static void FinishBuildSession(BuildSession session)
         {
+            BuildSession.ClearSession();
+            EditorUtility.ClearProgressBar();
+
+            bool isBatchMode = Application.isBatchMode || session.ForceBatchMode;
+
+            // バッチ実行時はログ出力後すぐに終了する。
+            if (isBatchMode)
+            {
+                bool batchSucceeded = !session.HasFailure;
+                string batchMessage = batchSucceeded
+                    ? "自動ビルドが完了しました。"
+                    : "自動ビルドが終了しました。Consoleでエラーを確認してください。";
+
+                if (batchSucceeded)
+                {
+                    Debug.Log($"[{nameof(AutoBuildExecuter)}] {batchMessage}");
+                }
+                else
+                {
+                    Debug.LogError($"[{nameof(AutoBuildExecuter)}] {batchMessage}");
+                }
+
+                ExitIfBatchMode(session.ForceBatchMode, batchSucceeded ? 0 : 1);
+                return;
+            }
+
             // ビルドプロファイル復元によるドメインリロードでコンソールが消える前に、
             // 成否だけは再出力用ログへ記録しておく。
             SetPendingLogFailure(session.HasFailure);
-
-            BuildSession.ClearSession();
-            EditorUtility.ClearProgressBar();
 
             bool restored = TryRestoreBuildProfile(session.OriginalProfileGuid);
             bool succeeded = !session.HasFailure && restored;
@@ -663,13 +686,7 @@ namespace KillChord.Editor.AutoBuilder
                 Debug.LogError($"[{nameof(AutoBuildExecuter)}] {message}");
             }
 
-            if (!Application.isBatchMode && !session.ForceBatchMode)
-            {
-                EditorUtility.DisplayDialog("AutoBuilder", message, "OK");
-            }
-
-            // ドメインリロードをまたがず確実に終了処理を実行する。
-            ExitIfBatchMode(session.ForceBatchMode, succeeded ? 0 : 1);
+            EditorUtility.DisplayDialog("AutoBuilder", message, "OK");
         }
 
         /// <summary>
