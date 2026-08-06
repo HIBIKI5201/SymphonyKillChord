@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEngine;
 
@@ -39,7 +38,7 @@ namespace KillChord.Editor.AutoBuilder
             }
             return null;
         }
-        
+
         /// <summary>
         ///     複数のビルドプロファイルに基づいてビルドを実行する。
         /// </summary>
@@ -47,7 +46,8 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="buildMode"> "Development" または "Master" を指定した場合、該当プロファイルのみビルドする。null または未指定時は両方をビルドする。 </param>
         public static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null)
         {
-            Debug.Log($"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. BuildMode: {buildMode ?? "All"}");
+            Debug.Log(
+                $"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. BuildMode: {buildMode ?? "All"}");
 
             AutoBuilderSettings settings = AutoBuilderSettings.instance;
             if (settings == null)
@@ -106,5 +106,6 @@ namespace KillChord.Editor.AutoBuilder
 
             // 実行プロセスをAutoBuildExecuterへ委譲する。
             AutoBuildExecuter.Run(baseOutputDir, profiles, isBatchMode);
+        }
     }
 }
