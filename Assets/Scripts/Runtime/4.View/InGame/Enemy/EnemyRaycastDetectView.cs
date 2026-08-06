@@ -17,7 +17,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="targetTransform"> レイキャスト対象です。 </param>
         /// <param name="attackRange"> 攻撃の射程です。 </param>
         /// <param name="justOffsetProvider">
-        /// 音楽のジャストからの符号付きオフセット(-1〜1)を返す供給元です。
+        /// 攻撃タイミングとなるターゲット拍への接近進捗(0〜1)を返す供給元です。
         /// nullの場合は警告デカールへ拍情報を渡しません。
         /// </param>
         public void Initialize(
@@ -102,10 +102,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             HideWarningInternal();
         }
 
-        /// <summary>
-        ///     警告デカールへ拍のずれを渡すシェーダープロパティIDです。
-        /// </summary>
-        private static readonly int RatioPropertyId = Shader.PropertyToID("_Ratio");
 
         [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
@@ -123,6 +119,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
         private Func<float> _justOffsetProvider;
+        private static readonly int DECAL_RATIO = Shader.PropertyToID("_Ratio");
         private static readonly int DECAL_COLOR = Shader.PropertyToID("_BaseColor");
         private static readonly int DECAL_EMISSION = Shader.PropertyToID("_BaseEmission");
 
@@ -200,7 +197,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         /// <summary>
         /// ターゲット追従中は毎フレーム警告ラインを更新し、
-        /// 方向固定中も拍のずれだけを更新し続けます。
+        /// 方向固定中も拍への接近進捗だけを更新し続けます。
         /// </summary>
         private void LateUpdate()
         {
@@ -275,7 +272,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        ///     音楽のジャストからのずれを警告デカールのシェーダープロパティへ適用します。
+        ///     ターゲット拍への接近進捗を警告デカールのシェーダープロパティへ適用します。
         /// </summary>
         private void ApplyWarningDecalJustOffset()
         {
@@ -284,12 +281,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            if (!_decalMaterial.HasProperty(RatioPropertyId))
+            if (!_decalMaterial.HasProperty(DECAL_RATIO))
             {
                 return;
             }
 
-            _decalMaterial.SetFloat(RatioPropertyId, _justOffsetProvider.Invoke());
+            _decalMaterial.SetFloat(DECAL_RATIO, _justOffsetProvider.Invoke());
         }
 
         /// <summary>
