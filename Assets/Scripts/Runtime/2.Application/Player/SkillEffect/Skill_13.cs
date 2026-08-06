@@ -35,7 +35,13 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 attackDefinition.AttackSpec,
                 attackDefinition.AttackPipeline,
                 attackDefinition.BeatType,
-                attackDefinition.JustDamageMultiplier);
+                attackDefinition.JustDamageMultiplier,
+                attackDefinition.WeaponDamageMultiplier,
+                attackDefinition.Range,
+                attackDefinition.HalfAngleDegrees,
+                attackDefinition.IsMultiTarget,
+                attackDefinition.HitCount,
+                attackDefinition.HitInterval);
 
 
             for (int i = 0; i < attackCount; i++)

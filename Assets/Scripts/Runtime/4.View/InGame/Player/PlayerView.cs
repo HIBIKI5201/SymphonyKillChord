@@ -213,6 +213,9 @@ namespace KillChord.Runtime.View.InGame.Player
 
             UnRegisterActions();
 
+            // 多段ヒットの残りを持ち越さない。プレイ再開時に前回の攻撃が飛ぶのを防ぐ。
+            PlayerAttackController?.ClearPendingHits();
+
             _moveVector = Vector2.zero;
             _dodgeVector = Vector2.zero;
             _isDodge = false;
