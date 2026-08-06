@@ -76,6 +76,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     text.SkillTypeLabel,
                     text.HasEffectDescription,
                     text.EffectDescription,
+                    skillTemplate.Tips,
                     skillTemplate.Level.Value);
             }
 

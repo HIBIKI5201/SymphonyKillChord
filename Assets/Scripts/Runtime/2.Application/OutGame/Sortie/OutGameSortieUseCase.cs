@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,12 +15,15 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// </summary>
         /// <param name="sceneTransitionUsecase"> シーン遷移ユースケース。 </param>
         /// <param name="outputPort"> 出力ポート。 </param>
+        /// <param name="scenarioTransitionCancellationToken"> OutGameシーンの終了時にキャンセルされるトークン。 </param>
         public OutGameSortieUseCase(
-               SceneTransitionUsecase sceneTransitionUsecase,
-               IOutGameSortieOutputPort outputPort)
+            SceneTransitionUsecase sceneTransitionUsecase,
+            IOutGameSortieOutputPort outputPort,
+            CancellationToken scenarioTransitionCancellationToken)
         {
             _usecase = sceneTransitionUsecase;
             _outputPort = outputPort;
+            _scenarioTransitionCancellationToken = scenarioTransitionCancellationToken;
         }
 
         /// <summary>
@@ -78,7 +80,32 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
             return true;
         }
 
+        /// <summary>
+        ///     シナリオシーンを終了してOutGameのホーム画面へ復帰します。
+        /// </summary>
+        /// <param name="scenarioSceneName"> 終了するシナリオシーン名。 </param>
+        /// <param name="returnSceneName"> 復帰先のOutGameシーン名。 </param>
+        /// <returns> シーン復帰に成功した場合はtrue。 </returns>
+        public async Task<bool> ReturnFromScenarioAsync(
+            string scenarioSceneName,
+            string returnSceneName)
+        {
+            bool success = await _usecase.UnloadAndSetActiveAsync(
+                scenarioSceneName,
+                returnSceneName,
+                _scenarioTransitionCancellationToken);
+
+            if (success && !_scenarioTransitionCancellationToken.IsCancellationRequested)
+            {
+                _outputPort.ShowHomeScreen();
+                _outputPort.SetOutGameActiveForScenario(true);
+            }
+
+            return success;
+        }
+
         private readonly SceneTransitionUsecase _usecase;
         private readonly IOutGameSortieOutputPort _outputPort;
+        private readonly CancellationToken _scenarioTransitionCancellationToken;
     }
 }
