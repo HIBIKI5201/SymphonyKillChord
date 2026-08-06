@@ -18,11 +18,13 @@ namespace KillChord.Runtime.View
         {
             if (_damageText == null)
             {
-                Debug.LogError("[DamageNumberView] TMP_Text が未設定です。", this);
+                Debug.LogError($"[{nameof(DamageNumberView)}] TMP_Text が未設定です。", this);
                 return;
             }
 
             _damageText.text = Mathf.CeilToInt(damage).ToString();
+
+            ApplyRandomOffset();
 
             LMotion.Create(1f, 0f, _duration)
                 .WithEase(Ease.OutQuad)
@@ -33,11 +35,55 @@ namespace KillChord.Runtime.View
                 .BindToColorA(_damageText);
         }
 
+        private const float DEFAULT_HORIZONTAL_OFFSET_RANGE = 0.3f;
+        private const float DEFAULT_UPWARD_OFFSET_RANGE = 0.5f;
+
+        /// <summary>
+        ///     表示演出専用の乱数生成器。
+        ///     UnityEngine.Random はクリティカル抽選が使うため、共有すると表示の乱数消費が
+        ///     戦闘結果へ影響してしまう。表示側は独立した生成器を使う。
+        /// </summary>
+        private static readonly System.Random PRESENTATION_RANDOM = new System.Random();
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
 
         [SerializeField, Tooltip("ダメージ演出の継続時間")]
         private float _duration;
+
+        [SerializeField, Tooltip("生成位置の横方向のランダム幅（メートル）。±この値の範囲でずらす。0でずらさない")]
+        private float _randomHorizontalOffsetRange = DEFAULT_HORIZONTAL_OFFSET_RANGE;
+
+        [SerializeField, Tooltip("生成位置の上方向のランダム幅（メートル）。0からこの値の範囲で上にだけずらす。下へは動かさない")]
+        private float _randomUpwardOffsetRange = DEFAULT_UPWARD_OFFSET_RANGE;
+
+        /// <summary>
+        ///     生成位置をランダムにずらす。
+        ///     多段ヒットや複数対象で同時に表示された数値が重なって読めなくなるのを防ぐ。
+        ///     生成位置が敵の足元にあるため、縦方向は上にのみずらして地面へ潜らせない。
+        /// </summary>
+        private void ApplyRandomOffset()
+        {
+            float horizontal = _randomHorizontalOffsetRange <= 0f
+                ? 0f
+                : NextRange(-_randomHorizontalOffsetRange, _randomHorizontalOffsetRange);
+
+            float upward = _randomUpwardOffsetRange <= 0f
+                ? 0f
+                : NextRange(0f, _randomUpwardOffsetRange);
+
+            transform.localPosition += new Vector3(horizontal, upward, 0f);
+        }
+
+        /// <summary>
+        ///     表示演出専用の乱数生成器から、指定範囲の値を取得する。
+        /// </summary>
+        /// <param name="min"> 最小値。 </param>
+        /// <param name="max"> 最大値。 </param>
+        /// <returns> min以上max未満の値。 </returns>
+        private static float NextRange(float min, float max)
+        {
+            return min + (float)PRESENTATION_RANDOM.NextDouble() * (max - min);
+        }
     }
 }
