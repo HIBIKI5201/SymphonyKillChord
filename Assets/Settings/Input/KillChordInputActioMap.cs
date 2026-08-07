@@ -100,6 +100,15 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BattlePause"",
+                    ""type"": ""Button"",
+                    ""id"": ""e6961b11-998a-4881-8858-c8f1e87ddb2d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -122,6 +131,17 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Option"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c1a54e4b-ef82-4547-9c93-a67dda5faf5b"",
+                    ""path"": ""<Keyboard>/o"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BattlePause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1191,6 +1211,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         // Common
         m_Common = asset.FindActionMap("Common", throwIfNotFound: true);
         m_Common_Option = m_Common.FindAction("Option", throwIfNotFound: true);
+        m_Common_BattlePause = m_Common.FindAction("BattlePause", throwIfNotFound: true);
         // OutGame
         m_OutGame = asset.FindActionMap("OutGame", throwIfNotFound: true);
         m_OutGame_Submit = m_OutGame.FindAction("Submit", throwIfNotFound: true);
@@ -1310,6 +1331,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     private readonly InputActionMap m_Common;
     private List<ICommonActions> m_CommonActionsCallbackInterfaces = new List<ICommonActions>();
     private readonly InputAction m_Common_Option;
+    private readonly InputAction m_Common_BattlePause;
     /// <summary>
     /// Provides access to input actions defined in input action map "Common".
     /// </summary>
@@ -1325,6 +1347,10 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "Common/Option".
         /// </summary>
         public InputAction @Option => m_Wrapper.m_Common_Option;
+        /// <summary>
+        /// Provides access to the underlying input action "Common/BattlePause".
+        /// </summary>
+        public InputAction @BattlePause => m_Wrapper.m_Common_BattlePause;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1354,6 +1380,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Option.started += instance.OnOption;
             @Option.performed += instance.OnOption;
             @Option.canceled += instance.OnOption;
+            @BattlePause.started += instance.OnBattlePause;
+            @BattlePause.performed += instance.OnBattlePause;
+            @BattlePause.canceled += instance.OnBattlePause;
         }
 
         /// <summary>
@@ -1368,6 +1397,9 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @Option.started -= instance.OnOption;
             @Option.performed -= instance.OnOption;
             @Option.canceled -= instance.OnOption;
+            @BattlePause.started -= instance.OnBattlePause;
+            @BattlePause.performed -= instance.OnBattlePause;
+            @BattlePause.canceled -= instance.OnBattlePause;
         }
 
         /// <summary>
@@ -2041,6 +2073,13 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnOption(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BattlePause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBattlePause(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "OutGame" which allows adding and removing callbacks.
