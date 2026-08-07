@@ -30,7 +30,17 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             Timeout = TimeSpan.FromMinutes(10)
         };
         private readonly SemaphoreSlim _concurrencyLimiter = new(MAX_CONCURRENT_DOWNLOADS, MAX_CONCURRENT_DOWNLOADS);
+        private readonly StallWatchdog _watchdog;
         private bool _isDisposed;
+
+        /// <summary>
+        ///     添付ファイルのダウンローダーを生成する。
+        /// </summary>
+        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
+        internal AssetDownloader(StallWatchdog watchdog)
+        {
+            _watchdog = watchdog;
+        }
 
         /// <summary>
         ///     Markdown内のメディアURLをダウンロードし、ローカル相対パスへ書き換える。
@@ -99,6 +109,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             await _concurrencyLimiter.WaitAsync();
             try
             {
+                _watchdog.ReportProgress($"添付ファイル取得: {GetFileNameFromUrl(assetUrl.DecodedUrl)}");
                 using HttpRequestMessage request = new(HttpMethod.Get, assetUrl.DecodedUrl);
                 using HttpResponseMessage response = await _httpClient.SendAsync(
                     request,

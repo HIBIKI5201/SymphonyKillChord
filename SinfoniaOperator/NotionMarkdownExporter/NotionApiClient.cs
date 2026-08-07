@@ -35,14 +35,17 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _concurrencyLimiter = new(MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_REQUESTS);
         private readonly RequestRateLimiter _rateLimiter = new(REQUESTS_PER_SECOND, REQUEST_BURST_CAPACITY);
+        private readonly StallWatchdog _watchdog;
         private bool _isDisposed;
 
         /// <summary>
         ///     Notion APIクライアントを生成する。
         /// </summary>
         /// <param name="notionToken">Notion内部インテグレーションのトークン。</param>
-        internal NotionApiClient(string notionToken)
+        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
+        internal NotionApiClient(string notionToken, StallWatchdog watchdog)
         {
+            _watchdog = watchdog;
             _httpClient = new HttpClient
             {
                 Timeout = TimeSpan.FromMinutes(5)
@@ -249,6 +252,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         {
             for (int attempt = 1; attempt <= MAX_RETRY_COUNT; attempt++)
             {
+                _watchdog.ReportProgress($"Notion API {method.Method} {CreateOperationPath(url)}");
                 using HttpRequestMessage request = new(method, url);
                 if (json != null)
                 {
@@ -290,6 +294,16 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
 
             throw new InvalidOperationException("Notion APIへの再試行回数を超えました。");
+        }
+
+        /// <summary>
+        ///     警告表示用に、リクエストURLからAPIのベースURLを除いた部分を取得する。
+        /// </summary>
+        /// <param name="url">リクエストURL。</param>
+        /// <returns>ベースURLを除いたパス。</returns>
+        private static string CreateOperationPath(string url)
+        {
+            return url.StartsWith(API_BASE_URL, StringComparison.Ordinal) ? url[API_BASE_URL.Length..] : url;
         }
 
         /// <summary>

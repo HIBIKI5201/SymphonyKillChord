@@ -15,6 +15,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
     {
         private readonly NotionApiClient _apiClient;
         private readonly ExporterOptions _options;
+        private readonly StallWatchdog _watchdog;
         private readonly HashSet<string> _reservedPaths = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, PageExportNode> _pagesById = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, DatabaseExportNode> _databasesById = new(StringComparer.OrdinalIgnoreCase);
@@ -31,10 +32,12 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// </summary>
         /// <param name="apiClient">Notion APIクライアント。</param>
         /// <param name="options">エクスポート設定。</param>
-        internal NotionExporter(NotionApiClient apiClient, ExporterOptions options)
+        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
+        internal NotionExporter(NotionApiClient apiClient, ExporterOptions options, StallWatchdog watchdog)
         {
             _apiClient = apiClient;
             _options = options;
+            _watchdog = watchdog;
             _stagingRootDirectory = Path.Combine(
                 Path.GetTempPath(),
                 "SinfoniaStudio",
@@ -59,6 +62,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 if (previousManifest != null)
                 {
                     Console.WriteLine("前回のエクスポートデータをクリーンアップします。");
+                    _watchdog.ReportProgress("前回エクスポートデータのクリーンアップ");
                     ExportManifest.DeleteGeneratedFiles(
                         previousManifest,
                         _options.OutputDirectory,
@@ -76,9 +80,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 HashSet<string> generatedFiles = new(StringComparer.OrdinalIgnoreCase);
                 int assetCount = 0;
 
-                using AssetDownloader assetDownloader = new();
+                using AssetDownloader assetDownloader = new(_watchdog);
                 foreach (PageExportNode page in _pages)
                 {
+                    _watchdog.ReportProgress($"Markdown出力: {page.Title}");
                     string rawMarkdown = await File.ReadAllTextAsync(page.StagingFilePath, Encoding.UTF8);
                     string markdown = CreatePageMarkdown(page, rawMarkdown);
                     rawMarkdown = string.Empty;
@@ -108,11 +113,13 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
                 foreach (DatabaseExportNode database in _databases)
                 {
+                    _watchdog.ReportProgress($"データベース出力: {database.Metadata.Title}");
                     string markdown = CreateDatabaseMarkdown(database);
                     await WriteMarkdownAsync(database.FilePath, markdown);
                     generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, database.FilePath));
                 }
 
+                _watchdog.ReportProgress("マニフェストの保存");
                 await ExportManifest.SaveAsync(_options.OutputDirectory, _options.RootPageId, generatedFiles);
 
                 return new ExportSummary(
