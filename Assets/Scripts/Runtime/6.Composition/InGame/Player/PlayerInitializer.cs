@@ -119,7 +119,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
         }
 
         /// <summary>
