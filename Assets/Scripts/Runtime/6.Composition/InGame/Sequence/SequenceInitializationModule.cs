@@ -11,7 +11,6 @@ using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.OutGame.Savedata;
-using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -41,20 +40,18 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceView = FindFirstObjectByType<StageSequenceView>();
             _stageSequenceMessageView = FindFirstObjectByType<StageSequenceMessageView>();
             _stageStartFadeView = FindFirstObjectByType<StageStartFadeView>();
-            _stageStartCameraView = FindFirstObjectByType<StageStartCameraView>();
-            _cameraSystemView = FindFirstObjectByType<CameraSystemView>();
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
+            _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
                 || _stageStartFadeView == null
-                || _stageStartCameraView == null
-                || _cameraSystemView == null
                 || _stageResultView == null
                 || _inGamePlayDirector == null
-                || _stageSequenceVoiceView == null)
+                || _stageSequenceVoiceView == null
+                || _stageStartConstraintView == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
@@ -125,16 +122,16 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _stageResultController = stageResultContainer.Controller;
 
-            _stageStartCameraView.Initialize(
-                _cameraSystemView,
+
+            _stageStartConstraintView.AddConstraintSource(
                 playerContainer.PlayerView.transform);
 
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
-                _stageStartCameraView,
                 _stageResultView,
+                _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _inGamePlayDirector);
 
@@ -367,6 +364,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
                 await _stageProgressSaveDataService.SaveClearAsync(
                     stageDefinition.StageId,
+                    stageDefinition.Reward,
                     evaluationResult,
                     stageDefinition.IsTutorial);
 
@@ -384,8 +382,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageSequenceView _stageSequenceView;
         private StageSequenceMessageView _stageSequenceMessageView;
         private StageStartFadeView _stageStartFadeView;
-        private StageStartCameraView _stageStartCameraView;
-        private CameraSystemView _cameraSystemView;
         private StageResultView _stageResultView;
         private StageResultController _stageResultController;
         private InGamePlayDirector _inGamePlayDirector;
@@ -394,6 +390,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
+        private StageStartConstraintView _stageStartConstraintView;
         private bool _isWaitingForLoadingCompleted;
         private bool _isRegistered;
         private bool _hasStarted;

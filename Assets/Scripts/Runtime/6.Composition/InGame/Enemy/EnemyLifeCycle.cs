@@ -11,6 +11,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -164,7 +165,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
             _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
@@ -177,7 +178,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view.Initialize(aiController, target, animationContext, musicSyncState);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
-            _raycastView.Initialize(target, spec.AttackRangeMax.Value);
+            // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
+            MusicSyncSpec warningTiming = attackMusicSpec.BattleTiming;
+            _raycastView.Initialize(
+                target,
+                spec.AttackRangeMax.Value,
+                () => musicSyncState.GetNormalizedApproach(
+                        battleState.FirstAttack ? attackMusicSpec.EncounterTiming : attackMusicSpec.BattleTiming,
+                        WARNING_LEAD_BEAT_COUNT));
+
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
             _aiController.OnAttack += _raycastView.HideWarning;
@@ -358,6 +367,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view?.StopGameplay();
         }
 
+        /// <summary> 警告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
+        private const double WARNING_LEAD_BEAT_COUNT = 2d;
+
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
@@ -493,6 +505,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _attackReservationUsecase?.Deactivate();
             _aiController?.CancelAttack();
+            _raycastView?.HideWarning();
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();

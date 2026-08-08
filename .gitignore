@@ -88,4 +88,15 @@ ExportedPackages/
 /[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/
 Docs/DiscordLog/
+<<<<<<< HEAD
 Docs/AI資料まとめ/
+=======
+
+
+# Python (scripts/)
+__pycache__/
+*.py[cod]
+
+# Claude Code のローカル設定（各自の環境依存のため共有しない）
+.claude/settings.local.json
+>>>>>>> b62541c7552987184eb82a1977c1f4f6dc899705

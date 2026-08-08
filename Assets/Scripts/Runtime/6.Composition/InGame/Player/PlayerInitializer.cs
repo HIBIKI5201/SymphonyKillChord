@@ -67,6 +67,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("プレイヤーの攻撃種別ごとのアニメーション設定です。")]
         private PlayerAttackAnimationConfig _playerAttackAnimationConfig;
 
+        [SerializeField, Tooltip("モバイルスティックフリック入力です。")]
+        private MobileStickFlickInput _mobileStickFlickInput;
+
+        [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
+        private string _mobileStickFlickInputConfigKey;
+
         [Space]
         [Header("キャラクターデータ（テスト用）")]
         [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")]
@@ -78,6 +84,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private DataID[] _equippedSkills;
 
         private CharacterDefinitionAsset _loadedPlayerData;
+        private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
         private ICharacterAnimationSignal _characterAnimationSignal;
@@ -112,11 +119,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
         }
 
         /// <summary>
-        ///     プレイヤーキャラクター定義を非同期でロードします。
+        ///     プレイヤーキャラクター定義とモバイル入力設定を非同期でロードします。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 成功した場合はtrue。 </returns>
@@ -130,6 +137,21 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤーキャラクター定義の解決に失敗しました。", this);
                 return false;
             }
+
+#if UNITY_ANDROID || UNITY_EDITOR
+            if (_mobileStickFlickInput != null)
+            {
+                _loadedMobileStickFlickInputConfig =
+                    await _mobileStickFlickInputConfigKey.LoadAssetAsync<MobileStickFlickInputConfig>(this, cancellationToken);
+                if (_loadedMobileStickFlickInputConfig == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInputConfig)} のロードに失敗しました。",
+                        this);
+                    return false;
+                }
+            }
+#endif
 
             return true;
         }
@@ -289,9 +311,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 attackIntervalEvaluator,
                 musicSyncService,
                 musicSyncState,
+                targetSystemContainer.TargetAreaQuery,
+                _player.transform,
                 (float)parameter.AttackRotationSpeed,
-                (float)parameter.AttackCooldown.Value,
-                (int)_playerEntity.BaseDamage.Value);
+                (float)parameter.AttackCooldown.Value);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
@@ -337,6 +360,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 inputView,
                 healthHudPresenter,
                 inputSuppressionState);
+
+            InitializeMobileStickFlickInput(inputView);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
@@ -428,6 +453,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
+            UninitializeMobileStickFlickInput();
+
             if (_playerInputView != null)
             {
                 _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
@@ -461,6 +488,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            UninitializeMobileStickFlickInput();
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
+            _loadedMobileStickFlickInputConfig = null;
+#endif
             _characterRepositoryKey.ReleaseLoadedAsset(this);
             _loadedPlayerData = null;
 
@@ -472,6 +504,37 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
+        }
+
+        /// <summary>
+        ///     Androidの仮想スティックフリック入力を入力Viewへ接続する。
+        /// </summary>
+        /// <param name="inputView"> フリック入力の通知先。 </param>
+        private void InitializeMobileStickFlickInput(PlayerInputView inputView)
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            if (_mobileStickFlickInput == null)
+            {
+#if UNITY_ANDROID
+                Debug.LogWarning(
+                    $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInput)} が設定されていません。",
+                    this);
+#endif
+                return;
+            }
+
+            _mobileStickFlickInput.Initialize(inputView, _loadedMobileStickFlickInputConfig);
+#endif
+        }
+
+        /// <summary>
+        ///     仮想スティックフリック入力と入力Viewの接続を解除する。
+        /// </summary>
+        private void UninitializeMobileStickFlickInput()
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInput?.Uninitialize();
+#endif
         }
 
         /// <summary>

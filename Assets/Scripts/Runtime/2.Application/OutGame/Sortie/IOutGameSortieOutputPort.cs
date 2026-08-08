@@ -16,6 +16,11 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         void StartBattle();
 
         /// <summary>
+        ///     ホーム画面の表示を要求します。
+        /// </summary>
+        void ShowHomeScreen();
+
+        /// <summary>
         ///    シナリオステージの出撃処理を要求する。
         /// </summary>
         /// <param name="isActive"> シナリオステージの出撃処理を有効にするかどうか。 </param>
