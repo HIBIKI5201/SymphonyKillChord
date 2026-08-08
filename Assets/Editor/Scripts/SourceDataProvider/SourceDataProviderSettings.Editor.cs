@@ -140,6 +140,10 @@ namespace KillChord.Editor.SourceDataProvider
             SynchronizeSourceAssetsFromAddressables();
         }
 
+        private const string ENEMY_DATA_COLLECTION_KEY = "EnemyData";
+        private const string ENEMY_DEFINITION_REPOSITORY_KEY = "EnemyDefinitionRepository";
+        private const string ENEMY_DATA_PROPERTY_PATH = "_enemyDefinitionAssets";
+
         [SerializeField, Tooltip("Addressable ScriptableObject設定一覧です。")]
         private List<SourceAssetMapping> _sourceAssetMappings = new();
 
@@ -201,7 +205,7 @@ namespace KillChord.Editor.SourceDataProvider
                 SynchronizeSourceAssetsFromAddressables();
             }
 
-            if (EnsureDefaultMappings())
+            if (EnsureEnemyDataMapping())
             {
                 // 新しい既定Collectionは、既存設定が初期化済みでも不足分だけ永続化する。
                 Save(true);
@@ -209,41 +213,39 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     バージョン更新で追加された既定SourceAsset・Collection設定を不足時だけ補完します。
+        ///     バージョン更新で追加されたEnemyData設定を不足時だけ補完します。
         /// </summary>
         /// <returns> 設定を追加した場合はtrueです。 </returns>
-        private bool EnsureDefaultMappings()
+        private bool EnsureEnemyDataMapping()
         {
             _sourceAssetMappings ??= new List<SourceAssetMapping>();
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
             bool changed = false;
-            List<RepositoryMapping> defaults = CreateDefaultLegacyMappings();
-            for (int i = 0; i < defaults.Count; i++)
+            if (!ContainsRepositoryMapping(ENEMY_DATA_COLLECTION_KEY))
             {
-                RepositoryMapping mapping = defaults[i];
-                if (!ContainsRepositoryMapping(mapping.CollectionKey))
-                {
-                    _repositoryMappings.Add(mapping);
-                    changed = true;
-                }
+                _repositoryMappings.Add(new RepositoryMapping(
+                    ENEMY_DATA_COLLECTION_KEY,
+                    ENEMY_DEFINITION_REPOSITORY_KEY,
+                    ENEMY_DATA_PROPERTY_PATH));
+                changed = true;
+            }
 
-                if (!ContainsSourceAssetAddress(mapping.AddressableKey))
-                {
-                    _sourceAssetMappings.Add(new SourceAssetMapping(mapping.AddressableKey));
-                    changed = true;
-                }
+            if (!ContainsSourceAssetAddress(ENEMY_DEFINITION_REPOSITORY_KEY))
+            {
+                _sourceAssetMappings.Add(new SourceAssetMapping(ENEMY_DEFINITION_REPOSITORY_KEY));
+                changed = true;
+            }
 
-                if (!ContainsCollectionMapping(mapping.CollectionKey))
-                {
-                    _sourceCollectionMappings.Add(new SourceCollectionMapping(
-                        mapping.CollectionKey,
-                        mapping.AddressableKey,
-                        mapping.ArrayPropertyPath,
-                        GetDefaultCreationDirectory(mapping.CollectionKey)));
-                    changed = true;
-                }
+            if (!ContainsCollectionMapping(ENEMY_DATA_COLLECTION_KEY))
+            {
+                _sourceCollectionMappings.Add(new SourceCollectionMapping(
+                    ENEMY_DATA_COLLECTION_KEY,
+                    ENEMY_DEFINITION_REPOSITORY_KEY,
+                    ENEMY_DATA_PROPERTY_PATH,
+                    GetDefaultCreationDirectory(ENEMY_DATA_COLLECTION_KEY)));
+                changed = true;
             }
 
             return changed;
@@ -379,7 +381,10 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioPortrait", "PortraitCatalogAsset", "_entries"),
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
                 new("Wave", "EnemyWaveDefinitionRepository", "_waveDefinitionAssets"),
-                new("EnemyData", "EnemyDefinitionRepository", "_enemyDefinitionAssets"),
+                new(
+                    ENEMY_DATA_COLLECTION_KEY,
+                    ENEMY_DEFINITION_REPOSITORY_KEY,
+                    ENEMY_DATA_PROPERTY_PATH),
                 new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
             };
         }
@@ -398,7 +403,7 @@ namespace KillChord.Editor.SourceDataProvider
                 "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
                 "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
-                "EnemyData" => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
+                ENEMY_DATA_COLLECTION_KEY => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
                 "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
                 _ => string.Empty,
             };
