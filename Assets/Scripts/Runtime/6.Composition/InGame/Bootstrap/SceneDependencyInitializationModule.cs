@@ -26,23 +26,26 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _stageSceneInstance = await ServiceLocator.GetInstanceAsync<IStageSceneInstance>();
-            if (_stageSceneInstance == null)
+            // 常駐サービスの登録を待つ。期限超過はfalse、キャンセルは例外として伝播する。
+            (bool isStageSceneLocated, IStageSceneInstance stageSceneInstance) =
+                await ServiceLocator.TryGetInstanceAsync<IStageSceneInstance>(
+                    SERVICE_WAIT_SECONDS,
+                    cancellationToken);
+            _stageSceneInstance = stageSceneInstance;
+
+            if (!isStageSceneLocated || _stageSceneInstance == null)
             {
                 Debug.LogError($"[{nameof(SceneDependencyInitializationModule)}] {nameof(IStageSceneInstance)} の取得に失敗しました。", this);
                 return false;
             }
 
-            int retryCount = 0;
-            _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-            while (_musicPlayer == null && retryCount < MAX_RETRY_COUNT)
-            {
-                await Awaitable.NextFrameAsync(cancellationToken);
-                _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
-                retryCount++;
-            }
+            (bool isMusicPlayerLocated, MusicPlayer musicPlayer) =
+                await ServiceLocator.TryGetInstanceAsync<MusicPlayer>(
+                    SERVICE_WAIT_SECONDS,
+                    cancellationToken);
+            _musicPlayer = musicPlayer;
 
-            if (_musicPlayer == null)
+            if (!isMusicPlayerLocated || _musicPlayer == null)
             {
                 Debug.LogError($"[{nameof(SceneDependencyInitializationModule)}] {nameof(MusicPlayer)} の取得に失敗しました。", this);
                 return false;
@@ -107,7 +110,8 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             _musicPlayer = null;
         }
 
-        private const int MAX_RETRY_COUNT = 20;
+        /// <summary> 常駐サービスの登録を待つ最大秒数です。 </summary>
+        private const byte SERVICE_WAIT_SECONDS = 5;
 
         private SceneDependencyModuleContainer _container;
         private IStageSceneInstance _stageSceneInstance;

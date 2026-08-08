@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -435,6 +436,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             // セーブデータをロードして、初期状態に戻す。
             _loadedSaveData = await LoadSaveData();
 
+            await ApplyInitialSkillLoadoutAsync();
+
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
             if (_loadedSaveData != null
                 && !_loadedSaveData.Tutorial.IsTutorialCompleted
@@ -447,6 +450,45 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _titleStartController.ClearTutorialBattleTarget();
             _titleSceneView.SetTargetSceneName(_targetSceneName);
+        }
+
+        /// <summary>
+        ///     リセット直後のセーブデータへ初期解放・初期装備スキルを補完して保存する。
+        ///     <para>
+        ///         補完処理は常駐シーンの起動時にしか走らないため、起動後のリセットでは
+        ///         ここで明示的に呼び直す必要がある。
+        ///     </para>
+        /// </summary>
+        private async ValueTask ApplyInitialSkillLoadoutAsync()
+        {
+            if (_loadedSaveData == null)
+            {
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out InitialSkillLoadoutService initialSkillLoadoutService))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] {nameof(InitialSkillLoadoutService)} が取得できませんでした。",
+                    this);
+                return;
+            }
+
+            if (!initialSkillLoadoutService.TryApply(_loadedSaveData))
+            {
+                return;
+            }
+
+            try
+            {
+                await _savedataSystem.SaveAsync(_loadedSaveData);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
+                    this);
+            }
         }
 
         /// <summary>
