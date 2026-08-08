@@ -12,11 +12,9 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
-using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.Rendering;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
@@ -42,25 +40,23 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     public class EnemyLifeCycle : MonoBehaviour, IGameplayControllable
     {
         /// <summary>
-        ///     敵用 Addressables アセットをロードします。
+        ///     個別の敵定義が保持するゲームデータを設定します。
         /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> 成功した場合はtrue。 </returns>
-        public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
+        /// <param name="definition"> このインスタンスへ適用する個別の敵定義です。 </param>
+        /// <returns> 必要なデータがすべて設定されている場合はtrueです。 </returns>
+        public bool Configure(EnemyDefinitionAsset definition)
         {
-            try
+            if (definition == null)
             {
-                CharacterDefinitionRepository characterRepository =
-                    await _characterRepositoryKey.LoadAssetAsync<CharacterDefinitionRepository>(this, cancellationToken);
-                characterRepository?.TryGetAsset(new CharacterDefinitionId(_characterId.Id), out _loadedEnemyData);
-                _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
-                _loadedEncounterMusicData = await _encounterMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
-                _loadedBattleMusicData = await _battleMusicDataKey.LoadAssetAsync<EnemyMusicSpecAsset>(this, cancellationToken);
-                EnemyMissionKeyRepository missionKeyRepository =
-                    await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
-                missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
+                return false;
             }
-            catch (Exception ex) { Debug.LogException(ex, this); }
+
+            _loadedEnemyData = definition.CharacterDefinition;
+            _loadedMoveData = definition.MoveSpec;
+            _loadedEncounterMusicData = definition.EncounterMusicSpec;
+            _loadedBattleMusicData = definition.BattleMusicSpec;
+            _loadedMissionKeyAsset = definition.MissionKey;
+            _attackIndex = definition.AttackIndex;
 
             return _loadedEnemyData != null
                 && _loadedMoveData != null
@@ -69,20 +65,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 && _loadedMissionKeyAsset != null
                 && _characterAnimationConfig != null;
         }
-
-        /// <summary>
-        ///     ロード済みアセット参照を別インスタンスへコピーします。
-        /// </summary>
-        /// <param name="source"> コピー元です。 </param>
-        public void CopyLoadedAssetsFrom(EnemyLifeCycle source)
-        {
-            _loadedEnemyData = source._loadedEnemyData;
-            _loadedMoveData = source._loadedMoveData;
-            _loadedEncounterMusicData = source._loadedEncounterMusicData;
-            _loadedBattleMusicData = source._loadedBattleMusicData;
-            _loadedMissionKeyAsset = source._loadedMissionKeyAsset;
-        }
-
 
         /// <summary>
         ///     初期化処理。
@@ -374,20 +356,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")] private string _characterRepositoryKey;
-        [SerializeField, SourceDataCollection("Character"), Tooltip("この敵が対応するキャラクター定義のIDです。")] private DataID _characterId;
-        [SerializeField, SourceDataAddress, Tooltip("敵移動仕様の Addressables キーです。")] private string _moveDataKey;
-        [SerializeField, SourceDataAddress, Tooltip("遭遇演出音楽仕様の Addressables キーです。")] private string _encounterMusicDataKey;
-        [SerializeField, SourceDataAddress, Tooltip("戦闘音楽仕様の Addressables キーです。")] private string _battleMusicDataKey;
-
-        [SerializeField] private int _attackIndex;
-
         [SerializeField] private EnemyMoveView _view;
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
-        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("この敵が対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -437,6 +409,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyBattleState _battleState;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
+        private int _attackIndex;
 
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
@@ -714,11 +687,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
-            _characterRepositoryKey.ReleaseLoadedAsset(this);
-            _moveDataKey.ReleaseLoadedAsset(this);
-            _encounterMusicDataKey.ReleaseLoadedAsset(this);
-            _battleMusicDataKey.ReleaseLoadedAsset(this);
-            _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _loadedEnemyData = null;
             _loadedMoveData = null;
             _loadedEncounterMusicData = null;

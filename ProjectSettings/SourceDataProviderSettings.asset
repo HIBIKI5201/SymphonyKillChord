@@ -49,6 +49,8 @@ MonoBehaviour:
   - _addressableKey: InitialSkillLoadout
   - _addressableKey: MissionDefinitionRepository
   - _addressableKey: MobileStickFlickInput
+  - _addressableKey: MobileStickFlickInputConfig
+  - _addressableKey: EnemyDefinitionRepository
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
@@ -118,6 +120,10 @@ MonoBehaviour:
     _sourceAssetAddressableKey: MissionDefinitionRepository
     _propertyPath: _missionDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
+  - _collectionKey: EnemyData
+    _sourceAssetAddressableKey: EnemyDefinitionRepository
+    _propertyPath: _enemyDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy/Definitions
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset
@@ -146,4 +152,16 @@ MonoBehaviour:
   - _category: Wave
     _addressableKey: EnemyWaveDefinitionRepository
     _arrayPropertyPath: _waveDefinitionAssets
+  - _category: PlayerAttack
+    _addressableKey: Player
+    _arrayPropertyPath: _attackDifinitions
+  - _category: SkillNodePhaseBind
+    _addressableKey: SkillNodePhaseBindDataRepo
+    _arrayPropertyPath: PhaseBindData
+  - _category: EnemyData
+    _addressableKey: EnemyDefinitionRepository
+    _arrayPropertyPath: _enemyDefinitionAssets
+  - _category: BossAttackEntry
+    _addressableKey: BossAttackEntryRepo
+    _arrayPropertyPath: _attackEntries
   _isInitialized: 1
