@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Domain.InGame.Mission;
-using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using System;
@@ -20,7 +19,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="stageSequenceView"> ステージのシーケンスを表示するビュー。 </param>
         /// <param name="stageSequenceMessageView"> ステージの結果を表示するビュー。 </param>
         /// <param name="stageStartFadeView"> ステージ開始時のフェードを表示するビュー。 </param>
-        /// <param name="stageStartCameraView"> ステージ開始時のカメラを表示するビュー。 </param>
         /// <param name="resultView"> ステージリザルトを表示するビュー。 </param>
         /// <param name="resultPresenter"> ステージリザルトのPresenter。 </param>
         /// <param name="stageStartConstraintView"> ステージ開始時の制約を表示するビュー。 </param>
@@ -29,7 +27,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             StageSequenceView stageSequenceView,
             StageSequenceMessageView stageSequenceMessageView,
             StageStartFadeView stageStartFadeView,
-            StageStartCameraView stageStartCameraView,
             StageResultView resultView,
             StageStartConstraintView stageStartConstraintView,
             StageResultPresenter resultPresenter,
@@ -38,7 +35,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceView = stageSequenceView ?? throw new ArgumentNullException(nameof(stageSequenceView));
             _stageSequenceMessageView = stageSequenceMessageView ?? throw new ArgumentNullException(nameof(stageSequenceMessageView));
             _stageStartFadeView = stageStartFadeView ?? throw new ArgumentNullException(nameof(stageStartFadeView));
-            _stageStartCameraView = stageStartCameraView ?? throw new ArgumentNullException(nameof(stageStartCameraView));
             _stageStartConstraintView = stageStartConstraintView ?? throw new ArgumentNullException(nameof(stageStartConstraintView));
             _stageResultView = resultView ?? throw new ArgumentNullException(nameof(resultView));
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
@@ -48,8 +44,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <summary>
         ///    ゲームプレイの開始演出を開始する。
         /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        /// <returns> 非同期操作の完了を表すAwaitable。 </returns>
         public void Start()
         {
             if (_isStartPlaying)
@@ -59,23 +53,16 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _isStartPlaying = true;
             _isTimelineCompleted = false;
-            _isCameraCompleted = false;
-            _isCameraPrepared = false;
 
             _gameplayControllable.StopGameplay();
             _stageResultView.Hide();
             _stageSequenceMessageView?.Hide();
             _stageSequenceMessageView?.SetStageStartMessage();
             _stageStartFadeView.ShowBlackImmediate();
-            // 黒画面中にカメラの準備を行う。
-            _isCameraPrepared =
-                _stageStartCameraView.Prepare();
 
-            _isCameraCompleted =
-                !_isCameraPrepared;
 
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
-            _stageStartFadeView.PlayFadeOut(HandleFadeCompleted);
+            _stageStartFadeView.PlayFadeOut();
         }
 
         /// <summary>
@@ -91,7 +78,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _isStartPlaying = false;
 
             _stageStartFadeView.HideImmediate();
-            _stageStartCameraView.Cancel();
             _stageSequenceView.CancelStageStart();
             _stageSequenceMessageView?.Hide();
 
@@ -148,15 +134,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly StageSequenceView _stageSequenceView;
         private readonly StageSequenceMessageView _stageSequenceMessageView;
         private readonly StageStartFadeView _stageStartFadeView;
-        private readonly StageStartCameraView _stageStartCameraView;
         private readonly StageResultView _stageResultView;
         private readonly StageResultPresenter _stageResultPresenter;
         private readonly StageStartConstraintView _stageStartConstraintView;
         private readonly IGameplayControllable _gameplayControllable;
 
         private bool _isStartPlaying;
-        private bool _isCameraPrepared;
-        private bool _isCameraCompleted;
         private bool _isTimelineCompleted;
 
         /// <summary>
@@ -165,7 +148,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private void TryCompleteStart()
         {
             if (!_isStartPlaying
-                || !_isCameraCompleted
                 || !_isTimelineCompleted)
             {
                 return;
@@ -193,40 +175,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _isTimelineCompleted = true;
             TryCompleteStart();
-        }
 
-        /// <summary>
-        ///     フェードアウト完了後にカメラ周回を開始します。
-        /// </summary>
-        private void HandleFadeCompleted()
-        {
-            if (!_isStartPlaying)
-            {
-                return;
-            }
-
-            if (!_isCameraPrepared)
-            {
-                _isCameraCompleted = true;
-                TryCompleteStart();
-                return;
-            }
-
-            _stageStartCameraView.Play(HandleCameraCompleted);
-        }
-
-        /// <summary>
-        ///     カメラ演出の完了を記録します。
-        /// </summary>
-        private void HandleCameraCompleted()
-        {
-            if (!_isStartPlaying)
-            {
-                return;
-            }
-
-            _isCameraCompleted = true;
-            TryCompleteStart();
         }
     }
 }

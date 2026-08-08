@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _viewSetting = _uiConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
         }
 

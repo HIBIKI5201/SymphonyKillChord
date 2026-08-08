@@ -90,6 +90,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
         private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
         private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
@@ -114,7 +115,9 @@ namespace KillChord.Runtime.View.InGame.Player
         private MusicSyncState _musicSyncState;
         private MotionHandle _dodgeMaterialEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
-        private MotionHandle _attackRotateHandle;
+
+        private float _attackFacingRemaining = 0f;
+        private Quaternion _attackFacingRotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -154,7 +157,6 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _dodgeMaterialEffectHandle.TryCancel();
-            _attackRotateHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -198,7 +200,7 @@ namespace KillChord.Runtime.View.InGame.Player
             RegisterActions();
             SyncFootstepTiming();
             _isPlaying = true;
-            _cacheRotation = _cacheTransform.rotation;
+            _cacheRotation = _rb != null ? _rb.rotation : _cacheTransform.rotation;
             _cacheVelocity = Vector3.zero;
         }
 
@@ -211,6 +213,9 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             UnRegisterActions();
+
+            // 多段ヒットの残りを持ち越さない。プレイ再開時に前回の攻撃が飛ぶのを防ぐ。
+            PlayerAttackController?.ClearPendingHits();
 
             _moveVector = Vector2.zero;
             _dodgeVector = Vector2.zero;
@@ -237,7 +242,6 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             // 回避関連の状態と演出をリセットする。
             _dodgeMaterialEffectHandle.TryCancel();
-            _attackRotateHandle.TryCancel();
             ResetDodgeMaterialEffect();
 
             // 位置と回転をスタート地点へ戻す。
@@ -258,6 +262,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 _rb.linearVelocity = Vector3.zero;
                 _rb.angularVelocity = Vector3.zero;
             }
+
+            _cacheRotation = rotation;
+            _cacheVelocity = Vector3.zero;
+            _attackFacingRemaining = 0f;
+            _attackFacingRotation = rotation;
 
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
@@ -505,7 +514,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
-                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
+                _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -530,16 +539,17 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Vector2 dir = _moveVector;
 
-            if (PlayerAttackController.IsAttacking)
+            if (PlayerAttackController.IsAttacking
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed))
             {
-                // 攻撃時、入力をキャンセルする。
+                // 攻撃中・入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
-
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR
+                && !_isDodge
+                && !_controller.IsDodging)
             {
-                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
-                dir = Vector2.zero;
+                _characterAnimationSignal?.CancelOneShot();
             }
 
             //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
@@ -551,7 +561,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
-                    var fwd = _cacheTransform.forward;
+                    Vector3 fwd = _cacheRotation * Vector3.forward;
                     dodgeDir.x = fwd.x;
                     dodgeDir.y = fwd.z;
                 }
@@ -568,12 +578,18 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
 
-            Quaternion rotation = _cacheTransform.rotation;
+            Quaternion rotation = _cacheRotation;
 
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
-            _cacheTransform.rotation = rotation;
             _cacheVelocity = velocity;
             _cacheRotation = rotation;
+
+            // 攻撃向きロック：0.1秒間は移動入力による回転を上書きして敵方向を維持する
+            if (_attackFacingRemaining > 0f)
+            {
+                _attackFacingRemaining -= Time.deltaTime;
+                _cacheRotation = _attackFacingRotation;
+            }
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
         }
@@ -597,17 +613,22 @@ namespace KillChord.Runtime.View.InGame.Player
             _isDodge = true;
         }
 
-        /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>
+        /// <summary> 攻撃時にターゲット方向への要求回転を更新する。 </summary>
         private void StartAttackRotate()
         {
             Vector3 dir = PlayerAttackController.CurrentLockOnTargetPosition - _cacheTransform.position;
             dir.y = 0;
-            Quaternion rotation = Quaternion.LookRotation(dir, Vector3.up);
 
-            _attackRotateHandle.TryCancel();
-            _attackRotateHandle = LMotion.Create(rotation, rotation, 0.1f)
-                .WithScheduler(MotionScheduler.PreLateUpdate)
-                .Bind(this, (value, state) => state._cacheTransform.rotation = value);
+            if (dir.sqrMagnitude <= float.Epsilon)
+            {
+                _attackFacingRotation = _cacheRotation;
+                _attackFacingRemaining = 0f;
+                return;
+            }
+
+            _attackFacingRotation = Quaternion.LookRotation(dir, Vector3.up);
+            _attackFacingRemaining = 0.1f;
+            _cacheRotation = _attackFacingRotation;
         }
 
         /// <summary>

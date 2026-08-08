@@ -49,6 +49,8 @@
                         </ui:VisualElement>
                         <ui:Label text="スキル効果" class="skill-effect-heading"/>
                         <ui:Label name="skill-description-label" class="skill-description-label"/>
+                        <ui:Label name="skill-tips-heading" text="Tips" class="skill-tips-heading"/>
+                        <ui:Label name="skill-tips-label" class="skill-tips-label"/>
                     </ui:ScrollView>
                     <ui:VisualElement name="SkillLevel" style="flex-grow: 1; width: 100%; flex-direction: row;">
                         <ui:Label text="" name="skill-level-label" style="background-color: rgb(217, 217, 217); border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; width: 35%; height: 55%; min-width: 200px; min-height: 100px; -unity-text-align: middle-center; -unity-font-style: bold; font-size: 24px; align-self: center; left: 2%;"/>

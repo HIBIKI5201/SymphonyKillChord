@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="skillTypeLabel"> スキル種類表示。 </param>
         /// <param name="hasEffectDescription"> 効果説明を表示する場合は true。 </param>
         /// <param name="effectDescription"> 効果説明。 </param>
+        /// <param name="tips"> 改造画面に表示するスキルTips。 </param>
         /// <param name="level"> レベル。 </param>
         public SkillViewData(
             int skillId,
@@ -27,6 +28,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             string skillTypeLabel,
             bool hasEffectDescription,
             string effectDescription,
+            string tips,
             int level)
         {
             SkillId = skillId;
@@ -36,6 +38,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             SkillTypeLabel = skillTypeLabel ?? string.Empty;
             HasEffectDescription = hasEffectDescription;
             EffectDescription = effectDescription ?? string.Empty;
+            Tips = tips ?? string.Empty;
             Level = level;
         }
 
@@ -60,6 +63,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <summary> 効果説明。 </summary>
         public string EffectDescription { get; }
 
+        /// <summary> 改造画面に表示するスキルTips。 </summary>
+        public string Tips { get; }
+
         /// <summary> レベル。 </summary>
         public int Level { get; }
 
@@ -77,6 +83,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                    SkillTypeLabel == other.SkillTypeLabel &&
                    HasEffectDescription == other.HasEffectDescription &&
                    EffectDescription == other.EffectDescription &&
+                   Tips == other.Tips &&
                    Level == other.Level;
         }
 
@@ -104,6 +111,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             hashCode.Add(SkillTypeLabel);
             hashCode.Add(HasEffectDescription);
             hashCode.Add(EffectDescription);
+            hashCode.Add(Tips);
             hashCode.Add(Level);
             return hashCode.ToHashCode();
         }

@@ -299,9 +299,9 @@ MonoBehaviour:
   - {fileID: 475226657184998521}
   - {fileID: 1357929724531286628}
   _deathSwampGameObject: {fileID: 8559757065684906511}
-  _targetTransform: {fileID: 3340112347866897855}
   _deathEffectDuration: 1
   _deathSwampSinkDuration: 3
+  _targetTransform: {fileID: 3340112347866897855}
   _shellSpawner: {fileID: 0}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
@@ -344,6 +344,7 @@ MonoBehaviour:
   _healthHudView: {fileID: 4653749312874443366}
   _damageNumberSpawnPoint: {fileID: 7263208405152872925}
   _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
+  _damageNumberCameraOffset: 0.2
 --- !u!114 &8900643656970599263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,6 +530,7 @@ MonoBehaviour:
   _healthHudView: {fileID: 4653749312874443366}
   _damageNumberSpawnPoint: {fileID: 7263208405152872925}
   _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
+  _damageNumberCameraOffset: 1
 --- !u!1 &6713716304385115461
 GameObject:
   m_ObjectHideFlags: 0
@@ -916,6 +918,14 @@ PrefabInstance:
     - target: {fileID: 4309459416848471988, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674212844608207637, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674212844608207637, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 2.2
       objectReference: {fileID: 0}
     - target: {fileID: 7243839929005732014, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_Enabled
