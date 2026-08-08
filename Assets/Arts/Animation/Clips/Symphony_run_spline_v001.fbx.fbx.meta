@@ -1,0 +1,3080 @@
+fileFormatVersion: 2
+guid: f38f64bbdea02544fb384457acfd5c05
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects: {}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
+      might lower retargeting quality:\nNote: Activate translation DOF on avatar
+      to improve retargeting quality.\n\t'Symphony_DefaultPose0624:spine_C0_spine_01_Jnt'
+      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_neck_02_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
+      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
+      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
+      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
+      has scale animation that will be discarded.\n"
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Take 001
+      takeName: Take 001
+      internalID: 1827226128182048838
+      firstFrame: 0
+      lastFrame: 60
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human:
+    - boneName: Symphony_DefaultPose0624:spine_C0_pelvis_Jnt
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_L0_thigh_Jnt
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_R0_thigh_Jnt
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_L0_calf_Jnt
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_R0_calf_Jnt
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_L0_foot_Jnt
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:leg_R0_foot_Jnt
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:spine_C0_spine_02_Jnt
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:spine_C0_spine_03_Jnt
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:neck_C0_neck_01_Jnt
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:neck_C0_neck_02_Jnt
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:shoulder_L0_shoulder_Jnt
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:shoulder_R0_shoulder_Jnt
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_L0_upperarm_Jnt
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_R0_upperarm_Jnt
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_L0_lowerarm_Jnt
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_R0_lowerarm_Jnt
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:foot_L0_ball_Jnt
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt
+      humanName: LeftEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt
+      humanName: RightEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:chain_L3_chain_01_Jnt
+      humanName: Jaw
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_L0_0_Jnt
+      humanName: Left Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_L0_1_Jnt
+      humanName: Left Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_L0_2_Jnt
+      humanName: Left Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_L0_0_Jnt
+      humanName: Left Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L0_0_Jnt
+      humanName: Left Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L0_1_Jnt
+      humanName: Left Index Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_L0_1_Jnt
+      humanName: Left Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L1_0_Jnt
+      humanName: Left Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L1_1_Jnt
+      humanName: Left Middle Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_L0_2_Jnt
+      humanName: Left Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L2_0_Jnt
+      humanName: Left Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L2_1_Jnt
+      humanName: Left Ring Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_L0_3_Jnt
+      humanName: Left Little Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L3_0_Jnt
+      humanName: Left Little Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_L3_1_Jnt
+      humanName: Left Little Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_R0_0_Jnt
+      humanName: Right Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_R0_1_Jnt
+      humanName: Right Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:thumb_R0_2_Jnt
+      humanName: Right Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_R0_3_Jnt
+      humanName: Right Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R3_0_Jnt
+      humanName: Right Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R3_1_Jnt
+      humanName: Right Index Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_R0_2_Jnt
+      humanName: Right Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R2_0_Jnt
+      humanName: Right Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R2_1_Jnt
+      humanName: Right Middle Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_R0_1_Jnt
+      humanName: Right Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R1_0_Jnt
+      humanName: Right Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R1_1_Jnt
+      humanName: Right Ring Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:meta_R0_0_Jnt
+      humanName: Right Little Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R0_0_Jnt
+      humanName: Right Little Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:finger_R0_1_Jnt
+      humanName: Right Little Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Symphony_DefaultPose0624:spine_C0_spine_04_Jnt
+      humanName: UpperChest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: Symphony_run_spline_v001.fbx(Clone)
+      parentName: 
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:world_ctl
+      parentName: Symphony_run_spline_v001.fbx(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:Local_C0_root
+      parentName: Symphony_DefaultPose0624:world_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:Local_C0_ik_cns
+      parentName: Symphony_DefaultPose0624:Local_C0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:Local_C0_ctl
+      parentName: Symphony_DefaultPose0624:Local_C0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:root_C0_root
+      parentName: Symphony_DefaultPose0624:Local_C0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:root_C0_ik_cns
+      parentName: Symphony_DefaultPose0624:root_C0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:root_C0_ctl
+      parentName: Symphony_DefaultPose0624:root_C0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:body_C0_root
+      parentName: Symphony_DefaultPose0624:root_C0_ctl
+      position: {x: -6.7700682e-21, y: 0.7485087, z: 0.017802976}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:body_C0_ik_cns
+      parentName: Symphony_DefaultPose0624:body_C0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:body_C0_ctl
+      parentName: Symphony_DefaultPose0624:body_C0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_root
+      parentName: Symphony_DefaultPose0624:body_C0_ctl
+      position: {x: 3.0468211e-33, y: -2.842171e-16, z: -3.330669e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_ik_off
+      parentName: Symphony_DefaultPose0624:spine_C0_root
+      position: {x: -1.180072e-18, y: 0.028643029, z: -0.001818684}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_ik0_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_ik_off
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_ik0_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_ik0_npo
+      position: {x: -0, y: -0.10654274, z: 0.016993517}
+      rotation: {x: 0.30657336, y: 0.04234294, z: -0.13010086, w: 0.94196266}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_pelvis_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_ik0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_pelvis_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_pelvis_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_pelvis_lvl
+      parentName: Symphony_DefaultPose0624:spine_C0_pelvis_ctl
+      position: {x: 1.180072e-18, y: -0.028643029, z: 0.001818684}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk0_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_root
+      position: {x: -0.000012296538, y: -0.078600585, z: 0.013076075}
+      rotation: {x: 0.14856672, y: -0.052588414, z: -0.0052540414, w: 0.98748916}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.2720789, y: -0, z: -0, w: 0.96227497}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_0_scl_ref
+      parentName: Symphony_DefaultPose0624:spine_C0_fk0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_scl_ref
+      position: {x: -0.091414995, y: 0.050563607, z: 0.021708108}
+      rotation: {x: -0.07598917, y: 0, z: -0, w: 0.99710864}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C4_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.75892764, y: 0.57997936, z: -0.24904886, w: -0.1600856}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C4_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C4_fk0_ctl
+      position: {x: -0.09921062, y: 0, z: 4.440892e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C4_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_scl_ref
+      position: {x: 0.09430609, y: 0.038571887, z: 0.01032493}
+      rotation: {x: -0.07598917, y: 0, z: -0, w: 0.99710864}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C5_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.11150449, y: -0.15715145, z: 0.76039314, w: 0.6202197}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C5_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C5_fk0_ctl
+      position: {x: -0.082744874, y: -7.105427e-17, z: 3.5527136e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C5_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_scl_ref
+      position: {x: -0.06702731, y: 0.01858628, z: -0.054698694}
+      rotation: {x: -0.07598917, y: 0, z: -0, w: 0.99710864}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C6_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.79012537, y: 0.43547845, z: 0.37776953, w: 0.2082081}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C6_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C6_fk0_ctl
+      position: {x: -0.056976307, y: 1.4210854e-16, z: 1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C6_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_scl_ref
+      position: {x: 0.040449943, y: 0.031108322, z: -0.064205095}
+      rotation: {x: -0.07598917, y: 0, z: -0, w: 0.99710864}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C7_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.4581053, y: 0.27794605, z: 0.7218512, w: 0.43796855}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C7_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C7_fk0_ctl
+      position: {x: -0.08573292, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C7_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk1_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_fk0_ctl
+      position: {x: -0.0013462512, y: 0.09469965, z: -0.016172063}
+      rotation: {x: -0.12874353, y: 0.005040919, z: 0.010124235, w: 0.99161345}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.25286978, y: -0.11260711, z: 0.06975626, w: 0.9583896}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_1_scl_ref
+      parentName: Symphony_DefaultPose0624:spine_C0_fk1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0106452, y: 1, z: 1.0106452}
+    - name: Symphony_DefaultPose0624:spine_C0_fk2_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_fk1_ctl
+      position: {x: -0.00014336397, y: 0.07429334, z: -0.0017051267}
+      rotation: {x: -0.024824457, y: 0.02516231, z: 0.0015114566, w: 0.999374}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_fk2_npo
+      position: {x: -0.0010072701, y: 0, z: 0}
+      rotation: {x: -0.008242429, y: -0.024012703, z: 0.045343027, w: 0.9986488}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_2_scl_ref
+      parentName: Symphony_DefaultPose0624:spine_C0_fk2_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0106452, y: 1, z: 1.0106452}
+    - name: Symphony_DefaultPose0624:spine_C0_fk3_npo
+      parentName: Symphony_DefaultPose0624:spine_C0_fk2_ctl
+      position: {x: -0.00023014926, y: 0.066497155, z: -0.0052135484}
+      rotation: {x: 0.079559036, y: 0.02280579, z: -0.0012810301, w: 0.99656844}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_fk3_ctl
+      parentName: Symphony_DefaultPose0624:spine_C0_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.016645988, y: -0.09581375, z: 0.05557279, w: 0.99370736}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_3_scl_ref
+      parentName: Symphony_DefaultPose0624:spine_C0_fk3_ctl
+      position: {x: 2.2946813e-18, y: 3.7187803e-10, z: -2.1449999e-10}
+      rotation: {x: -0.15285064, y: 0, z: -0, w: 0.9882493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_0_cnx
+      parentName: Symphony_DefaultPose0624:spine_C0_root
+      position: {x: 0.007043929, y: -0.10194743, z: -0.0020522247}
+      rotation: {x: 0.31350374, y: -0.049165465, z: 0.11516878, w: 0.94129395}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_cnx
+      position: {x: -0.054131832, y: -0.019530412, z: -0.006803404}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_root_npo
+      parentName: Symphony_DefaultPose0624:leg_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_root_ctl
+      parentName: Symphony_DefaultPose0624:leg_L0_root_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_eff_loc
+      parentName: Symphony_DefaultPose0624:leg_L0_root_ctl
+      position: {x: -0.117167726, y: -0.4059905, z: -0.3691007}
+      rotation: {x: 0.6198685, y: -0.059008677, z: -0.14567901, w: 0.76880336}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_end_ref
+      parentName: Symphony_DefaultPose0624:leg_L0_eff_loc
+      position: {x: -0, y: -3.5527136e-17, z: 0}
+      rotation: {x: 0.49063393, y: 0.49063393, z: 0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweakEnd_scl
+      parentName: Symphony_DefaultPose0624:leg_L0_end_ref
+      position: {x: -0.1145461, y: 0, z: 0}
+      rotation: {x: -0.49063393, y: -0.49063393, z: -0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweakEnd_npo
+      parentName: Symphony_DefaultPose0624:leg_L0_tweakEnd_scl
+      position: {x: -0, y: 0.1145461, z: 0}
+      rotation: {x: 0.49063393, y: 0.49063393, z: 0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweakEnd_ctl
+      parentName: Symphony_DefaultPose0624:leg_L0_tweakEnd_npo
+      position: {x: -1.7763568e-17, y: 2.220446e-18, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_end_off
+      parentName: Symphony_DefaultPose0624:leg_L0_tweakEnd_ctl
+      position: {x: -0, y: -2.220446e-18, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_div0_loc
+      parentName: Symphony_DefaultPose0624:leg_L0_root_ctl
+      position: {x: 7.105427e-17, y: -2.1316282e-16, z: 0}
+      rotation: {x: 0.6220114, y: 0.33738512, z: 0.5180959, w: 0.48046827}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweak0_ctl
+      parentName: Symphony_DefaultPose0624:leg_L0_div0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_roll0_off
+      parentName: Symphony_DefaultPose0624:leg_L0_tweak0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_div1_loc
+      parentName: Symphony_DefaultPose0624:leg_L0_root_ctl
+      position: {x: -0.03861079, y: -0.15044078, z: -0.052517727}
+      rotation: {x: 0.6354512, y: 0.35201284, z: 0.5082706, w: 0.46254697}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweak1_ctl
+      parentName: Symphony_DefaultPose0624:leg_L0_div1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_roll1_off
+      parentName: Symphony_DefaultPose0624:leg_L0_tweak1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_div2_loc
+      parentName: Symphony_DefaultPose0624:leg_L0_root_ctl
+      position: {x: -0.07722158, y: -0.30088153, z: -0.105035454}
+      rotation: {x: 0.7238395, y: 0.060143404, z: 0.65329343, w: 0.21365118}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tweak2_ctl
+      parentName: Symphony_DefaultPose0624:leg_L0_div2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_roll2_off
+      parentName: Symphony_DefaultPose0624:leg_L0_tweak2_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tws2_npo
+      parentName: Symphony_DefaultPose0624:leg_L0_root
+      position: {x: -0.117167726, y: -0.4059905, z: -0.3691007}
+      rotation: {x: 0.6198685, y: -0.059008677, z: -0.14567901, w: 0.76880336}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_tws2_rot
+      parentName: Symphony_DefaultPose0624:leg_L0_tws2_npo
+      position: {x: 1.110223e-18, y: 3.5527136e-17, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_L0_fk_ref
+      parentName: Symphony_DefaultPose0624:leg_L0_tws2_rot
+      position: {x: 3.768778e-11, y: 3.8629863e-11, z: -0.0000000010288919}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_L0_fk0_npo
+      parentName: Symphony_DefaultPose0624:foot_L0_fk_ref
+      position: {x: -0.005766641, y: -0.07015108, z: 0.081038386}
+      rotation: {x: 0.109263, y: 0.6727345, z: 0.117314376, w: 0.72230697}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_L0_fk0_loc
+      parentName: Symphony_DefaultPose0624:foot_L0_fk0_npo
+      position: {x: -0, y: 2.6645352e-17, z: 1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0.18683442, w: 0.9823914}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_L0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:foot_L0_fk0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_root
+      parentName: Symphony_DefaultPose0624:spine_C0_0_cnx
+      position: {x: 0.054131832, y: -0.019530412, z: -0.006803404}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_root_npo
+      parentName: Symphony_DefaultPose0624:leg_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_root_ctl
+      parentName: Symphony_DefaultPose0624:leg_R0_root_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_eff_loc
+      parentName: Symphony_DefaultPose0624:leg_R0_root_ctl
+      position: {x: -0.06394313, y: -0.20006974, z: 0.31389603}
+      rotation: {x: -0.16300513, y: -0.007911926, z: -0.09325787, w: 0.982176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_end_ref
+      parentName: Symphony_DefaultPose0624:leg_R0_eff_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.49063393, y: 0.49063393, z: 0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweakEnd_scl
+      parentName: Symphony_DefaultPose0624:leg_R0_end_ref
+      position: {x: -0.1145461, y: -1.11022296e-17, z: -5.3290704e-17}
+      rotation: {x: -0.49063393, y: -0.49063393, z: -0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweakEnd_npo
+      parentName: Symphony_DefaultPose0624:leg_R0_tweakEnd_scl
+      position: {x: 5.3290704e-17, y: 0.1145461, z: 1.3322676e-17}
+      rotation: {x: 0.49063393, y: 0.49063393, z: 0.50919384, w: 0.50919384}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweakEnd_ctl
+      parentName: Symphony_DefaultPose0624:leg_R0_tweakEnd_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_end_off
+      parentName: Symphony_DefaultPose0624:leg_R0_tweakEnd_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 2.2725408e-18, y: -0.03711341, z: 0.9993111, w: -6.1190156e-17}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_div0_loc
+      parentName: Symphony_DefaultPose0624:leg_R0_root_ctl
+      position: {x: -3.5527136e-17, y: -7.105427e-17, z: -1.4210854e-16}
+      rotation: {x: 0.6844494, y: 0.056726072, z: 0.7168219, w: 0.12032272}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweak0_ctl
+      parentName: Symphony_DefaultPose0624:leg_R0_div0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_roll0_off
+      parentName: Symphony_DefaultPose0624:leg_R0_tweak0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_div1_loc
+      parentName: Symphony_DefaultPose0624:leg_R0_root_ctl
+      position: {x: -0.0055913697, y: 0.04101377, z: 0.15864407}
+      rotation: {x: 0.6771799, y: 0.01897496, z: 0.7188125, w: 0.15612781}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweak1_ctl
+      parentName: Symphony_DefaultPose0624:leg_R0_div1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_roll1_off
+      parentName: Symphony_DefaultPose0624:leg_R0_tweak1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_div2_loc
+      parentName: Symphony_DefaultPose0624:leg_R0_root_ctl
+      position: {x: -0.011182739, y: 0.08202753, z: 0.3172881}
+      rotation: {x: 0.42983985, y: -0.5244845, z: 0.56287676, w: -0.4725711}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tweak2_ctl
+      parentName: Symphony_DefaultPose0624:leg_R0_div2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_roll2_off
+      parentName: Symphony_DefaultPose0624:leg_R0_tweak2_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tws2_npo
+      parentName: Symphony_DefaultPose0624:leg_R0_root
+      position: {x: -0.06394313, y: -0.20006974, z: 0.31389603}
+      rotation: {x: -0.16300513, y: -0.007911926, z: -0.09325787, w: 0.982176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_tws2_rot
+      parentName: Symphony_DefaultPose0624:leg_R0_tws2_npo
+      position: {x: 1.110223e-18, y: 1.7763568e-17, z: -8.881784e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_R0_fk_ref
+      parentName: Symphony_DefaultPose0624:leg_R0_tws2_rot
+      position: {x: -3.768763e-11, y: 3.8630148e-11, z: -0.0000000010288898}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_R0_fk0_npo
+      parentName: Symphony_DefaultPose0624:foot_R0_fk_ref
+      position: {x: 0.005766641, y: -0.07015108, z: 0.081038386}
+      rotation: {x: 0.72230697, y: -0.117314376, z: 0.6727345, w: -0.109263}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_R0_fk0_loc
+      parentName: Symphony_DefaultPose0624:foot_R0_fk0_npo
+      position: {x: 8.881784e-18, y: -8.881784e-18, z: 0}
+      rotation: {x: 0, y: -0, z: -0.18683442, w: 0.9823914}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_R0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:foot_R0_fk0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_1_cnx
+      parentName: Symphony_DefaultPose0624:spine_C0_root
+      position: {x: 0.01565978, y: 0.10518774, z: 0.23074745}
+      rotation: {x: 0.4052821, y: 0.27274036, z: 0.046959445, w: 0.8712944}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_root
+      parentName: Symphony_DefaultPose0624:spine_C0_1_cnx
+      position: {x: -0.027129808, y: 0.046682883, z: 0.0023086735}
+      rotation: {x: 0.15285064, y: -0, z: -0, w: 0.9882493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_ctl_npo
+      parentName: Symphony_DefaultPose0624:shoulder_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.6923204, y: -0.11789127, z: 0.059014298, w: 0.70944446}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_ctl
+      parentName: Symphony_DefaultPose0624:shoulder_L0_ctl_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0.07704787, w: 0.9970274}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_orbit_cns
+      parentName: Symphony_DefaultPose0624:shoulder_L0_ctl
+      position: {x: -0.07409191, y: -8.881784e-18, z: -1.4210854e-16}
+      rotation: {x: 0.6923204, y: 0.11789127, z: -0.059014298, w: 0.70944446}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_orbit_npo
+      parentName: Symphony_DefaultPose0624:shoulder_L0_orbit_cns
+      position: {x: -1.7763568e-17, y: 1.4210854e-16, z: -8.881784e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_orbit_ctl
+      parentName: Symphony_DefaultPose0624:shoulder_L0_orbit_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_root
+      parentName: Symphony_DefaultPose0624:shoulder_L0_orbit_ctl
+      position: {x: 0.0000000012965757, y: -0.00000004246913, z: 6.734835e-14}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_eff_loc
+      parentName: Symphony_DefaultPose0624:arm_L0_root
+      position: {x: -0.081203945, y: 0.16616672, z: 0.08754653}
+      rotation: {x: -0.4749334, y: 0.8708934, z: -0.025449743, w: -0.1238356}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_end_ref
+      parentName: Symphony_DefaultPose0624:arm_L0_eff_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_root
+      parentName: Symphony_DefaultPose0624:arm_L0_eff_loc
+      position: {x: -0.016571416, y: -0.019732276, z: 0.00057772995}
+      rotation: {x: 0.6641198, y: -0.03765066, z: -0.06580577, w: 0.74377215}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk0_npo
+      parentName: Symphony_DefaultPose0624:thumb_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.7779331, y: -0.18644592, z: -0.40423998, w: -0.44345015}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:thumb_L0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.049635947, y: -0.010709623, z: -0.2294918, w: 0.97198516}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk1_npo
+      parentName: Symphony_DefaultPose0624:thumb_L0_fk0_ctl
+      position: {x: -0.029404975, y: -3.5527136e-17, z: -1.4210854e-16}
+      rotation: {x: 0, y: 0.034944385, z: -0, w: 0.9993893}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:thumb_L0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.078884214, y: -0.102830954, z: -0.3147737, w: 0.94027686}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk2_npo
+      parentName: Symphony_DefaultPose0624:thumb_L0_fk1_ctl
+      position: {x: -0.014566268, y: -1.4210854e-16, z: -1.4210854e-16}
+      rotation: {x: 0.0032795973, y: -0.02158687, z: -0.057759542, w: 0.99809176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:thumb_L0_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_root
+      parentName: Symphony_DefaultPose0624:arm_L0_eff_loc
+      position: {x: -0.027146725, y: -0.018765304, z: -0.0017444814}
+      rotation: {x: 0.6641198, y: -0.03765066, z: -0.06580577, w: 0.74377215}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_0_lvl
+      parentName: Symphony_DefaultPose0624:meta_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.17581154, y: -0.6386807, z: -0.20784429, w: 0.7197069}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_0_npo
+      parentName: Symphony_DefaultPose0624:meta_L0_0_lvl
+      position: {x: -0, y: -1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_0_loc
+      parentName: Symphony_DefaultPose0624:meta_L0_0_npo
+      position: {x: -0, y: -1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_meta0_ctl
+      parentName: Symphony_DefaultPose0624:meta_L0_0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_root
+      parentName: Symphony_DefaultPose0624:meta_L0_0_loc
+      position: {x: -0.0073251096, y: 0.0064638057, z: 0.032536387}
+      rotation: {x: -0.17581154, y: 0.6386807, z: 0.20784429, w: 0.7197069}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.9946305, y: 0.012297147, z: -0.1010631, w: 0.018579395}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_L0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.035261724, y: 0.062428314, z: -0.5041827, w: 0.86061555}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_L0_fk0_ctl
+      position: {x: -0.028100692, y: 0, z: 1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_L0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.84323776, w: 0.5375408}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_L0_fk1_ctl
+      position: {x: -0.01862108, y: 2.842171e-16, z: -1.1546319e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_L0_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.69584334, w: 0.7181936}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_1_lvl
+      parentName: Symphony_DefaultPose0624:meta_L0_root
+      position: {x: -0.0015675616, y: 0.008396879, z: -0.013567191}
+      rotation: {x: 0.06510717, y: -0.643931, z: -0.08375467, w: 0.75769335}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_1_npo
+      parentName: Symphony_DefaultPose0624:meta_L0_1_lvl
+      position: {x: -0, y: 1.4210854e-16, z: -7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_1_loc
+      parentName: Symphony_DefaultPose0624:meta_L0_1_npo
+      position: {x: -0, y: 9.4739034e-17, z: -4.7369517e-17}
+      rotation: {x: 0, y: 0, z: 0.033333432, w: 0.9994443}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_meta1_ctl
+      parentName: Symphony_DefaultPose0624:meta_L0_1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_root
+      parentName: Symphony_DefaultPose0624:meta_L0_1_loc
+      position: {x: -0.0075350385, y: -0.0004605526, z: 0.034731217}
+      rotation: {x: -0.06510717, y: 0.643931, z: 0.08375467, w: 0.75769335}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_L1_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.9984719, y: 0.03241562, z: -0.044084024, w: 0.0077240304}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_L1_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.5587222, w: 0.8293549}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_L1_fk0_ctl
+      position: {x: -0.031126492, y: -1.4210854e-16, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_L1_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.84323776, w: 0.5375408}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_L1_fk1_ctl
+      position: {x: -0.022028891, y: 4.2632563e-16, z: 1.3322676e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_L1_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.5403316, w: 0.8414522}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_2_lvl
+      parentName: Symphony_DefaultPose0624:meta_L0_root
+      position: {x: -0.0033087684, y: 0.01073925, z: -0.024290502}
+      rotation: {x: 0.052832507, y: -0.6670476, z: -0.0746842, w: 0.7393771}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_2_npo
+      parentName: Symphony_DefaultPose0624:meta_L0_2_lvl
+      position: {x: 7.105427e-17, y: -2.842171e-16, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_2_loc
+      parentName: Symphony_DefaultPose0624:meta_L0_2_npo
+      position: {x: 2.3684758e-17, y: -9.4739034e-17, z: 0}
+      rotation: {x: 0, y: 0, z: 0.06662982, w: 0.99777776}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_meta2_ctl
+      parentName: Symphony_DefaultPose0624:meta_L0_2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_root
+      parentName: Symphony_DefaultPose0624:meta_L0_2_loc
+      position: {x: -0.0075657777, y: -0.0058889794, z: 0.03236281}
+      rotation: {x: -0.052832507, y: 0.6670476, z: 0.0746842, w: 0.7393771}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_L2_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.9992059, y: 0.0136519, z: -0.037371084, w: 0.002136559}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_L2_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.60448647, w: 0.7966154}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_L2_fk0_ctl
+      position: {x: -0.027507955, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_L2_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.84323776, w: 0.5375408}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_L2_fk1_ctl
+      position: {x: -0.018641887, y: 7.105427e-16, z: 1.0658141e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_L2_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.5521434, w: 0.8337492}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_3_lvl
+      parentName: Symphony_DefaultPose0624:meta_L0_root
+      position: {x: -0.0043713585, y: 0.012682329, z: -0.034799486}
+      rotation: {x: 0.052832507, y: -0.6670476, z: -0.0746842, w: 0.7393771}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_3_npo
+      parentName: Symphony_DefaultPose0624:meta_L0_3_lvl
+      position: {x: 3.5527136e-17, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_3_loc
+      parentName: Symphony_DefaultPose0624:meta_L0_3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0.09985216, w: 0.9950023}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_meta3_ctl
+      parentName: Symphony_DefaultPose0624:meta_L0_3_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_root
+      parentName: Symphony_DefaultPose0624:meta_L0_3_loc
+      position: {x: -0.009234602, y: -0.00999206, z: 0.026301557}
+      rotation: {x: -0.052832507, y: 0.6670476, z: 0.0746842, w: 0.7393771}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_L3_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.9986146, y: 0.007513366, z: 0.03643798, w: 0.037211783}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_L3_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.6019587, w: 0.79852724}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_L3_fk0_ctl
+      position: {x: -0.025663475, y: 2.842171e-16, z: -8.881784e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_L3_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.0032862169, y: -0.0028241414, z: -0.8415769, w: 0.54011995}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_L3_fk1_ctl
+      position: {x: -0.013958076, y: -5.684342e-16, z: -4.4408918e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_L3_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.5843903, w: 0.8114727}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_div0_loc
+      parentName: Symphony_DefaultPose0624:arm_L0_root
+      position: {x: -0, y: -1.4210854e-16, z: 0}
+      rotation: {x: -0.63814956, y: 0.20651627, z: 0.20377642, w: 0.7131559}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_tweak0_ctl
+      parentName: Symphony_DefaultPose0624:arm_L0_div0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_roll0_off
+      parentName: Symphony_DefaultPose0624:arm_L0_tweak0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_div1_loc
+      parentName: Symphony_DefaultPose0624:arm_L0_root
+      position: {x: -0.088048056, y: -0.0028661655, z: 0.058720015}
+      rotation: {x: 0.953497, y: -0.010636747, z: -0.28993216, w: -0.08166807}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_tweak1_ctl
+      parentName: Symphony_DefaultPose0624:arm_L0_div1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_roll1_off
+      parentName: Symphony_DefaultPose0624:arm_L0_tweak1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_div2_loc
+      parentName: Symphony_DefaultPose0624:arm_L0_root
+      position: {x: -0.17609611, y: -0.005732331, z: 0.11744003}
+      rotation: {x: -0.46549323, y: 0.83221734, z: 0.2151754, w: -0.21078394}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_tweak2_ctl
+      parentName: Symphony_DefaultPose0624:arm_L0_div2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_roll2_off
+      parentName: Symphony_DefaultPose0624:arm_L0_tweak2_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_L0_root
+      parentName: Symphony_DefaultPose0624:arm_L0_div2_loc
+      position: {x: -0.23650111, y: -0.0017926845, z: -0.028238697}
+      rotation: {x: 0.6662874, y: -0.008776057, z: -0.017546989, w: 0.74543697}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_L0_ik_cns
+      parentName: Symphony_DefaultPose0624:HandGrip_L0_root
+      position: {x: -0.0034266429, y: 0.008581217, z: -0.012330216}
+      rotation: {x: 0.2454854, y: 0.0014406581, z: -0.06721927, w: 0.9670659}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_L0_ctl
+      parentName: Symphony_DefaultPose0624:HandGrip_L0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_root
+      parentName: Symphony_DefaultPose0624:spine_C0_1_cnx
+      position: {x: -5.673528e-10, y: 0.07384978, z: -0.007211353}
+      rotation: {x: 0.15285064, y: -0, z: -0, w: 0.9882493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_0_scl_npo
+      parentName: Symphony_DefaultPose0624:neck_C0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_fk0_npo
+      parentName: Symphony_DefaultPose0624:neck_C0_0_scl_npo
+      position: {x: -3.5527135e-16, y: 5.684342e-16, z: 1.4210854e-16}
+      rotation: {x: 0.22968262, y: -0.000000019343952, z: -0.000000005638735, w: 0.9732656}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:neck_C0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_1_scl_npo
+      parentName: Symphony_DefaultPose0624:neck_C0_fk0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_fk1_npo
+      parentName: Symphony_DefaultPose0624:neck_C0_1_scl_npo
+      position: {x: -2.8306998e-10, y: 0.033044457, z: -0.0072213104}
+      rotation: {x: -0.14673139, y: -0.000000009148717, z: 0.000000007108847, w: 0.9891764}
+      scale: {x: 0.9948045, y: 1, z: 0.9948045}
+    - name: Symphony_DefaultPose0624:neck_C0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:neck_C0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.25919366, y: 0.23107651, z: -0.10783838, w: 0.9315542}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_2_scl_npo
+      parentName: Symphony_DefaultPose0624:neck_C0_fk1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0052227, y: 1, z: 1.0052227}
+    - name: Symphony_DefaultPose0624:neck_C0_2_loc
+      parentName: Symphony_DefaultPose0624:neck_C0_2_scl_npo
+      position: {x: 1.7729032e-10, y: 0.033648215, z: 0.003072794}
+      rotation: {x: -0.08438804, y: 0.00000003013245, z: 0.0000000020468462, w: 0.996433}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_head_cns
+      parentName: Symphony_DefaultPose0624:neck_C0_2_loc
+      position: {x: 5.314696e-10, y: 0.06577998, z: -0.01880479}
+      rotation: {x: 2.7755576e-17, y: -0.000000018377566, z: 0.0000000018195576, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_head_ctl
+      parentName: Symphony_DefaultPose0624:neck_C0_head_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.017481348, y: 0, z: -0, w: 0.99984723}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_L0_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: -0.02436782, y: 0.00031440996, z: 0.046725433}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_L0_ik_cns
+      parentName: Symphony_DefaultPose0624:eye_base_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.04824788, y: -0.12711787, z: 0.005013212, w: 0.9907008}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_L0_ctl
+      parentName: Symphony_DefaultPose0624:eye_base_L0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_L0_root
+      parentName: Symphony_DefaultPose0624:eye_base_L0_ctl
+      position: {x: -0.008478976, y: -0.0148931, z: 0.082248025}
+      rotation: {x: -0.048247885, y: 0.12711787, z: -0.0050132163, w: 0.9907008}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_L0_ik_cns
+      parentName: Symphony_DefaultPose0624:eye_L0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.04824788, y: -0.12711787, z: 0.005013212, w: 0.9907008}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_L0_ctl
+      parentName: Symphony_DefaultPose0624:eye_L0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.0017769462, y: -0.090382114, z: -0.108973294}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.5479758, y: 0.40304685, z: 0.6492817, w: 0.3401604}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk0_ctl
+      position: {x: -0.07725777, y: 0, z: 3.5527136e-17}
+      rotation: {x: 0.0008879978, y: 0.040266152, z: -0.018584412, w: 0.9990158}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk1_ctl
+      position: {x: -0.082794115, y: 7.105427e-17, z: 3.5527136e-17}
+      rotation: {x: -0.23771366, y: -0.08732176, z: -0.49297783, w: 0.8323701}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk2_ctl
+      position: {x: -0.049765978, y: 0, z: 7.105427e-17}
+      rotation: {x: -0.20124896, y: -0.098336175, z: -0.20007421, w: 0.953834}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk4_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk3_ctl
+      position: {x: -0.052644722, y: 1.4210854e-16, z: -2.6645352e-17}
+      rotation: {x: -0.3451952, y: 0.1529219, z: -0.4092077, w: 0.830665}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk4_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk4_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk5_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk4_ctl
+      position: {x: -0.0541228, y: -1.4210854e-16, z: -1.4210854e-16}
+      rotation: {x: 0.4476224, y: 0.22540504, z: -0.34893802, w: 0.7918769}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk5_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk5_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk6_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk5_ctl
+      position: {x: -0.05828235, y: 0, z: 1.0658141e-16}
+      rotation: {x: 0.2222778, y: -0.31536335, z: -0.47643203, w: 0.7900323}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk6_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk6_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk7_npo
+      parentName: Symphony_DefaultPose0624:chain_C0_fk6_ctl
+      position: {x: -0.054424237, y: -7.105427e-17, z: -7.105427e-17}
+      rotation: {x: -0.40088674, y: -0.10021459, z: -0.18450576, w: 0.8917424}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_fk7_ctl
+      parentName: Symphony_DefaultPose0624:chain_C0_fk7_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.016147561, y: 0.16206218, z: -0.004275057}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.40205008, y: -0.18457893, z: 0.8639953, w: -0.24041317}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk0_ctl
+      position: {x: -0.034432754, y: 2.842171e-16, z: -3.5527136e-17}
+      rotation: {x: 0.06600804, y: -0.018396521, z: 0.48823595, w: 0.87001735}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk1_ctl
+      position: {x: -0.038850706, y: 0, z: -8.881784e-18}
+      rotation: {x: 0.04786767, y: 0.023521468, z: 0.4455789, w: 0.89365256}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk2_ctl
+      position: {x: -0.05397375, y: -2.842171e-16, z: 1.0658141e-16}
+      rotation: {x: -0.087368295, y: 0.0658291, z: 0.3431706, w: 0.9328812}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk4_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk3_ctl
+      position: {x: -0.055138905, y: 0, z: -2.220446e-18}
+      rotation: {x: -0.12637378, y: -0.0050397697, z: 0.2915202, w: 0.9481668}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk4_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk4_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk5_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk4_ctl
+      position: {x: -0.0613635, y: -2.842171e-16, z: 7.105427e-17}
+      rotation: {x: -0.07768386, y: -0.05481413, z: 0.30065784, w: 0.9489813}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk5_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk5_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk6_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk5_ctl
+      position: {x: -0.062387317, y: 0, z: -7.105427e-17}
+      rotation: {x: -0.011883738, y: 0.0062607382, z: 0.14419563, w: 0.989458}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk6_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk6_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk7_npo
+      parentName: Symphony_DefaultPose0624:chain_C1_fk6_ctl
+      position: {x: -0.052069247, y: 1.7763568e-17, z: 0}
+      rotation: {x: -0.0014203914, y: -0.04779793, z: 0.080714785, w: 0.99558955}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_fk7_ctl
+      parentName: Symphony_DefaultPose0624:chain_C1_fk7_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: -0.0000000031342193, y: -0.10674991, z: -0.055309966}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C2_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.55266637, y: 0.49247918, z: 0.5474182, w: 0.39032993}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C2_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C2_fk0_ctl
+      position: {x: -0.047199793, y: 0, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C2_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_C2_fk1_ctl
+      position: {x: -0.047199793, y: -3.5527135e-16, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_C2_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_C2_fk2_ctl
+      position: {x: -0.047199793, y: -3.5527135e-16, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_C2_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_R0_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.024367826, y: 0.0003144095, z: 0.04672543}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_R0_ik_cns
+      parentName: Symphony_DefaultPose0624:eye_base_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.005013212, y: 0.9907008, z: 0.04824788, w: -0.12711787}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_R0_ctl
+      parentName: Symphony_DefaultPose0624:eye_base_R0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_R0_root
+      parentName: Symphony_DefaultPose0624:eye_base_R0_ctl
+      position: {x: -0.008478976, y: -0.0148931, z: -0.082248025}
+      rotation: {x: 0.0050132074, y: 0.9907008, z: 0.04824788, w: 0.12711787}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_R0_ik_cns
+      parentName: Symphony_DefaultPose0624:eye_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.005013212, y: 0.9907008, z: 0.04824788, w: -0.12711787}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_R0_ctl
+      parentName: Symphony_DefaultPose0624:eye_R0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: -0.092340074, y: 0.06841819, z: 0.061359983}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.75754565, y: 0.61823577, z: -0.13248982, w: -0.16234435}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_fk0_ctl
+      position: {x: -0.024595886, y: 0, z: -2.4868996e-16}
+      rotation: {x: 0, y: -0, z: -0.07330849, w: 0.9973093}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_fk1_ctl
+      position: {x: -0.02470474, y: 3.5527136e-17, z: -2.4868996e-16}
+      rotation: {x: -0.013778897, y: -0.16321732, z: -0.045818076, w: 0.98542935}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_fk2_ctl
+      position: {x: -0.033663757, y: -7.5495166e-17, z: 3.5527136e-17}
+      rotation: {x: -0.088042215, y: 0.020258412, z: -0.15315352, w: 0.9840641}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk4_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_fk3_ctl
+      position: {x: -0.033194244, y: 0, z: -3.5527136e-17}
+      rotation: {x: -0.3574965, y: -0.22089791, z: -0.21251456, w: 0.88217795}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk4_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk4_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk5_npo
+      parentName: Symphony_DefaultPose0624:chain_L3_fk4_ctl
+      position: {x: -0.029086398, y: 1.4210854e-16, z: 1.4210854e-16}
+      rotation: {x: -0.10280239, y: 0.09781409, z: -0.04684941, w: 0.9887716}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_fk5_ctl
+      parentName: Symphony_DefaultPose0624:chain_L3_fk5_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.09234009, y: 0.06841819, z: 0.061359975}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.16234435, y: -0.13248982, z: -0.61823577, w: 0.75754565}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_fk0_ctl
+      position: {x: 0.024595886, y: 1.4210854e-16, z: 2.4868996e-16}
+      rotation: {x: 0, y: -0, z: -0.07330849, w: 0.9973093}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_fk1_ctl
+      position: {x: 0.02470474, y: 3.5527136e-17, z: 7.105427e-17}
+      rotation: {x: -0.013778897, y: -0.16321732, z: -0.045818076, w: 0.98542935}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_fk2_ctl
+      position: {x: 0.033663757, y: 1.7763568e-17, z: 7.105427e-17}
+      rotation: {x: -0.088042215, y: 0.020258412, z: -0.15315352, w: 0.9840641}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk4_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_fk3_ctl
+      position: {x: 0.033194244, y: 7.105427e-17, z: -7.105427e-17}
+      rotation: {x: -0.3574965, y: -0.22089791, z: -0.21251456, w: 0.88217795}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk4_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk4_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk5_npo
+      parentName: Symphony_DefaultPose0624:chain_R3_fk4_ctl
+      position: {x: 0.029086398, y: 2.842171e-16, z: -1.0658141e-16}
+      rotation: {x: -0.10280239, y: 0.09781409, z: -0.04684941, w: 0.9887716}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_fk5_ctl
+      parentName: Symphony_DefaultPose0624:chain_R3_fk5_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.000000004771163, y: 0.12595728, z: 0.09232873}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk0_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.5759094, y: -0.31683108, z: 0.7123539, w: 0.2459642}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk0_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk1_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_fk0_ctl
+      position: {x: -0.037861153, y: -1.4210854e-16, z: 3.5527136e-17}
+      rotation: {x: 0, y: -0, z: -0.17875382, w: 0.9838939}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk1_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk2_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_fk1_ctl
+      position: {x: -0.037861153, y: 0, z: -7.105427e-17}
+      rotation: {x: 0.03292881, y: 0.10438811, z: -0.15934919, w: 0.98113537}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk2_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk3_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_fk2_ctl
+      position: {x: -0.037861153, y: -3.5527136e-17, z: 0}
+      rotation: {x: 0.27119458, y: 0.13315916, z: -0.2731459, w: 0.91329813}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk3_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk4_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_fk3_ctl
+      position: {x: -0.037861153, y: 0, z: 7.105427e-17}
+      rotation: {x: 0.19540942, y: -0.07179702, z: -0.17670806, w: 0.9619951}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk4_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk4_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk5_npo
+      parentName: Symphony_DefaultPose0624:chain_C3_fk4_ctl
+      position: {x: -0.037861153, y: 0, z: -3.5527136e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_fk5_ctl
+      parentName: Symphony_DefaultPose0624:chain_C3_fk5_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: -0.10783157, y: 0.04660713, z: 0.03754924}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_0_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: -3.1086245e-17, y: 0, z: 3.5527136e-17}
+      rotation: {x: 0.7054245, y: 0.6809028, z: -0.17032787, w: -0.09867244}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_1_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: -0.00055730646, y: -0.03764399, z: 0.004010791}
+      rotation: {x: 0.7054245, y: 0.6809028, z: -0.17032787, w: -0.09867244}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_2_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: -0.0011146129, y: -0.07528798, z: 0.008021582}
+      rotation: {x: 0.6012465, y: 0.7744385, z: -0.15453663, w: -0.12192729}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_3_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: 0.008247428, y: -0.1119732, z: 0.007907196}
+      rotation: {x: 0.48417884, y: 0.8467235, z: -0.21818468, w: 0.0320244}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_4_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: 0.028279407, y: -0.14248766, z: 0.017959803}
+      rotation: {x: 0.29497045, y: 0.9533344, z: -0.064118944, w: 0.0059022005}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_5_loc
+      parentName: Symphony_DefaultPose0624:chain_L4_root
+      position: {x: 0.05954951, y: -0.16375253, z: 0.019818025}
+      rotation: {x: 0.29497045, y: 0.9533344, z: -0.064118944, w: 0.0059022005}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_root
+      parentName: Symphony_DefaultPose0624:neck_C0_head_ctl
+      position: {x: 0.10783158, y: 0.04660713, z: 0.03754923}
+      rotation: {x: 0, y: 0.000000019821393, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_0_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: -0, y: 1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0.09867244, y: -0.17032787, z: -0.6809028, w: 0.7054245}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_1_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: 0.00055730646, y: -0.03764399, z: 0.004010791}
+      rotation: {x: 0.09867244, y: -0.17032787, z: -0.6809028, w: 0.7054245}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_2_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: 0.0011146129, y: -0.07528798, z: 0.008021582}
+      rotation: {x: 0.12192729, y: -0.15453663, z: -0.7744385, w: 0.6012465}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_3_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: -0.008247428, y: -0.1119732, z: 0.007907196}
+      rotation: {x: 0.0320244, y: 0.21818468, z: 0.8467235, w: -0.48417884}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_4_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: -0.028279407, y: -0.14248766, z: 0.017959803}
+      rotation: {x: 0.0059022, y: 0.06411895, z: 0.95333433, w: -0.29497048}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_5_loc
+      parentName: Symphony_DefaultPose0624:chain_R4_root
+      position: {x: -0.05954951, y: -0.16375253, z: 0.019818025}
+      rotation: {x: 0.0059022, y: 0.06411895, z: 0.95333433, w: -0.29497048}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_root
+      parentName: Symphony_DefaultPose0624:spine_C0_1_cnx
+      position: {x: 0.027129812, y: 0.046682883, z: 0.0023086735}
+      rotation: {x: 0.15285064, y: -0, z: -0, w: 0.9882493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_ctl_npo
+      parentName: Symphony_DefaultPose0624:shoulder_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.70944446, y: -0.059014298, z: -0.11789127, w: 0.6923204}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_ctl
+      parentName: Symphony_DefaultPose0624:shoulder_R0_ctl_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0.07704787, w: 0.9970274}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_orbit_cns
+      parentName: Symphony_DefaultPose0624:shoulder_R0_ctl
+      position: {x: 0.07409191, y: -8.881784e-18, z: 1.4210854e-16}
+      rotation: {x: -0.70944446, y: 0.059014298, z: 0.11789127, w: 0.6923204}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_orbit_npo
+      parentName: Symphony_DefaultPose0624:shoulder_R0_orbit_cns
+      position: {x: -3.5527136e-17, y: 0, z: 2.220446e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_orbit_ctl
+      parentName: Symphony_DefaultPose0624:shoulder_R0_orbit_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_root
+      parentName: Symphony_DefaultPose0624:shoulder_R0_orbit_ctl
+      position: {x: -0.0000000012965757, y: -0.00000004246913, z: 6.736833e-14}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_eff_loc
+      parentName: Symphony_DefaultPose0624:arm_R0_root
+      position: {x: 0.12611909, y: -0.25389048, z: -0.10806868}
+      rotation: {x: 0.3613345, y: -0.4861401, z: -0.30985174, w: 0.7328691}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_end_ref
+      parentName: Symphony_DefaultPose0624:arm_R0_eff_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 1, w: -6.123234e-17}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_root
+      parentName: Symphony_DefaultPose0624:arm_R0_eff_loc
+      position: {x: 0.016571416, y: 0.019732276, z: -0.00057772995}
+      rotation: {x: -0.7437721, y: 0.06580578, z: -0.037650656, w: 0.66411984}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk0_npo
+      parentName: Symphony_DefaultPose0624:thumb_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.44345015, y: -0.40423998, z: 0.18644592, w: 0.7779331}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:thumb_R0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.019650841, y: 0.1269088, z: -0.15008056, w: 0.9802978}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk1_npo
+      parentName: Symphony_DefaultPose0624:thumb_R0_fk0_ctl
+      position: {x: 0.029404975, y: 0, z: 1.4210854e-16}
+      rotation: {x: 0, y: 0.034944385, z: -0, w: 0.9993893}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:thumb_R0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.12609418, y: -0.16033362, z: -0.23769583, w: 0.94968104}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk2_npo
+      parentName: Symphony_DefaultPose0624:thumb_R0_fk1_ctl
+      position: {x: 0.014566268, y: -3.5527136e-17, z: -1.4210854e-16}
+      rotation: {x: 0.0032795973, y: -0.02158687, z: -0.057759542, w: 0.99809176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:thumb_R0_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.069937594, y: -0.026957344, z: -0.34902585, w: 0.9341108}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_root
+      parentName: Symphony_DefaultPose0624:arm_R0_eff_loc
+      position: {x: 0.027146725, y: 0.018765304, z: 0.0017444814}
+      rotation: {x: -0.7437721, y: 0.06580578, z: -0.037650656, w: 0.66411984}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_0_lvl
+      parentName: Symphony_DefaultPose0624:meta_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.7197069, y: 0.20784429, z: -0.6386807, w: -0.17581154}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_0_npo
+      parentName: Symphony_DefaultPose0624:meta_R0_0_lvl
+      position: {x: -0, y: -1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_0_loc
+      parentName: Symphony_DefaultPose0624:meta_R0_0_npo
+      position: {x: -0, y: -1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_meta0_ctl
+      parentName: Symphony_DefaultPose0624:meta_R0_0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_root
+      parentName: Symphony_DefaultPose0624:meta_R0_0_loc
+      position: {x: 0.0073251096, y: -0.0064638057, z: -0.032536387}
+      rotation: {x: 0.7197069, y: 0.20784429, z: -0.6386807, w: 0.17581154}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_R0_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.018579395, y: -0.1010631, z: -0.012297147, w: 0.9946305}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_R0_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.029440958, y: 0.0754647, z: -0.6995817, w: 0.70994633}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_R0_fk0_ctl
+      position: {x: 0.028100692, y: 0, z: 8.881784e-18}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_R0_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.6728758, w: 0.73975545}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_R0_fk1_ctl
+      position: {x: 0.01862108, y: -1.4210854e-16, z: -6.217249e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_R0_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.80611014, w: 0.5917656}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_1_lvl
+      parentName: Symphony_DefaultPose0624:meta_R0_root
+      position: {x: 0.0015675616, y: 0.008396879, z: -0.013567191}
+      rotation: {x: 0.75769335, y: 0.08375467, z: -0.643931, w: -0.06510717}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_1_npo
+      parentName: Symphony_DefaultPose0624:meta_R0_1_lvl
+      position: {x: -0, y: 2.842171e-16, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_1_loc
+      parentName: Symphony_DefaultPose0624:meta_R0_1_npo
+      position: {x: -0, y: 1.8947807e-16, z: 0}
+      rotation: {x: 0, y: 0, z: 0.028407536, w: 0.9995964}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_meta1_ctl
+      parentName: Symphony_DefaultPose0624:meta_R0_1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_root
+      parentName: Symphony_DefaultPose0624:meta_R0_1_loc
+      position: {x: 0.0075350385, y: 0.0004605526, z: -0.034731217}
+      rotation: {x: 0.75769335, y: 0.08375467, z: -0.643931, w: 0.06510717}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_R1_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.0077240304, y: -0.044084024, z: -0.03241562, w: 0.9984719}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_R1_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.6930874, w: 0.7208536}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_R1_fk0_ctl
+      position: {x: 0.031126492, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_R1_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.76918936, w: 0.6390209}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_R1_fk1_ctl
+      position: {x: 0.022028891, y: 1.4210854e-16, z: -8.8817837e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_R1_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.008671722, y: -0.05040381, z: -0.83718807, w: 0.54451853}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_2_lvl
+      parentName: Symphony_DefaultPose0624:meta_R0_root
+      position: {x: 0.0033087684, y: 0.01073925, z: -0.024290502}
+      rotation: {x: 0.7393771, y: 0.0746842, z: -0.6670476, w: -0.052832507}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_2_npo
+      parentName: Symphony_DefaultPose0624:meta_R0_2_lvl
+      position: {x: -3.5527136e-17, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_2_loc
+      parentName: Symphony_DefaultPose0624:meta_R0_2_npo
+      position: {x: -1.1842379e-17, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0.056792144, w: 0.998386}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_meta2_ctl
+      parentName: Symphony_DefaultPose0624:meta_R0_2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_root
+      parentName: Symphony_DefaultPose0624:meta_R0_2_loc
+      position: {x: 0.0075657777, y: 0.0058889794, z: -0.03236281}
+      rotation: {x: 0.7393771, y: 0.0746842, z: -0.6670476, w: 0.052832507}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_R2_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.0021365592, y: -0.037371088, z: -0.013651901, w: 0.99920595}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_R2_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.7190824, w: 0.6949248}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_R2_fk0_ctl
+      position: {x: 0.027507955, y: -1.4210854e-16, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_R2_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0.69423205, w: 0.71975124}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_R2_fk1_ctl
+      position: {x: 0.018641887, y: 9.947598e-16, z: -7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_R2_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.000874708, y: 0.0009935775, z: -0.75057805, w: 0.6607805}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_3_lvl
+      parentName: Symphony_DefaultPose0624:meta_R0_root
+      position: {x: 0.0043713585, y: 0.012682329, z: -0.034799486}
+      rotation: {x: 0.7393771, y: 0.0746842, z: -0.6670476, w: -0.052832507}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_3_npo
+      parentName: Symphony_DefaultPose0624:meta_R0_3_lvl
+      position: {x: -3.5527136e-17, y: 1.4210854e-16, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_3_loc
+      parentName: Symphony_DefaultPose0624:meta_R0_3_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0.08513091, w: 0.9963698}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_meta3_ctl
+      parentName: Symphony_DefaultPose0624:meta_R0_3_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_root
+      parentName: Symphony_DefaultPose0624:meta_R0_3_loc
+      position: {x: 0.009234602, y: 0.00999206, z: -0.026301557}
+      rotation: {x: 0.7393771, y: 0.0746842, z: -0.6670476, w: 0.052832507}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk0_npo
+      parentName: Symphony_DefaultPose0624:finger_R3_root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.037211783, y: 0.03643798, z: -0.007513366, w: 0.9986146}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk0_ctl
+      parentName: Symphony_DefaultPose0624:finger_R3_fk0_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0.01696662, y: 0.0124287, z: -0.7430357, w: 0.66892135}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk1_npo
+      parentName: Symphony_DefaultPose0624:finger_R3_fk0_ctl
+      position: {x: 0.025663475, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk1_ctl
+      parentName: Symphony_DefaultPose0624:finger_R3_fk1_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.7465286, w: 0.6653533}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk2_npo
+      parentName: Symphony_DefaultPose0624:finger_R3_fk1_ctl
+      position: {x: 0.013958076, y: -7.105427e-16, z: 8.8817837e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_fk2_ctl
+      parentName: Symphony_DefaultPose0624:finger_R3_fk2_npo
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: -0.7733095, w: 0.6340287}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_div0_loc
+      parentName: Symphony_DefaultPose0624:arm_R0_root
+      position: {x: -0, y: 2.842171e-16, z: 1.4210854e-16}
+      rotation: {x: 0.57930744, y: 0.1820255, z: -0.5920342, w: 0.5298727}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_tweak0_ctl
+      parentName: Symphony_DefaultPose0624:arm_R0_div0_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_roll0_off
+      parentName: Symphony_DefaultPose0624:arm_R0_tweak0_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_div1_loc
+      parentName: Symphony_DefaultPose0624:arm_R0_root
+      position: {x: 0.024638817, y: -0.044096217, z: -0.09304391}
+      rotation: {x: 0.7229249, y: -0.025980677, z: -0.61883986, w: 0.30617285}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_tweak1_ctl
+      parentName: Symphony_DefaultPose0624:arm_R0_div1_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_roll1_off
+      parentName: Symphony_DefaultPose0624:arm_R0_tweak1_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_div2_loc
+      parentName: Symphony_DefaultPose0624:arm_R0_root
+      position: {x: 0.049277633, y: -0.08819243, z: -0.18608782}
+      rotation: {x: 0.5470606, y: -0.5069046, z: -0.22271794, w: 0.6278289}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_tweak2_ctl
+      parentName: Symphony_DefaultPose0624:arm_R0_div2_loc
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_roll2_off
+      parentName: Symphony_DefaultPose0624:arm_R0_tweak2_ctl
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_R0_root
+      parentName: Symphony_DefaultPose0624:arm_R0_div2_loc
+      position: {x: 0.23650111, y: 0.0017926845, z: 0.028238697}
+      rotation: {x: -0.74543697, y: 0.017546989, z: -0.008776057, w: 0.6662874}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_R0_ik_cns
+      parentName: Symphony_DefaultPose0624:HandGrip_R0_root
+      position: {x: -0.0017515193, y: 0.00035509776, z: 0.012191279}
+      rotation: {x: 0.032094385, y: 0.9746374, z: -0.2212175, w: -0.010715051}
+      scale: {x: 1, y: 1, z: -1}
+    - name: Symphony_DefaultPose0624:HandGrip_R0_ctl
+      parentName: Symphony_DefaultPose0624:HandGrip_R0_ik_cns
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:jnt_org
+      parentName: Symphony_run_spline_v001.fbx(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:root_C0_root_Jnt
+      parentName: Symphony_DefaultPose0624:jnt_org
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_pelvis_Jnt
+      parentName: Symphony_DefaultPose0624:root_C0_root_Jnt
+      position: {x: 0.0066211694, y: 0.6472493, z: 0.01822058}
+      rotation: {x: -0.5472465, y: 0.55670816, z: -0.5557135, w: 0.28597176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_pelvis_Jnt
+      position: {x: -0.028643029, y: 0.001818684, z: 5.0665656e-11}
+      rotation: {x: -0.055749603, y: -0.11677105, z: 0.104595765, w: 0.986061}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:spine_C0_spine_02_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      position: {x: -0.09449616, y: 0.01629866, z: 0.0014783235}
+      rotation: {x: 0.105561085, y: -0.07249865, z: 0.12480552, w: 0.9838823}
+      scale: {x: 1.0132774, y: 1, z: 1.0132774}
+    - name: Symphony_DefaultPose0624:spine_C0_spine_03_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_02_Jnt
+      position: {x: -0.07319147, y: 0.0017640284, z: -0.0008393505}
+      rotation: {x: 0.04614173, y: -0.044055667, z: -0.034836315, w: 0.99735475}
+      scale: {x: 1.0000705, y: 0.9998238, z: 1.0001057}
+    - name: Symphony_DefaultPose0624:spine_C0_spine_04_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_03_Jnt
+      position: {x: -0.06550315, y: 0.0052202665, z: 0.00021986598}
+      rotation: {x: 0.12564074, y: -0.030013105, z: -0.09165942, w: 0.9873764}
+      scale: {x: 0.9873536, y: 0.99875176, z: 0.9876726}
+    - name: Symphony_DefaultPose0624:spine_C0_spine_05_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_04_Jnt
+      position: {x: -0.052822817, y: -9.136656e-12, z: -8.2878976e-10}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_L0_shoulder_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_05_Jnt
+      position: {x: -0.046682883, y: -0.0023086737, z: -0.027129808}
+      rotation: {x: 0.07898692, y: -0.7471093, z: 0.13403763, w: 0.64623743}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_upperarm_Jnt
+      parentName: Symphony_DefaultPose0624:shoulder_L0_shoulder_Jnt
+      position: {x: -0.07409192, y: -0.0000000013587539, z: -0.00000004144777}
+      rotation: {x: 0.040117722, y: 0.14877878, z: 0.02058605, w: 0.98784196}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_upperarm_twist_01_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_upperarm_Jnt
+      position: {x: -0.10587123, y: -1.4210854e-16, z: 4.2632563e-16}
+      rotation: {x: 0.34090894, y: -0, z: -0, w: 0.9400964}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_lowerarm_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_upperarm_Jnt
+      position: {x: -0.21174246, y: 4.2632563e-16, z: 2.842171e-16}
+      rotation: {x: 0.32810378, y: 0.012045396, z: 0.015785769, w: 0.944433}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_lowerarm_Jnt
+      position: {x: -0.19861378, y: 7.105427e-17, z: 4.973799e-16}
+      rotation: {x: -0.3078435, y: -0.027202211, z: 0.049267657, w: 0.9497711}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_0_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      position: {x: -0.016571416, y: -0.019732276, z: 0.00057772995}
+      rotation: {x: -0.35304654, y: -0.0016185652, z: 0.43711948, w: 0.82721347}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_1_Jnt
+      parentName: Symphony_DefaultPose0624:thumb_L0_0_Jnt
+      position: {x: -0.029404975, y: -5.3290704e-17, z: -1.0658141e-16}
+      rotation: {x: 0.07243674, y: -0.005141723, z: -0.027859027, w: 0.9969706}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_L0_2_Jnt
+      parentName: Symphony_DefaultPose0624:thumb_L0_1_Jnt
+      position: {x: -0.014566268, y: -1.4210854e-16, z: -1.0658141e-16}
+      rotation: {x: 0.0032795973, y: -0.021586869, z: -0.057759542, w: 0.99809176}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_0_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      position: {x: -0.027146725, y: -0.018765304, z: -0.0017444814}
+      rotation: {x: -0.62957025, y: 0.3327691, z: 0.57664114, w: -0.4004886}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_L0_0_Jnt
+      position: {x: -0.0073251096, y: 0.0064638057, z: 0.032536387}
+      rotation: {x: -0.74637055, y: -0.059479237, z: 0.6279762, w: -0.2122245}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L0_0_Jnt
+      position: {x: -0.028100692, y: -7.105427e-17, z: -7.105427e-17}
+      rotation: {x: -0.0012151743, y: -0.0028322237, z: 0.0014370973, w: 0.9999942}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L0_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L0_1_Jnt
+      position: {x: -0.01862108, y: 2.842171e-16, z: 5.471179e-15}
+      rotation: {x: 0, y: -0, z: -0.69584334, w: 0.7181936}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_1_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      position: {x: -0.026348516, y: -0.004280383, z: 0.0050807195}
+      rotation: {x: 0.52954257, y: -0.3897912, z: -0.49034926, w: 0.5720184}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_L0_1_Jnt
+      position: {x: -0.0075350385, y: -0.0004605526, z: 0.034731217}
+      rotation: {x: -0.77405435, y: -0.05350272, z: 0.6295967, w: -0.039815567}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L1_0_Jnt
+      position: {x: -0.031126492, y: -1.4210854e-16, z: -2.7142732e-14}
+      rotation: {x: -0.0003179199, y: -0.003439594, z: 0.0009923948, w: 0.9999935}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L1_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L1_1_Jnt
+      position: {x: -0.022028891, y: 4.6185276e-16, z: 1.1084466e-14}
+      rotation: {x: 0, y: -0, z: -0.5403316, w: 0.8414522}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_2_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      position: {x: -0.026419694, y: 0.0067734965, z: 0.006227277}
+      rotation: {x: 0.47192103, y: -0.36788854, z: -0.4816879, w: 0.6402541}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_L0_2_Jnt
+      position: {x: -0.0075657777, y: -0.0058889794, z: 0.03236281}
+      rotation: {x: -0.7760629, y: -0.077787586, z: 0.6227204, w: 0.062409207}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L2_0_Jnt
+      position: {x: -0.027507955, y: -1.4210854e-16, z: -2.3838709e-14}
+      rotation: {x: -0.00014403828, y: -0.003308441, z: 0.0010777484, w: 0.9999939}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L2_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L2_1_Jnt
+      position: {x: -0.018641887, y: 7.105427e-16, z: 1.0729195e-14}
+      rotation: {x: 0, y: -0, z: -0.5521434, w: 0.8337492}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_L0_3_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_hand_Jnt
+      position: {x: -0.02586991, y: 0.017472722, z: 0.0069807456}
+      rotation: {x: 0.42091268, y: -0.30893233, z: -0.46454898, w: 0.7152536}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_L0_3_Jnt
+      position: {x: -0.009234602, y: -0.00999206, z: 0.026301557}
+      rotation: {x: -0.79984134, y: -0.17007054, z: 0.56944567, w: 0.08403327}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L3_0_Jnt
+      position: {x: -0.025663475, y: 2.842171e-16, z: -4.067857e-14}
+      rotation: {x: -0.005567124, y: -0.0036718468, z: 0.0008304265, w: 0.99997747}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_L3_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_L3_1_Jnt
+      position: {x: -0.013958076, y: -4.6185276e-16, z: 0}
+      rotation: {x: 0, y: -0, z: -0.5843903, w: 0.8114727}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_L0_HandGrip_Jnt
+      parentName: Symphony_DefaultPose0624:arm_L0_lowerarm_Jnt
+      position: {x: -0.23475336, y: -0.018272353, z: -0.024415996}
+      rotation: {x: 0.4054414, y: -0.043530002, z: 0.0037995307, w: 0.9130761}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_neck_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_05_Jnt
+      position: {x: -0.07384978, y: 0.007211353, z: -4.944164e-10}
+      rotation: {x: -0.001990594, y: 0.011807544, z: 0.32590073, w: 0.94532824}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:neck_C0_neck_02_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_neck_01_Jnt
+      position: {x: -0.033044457, y: 0.0072213104, z: -5.034549e-10}
+      rotation: {x: -0.21266103, y: 0.14154442, z: -0.39233765, w: 0.8836355}
+      scale: {x: 0.9953401, y: 0.99849004, z: 0.9957727}
+    - name: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_neck_02_Jnt
+      position: {x: -0.095454365, y: 0.026593491, z: -0.00023057162}
+      rotation: {x: -0.000000016223836, y: -0.0000000030394431, z: -0.10186285, w: 0.9947985}
+      scale: {x: 1.0045285, y: 1.0000376, z: 1.0058795}
+    - name: Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.00059430447, y: -0.046841588, z: -0.024435086}
+      rotation: {x: 0.5816925, y: -0.53768945, z: 0.4575953, w: 0.40389413}
+      scale: {x: 0.9993634, y: 0.99792767, z: 1.0027149}
+    - name: Symphony_DefaultPose0624:eye_L0_eye_Jnt
+      parentName: Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt
+      position: {x: -0.008478976, y: -0.0148931, z: 0.082248025}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: 0.090684146, y: 0.10938158, z: 0.00221388}
+      rotation: {x: -0.08346731, y: -0.019260114, z: 0.97000587, w: -0.22748809}
+      scale: {x: 1.001137, y: 1.0005331, z: 0.998332}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_01_Jnt
+      position: {x: -0.07725777, y: -1.4210854e-16, z: 3.5527136e-17}
+      rotation: {x: 0.0008879978, y: 0.040266156, z: -0.018584412, w: 0.9990158}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_02_Jnt
+      position: {x: -0.082794115, y: 2.842171e-16, z: 7.105427e-17}
+      rotation: {x: -0.23771366, y: -0.087321766, z: -0.49297783, w: 0.8323701}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_03_Jnt
+      position: {x: -0.049765978, y: -3.5527136e-17, z: 3.5527136e-17}
+      rotation: {x: -0.20124896, y: -0.098336175, z: -0.2000742, w: 0.953834}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_05_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_04_Jnt
+      position: {x: -0.052644722, y: 2.1316282e-16, z: 7.105427e-17}
+      rotation: {x: -0.34519517, y: 0.15292187, z: -0.4092077, w: 0.83066493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_06_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_05_Jnt
+      position: {x: -0.0541228, y: 1.4210854e-16, z: -1.4210854e-16}
+      rotation: {x: 0.4476224, y: 0.22540505, z: -0.34893802, w: 0.7918769}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_07_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_06_Jnt
+      position: {x: -0.05828235, y: 0, z: 1.4210854e-16}
+      rotation: {x: 0.22227782, y: -0.31536335, z: -0.47643203, w: 0.7900323}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C0_chain_08_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C0_chain_07_Jnt
+      position: {x: -0.054424237, y: -1.4210854e-16, z: 0}
+      rotation: {x: -0.40088674, y: -0.100214586, z: -0.18450576, w: 0.8917424}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.16157228, y: 0.0042518107, z: 0.015740445}
+      rotation: {x: 0.2589231, y: 0.20318033, z: -0.42279446, w: 0.84434676}
+      scale: {x: 0.9969284, y: 1.0020775, z: 1.0010015}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_01_Jnt
+      position: {x: -0.034432754, y: 1.4210854e-16, z: 3.5527136e-17}
+      rotation: {x: 0.06600804, y: -0.018396521, z: 0.48823598, w: 0.87001735}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_02_Jnt
+      position: {x: -0.038850706, y: 1.0658141e-16, z: 0}
+      rotation: {x: 0.04786767, y: 0.023521468, z: 0.4455789, w: 0.89365256}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_03_Jnt
+      position: {x: -0.05397375, y: -1.4210854e-16, z: -7.105427e-17}
+      rotation: {x: -0.087368295, y: 0.0658291, z: 0.3431706, w: 0.9328812}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_05_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_04_Jnt
+      position: {x: -0.055138905, y: 1.4210854e-16, z: -5.3290704e-17}
+      rotation: {x: -0.12637378, y: -0.005039772, z: 0.29152024, w: 0.9481668}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_06_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_05_Jnt
+      position: {x: -0.0613635, y: -7.105427e-16, z: 7.105427e-17}
+      rotation: {x: -0.07768386, y: -0.05481413, z: 0.30065784, w: 0.9489813}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_07_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_06_Jnt
+      position: {x: -0.062387317, y: -3.5527136e-17, z: -3.5527136e-17}
+      rotation: {x: -0.011883738, y: 0.006260738, z: 0.14419565, w: 0.989458}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C1_chain_08_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C1_chain_07_Jnt
+      position: {x: -0.052069247, y: -8.8817837e-17, z: -1.5987211e-16}
+      rotation: {x: -0.0014203915, y: -0.047797926, z: 0.080714785, w: 0.99558955}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: 0.10673741, y: 0.055519078, z: 0.00037227344}
+      rotation: {x: -0.049807016, y: 0.052894965, z: 0.9913798, w: -0.10902968}
+      scale: {x: 0.999057, y: 1.0025907, z: 0.9983575}
+    - name: Symphony_DefaultPose0624:chain_C2_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C2_chain_01_Jnt
+      position: {x: -0.047199793, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C2_chain_02_Jnt
+      position: {x: -0.047199793, y: -4.2632563e-16, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C2_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C2_chain_03_Jnt
+      position: {x: -0.047199793, y: -2.842171e-16, z: -5.3290704e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.00049761875, y: -0.046963695, z: 0.024247574}
+      rotation: {x: 0.57933533, y: -0.53786534, z: -0.45948365, w: -0.40490276}
+      scale: {x: 0.9990906, y: 0.99772096, z: 1.0031966}
+    - name: Symphony_DefaultPose0624:eye_R0_eye_Jnt
+      parentName: Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt
+      position: {x: -0.008478976, y: -0.0148931, z: -0.082248025}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.06872224, y: -0.061360914, z: -0.09252985}
+      rotation: {x: 0.054030046, y: 0.83510286, z: 0.54097176, w: -0.083866954}
+      scale: {x: 0.9965005, y: 1.0005797, z: 1.0029304}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L3_chain_01_Jnt
+      position: {x: -0.024595886, y: 0, z: -1.0658141e-16}
+      rotation: {x: -2.2381916e-17, y: -3.0448984e-16, z: -0.0733085, w: 0.9973093}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L3_chain_02_Jnt
+      position: {x: -0.02470474, y: 3.5527136e-17, z: -1.7763567e-16}
+      rotation: {x: -0.013778897, y: -0.16321732, z: -0.045818076, w: 0.98542935}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L3_chain_03_Jnt
+      position: {x: -0.033663757, y: -8.881784e-18, z: -2.4868996e-16}
+      rotation: {x: -0.088042215, y: 0.020258412, z: -0.15315352, w: 0.9840641}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_05_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L3_chain_04_Jnt
+      position: {x: -0.033194244, y: -1.4210854e-16, z: 2.6645352e-17}
+      rotation: {x: -0.35749653, y: -0.2208979, z: -0.21251456, w: 0.88217795}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L3_chain_06_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L3_chain_05_Jnt
+      position: {x: -0.029086398, y: 2.842171e-16, z: 3.9968027e-17}
+      rotation: {x: -0.10280239, y: 0.09781409, z: -0.04684941, w: 0.9887716}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.06835586, y: -0.06182363, z: 0.09194953}
+      rotation: {x: 0.83639205, y: -0.055455, z: 0.085651204, w: 0.5385508}
+      scale: {x: 0.998246, y: 0.9995208, z: 1.0022374}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R3_chain_01_Jnt
+      position: {x: 0.024595886, y: -7.544287e-11, z: -1.67466e-10}
+      rotation: {x: 5.1538857e-10, y: 0.0000000034738599, z: -0.0733085, w: 0.9973093}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R3_chain_02_Jnt
+      position: {x: 0.02470474, y: 1.8482992e-13, z: -1.7195009e-10}
+      rotation: {x: -0.013778897, y: -0.16321732, z: -0.045818076, w: 0.98542935}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R3_chain_03_Jnt
+      position: {x: 0.033663757, y: 2.402878e-13, z: 1.2551826e-12}
+      rotation: {x: -0.088042215, y: 0.020258412, z: -0.15315352, w: 0.9840641}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_05_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R3_chain_04_Jnt
+      position: {x: 0.033194244, y: -1.2605028e-13, z: 1.196655e-12}
+      rotation: {x: -0.35749653, y: -0.2208979, z: -0.21251456, w: 0.88217795}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R3_chain_06_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R3_chain_05_Jnt
+      position: {x: 0.029086398, y: -2.3376854e-13, z: 4.9088733e-13}
+      rotation: {x: -0.10280239, y: 0.09781409, z: -0.04684941, w: 0.9887716}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.12607716, y: -0.092678115, z: -0.0004931196}
+      rotation: {x: 0.36511424, y: 0.9245442, z: -0.03118042, w: 0.10458187}
+      scale: {x: 0.99865854, y: 1.0033116, z: 0.99803805}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C3_chain_01_Jnt
+      position: {x: -0.037861153, y: -2.842171e-16, z: 7.105427e-17}
+      rotation: {x: 7.824609e-17, y: -3.4568243e-16, z: -0.17875382, w: 0.9838939}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_03_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C3_chain_02_Jnt
+      position: {x: -0.037861153, y: 7.105427e-17, z: -1.7763567e-16}
+      rotation: {x: 0.03292881, y: 0.1043881, z: -0.15934919, w: 0.98113537}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_04_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C3_chain_03_Jnt
+      position: {x: -0.037861153, y: -1.11022296e-17, z: 7.105427e-17}
+      rotation: {x: 0.27119458, y: 0.13315916, z: -0.2731459, w: 0.91329813}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_05_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C3_chain_04_Jnt
+      position: {x: -0.037861153, y: 7.105427e-17, z: -3.5527136e-17}
+      rotation: {x: 0.19540943, y: -0.07179702, z: -0.17670806, w: 0.9619951}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C3_chain_06_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C3_chain_05_Jnt
+      position: {x: -0.037861153, y: 0, z: 7.105427e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_0_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.046882253, y: -0.037421186, z: -0.10790355}
+      rotation: {x: 0.047762565, y: 0.82756066, z: 0.55879563, w: 0.024690935}
+      scale: {x: 0.99679273, y: 0.9997127, z: 1.003506}
+    - name: Symphony_DefaultPose0624:chain_L4_1_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L4_0_Jnt
+      position: {x: -0.037861153, y: -8.8817837e-17, z: -1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_2_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L4_1_Jnt
+      position: {x: -0.037861153, y: -7.105427e-17, z: -1.2434498e-16}
+      rotation: {x: -1.9480982e-16, y: 1.0288878e-17, z: -0.14243661, w: 0.98980397}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_3_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L4_2_Jnt
+      position: {x: -0.037861153, y: 1.7763567e-16, z: 7.105427e-17}
+      rotation: {x: -0.040168345, y: -0.18439902, z: -0.102571145, w: 0.97665894}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_4_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L4_3_Jnt
+      position: {x: -0.037861153, y: -1.4210854e-16, z: -2.4868996e-16}
+      rotation: {x: -0.14712341, y: 0.058845423, z: -0.21259151, w: 0.9642078}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_L4_5_Jnt
+      parentName: Symphony_DefaultPose0624:chain_L4_4_Jnt
+      position: {x: -0.037861153, y: 2.842171e-16, z: -9.7699626e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_0_Jnt
+      parentName: Symphony_DefaultPose0624:neck_C0_head_Jnt
+      position: {x: -0.0464544, y: -0.03796153, z: 0.10752514}
+      rotation: {x: 0.8287599, y: -0.049091842, z: -0.022744376, w: 0.5569827}
+      scale: {x: 0.99692446, y: 0.9996413, z: 1.0034449}
+    - name: Symphony_DefaultPose0624:chain_R4_1_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R4_0_Jnt
+      position: {x: 0.037861153, y: 5.3290704e-17, z: 1.7763568e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_2_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R4_1_Jnt
+      position: {x: 0.037861153, y: 8.881784e-18, z: 1.0658141e-16}
+      rotation: {x: -2.395317e-16, y: 8.923807e-17, z: -0.14243661, w: 0.98980397}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_3_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R4_2_Jnt
+      position: {x: 0.037861153, y: 3.5527136e-17, z: -7.105427e-17}
+      rotation: {x: -0.040168345, y: -0.18439902, z: -0.102571145, w: 0.97665894}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_4_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R4_3_Jnt
+      position: {x: 0.037861153, y: -2.842171e-16, z: -3.5527136e-17}
+      rotation: {x: -0.14712341, y: 0.058845423, z: -0.21259151, w: 0.9642078}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_R4_5_Jnt
+      parentName: Symphony_DefaultPose0624:chain_R4_4_Jnt
+      position: {x: 0.037861153, y: -2.842171e-16, z: 2.220446e-16}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:shoulder_R0_shoulder_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_05_Jnt
+      position: {x: -0.046682883, y: -0.0023086735, z: 0.027129812}
+      rotation: {x: 0.78413934, y: 0.098079644, z: 0.6009927, w: -0.119639955}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_upperarm_Jnt
+      parentName: Symphony_DefaultPose0624:shoulder_R0_shoulder_Jnt
+      position: {x: 0.07409192, y: 0.0000000013587532, z: 0.000000041454832}
+      rotation: {x: 0.14850818, y: 0.0093527455, z: -0.12392743, w: 0.9810708}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_upperarm_twist_01_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_upperarm_Jnt
+      position: {x: 0.10587123, y: -8.8817837e-17, z: 4.973799e-16}
+      rotation: {x: -0.61401725, y: 0, z: -0, w: 0.78929263}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_lowerarm_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_upperarm_Jnt
+      position: {x: 0.21174246, y: -3.5527135e-16, z: 8.5265126e-16}
+      rotation: {x: -0.61301327, y: -0.00031909242, z: 0.00016261073, w: 0.79007256}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_lowerarm_Jnt
+      position: {x: 0.19861378, y: 7.105427e-17, z: 5.12923e-16}
+      rotation: {x: 0.07686037, y: 0.0048398813, z: 0.9969883, w: -0.009132652}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_0_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      position: {x: -0.016571416, y: -0.019732276, z: -0.00057772995}
+      rotation: {x: 0.10817715, y: -0.2789059, z: 0.94066316, w: -0.16019368}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_1_Jnt
+      parentName: Symphony_DefaultPose0624:thumb_R0_0_Jnt
+      position: {x: 0.029404975, y: 0, z: 1.7763567e-16}
+      rotation: {x: 0.123331636, y: -0.0141209485, z: -0.025548508, w: 0.99193615}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:thumb_R0_2_Jnt
+      parentName: Symphony_DefaultPose0624:thumb_R0_1_Jnt
+      position: {x: 0.014566268, y: -7.105427e-17, z: -1.3100631e-16}
+      rotation: {x: 0.07884497, y: -0.049965326, z: -0.4008923, w: 0.9113574}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_0_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      position: {x: -0.027146725, y: -0.018765304, z: 0.0017444814}
+      rotation: {x: 0.3756662, y: 0.5745319, z: 0.3808139, w: 0.61949074}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_R0_0_Jnt
+      position: {x: 0.0073251096, y: -0.0064638057, z: -0.032536387}
+      rotation: {x: -0.759493, y: -0.01991402, z: 0.62561643, w: -0.17713809}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R0_0_Jnt
+      position: {x: 0.028100692, y: 4.2632563e-16, z: 3.5527136e-17}
+      rotation: {x: 0.002352729, y: -0.00068359985, z: -0.0078064483, w: 0.9999665}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R0_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R0_1_Jnt
+      position: {x: 0.01862108, y: -1.4210854e-16, z: -8.455458e-15}
+      rotation: {x: 0, y: 0, z: -0.80611014, w: 0.5917656}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_1_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      position: {x: -0.026348516, y: -0.004280383, z: -0.0050807195}
+      rotation: {x: 0.4684071, y: 0.4966932, z: 0.50663275, w: 0.52651113}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_R0_1_Jnt
+      position: {x: 0.0075350385, y: 0.0004605526, z: -0.034731217}
+      rotation: {x: 0.7783934, y: 0.030999387, z: -0.62641275, w: 0.027385347}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R1_0_Jnt
+      position: {x: 0.031126492, y: 4.2632563e-16, z: 3.6425973e-13}
+      rotation: {x: 0.0021490466, y: 0.00060077215, z: 0.0022759729, w: 0.99999493}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R1_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R1_1_Jnt
+      position: {x: 0.022028891, y: 2.4868996e-16, z: -2.3412382e-14}
+      rotation: {x: -0.008671722, y: -0.05040381, z: -0.83718807, w: 0.54451853}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_2_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      position: {x: -0.026419694, y: 0.0067734965, z: -0.006227277}
+      rotation: {x: 0.4417389, y: 0.42748636, z: 0.5492231, w: 0.56610614}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_R0_2_Jnt
+      position: {x: 0.0075657777, y: 0.0058889794, z: -0.03236281}
+      rotation: {x: 0.7779353, y: 0.05186203, z: -0.62084633, w: -0.081712306}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R2_0_Jnt
+      position: {x: 0.027507955, y: -2.842171e-16, z: 3.291234e-13}
+      rotation: {x: 0.0021538283, y: 0.0001275027, z: -0.003911334, w: 0.9999901}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R2_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R2_1_Jnt
+      position: {x: 0.018641887, y: 9.947598e-16, z: 1.886491e-14}
+      rotation: {x: -0.000874708, y: 0.0009935775, z: -0.75057805, w: 0.6607805}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:meta_R0_3_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_hand_Jnt
+      position: {x: -0.02586991, y: 0.017472722, z: -0.0069807456}
+      rotation: {x: 0.3669771, y: 0.39108983, z: 0.6066541, w: 0.58681124}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_0_Jnt
+      parentName: Symphony_DefaultPose0624:meta_R0_3_Jnt
+      position: {x: 0.009234602, y: 0.00999206, z: -0.026301557}
+      rotation: {x: 0.7997685, y: 0.13025802, z: -0.57293844, w: -0.12306416}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_1_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R3_0_Jnt
+      position: {x: 0.025663475, y: 1.4210854e-16, z: -7.105427e-17}
+      rotation: {x: 0.0019957416, y: 0.00040948935, z: 0.000593744, w: 0.9999978}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:finger_R3_2_Jnt
+      parentName: Symphony_DefaultPose0624:finger_R3_1_Jnt
+      position: {x: 0.013958076, y: -6.750156e-16, z: 3.1974422e-16}
+      rotation: {x: 0, y: 0, z: -0.7733095, w: 0.6340287}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:HandGrip_R0_HandGrip_Jnt
+      parentName: Symphony_DefaultPose0624:arm_R0_lowerarm_Jnt
+      position: {x: 0.24299861, y: 0.0025141488, z: 0.016116887}
+      rotation: {x: 0.09906468, y: -0.64462817, z: 0.7494635, w: 0.11377708}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      position: {x: -0.050563607, y: -0.02170811, z: -0.091414995}
+      rotation: {x: 0.19998471, y: 0.8613144, z: 0.4669611, w: -0.009536173}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C4_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C4_chain_01_Jnt
+      position: {x: -0.09921062, y: -9.46665e-13, z: -3.2120795e-12}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      position: {x: -0.038571887, y: -0.010324929, z: 0.09430609}
+      rotation: {x: 0.10978992, y: 0.81865853, z: -0.56143117, w: 0.05039325}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C5_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C5_chain_01_Jnt
+      position: {x: -0.082744874, y: -2.2233946e-12, z: 2.4525093e-12}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      position: {x: -0.01858628, y: 0.054698694, z: -0.06702731}
+      rotation: {x: 0.11657748, y: 0.31185612, z: 0.92308885, w: -0.19251604}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C6_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C6_chain_01_Jnt
+      position: {x: -0.056976307, y: 2.0715164e-12, z: -1.8953727e-13}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_chain_01_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_spine_01_Jnt
+      position: {x: -0.031108322, y: 0.064205095, z: 0.04044994}
+      rotation: {x: -0.067812674, y: -0.20733066, z: 0.9628258, w: -0.15931731}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:chain_C7_chain_02_Jnt
+      parentName: Symphony_DefaultPose0624:chain_C7_chain_01_Jnt
+      position: {x: -0.08573292, y: 2.2785684e-12, z: 2.5903368e-12}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_thigh_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_pelvis_Jnt
+      position: {x: 0.019530412, y: 0.006803404, z: -0.054131832}
+      rotation: {x: -0.1461171, y: 0.1573118, z: 0.9765897, w: -0.013242302}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_thigh_twist_01_Jnt
+      parentName: Symphony_DefaultPose0624:leg_L0_thigh_Jnt
+      position: {x: -0.16395527, y: 0.000000001177131, z: -3.5527136e-17}
+      rotation: {x: -0.072656326, y: 0, z: -0, w: 0.9973571}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_calf_Jnt
+      parentName: Symphony_DefaultPose0624:leg_L0_thigh_Jnt
+      position: {x: -0.32791054, y: 0.000000002354262, z: 0}
+      rotation: {x: -0.10045994, y: 0.047384754, z: 0.2816917, w: 0.95305425}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_L0_foot_Jnt
+      parentName: Symphony_DefaultPose0624:leg_L0_calf_Jnt
+      position: {x: -0.28700876, y: 0.0000000020605986, z: -1.7053025e-15}
+      rotation: {x: -0.036163136, y: -0.049311593, z: -0.45892066, w: 0.8863704}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_L0_ball_Jnt
+      parentName: Symphony_DefaultPose0624:leg_L0_foot_Jnt
+      position: {x: -0.07015108, y: 0.08119658, z: -0.0027550575}
+      rotation: {x: -0.0116639305, y: -0.012309661, z: -0.7257851, w: 0.6877125}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_thigh_Jnt
+      parentName: Symphony_DefaultPose0624:spine_C0_pelvis_Jnt
+      position: {x: 0.019530412, y: 0.006803404, z: 0.054131832}
+      rotation: {x: -0.019459426, y: -0.12602335, z: 0.17827238, w: 0.97568357}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_thigh_twist_01_Jnt
+      parentName: Symphony_DefaultPose0624:leg_R0_thigh_Jnt
+      position: {x: 0.16395527, y: -0.0000000011771311, z: 4.4408918e-17}
+      rotation: {x: 0.028466426, y: -0, z: -0, w: 0.99959475}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_calf_Jnt
+      parentName: Symphony_DefaultPose0624:leg_R0_thigh_Jnt
+      position: {x: 0.32791054, y: -0.0000000023542623, z: 7.105427e-17}
+      rotation: {x: 0.04863956, y: -0.05219808, z: 0.15010701, w: 0.986092}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:leg_R0_foot_Jnt
+      parentName: Symphony_DefaultPose0624:leg_R0_calf_Jnt
+      position: {x: 0.28700876, y: -0.0000000020606068, z: -3.134215e-14}
+      rotation: {x: 0.65411454, y: -0.741951, z: 0.024378814, w: 0.14508173}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Symphony_DefaultPose0624:foot_R0_ball_Jnt
+      parentName: Symphony_DefaultPose0624:leg_R0_foot_Jnt
+      position: {x: 0.07015108, y: -0.08119658, z: 0.0027550575}
+      rotation: {x: -0.0116639305, y: -0.012309661, z: -0.7257851, w: 0.6877125}
+      scale: {x: 1, y: 1, z: 1}
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 3
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
-using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -22,7 +21,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
@@ -61,7 +59,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ViewModel _viewModel;
         private InputComposition _inputComposition;
         private SelectedScenarioState _selectedScenarioState;
-        private SceneTransitionController _sceneTransitionController;
         private OutGameUIEvent _outGameUIEvent;
         private OutGameSortieController _outGameSortieController;
         private PendingNodeTransitionState _pendingNodeTransitionState;
@@ -81,10 +78,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             try
             {
-            _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
-            _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
-            _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
-            _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
+                _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
+                _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
+                _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
+                _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
             return _loadedBackgroundCatalog != null
@@ -158,7 +155,19 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            _scenarioView.Initialize(_viewModel, backgroundMap, animationMap, portraitMap);
+            // レイヤー順は View が Domain を参照しないよう、文字列名へ変換して渡す。
+            var layerOrder = new List<string>(_loadedScenarioSettings.LayerBackToFront.Count);
+            foreach (ScenarioLayer layer in _loadedScenarioSettings.LayerBackToFront)
+            {
+                layerOrder.Add(layer.ToString());
+            }
+
+            _scenarioView.Initialize(
+                _viewModel,
+                backgroundMap,
+                animationMap,
+                portraitMap,
+                layerOrder);
             _isInitialized = true;
             return true;
         }
@@ -183,12 +192,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] SelectedScenarioState が取得できませんでした。", this);
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
-            {
-                Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
                 return false;
             }
 
@@ -250,7 +253,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             _viewModel = null;
             _inputComposition = null;
             _selectedScenarioState = null;
-            _sceneTransitionController = null;
             _outGameUIEvent = null;
             _outGameSortieController = null;
             _pendingNodeTransitionState = null;
@@ -288,10 +290,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     break;
                 }
 
-                bool transitioned = await _sceneTransitionController.UnloadAndSetActiveAsync(
-                    SceneManager.GetActiveScene().name,
-                    _returnSceneName,
-                    destroyCancellationToken);
+                string scenarioSceneName = gameObject.scene.name;
+                SelectedScenarioState selectedScenarioState = _selectedScenarioState;
+
+                bool transitioned = await _outGameSortieController.ReturnFromScenarioAsync(
+                    scenarioSceneName,
+                    _returnSceneName);
 
                 if (!transitioned)
                 {
@@ -299,10 +303,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     return;
                 }
 
-                _selectedScenarioState.Clear();
-                _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
-                _outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(true);
-                _outGameUIEvent.OnShownHomeScreen?.Invoke();
+                selectedScenarioState.Clear();
             }
             catch (OperationCanceledException)
             {
@@ -324,7 +325,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return;
             }
 
-            await _stageProgressSaveDataService.SaveClearAsync(stageDefinition.StageId);
+            await _stageProgressSaveDataService.SaveClearAsync(
+                stageDefinition.StageId,
+                stageDefinition.Reward);
             _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
             _outGameUIEvent?.OnStageCleared?.Invoke(stageDefinition.StageId.Value);
         }

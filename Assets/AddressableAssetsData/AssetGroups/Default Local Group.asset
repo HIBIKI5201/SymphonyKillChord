@@ -25,13 +25,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
-    m_Address: SkillInputProgressUIConfig
+  - m_GUID: 05914eb9c35ddf14497e3bc124bf8c6a
+    m_Address: MobileStickFlickInputConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 114f8ed06b070604fbf83641b90742c9
-    m_Address: TestSkillData1
+  - m_GUID: 0753d520cf0a2da46b77d63680e46d9b
+    m_Address: SkillInputProgressUIConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -70,11 +70,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5e72162da6cb4a54fb6e019bf90f79c3
-    m_Address: EnemyMissionKeyAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ee731abf1f9c8243aa52e0b51d5c9a5
     m_Address: RhythmJudgmentDefinitionAsset
     m_ReadOnly: 0
@@ -85,13 +80,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77438a4db85a96f4982b191e886666d5
+    m_Address: CharacterDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7abb1786189c6ab409df92032a7b3bb6
     m_Address: ShellAttackData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8836b3eb044a4af4fbfcb41d68328252
-    m_Address: TestSkillData2
+  - m_GUID: 8353de4b09cc6674393d85367d46fcab
+    m_Address: EnemyMissionKeyRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -115,8 +115,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 93524034675db3e489e93312c0366c23
-    m_Address: Enemy
+  - m_GUID: 9b244ab8c89d4230b98ee894aa815b0b
+    m_Address: EnemyWaveDefinitionRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,8 +125,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b11f6152160bbfc42b59af15ef998adc
+    m_Address: InitialSkillLoadout
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b30935a5032ae8148a6abe059bf9f941
+    m_Address: MissionDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bad017c822c5b8c4da79df297d30324c
     m_Address: ExampleEncountMusicData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd2baf74c95bbc545ac18bea3a467152
+    m_Address: CameraConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -142,16 +157,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d69421e5dc9278446a38b4415677e2aa
     m_Address: ShellMusicData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d96aa53a8bf8e3e49ac87fa3cd9fbb2b
-    m_Address: BossCharacterData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e769e9900eed0c94eaa8d71f564c1966
-    m_Address: EnemyWaveDefinitionAsset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -172,11 +177,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fa8820e093edab1489d8bbed0db664af
     m_Address: SkillTreeTestInputData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd2baf74c95bbc545ac18bea3a467152
-    m_Address: CameraConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

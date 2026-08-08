@@ -80,11 +80,19 @@ ExportedPackages/
 .idea/
 .utmp/
 
-# SinfoniaOperatorのローカル設定 (トークンを含むためコミット禁止)
-sinfonia-operator.settings.json
+/SinfoniaOperator/sinfonia-operator.secrets.json
 
 # CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
 # ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/
+Docs/DiscordLog/
+
+
+# Python (scripts/)
+__pycache__/
+*.py[cod]
+
+# Claude Code のローカル設定（各自の環境依存のため共有しない）
+.claude/settings.local.json

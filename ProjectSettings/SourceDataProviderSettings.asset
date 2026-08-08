@@ -14,14 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Editor::KillChord.Editor.SourceDataProvider.SourceDataProviderSettings
   _sourceAssetMappings:
   - _addressableKey: StageTreeAsset
-  - _addressableKey: EnemyMissionKeyAsset
   - _addressableKey: OutGameSkillRepository
   - _addressableKey: SkillNodeDataRepo
   - _addressableKey: SkillNodeBindRepo
   - _addressableKey: AnimationCatalogAsset
   - _addressableKey: PortraitCatalogAsset
   - _addressableKey: BackgroundCatalogAsset
-  - _addressableKey: EnemyWaveDefinitionAsset
+  - _addressableKey: EnemyWaveDefinitionRepository
   - _addressableKey: PlayerConfig
   - _addressableKey: SkillInputProgressViewConfigAsset
   - _addressableKey: TestSkillData1
@@ -36,16 +35,20 @@ MonoBehaviour:
   - _addressableKey: TestSkillData2
   - _addressableKey: ScenarioSettingsAsset
   - _addressableKey: OwnedSkillRepositoryDebug
-  - _addressableKey: Enemy
   - _addressableKey: ExampleEncountMusicData
   - _addressableKey: BossAttackEntryRepo
   - _addressableKey: SkillBuildRepository
   - _addressableKey: ShellMusicData
-  - _addressableKey: BossCharacterData
   - _addressableKey: SkillBuildRepositoryDebug
   - _addressableKey: OutGameScreenRuleData
   - _addressableKey: SkillTreeTestInputData
   - _addressableKey: CameraConfig
+  - _addressableKey: EnemyMissionKeyRepository
+  - _addressableKey: CharacterDefinitionRepository
+  - _addressableKey: SkillInputProgressUIConfig
+  - _addressableKey: InitialSkillLoadout
+  - _addressableKey: MissionDefinitionRepository
+  - _addressableKey: MobileStickFlickInput
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
@@ -58,27 +61,27 @@ MonoBehaviour:
   - _collectionKey: SkillNode
     _sourceAssetAddressableKey: SkillNodeDataRepo
     _propertyPath: SkillNodes
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: SkillNodeBind
     _sourceAssetAddressableKey: SkillNodeBindRepo
     _propertyPath: SkillNodeBinds
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioAnimation
     _sourceAssetAddressableKey: AnimationCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioPortrait
     _sourceAssetAddressableKey: PortraitCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: ScenarioBackground
     _sourceAssetAddressableKey: BackgroundCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: Wave
-    _sourceAssetAddressableKey: EnemyWaveDefinitionAsset
-    _propertyPath: _waves
-    _assetCreationDirectory:
+    _sourceAssetAddressableKey: EnemyWaveDefinitionRepository
+    _propertyPath: _waveDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy
   - _collectionKey: StageBind
     _sourceAssetAddressableKey: StageTreeAsset
     _propertyPath: _bindAssets
@@ -91,10 +94,30 @@ MonoBehaviour:
     _sourceAssetAddressableKey: Player
     _propertyPath: _attackDifinitions
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
-  - _collectionKey: EnemyAttack
-    _sourceAssetAddressableKey: Enemy
-    _propertyPath: _attackDifinitions
-    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
+  - _collectionKey: EnemyMissionKey
+    _sourceAssetAddressableKey: EnemyMissionKeyRepository
+    _propertyPath: _missionKeyAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
+  - _collectionKey: Character
+    _sourceAssetAddressableKey: CharacterDefinitionRepository
+    _propertyPath: _characterAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/Character
+  - _collectionKey: TitleScreenRule
+    _sourceAssetAddressableKey: TitleScreenRuleData
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: OutGameScreenRule
+    _sourceAssetAddressableKey: OutGameScreenRuleData
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: SkillNodePhaseBind
+    _sourceAssetAddressableKey: SkillNodePhaseBindDataRepo
+    _propertyPath: PhaseBindData
+    _assetCreationDirectory: 
+  - _collectionKey: Mission
+    _sourceAssetAddressableKey: MissionDefinitionRepository
+    _propertyPath: _missionDefinitionAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset
@@ -121,6 +144,6 @@ MonoBehaviour:
     _addressableKey: BackgroundCatalogAsset
     _arrayPropertyPath: _entries
   - _category: Wave
-    _addressableKey: EnemyWaveDefinitionAsset
-    _arrayPropertyPath: _waves
+    _addressableKey: EnemyWaveDefinitionRepository
+    _arrayPropertyPath: _waveDefinitionAssets
   _isInitialized: 1

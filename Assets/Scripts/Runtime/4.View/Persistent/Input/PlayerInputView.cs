@@ -25,6 +25,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnCancelInput;
 
         public event Action<InputContext<float>> OnDodgeInput;
+        /// <summary> モバイル仮想スティックの方向付き回避入力を通知するイベント。 </summary>
+        public event Action<InputContext<Vector2>> OnMobileDodgeFlickInput;
         public event Action<InputContext<float>> OnAttackInput;
         public event Action<InputContext<Vector2>> OnMoveInput;
         public event Action<InputContext<Vector2>> OnLookMouseInput;
@@ -33,6 +35,10 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnLockOnInput;
         /// <summary> ロックオン対象切り替え入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnSelectInput;
+        /// <summary> プレイヤーをスタート地点へ戻す入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnResetPositionInput;
+        /// <summary> タイトルへ戻る入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnReturnToTitleInput;
         public event Action<InputContext<Vector2>> OnMobileLookInput;
 
         /// <summary> モバイルのロックオン対象切り替え入力を通知するイベント。 </summary>
@@ -130,6 +136,30 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnLockOnSelectInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     プレイヤーをスタート地点へ戻す入力を通知する。
+        /// </summary>
+        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
+        public void OnResetPosition(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.ResetPosition, context, time);
+            OnResetPositionInput?.Invoke(inputContext);
+        }
+
+        /// <summary>
+        ///     タイトルへ戻る入力を通知する。
+        /// </summary>
+        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
+        public void OnReturnToTitle(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.ReturnToTitle, context, time);
+            OnReturnToTitleInput?.Invoke(inputContext);
+        }
+
         public void OnScenarioAdvance(InputAction.CallbackContext context)
         {
             float time = _timestampProvider.GetCurrentTimestamp();
@@ -219,6 +249,21 @@ namespace KillChord.Runtime.View.Persistent.Input
         }
 
         /// <summary>
+        ///     モバイル仮想スティックの方向付き回避入力を通知する。
+        /// </summary>
+        /// <param name="direction"> 仮想スティック上のフリック方向。 </param>
+        public void OnMobileDodgeFlick(in Vector2 direction)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<Vector2> inputContext = new InputContext<Vector2>(
+                InputActionKind.Dodge,
+                direction,
+                InputActionPhase.Started,
+                time);
+            OnMobileDodgeFlickInput?.Invoke(inputContext);
+        }
+
+        /// <summary>
         ///     モバイルのロックオン対象切り替え入力を通知する。
         /// </summary>
         /// <param name="direction"> 左右方向を表す入力値。 </param>
@@ -236,6 +281,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string LOOK_ACTION_NAME = "Look";
         private const string LOCK_ON_ACTION_NAME = "LockOn";
         private const string LOCK_ON_SELECT_ACTION_NAME = "LockOnSelect";
+        private const string RESET_POSITION_ACTION_NAME = "ResetPosition";
+        private const string RETURN_TO_TITLE_ACTION_NAME = "ReturnToTitle";
         private const string SCENARIO_ADVANCE_ACTION_NAME = "Advance";
         private const string SCENARIO_FAST_FORWARD_ACTION_NAME = "FastForward";
         private const string SCENARIO_PAUSE_ACTION_NAME = "Pause";
@@ -257,6 +304,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _lookAction;
         private InputAction _lockOnAction;
         private InputAction _lockOnSelectAction;
+        private InputAction _resetPositionAction;
+        private InputAction _returnToTitleAction;
 
         private InputAction _scenarioAdvanceAction;
         private InputAction _scenarioFastForwardAction;
@@ -295,6 +344,8 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_lookAction, OnLook);
             RegisterAction(_lockOnAction, OnLockOn);
             RegisterAction(_lockOnSelectAction, OnLockOnSelect);
+            RegisterAction(_resetPositionAction, OnResetPosition);
+            RegisterAction(_returnToTitleAction, OnReturnToTitle);
             RegisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             RegisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             RegisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -314,6 +365,8 @@ namespace KillChord.Runtime.View.Persistent.Input
             UnregisterAction(_lookAction, OnLook);
             UnregisterAction(_lockOnAction, OnLockOn);
             UnregisterAction(_lockOnSelectAction, OnLockOnSelect);
+            UnregisterAction(_resetPositionAction, OnResetPosition);
+            UnregisterAction(_returnToTitleAction, OnReturnToTitle);
             UnregisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             UnregisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             UnregisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -338,6 +391,8 @@ namespace KillChord.Runtime.View.Persistent.Input
             _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
             _lockOnAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_ACTION_NAME}", true);
             _lockOnSelectAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_SELECT_ACTION_NAME}", true);
+            _resetPositionAction = actions.FindAction($"{InputMapNames.InGame}/{RESET_POSITION_ACTION_NAME}", true);
+            _returnToTitleAction = actions.FindAction($"{InputMapNames.InGame}/{RETURN_TO_TITLE_ACTION_NAME}", true);
             _scenarioAdvanceAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_ADVANCE_ACTION_NAME}", true);
             _scenarioFastForwardAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_FAST_FORWARD_ACTION_NAME}", true);
             _scenarioPauseAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_PAUSE_ACTION_NAME}", true);

@@ -1,14 +1,14 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Persistent;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Battle
@@ -27,6 +27,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="skillController"></param>
         /// <param name="targetingSystem"></param>
         /// <param name="musicSyncService"></param>
+        /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
+        /// <param name="playerTransform"> 判定の原点となるプレイヤーTransformです。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
@@ -35,9 +37,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             AttackIntervalEvaluator attackIntervalEvaluator,
             IMusicSyncService musicSyncService,
             MusicSyncState musicSyncState,
+            TargetAreaQuery targetAreaQuery,
+            Transform playerTransform,
             float attackRotationSpeed,
-            float attackCooldown,
-            int baseDamage
+            float attackCooldown
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -46,15 +49,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _skillController = skillController;
             _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
+            _targetAreaQuery = targetAreaQuery;
+            _playerTransform = playerTransform;
             AttackRotationSpeed = attackRotationSpeed;
-            _baseDamage = baseDamage;
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
             _attackCooldownRemainig = 0d;
         }
 
-        /// <summary> プレイヤーが攻撃を実行したときに発火します。 </summary>
+        /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
+
+        /// <summary> プレイヤーが指定拍子の攻撃を実行したときに発火します。 </summary>
+        public event Action<BeatType> OnAttackBeatExecuted;
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
@@ -62,13 +69,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> 攻撃クールダウン中かどうかを表すプロパティ。 </summary>
         public bool IsAttackCooldown => _attackCooldownRemainig > 0f;
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> ロックオン対象が存在する場合はtrue。 </summary>
         public bool HasCurrentLockOnTarget { get; private set; }
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> ロックオン対象の座標。対象がない場合は <see cref="Vector3.zero"/>。 </summary>
         public Vector3 CurrentLockOnTargetPosition { get; private set; }
 
-        /// <summary> 現在のロックオン対象。ロックオンしていない場合はnull。 </summary>
+        /// <summary> 攻撃時に対象へ向き直る回転速度。 </summary>
         public float AttackRotationSpeed { get; }
 
         /// <summary>
@@ -81,62 +88,57 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             resultBeatType = 0;
             if (_targetingSystem == null)
             {
-                Debug.LogError("TargetingSystemが設定されていません。");
+                Debug.LogError($"[{nameof(PlayerAttackController)}] TargetingSystemが設定されていません。");
                 return false;
             }
-
-            bool hasTarget = TryUpdateCurrentTarget();
 
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType();
 
+            bool hasTarget = TryUpdateCurrentTarget();
             _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
-            if (attackDefinition == null) return false;
+            if (attackDefinition == null)
+            {
+                return false;
+            }
 
             StartAttackInterval();
             StartAttackCooldown();
-
-            if (!hasTarget)
-            {
-                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
-                resultBeatType = (int)beatType;
-                return true;
-            }
-
-            CharacterEntity targetEntity = _battleState.Target as CharacterEntity;
-            if (targetEntity == null)
-            {
-                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
-                resultBeatType = (int)beatType;
-                return true;
-            }
-
-            BuffContext buffContext = new BuffContext(_battleState.Attacker, _battleState.Target as CharacterEntity);
-            _ = _battleState.Attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_Before);
-            // TODO 射線判定などを追加して、攻撃がヒットするかどうかを判定する必要がある。
-            AttackResult result = AttackExecutor.Execute(attackDefinition,
-                _battleState.Attacker,
-                _battleState.Target,
-                false,
-                _battleState.Attacker.BaseDamage
-            );
-
-            BuffContext buffContextPost = new BuffContext(_battleState.Attacker.BuffSystem.Execute(new BuffContext(buffContext.Attacker, buffContext.Target, result), BuffExecuteTiming.Attack_Logic_After));
-
-
-            // TODO 攻撃対象を特定するための、一時的な手段としてEntityのHashCodeを使う
-            Debug.Log($"[PlayerAttackController]攻撃対象のId：{targetEntity.Id}");
-            EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(buffContextPost.AttackResult.FinalDamage.Value, buffContextPost.AttackResult.IsCritical,
-                targetEntity.Id));
-
-            buffContext.Attacker.SetDamage(buffContextPost.AttackResult.FinalDamage);
-            _presenter.Push(buffContextPost.AttackResult);
-            OnAttackExecuted?.Invoke(attackDefinition.AttackName, true);
-
+            OnAttackBeatExecuted?.Invoke(beatType);
             resultBeatType = (int)beatType;
+
+            // 前回の多段ヒットが残っている場合は破棄する。ヒット間隔が攻撃硬直より長い設定になっている。
+            DiscardPendingHits(attackDefinition);
+
+            // ロックオン対象がいない場合、仕様上は進行方向へ攻撃が発生するが敵にはHitしない。
+            if (!hasTarget || !HasCurrentLockOnTarget)
+            {
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
+                return true;
+            }
+
+            if (!TryResolveHitTargets(attackDefinition))
+            {
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
+                return true;
+            }
+
+            bool hasHit = ApplyHit(attackDefinition);
+
+            // 2発目以降は毎フレーム更新で消化する。
+            int remainingHits = attackDefinition.HitCount - 1;
+            if (remainingHits > 0)
+            {
+                _pendingAttackDefinition = attackDefinition;
+                _pendingHitCount = remainingHits;
+                _pendingHitTimer = attackDefinition.HitInterval;
+            }
+
+            OnAttackExecuted?.Invoke(attackDefinition.AttackName, hasHit);
+
             return true;
         }
 
@@ -154,7 +156,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _attackCooldownRemainig = _attackCooldown;
         }
 
-        /// <summary> 毎フレームクールダウンを減算する。 </summary>
+        /// <summary> 毎フレームクールダウンの減算と多段ヒットの消化を行う。 </summary>
         public void UpdateAttackCooldown(double deltaTime)
         {
             if (_attackCooldownRemainig > 0f)
@@ -165,7 +167,176 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                     _attackCooldownRemainig = 0f;
                 }
             }
+
+            UpdatePendingHits(deltaTime);
         }
+
+        /// <summary>
+        ///     保留中の多段ヒットの状態を初期化する。
+        ///     ゲームプレイ停止時にも呼び、残りヒットを次のプレイへ持ち越さないようにする。
+        /// </summary>
+        public void ClearPendingHits()
+        {
+            _pendingHitCount = 0;
+            _pendingHitTimer = 0d;
+            _pendingAttackDefinition = null;
+        }
+
+        /// <summary>
+        ///     保留中の多段ヒットを消化する。
+        /// </summary>
+        /// <param name="deltaTime"> 前フレームからの経過秒数。 </param>
+        private void UpdatePendingHits(double deltaTime)
+        {
+            if (_pendingHitCount <= 0)
+            {
+                return;
+            }
+
+            _pendingHitTimer -= deltaTime;
+            if (_pendingHitTimer > 0d)
+            {
+                return;
+            }
+
+            AttackDefinition definition = _pendingAttackDefinition;
+            _pendingHitCount--;
+            _pendingHitTimer += definition.HitInterval;
+
+            ApplyHit(definition);
+
+            if (_pendingHitCount <= 0)
+            {
+                ClearPendingHits();
+            }
+        }
+
+        /// <summary>
+        ///     攻撃範囲内の対象を解決し、命中対象の一覧を作る。
+        /// </summary>
+        /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <returns> 命中対象が1体以上いる場合はtrue。 </returns>
+        private bool TryResolveHitTargets(AttackDefinition attackDefinition)
+        {
+            _hitTargets.Clear();
+
+            if (_targetAreaQuery == null || _playerTransform == null)
+            {
+                Debug.LogError($"[{nameof(PlayerAttackController)}] 範囲クエリまたはプレイヤーTransformが設定されていません。");
+                return false;
+            }
+
+            // 判定の中心軸はプレイヤーからロックオン対象へ向かう方向とする。
+            // 攻撃後に body が対象を向く仕様のため、transform.forward では判定時点で対象を向いていない。
+            Vector3 origin = _playerTransform.position;
+            Vector3 direction = CurrentLockOnTargetPosition - origin;
+
+            // 射程外にもダメージ減衰付きで命中させるため、探索距離は射程ではなく上限距離を使う。
+            // 減衰率が0でもヒット自体は成立させる。当たらないとプレイヤーには不具合に見えるため、
+            // ダメージ0の表示を出して「当たったが効いていない」ことを伝える。
+            _targetAreaQuery.QueryFanArea(
+                origin,
+                direction,
+                OUT_OF_RANGE_QUERY_DISTANCE,
+                attackDefinition.HalfAngleDegrees,
+                _hitTargets);
+
+            return _hitTargets.Count > 0;
+        }
+
+        /// <summary>
+        ///     命中対象へ1ヒット分のダメージを適用する。
+        ///     単体攻撃の場合は生存している最も近い1体のみを対象とする。
+        /// </summary>
+        /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <returns> 1体以上に命中した場合はtrue。 </returns>
+        private bool ApplyHit(AttackDefinition attackDefinition)
+        {
+            _hitDefenders.Clear();
+            _attackTargets.Clear();
+
+            // 一覧は水平距離の昇順。多段ヒットの途中で対象が倒れた場合は次に近い対象へ移る。
+            for (int i = 0; i < _hitTargets.Count; i++)
+            {
+                TargetAreaHit hit = _hitTargets[i];
+                if (!IsHitTargetAlive(hit))
+                {
+                    continue;
+                }
+
+                bool isOutOfRange = hit.Distance > attackDefinition.Range;
+                _hitDefenders.Add(hit.Entity);
+                _attackTargets.Add(new AttackTarget(hit.Entity, isOutOfRange));
+
+                if (!attackDefinition.IsMultiTarget)
+                {
+                    break;
+                }
+            }
+
+            if (_attackTargets.Count == 0)
+            {
+                return false;
+            }
+
+            AttackExecutor.Execute(
+                attackDefinition,
+                _battleState.Attacker,
+                _attackTargets,
+                false,
+                _battleState.Attacker.BaseDamage,
+                _hitResults);
+
+            for (int i = 0; i < _hitResults.Count; i++)
+            {
+                AttackResult result = _hitResults[i];
+                EventBus<EOnTakeDamage>.Raise(
+                    new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id, DamageAttackType.Normal));
+
+                _battleState.Attacker.SetDamage(result.FinalDamage);
+                _presenter.Push(result);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     命中候補が生存しているかを判定する。
+        /// </summary>
+        /// <param name="hit"> 命中候補。 </param>
+        /// <returns> 生存している場合はtrue。 </returns>
+        private bool IsHitTargetAlive(in TargetAreaHit hit)
+        {
+            return hit.Entity != null
+                && !hit.Entity.IsDead
+                && hit.Target != null
+                && hit.Target.IsAlive;
+        }
+
+        /// <summary>
+        ///     保留中の多段ヒットを破棄する。
+        /// </summary>
+        /// <param name="nextAttackDefinition"> これから実行する攻撃定義。 </param>
+        private void DiscardPendingHits(AttackDefinition nextAttackDefinition)
+        {
+            if (_pendingHitCount <= 0)
+            {
+                return;
+            }
+
+            Debug.LogWarning(
+                $"[{nameof(PlayerAttackController)}] 前回の多段ヒットが完了する前に次の攻撃が実行されました。" +
+                $"残り{_pendingHitCount}ヒットを破棄します。" +
+                $"攻撃定義 '{nextAttackDefinition.AttackName}' のヒット間隔が攻撃硬直より長くないか確認してください。");
+
+            ClearPendingHits();
+        }
+
+        /// <summary>
+        ///     射程外の対象まで探索する際の最大距離（メートル）。
+        ///     射程外にも減衰付きで命中させる仕様のため、実質的な上限として使う。
+        /// </summary>
+        private const float OUT_OF_RANGE_QUERY_DISTANCE = 1000f;
 
         /// <summary>
         ///     現在のターゲット状態を更新します。
@@ -173,7 +344,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <returns> 攻撃対象が存在する場合はtrueです。 </returns>
         private bool TryUpdateCurrentTarget()
         {
-            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity))
+            if (!_targetingSystem.TryGetCurrentTargetEntity(out CharacterEntity targetEntity)
+                && (!_targetingSystem.TryGetCurrentCandidateEntity(out targetEntity)
+                    || !_targetingSystem.TrySetCurrentTarget(targetEntity.Id)))
             {
                 _battleState.ClearTarget();
                 HasCurrentLockOnTarget = false;
@@ -197,6 +370,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             return true;
         }
 
+        /// <summary>
+        ///     拍子に対応する攻撃定義を取得する。
+        /// </summary>
+        /// <param name="beatType"> 拍子。 </param>
+        /// <returns> 攻撃定義。見つからない場合はnull。 </returns>
         private AttackDefinition GetDifinitionByBeatType(BeatType beatType)
         {
             try
@@ -216,8 +394,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
-        private readonly int _baseDamage;
+        private readonly TargetAreaQuery _targetAreaQuery;
+        private readonly Transform _playerTransform;
+        private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
+        private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
+        private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
+        private readonly List<AttackResult> _hitResults = new List<AttackResult>();
         private double _attackCooldownRemainig;
         private double _attackCooldown;
+        private AttackDefinition _pendingAttackDefinition;
+        private int _pendingHitCount;
+        private double _pendingHitTimer;
     }
 }

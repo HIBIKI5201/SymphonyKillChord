@@ -22,7 +22,11 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
                 buff.ExecuteAsync(context, _source.Token);
                 context = buff.ExecuteInstance(context);
-                _list.RemoveAt(i);
+
+                if (!buff.GetState().IsPersistent())
+                {
+                    _list.RemoveAt(i);
+                }
             }
 
             return context;
@@ -30,6 +34,11 @@ namespace KillChord.Runtime.Application.InGame.Buff
         public void Add(IBuff buff)
         {
             _list.Add(buff);
+        }
+
+        public void Remove(IBuff buff)
+        {
+            _list.Remove(buff);
         }
 
         public void Dispose()

@@ -280,7 +280,6 @@ namespace KillChord.Editor.SourceDataProvider
                 new("StageAsset", "StageTreeAsset", "_stageAssets"),
                 new("StageBind", "StageTreeAsset", "_bindAssets"),
                 new("PlayerAttack", "Player", "_attackDifinitions"),
-                new("EnemyAttack", "Enemy", "_attackDifinitions"),
                 new("Skill", "OutGameSkillRepository", "_skillDataAssets"),
                 new("SkillNode", "SkillNodeDataRepo", "SkillNodes"),
                 new("SkillNodeBind", "SkillNodeBindRepo", "SkillNodeBinds"),
@@ -288,7 +287,7 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioAnimation", "AnimationCatalogAsset", "_entries"),
                 new("ScenarioPortrait", "PortraitCatalogAsset", "_entries"),
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
-                new("Wave", "EnemyWaveDefinitionAsset", "_waves"),
+                new("Wave", "EnemyWaveDefinitionRepository", "_waveDefinitionAssets"),
                 new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
             };
         }
@@ -305,8 +304,8 @@ namespace KillChord.Editor.SourceDataProvider
                 "StageAsset" => "Assets/Level/Data/Master/OutGame/StageSelect/Stages",
                 "StageBind" => "Assets/Level/Data/Master/OutGame/StageSelect/StageBinds",
                 "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
-                "EnemyAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
+                "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
                 "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
                 _ => string.Empty,
             };

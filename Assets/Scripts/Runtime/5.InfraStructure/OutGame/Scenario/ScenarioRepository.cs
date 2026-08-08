@@ -30,7 +30,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string root = UnityEngine.Application.streamingAssetsPath;
             bool isUrlPath = root.Contains("://", StringComparison.Ordinal);
             string authoringPath = isUrlPath
-                ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
+                            ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
                 : Path.Combine(root, "ScenarioAuthoring", $"{id}.events.csv");
             string scenarioPath = isUrlPath
                 ? $"{root.TrimEnd('/')}/Scenario/{id}.csv"
@@ -245,7 +245,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         float start = ParseRequiredFloat(GetAuthoringField(fields, 2), "FadeStart", lineNo);
                         float end = ParseRequiredFloat(GetAuthoringField(fields, 3), "FadeEnd", lineNo);
                         float duration = ParseRequiredFloat(GetAuthoringField(fields, 4), "FadeDuration", lineNo);
-                        return new PlainEventDefinition(step, new FadeEvent(start, end, duration));
+                        // 対象は省略可能。省略時は画面全体（Screen）。
+                        FadeTarget target = ParseFadeTarget(GetAuthoringField(fields, 5), lineNo);
+                        return new PlainEventDefinition(step, new FadeEvent(start, end, duration, target));
                     }
                 case "portrait":
                     {
@@ -520,7 +522,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
                         float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", row.LineNo);
                         float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
-                        return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration));
+                        FadeTarget target = ParseFadeTarget(GetValue(values, headerIndex, "FadeTarget"), row.LineNo);
+                        return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration, target));
                     }
                 case "portrait":
                     {
@@ -805,6 +808,32 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             if (!Enum.TryParse(raw.Trim(), true, out LayerTarget target))
             {
                 throw new FormatException($"line {lineNo}: invalid {columnName} '{raw}'.");
+            }
+
+            return target;
+        }
+
+        /// <summary>
+        /// 文字列からフェード対象を解析する。省略時は画面全体（Screen）。
+        /// </summary>
+        private static FadeTarget ParseFadeTarget(string raw, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return FadeTarget.Screen;
+            }
+
+            string value = raw.Trim();
+            if (value.Equals("Screen", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Canvas", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                return FadeTarget.Screen;
+            }
+
+            if (!Enum.TryParse(value, true, out FadeTarget target))
+            {
+                throw new FormatException($"line {lineNo}: unknown FadeTarget '{raw}'.");
             }
 
             return target;

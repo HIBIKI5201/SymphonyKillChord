@@ -96,9 +96,22 @@ namespace KillChord.Runtime.View
         }
 
         /// <summary>
+        ///     再生中のワンショットアニメーションを途中終了し、ロコモーションへ戻す。
+        /// </summary>
+        public void CancelOneShot()
+        {
+            OnCancelRequested?.Invoke();
+        }
+
+        /// <summary>
         ///     内部再生要求イベントです。
         /// </summary>
         internal event Action<CharacterAnimationRequest> OnRequested;
+
+        /// <summary>
+        ///     内部ワンショット取り消し要求イベントです。
+        /// </summary>
+        internal event Action OnCancelRequested;
 
         /// <summary>
         ///     回避アニメーション再生終了を通知する。
