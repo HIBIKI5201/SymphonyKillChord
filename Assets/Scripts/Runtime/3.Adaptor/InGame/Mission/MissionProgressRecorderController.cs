@@ -107,7 +107,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _skillController = null;
             _playerController = null;
             _targetSystemController = null;
-            _currentCombo = 0;
         }
 
         /// <summary>
@@ -126,7 +125,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private PlayerController _playerController;
         private TargetSystemController _targetSystemController;
         private ComboHudPresenter _comboHudPresenter;
-        private int _currentCombo;
 
         /// <summary>
         ///     回避の実行をミッションへ通知します。敵の攻撃を実際に避けられたかどうかは問いません。
@@ -184,8 +182,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
 
             _missionProgress.RecordDamageTaken(-amountChanged);
-            _currentCombo = 0;
-            _missionProgress.RecordComboCount(_currentCombo);
+            _missionProgress.ResetCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
 
@@ -201,15 +198,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             if (!hasHit)
             {
-                _currentCombo = 0;
-                _missionProgress.RecordComboCount(_currentCombo);
+                _missionProgress.ResetCombo();
                 _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
                 return;
             }
-
-            _currentCombo++;
-            _missionProgress.RecordMaxCombo(_currentCombo);
-            _missionProgress.RecordComboCount(_currentCombo);
+            _missionProgress.IncrementCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
 

@@ -92,26 +92,24 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _actionRecord.RecordAction(actionKind);
         }
 
-        /// <summary>
-        ///     現在コンボ数から最大コンボを更新します。
+        /// <summary> 
+        ///     現在コンボ数を1増やし、最大コンボを必要に応じて更新します。 
         /// </summary>
-        /// <param name="combo"> 現在コンボ数です。 </param>
-        public void RecordMaxCombo(int combo)
+        public void IncrementCombo()
         {
-            if (combo <= _maxCombo.Value)
+            _comboCount = new ComboCount(_comboCount.Value + 1);
+            if (_comboCount.Value > _maxCombo.Value)
             {
-                return;
+                _maxCombo = new MissionMaxCombo(_comboCount.Value);
             }
-
-            _maxCombo = new MissionMaxCombo(combo);
         }
-        /// <summary>
-        ///    現在コンボ数を記録します。
+
+        /// <summary> 
+        ///     現在コンボ数を0にリセットします。 
         /// </summary>
-        /// <param name="combo"></param>
-        public void RecordComboCount(int combo)
+        public void ResetCombo()
         {
-            _comboCount = new ComboCount(combo);
+            _comboCount = new ComboCount(0);
         }
         /// <summary>
         ///     ミッションを終了させます。
