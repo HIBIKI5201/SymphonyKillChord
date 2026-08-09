@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _enemyKillRecord = new EnemyKillRecord();
             _actionRecord = new MissionActionRecord();
             _damageTaken = new MissionDamageTaken(0f);
-            _maxCombo = new MissionCombo(0);
+            _maxCombo = new MissionMaxCombo(0);
             _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
             _endReason = MissionEndReason.None;
         }
@@ -33,8 +33,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <summary> 使用した武器種類数を取得します。 </summary>
         public MissionWeaponVariety WeaponVariety => new(_usedWeaponIds.Count);
         /// <summary> 最大コンボ数を取得します。 </summary>
-        public MissionCombo MaxCombo => _maxCombo;
-
+        public MissionMaxCombo MaxCombo => _maxCombo;
+        /// <summary> コンボ数を取得します。 </summary>
+        public ComboCount ComboCount => _comboCount;
         /// <summary> プレイヤーが死亡したかどうかを取得します。 </summary>
         public bool IsPlayerDead => _isPlayerDead;
         /// <summary> ミッションが終了したかどうかを取得します。 </summary>
@@ -95,16 +96,23 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         ///     現在コンボ数から最大コンボを更新します。
         /// </summary>
         /// <param name="combo"> 現在コンボ数です。 </param>
-        public void RecordCombo(int combo)
+        public void RecordMaxCombo(int combo)
         {
             if (combo <= _maxCombo.Value)
             {
                 return;
             }
 
-            _maxCombo = new MissionCombo(combo);
+            _maxCombo = new MissionMaxCombo(combo);
         }
-
+        /// <summary>
+        ///    現在コンボ数を記録します。
+        /// </summary>
+        /// <param name="combo"></param>
+        public void RecordComboCount(int combo)
+        {
+            _comboCount = new ComboCount(combo);
+        }
         /// <summary>
         ///     ミッションを終了させます。
         /// </summary>
@@ -138,7 +146,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private readonly MissionActionRecord _actionRecord;
         private readonly HashSet<string> _usedWeaponIds;
         private MissionDamageTaken _damageTaken;
-        private MissionCombo _maxCombo;
+        private MissionMaxCombo _maxCombo;
+        private ComboCount _comboCount;
 
         /// <summary> プレイヤー死亡フラグ。 </summary>
         private bool _isPlayerDead;
