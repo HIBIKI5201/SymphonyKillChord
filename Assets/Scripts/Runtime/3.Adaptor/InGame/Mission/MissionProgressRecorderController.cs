@@ -19,14 +19,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         /// <param name="missionProgress"> 記録対象です。 </param>
         /// <param name="missionEventController"> ミッション行動を通知するControllerです。 </param>
+        /// <param name="comboHudPresenter"> コンボHUDへ現在のコンボ数を反映するPresenterです。 </param>
         public MissionProgressRecorderController(
             MissionProgress missionProgress,
-            MissionEventController missionEventController)
+            MissionEventController missionEventController,
+            ComboHudPresenter comboHudPresenter)
         {
             _missionProgress = missionProgress
                 ?? throw new ArgumentNullException(nameof(missionProgress));
             _missionEventController = missionEventController
                 ?? throw new ArgumentNullException(nameof(missionEventController));
+            _comboHudPresenter = comboHudPresenter
+                ?? throw new ArgumentNullException(nameof(comboHudPresenter));
         }
 
         /// <summary>
@@ -121,6 +125,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private SkillController _skillController;
         private PlayerController _playerController;
         private TargetSystemController _targetSystemController;
+        private ComboHudPresenter _comboHudPresenter;
         private int _currentCombo;
 
         /// <summary>
@@ -180,6 +185,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             _missionProgress.RecordDamageTaken(-amountChanged);
             _currentCombo = 0;
+            _missionProgress.RecordComboCount(_currentCombo);
+            _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
 
         /// <summary>
@@ -195,11 +202,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             if (!hasHit)
             {
                 _currentCombo = 0;
+                _missionProgress.RecordComboCount(_currentCombo);
+                _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
                 return;
             }
 
             _currentCombo++;
-            _missionProgress.RecordCombo(_currentCombo);
+            _missionProgress.RecordMaxCombo(_currentCombo);
+            _missionProgress.RecordComboCount(_currentCombo);
+            _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
 
         /// <summary>
