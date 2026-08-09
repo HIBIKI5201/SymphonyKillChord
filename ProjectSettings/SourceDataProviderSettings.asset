@@ -164,4 +164,19 @@ MonoBehaviour:
   - _category: BossAttackEntry
     _addressableKey: BossAttackEntryRepo
     _arrayPropertyPath: _attackEntries
+  - _category: EnemyMissionKey
+    _addressableKey: EnemyMissionKeyRepository
+    _arrayPropertyPath: _missionKeyAssets
+  - _category: Character
+    _addressableKey: CharacterDefinitionRepository
+    _arrayPropertyPath: _characterAssets
+  - _category: TitleScreenRule
+    _addressableKey: TitleScreenRuleData
+    _arrayPropertyPath: _entries
+  - _category: OutGameScreenRule
+    _addressableKey: OutGameScreenRuleData
+    _arrayPropertyPath: _entries
+  - _category: Mission
+    _addressableKey: MissionDefinitionRepository
+    _arrayPropertyPath: _missionDefinitionAssets
   _isInitialized: 1
