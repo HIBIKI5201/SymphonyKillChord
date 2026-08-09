@@ -10,8 +10,8 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///   コンボ数を表す値オブジェクトを作成する。
         /// </summary>
-        /// <param name="value"></param>
-        /// <exception cref="System.ArgumentOutOfRangeException"></exception>
+        /// <param name="value"> コンボ数です。 </param>
+        /// <exception cref="System.ArgumentOutOfRangeException"> コンボ数が負の値の場合にスローされます。 </exception>
         public ComboCount(int value)
         {
             if (value < 0)
@@ -25,8 +25,8 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///     値オブジェクトの等価性を比較します。
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="other"> 比較対象です。 </param>
+        /// <returns> 等しい場合はtrueです。 </returns>
         public bool Equals(ComboCount other)
         {
             return Value == other.Value;
@@ -34,8 +34,8 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///     値オブジェクトの等価性を比較します。
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj"> 比較対象です。 </param>
+        /// <returns> 等しい場合はtrueです。 </returns>
         public override bool Equals(object obj)
         {
             return obj is ComboCount other && Equals(other);
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///     値オブジェクトのハッシュコードを取得します。
         /// </summary>
-        /// <returns></returns>
+        /// <returns> ハッシュコードです。 </returns>
         public override int GetHashCode()
         {
             return Value.GetHashCode();
@@ -51,16 +51,16 @@ namespace KillChord.Runtime.Domain
         /// <summary>
         ///     値オブジェクトの等価性を比較します。
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left"> 左辺です。 </param>
+        /// <param name="right"> 右辺です。 </param>
+        /// <returns> 等しい場合はtrueです。 </returns>
         public static bool operator ==(ComboCount left, ComboCount right) => left.Equals(right);
         /// <summary>
         ///     値オブジェクトの非等価性を比較します。
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left"> 左辺です。 </param>
+        /// <param name="right"> 右辺です。 </param>
+        /// <returns> 等しくない場合はtrueです。 </returns>
         public static bool operator !=(ComboCount left, ComboCount right) => !left.Equals(right);
     }
 }
