@@ -15,15 +15,12 @@ namespace KillChord.Runtime.View.InGame.Combo
         /// </summary>
         /// <param name="viewModel"> 購読するコンボHUDのViewModelです。 </param>
         /// <param name="comboVisibleCount"> コンボ表示を開始する最小コンボ数です。 </param>
-        /// <exception cref="ArgumentNullException"> viewModelがnullの場合にスローされます。 </exception>
         public void Initialize(ComboHudViewModel viewModel, int comboVisibleCount)
         {
-            if (viewModel == null)
+            if(_comboText == null)
             {
-                throw new ArgumentNullException(nameof(viewModel));
+                Debug.LogError($"{_comboText}がNullです。");
             }
-
-            _comboVisibleCount = comboVisibleCount;
 
             _comboDisposable?.Dispose();
             _comboHudViewModel = viewModel;
@@ -33,19 +30,18 @@ namespace KillChord.Runtime.View.InGame.Combo
                   {
                       if (_comboText == null) { return; }
 
-                      if (comboCount < _comboVisibleCount)
+                      if (comboCount < comboVisibleCount)
                       {
                           _comboText.SetText(string.Empty);
                       }
                       else
                       {
-                          _comboText.SetText($"{comboCount}コンボ");
+                          _comboText.SetText("{0}コンボ", comboCount);
                       }
                   }).RegisterTo(destroyCancellationToken);
         }
 
         [SerializeField] private TextMeshProUGUI _comboText;
-        private int _comboVisibleCount;
         private ComboHudViewModel _comboHudViewModel;
         private IDisposable _comboDisposable;
     }
