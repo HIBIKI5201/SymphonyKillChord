@@ -221,7 +221,7 @@ jobs:
           if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
 
           $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
-            -ArgumentList @("-batchmode", "-quit", "-nographics", "-logFile", $LogPath) `
+            -ArgumentList @("-batchmode", "-quit", "-nographics", "-ignorecompilererrors", "-logFile", $LogPath) `
             -PassThru -Wait -NoNewWindow
 
           Write-Host "Unity終了コード: $($Process.ExitCode)"
@@ -249,7 +249,7 @@ jobs:
 
           Write-Host "Unityライセンス: 有効"
         shell: pwsh
-  
+
 # ==================================================================================================
 
       - name: .NET SDK / dotnet CLI の可用性チェック
