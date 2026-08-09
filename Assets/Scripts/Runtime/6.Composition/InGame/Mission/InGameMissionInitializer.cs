@@ -303,6 +303,15 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
                 return false;
             }
+            if(_comboHudView == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(_comboHudView)}が設定されていません。",
+                    this);
+
+                return false;
+            }
 
             return true;
         }
