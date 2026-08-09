@@ -1,6 +1,6 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
@@ -291,7 +291,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             {
                 AttackResult result = _hitResults[i];
                 EventBus<EOnTakeDamage>.Raise(
-                    new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id));
+                    new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id, DamageAttackType.Normal));
 
                 _battleState.Attacker.SetDamage(result.FinalDamage);
                 _presenter.Push(result);

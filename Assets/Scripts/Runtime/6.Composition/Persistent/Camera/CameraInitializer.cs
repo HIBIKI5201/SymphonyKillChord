@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateTypeEnum.Locator);
             return true;
         }
 
