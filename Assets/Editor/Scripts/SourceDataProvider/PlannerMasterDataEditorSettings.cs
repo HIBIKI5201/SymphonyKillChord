@@ -71,6 +71,7 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         "StageTreeAsset",
                         "EnemyWaveDefinitionRepository",
+                        "EnemyDefinitionRepository",
                         "EnemyMissionKeyRepository",
                         "MissionDefinitionRepository"
                     },
@@ -79,6 +80,7 @@ namespace KillChord.Editor.SourceDataProvider
                         "StageAsset",
                         "StageBind",
                         "Wave",
+                        "EnemyData",
                         "EnemyMissionKey",
                         "Mission"
                     }),
@@ -117,6 +119,7 @@ namespace KillChord.Editor.SourceDataProvider
                         "ExampleEnemyMoveData",
                         "ShellAttackData",
                         "BossAttackEntryRepo",
+                        "EnemyDefinitionRepository",
                         "CharacterDefinitionRepository",
                         "ExampleBattleMusicData",
                         "ExampleEncountMusicData",
@@ -125,6 +128,7 @@ namespace KillChord.Editor.SourceDataProvider
                     new List<string>
                     {
                         "BossAttackEntry",
+                        "EnemyData",
                         "Character"
                     }),
                 new(
