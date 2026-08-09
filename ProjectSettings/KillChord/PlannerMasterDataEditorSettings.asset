@@ -17,12 +17,14 @@ MonoBehaviour:
     _sourceAssetAddressableKeys:
     - StageTreeAsset
     - EnemyWaveDefinitionRepository
+    - EnemyDefinitionRepository
     - EnemyMissionKeyRepository
     - MissionDefinitionRepository
     _collectionCategories:
     - StageAsset
     - StageBind
     - Wave
+    - EnemyData
     - EnemyMissionKey
     - Mission
   - _displayName: Player
@@ -48,12 +50,14 @@ MonoBehaviour:
     - ExampleEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
+    - EnemyDefinitionRepository
     - CharacterDefinitionRepository
     - ExampleBattleMusicData
     - ExampleEncountMusicData
     - ShellMusicData
     _collectionCategories:
     - BossAttackEntry
+    - EnemyData
     - Character
   - _displayName: Skill Tree
     _sourceAssetAddressableKeys:
