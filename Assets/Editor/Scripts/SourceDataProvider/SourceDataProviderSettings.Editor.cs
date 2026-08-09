@@ -35,7 +35,14 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary> 互換維持用の旧設定一覧です。 </summary>
-        public IReadOnlyList<RepositoryMapping> RepositoryMappings => _repositoryMappings;
+        public IReadOnlyList<RepositoryMapping> RepositoryMappings
+        {
+            get
+            {
+                EnsureInitialized();
+                return _repositoryMappings;
+            }
+        }
 
         /// <summary>
         ///     指定CollectionKeyがcollection設定に登録済みか判定します。
@@ -137,12 +144,11 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
-            SynchronizeSourceAssetsFromAddressables();
+            if (SynchronizeSourceAssetsFromAddressables())
+            {
+                Save(true);
+            }
         }
-
-        private const string ENEMY_DATA_COLLECTION_KEY = "EnemyData";
-        private const string ENEMY_DEFINITION_REPOSITORY_KEY = "EnemyDefinitionRepository";
-        private const string ENEMY_DATA_PROPERTY_PATH = "_enemyDefinitionAssets";
 
         [SerializeField, Tooltip("Addressable ScriptableObject設定一覧です。")]
         private List<SourceAssetMapping> _sourceAssetMappings = new();
@@ -151,7 +157,7 @@ namespace KillChord.Editor.SourceDataProvider
         private List<SourceCollectionMapping> _sourceCollectionMappings = new();
 
         [SerializeField, HideInInspector]
-        private List<RepositoryMapping> _repositoryMappings = CreateDefaultLegacyMappings();
+        private List<RepositoryMapping> _repositoryMappings = CreateDefaultMappings();
 
         [SerializeField, HideInInspector]
         private bool _isInitialized;
@@ -165,6 +171,7 @@ namespace KillChord.Editor.SourceDataProvider
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
+            bool changed = false;
             if (!_isInitialized)
             {
                 if (_sourceAssetMappings.Count == 0)
@@ -178,6 +185,7 @@ namespace KillChord.Editor.SourceDataProvider
                         }
 
                         AppendSourceAssetMapping(legacy.AddressableKey);
+                        changed = true;
                     }
                 }
 
@@ -198,54 +206,59 @@ namespace KillChord.Editor.SourceDataProvider
                             legacy.AddressableKey,
                             legacy.ArrayPropertyPath,
                             GetDefaultCreationDirectory(legacy.CollectionKey)));
+                        changed = true;
                     }
                 }
 
                 _isInitialized = true;
-                SynchronizeSourceAssetsFromAddressables();
+                changed = SynchronizeSourceAssetsFromAddressables() || changed;
+                changed = true;
             }
 
-            if (EnsureEnemyDataMapping())
+            changed = EnsureDefaultMappings() || changed;
+            if (changed)
             {
-                // 新しい既定Collectionは、既存設定が初期化済みでも不足分だけ永続化する。
+                // 新しい既定設定は、既存設定が初期化済みでも不足分だけ永続化する。
                 Save(true);
             }
         }
 
         /// <summary>
-        ///     バージョン更新で追加されたEnemyData設定を不足時だけ補完します。
+        ///     バージョン更新で追加された全ての既定設定を不足時だけ補完します。
         /// </summary>
         /// <returns> 設定を追加した場合はtrueです。 </returns>
-        private bool EnsureEnemyDataMapping()
+        private bool EnsureDefaultMappings()
         {
             _sourceAssetMappings ??= new List<SourceAssetMapping>();
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
             bool changed = false;
-            if (!ContainsRepositoryMapping(ENEMY_DATA_COLLECTION_KEY))
+            List<RepositoryMapping> defaults = CreateDefaultMappings();
+            for (int i = 0; i < defaults.Count; i++)
             {
-                _repositoryMappings.Add(new RepositoryMapping(
-                    ENEMY_DATA_COLLECTION_KEY,
-                    ENEMY_DEFINITION_REPOSITORY_KEY,
-                    ENEMY_DATA_PROPERTY_PATH));
-                changed = true;
-            }
+                RepositoryMapping mapping = defaults[i];
+                if (!ContainsRepositoryMapping(mapping.CollectionKey))
+                {
+                    _repositoryMappings.Add(mapping);
+                    changed = true;
+                }
 
-            if (!ContainsSourceAssetAddress(ENEMY_DEFINITION_REPOSITORY_KEY))
-            {
-                _sourceAssetMappings.Add(new SourceAssetMapping(ENEMY_DEFINITION_REPOSITORY_KEY));
-                changed = true;
-            }
+                if (!ContainsSourceAssetAddress(mapping.AddressableKey))
+                {
+                    _sourceAssetMappings.Add(new SourceAssetMapping(mapping.AddressableKey));
+                    changed = true;
+                }
 
-            if (!ContainsCollectionMapping(ENEMY_DATA_COLLECTION_KEY))
-            {
-                _sourceCollectionMappings.Add(new SourceCollectionMapping(
-                    ENEMY_DATA_COLLECTION_KEY,
-                    ENEMY_DEFINITION_REPOSITORY_KEY,
-                    ENEMY_DATA_PROPERTY_PATH,
-                    GetDefaultCreationDirectory(ENEMY_DATA_COLLECTION_KEY)));
-                changed = true;
+                if (!ContainsCollectionMapping(mapping.CollectionKey))
+                {
+                    _sourceCollectionMappings.Add(new SourceCollectionMapping(
+                        mapping.CollectionKey,
+                        mapping.AddressableKey,
+                        mapping.ArrayPropertyPath,
+                        GetDefaultCreationDirectory(mapping.CollectionKey)));
+                    changed = true;
+                }
             }
 
             return changed;
@@ -254,14 +267,16 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     Addressablesへ登録済みのScriptableObjectをSourceAsset一覧へ補完します。
         /// </summary>
-        private void SynchronizeSourceAssetsFromAddressables()
+        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
+        private bool SynchronizeSourceAssetsFromAddressables()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
-                return;
+                return false;
             }
 
+            bool changed = false;
             for (int i = 0; i < settings.groups.Count; i++)
             {
                 AddressableAssetGroup group = settings.groups[i];
@@ -283,23 +298,27 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
-                    AppendSourceAssetMapping(entry.address);
+                    changed = AppendSourceAssetMapping(entry.address) || changed;
                 }
             }
+
+            return changed;
         }
 
         /// <summary>
         ///     SourceAsset設定を未登録の場合のみ追加します。
         /// </summary>
         /// <param name="addressableKey"> 追加対象のAddressableキーです。 </param>
-        private void AppendSourceAssetMapping(string addressableKey)
+        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
+        private bool AppendSourceAssetMapping(string addressableKey)
         {
             if (string.IsNullOrWhiteSpace(addressableKey) || ContainsSourceAssetAddress(addressableKey))
             {
-                return;
+                return false;
             }
 
             _sourceAssetMappings.Add(new SourceAssetMapping(addressableKey));
+            return true;
         }
 
         /// <summary>
@@ -363,10 +382,10 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     旧形式の初期設定を生成します。
+        ///     全データに共通して適用する既定マッピングを生成します。
         /// </summary>
         /// <returns> 初期設定です。 </returns>
-        private static List<RepositoryMapping> CreateDefaultLegacyMappings()
+        private static List<RepositoryMapping> CreateDefaultMappings()
         {
             return new List<RepositoryMapping>
             {
@@ -381,11 +400,13 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioPortrait", "PortraitCatalogAsset", "_entries"),
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
                 new("Wave", "EnemyWaveDefinitionRepository", "_waveDefinitionAssets"),
-                new(
-                    ENEMY_DATA_COLLECTION_KEY,
-                    ENEMY_DEFINITION_REPOSITORY_KEY,
-                    ENEMY_DATA_PROPERTY_PATH),
-                new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
+                new("EnemyData", "EnemyDefinitionRepository", "_enemyDefinitionAssets"),
+                new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries"),
+                new("EnemyMissionKey", "EnemyMissionKeyRepository", "_missionKeyAssets"),
+                new("Character", "CharacterDefinitionRepository", "_characterAssets"),
+                new("TitleScreenRule", "TitleScreenRuleData", "_entries"),
+                new("OutGameScreenRule", "OutGameScreenRuleData", "_entries"),
+                new("Mission", "MissionDefinitionRepository", "_missionDefinitionAssets")
             };
         }
 
@@ -403,8 +424,11 @@ namespace KillChord.Editor.SourceDataProvider
                 "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
                 "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
-                ENEMY_DATA_COLLECTION_KEY => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
+                "EnemyData" => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
                 "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
+                "EnemyMissionKey" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",
+                "Character" => "Assets/Level/Data/Master/Character",
+                "Mission" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",
                 _ => string.Empty,
             };
         }
