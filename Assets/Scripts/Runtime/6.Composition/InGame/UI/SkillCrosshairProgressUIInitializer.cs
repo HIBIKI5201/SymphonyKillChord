@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _viewSetting = _uiConfig.Create();
             _controller = new SkillCrosshairProgressController();
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
             return true;
         }
