@@ -53,12 +53,12 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <inheritdoc />
         public void SetVisible(bool visible)
         {
-            if (gameObject.activeSelf != visible)
+            if (_stepRoot.gameObject.activeSelf != visible)
             {
-                gameObject.SetActive(visible);
+                _stepRoot.gameObject.SetActive(visible);
             }
         }
-        void Update()
+        private void Update()
         {
             OnUpdate?.Invoke();
         }
