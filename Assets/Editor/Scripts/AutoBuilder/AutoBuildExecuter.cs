@@ -47,6 +47,7 @@ namespace KillChord.Editor.AutoBuilder
             /// <returns> 保存されているセッションです。 </returns>
             public static BuildSession LoadSession()
             {
+                LogDebug("セッションを読み込み開始");
                 string json = SessionState.GetString(SESSION_KEY, string.Empty);
 
                 if (string.IsNullOrEmpty(json))
@@ -63,6 +64,7 @@ namespace KillChord.Editor.AutoBuilder
             /// <param name="session"> 保存するセッションです。 </param>
             public static void SaveSession(BuildSession session)
             {
+                LogDebug("セッションを保存開始");
                 string json = JsonUtility.ToJson(session);
 
                 SessionState.SetString(SESSION_KEY, json);
@@ -73,6 +75,7 @@ namespace KillChord.Editor.AutoBuilder
             /// </summary>
             public static void ClearSession()
             {
+                LogDebug("セッションの消去開始");
                 SessionState.EraseString(SESSION_KEY);
             }
 
@@ -126,6 +129,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
         public static void Run(string path, BuildProfile[] profiles, bool isBatchMode = false)
         {
+            LogDebug("自動ビルド処理を開始");
             if (profiles == null || profiles.Length == 0)
             {
                 Debug.LogError("Build Profiles are not set.");
@@ -176,6 +180,7 @@ namespace KillChord.Editor.AutoBuilder
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            LogDebug("初期化処理（ドメインリロード後）を開始");
             Application.logMessageReceived += HandleLogMessage;
             ReplayPendingLogIfAny();
 
@@ -191,6 +196,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="type"> ログ種別です。 </param>
         private static void HandleLogMessage(string message, string stackTrace, LogType type)
         {
+            LogDebug("ログメッセージ捕捉処理を開始");
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
             {
                 return;
@@ -212,6 +218,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="stackTrace"> スタックトレースです。 </param>
         private static void AppendCapturedLog(LogType type, string message, string stackTrace)
         {
+            LogDebug("エラーログを保存セッションへ追記開始");
             PendingLogReplay replay = LoadPendingLogReplay();
             CapturedLogEntry[] entries = replay.Entries ?? Array.Empty<CapturedLogEntry>();
 
@@ -239,6 +246,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="hasFailure"> いずれかのビルドが失敗した場合はtrueです。 </param>
         private static void SetPendingLogFailure(bool hasFailure)
         {
+            LogDebug("再出力用ログへ失敗状態を記録開始");
             PendingLogReplay replay = LoadPendingLogReplay();
             if (replay.Entries == null || replay.Entries.Length == 0)
             {
@@ -254,6 +262,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static void ReplayPendingLogIfAny()
         {
+            LogDebug("ドメインリロードで消失したログの再出力処理を開始");
             string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
             if (string.IsNullOrEmpty(json))
             {
@@ -293,6 +302,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 保存されている再出力用ログです。未保存の場合は空です。 </returns>
         private static PendingLogReplay LoadPendingLogReplay()
         {
+            LogDebug("再出力用ログの読み込み開始");
             string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
             return string.IsNullOrEmpty(json)
                 ? new PendingLogReplay { Entries = Array.Empty<CapturedLogEntry>() }
@@ -305,6 +315,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="replay"> 保存する再出力用ログです。 </param>
         private static void SavePendingLogReplay(PendingLogReplay replay)
         {
+            LogDebug("再出力用ログの保存開始");
             SessionState.SetString(PENDING_LOG_KEY, JsonUtility.ToJson(replay));
         }
 
@@ -313,6 +324,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static async void Resume()
         {
+            LogDebug("自動ビルドの再開準備（遅延実行）を開始");
             EditorApplication.delayCall -= Resume;
 
             await Awaitable.NextFrameAsync();
@@ -334,6 +346,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static void ResumeBuild()
         {
+            LogDebug("次のビルドの予約処理を開始");
             EditorApplication.delayCall -= ResumeBuild;
 
             BuildSession session = BuildSession.LoadSession();
@@ -359,9 +372,11 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static async void ExecuteBuild()
         {
+            LogDebug("現在のビルドプロファイル実行準備を開始");
             EditorApplication.delayCall -= ExecuteBuild;
 
             await WaitForEditorReady();
+            LogDebug("エディタの準備完了。ビルド処理を開始します");
 
             BuildSession session = BuildSession.LoadSession();
 
@@ -388,6 +403,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="session"> 実行中の自動ビルドセッションです。 </param>
         private static async ValueTask ExecuteBuildAsync(BuildSession session)
         {
+            LogDebug("ビルドプロファイルの非同期ビルド処理を開始");
             try
             {
                 string guid = session.ProfileGuids[session.CurrentIndex];
@@ -412,6 +428,7 @@ namespace KillChord.Editor.AutoBuilder
                 BuildProfile.SetActiveBuildProfile(profile);
 
                 await WaitForEditorReady();
+                LogDebug($"プロファイル切替後のエディタ準備完了: {profile.name}");
 
                 string[] scenes = profile.GetScenesForBuild()
                     .Where(s => s.enabled)
@@ -455,6 +472,7 @@ namespace KillChord.Editor.AutoBuilder
                 AssetDatabase.Refresh(ImportAssetOptions.DontDownloadFromCacheServer);
 
                 await WaitForEditorReady();
+                LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
 
                 int executePlayerBuildRetryCount = 0;
                 const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
@@ -464,6 +482,7 @@ namespace KillChord.Editor.AutoBuilder
 
                 void ExecutePlayerBuild()
                 {
+                    LogDebug("実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始");
                     EditorApplication.delayCall -= ExecutePlayerBuild;
 
                     if (EditorApplication.isCompiling || EditorApplication.isUpdating)
@@ -514,6 +533,7 @@ namespace KillChord.Editor.AutoBuilder
 
                 void NextSession(bool hasFailure = false)
                 {
+                    LogDebug("次のセッションへの移行処理を開始");
                     session.CurrentIndex++;
                     session.HasFailure |= hasFailure;
 
@@ -525,6 +545,7 @@ namespace KillChord.Editor.AutoBuilder
             }
             catch (TimeoutException timeoutException)
             {
+                LogDebug($"タイムアウトが発生しました: {timeoutException.Message}");
                 Debug.LogError(
                     $"[{nameof(AutoBuildExecuter)}] EditorReady timeout - Skipping profile: {session.ProfileGuids[session.CurrentIndex]}. {timeoutException.Message}");
                 
@@ -539,6 +560,7 @@ namespace KillChord.Editor.AutoBuilder
             }
             catch (Exception exception)
             {
+                LogDebug($"例外が発生しました: {exception.Message}");
                 Debug.LogException(exception);
                 
                 // 予期しない例外はプロファイルをスキップして次へ
@@ -559,6 +581,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <exception cref="TimeoutException">指定時間内に準備ができなかった場合</exception>
         private static async ValueTask WaitForEditorReady(int timeoutSeconds = 120)
         {
+            LogDebug("エディタの準備完了（コンパイル・アセット更新終了）待機を開始");
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
             await SymphonyTask.WaitUntil(() =>
@@ -592,6 +615,7 @@ namespace KillChord.Editor.AutoBuilder
             });
 
             stopwatch.Stop();
+            LogDebug($"エディタの準備完了待機が終了。経過時間: {stopwatch.Elapsed.TotalSeconds:F2}秒");
 
             // 念のためさらに1フレーム待つ。
             await Awaitable.NextFrameAsync();
@@ -604,6 +628,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 出力ファイルの拡張子です。 </returns>
         public static string GetExtension(BuildTarget target)
         {
+            LogDebug("ビルドターゲットに対応する拡張子の取得処理を開始");
             return target switch
             {
                 BuildTarget.StandaloneWindows => ".exe",
@@ -620,6 +645,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         public static BuildPlayerWithProfileOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
         {
+            LogDebug("BuildPlayerWithProfileOptionsの生成処理を開始");
             BuildProfile.SetActiveBuildProfile(profile);
 
             return new BuildPlayerWithProfileOptions
@@ -636,6 +662,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 復元に必要な情報を取得できた場合はtrueです。 </returns>
         private static bool TryGetActiveBuildProfileGuid(out string profileGuid)
         {
+            LogDebug("現在のアクティブなビルドプロファイルGUIDの取得処理を開始");
             profileGuid = string.Empty;
             BuildProfile activeProfile = BuildProfile.GetActiveBuildProfile();
             if (activeProfile == null)
@@ -661,10 +688,12 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="session"> 終了する自動ビルドセッションです。 </param>
         private static void FinishBuildSession(BuildSession session)
         {
+            LogDebug("自動ビルドセッションの終了処理を開始");
             BuildSession.ClearSession();
             EditorUtility.ClearProgressBar();
 
             bool isBatchMode = Application.isBatchMode || session.ForceBatchMode;
+            LogDebug($"バッチモードでの実行判定: isBatchMode={isBatchMode}, Application.isBatchMode={Application.isBatchMode}, session.ForceBatchMode={session.ForceBatchMode}");
 
             // バッチ実行時はログ出力後すぐに終了する。
             if (isBatchMode)
@@ -717,6 +746,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="exitCode"> 終了コード（0: 成功、1: 失敗）。 </param>
         public static void ExitIfBatchMode(bool forceBatchMode, int exitCode)
         {
+            LogDebug("バッチモード時のエディタ終了処理判定を開始");
             bool shouldExit = Application.isBatchMode || forceBatchMode;
             if (shouldExit)
             {
@@ -732,6 +762,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 復元できた場合はtrueです。 </returns>
         private static bool TryRestoreBuildProfile(string profileGuid)
         {
+            LogDebug("開始時のビルドプロファイルへの復元処理を開始");
             BuildProfile originalProfile = null;
             if (!string.IsNullOrEmpty(profileGuid))
             {
@@ -767,6 +798,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="status"> 現在の処理内容です。 </param>
         private static void ShowBuildProgress(BuildSession session, string status)
         {
+            LogDebug("ビルド進捗のUI表示処理を開始");
             if (Application.isBatchMode)
             {
                 return;
@@ -784,6 +816,18 @@ namespace KillChord.Editor.AutoBuilder
                 "AutoBuilder",
                 $"自動ビルドを実行中です。 ({displayIndex}/{profileCount})\n{status}",
                 progress);
+        }
+
+        /// <summary>
+        /// メンテナンス用デバッグログを出力します。
+        /// </summary>
+        /// <param name="message">追加のメッセージ（オプション）</param>
+        /// <param name="methodName">呼び出し元のメソッド名（自動取得）</param>
+        private static void LogDebug(string message = "", [System.Runtime.CompilerServices.CallerMemberName] string methodName = "")
+        {
+            string time = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            string additionalMessage = string.IsNullOrEmpty(message) ? "" : $" - {message}";
+            Debug.Log($"[{nameof(AutoBuildExecuter)}] [DEBUG] {time} | {methodName}{additionalMessage}");
         }
     }
 }
