@@ -420,13 +420,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="beatColor"> Vignetteへ反映するビート色。 </param>
         private void PlayJustTimingVignette(Color beatColor)
         {
-            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled)
-            {
-                return;
-            }
-
-            float now = Time.unscaledTime;
-            if (now - _lastVignetteTimestamp < Mathf.Max(0f, _effectConfig.VignetteMinimumInterval))
+            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled || _rhythmGuidePostEffectView == null)
             {
                 return;
             }
