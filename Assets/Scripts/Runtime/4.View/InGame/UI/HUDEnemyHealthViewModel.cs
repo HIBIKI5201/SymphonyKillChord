@@ -19,7 +19,15 @@ namespace KillChord.Runtime.View.InGame.UI
         public HUDEnemyHealthViewModel(HUDEnemyHealthView view)
         {
             _view = view;
+
+            // カメラが存在しない場合はTransform参照でNullReferenceExceptionになるため、購読を構成せず中断する。
             _mainCamera = Camera.main;
+            if (_mainCamera == null)
+            {
+                Debug.LogError($"[{nameof(HUDEnemyHealthViewModel)}] {nameof(Camera)}.main が見つかりません。");
+                return;
+            }
+
             _cameraTransform = _mainCamera.transform;
 
             _currentHealth
