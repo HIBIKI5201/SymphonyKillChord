@@ -325,7 +325,9 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return;
             }
 
-            await _stageProgressSaveDataService.SaveClearAsync(stageDefinition.StageId);
+            await _stageProgressSaveDataService.SaveClearAsync(
+                stageDefinition.StageId,
+                stageDefinition.Reward);
             _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
             _outGameUIEvent?.OnStageCleared?.Invoke(stageDefinition.StageId.Value);
         }
