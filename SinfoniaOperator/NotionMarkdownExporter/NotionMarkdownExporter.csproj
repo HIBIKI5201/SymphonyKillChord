@@ -7,10 +7,20 @@
     <Nullable>enable</Nullable>
     <RootNamespace>SinfoniaStudio.NotionMarkdownExporter</RootNamespace>
     <AssemblyName>NotionMarkdownExporter</AssemblyName>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SinfoniaOperator.Core\SinfoniaOperator.Core.csproj" />
   </ItemGroup>
+
+  <!-- dotnet publish の完了後、配布用exeをリポジトリ直下（SinfoniaOperator/NotionMarkdownExporter.exe）へ自動コピーする。 -->
+  <Target Name="CopyPublishedExeToRepoRoot" AfterTargets="Publish">
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).exe"
+          DestinationFolder="$(MSBuildProjectDirectory)\.." />
+  </Target>
 
 </Project>

@@ -19,10 +19,11 @@ MonoBehaviour:
   _attackInterval: 0.2
   _maxHealth: 100
   _attackDifinitions:
-  - {fileID: 11400000, guid: 54de395a4c3a70f4cbeb57c92fab0d24, type: 2}
-  - {fileID: 11400000, guid: a0248d99b3395974a9ecc1ecda9d5933, type: 2}
-  - {fileID: 11400000, guid: c26fd88cae2866f4088caebb442ab2d1, type: 2}
-  - {fileID: 11400000, guid: ff7935e7b63178f42b43ba2bd2404864, type: 2}
-  - {fileID: 11400000, guid: 5178ef70675b7ce458b25b4b20912e86, type: 2}
-  - {fileID: 11400000, guid: 76d96cd6c886b214bae3e375e97b1274, type: 2}
+  - {fileID: 11400000, guid: e83374468c0f57d41987b9e4aa77e0b3, type: 2}
+  - {fileID: 11400000, guid: 953829d31e5c7ab4f96aba11c7bb5c84, type: 2}
+  - {fileID: 11400000, guid: 7d2376f3652c8cc48ac9ac1ff0457c3e, type: 2}
+  - {fileID: 11400000, guid: c5cfcc5f808936245ad10c99eddd3ca6, type: 2}
+  - {fileID: 11400000, guid: 5b5ff07d269335344ab47146d30681e0, type: 2}
+  - {fileID: 11400000, guid: 3624c2c7a94c22a49b87459d9e742128, type: 2}
   _baseDamage: 5
+  _criticalChance: 0.05

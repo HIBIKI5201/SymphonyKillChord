@@ -23,16 +23,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="targetSystemViewModel"> ターゲットViewModelです。 </param>
         /// <param name="targetEntityRegistry"> ターゲットEntityレジストリです。 </param>
+        /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
         /// <param name="playerTransform"> プレイヤーTransformです。 </param>
         /// <param name="areaAttackRangeAddition"> 前方範囲攻撃の追加射程です。 </param>
         public SkillTargetResolver(
             ITargetSystemViewModel targetSystemViewModel,
             TargetEntityRegistry targetEntityRegistry,
+            TargetAreaQuery targetAreaQuery,
             Transform playerTransform,
             float areaAttackRangeAddition)
         {
             _targetSystemViewModel = targetSystemViewModel;
             _targetEntityRegistry = targetEntityRegistry;
+            _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
             _forwardAreaRange = Mathf.Max(0f, FORWARD_AREA_RANGE + areaAttackRangeAddition);
         }
@@ -90,53 +93,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             result = default;
 
-            if (_playerTransform == null)
+            if (_playerTransform == null || _targetAreaQuery == null)
             {
                 return false;
             }
 
-            List<CharacterEntity> targetEntities = new List<CharacterEntity>();
-            ITargetableViewModel[] targets = _targetSystemViewModel.GetRegisteredTargetsSnapshot();
-            Vector3 origin = _playerTransform.position;
-            Vector3 forward = _playerTransform.forward;
-            float cosThreshold = Mathf.Cos(FORWARD_AREA_HALF_ANGLE * Mathf.Deg2Rad);
+            _targetAreaQuery.QueryFanArea(
+                _playerTransform.position,
+                _playerTransform.forward,
+                _forwardAreaRange,
+                FORWARD_AREA_HALF_ANGLE,
+                _areaHitBuffer);
 
-            for (int i = 0; i < targets.Length; i++)
-            {
-                ITargetableViewModel target = targets[i];
-                if (!TryResolveEntity(target, out CharacterEntity entity))
-                {
-                    continue;
-                }
-
-                Vector3 toTarget = target.Position - origin;
-                float sqrDistance = toTarget.sqrMagnitude;
-                if (sqrDistance > _forwardAreaRange * _forwardAreaRange)
-                {
-                    continue;
-                }
-
-                float distance = Mathf.Sqrt(sqrDistance);
-                if (distance <= Mathf.Epsilon)
-                {
-                    continue;
-                }
-
-                float dot = Vector3.Dot(forward, toTarget / distance);
-                if (dot < cosThreshold)
-                {
-                    continue;
-                }
-
-                targetEntities.Add(entity);
-            }
-
-            if (targetEntities.Count == 0)
+            if (_areaHitBuffer.Count == 0)
             {
                 return false;
             }
 
-            result = new SkillTargetResolveResult(targetEntities[0], targetEntities.ToArray());
+            // クエリは水平距離の昇順で返すため、先頭が最も近い対象になる。
+            CharacterEntity[] targetEntities = new CharacterEntity[_areaHitBuffer.Count];
+            for (int i = 0; i < _areaHitBuffer.Count; i++)
+            {
+                targetEntities[i] = _areaHitBuffer[i].Entity;
+            }
+
+            result = new SkillTargetResolveResult(targetEntities[0], targetEntities);
             return true;
         }
 
@@ -243,7 +224,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         private readonly ITargetSystemViewModel _targetSystemViewModel;
         private readonly TargetEntityRegistry _targetEntityRegistry;
+        private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
         private readonly float _forwardAreaRange;
+        private readonly List<TargetAreaHit> _areaHitBuffer = new List<TargetAreaHit>();
     }
 }

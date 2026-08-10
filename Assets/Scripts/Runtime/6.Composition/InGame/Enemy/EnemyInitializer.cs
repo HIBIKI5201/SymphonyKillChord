@@ -64,10 +64,22 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(_enemyDefinitionRepositoryKey))
+            {
+                Debug.LogError(
+                    $"[{nameof(EnemyInitializer)}] 個別の敵定義リポジトリのキーが未設定です。",
+                    this);
+                return false;
+            }
+
             try
             {
                 _loadedEnemyWaveDefinitionRepository =
                     await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
+                        this,
+                        cancellationToken);
+                _loadedEnemyDefinitionRepository =
+                    await _enemyDefinitionRepositoryKey.LoadAssetAsync<EnemyDefinitionRepository>(
                         this,
                         cancellationToken);
             }
@@ -77,7 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            if (_loadedEnemyWaveDefinitionRepository == null)
+            if (_loadedEnemyWaveDefinitionRepository == null || _loadedEnemyDefinitionRepository == null)
             {
                 return false;
             }
@@ -125,7 +137,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            _enemyPools.Initialize();
+            _enemyPools.Initialize(_loadedEnemyDefinitionRepository);
             _moduleContainer = new EnemyModuleContainer(new EnemyWaveSpawnerState());
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
@@ -169,11 +181,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 out ObjectiveSequenceClearCondition objectiveSequence);
 
             _moduleContainer.StageEffectCatalog = _loadedStageEffectCatalog;
+            EnemySpawnerRouter enemySpawner = new EnemySpawnerRouter(
+                _loadedEnemyDefinitionRepository,
+                _enemyInfantrySpawner,
+                _enemyArtillerySpawner);
             _moduleContainer.EnemyWaveSpawnerController = new EnemyWaveSpawnerController(
                 _loadedEnemyWaves,
                 _moduleContainer.EnemyWaveSpawnerState,
-                _enemyInfantrySpawner,
-                _enemyArtillerySpawner,
+                enemySpawner,
                 _enemyWaveTimerView,
                 !isMissionControlledWave);
             _enemyWaveTimerView.Initialize(_moduleContainer.EnemyWaveSpawnerController);
@@ -232,37 +247,41 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
-        ///     歩兵の初期化処理。
+        ///     個別の敵定義が指定する処理種別で敵を初期化します。
         /// </summary>
-        /// <param name="lifeCycle"></param>
-        /// <param name="releaseCallback"></param>
-        public void InitializeInfantry(EnemyLifeCycle lifeCycle, Action<EnemyLifeCycle> releaseCallback)
+        /// <param name="lifeCycle"> 初期化する敵です。 </param>
+        /// <param name="enemyType"> 適用する敵の処理種別です。 </param>
+        /// <param name="releaseCallback"> 敵をプールへ戻す処理です。 </param>
+        public void InitializeEnemy(
+            EnemyLifeCycle lifeCycle,
+            EnemyType enemyType,
+            Action<EnemyLifeCycle> releaseCallback)
         {
             if (!_initialized)
             {
                 Debug.LogError("[EnemyInitializer] 初期化が行われていません。", this);
                 return;
             }
-            EnemyInfantryAttackControllerGenerator attackControllerGenerator = new EnemyInfantryAttackControllerGenerator();
-            lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
-            _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, null, _waveSpawnState, releaseCallback);
-        }
 
-        /// <summary>
-        ///     砲兵の初期化処理。
-        /// </summary>
-        /// <param name="lifeCycle"></param>
-        /// <param name="releaseCallback"></param>
-        public void InitializeArtillery(EnemyLifeCycle lifeCycle, Action<EnemyLifeCycle> releaseCallback)
-        {
-            if (!_initialized)
+            IEnemyAttackControllerGenerator attackControllerGenerator;
+            IShellPool shellPool;
+            switch (enemyType)
             {
-                Debug.LogError("[EnemyInitializer] 初期化が行われていません。", this);
-                return;
+                case EnemyType.Infantry:
+                    attackControllerGenerator = new EnemyInfantryAttackControllerGenerator();
+                    shellPool = null;
+                    break;
+                case EnemyType.Artillery:
+                    attackControllerGenerator = new EnemyArtilleryAttackControllerGenerator();
+                    shellPool = _enemyPools;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(enemyType), enemyType, "未対応の敵処理種別です。");
             }
-            EnemyArtilleryAttackControllerGenerator attackControllerGenerator = new EnemyArtilleryAttackControllerGenerator();
+
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
-            _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator, _enemyPools, _waveSpawnState, releaseCallback);
+                _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
+                shellPool, _waveSpawnState, releaseCallback);
         }
 
         /// <summary>
@@ -288,13 +307,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _moduleContainer = null;
             _initialized = false;
             _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _enemyDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedEnemyWaveDefinitionRepository = null;
+            _loadedEnemyDefinitionRepository = null;
             _loadedEnemyWaves = null;
             _loadedStageEffectCatalog = null;
         }
 
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリのAddressablesキーです。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
+        [SerializeField, SourceDataAddress, Tooltip("個別の敵定義リポジトリのAddressablesキーです。")]
+        private string _enemyDefinitionRepositoryKey = "EnemyDefinitionRepository";
 
         [SerializeField, Tooltip("敵プールです。")]
         private EnemyPools _enemyPools;
@@ -321,6 +345,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
+        private EnemyDefinitionRepository _loadedEnemyDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;
         private IReadOnlyDictionary<int, IStageEffectDefinition> _loadedStageEffectCatalog;
         private MissionWaveController _missionWaveController;

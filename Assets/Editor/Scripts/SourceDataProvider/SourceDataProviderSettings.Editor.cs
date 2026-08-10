@@ -35,7 +35,14 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary> 互換維持用の旧設定一覧です。 </summary>
-        public IReadOnlyList<RepositoryMapping> RepositoryMappings => _repositoryMappings;
+        public IReadOnlyList<RepositoryMapping> RepositoryMappings
+        {
+            get
+            {
+                EnsureInitialized();
+                return _repositoryMappings;
+            }
+        }
 
         /// <summary>
         ///     指定CollectionKeyがcollection設定に登録済みか判定します。
@@ -137,7 +144,10 @@ namespace KillChord.Editor.SourceDataProvider
                 return;
             }
 
-            SynchronizeSourceAssetsFromAddressables();
+            if (SynchronizeSourceAssetsFromAddressables())
+            {
+                Save(true);
+            }
         }
 
         [SerializeField, Tooltip("Addressable ScriptableObject設定一覧です。")]
@@ -147,16 +157,21 @@ namespace KillChord.Editor.SourceDataProvider
         private List<SourceCollectionMapping> _sourceCollectionMappings = new();
 
         [SerializeField, HideInInspector]
-        private List<RepositoryMapping> _repositoryMappings = CreateDefaultLegacyMappings();
+        private List<RepositoryMapping> _repositoryMappings = CreateDefaultMappings();
 
         [SerializeField, HideInInspector]
         private bool _isInitialized;
 
         /// <summary>
-        ///     旧設定の移行とAddressables同期を行います。
+        ///     旧設定の移行、必須設定の補完、Addressables同期を行います。
         /// </summary>
         private void EnsureInitialized()
         {
+            _sourceAssetMappings ??= new List<SourceAssetMapping>();
+            _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
+            _repositoryMappings ??= new List<RepositoryMapping>();
+
+            bool changed = false;
             if (!_isInitialized)
             {
                 if (_sourceAssetMappings.Count == 0)
@@ -170,6 +185,7 @@ namespace KillChord.Editor.SourceDataProvider
                         }
 
                         AppendSourceAssetMapping(legacy.AddressableKey);
+                        changed = true;
                     }
                 }
 
@@ -190,25 +206,77 @@ namespace KillChord.Editor.SourceDataProvider
                             legacy.AddressableKey,
                             legacy.ArrayPropertyPath,
                             GetDefaultCreationDirectory(legacy.CollectionKey)));
+                        changed = true;
                     }
                 }
 
                 _isInitialized = true;
-                SynchronizeSourceAssetsFromAddressables();
+                changed = SynchronizeSourceAssetsFromAddressables() || changed;
+                changed = true;
             }
+
+            changed = EnsureDefaultMappings() || changed;
+            if (changed)
+            {
+                // 新しい既定設定は、既存設定が初期化済みでも不足分だけ永続化する。
+                Save(true);
+            }
+        }
+
+        /// <summary>
+        ///     バージョン更新で追加された全ての既定設定を不足時だけ補完します。
+        /// </summary>
+        /// <returns> 設定を追加した場合はtrueです。 </returns>
+        private bool EnsureDefaultMappings()
+        {
+            _sourceAssetMappings ??= new List<SourceAssetMapping>();
+            _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
+            _repositoryMappings ??= new List<RepositoryMapping>();
+
+            bool changed = false;
+            List<RepositoryMapping> defaults = CreateDefaultMappings();
+            for (int i = 0; i < defaults.Count; i++)
+            {
+                RepositoryMapping mapping = defaults[i];
+                if (!ContainsRepositoryMapping(mapping.CollectionKey))
+                {
+                    _repositoryMappings.Add(mapping);
+                    changed = true;
+                }
+
+                if (!ContainsSourceAssetAddress(mapping.AddressableKey))
+                {
+                    _sourceAssetMappings.Add(new SourceAssetMapping(mapping.AddressableKey));
+                    changed = true;
+                }
+
+                if (!ContainsCollectionMapping(mapping.CollectionKey))
+                {
+                    _sourceCollectionMappings.Add(new SourceCollectionMapping(
+                        mapping.CollectionKey,
+                        mapping.AddressableKey,
+                        mapping.ArrayPropertyPath,
+                        GetDefaultCreationDirectory(mapping.CollectionKey)));
+                    changed = true;
+                }
+            }
+
+            return changed;
         }
 
         /// <summary>
         ///     Addressablesへ登録済みのScriptableObjectをSourceAsset一覧へ補完します。
         /// </summary>
-        private void SynchronizeSourceAssetsFromAddressables()
+        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
+        private bool SynchronizeSourceAssetsFromAddressables()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
-                return;
+                return false;
             }
 
+            bool changed = false;
             for (int i = 0; i < settings.groups.Count; i++)
             {
                 AddressableAssetGroup group = settings.groups[i];
@@ -230,23 +298,27 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
-                    AppendSourceAssetMapping(entry.address);
+                    changed = AppendSourceAssetMapping(entry.address) || changed;
                 }
             }
+
+            return changed;
         }
 
         /// <summary>
         ///     SourceAsset設定を未登録の場合のみ追加します。
         /// </summary>
         /// <param name="addressableKey"> 追加対象のAddressableキーです。 </param>
-        private void AppendSourceAssetMapping(string addressableKey)
+        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
+        private bool AppendSourceAssetMapping(string addressableKey)
         {
             if (string.IsNullOrWhiteSpace(addressableKey) || ContainsSourceAssetAddress(addressableKey))
             {
-                return;
+                return false;
             }
 
             _sourceAssetMappings.Add(new SourceAssetMapping(addressableKey));
+            return true;
         }
 
         /// <summary>
@@ -270,10 +342,50 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     旧形式の初期設定を生成します。
+        ///     CollectionKeyが現在のCollection設定に含まれているか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> 確認するCollectionKeyです。 </param>
+        /// <returns> 登録済みの場合はtrueです。 </returns>
+        private bool ContainsCollectionMapping(string collectionKey)
+        {
+            for (int i = 0; i < _sourceCollectionMappings.Count; i++)
+            {
+                SourceCollectionMapping mapping = _sourceCollectionMappings[i];
+                if (mapping != null
+                    && string.Equals(mapping.CollectionKey, collectionKey, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     CollectionKeyが互換維持用の旧設定に含まれているか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> 確認するCollectionKeyです。 </param>
+        /// <returns> 登録済みの場合はtrueです。 </returns>
+        private bool ContainsRepositoryMapping(string collectionKey)
+        {
+            for (int i = 0; i < _repositoryMappings.Count; i++)
+            {
+                RepositoryMapping mapping = _repositoryMappings[i];
+                if (mapping != null
+                    && string.Equals(mapping.CollectionKey, collectionKey, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     全データに共通して適用する既定マッピングを生成します。
         /// </summary>
         /// <returns> 初期設定です。 </returns>
-        private static List<RepositoryMapping> CreateDefaultLegacyMappings()
+        private static List<RepositoryMapping> CreateDefaultMappings()
         {
             return new List<RepositoryMapping>
             {
@@ -288,7 +400,13 @@ namespace KillChord.Editor.SourceDataProvider
                 new("ScenarioPortrait", "PortraitCatalogAsset", "_entries"),
                 new("ScenarioBackground", "BackgroundCatalogAsset", "_entries"),
                 new("Wave", "EnemyWaveDefinitionRepository", "_waveDefinitionAssets"),
-                new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries")
+                new("EnemyData", "EnemyDefinitionRepository", "_enemyDefinitionAssets"),
+                new("BossAttackEntry", "BossAttackEntryRepo", "_attackEntries"),
+                new("EnemyMissionKey", "EnemyMissionKeyRepository", "_missionKeyAssets"),
+                new("Character", "CharacterDefinitionRepository", "_characterAssets"),
+                new("TitleScreenRule", "TitleScreenRuleData", "_entries"),
+                new("OutGameScreenRule", "OutGameScreenRuleData", "_entries"),
+                new("Mission", "MissionDefinitionRepository", "_missionDefinitionAssets")
             };
         }
 
@@ -306,7 +424,11 @@ namespace KillChord.Editor.SourceDataProvider
                 "PlayerAttack" => "Assets/Level/Data/Master/InGame/Battle",
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
                 "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
+                "EnemyData" => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
                 "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
+                "EnemyMissionKey" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",
+                "Character" => "Assets/Level/Data/Master/Character",
+                "Mission" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",
                 _ => string.Empty,
             };
         }

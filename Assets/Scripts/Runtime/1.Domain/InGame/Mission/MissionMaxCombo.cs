@@ -5,23 +5,23 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     /// <summary>
     ///     ミッション中のコンボ数を表す値オブジェクトです。
     /// </summary>
-    public readonly struct MissionCombo : IEquatable<MissionCombo>
+    public readonly struct MissionMaxCombo : IEquatable<MissionMaxCombo>
     {
         /// <summary>
         ///     コンボ数を生成します。
         /// </summary>
         /// <param name="value"> コンボ数です。 </param>
-        public MissionCombo(int value)
+        public MissionMaxCombo(int value)
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                throw new ArgumentOutOfRangeException(nameof(value), "現在の最大コンボ数は負の値を取ることができません。");
             }
 
             Value = value;
         }
 
-        /// <summary> コンボ数です。 </summary>
+        /// <summary> 現在の最大コンボ数です。 </summary>
         public int Value { get; }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// </summary>
         /// <param name="other"> 比較対象です。 </param>
         /// <returns> 等しい場合はtrueです。 </returns>
-        public bool Equals(MissionCombo other)
+        public bool Equals(MissionMaxCombo other)
         {
             return Value == other.Value;
         }
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <returns> 等しい場合はtrueです。 </returns>
         public override bool Equals(object obj)
         {
-            return obj is MissionCombo other && Equals(other);
+            return obj is MissionMaxCombo other && Equals(other);
         }
 
         /// <summary>

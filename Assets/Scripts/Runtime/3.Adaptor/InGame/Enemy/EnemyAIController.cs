@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
@@ -162,12 +161,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の2拍前に到達した時に実行される処理。
+        /// </summary>
+
         private void Handle2BeatBefore()
         {
             Debug.Log("[EnemyAIController] 攻撃の2拍前");
             On2BeatBefore?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の1拍前に到達した時に実行される処理。
+        /// </summary>
         private void Handle1BeatBefore()
         {
             Debug.Log("[EnemyAIController] 攻撃の1拍前");
