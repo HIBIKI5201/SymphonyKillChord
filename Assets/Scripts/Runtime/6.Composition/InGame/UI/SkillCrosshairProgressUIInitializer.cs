@@ -54,7 +54,14 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public override void Shutdown()
         {
             if (_isRegistered)
+            {
                 ServiceLocator.UnregisterInstance(this);
+            }
+
+            if (_progressView is not null)
+            {
+                _progressView.OnUpdate -= _controller.Tick;
+            }
         }
 
         /// <summary>
