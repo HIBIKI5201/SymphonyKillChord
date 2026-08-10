@@ -17,7 +17,6 @@ namespace KillChord.Editor.AutoBuilder
     {
         /// <summary> 自動ビルドセッションが実行中の場合はtrueです。 </summary>
         public static bool IsRunning => BuildSession.LoadSession().Running;
-
         [Serializable]
         private struct BuildSession
         {
@@ -38,6 +37,9 @@ namespace KillChord.Editor.AutoBuilder
 
             /// <summary> いずれかのビルドが失敗した場合はtrueです。 </summary>
             public bool HasFailure;
+            
+            /// <summary> バッチモードフラグをセッションに保持します。 </summary>
+            public bool ForceBatchMode;
 
             /// <summary>
             ///     保存済みの自動ビルドセッションを読み込みます。
@@ -45,6 +47,7 @@ namespace KillChord.Editor.AutoBuilder
             /// <returns> 保存されているセッションです。 </returns>
             public static BuildSession LoadSession()
             {
+                LogDebug("セッションを読み込み開始");
                 string json = SessionState.GetString(SESSION_KEY, string.Empty);
 
                 if (string.IsNullOrEmpty(json))
@@ -61,6 +64,7 @@ namespace KillChord.Editor.AutoBuilder
             /// <param name="session"> 保存するセッションです。 </param>
             public static void SaveSession(BuildSession session)
             {
+                LogDebug("セッションを保存開始");
                 string json = JsonUtility.ToJson(session);
 
                 SessionState.SetString(SESSION_KEY, json);
@@ -71,6 +75,7 @@ namespace KillChord.Editor.AutoBuilder
             /// </summary>
             public static void ClearSession()
             {
+                LogDebug("セッションの消去開始");
                 SessionState.EraseString(SESSION_KEY);
             }
 
@@ -121,18 +126,20 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         /// <param name="path"> ビルド出力先です。 </param>
         /// <param name="profiles"> 実行対象のビルドプロファイル一覧です。 </param>
-        public static void Run(string path, params BuildProfile[] profiles)
+        /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
+        public static void Run(string path, BuildProfile[] profiles, bool isBatchMode = false)
         {
+            LogDebug("自動ビルド処理を開始");
             if (profiles == null || profiles.Length == 0)
             {
-                Debug.LogError(
-                    "Build Profiles are not set.");
-
+                Debug.LogError("Build Profiles are not set.");
+                ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
             if (!TryGetActiveBuildProfileGuid(out string originalProfileGuid))
             {
+                ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
@@ -155,7 +162,8 @@ namespace KillChord.Editor.AutoBuilder
 
                 Running = true,
 
-                HasFailure = false
+                HasFailure = false,
+                ForceBatchMode = isBatchMode
             };
 
             BuildSession.SaveSession(session);
@@ -172,6 +180,7 @@ namespace KillChord.Editor.AutoBuilder
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            LogDebug("初期化処理（ドメインリロード後）を開始");
             Application.logMessageReceived += HandleLogMessage;
             ReplayPendingLogIfAny();
 
@@ -187,6 +196,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="type"> ログ種別です。 </param>
         private static void HandleLogMessage(string message, string stackTrace, LogType type)
         {
+            LogDebug("ログメッセージ捕捉処理を開始");
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
             {
                 return;
@@ -208,6 +218,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="stackTrace"> スタックトレースです。 </param>
         private static void AppendCapturedLog(LogType type, string message, string stackTrace)
         {
+            LogDebug("エラーログを保存セッションへ追記開始");
             PendingLogReplay replay = LoadPendingLogReplay();
             CapturedLogEntry[] entries = replay.Entries ?? Array.Empty<CapturedLogEntry>();
 
@@ -217,7 +228,7 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             Array.Resize(ref entries, entries.Length + 1);
-            entries[entries.Length - 1] = new CapturedLogEntry
+            entries[^1] = new CapturedLogEntry
             {
                 Type = type.ToString(),
                 Message = message,
@@ -235,6 +246,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="hasFailure"> いずれかのビルドが失敗した場合はtrueです。 </param>
         private static void SetPendingLogFailure(bool hasFailure)
         {
+            LogDebug("再出力用ログへ失敗状態を記録開始");
             PendingLogReplay replay = LoadPendingLogReplay();
             if (replay.Entries == null || replay.Entries.Length == 0)
             {
@@ -250,6 +262,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static void ReplayPendingLogIfAny()
         {
+            LogDebug("ドメインリロードで消失したログの再出力処理を開始");
             string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
             if (string.IsNullOrEmpty(json))
             {
@@ -289,6 +302,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 保存されている再出力用ログです。未保存の場合は空です。 </returns>
         private static PendingLogReplay LoadPendingLogReplay()
         {
+            LogDebug("再出力用ログの読み込み開始");
             string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
             return string.IsNullOrEmpty(json)
                 ? new PendingLogReplay { Entries = Array.Empty<CapturedLogEntry>() }
@@ -301,6 +315,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="replay"> 保存する再出力用ログです。 </param>
         private static void SavePendingLogReplay(PendingLogReplay replay)
         {
+            LogDebug("再出力用ログの保存開始");
             SessionState.SetString(PENDING_LOG_KEY, JsonUtility.ToJson(replay));
         }
 
@@ -309,6 +324,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static async void Resume()
         {
+            LogDebug("自動ビルドの再開準備（遅延実行）を開始");
             EditorApplication.delayCall -= Resume;
 
             await Awaitable.NextFrameAsync();
@@ -330,6 +346,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static void ResumeBuild()
         {
+            LogDebug("次のビルドの予約処理を開始");
             EditorApplication.delayCall -= ResumeBuild;
 
             BuildSession session = BuildSession.LoadSession();
@@ -355,9 +372,11 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static async void ExecuteBuild()
         {
+            LogDebug("現在のビルドプロファイル実行準備を開始");
             EditorApplication.delayCall -= ExecuteBuild;
 
             await WaitForEditorReady();
+            LogDebug("エディタの準備完了。ビルド処理を開始します");
 
             BuildSession session = BuildSession.LoadSession();
 
@@ -384,114 +403,173 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="session"> 実行中の自動ビルドセッションです。 </param>
         private static async ValueTask ExecuteBuildAsync(BuildSession session)
         {
-
-            string guid = session.ProfileGuids[session.CurrentIndex];
-
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-
-            BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(assetPath);
-
-            if (profile == null)
+            LogDebug("ビルドプロファイルの非同期ビルド処理を開始");
+            try
             {
-                Debug.LogError($"[{nameof(AutoBuildExecuter)}] Profile Missing : {guid}");
+                string guid = session.ProfileGuids[session.CurrentIndex];
 
-                NextSession(true);
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                return;
-            }
+                BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(assetPath);
 
-            Debug.Log($"[{nameof(AutoBuildExecuter)}] Start Build : {profile.name}");
-            ShowBuildProgress(session, $"{profile.name} をビルドしています。");
+                if (profile == null)
+                {
+                    Debug.LogError($"[{nameof(AutoBuildExecuter)}] Profile Missing : {guid}");
 
-            // Profile切替。
-            BuildProfile.SetActiveBuildProfile(profile);
+                    NextSession(true);
 
-            await WaitForEditorReady();
+                    return;
+                }
 
-            string[] scenes = profile.GetScenesForBuild()
-                .Where(s => s.enabled)
-                .Select(s => s.path)
-                .ToArray();
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] Start Build : {profile.name}");
+                ShowBuildProgress(session, $"{profile.name} をビルドしています。");
 
-            // プロファイルに指定がなければグローバルを使用。
-            if (scenes.Length == 0)
-            {
-                scenes = EditorBuildSettings.scenes
+                // Profile切替。
+                BuildProfile.SetActiveBuildProfile(profile);
+
+                await WaitForEditorReady();
+                LogDebug($"プロファイル切替後のエディタ準備完了: {profile.name}");
+
+                string[] scenes = profile.GetScenesForBuild()
                     .Where(s => s.enabled)
                     .Select(s => s.path)
                     .ToArray();
-            }
 
-            if (scenes.Length == 0)
-            {
-                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] No scenes : {profile.name}");
-
-                NextSession(true);
-
-                return;
-            }
-
-            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
-
-            string buildDir = Path.Combine(session.OutputPath, profile.name);
-            string fileName = Application.productName + GetExtension(target);
-            string locationPath = Path.Combine(buildDir, fileName);
-
-            BuildPlayerOptions options = CreateBuildPlayerOptions(profile, locationPath);
-
-            // フォルダ生成。
-            if (Directory.Exists(buildDir))
-            {
-                Directory.Delete(buildDir, true);
-            }
-
-            Directory.CreateDirectory(buildDir);
-
-            AssetDatabase.Refresh(ImportAssetOptions.DontDownloadFromCacheServer);
-
-            await WaitForEditorReady();
-
-            // BuildはdelayCallから実行する。
-            EditorApplication.delayCall += ExecutePlayerBuild;
-
-            void ExecutePlayerBuild()
-            {
-                EditorApplication.delayCall -= ExecutePlayerBuild;
-
-                bool hasFailure = false;
-                try
+                // プロファイルに指定がなければグローバルを使用。
+                if (scenes.Length == 0)
                 {
-                    BuildReport report = BuildPipeline.BuildPlayer(options);
-                    hasFailure = report.summary.result != BuildResult.Succeeded;
+                    scenes = EditorBuildSettings.scenes
+                        .Where(s => s.enabled)
+                        .Select(s => s.path)
+                        .ToArray();
+                }
 
-                    if (hasFailure)
+                if (scenes.Length == 0)
+                {
+                    Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] No scenes : {profile.name}");
+
+                    NextSession(true);
+
+                    return;
+                }
+
+                BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+
+                string buildDir = Path.Combine(session.OutputPath, profile.name);
+                string fileName = Application.productName + GetExtension(target);
+                string locationPath = Path.Combine(buildDir, fileName);
+
+                BuildPlayerWithProfileOptions options = CreateBuildPlayerOptions(profile, locationPath);
+
+                // フォルダ生成。
+                if (Directory.Exists(buildDir))
+                {
+                    Directory.Delete(buildDir, true);
+                }
+
+                Directory.CreateDirectory(buildDir);
+
+                AssetDatabase.Refresh(ImportAssetOptions.DontDownloadFromCacheServer);
+
+                await WaitForEditorReady();
+                LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
+
+                int executePlayerBuildRetryCount = 0;
+                const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
+                
+                // BuildはdelayCallから実行する。
+                EditorApplication.delayCall += ExecutePlayerBuild;
+
+                void ExecutePlayerBuild()
+                {
+                    LogDebug("実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始");
+                    EditorApplication.delayCall -= ExecutePlayerBuild;
+
+                    if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                     {
-                        Debug.LogError(
-                            $"[{nameof(AutoBuildExecuter)}] Build Failed : {profile.name}");
+                        executePlayerBuildRetryCount++;
+
+                        if (executePlayerBuildRetryCount > MAX_EXECUTE_PLAYER_BUILD_RETRY)
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer retry limit exceeded : {profile.name}");
+
+                            NextSession(true);
+                            return;
+                        }
+
+                        EditorApplication.delayCall += ExecutePlayerBuild;
+                        return;
                     }
-                    else
+
+                    bool hasFailure;
+                    try
                     {
                         Debug.Log(
-                            $"[{nameof(AutoBuildExecuter)}] Build Succeeded : {profile.name}");
+                            $"[{nameof(AutoBuildExecuter)}] About to call BuildPipeline.BuildPlayer for profile: {profile.name}");
+                        
+                        BuildReport report = BuildPipeline.BuildPlayer(options);
+                        hasFailure = report.summary.result != BuildResult.Succeeded;
+
+                        if (hasFailure)
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AutoBuildExecuter)}] Build Failed : {profile.name}");
+                        }
+                        else
+                        {
+                            Debug.Log(
+                                $"[{nameof(AutoBuildExecuter)}] Build Succeeded : {profile.name}");
+                        }
                     }
+                    catch (Exception exception)
+                    {
+                        Debug.LogException(exception);
+                        hasFailure = true;
+                    }
+
+                    NextSession(hasFailure);
                 }
-                catch (Exception exception)
+
+                void NextSession(bool hasFailure = false)
                 {
-                    Debug.LogException(exception);
-                    hasFailure = true;
+                    LogDebug("次のセッションへの移行処理を開始");
+                    session.CurrentIndex++;
+                    session.HasFailure |= hasFailure;
+
+                    BuildSession.SaveSession(session);
+                    ShowBuildProgress(session, "次のビルドを準備しています。");
+
+                    EditorApplication.delayCall += ResumeBuild;
                 }
-
-                NextSession(hasFailure);
             }
-
-            void NextSession(bool hasFailure = false)
+            catch (TimeoutException timeoutException)
             {
+                LogDebug($"タイムアウトが発生しました: {timeoutException.Message}");
+                Debug.LogError(
+                    $"[{nameof(AutoBuildExecuter)}] EditorReady timeout - Skipping profile: {session.ProfileGuids[session.CurrentIndex]}. {timeoutException.Message}");
+                
+                // タイムアウト時はプロファイルをスキップして次へ
                 session.CurrentIndex++;
-                session.HasFailure |= hasFailure;
-
+                session.HasFailure = true;
+                
                 BuildSession.SaveSession(session);
-                ShowBuildProgress(session, "次のビルドを準備しています。");
-
+                ShowBuildProgress(session, "タイムアウトのため次のビルドを準備しています。");
+                
+                EditorApplication.delayCall += ResumeBuild;
+            }
+            catch (Exception exception)
+            {
+                LogDebug($"例外が発生しました: {exception.Message}");
+                Debug.LogException(exception);
+                
+                // 予期しない例外はプロファイルをスキップして次へ
+                session.CurrentIndex++;
+                session.HasFailure = true;
+                
+                BuildSession.SaveSession(session);
+                ShowBuildProgress(session, "エラーのため次のビルドを準備しています。");
+                
                 EditorApplication.delayCall += ResumeBuild;
             }
         }
@@ -499,10 +577,25 @@ namespace KillChord.Editor.AutoBuilder
         /// <summary>
         ///     コンパイル・アセット更新・プレイヤービルドが終了するまで待機します。
         /// </summary>
-        private static async ValueTask WaitForEditorReady()
+        /// <param name="timeoutSeconds">タイムアウト時間（秒）。デフォルトは120秒</param>
+        /// <exception cref="TimeoutException">指定時間内に準備ができなかった場合</exception>
+        private static async ValueTask WaitForEditorReady(int timeoutSeconds = 120)
         {
-            await SymphonyAwaitable.WaitUntil(() =>
+            LogDebug("エディタの準備完了（コンパイル・アセット更新終了）待機を開始");
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            await SymphonyTask.WaitUntil(() =>
             {
+                if (stopwatch.Elapsed.TotalSeconds > timeoutSeconds)
+                {
+                    stopwatch.Stop();
+                    throw new TimeoutException(
+                        $"[{nameof(AutoBuildExecuter)}] EditorReady timeout exceeded {timeoutSeconds}s. " +
+                        $"isCompiling={EditorApplication.isCompiling}, " +
+                        $"isUpdating={EditorApplication.isUpdating}, " +
+                        $"isBuildingPlayer={BuildPipeline.isBuildingPlayer}");
+                }
+
                 if (EditorApplication.isCompiling)
                 {
                     return false;
@@ -521,6 +614,9 @@ namespace KillChord.Editor.AutoBuilder
                 return true;
             });
 
+            stopwatch.Stop();
+            LogDebug($"エディタの準備完了待機が終了。経過時間: {stopwatch.Elapsed.TotalSeconds:F2}秒");
+
             // 念のためさらに1フレーム待つ。
             await Awaitable.NextFrameAsync();
         }
@@ -532,6 +628,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 出力ファイルの拡張子です。 </returns>
         public static string GetExtension(BuildTarget target)
         {
+            LogDebug("ビルドターゲットに対応する拡張子の取得処理を開始");
             return target switch
             {
                 BuildTarget.StandaloneWindows => ".exe",
@@ -544,31 +641,16 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
-        /// BuildProfileの情報からBuildPlayerOptionsを生成する静的メソッド
+        ///     指定したビルドプロファイルに対応するBuildPlayerWithProfileOptionsを作成します。
         /// </summary>
-        public static BuildPlayerOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
+        public static BuildPlayerWithProfileOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
         {
+            LogDebug("BuildPlayerWithProfileOptionsの生成処理を開始");
             BuildProfile.SetActiveBuildProfile(profile);
-            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 
-            // 有効なシーンの抽出
-            string[] scenes = profile.GetScenesForBuild()
-                .Where(s => s.enabled)
-                .Select(s => s.path)
-                .ToArray();
-
-            if (scenes.Length == 0)
+            return new BuildPlayerWithProfileOptions
             {
-                scenes = EditorBuildSettings.scenes
-                    .Where(s => s.enabled)
-                    .Select(s => s.path)
-                    .ToArray();
-            }
-
-            return new BuildPlayerOptions()
-            {
-                scenes = scenes,
-                target = target,
+                buildProfile = profile,
                 locationPathName = path,
             };
         }
@@ -580,6 +662,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 復元に必要な情報を取得できた場合はtrueです。 </returns>
         private static bool TryGetActiveBuildProfileGuid(out string profileGuid)
         {
+            LogDebug("現在のアクティブなビルドプロファイルGUIDの取得処理を開始");
             profileGuid = string.Empty;
             BuildProfile activeProfile = BuildProfile.GetActiveBuildProfile();
             if (activeProfile == null)
@@ -600,16 +683,42 @@ namespace KillChord.Editor.AutoBuilder
 
         /// <summary>
         ///     自動ビルドセッションを終了し、開始前のビルドプロファイルへ戻します。
+        ///     バッチモード時はビルド成否に対応した終了コードでエディタを終了します。
         /// </summary>
         /// <param name="session"> 終了する自動ビルドセッションです。 </param>
         private static void FinishBuildSession(BuildSession session)
         {
+            LogDebug("自動ビルドセッションの終了処理を開始");
+            BuildSession.ClearSession();
+            EditorUtility.ClearProgressBar();
+
+            bool isBatchMode = Application.isBatchMode || session.ForceBatchMode;
+            LogDebug($"バッチモードでの実行判定: isBatchMode={isBatchMode}, Application.isBatchMode={Application.isBatchMode}, session.ForceBatchMode={session.ForceBatchMode}");
+
+            // バッチ実行時はログ出力後すぐに終了する。
+            if (isBatchMode)
+            {
+                bool batchSucceeded = !session.HasFailure;
+                string batchMessage = batchSucceeded
+                    ? "自動ビルドが完了しました。"
+                    : "自動ビルドが終了しました。Consoleでエラーを確認してください。";
+
+                if (batchSucceeded)
+                {
+                    Debug.Log($"[{nameof(AutoBuildExecuter)}] {batchMessage}");
+                }
+                else
+                {
+                    Debug.LogError($"[{nameof(AutoBuildExecuter)}] {batchMessage}");
+                }
+
+                ExitIfBatchMode(true, batchSucceeded ? 0 : 1);
+                return;
+            }
+
             // ビルドプロファイル復元によるドメインリロードでコンソールが消える前に、
             // 成否だけは再出力用ログへ記録しておく。
             SetPendingLogFailure(session.HasFailure);
-
-            BuildSession.ClearSession();
-            EditorUtility.ClearProgressBar();
 
             bool restored = TryRestoreBuildProfile(session.OriginalProfileGuid);
             bool succeeded = !session.HasFailure && restored;
@@ -626,9 +735,23 @@ namespace KillChord.Editor.AutoBuilder
                 Debug.LogError($"[{nameof(AutoBuildExecuter)}] {message}");
             }
 
-            if (!Application.isBatchMode)
+            EditorUtility.DisplayDialog("AutoBuilder", message, "OK");
+        }
+
+        /// <summary>
+        ///     バッチモード、または forceBatchMode が true の場合のみ、エディタプロセスを指定されたコードで終了する。
+        ///     これにより、手動実行時のエディタ強制終了を回避できる。
+        /// </summary>
+        /// <param name="forceBatchMode"> true の場合、Application.isBatchMode に関わらずバッチモード判定を行う。 </param>
+        /// <param name="exitCode"> 終了コード（0: 成功、1: 失敗）。 </param>
+        public static void ExitIfBatchMode(bool forceBatchMode, int exitCode)
+        {
+            LogDebug("バッチモード時のエディタ終了処理判定を開始");
+            bool shouldExit = Application.isBatchMode || forceBatchMode;
+            if (shouldExit)
             {
-                EditorUtility.DisplayDialog("AutoBuilder", message, "OK");
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] Exiting Unity editor with code {exitCode} (Batch Mode)");
+                EditorApplication.Exit(exitCode);
             }
         }
 
@@ -639,6 +762,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <returns> 復元できた場合はtrueです。 </returns>
         private static bool TryRestoreBuildProfile(string profileGuid)
         {
+            LogDebug("開始時のビルドプロファイルへの復元処理を開始");
             BuildProfile originalProfile = null;
             if (!string.IsNullOrEmpty(profileGuid))
             {
@@ -674,6 +798,7 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="status"> 現在の処理内容です。 </param>
         private static void ShowBuildProgress(BuildSession session, string status)
         {
+            LogDebug("ビルド進捗のUI表示処理を開始");
             if (Application.isBatchMode)
             {
                 return;
@@ -691,6 +816,18 @@ namespace KillChord.Editor.AutoBuilder
                 "AutoBuilder",
                 $"自動ビルドを実行中です。 ({displayIndex}/{profileCount})\n{status}",
                 progress);
+        }
+
+        /// <summary>
+        /// メンテナンス用デバッグログを出力します。
+        /// </summary>
+        /// <param name="message">追加のメッセージ（オプション）</param>
+        /// <param name="methodName">呼び出し元のメソッド名（自動取得）</param>
+        private static void LogDebug(string message = "", [System.Runtime.CompilerServices.CallerMemberName] string methodName = "")
+        {
+            string time = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            string additionalMessage = string.IsNullOrEmpty(message) ? "" : $" - {message}";
+            Debug.Log($"[{nameof(AutoBuildExecuter)}] [DEBUG] {time} | {methodName}{additionalMessage}");
         }
     }
 }
