@@ -456,11 +456,11 @@ namespace KillChord.Editor.AutoBuilder
 
                 await WaitForEditorReady();
 
-                // BuildはdelayCallから実行する。
-                EditorApplication.delayCall += ExecutePlayerBuild;
-
                 int executePlayerBuildRetryCount = 0;
                 const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
+                
+                // BuildはdelayCallから実行する。
+                EditorApplication.delayCall += ExecutePlayerBuild;
 
                 void ExecutePlayerBuild()
                 {
