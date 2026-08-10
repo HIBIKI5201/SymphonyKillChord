@@ -30,6 +30,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (systemView == null)
                 throw new ArgumentNullException(nameof(systemView), "ReusableParticleSystemViewがNULLです。");
 
+            if (_indicator == null)
+                throw new InvalidOperationException($"[{nameof(ShellView)}] 爆発範囲表示用のDecalProjectorがアサインされていません。");
+
+            if (_indicator.material == null)
+                throw new InvalidOperationException($"[{nameof(ShellView)}] 爆発範囲表示用のDecalProjectorにマテリアルがアサインされていません。");
+
             _targetTransform = targetTransform;
             _shellSpecPresenter = shellSpecPresenter;
             _dedonateCallback = dedonateCallback;

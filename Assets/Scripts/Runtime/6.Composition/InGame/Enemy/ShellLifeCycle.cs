@@ -144,7 +144,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         /// <summary>
         ///     予約済みの爆発時刻までの残り時間から、0〜1の接近進捗を算出します。
-        ///     小節周期ではなく絶対時刻を基準にするため、予約が何小節先でも遷移は必ず1回だけになります。
         /// </summary>
         /// <returns> 0〜1の進捗。予約が無い場合や算出できない場合は0。 </returns>
         private float GetDetonateApproach()
@@ -155,16 +154,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             MusicSyncState musicSyncState = _musicSyncView != null ? _musicSyncView.MusicSyncState : null;
-            if (musicSyncState == null || musicSyncState.BeatLength <= 0d)
+            if (musicSyncState == null)
             {
                 return 0f;
             }
 
-            double leadSeconds = musicSyncState.BeatLength * DETONATE_LEAD_BEAT_COUNT;
-            double remainingSeconds = _reservationUsecase.DetonateExecutionTime - musicSyncState.PlayTime;
-
-            // 区間に入る前は0のまま、爆発時刻に向かって1へ近づく。
-            return Mathf.Clamp01((float)(1d - remainingSeconds / leadSeconds));
+            return musicSyncState.GetNormalizedApproach(
+                _reservationUsecase.DetonateExecutionTime,
+                DETONATE_LEAD_BEAT_COUNT);
         }
 
         /// <summary>

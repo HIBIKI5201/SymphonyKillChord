@@ -47,8 +47,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         public void Dispose()
         {
-            _reservationUsecase.Dispose();
+            // 破棄する前に購読を解除する。
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _reservationUsecase.Dispose();
         }
 
         /// <summary>
