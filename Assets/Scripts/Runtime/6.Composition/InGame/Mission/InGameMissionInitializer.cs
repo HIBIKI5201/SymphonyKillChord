@@ -248,7 +248,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private string _missionDefinitionRepositoryKey;
         [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")]
         private string _enemyMissionKeyRepositoryKey;
-        [SerializeField, Tooltip("コンボ数が表示される最小値。")]
+        [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
         private int _comboVisibleCount = 1;
 
         private bool _registeredMissionRuntimeService;
