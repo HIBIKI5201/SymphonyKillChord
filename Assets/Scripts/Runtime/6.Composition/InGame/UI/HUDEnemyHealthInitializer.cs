@@ -68,6 +68,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _viewModel?.Dispose();
             _viewModel = null;
             _presenter = null;
+
+            if (_view != null)
+            {
+                _view.OnUpdate -= _presenter.Update;
+            }
         }
     }
 }
