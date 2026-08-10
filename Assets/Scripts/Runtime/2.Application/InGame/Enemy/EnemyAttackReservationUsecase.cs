@@ -29,6 +29,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 予約が存在するかどうかを示すプロパティ。 </summary>
         public bool HasReservation => _hasReservation;
 
+        /// <summary> 予約中の攻撃時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
+        public double AttackExecutionTime { get; private set; }
+
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
         public event Action On2BeatBefore;
@@ -107,7 +110,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _cancellationTokenSource = new CancellationTokenSource();
             _hasReservation = true;
 
-            _musicActionScheduler.Schedule(
+            // 攻撃の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
+            AttackExecutionTime = _musicActionScheduler.Schedule(
                 musicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
@@ -125,36 +129,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <param name="handler"> 予告タイミングで実行する処理。 </param>
         private void ScheduleLeadNotification(in MusicSyncSpec musicSpec, double leadCount, Action handler)
         {
-            // 拍子が不正な場合は遡り量を決められないため予約しない。
-            if (musicSpec.TimeSignature <= 0d)
-            {
-                return;
-            }
-
-            double targetBeat = musicSpec.TargetBeat - leadCount;
-            int barFlag = musicSpec.BarFlag;
-
-            if (double.IsNegativeInfinity(targetBeat))
-            {
-                return;
-            }
-
-            // 1拍目より前にある間は、拍子1小節分だけ戻して前の小節へ送る。
-            int barsBack = (int)Math.Ceiling((FIRST_BEAT - targetBeat) / musicSpec.TimeSignature);
-            if (barsBack > 0)
-            {
-                targetBeat += barsBack * musicSpec.TimeSignature;
-                barFlag -= barsBack;
-            }
-
-            // 現在の小節より前や、拍子の範囲外へはみ出す場合は予約しない。
-            if (barFlag < 0 || targetBeat > musicSpec.TimeSignature)
+            if (!MusicTimingCalculator.TryCreateLeadTiming(musicSpec, leadCount, out MusicSyncSpec leadSpec))
             {
                 return;
             }
 
             _musicActionScheduler.Schedule(
-                new MusicSyncSpec((byte)barFlag, musicSpec.TimeSignature, targetBeat),
+                leadSpec,
                 handler,
                 _cancellationTokenSource.Token);
         }
@@ -187,8 +168,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
 
-        /// <summary> 小節内の最初の拍。 </summary>
-        private const double FIRST_BEAT = 1d;
         /// <summary> 2拍前の予告に使う遡り量。 </summary>
         private const double TWO_BEAT_LEAD = 2d;
         /// <summary> 1拍前の予告に使う遡り量。 </summary>

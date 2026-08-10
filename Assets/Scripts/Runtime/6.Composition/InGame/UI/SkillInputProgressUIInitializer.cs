@@ -25,7 +25,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         {
             if (_skillInputProgressUIConfig == null)
             {
-                Debug.LogError("スキル入力進行UIの表示設定が未設定です。", this);
+                Debug.LogError($"[{nameof(SkillInputProgressUIInitializer)}] スキル入力進行UIの表示設定が未設定です。", this);
+                return false;
+            }
+            if (_viewPrefab == null || _viewRoot == null || _rhythmGuideView == null)
+            {
+                Debug.LogError($"[{nameof(SkillInputProgressUIInitializer)}] View Prefab・親Transform・リズムガイドViewのいずれかが未設定です。", this);
                 return false;
             }
 

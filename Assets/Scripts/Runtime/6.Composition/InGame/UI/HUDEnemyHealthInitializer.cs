@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
 {
+    using Camera = UnityEngine.Camera;
     /// <summary>
     ///     ロックオン中の敵HP HUDに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
@@ -51,6 +52,13 @@ namespace KillChord.Runtime.Composition.InGame.UI
             if (_view == null)
             {
                 Debug.LogError($"{nameof(_view)} がアサインされていません。");
+                return;
+            }
+
+            // ViewModelがカメラ前提で動作するため、カメラが無い場合はHUDを構築しない。
+            if (Camera.main == null)
+            {
+                Debug.LogError($"[{nameof(HUDEnemyHealthInitializer)}] {nameof(Camera)}.main が見つかりません。", this);
                 return;
             }
 

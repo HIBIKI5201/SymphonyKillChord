@@ -15,7 +15,8 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="musicSpec"> 音楽同期スペック。 </param>
         /// <param name="action"> 実行するアクション。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        void Schedule(
+        /// <returns> 実行される音源再生時間（秒）。 </returns>
+        double Schedule(
             in MusicSyncSpec musicSpec,
             Action action,
             CancellationToken cancellationToken);
