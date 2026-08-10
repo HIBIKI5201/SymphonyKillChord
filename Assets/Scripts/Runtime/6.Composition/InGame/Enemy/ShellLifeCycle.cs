@@ -55,9 +55,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     砲弾の依存関係を構築する。
         /// </summary>
-        /// <param name="shellView"></param>
-        /// <param name="enemyBattleState"></param>
-        /// <returns></returns>
+        /// <param name="releaseCallback"> 砲弾をObject Poolへ戻す際に呼び出すコールバック。 </param>
+        /// <param name="shellExplosionEffectView"> 爆発エフェクトを再生するパーティクルView。 </param>
         public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView)
         {
             if (!_musicSyncInitializer) _musicSyncInitializer = FindFirstObjectByType<MusicSyncInitializer>();
@@ -108,7 +107,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     有効化処理。
         /// </summary>
-        /// <param name="enemyBattleState"></param>
+        /// <param name="enemyBattleState"> 砲弾の発射元となる敵の戦闘状態。 </param>
         public void Activate(EnemyBattleState enemyBattleState)
         {
             gameObject.SetActive(true);
@@ -127,7 +126,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _releaseCallback.Invoke(this);
         }
 
-        private const double DETONATE_LEAD_BEAT_COUNT = 2d;
 
         [SerializeField] private ShellView _view;
         [SerializeField, SourceDataAddress, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
@@ -141,10 +139,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ShellReservationUsecase _reservationUsecase;
         private ShellAttackSpecAsset _loadedAttackData;
         private EnemyMusicSpecAsset _loadedMusicData;
+        /// <summary> 爆発予告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
+        private const double DETONATE_LEAD_BEAT_COUNT = 2d;
 
         /// <summary>
         ///     予約済みの爆発時刻までの残り時間から、0〜1の接近進捗を算出します。
-        ///     小節周期ではなく絶対時刻を基準にするため、予約が何小節先でも遷移は必ず1回だけになります。
         /// </summary>
         /// <returns> 0〜1の進捗。予約が無い場合や算出できない場合は0。 </returns>
         private float GetDetonateApproach()
@@ -155,16 +154,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             MusicSyncState musicSyncState = _musicSyncView != null ? _musicSyncView.MusicSyncState : null;
-            if (musicSyncState == null || musicSyncState.BeatLength <= 0d)
+            if (musicSyncState == null)
             {
                 return 0f;
             }
 
-            double leadSeconds = musicSyncState.BeatLength * DETONATE_LEAD_BEAT_COUNT;
-            double remainingSeconds = _reservationUsecase.DetonateExecutionTime - musicSyncState.PlayTime;
-
-            // 区間に入る前は0のまま、爆発時刻に向かって1へ近づく。
-            return Mathf.Clamp01((float)(1d - remainingSeconds / leadSeconds));
+            return musicSyncState.GetNormalizedApproach(
+                _reservationUsecase.DetonateExecutionTime,
+                DETONATE_LEAD_BEAT_COUNT);
         }
 
         /// <summary>
