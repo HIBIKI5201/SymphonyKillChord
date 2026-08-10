@@ -34,6 +34,11 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         public event Action On1BeatBefore;
 
+        /// <summary> 予約中の爆発時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
+        public double DetonateExecutionTime { get; private set; }
+        /// <summary> 爆発予約が有効かどうか。 </summary>
+        public bool HasDetonateReservation { get; private set; }
+
         public void Dispose()
         {
             if (_cancellationTokenSource != null)
@@ -42,6 +47,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
+
+            HasDetonateReservation = false;
         }
         /// <summary>
         ///     予約をキャンセルする。
@@ -57,6 +64,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
+            HasDetonateReservation = false;
         }
         /// <summary>
         ///     爆発タイミングを予約する。
@@ -68,10 +76,12 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _musicActionScheduler.Schedule(
+            // 爆発の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
+            DetonateExecutionTime = _musicActionScheduler.Schedule(
                 _entity.MusicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
+            HasDetonateReservation = true;
                 _musicActionScheduler.Schedule(
                 new MusicSyncSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 2),// 2拍前
                 Handle2BeatBefore,
@@ -88,6 +98,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         private void HandleReservedTimingReached()
         {
             Debug.Log("予約されたタイミングに到達しました。");
+            HasDetonateReservation = false;
             OnReservedTimingReached?.Invoke();
         }
 
