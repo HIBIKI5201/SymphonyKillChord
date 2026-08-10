@@ -16,6 +16,6 @@ MonoBehaviour:
     _id: scenario_stage_02
     _hashId: 1711044682
   _toStageId:
-    _id: battle_stage_01
-    _hashId: 718734217
+    _id: battle_stage_02
+    _hashId: -1277275597
   _advanceMode: 0
