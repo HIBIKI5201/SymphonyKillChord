@@ -18,10 +18,16 @@ MonoBehaviour:
   _battleSceneName: Stage_01
   _waves:
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 2
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates:
@@ -30,52 +36,88 @@ MonoBehaviour:
     - _id: PositionPair_16
       _hashId: 1843852890
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 1
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates: []
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 1
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates:
     - _id: 
       _hashId: 0
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 1
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates: []
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 1
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates: []
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 1
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates: []
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 2
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 2
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
     SpawnPointCandidates: []
