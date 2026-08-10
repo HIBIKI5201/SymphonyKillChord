@@ -683,7 +683,7 @@ namespace KillChord.Editor.AutoBuilder
                     Debug.LogError($"[{nameof(AutoBuildExecuter)}] {batchMessage}");
                 }
 
-                ExitIfBatchMode(session.ForceBatchMode, batchSucceeded ? 0 : 1);
+                ExitIfBatchMode(true, batchSucceeded ? 0 : 1);
                 return;
             }
 
