@@ -584,7 +584,7 @@ namespace KillChord.Editor.AutoBuilder
             LogDebug("エディタの準備完了（コンパイル・アセット更新終了）待機を開始");
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
-            await SymphonyTask.WaitUntil(() =>
+            await SymphonyAwaitable.WaitUntil(() =>
             {
                 if (stopwatch.Elapsed.TotalSeconds > timeoutSeconds)
                 {
