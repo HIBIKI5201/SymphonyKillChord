@@ -27,6 +27,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private async void Start()
         {
+            if (!IsBootedThroughPersistentFlow)
+            {
+                Debug.Log(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"常駐シーンが未起動のため、インゲーム初期化を行いません。{gameObject.scene.name}");
+                return;
+            }
+
             bool isSuccess = false;
 
             try
@@ -118,6 +126,15 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 CompleteSceneInitialization(isSuccess);
             }
         }
+
+        /// <summary>
+        ///     常駐シーンの初期化を経てこのシーンが起動されたかを示します。
+        ///     falseの場合、このシーンはインゲームシーンを直接開いて再生した場合などの
+        ///     フローに乗っていないシーンであり、起動時のシーン整理でアンロードされます。
+        ///     前提となる常駐サービスは登録されないため、待機しても解決しません。
+        /// </summary>
+        private static bool IsBootedThroughPersistentFlow =>
+            ServiceLocator.IsExistInstance<ISceneInitializationReadiness>();
 
         /// <summary>
         ///     現在のインゲームシーン優先度を登録します。
