@@ -456,12 +456,32 @@ namespace KillChord.Editor.AutoBuilder
 
                 await WaitForEditorReady();
 
+                int executePlayerBuildRetryCount = 0;
+                const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
+                
                 // BuildはdelayCallから実行する。
                 EditorApplication.delayCall += ExecutePlayerBuild;
 
                 void ExecutePlayerBuild()
                 {
                     EditorApplication.delayCall -= ExecutePlayerBuild;
+
+                    if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+                    {
+                        executePlayerBuildRetryCount++;
+
+                        if (executePlayerBuildRetryCount > MAX_EXECUTE_PLAYER_BUILD_RETRY)
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer retry limit exceeded : {profile.name}");
+
+                            NextSession(true);
+                            return;
+                        }
+
+                        EditorApplication.delayCall += ExecutePlayerBuild;
+                        return;
+                    }
 
                     bool hasFailure;
                     try
