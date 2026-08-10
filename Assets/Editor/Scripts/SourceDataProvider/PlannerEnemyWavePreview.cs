@@ -171,7 +171,7 @@ namespace KillChord.Editor.SourceDataProvider
                 SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(
                     WAVE_STAGE_EFFECTS_PROPERTY_NAME);
 
-                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
+                int enemyDefinitionCount = detailsProperty?.arraySize ?? 0;
                 int spawnCount = CountEnemies(detailsProperty);
                 int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
                 float duration = durationProperty?.floatValue ?? 0f;
@@ -179,7 +179,8 @@ namespace KillChord.Editor.SourceDataProvider
 
                 EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
                 EditorGUILayout.LabelField(
-                    $"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
+                    $"敵データ: {enemyDefinitionCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
+                DrawEnemyDefinitions(detailsProperty);
                 Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
                 EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
 
@@ -371,6 +372,35 @@ namespace KillChord.Editor.SourceDataProvider
             return count;
         }
 
+        /// <summary>
+        ///     Waveに設定された個別の敵データIDと生成数を表示します。
+        /// </summary>
+        /// <param name="detailsProperty"> Wave詳細配列です。 </param>
+        private static void DrawEnemyDefinitions(SerializedProperty detailsProperty)
+        {
+            if (detailsProperty == null || !detailsProperty.isArray)
+            {
+                return;
+            }
+
+            for (int i = 0; i < detailsProperty.arraySize; i++)
+            {
+                SerializedProperty detail = detailsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty definitionIdProperty = detail.FindPropertyRelative(
+                    WAVE_ENEMY_DEFINITION_ID_PROPERTY_NAME);
+                SerializedProperty definitionIdValueProperty = definitionIdProperty?.FindPropertyRelative(
+                    DATA_ID_VALUE_PROPERTY_NAME);
+                SerializedProperty amountProperty = detail.FindPropertyRelative(
+                    WAVE_ENEMY_AMOUNT_PROPERTY_NAME);
+                string definitionId = string.IsNullOrWhiteSpace(definitionIdValueProperty?.stringValue)
+                    ? "<未設定>"
+                    : definitionIdValueProperty.stringValue;
+                EditorGUILayout.LabelField(
+                    $"  {definitionId} × {amountProperty?.intValue ?? 0}",
+                    EditorStyles.miniLabel);
+            }
+        }
+
         private const string ID_PROPERTY_NAME = "_id";
         private const string DATA_ID_VALUE_PROPERTY_NAME = "_id";
         private const string DATA_ID_HASH_PROPERTY_NAME = "_hashId";
@@ -381,6 +411,7 @@ namespace KillChord.Editor.SourceDataProvider
         private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
         private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
         private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
+        private const string WAVE_ENEMY_DEFINITION_ID_PROPERTY_NAME = "EnemyDefinitionId";
         private const string SPAWN_POINT_CANDIDATES_PROPERTY_NAME = "SpawnPointCandidates";
         private const string BATTLE_SCENE_NAME_PROPERTY_NAME = "_battleSceneName";
     }

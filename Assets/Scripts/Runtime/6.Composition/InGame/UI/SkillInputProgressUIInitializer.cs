@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
 
             return true;

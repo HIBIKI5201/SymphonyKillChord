@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         }
         public override bool Build()
         {
-            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateTypeEnum.Locator);
             return true;
         }
         public override void Shutdown()

@@ -96,3 +96,6 @@ __pycache__/
 
 # Claude Code のローカル設定（各自の環境依存のため共有しない）
 .claude/settings.local.json
+
+# Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
+Packages/com.singularitygroup.hotreload/
