@@ -594,6 +594,139 @@ jobs:
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
         shell: pwsh
+# ==================================================================================================
+
+      - name: 必要なビルドモジュールの確認
+        id: module_check
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::必要なビルドモジュールの確認"
+
+          $LogPath = "unity_module_check.log"
+          if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
+
+          $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList @("-batchmode", "-quit", "-nographics", "-ignorecompilererrors", "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuildExecuter.CheckRequiredModules", "-logFile", $LogPath) `
+            -PassThru -Wait -NoNewWindow
+
+          Write-Host "Unity終了コード: $($Process.ExitCode)"
+
+          if (-not (Test-Path $LogPath)) {
+              Write-Host "::error::ログファイルが生成されませんでした。"
+              exit 1
+          }
+
+          $Content = Get-Content $LogPath -Raw
+
+          if ($Content -notmatch "MODULE_CHECK") {
+              Write-Host "::error::MODULE_CHECKの出力がありません。Unity実行に失敗した可能性があります。"
+              exit 1
+          }
+
+          $MissingAndroid = $Content -match "MODULE_CHECK\|Android\|MISSING"
+          $MissingMacOS   = $Content -match "MODULE_CHECK\|macOS\|MISSING"
+
+          "missing_android=$([bool]$MissingAndroid)" | Add-Content -Path $env:GITHUB_OUTPUT
+          "missing_macos=$([bool]$MissingMacOS)"     | Add-Content -Path $env:GITHUB_OUTPUT
+
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: 不足モジュールの追加インストール
+        id: module_install
+        if: steps.module_check.outputs.missing_android == 'True' || steps.module_check.outputs.missing_macos == 'True'
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::不足モジュールの追加インストール"
+
+          # UNITY_EXE_PATH（例: C:\...\Hub\Editor\6000.3.10f1\Editor\Unity.exe）からバージョン文字列を抽出する
+          if ("$env:UNITY_EXE_PATH" -match '\\Editor\\([^\\]+)\\Editor\\Unity\.exe$') {
+            $UnityVersion = $Matches[1]
+          } else {
+            Write-Host "::error::UNITY_EXE_PATH からUnityバージョンを特定できませんでした: $env:UNITY_EXE_PATH"
+            exit 1
+          }
+          Write-Host "対象Unityバージョン: $UnityVersion"
+
+          $HubPath = "C:\Program Files\Unity Hub\Unity Hub.exe"
+          if (-not (Test-Path $HubPath)) {
+            Write-Host "::error::Unity Hubが見つかりません: $HubPath"
+            exit 1
+          }
+
+          $Modules = @()
+          if ("${{ steps.module_check.outputs.missing_android }}" -eq "True") { $Modules += "android" }
+          if ("${{ steps.module_check.outputs.missing_macos }}" -eq "True")   { $Modules += "mac-mono" }
+
+          Write-Host "インストール対象モジュール: $($Modules -join ', ')"
+
+          & "$HubPath" -- --headless install-modules --version $UnityVersion -m $Modules --childModules
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error::モジュールのインストールに失敗しました (終了コード $LASTEXITCODE)"
+            exit 1
+          }
+
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: モジュール追加インストール後の再検証
+        if: steps.module_install.outcome == 'success'
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::モジュール追加インストール後の再検証"
+
+          $LogPath = "unity_module_check_after_install.log"
+          if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
+
+          $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList @("-batchmode", "-quit", "-nographics", "-ignorecompilererrors", "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuildExecuter.CheckRequiredModules", "-logFile", $LogPath) `
+            -PassThru -Wait -NoNewWindow
+
+          Write-Host "Unity終了コード: $($Process.ExitCode)"
+
+          if (Test-Path $LogPath) {
+            Get-Content -Path $LogPath | Write-Host
+          }
+            
+          $Content = Get-Content $LogPath -Raw
+                  
+          if ($Content -notmatch "MODULE_CHECK\|") {
+            Write-Host "::error::MODULE_CHECKの出力がありません。"
+            exit 1
+          }
+         
+          $MissingAndroid = $Content -match "MODULE_CHECK\|Android\|MISSING"
+          $MissingMacOS   = $Content -match "MODULE_CHECK\|macOS\|MISSING"
+
+          if ($MissingAndroid -or $MissingMacOS) {
+
+              if ($MissingAndroid) {
+                  Write-Host "::error::Androidモジュールが不足しています。"
+              }
+
+              if ($MissingMacOS) {
+                  Write-Host "::error::macOSモジュールが不足しています。"
+              }
+
+              exit 1
+          }
+
+          if ($Process.ExitCode -ne 0) {
+              Write-Host "::warning::Unityは終了コード $($Process.ExitCode) を返しましたが、モジュール確認は成功しています。"
+          }
+
+          Write-Host "::endgroup::"
+        shell: pwsh
 
 # ==================================================================================================
 
