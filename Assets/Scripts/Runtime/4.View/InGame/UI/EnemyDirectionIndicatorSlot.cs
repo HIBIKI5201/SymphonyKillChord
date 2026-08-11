@@ -75,19 +75,13 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <summary> 最後に確定または読み取った透明度。 </summary>
         public float CurrentAlpha => _currentAlpha;
 
-        /// <summary> フェード完了処理を識別する世代番号。 </summary>
-        public int MotionVersion => _motionVersion;
-
         /// <summary>
-        ///     希望表示状態を記録し、Motion世代を進める。
+        ///     希望表示状態を記録する。
         /// </summary>
         /// <param name="isVisible"> 表示する場合はtrue。 </param>
-        /// <returns> 更新後のMotion世代番号。 </returns>
-        public int RecordVisibility(bool isVisible)
+        public void RecordVisibility(bool isVisible)
         {
             _isVisible = isVisible;
-            _motionVersion++;
-            return _motionVersion;
         }
 
         /// <summary>
@@ -142,6 +136,32 @@ namespace KillChord.Runtime.View.InGame.UI
         }
 
         /// <summary>
+        ///     フェード中の透明度を反映し、非表示への到達時にGameObjectを無効化する。
+        /// </summary>
+        /// <param name="alpha"> 反映する透明度。 </param>
+        public void ApplyFadeAlpha(float alpha)
+        {
+            ApplyAlpha(alpha);
+            if (!_isVisible && alpha <= 0f)
+            {
+                GameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        ///     フェードを使わずに透明度と表示状態を確定する。
+        /// </summary>
+        /// <param name="targetAlpha"> 確定する透明度。 </param>
+        public void CompleteVisibility(float targetAlpha)
+        {
+            ApplyAlpha(targetAlpha);
+            if (!_isVisible)
+            {
+                GameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
         ///     Materialの透明度制御に使用するメインカラーを取得する。
         /// </summary>
         /// <param name="material"> 検査するMaterial。 </param>
@@ -176,7 +196,6 @@ namespace KillChord.Runtime.View.InGame.UI
         private readonly RendererMaterialState[][] _materialStates;
         private MotionHandle _motionHandle;
         private float _currentAlpha;
-        private int _motionVersion;
         private bool _isVisible;
 
         /// <summary>
