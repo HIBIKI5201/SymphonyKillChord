@@ -3,30 +3,46 @@ using LitMotion.Extensions;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.UI
 {
     public sealed class LetterBoxAnimationGUI : MonoBehaviour
     {
+        /// <summary>
+        ///     レターボックスを即座に表示状態にする。
+        /// </summary>
         public void ActiveAspectImmediate()
         {
             Vector2 canvas = _canvas.sizeDelta;
             Vector2 screenSize = AspectToSizeDelta(ASPECT, canvas);
-            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * 0.5f;
+            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * HALF;
 
             _upperLetter.sizeDelta = new Vector2(_upperLetter.sizeDelta.x, letterSizeY);
             _lowerLetter.sizeDelta = new Vector2(_lowerLetter.sizeDelta.x, letterSizeY);
         }
+
+        /// <summary>
+        ///     レターボックスを即座に非表示状態にする。
+        /// </summary>
         public void DeactiveAspectImmediate()
         {
             _upperLetter.sizeDelta = new Vector2(_upperLetter.sizeDelta.x, 0f);
             _lowerLetter.sizeDelta = new Vector2(_lowerLetter.sizeDelta.x, 0f);
         }
+
+        /// <summary>
+        ///     レターボックスを表示状態へアニメーションさせる。
+        /// </summary>
+        /// <param name="duration"> アニメーションにかける秒数。</param>
         public void ActiveAspect(float duration)
         {
+            // 再生中のアニメーションが残っていると値が競合するため、先に破棄する。
             _handle.TryCancel();
+
             Vector2 canvas = _canvas.sizeDelta;
             Vector2 screenSize = AspectToSizeDelta(ASPECT, canvas);
-            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * 0.5f;
+            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * HALF;
+
+            // 上下の帯を同時に動かすため、Joinで並列に繋ぐ。
             _handle = LSequence.Create()
                 .Join(LMotion.Create(0f, letterSizeY, duration)
                     .BindToSizeDeltaY(_upperLetter))
@@ -34,43 +50,27 @@ namespace KillChord.Runtime.Composition
                     .BindToSizeDeltaY(_lowerLetter))
                 .Run();
         }
+
+        /// <summary>
+        ///     レターボックスを非表示状態へアニメーションさせる。
+        /// </summary>
+        /// <param name="duration"> アニメーションにかける秒数。</param>
         public void DeactiveAspect(float duration)
         {
+            // 再生中のアニメーションが残っていると値が競合するため、先に破棄する。
             _handle.TryCancel();
+
             Vector2 canvas = _canvas.sizeDelta;
             Vector2 screenSize = AspectToSizeDelta(ASPECT, canvas);
-            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * 0.5f;
+            float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * HALF;
 
+            // 上下の帯を同時に動かすため、Joinで並列に繋ぐ。
             _handle = LSequence.Create()
                 .Join(LMotion.Create(letterSizeY, 0f, duration)
                     .BindToSizeDeltaY(_upperLetter))
                 .Join(LMotion.Create(letterSizeY, 0f, duration)
                     .BindToSizeDeltaY(_lowerLetter))
                 .Run();
-        }
-
-
-        [SerializeField] private RectTransform _canvas;
-        [SerializeField] private RectTransform _upperLetter;
-        [SerializeField] private RectTransform _lowerLetter;
-        private void Awake()
-        {
-            if (_canvas == null)
-            {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Canvasが設定されていません", this);
-            }
-            if (_upperLetter == null)
-            {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Upper Letterが設定されていません", this);
-            }
-            if (_lowerLetter == null)
-            {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Lower Letterが設定されていません", this);
-            }
-        }
-        private void OnDestroy()
-        {
-            _handle.TryCancel();
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace KillChord.Runtime.Composition
         /// </summary>
         /// <param name="aspect"> 目標とする縦横比。</param>
         /// <param name="sizeDelta"> 収める領域のサイズ。</param>
-        /// <returns> aspectと同じ比率を持ち、sizeDelta内に収まるサイズ。</returns> 
+        /// <returns> aspectと同じ比率を持ち、sizeDelta内に収まるサイズ。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 AspectToSizeDelta(in Vector2 aspect, in Vector2 sizeDelta)
         {
@@ -94,7 +94,48 @@ namespace KillChord.Runtime.Composition
             return aspect * scale;
         }
 
-        private MotionHandle _handle;
+        /// <summary> 余白を上下の帯へ均等に分配するための係数。 </summary>
+        private const float HALF = 0.5f;
+
+        /// <summary> 目標とするレターボックスの縦横比。 </summary>
         private static readonly Vector2 ASPECT = new Vector2(2.35f, 1f);
+
+        [Tooltip("レターボックスの基準となるCanvasのRectTransform")]
+        [SerializeField] private RectTransform _canvas;
+
+        [Tooltip("画面上側に表示する帯のRectTransform")]
+        [SerializeField] private RectTransform _upperLetter;
+
+        [Tooltip("画面下側に表示する帯のRectTransform")]
+        [SerializeField] private RectTransform _lowerLetter;
+
+        private MotionHandle _handle;
+
+        /// <summary>
+        ///     インスペクターの設定漏れを検出する。
+        /// </summary>
+        private void Awake()
+        {
+            if (_canvas == null)
+            {
+                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Canvasが設定されていません", this);
+            }
+            if (_upperLetter == null)
+            {
+                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Upper Letterが設定されていません", this);
+            }
+            if (_lowerLetter == null)
+            {
+                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Lower Letterが設定されていません", this);
+            }
+        }
+
+        /// <summary>
+        ///     破棄時に再生中のアニメーションを停止する。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _handle.TryCancel();
+        }
     }
 }
