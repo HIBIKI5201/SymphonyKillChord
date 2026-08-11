@@ -314,6 +314,66 @@ jobs:
 
 # ==================================================================================================
 
+      - name: Unity Hubの検索
+        id: unity_hub
+        shell: pwsh
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::Unity Hubの検索"
+
+          # 既定のインストール先
+          $Candidates = @(
+            "C:\Program Files\Unity Hub\Unity Hub.exe",
+            "C:\Program Files (x86)\Unity Hub\Unity Hub.exe"
+          )
+
+          $HubPath = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+          # レジストリから検索
+          if (-not $HubPath) {
+            $Keys = @(
+              "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
+              "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
+              "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+            )
+
+            $InstallLocation = Get-ItemProperty $Keys -ErrorAction SilentlyContinue |
+              Where-Object { $_.DisplayName -eq "Unity Hub" } |
+              Select-Object -ExpandProperty InstallLocation -First 1
+
+            if ($InstallLocation) {
+              $Exe = Join-Path $InstallLocation "Unity Hub.exe"
+              if (Test-Path $Exe) {
+                $HubPath = $Exe
+              }
+            }
+          }
+
+          # 最終手段としてドライブ全体を検索
+          if (-not $HubPath) {
+            $HubPath = Get-ChildItem "C:\" `
+              -Filter "Unity Hub.exe" `
+              -Recurse `
+              -File `
+              -ErrorAction SilentlyContinue |
+              Select-Object -ExpandProperty FullName -First 1
+          }
+
+          if (-not $HubPath) {
+            Write-Host "::error::Unity Hub.exe が見つかりませんでした。"
+            exit 1
+          }
+
+          Write-Host "Unity Hub: $HubPath"
+
+          "UNITY_HUB_PATH=$HubPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
       - name: Unityライセンス状態の事前確認
         run: |
           $LogPath = "unity_license_check.log"
@@ -629,6 +689,10 @@ jobs:
           $MissingAndroid = $Content -match "MODULE_CHECK\|Android\|MISSING"
           $MissingMacOS   = $Content -match "MODULE_CHECK\|macOS\|MISSING"
 
+          if ($MissingAndroid -or $MissingMacOS) {
+            Write-Host "::warning::不足モジュールがあります。次ステップでモジュールが追加インストールされます。" 
+          }
+
           "missing_android=$([bool]$MissingAndroid)" | Add-Content -Path $env:GITHUB_OUTPUT
           "missing_macos=$([bool]$MissingMacOS)"     | Add-Content -Path $env:GITHUB_OUTPUT
 
@@ -655,7 +719,7 @@ jobs:
           }
           Write-Host "対象Unityバージョン: $UnityVersion"
 
-          $HubPath = "C:\Program Files\Unity Hub\Unity Hub.exe"
+          $HubPath = "$env:UNITY_HUB_PATH"
           if (-not (Test-Path $HubPath)) {
             Write-Host "::error::Unity Hubが見つかりません: $HubPath"
             exit 1
