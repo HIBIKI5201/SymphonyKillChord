@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -19,11 +20,11 @@ namespace KillChord.Editor.AutoBuilder
         public static void RunFromCli()
         {
             string buildMode = GetCliArg("-buildMode");
-            CheckRequiredModules();
             PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode);
         }
         
         /// <summary>
+        ///     【GitHub Actions 用エントリポイント】
         ///     ビルド対象プラットフォームのモジュールがインストール済みかを確認し、
         ///     結果をログへ出力してエディタを終了する。
         /// </summary>
@@ -36,28 +37,27 @@ namespace KillChord.Editor.AutoBuilder
             };
 
             bool allSupported = true;
+            List<string> missingModules = new();
 
             foreach ((BuildTarget target, string label) in requiredTargets)
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
                 bool supported = BuildPipeline.IsBuildTargetSupported(group, target);
 
-                Debug.Log($"[{nameof(AutoBuildExecuter)}] MODULE_CHECK {label} : {(supported ? "OK" : "MISSING")}");
+                Debug.Log($"MODULE_CHECK|{label}|{(supported ? "OK" : "MISSING")}");
 
                 if (!supported)
                 {
                     allSupported = false;
+                    missingModules.Add(label);
                 }
             }
 
             string msg = allSupported ?
                 $"[{nameof(AutoBuildExecuter)}] 全ての必要なモジュールがインストール済みです。" :
-                $"[{nameof(AutoBuildExecuter)}] 必要なモジュールが不足しています。ビルドを続行できません。";
+                $"[{nameof(AutoBuildExecuter)}] 不足モジュール: {string.Join(", ", missingModules)}";
             Debug.Log(msg);
-            if (!allSupported)
-            {
-                EditorApplication.Exit(1);
-            }
+            AutoBuildExecuter.ExitIfBatchMode(true, exitCode: allSupported ? 0 : 1);
         }
 
         /// <summary>
