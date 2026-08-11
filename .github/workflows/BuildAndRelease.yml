@@ -747,23 +747,24 @@ jobs:
           Write-Host "インストール対象モジュール: $($Modules -join ', ')"
 
           $Arguments = @(
-            "--",
-            "--headless",
-            "--errors",
-            "install-modules",
-            "--version",
-            $UnityVersion,
-            "-m"
+              "--",
+              "--headless",
+              "install-modules",
+              "--version",
+              $UnityVersion,
+              "-m"
           ) + $Modules + @(
-            "--childModules"
+              "--childModules"
           )
 
+          Write-Host "ArgumentList:"
+          $Arguments | ForEach-Object { Write-Host "[$_]" }
+
           $Process = Start-Process `
-            -FilePath $HubPath `
-            -ArgumentList $Arguments `
-            -Wait `
-            -PassThru `
-            -NoNewWindow
+              -FilePath $HubPath `
+              -ArgumentList $Arguments `
+              -Wait `
+              -PassThru
 
           Write-Host "Unity Hub終了コード: $($Process.ExitCode)"
 
