@@ -2,9 +2,12 @@ using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -21,6 +24,46 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         /// <summary> 実行順。 </summary>
         public override int Order => 660;
+
+        /// <summary>
+        ///     敵方向表示の設定をAddressablesから読み込む。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
+        /// <returns> 読み込みに成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            ReleaseLoadedConfig();
+
+            try
+            {
+                _loadedConfig = await _configKey.LoadAssetAsync<EnemyDirectionIndicatorConfig>(
+                    this,
+                    cancellationToken);
+                if (_loadedConfig != null)
+                {
+                    return true;
+                }
+
+                Debug.LogError(
+                    $"[{nameof(EnemyDirectionIndicatorInitializer)}] 敵方向表示のConfigを読み込めませんでした。",
+                    this);
+                ReleaseLoadedConfig();
+                return false;
+            }
+            catch (OperationCanceledException)
+            {
+                ReleaseLoadedConfig();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"[{nameof(EnemyDirectionIndicatorInitializer)}] 敵方向表示のConfig読み込みに失敗しました: {exception}",
+                    this);
+                ReleaseLoadedConfig();
+                return false;
+            }
+        }
 
         /// <summary>
         ///     Target、Player、Cameraと結合して敵方向表示を構築する。
@@ -63,10 +106,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _view = Instantiate(_viewPrefab, playerTransform, false);
                 if (!_view.Initialize(
                         mainCamera,
-                        _config.MaximumDisplayCount,
-                        _config.PositionOffset,
-                        _config.FadeEase,
-                        _config.FadeDuration))
+                        _loadedConfig.MaximumDisplayCount,
+                        _loadedConfig.PositionOffset,
+                        _loadedConfig.FadeEase,
+                        _loadedConfig.FadeDuration))
                 {
                     Cleanup();
                     return false;
@@ -82,7 +125,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                     _viewModel,
                     _getPlayerPosition,
                     _isOutsideViewport,
-                    _config.MaximumDistance);
+                    _loadedConfig.MaximumDistance);
                 _view.OnUpdate += _presenter.Update;
                 _isInitialized = true;
                 return true;
@@ -101,10 +144,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public override void Shutdown()
         {
             Cleanup();
+            ReleaseLoadedConfig();
         }
 
-        [SerializeField, Tooltip("敵方向表示の設定。")]
-        private EnemyDirectionIndicatorConfig _config;
+        [SerializeField, SourceDataAddress, Tooltip("敵方向表示ConfigのAddressablesキー。")]
+        private string _configKey;
 
         [SerializeField, Tooltip("プレイヤー配下へ生成する敵方向表示View Prefab。")]
         private EnemyDirectionIndicatorView _viewPrefab;
@@ -114,6 +158,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private EnemyDirectionIndicatorPresenter _presenter;
         private Func<Vector3> _getPlayerPosition;
         private Func<Bounds, bool> _isOutsideViewport;
+        private EnemyDirectionIndicatorConfig _loadedConfig;
         private bool _isInitialized;
 
         /// <summary>
@@ -122,6 +167,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void OnDestroy()
         {
             Cleanup();
+            ReleaseLoadedConfig();
         }
 
         /// <summary>
@@ -130,24 +176,24 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 初期化可能な場合はtrue。 </returns>
         private bool ValidateConfig()
         {
-            if (_config == null || _viewPrefab == null)
+            if (_loadedConfig == null || _viewPrefab == null)
             {
                 Debug.LogError(
-                    $"[{nameof(EnemyDirectionIndicatorInitializer)}] ConfigまたはView Prefabがアサインされていません。",
+                    $"[{nameof(EnemyDirectionIndicatorInitializer)}] Configが未ロード、またはView Prefabがアサインされていません。",
                     this);
                 return false;
             }
 
-            if (_config.MaximumDisplayCount <= 0
-                || _config.MaximumDisplayCount > EnemyDirectionIndicatorConfig.MAXIMUM_DISPLAY_COUNT
-                || _config.MaximumDistance < 0f
-                || float.IsNaN(_config.MaximumDistance)
-                || float.IsInfinity(_config.MaximumDistance)
-                || _config.MaximumDistance > Mathf.Sqrt(float.MaxValue)
-                || !IsFinite(_config.PositionOffset)
-                || _config.FadeDuration < 0f
-                || float.IsNaN(_config.FadeDuration)
-                || float.IsInfinity(_config.FadeDuration))
+            if (_loadedConfig.MaximumDisplayCount <= 0
+                || _loadedConfig.MaximumDisplayCount > EnemyDirectionIndicatorConfig.MAXIMUM_DISPLAY_COUNT
+                || _loadedConfig.MaximumDistance < 0f
+                || float.IsNaN(_loadedConfig.MaximumDistance)
+                || float.IsInfinity(_loadedConfig.MaximumDistance)
+                || _loadedConfig.MaximumDistance > Mathf.Sqrt(float.MaxValue)
+                || !IsFinite(_loadedConfig.PositionOffset)
+                || _loadedConfig.FadeDuration < 0f
+                || float.IsNaN(_loadedConfig.FadeDuration)
+                || float.IsInfinity(_loadedConfig.FadeDuration))
             {
                 Debug.LogError(
                     $"[{nameof(EnemyDirectionIndicatorInitializer)}] Configの設定値が不正です。",
@@ -196,6 +242,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     ロード済みConfigとAddressablesハンドルを解放する。
+        /// </summary>
+        private void ReleaseLoadedConfig()
+        {
+            _configKey.ReleaseLoadedAsset(this);
+            _loadedConfig = null;
         }
     }
 }
