@@ -19,12 +19,18 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         public override int Order => 10;
 
         /// <summary>
-        ///     セーブシステムを生成する。
+        ///     セーブシステムを生成して登録する。
+        ///     <para>
+        ///         登録をBuildではなくInitで行うのは、ResourceLoadAsyncフェーズの他モジュールが
+        ///         セーブシステムを必要とするため。Coordinatorはフェーズ単位で実行するため、
+        ///         Buildで登録すると全モジュールのResourceLoadAsyncが終わるまで参照できない。
+        ///     </para>
         /// </summary>
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Init()
         {
             _savedataSystem = new SavedataSystem();
+            ServiceLocator.RegisterInstance(_savedataSystem);
             return true;
         }
 
@@ -45,16 +51,6 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
                 Debug.Log($"[{nameof(SavedataSystemInitializer)}] 旧IDを統一IDへ移行しました。", this);
             }
 
-            return true;
-        }
-
-        /// <summary>
-        ///     セーブシステムを生成して登録する。
-        /// </summary>
-        /// <returns> 成功した場合はtrue。 </returns>
-        public override bool Build()
-        {
-            ServiceLocator.RegisterInstance(_savedataSystem);
             return true;
         }
 

@@ -18,12 +18,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="attackInterval"></param>
         /// <param name="health"></param>
         /// <param name="combatSpec"></param>
+        /// <param name="criticalChance"> 会心率。武器ではなくキャラクターが持つ。 </param>
         public CharacterEntity(CharacterName name,
             HealthEntity health,
             CharacterCombatSpec combatSpec,
             AttackInterval attackInterval,
             Damage baseDamage,
-            IBuffSystem buffSystem
+            IBuffSystem buffSystem,
+            CriticalChance criticalChance = default
         )
         {
             if (health is null)
@@ -37,6 +39,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
             _baseDamage = baseDamage;
             _buffSystem = buffSystem;
+            _criticalChance = criticalChance;
         }
 
         /// <summary>
@@ -79,6 +82,9 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
         public Damage BaseDamage => _baseDamage;
         public IBuffSystem BuffSystem => _buffSystem;
+
+        /// <summary> キャラクターの会心率を取得する。 </summary>
+        public CriticalChance CriticalChance => _criticalChance;
 
         public void ChangeBaseDamage(Damage newDamage)
         {
@@ -159,5 +165,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
         private bool _isDeadNotified;
         private bool _isInvincible;
         private Damage _baseDamage;
+        private CriticalChance _criticalChance;
     }
 }
