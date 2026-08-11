@@ -42,7 +42,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return true;
             }
 
-            if (!ValidateReferences(camera, capacity, fadeDuration, out Renderer[] prefabRenderers))
+            if (!ValidateReferences(camera, capacity, fadeDuration))
             {
                 return false;
             }
@@ -69,8 +69,8 @@ namespace KillChord.Runtime.View.InGame.UI
                 _slots[i] = slot;
             }
 
-            _isInitialized = prefabRenderers.Length > 0;
-            return _isInitialized;
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return;
             }
 
-            int motionVersion = slot.RecordVisibility(isVisible);
+            slot.RecordVisibility(isVisible);
             slot.CancelMotion();
 
             if (isVisible)
@@ -128,15 +128,13 @@ namespace KillChord.Runtime.View.InGame.UI
             float targetAlpha = isVisible ? 1f : 0f;
             if (_fadeDuration <= 0f)
             {
-                slot.ApplyAlpha(targetAlpha);
-                CompleteVisibility(slot, motionVersion, isVisible, targetAlpha);
+                slot.CompleteVisibility(targetAlpha);
                 return;
             }
 
             MotionHandle motionHandle = LMotion.Create(slot.CurrentAlpha, targetAlpha, _fadeDuration)
                 .WithEase(_fadeEase)
-                .WithOnComplete(() => CompleteVisibility(slot, motionVersion, isVisible, targetAlpha))
-                .Bind(slot, static (alpha, state) => state.ApplyAlpha(alpha));
+                .Bind(slot, static (alpha, state) => state.ApplyFadeAlpha(alpha));
             slot.RecordMotion(motionHandle);
         }
 
@@ -192,16 +190,12 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="camera"> 判定用Camera。 </param>
         /// <param name="capacity"> 生成する表示スロット数。 </param>
         /// <param name="fadeDuration"> 表示・非表示のフェード時間。 </param>
-        /// <param name="prefabRenderers"> マーカーPrefabのRenderer一覧。 </param>
         /// <returns> 初期化可能な場合はtrue。 </returns>
         private bool ValidateReferences(
             Camera camera,
             int capacity,
-            float fadeDuration,
-            out Renderer[] prefabRenderers)
+            float fadeDuration)
         {
-            prefabRenderers = Array.Empty<Renderer>();
-
             if (camera == null
                 || _indicatorPrefab == null
                 || capacity <= 0
@@ -213,7 +207,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return false;
             }
 
-            prefabRenderers = _indicatorPrefab.GetComponentsInChildren<Renderer>(true);
+            Renderer[] prefabRenderers = _indicatorPrefab.GetComponentsInChildren<Renderer>(true);
             if (prefabRenderers.Length == 0)
             {
                 Debug.LogError($"[{nameof(EnemyDirectionIndicatorView)}] マーカーPrefabにRendererがありません。", this);
@@ -278,31 +272,6 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             return _slots[slotIndex];
-        }
-
-        /// <summary>
-        ///     現在世代のフェード完了状態を確定する。
-        /// </summary>
-        /// <param name="slot"> 更新対象の表示スロット。 </param>
-        /// <param name="motionVersion"> 開始時のMotion世代番号。 </param>
-        /// <param name="isVisible"> 完了後に表示する場合はtrue。 </param>
-        /// <param name="targetAlpha"> 完了時の透明度。 </param>
-        private static void CompleteVisibility(
-            EnemyDirectionIndicatorSlot slot,
-            int motionVersion,
-            bool isVisible,
-            float targetAlpha)
-        {
-            if (slot == null || slot.MotionVersion != motionVersion || slot.IsVisible != isVisible)
-            {
-                return;
-            }
-
-            slot.ApplyAlpha(targetAlpha);
-            if (!isVisible)
-            {
-                slot.GameObject.SetActive(false);
-            }
         }
 
     }

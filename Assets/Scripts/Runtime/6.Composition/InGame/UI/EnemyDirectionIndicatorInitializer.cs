@@ -211,12 +211,9 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 全成分が有限値の場合はtrue。 </returns>
         private static bool IsFinite(in Vector3 value)
         {
-            return !float.IsNaN(value.x)
-                && !float.IsInfinity(value.x)
-                && !float.IsNaN(value.y)
-                && !float.IsInfinity(value.y)
-                && !float.IsNaN(value.z)
-                && !float.IsInfinity(value.z);
+            return float.IsFinite(value.x)
+                && float.IsFinite(value.y)
+                && float.IsFinite(value.z);
         }
 
         /// <summary>
