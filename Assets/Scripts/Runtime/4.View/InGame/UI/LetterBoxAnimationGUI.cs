@@ -98,7 +98,7 @@ namespace KillChord.Runtime.View.InGame.UI
         private const float HALF = 0.5f;
 
         /// <summary> 目標とするレターボックスの縦横比。 </summary>
-        private static readonly Vector2 ASPECT = new Vector2(2.35f, 1f);
+        private static readonly Vector2 ASPECT = new Vector2(4.7f, 1f);
 
         [Tooltip("レターボックスの基準となるCanvasのRectTransform")]
         [SerializeField] private RectTransform _canvas;
