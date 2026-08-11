@@ -30,7 +30,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string root = UnityEngine.Application.streamingAssetsPath;
             bool isUrlPath = root.Contains("://", StringComparison.Ordinal);
             string authoringPath = isUrlPath
-                ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
+                            ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
                 : Path.Combine(root, "ScenarioAuthoring", $"{id}.events.csv");
             string scenarioPath = isUrlPath
                 ? $"{root.TrimEnd('/')}/Scenario/{id}.csv"
