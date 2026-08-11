@@ -1555,6 +1555,7 @@ GameObject:
   - component: {fileID: 2814488824962291877}
   - component: {fileID: 5236480580957991468}
   - component: {fileID: 278959643822293115}
+  - component: {fileID: 1152545160056203970}
   m_Layer: 5
   m_Name: InGameCanvas
   m_TagString: Untagged
@@ -1758,6 +1759,20 @@ MonoBehaviour:
   _rowViewPrefab: {fileID: 6913908989182649591, guid: 04bd5270143cdde4cbd1d48e0c85b204, type: 3}
   _stepViewPrefab: {fileID: 6918056803802211754, guid: 66815fe123251d543b9d2badba286944, type: 3}
   _rowRoot: {fileID: 7851524415466626811}
+--- !u!114 &1152545160056203970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4011713318222993239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bed714880725b64393ede296b9ab4d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.UI.EnemyDirectionIndicatorInitializer
+  _configKey: EnemyDirectionIndicatorConfig
+  _viewPrefab: {fileID: 526950080450594715, guid: 625c17f348ddea34f97fd726ac472e0f, type: 3}
 --- !u!1 &4144755797720839312
 GameObject:
   m_ObjectHideFlags: 0

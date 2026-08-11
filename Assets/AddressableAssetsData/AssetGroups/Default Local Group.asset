@@ -130,6 +130,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9feea8387900e4446bb1f6f882caafca
+    m_Address: EnemyDirectionIndicatorConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b11f6152160bbfc42b59af15ef998adc
     m_Address: InitialSkillLoadout
     m_ReadOnly: 0
