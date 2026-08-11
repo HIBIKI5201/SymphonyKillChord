@@ -1200,6 +1200,11 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""devicePath"": ""<Mouse>"",
                     ""isOptional"": false,
                     ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<VirtualMouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
                 }
             ]
         }
