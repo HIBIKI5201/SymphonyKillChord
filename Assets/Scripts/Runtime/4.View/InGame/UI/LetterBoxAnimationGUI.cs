@@ -12,6 +12,11 @@ namespace KillChord.Runtime.View.InGame.UI
         /// </summary>
         public void ActiveAspectImmediate()
         {
+            if (!_isValid)
+            {
+                return;
+            }
+
             Vector2 canvas = _canvas.sizeDelta;
             Vector2 screenSize = AspectToSizeDelta(ASPECT, canvas);
             float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * HALF;
@@ -25,6 +30,10 @@ namespace KillChord.Runtime.View.InGame.UI
         /// </summary>
         public void DeactiveAspectImmediate()
         {
+            if (!_isValid)
+            {
+                return;
+            }
             _upperLetter.sizeDelta = new Vector2(_upperLetter.sizeDelta.x, 0f);
             _lowerLetter.sizeDelta = new Vector2(_lowerLetter.sizeDelta.x, 0f);
         }
@@ -35,6 +44,10 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="duration"> アニメーションにかける秒数。</param>
         public void ActiveAspect(float duration)
         {
+            if (!_isValid)
+            {
+                return;
+            }
             // 再生中のアニメーションが残っていると値が競合するため、先に破棄する。
             _handle.TryCancel();
 
@@ -57,6 +70,10 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="duration"> アニメーションにかける秒数。</param>
         public void DeactiveAspect(float duration)
         {
+            if (!_isValid)
+            {
+                return;
+            }
             // 再生中のアニメーションが残っていると値が競合するため、先に破棄する。
             _handle.TryCancel();
 
@@ -110,6 +127,7 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField] private RectTransform _lowerLetter;
 
         private MotionHandle _handle;
+        private bool _isValid = false;
 
         /// <summary>
         ///     インスペクターの設定漏れを検出する。
@@ -118,16 +136,20 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             if (_canvas == null)
             {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Canvasが設定されていません", this);
+                Debug.LogError($"[{nameof(LetterBoxAnimationGUI)}] Canvasが設定されていません", this);
+                return;
             }
             if (_upperLetter == null)
             {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Upper Letterが設定されていません", this);
+                Debug.LogError($"[{nameof(LetterBoxAnimationGUI)}] Upper Letterが設定されていません", this);
+                return;
             }
             if (_lowerLetter == null)
             {
-                Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Lower Letterが設定されていません", this);
+                Debug.LogError($"[{nameof(LetterBoxAnimationGUI)}] Lower Letterが設定されていません", this);
+                return;
             }
+            _isValid = true;
         }
 
         /// <summary>
