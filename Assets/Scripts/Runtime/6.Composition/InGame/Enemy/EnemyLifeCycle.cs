@@ -150,7 +150,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
             // View接続
             var animationComposition = new AnimationComposition();
@@ -161,13 +161,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter);
             // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
-            MusicSyncSpec warningTiming = attackMusicSpec.BattleTiming;
+            _musicSyncState = musicSyncState;
             _raycastView.Initialize(
                 target,
                 spec.AttackRangeMax.Value,
-                () => musicSyncState.GetNormalizedApproach(
-                        battleState.FirstAttack ? attackMusicSpec.EncounterTiming : attackMusicSpec.BattleTiming,
-                        WARNING_LEAD_BEAT_COUNT));
+                GetAttackApproach);
 
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
@@ -349,9 +347,28 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view?.StopGameplay();
         }
 
+        /// <summary>
+        ///     予約済みの攻撃時刻までの残り時間から、警告デカール用の0〜1の接近進捗を算出します。
+        /// </summary>
+        /// <returns> 0〜1の進捗。予約が無い場合は0。 </returns>
+        private float GetAttackApproach()
+        {
+            if (_musicSyncState == null
+                || _attackReservationUsecase == null
+                || !_attackReservationUsecase.HasReservation)
+            {
+                return 0f;
+            }
+
+            return _musicSyncState.GetNormalizedApproach(
+                _attackReservationUsecase.AttackExecutionTime,
+                WARNING_LEAD_BEAT_COUNT);
+        }
+
         /// <summary> 警告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
         private const double WARNING_LEAD_BEAT_COUNT = 2d;
 
+        private MusicSyncState _musicSyncState;
         private System.Action _spawnerCallback;
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
