@@ -42,13 +42,13 @@ namespace KillChord.Runtime.View.InGame.UI
                 return true;
             }
 
-            if (!ValidateReferences(camera, capacity, fadeDuration, out Renderer[] prefabRenderers))
+            if (!ValidateReferences(camera, capacity, fadeDuration))
             {
                 return false;
             }
 
             _camera = camera;
-            _fadeDuration = fadeDuration;
+            _fadeDuration = 0;
             _fadeEase = fadeEase;
             _slots = new EnemyDirectionIndicatorSlot[capacity];
             _frustumPlanes = new Plane[FRUSTUM_PLANE_COUNT];
@@ -69,8 +69,8 @@ namespace KillChord.Runtime.View.InGame.UI
                 _slots[i] = slot;
             }
 
-            _isInitialized = prefabRenderers.Length > 0;
-            return _isInitialized;
+            _isInitialized = true;
+            return true;
         }
 
         /// <summary>
@@ -192,16 +192,12 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="camera"> 判定用Camera。 </param>
         /// <param name="capacity"> 生成する表示スロット数。 </param>
         /// <param name="fadeDuration"> 表示・非表示のフェード時間。 </param>
-        /// <param name="prefabRenderers"> マーカーPrefabのRenderer一覧。 </param>
         /// <returns> 初期化可能な場合はtrue。 </returns>
         private bool ValidateReferences(
             Camera camera,
             int capacity,
-            float fadeDuration,
-            out Renderer[] prefabRenderers)
+            float fadeDuration)
         {
-            prefabRenderers = Array.Empty<Renderer>();
-
             if (camera == null
                 || _indicatorPrefab == null
                 || capacity <= 0
@@ -213,7 +209,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return false;
             }
 
-            prefabRenderers = _indicatorPrefab.GetComponentsInChildren<Renderer>(true);
+            Renderer[] prefabRenderers = _indicatorPrefab.GetComponentsInChildren<Renderer>(true);
             if (prefabRenderers.Length == 0)
             {
                 Debug.LogError($"[{nameof(EnemyDirectionIndicatorView)}] マーカーPrefabにRendererがありません。", this);

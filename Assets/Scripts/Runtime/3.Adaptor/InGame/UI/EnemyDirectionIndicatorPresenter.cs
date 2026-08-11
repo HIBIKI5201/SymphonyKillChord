@@ -42,8 +42,6 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
             }
 
             _maximumSqrDistance = maximumDistance * maximumDistance;
-            _slotTargetIds = new Guid[_viewModel.Capacity];
-            _hasSlotTarget = new bool[_viewModel.Capacity];
             _registeredTargets = new List<ITargetableViewModel>(_viewModel.Capacity);
             _candidates = new List<Candidate>(_viewModel.Capacity);
         }
@@ -58,8 +56,6 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
             _candidates.Sort();
 
             int selectedCount = Mathf.Min(_viewModel.Capacity, _candidates.Count);
-            ReleaseUnselectedSlots(selectedCount);
-            AssignNewTargets(selectedCount);
             UpdateSlots(selectedCount);
         }
 
@@ -71,8 +67,6 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         private readonly Func<Vector3> _getPlayerPosition;
         private readonly Func<Bounds, bool> _isOutsideViewport;
         private readonly float _maximumSqrDistance;
-        private readonly Guid[] _slotTargetIds;
-        private readonly bool[] _hasSlotTarget;
         private readonly List<ITargetableViewModel> _registeredTargets;
         private readonly List<Candidate> _candidates;
 
@@ -117,66 +111,16 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
         }
 
         /// <summary>
-        ///     今回の選択対象から外れたスロットを解放する。
-        /// </summary>
-        /// <param name="selectedCount"> 距離順で選ばれた候補数。 </param>
-        private void ReleaseUnselectedSlots(int selectedCount)
-        {
-            for (int slotIndex = 0; slotIndex < _hasSlotTarget.Length; slotIndex++)
-            {
-                if (!_hasSlotTarget[slotIndex])
-                {
-                    continue;
-                }
-
-                if (TryFindSelectedCandidate(_slotTargetIds[slotIndex], selectedCount, out _))
-                {
-                    continue;
-                }
-
-                _hasSlotTarget[slotIndex] = false;
-                _slotTargetIds[slotIndex] = Guid.Empty;
-            }
-        }
-
-        /// <summary>
-        ///     新しく選ばれたターゲットを空きスロットへ割り当てる。
-        /// </summary>
-        /// <param name="selectedCount"> 距離順で選ばれた候補数。 </param>
-        private void AssignNewTargets(int selectedCount)
-        {
-            for (int candidateIndex = 0; candidateIndex < selectedCount; candidateIndex++)
-            {
-                Candidate candidate = _candidates[candidateIndex];
-                if (TryFindAssignedSlot(candidate.TargetId, out _))
-                {
-                    continue;
-                }
-
-                if (!TryFindFreeSlot(out int slotIndex))
-                {
-                    return;
-                }
-
-                _slotTargetIds[slotIndex] = candidate.TargetId;
-                _hasSlotTarget[slotIndex] = true;
-            }
-        }
-
-        /// <summary>
-        ///     全スロットの表示情報をViewModelへ送る。
+        ///     距離、TargetId順で全スロットの表示情報をViewModelへ送る。
         /// </summary>
         /// <param name="selectedCount"> 距離順で選ばれた候補数。 </param>
         private void UpdateSlots(int selectedCount)
         {
-            for (int slotIndex = 0; slotIndex < _hasSlotTarget.Length; slotIndex++)
+            for (int slotIndex = 0; slotIndex < _viewModel.Capacity; slotIndex++)
             {
-                if (_hasSlotTarget[slotIndex]
-                    && TryFindSelectedCandidate(
-                        _slotTargetIds[slotIndex],
-                        selectedCount,
-                        out Candidate candidate))
+                if (slotIndex < selectedCount)
                 {
+                    Candidate candidate = _candidates[slotIndex];
                     _viewModel.Update(new EnemyDirectionIndicatorDTO(
                         slotIndex,
                         true,
@@ -189,74 +133,6 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
                     false,
                     Vector3.zero));
             }
-        }
-
-        /// <summary>
-        ///     選択済み候補から指定TargetIdを検索する。
-        /// </summary>
-        /// <param name="targetId"> 検索するTargetId。 </param>
-        /// <param name="selectedCount"> 距離順で選ばれた候補数。 </param>
-        /// <param name="candidate"> 見つかった候補。 </param>
-        /// <returns> 見つかった場合はtrue。 </returns>
-        private bool TryFindSelectedCandidate(
-            Guid targetId,
-            int selectedCount,
-            out Candidate candidate)
-        {
-            for (int i = 0; i < selectedCount; i++)
-            {
-                if (_candidates[i].TargetId != targetId)
-                {
-                    continue;
-                }
-
-                candidate = _candidates[i];
-                return true;
-            }
-
-            candidate = default;
-            return false;
-        }
-
-        /// <summary>
-        ///     指定TargetIdが割り当て済みのスロットを検索する。
-        /// </summary>
-        /// <param name="targetId"> 検索するTargetId。 </param>
-        /// <param name="slotIndex"> 見つかったスロット番号。 </param>
-        /// <returns> 見つかった場合はtrue。 </returns>
-        private bool TryFindAssignedSlot(Guid targetId, out int slotIndex)
-        {
-            for (int i = 0; i < _hasSlotTarget.Length; i++)
-            {
-                if (_hasSlotTarget[i] && _slotTargetIds[i] == targetId)
-                {
-                    slotIndex = i;
-                    return true;
-                }
-            }
-
-            slotIndex = -1;
-            return false;
-        }
-
-        /// <summary>
-        ///     未割り当ての表示スロットを検索する。
-        /// </summary>
-        /// <param name="slotIndex"> 見つかったスロット番号。 </param>
-        /// <returns> 見つかった場合はtrue。 </returns>
-        private bool TryFindFreeSlot(out int slotIndex)
-        {
-            for (int i = 0; i < _hasSlotTarget.Length; i++)
-            {
-                if (!_hasSlotTarget[i])
-                {
-                    slotIndex = i;
-                    return true;
-                }
-            }
-
-            slotIndex = -1;
-            return false;
         }
 
         /// <summary>
