@@ -657,57 +657,6 @@ jobs:
 
 # ==================================================================================================
 
-      - name: 必要なビルドモジュールの確認
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::必要なビルドモジュールの確認"
-
-          $LogPath = "unity_module_check.log"
-          if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
-
-          $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
-            -ArgumentList @("-batchmode", "-quit", "-nographics", "-ignorecompilererrors", "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.CheckRequiredModules", "-logFile", $LogPath) `
-            -PassThru -Wait -NoNewWindow
-
-          Write-Host "Unity終了コード: $($Process.ExitCode)"
-
-          if (-not (Test-Path $LogPath)) {
-            Write-Host "::error::ログファイルが生成されませんでした。"
-            exit 1
-          }
-
-          $Content = Get-Content $LogPath -Raw
-
-          if ($Content -notmatch "MODULE_CHECK\|") {
-            Write-Host "::error::MODULE_CHECKの出力がありません。Unity実行に失敗した可能性があります。"
-            exit 1
-          }
-
-          $MissingAndroid = $Content -match "MODULE_CHECK\|Android\|MISSING"
-          $MissingMacOS   = $Content -match "MODULE_CHECK\|macOS\|MISSING"
-
-          if ($MissingAndroid) {
-            Write-Host "::error::Android Build Support がインストールされていません。"
-          }
-
-          if ($MissingMacOS) {
-            Write-Host "::error::macOS Build Support (Mono) がインストールされていません。"
-          }
-
-          if ($MissingAndroid -or $MissingMacOS) {
-            Write-Host "::error::必要なビルドモジュールが不足しているため、ワークフローを終了します。"
-            exit 1
-          }
-
-          Write-Host "必要なビルドモジュールはすべてインストールされています。"
-
-          Write-Host "::endgroup::"
-        shell: pwsh
-
-# ==================================================================================================
-
       - name: Unityビルドの実行
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
