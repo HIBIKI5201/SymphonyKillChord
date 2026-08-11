@@ -32,6 +32,14 @@ namespace KillChord.Editor.AutoBuilder
             /// <summary> 現在処理しているプロファイル位置です。 </summary>
             public int CurrentIndex;
 
+            /// <summary>
+            ///     現在のプロファイル（CurrentIndex）へのExecuteBuild試行回数です。
+            ///     ドメインリロードのたびにInitializeOnLoadMethod経由でResumeBuildが再発火し、
+            ///     同一プロファイルのビルドがゼロからやり直されることがあるため、
+            ///     無限にやり直し続けることを防ぐ上限判定に使用する。
+            /// </summary>
+            public int CurrentProfileAttemptCount;
+
             /// <summary> 自動ビルド中の場合はtrueです。 </summary>
             public bool Running;
 
@@ -117,6 +125,12 @@ namespace KillChord.Editor.AutoBuilder
         ///     再出力用ログを保持しすぎないための上限件数です。
         /// </summary>
         private const int MAX_CAPTURED_LOG_COUNT = 50;
+
+        /// <summary>
+        ///     ドメインリロードによる再試行が同一プロファイルに対して許容される最大回数です。
+        ///     超過した場合はそのプロファイルを失敗としてスキップし、次のプロファイルへ進めます。
+        /// </summary>
+        private const int MAX_PROFILE_ATTEMPT_COUNT = 10;
 
         /// <summary> 再出力用ログを保存するSessionStateキーです。 </summary>
         private const string PENDING_LOG_KEY = "AUTO_BUILD_PENDING_LOG";
@@ -385,6 +399,27 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
+            session.CurrentProfileAttemptCount++;
+            BuildSession.SaveSession(session);
+
+            if (session.CurrentProfileAttemptCount > MAX_PROFILE_ATTEMPT_COUNT)
+            {
+                string guid = session.CurrentIndex < session.ProfileGuids.Length
+                    ? session.ProfileGuids[session.CurrentIndex]
+                    : string.Empty;
+
+                Debug.LogError(
+                    $"[{nameof(AutoBuildExecuter)}] やり直し回数の上限（{MAX_PROFILE_ATTEMPT_COUNT}回）に達したため、このプロファイルをスキップします。GUID: {guid}");
+
+                session.CurrentIndex++;
+                session.CurrentProfileAttemptCount = 0;
+                session.HasFailure = true;
+                BuildSession.SaveSession(session);
+
+                EditorApplication.delayCall += ResumeBuild;
+                return;
+            }
+
             try
             {
                 await ExecuteBuildAsync(session);
@@ -535,6 +570,7 @@ namespace KillChord.Editor.AutoBuilder
                 {
                     LogDebug("次のセッションへの移行処理を開始");
                     session.CurrentIndex++;
+                    session.CurrentProfileAttemptCount = 0;
                     session.HasFailure |= hasFailure;
 
                     BuildSession.SaveSession(session);
@@ -551,6 +587,7 @@ namespace KillChord.Editor.AutoBuilder
                 
                 // タイムアウト時はプロファイルをスキップして次へ
                 session.CurrentIndex++;
+                session.CurrentProfileAttemptCount = 0;
                 session.HasFailure = true;
                 
                 BuildSession.SaveSession(session);
@@ -565,6 +602,7 @@ namespace KillChord.Editor.AutoBuilder
                 
                 // 予期しない例外はプロファイルをスキップして次へ
                 session.CurrentIndex++;
+                session.CurrentProfileAttemptCount = 0;
                 session.HasFailure = true;
                 
                 BuildSession.SaveSession(session);
