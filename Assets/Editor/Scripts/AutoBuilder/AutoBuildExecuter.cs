@@ -684,7 +684,6 @@ namespace KillChord.Editor.AutoBuilder
         public static BuildPlayerWithProfileOptions CreateBuildPlayerOptions(BuildProfile profile, string path = null)
         {
             LogDebug("BuildPlayerWithProfileOptionsの生成処理を開始");
-            BuildProfile.SetActiveBuildProfile(profile);
 
             return new BuildPlayerWithProfileOptions
             {

@@ -126,6 +126,53 @@ jobs:
       BUILD_MODE: ''
 
     steps:
+      - name: クローン先プロジェクトフォルダおよびディスク事前クリーンアップ
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
+          $Workspace = "${{ github.workspace }}"
+          Write-Host "対象プロジェクトフォルダ: $Workspace"
+
+          # 1. プロジェクトフォルダが存在する場合、未追跡ファイルや残渣を整理
+          if (Test-Path $Workspace) {
+            if (Test-Path (Join-Path $Workspace ".git")) {
+              Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
+              Push-Location $Workspace
+              try {
+                git clean -ffdx
+                git reset --hard
+                Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
+              } catch {
+                Write-Host "[WARN]: git clean に失敗しました: $_"
+              } finally {
+                Pop-Location
+              }
+            }
+          }
+
+          # 2. 一時フォルダ (TEMP) の過去ビルド残渣削除による容量確保
+          $TempZip = "$env:TEMP\src_assets.zip"
+          $ExtractDir = "$env:TEMP\UnityPackages"
+          if (Test-Path $TempZip) {
+            Remove-Item -Path $TempZip -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 過去の一時ZIP ($TempZip) を削除しました。"
+          }
+          if (Test-Path $ExtractDir) {
+            Remove-Item -Path $ExtractDir -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 過去の展開用一時フォルダ ($ExtractDir) を削除しました。"
+          }
+          Get-ChildItem -Path $env:TEMP -Filter "pkg_*" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 一時パッケージディレクトリ ($($_.Name)) を削除しました。"
+          }
+
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
       - name: リポジトリをチェックアウト
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -161,6 +208,58 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: ビルド出力先の空確認とディスク残り容量の検証
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::ビルド出力先の空確認とディスク残り容量の検証"
+
+          # 1. ビルド出力ディレクトリのクリア・空確認
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          if ($RawOutputDir) {
+            $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+            $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+            Write-Host "ビルド出力先ディレクトリ: $ResolvedOutputDir"
+
+            if (Test-Path $ResolvedOutputDir) {
+              Write-Host "[INFO]: 既存のビルド出力ディレクトリが存在します。配下の全コンテンツを削除し、空にします..."
+              Remove-Item -Path "$ResolvedOutputDir\*" -Recurse -Force -ErrorAction SilentlyContinue
+            } else {
+              Write-Host "[INFO]: ビルド出力ディレクトリが存在しないため、新規作成します..."
+              New-Item -ItemType Directory -Path $ResolvedOutputDir -Force | Out-Null
+            }
+
+            # 空確認の検証
+            $ChildItems = Get-ChildItem -Path $ResolvedOutputDir -ErrorAction SilentlyContinue
+            if ($ChildItems.Count -eq 0 -or $null -eq $ChildItems) {
+              Write-Host "[OK]: ビルド出力先ディレクトリが空であることを確認しました。"
+            } else {
+              Write-Host "[ERROR]: ビルド出力先ディレクトリを空にできませんでした。"
+              exit 1
+            }
+          } else {
+            Write-Host "[WARN]: UNITY_BUILD_OUTPUT_DIR が設定されていません。"
+          }
+
+          # 2. ディスク残り容量のチェック
+          $WorkspaceDrive = (Get-Item "${{ github.workspace }}").PSDrive
+          $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+          $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+          Write-Host "プロジェクトが配置されているドライブ ($($WorkspaceDrive.Name):) の残り空き容量: $FreeSpaceGB GB"
+
+          $MinRequiredGB = 20
+          if ($FreeSpaceGB -lt $MinRequiredGB) {
+            Write-Host "[WARN]: 残り空き容量が推奨値 ($MinRequiredGB GB) を下回っています。ビルド中の容量不足にご注意ください。"
+          } else {
+            Write-Host "[OK]: 十分なディスク空き容量が確保されています。"
+          }
+
+          Write-Host "::endgroup::"
         shell: pwsh
 
 # ==================================================================================================
