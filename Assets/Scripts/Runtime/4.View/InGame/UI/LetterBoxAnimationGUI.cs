@@ -3,7 +3,7 @@ using LitMotion.Extensions;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition.InGame.UI
+namespace KillChord.Runtime.View.InGame.UI
 {
     public sealed class LetterBoxAnimationGUI : MonoBehaviour
     {
@@ -80,7 +80,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <param name="sizeDelta"> 収める領域のサイズ。</param>
         /// <returns> aspectと同じ比率を持ち、sizeDelta内に収まるサイズ。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 AspectToSizeDelta(in Vector2 aspect, in Vector2 sizeDelta)
+        private static Vector2 AspectToSizeDelta(in Vector2 aspect, in Vector2 sizeDelta)
         {
             // 比率が0以下だと除算できないため、そのまま領域サイズを返す。
             if (aspect.x <= 0f || aspect.y <= 0f)
