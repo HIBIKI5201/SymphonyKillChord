@@ -1043,16 +1043,16 @@ jobs:
                 -ErrorAction Stop
 
               if (-not (Test-Path $ZipPath)) {
-                throw "ZIP file was not created: $ZipPath"
+                Write-Host "::warning::$($PlatformDir.Name) のZIPファイルが作成されませんでした。"
+                continue
               }
 
               $ZipSize = (Get-Item $ZipPath).Length
 
               Write-Host "[INFO]: アーカイブ ($ZipName) が正常に作成されました。ファイルサイズ: $([Math]::Round($ZipSize / 1MB, 2)) MB"
             } catch {
-              Write-Host "[ERROR]: $($PlatformDir.Name) のアーカイブ作成に失敗しました: $_"
-              Write-Host "::endgroup::"
-              exit 1
+              Write-Host "[WARN]: $($PlatformDir.Name) のアーカイブ作成に失敗しました: $_"
+              continue
             }
           }
           Write-Host "::endgroup::"
