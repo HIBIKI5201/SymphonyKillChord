@@ -374,30 +374,6 @@ jobs:
 
 # ==================================================================================================
 
-      - name: Unity Hub CLI診断
-        shell: pwsh
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::Unity Hub CLI診断"
-
-          $HubPath = $env:UNITY_HUB_PATH
-
-          Write-Host "Hub: $HubPath"
-
-          Write-Host ""
-          Write-Host "=== Version ==="
-          & "$HubPath" -- --headless --version 2>&1 | Write-Host
-
-          Write-Host ""
-          Write-Host "=== Help ==="
-          & "$HubPath" -- --headless help 2>&1 | Write-Host
-
-          Write-Host "::endgroup::"
-
-# ==================================================================================================
-
       - name: Unityライセンス状態の事前確認
         run: |
           $LogPath = "unity_license_check.log"
