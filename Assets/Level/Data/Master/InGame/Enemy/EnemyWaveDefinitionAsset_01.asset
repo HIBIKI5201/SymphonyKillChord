@@ -18,12 +18,19 @@ MonoBehaviour:
   _battleSceneName: Stage_01
   _waves:
   - Details:
-    - EnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
       EnemyAmount: 2
-    - EnemyType: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
       EnemyAmount: 1
+      _legacyEnemyType: 1
     WaveDuration: 30
     StageEffects: []
+    SpawnPointCandidates: []
   _loop: 0
   _loopStart: 0
   references:
