@@ -710,7 +710,6 @@ jobs:
 
           Write-Host "::group::不足モジュールの追加インストール"
 
-          # UNITY_EXE_PATHからUnityバージョンを取得
           if ("$env:UNITY_EXE_PATH" -match '\\Editor\\([^\\]+)\\Editor\\Unity\.exe$') {
             $UnityVersion = $Matches[1]
           }
@@ -721,17 +720,15 @@ jobs:
 
           Write-Host "対象Unityバージョン: $UnityVersion"
 
-          # 前段のUnity Hub検索ステップで設定したパスを使用
           $HubPath = $env:UNITY_HUB_PATH
 
-          if (-not $HubPath -or -not (Test-Path $HubPath)) {
+          if (-not (Test-Path $HubPath)) {
             Write-Host "::error::Unity Hubが見つかりません: $HubPath"
             exit 1
           }
 
           Write-Host "Unity Hub: $HubPath"
 
-          # 不足しているモジュールだけを対象にする
           $Modules = @()
 
           if ("${{ steps.module_check.outputs.missing_android }}" -eq "True") {
@@ -743,19 +740,12 @@ jobs:
           }
 
           if ($Modules.Count -eq 0) {
-            Write-Host "::error::インストール対象のモジュールがありません。"
+            Write-Host "::error::インストール対象モジュールがありません。"
             exit 1
           }
 
           Write-Host "インストール対象モジュール: $($Modules -join ', ')"
 
-          # Unity Hubの標準出力・標準エラーを個別に保存
-          $HubStdOut = Join-Path $env:RUNNER_TEMP "unity_hub_module_install_stdout.log"
-          $HubStdErr = Join-Path $env:RUNNER_TEMP "unity_hub_module_install_stderr.log"
-
-          Remove-Item $HubStdOut, $HubStdErr -Force -ErrorAction SilentlyContinue
-
-          # Unity Hub CLI引数
           $Arguments = @(
             "--",
             "--headless",
@@ -768,40 +758,20 @@ jobs:
             "--childModules"
           )
 
-          Write-Host "Unity Hub CLIを実行します。"
-          Write-Host "引数: $($Arguments -join ' ')"
-
           $Process = Start-Process `
             -FilePath $HubPath `
             -ArgumentList $Arguments `
             -Wait `
             -PassThru `
-            -NoNewWindow `
-            -RedirectStandardOutput $HubStdOut `
-            -RedirectStandardError $HubStdErr
+            -NoNewWindow
 
           Write-Host "Unity Hub終了コード: $($Process.ExitCode)"
-
-          # stdoutを表示
-          if (Test-Path $HubStdOut) {
-            Write-Host "::group::Unity Hub stdout"
-            Get-Content $HubStdOut | Write-Host
-            Write-Host "::endgroup::"
-          }
-
-          # stderrを表示
-          if (Test-Path $HubStdErr) {
-            Write-Host "::group::Unity Hub stderr"
-            Get-Content $HubStdErr | Write-Host
-            Write-Host "::endgroup::"
-          }
 
           if ($Process.ExitCode -ne 0) {
             Write-Host "::error::モジュールのインストールに失敗しました (終了コード $($Process.ExitCode))"
             exit 1
           }
 
-          Write-Host "Unity Hubによるモジュールインストールが完了しました。"
           Write-Host "::endgroup::"
         shell: pwsh
 
