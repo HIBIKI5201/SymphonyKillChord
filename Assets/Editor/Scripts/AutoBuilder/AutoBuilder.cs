@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEngine;
 
@@ -18,7 +19,45 @@ namespace KillChord.Editor.AutoBuilder
         public static void RunFromCli()
         {
             string buildMode = GetCliArg("-buildMode");
+            CheckRequiredModules();
             PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode);
+        }
+        
+        /// <summary>
+        ///     ビルド対象プラットフォームのモジュールがインストール済みかを確認し、
+        ///     結果をログへ出力してエディタを終了する。
+        /// </summary>
+        public static void CheckRequiredModules()
+        {
+            (BuildTarget target, string label)[] requiredTargets =
+            {
+                (BuildTarget.Android, "Android"),
+                (BuildTarget.StandaloneOSX, "macOS"),
+            };
+
+            bool allSupported = true;
+
+            foreach ((BuildTarget target, string label) in requiredTargets)
+            {
+                BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
+                bool supported = BuildPipeline.IsBuildTargetSupported(group, target);
+
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] MODULE_CHECK {label} : {(supported ? "OK" : "MISSING")}");
+
+                if (!supported)
+                {
+                    allSupported = false;
+                }
+            }
+
+            string msg = allSupported ?
+                $"[{nameof(AutoBuildExecuter)}] 全ての必要なモジュールがインストール済みです。" :
+                $"[{nameof(AutoBuildExecuter)}] 必要なモジュールが不足しています。ビルドを続行できません。";
+            Debug.Log(msg);
+            if (!allSupported)
+            {
+                EditorApplication.Exit(1);
+            }
         }
 
         /// <summary>
@@ -44,7 +83,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
         /// <param name="buildMode"> "Development" または "Master" を指定した場合、該当プロファイルのみビルドする。null または未指定時は両方をビルドする。 </param>
-        public static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null)
+        private static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null)
         {
             Debug.Log(
                 $"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. BuildMode: {buildMode ?? "All"}");
