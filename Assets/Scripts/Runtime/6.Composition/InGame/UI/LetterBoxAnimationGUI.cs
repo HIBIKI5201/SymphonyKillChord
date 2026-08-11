@@ -55,15 +55,15 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private RectTransform _lowerLetter;
         private void Awake()
         {
-            if (_canvas != null)
+            if (_canvas == null)
             {
                 Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Canvasが設定されていません", this);
             }
-            if (_upperLetter != null)
+            if (_upperLetter == null)
             {
                 Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Upper Letterが設定されていません", this);
             }
-            if (_lowerLetter != null)
+            if (_lowerLetter == null)
             {
                 Debug.LogWarning($"[{nameof(LetterBoxAnimationGUI)}] Lower Letterが設定されていません", this);
             }
