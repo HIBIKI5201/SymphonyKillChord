@@ -18,7 +18,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             {
                 throw new InvalidOperationException($"{nameof(_innerCondition)} is required.");
             }
-            if (string.IsNullOrEmpty(_scenarioId))
+            if (string.IsNullOrWhiteSpace(_scenarioId))
             {
                 throw new InvalidOperationException($"{nameof(_scenarioId)} is required.");
             }
@@ -31,7 +31,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             return string.IsNullOrWhiteSpace(_scenarioId) ? "シナリオ未設定" : $"シナリオ「{_scenarioId}」を再生する";
         }
 
-        [SerializeReference, SubclassSelector, Tooltip("ポップアップが閉じる判定を委譲する内側のクリア条件。")]
+        [SerializeReference, SubclassSelector, Tooltip("シナリオ再生完了後に判定する内側のクリア条件。")]
         private MissionClearConditionAssetBase _innerCondition;
         
         [SerializeField, Tooltip("再生するシナリオのID。")]

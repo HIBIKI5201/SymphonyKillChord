@@ -35,6 +35,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// </summary>
         public void Toggle()
         {
+            if (_isScenarioPauseActive)
+            {
+                return;
+            }
+
             if (_isPaused)
             {
                 Resume();
@@ -51,7 +56,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <returns></returns>
         public bool Pause()
         {
-            if(_isPaused || _module == null)
+            if (_isScenarioPauseActive || !_isPaused || _module == null)
             {
                 return false;
             }
@@ -59,8 +64,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
             {
                 return false;
             }
-            OnPaused?.Invoke();
             _isPaused = true;
+            OnPaused?.Invoke();
             return true;
         }
 
@@ -74,9 +79,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
             {
                 return false;
             }
+            _isPaused = false;
             _module.Resume();
             OnResumed?.Invoke();
-            _isPaused = false;
             return true;
         }
 

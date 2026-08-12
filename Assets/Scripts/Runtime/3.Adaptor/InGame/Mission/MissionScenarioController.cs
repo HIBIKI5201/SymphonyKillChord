@@ -108,6 +108,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 if (!isScenarioPauseStarted)
                 {
                     Debug.LogError($"[MissionScenarioController] ポーズできなかったため、シナリオを開始しません。");
+                    _isPlaybackInProgress = false;
                     return;
                 }
 
