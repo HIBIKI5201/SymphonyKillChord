@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Sequence;
 using LitMotion;
@@ -77,7 +78,7 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     判定ゾーン定義に応じてビートGUIを再構築する。
         /// </summary>
         /// <param name="zones"> 判定ゾーンの一覧。 </param>
-        public void ConfigureZones(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        public void ConfigureZones(IReadOnlyList<RhythmGuideZoneDto> zones)
         {
             if (!NeedsRebuild(zones))
             {
@@ -186,9 +187,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
+            // ジャストタイミングは上で処理済みのため、ここは常に通常タイミングの縮小モーション。
             Ease ease = _effectConfig.NormalTimingEase;
-            _handles[openIndex] = CreateNormalTimingMotion(openIndex, targetSizeDelta, ease);
+            _handles[openIndex] = CreateNormalTimingMotion(openIndex, _inTimingSizeDelta, ease);
         }
 
         /// <summary>
@@ -236,7 +237,7 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("ビート位置を表示するImage")]
         [SerializeField] private Image[] _beatPositionImages;
         [Tooltip("ビート位置を表示するRectTransform")]
-        [SerializeField] private RectTransform[] _beatPositionRectTransfroms;
+        [SerializeField] private RectTransform[] _beatPositionRectTransforms;
 
         [Space]
 
@@ -273,6 +274,9 @@ namespace KillChord.Runtime.View.InGame.Music
         private float[] _zoneEnds = Array.Empty<float>();
         private int[] _zoneBeatCounts = Array.Empty<int>();
 
+        /// <summary>
+        ///     演出設定の設定漏れを検知し、ビートGUIを構築する。
+        /// </summary>
         private void Awake()
         {
             if (_effectConfig == null)
@@ -283,10 +287,14 @@ namespace KillChord.Runtime.View.InGame.Music
             RebuildBeatRectTransforms();
         }
 
+        /// <summary>
+        ///     毎フレームの更新タイミングを購読側（ViewModel）へ通知する。
+        /// </summary>
         private void Update()
         {
             OnUpdate?.Invoke();
         }
+
         /// <summary>
         ///     破棄時にイベントと生成した演出リソースを解放する。
         /// </summary>
@@ -305,6 +313,9 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
+        /// <summary>
+        ///     生成済みのビートオブジェクトを破棄し、現在の判定ゾーン定義でビートGUIを作り直す。
+        /// </summary>
         [ContextMenu("ビートの位置を初期化")]
         private void RebuildBeatRectTransforms()
         {
@@ -476,7 +487,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         /// <param name="zones"> 判定ゾーンの一覧。 </param>
         /// <returns> 再構築が必要な場合はtrue。 </returns>
-        private bool NeedsRebuild(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        private bool NeedsRebuild(IReadOnlyList<RhythmGuideZoneDto> zones)
         {
             if (zones == null)
             {
@@ -505,7 +516,7 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     判定ゾーン内容をキャッシュする。
         /// </summary>
         /// <param name="zones"> 判定ゾーンの一覧。 </param>
-        private void CacheZones(IReadOnlyList<KillChord.Runtime.Adaptor.InGame.Music.RhythmGuideZoneDto> zones)
+        private void CacheZones(IReadOnlyList<RhythmGuideZoneDto> zones)
         {
             if (zones == null || zones.Count == 0)
             {
@@ -527,6 +538,21 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
+        /// <summary>
+        ///     判定ゾーン定義からスペクトラム風ビートのブロックを左右対称に生成し、
+        ///     生成物とジャストタイミング位置を出力する。
+        /// </summary>
+        /// <param name="parent"> 生成したブロックの親オブジェクト。 </param>
+        /// <param name="beatWidth"> 1ブロックの幅。 </param>
+        /// <param name="beatHeight"> 1ブロックの初期高さ。 </param>
+        /// <param name="scale"> ビート描画全長に掛けるスケール。 </param>
+        /// <param name="totalBeatBoxCount"> 生成したブロック総数。生成できない場合は0。 </param>
+        /// <param name="leftBeatImages"> 左側ブロックのImage。 </param>
+        /// <param name="rightBeatImages"> 右側ブロックのImage。 </param>
+        /// <param name="leftBeatRT"> 左側ブロックのRectTransform。 </param>
+        /// <param name="rightBeatRT"> 右側ブロックのRectTransform。 </param>
+        /// <param name="handles"> ブロックごとのモーションハンドル。 </param>
+        /// <param name="justTimingBeatBoxIndex"> 判定ゾーンごとのジャストタイミング位置のブロック番号。 </param>
         private void InitBeatGUI(
             in GameObject parent,
             float beatWidth,
@@ -556,7 +582,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
             if (_beatColor == null || _beatColor.Length < _zoneStarts.Length)
             {
-                Debug.LogError("_beatColor の長さが判定ゾーン数より少ないです。", this);
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideView)}] _beatColor の長さが判定ゾーン数より少ないです。", this);
                 totalBeatBoxCount = 0;
                 return;
             }

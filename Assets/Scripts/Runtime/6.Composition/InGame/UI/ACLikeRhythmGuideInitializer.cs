@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     AC風リズムガイドを初期化するモジュールです。
     /// </summary>
-    public class ACLikeRhythmGuideInitializer : InGameInitializationModuleBase
+    public sealed class ACLikeRhythmGuideInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
         public override string ModuleName => nameof(ACLikeRhythmGuideInitializer);
@@ -68,7 +68,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             if (musicSyncService == null)
             {
-                Debug.LogError($"{nameof(IMusicSyncService)} が見つかりません。MusicSyncInitializer が先に初期化されているか確認してください。");
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IMusicSyncService)} が見つかりません。MusicSyncInitializer が先に初期化されているか確認してください。", this);
                 return false;
             }
 
@@ -76,7 +76,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             if (targetingSystem == null)
             {
-                Debug.LogError($"{nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。");
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。", this);
                 return false;
             }
 

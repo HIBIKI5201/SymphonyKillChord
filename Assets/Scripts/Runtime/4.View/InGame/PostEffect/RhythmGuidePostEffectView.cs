@@ -24,43 +24,43 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         /// <param name="ease"> 減衰のイージング。 </param>
         /// <param name="duration"> 減衰にかける秒数。 </param>
         /// <param name="from"> 再生開始時の濃度。 </param>
-        public void OneShotRatio(
+        public void PlayOneShot(
             Ease ease = Ease.InCirc,
             float duration = DEFAULT_DURATION,
-            float from = DEFAULT_FROM_RATIO)
+            float from = DEFAULT_FROM_ALPHA)
         {
             // 再生中のアニメーションが残っていると値が競合するため、先に完了させる。
             _handle.TryComplete();
             _handle = LMotion.Create(from, 0f, duration)
                 .WithEase(ease)
                 .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                .BindToMaterialFloat(_material, RATIO);
+                .BindToMaterialFloat(_material, ALPHA);
         }
 
         /// <summary> 呼び出し側が指定しない場合の減衰時間（秒）。 </summary>
         private const float DEFAULT_DURATION = 0.1f;
 
         /// <summary> 呼び出し側が指定しない場合の再生開始時の濃度。 </summary>
-        private const float DEFAULT_FROM_RATIO = 1f;
-
-        [Tooltip("フルスクリーン演出のMaterial。RendererFeatureに設定した物と同じアセットを指定")]
-        [SerializeField] private Material _material;
-
-        private float _defaultRatio;
-        private MotionHandle _handle;
+        private const float DEFAULT_FROM_ALPHA = 1f;
 
         /// <summary> 演出色のShaderプロパティID。 </summary>
         private static readonly int COLOR = Shader.PropertyToID("_Color");
 
         /// <summary> 演出濃度のShaderプロパティID。 </summary>
-        private static readonly int RATIO = Shader.PropertyToID("_Alpha");
+        private static readonly int ALPHA = Shader.PropertyToID("_Alpha");
+
+        [Tooltip("フルスクリーン演出のMaterial。RendererFeatureに設定した物と同じアセットを指定")]
+        [SerializeField] private Material _material;
+
+        private float _defaultAlpha;
+        private MotionHandle _handle;
 
         /// <summary>
         ///     Materialの初期濃度を控えておく。
         /// </summary>
         private void Awake()
         {
-            _defaultRatio = _material.GetFloat(RATIO);
+            _defaultAlpha = _material.GetFloat(ALPHA);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         {
             // Materialはアセットとして共有されるため、実行中の変更を必ず巻き戻す。
             _handle.TryCancel();
-            _material.SetFloat(RATIO, _defaultRatio);
+            _material.SetFloat(ALPHA, _defaultAlpha);
         }
     }
 }

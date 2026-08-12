@@ -5,7 +5,7 @@ using System;
 namespace KillChord.Runtime.View.InGame.PostEffect
 {
     /// <summary>
-    ///     リズムガイドの全画面Vignetteの表示設定を保持し、Viewへ反映するViewModelです。
+    ///     リズムガイドの全画面Vignetteについて、演出設定を参照して表示内容を決定しViewへ反映するViewModelです。
     /// </summary>
     public sealed class RhythmGuidePostEffectViewModel : IRhythmGuidePostEffectViewModel
     {
@@ -52,7 +52,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
                 : _effectConfig.NormalVignetteDuration;
 
             _postEffectView.SetColor(dto.Color);
-            _postEffectView.OneShotRatio(_effectConfig.VignetteEase, duration, intensity);
+            _postEffectView.PlayOneShot(_effectConfig.VignetteEase, duration, intensity);
         }
 
         private readonly RhythmGuidePostEffectView _postEffectView;
