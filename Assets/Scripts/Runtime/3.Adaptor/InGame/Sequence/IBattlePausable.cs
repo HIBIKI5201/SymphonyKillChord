@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
     public interface IBattlePausable
     {
         /// <summary>
-        ///     戦闘ポーズを行う。
+        ///     戦闘ポーズを実行する。
         /// </summary>
         void PauseBattle();
 

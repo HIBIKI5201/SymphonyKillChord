@@ -31,6 +31,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
             // TODO InputMapの切替は、Commonの無効化⇒有効化が発生し、2重処理になってしまうため、改修や使い方の検討が必要
+            // 改修出来たらここのコメントアウトを外す
             //_inputMapController.EnableOnly(InputMapNames.Common);
             _musicPlayer.PauseBGM();
             Time.timeScale = 0f;
@@ -46,6 +47,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return;
             }
             _musicPlayer.ResumeBGM();
+            // TODO InputMapの改修出来たらここのコメントアウトを外す
             //_inputMapController.EnableCommonWith(InputMapNames.InGame);
             Time.timeScale = 1f;
             _isPaused = false;

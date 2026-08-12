@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
     /// <summary>
     ///     戦闘ポーズのコントローラー。
     /// </summary>
-    public class BattlePauseController
+    public class BattlePauseController : IScenarioBattlePauseController
     {
         public BattlePauseController(IBattlePauseModule module)
         {

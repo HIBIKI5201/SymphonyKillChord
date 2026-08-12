@@ -14,7 +14,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <summary>
         ///     目標ステップ進入時アクションを実行します。
         /// </summary>
-        /// <param name="entryAction">実行するアクションです。</param>
+        /// <param name="entryAction">実行するアクション</param>
         void Execute(IMissionStepEntryAction entryAction);
     }
 }

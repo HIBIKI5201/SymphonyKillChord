@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <summary>
         ///     ステップ進入時アクション一覧を生成します。
         /// </summary>
-        /// <param name="entryActions">元となるアクション一覧です。</param>
+        /// <param name="entryActions">元となるアクション一覧</param>
         /// <returns>変更できないアクション一覧です。</returns>
         private static IReadOnlyList<IMissionStepEntryAction> CreateEntryActions(
             IReadOnlyList<IMissionStepEntryAction> entryActions)
@@ -64,11 +64,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
                 IMissionStepEntryAction entryAction = entryActions[i];
                 if (entryAction == null)
                 {
-                    throw new ArgumentException(
-                        $"{nameof(entryActions)}[{i}] must not be null.",
-                        nameof(entryActions));
+                    throw new ArgumentException($"{nameof(entryActions)}[{i}]がnull.", nameof(entryActions));
                 }
-
                 actions.Add(entryAction);
             }
 
