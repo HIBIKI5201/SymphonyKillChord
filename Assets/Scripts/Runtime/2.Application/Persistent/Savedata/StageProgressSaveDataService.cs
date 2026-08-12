@@ -38,6 +38,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
+            SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
@@ -48,7 +49,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 return false;
             }
 
-            await SaveAndLogRewardAsync(saveData, stageId, reward, isFirstClear);
+            await SaveAndLogRewardAsync(saveData, snapshot, stageId, reward, isFirstClear);
             return true;
         }
 
@@ -63,6 +64,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
+            SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
@@ -71,7 +73,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 return false;
             }
 
-            await SaveAndLogRewardAsync(saveData, stageId, reward, isFirstClear);
+            await SaveAndLogRewardAsync(saveData, snapshot, stageId, reward, isFirstClear);
             return true;
         }
 
@@ -139,11 +141,13 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         ///     初回クリア報酬を反映して保存し、結果をログへ出力します。
         /// </summary>
         /// <param name="saveData"> 保存するセーブデータ。</param>
+        /// <param name="snapshot"> 保存に失敗した場合へ戻すための変更前状態。</param>
         /// <param name="stageId"> クリアしたステージID。</param>
         /// <param name="reward"> 初回クリア時に付与する報酬。</param>
         /// <param name="isFirstClear"> 初回クリアの場合はtrue。</param>
         private static async ValueTask SaveAndLogRewardAsync(
             SaveData saveData,
+            SaveDataSnapshot snapshot,
             StageId stageId,
             StageReward reward,
             bool isFirstClear)
@@ -169,11 +173,54 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             }
             catch (Exception exception)
             {
+                // SaveStore が返すキャッシュ参照を、クリア記録前の状態へ戻す。
+                snapshot.Restore(saveData);
                 Debug.LogError(
                     $"[{nameof(StageProgressSaveDataService)}] ステージクリア報酬の付与または保存に失敗しました。"
                     + $" StageId: {stageId.Value} / {exception}");
                 throw;
             }
+        }
+
+        /// <summary>
+        ///     保存に失敗した場合にキャッシュを戻すための、セーブデータの変更前状態。
+        /// </summary>
+        private readonly struct SaveDataSnapshot
+        {
+            /// <summary>
+            ///     セーブデータの現在の内容を複製して保持する。
+            /// </summary>
+            /// <param name="saveData"> 複製元のセーブデータ。 </param>
+            internal SaveDataSnapshot(SaveData saveData)
+            {
+                _stageProgressJson = JsonUtility.ToJson(saveData.StageProgress);
+                _tutorialJson = JsonUtility.ToJson(saveData.Tutorial);
+                _skillBuildJson = JsonUtility.ToJson(saveData.SkillBuild);
+                _skillUnlockJson = JsonUtility.ToJson(saveData.SkillUnlock);
+            }
+
+            /// <summary>
+            ///     保持している内容をセーブデータへ書き戻す。
+            ///     <para>
+            ///         StageProgressとTutorialは変更を打ち消すDomain APIを持たないため、
+            ///         各データのインスタンスを保ったままJSONで上書きする。
+            ///         インスタンスを差し替えないのは、参照を保持している呼び出し元が
+            ///         古いインスタンスを見続けることを防ぐため。
+            ///     </para>
+            /// </summary>
+            /// <param name="saveData"> 書き戻す先のセーブデータ。 </param>
+            internal void Restore(SaveData saveData)
+            {
+                JsonUtility.FromJsonOverwrite(_stageProgressJson, saveData.StageProgress);
+                JsonUtility.FromJsonOverwrite(_tutorialJson, saveData.Tutorial);
+                JsonUtility.FromJsonOverwrite(_skillBuildJson, saveData.SkillBuild);
+                JsonUtility.FromJsonOverwrite(_skillUnlockJson, saveData.SkillUnlock);
+            }
+
+            private readonly string _stageProgressJson;
+            private readonly string _tutorialJson;
+            private readonly string _skillBuildJson;
+            private readonly string _skillUnlockJson;
         }
     }
 }

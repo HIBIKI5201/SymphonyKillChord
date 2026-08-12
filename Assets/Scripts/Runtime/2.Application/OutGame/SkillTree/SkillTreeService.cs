@@ -101,10 +101,26 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockedSkillValues[i] = unlockedSkillIds[i].Value;
             }
 
+            int previousPoints = saveData.SkillUnlock.ResearchPoint;
+            int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
+            int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
+
             saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodeValues);
             saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillValues);
             saveData.SkillUnlock.SetResearchPoint(currentPoints);
-            await SaveStore.SaveAsync<SaveData>();
+
+            try
+            {
+                await SaveStore.SaveAsync<SaveData>();
+            }
+            catch
+            {
+                // SaveStore が返すキャッシュ参照を、保存試行前の状態へ戻す。
+                saveData.SkillUnlock.SetResearchPoint(previousPoints);
+                saveData.SkillUnlock.SetUnlockedSkillNodeIds(previousNodeIds);
+                saveData.SkillUnlock.SetUnlockedSkillIds(previousSkillIds);
+                throw;
+            }
         }
 
         /// <summary>
