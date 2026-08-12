@@ -4,7 +4,7 @@ using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,15 +19,6 @@ namespace KillChord.Runtime.InfraStructure
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(OwnedSkillRepository))]
     public class OwnedSkillRepository : ScriptableObject, IOwnedSkillRepository
     {
-        /// <summary>
-        ///     セーブデータシステムを初期化する。
-        /// </summary>
-        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
-        public void Initialize(SavedataSystem savedataSystem)
-        {
-            _savedataSystem = savedataSystem ?? throw new ArgumentNullException(nameof(savedataSystem));
-        }
-
         /// <summary>
         ///     入手済みスキル一覧を取得する。
         /// </summary>
@@ -51,9 +42,9 @@ namespace KillChord.Runtime.InfraStructure
         public async ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
         {
             ValidateDependencies();
-            ValidateSavedataSystem();
-
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             BuildOwnedSkills(saveData.SkillUnlock.UnlockedSkillIds);
 
             // 入手済みスキルのコピーを返す。
@@ -64,7 +55,6 @@ namespace KillChord.Runtime.InfraStructure
         private SkillRepository _skillRepository;
 
         private List<EquippedSkill> _ownedSkills;
-        private SavedataSystem _savedataSystem;
 
         /// <summary>
         ///     依存関係が設定されているか確認する。
@@ -75,18 +65,6 @@ namespace KillChord.Runtime.InfraStructure
             if (_skillRepository == null)
             {
                 throw new InvalidOperationException($"{nameof(_skillRepository)}: SkillRepository が設定されていません。");
-            }
-        }
-
-        /// <summary>
-        ///     セーブデータシステムが設定されているか確認する。
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
-        private void ValidateSavedataSystem()
-        {
-            if (_savedataSystem == null)
-            {
-                throw new InvalidOperationException($"{nameof(_savedataSystem)} が設定されていません。");
             }
         }
 
