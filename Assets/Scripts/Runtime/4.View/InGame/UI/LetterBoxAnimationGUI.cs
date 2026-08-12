@@ -21,8 +21,8 @@ namespace KillChord.Runtime.View.InGame.UI
             Vector2 screenSize = AspectToSizeDelta(ASPECT, canvas);
             float letterSizeY = Mathf.Abs(canvas.y - screenSize.y) * HALF;
 
-            _upperLetter.sizeDelta = new Vector2(_upperLetter.sizeDelta.x, letterSizeY);
-            _lowerLetter.sizeDelta = new Vector2(_lowerLetter.sizeDelta.x, letterSizeY);
+            _upperLetter.sizeDelta = new Vector2(_canvas.sizeDelta.x, letterSizeY);
+            _lowerLetter.sizeDelta = new Vector2(_canvas.sizeDelta.x, letterSizeY);
         }
 
         /// <summary>
@@ -34,8 +34,8 @@ namespace KillChord.Runtime.View.InGame.UI
             {
                 return;
             }
-            _upperLetter.sizeDelta = new Vector2(_upperLetter.sizeDelta.x, 0f);
-            _lowerLetter.sizeDelta = new Vector2(_lowerLetter.sizeDelta.x, 0f);
+            _upperLetter.sizeDelta = new Vector2(_canvas.sizeDelta.x, 0f);
+            _lowerLetter.sizeDelta = new Vector2(_canvas.sizeDelta.x, 0f);
         }
 
         /// <summary>
@@ -57,10 +57,10 @@ namespace KillChord.Runtime.View.InGame.UI
 
             // 上下の帯を同時に動かすため、Joinで並列に繋ぐ。
             _handle = LSequence.Create()
-                .Join(LMotion.Create(0f, letterSizeY, duration)
-                    .BindToSizeDeltaY(_upperLetter))
-                .Join(LMotion.Create(0f, letterSizeY, duration)
-                    .BindToSizeDeltaY(_lowerLetter))
+                .Join(LMotion.Create(new Vector2(_canvas.sizeDelta.x, 0f), new Vector2(_canvas.sizeDelta.x, letterSizeY), duration)
+                    .BindToSizeDelta(_upperLetter))
+                .Join(LMotion.Create(new Vector2(_canvas.sizeDelta.x, 0f), new Vector2(_canvas.sizeDelta.x, letterSizeY), duration)
+                    .BindToSizeDelta(_lowerLetter))
                 .Run();
         }
 
@@ -83,10 +83,10 @@ namespace KillChord.Runtime.View.InGame.UI
 
             // 上下の帯を同時に動かすため、Joinで並列に繋ぐ。
             _handle = LSequence.Create()
-                .Join(LMotion.Create(letterSizeY, 0f, duration)
-                    .BindToSizeDeltaY(_upperLetter))
-                .Join(LMotion.Create(letterSizeY, 0f, duration)
-                    .BindToSizeDeltaY(_lowerLetter))
+                .Join(LMotion.Create(new Vector2(_canvas.sizeDelta.x, letterSizeY), new Vector2(_canvas.sizeDelta.x, 0f), duration)
+                    .BindToSizeDelta(_upperLetter))
+                .Join(LMotion.Create(new Vector2(_canvas.sizeDelta.x, letterSizeY), new Vector2(_canvas.sizeDelta.x, 0f), duration)
+                    .BindToSizeDelta(_lowerLetter))
                 .Run();
         }
 
