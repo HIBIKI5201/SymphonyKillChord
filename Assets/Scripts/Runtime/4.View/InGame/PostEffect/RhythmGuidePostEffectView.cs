@@ -10,10 +10,10 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         {
             _material.SetColor(COLOR, color);
         }
-        public void OneShotRatio(Ease ease = Ease.InCirc, float duration = 0.1f)
+        public void OneShotRatio(Ease ease = Ease.InCirc, float duration = 0.1f, float from = 1f)
         {
             _handle.TryComplete();
-            _handle = LMotion.Create(1f, 0f, duration)
+            _handle = LMotion.Create(from, 0f, duration)
                 .WithEase(ease)
                 .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                 .BindToMaterialFloat(_material, RATIO);

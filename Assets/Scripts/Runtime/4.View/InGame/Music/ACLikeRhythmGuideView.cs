@@ -1,4 +1,3 @@
-using KillChord.Runtime.View.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Sequence;
 using LitMotion;
 using LitMotion.Extensions;
@@ -14,6 +13,31 @@ namespace KillChord.Runtime.View.InGame.Music
         public event Action OnUpdate;
         public event Action OnStartGameplay;
         public event Action OnStopGameplay;
+
+        /// <summary>
+        ///     現在のビート位置がジャストタイミングのブロック上にあるか。
+        ///     ガイドに表示しているJustTimingMarkerと同じ基準で判定する。
+        /// </summary>
+        public bool IsOnJustTiming
+        {
+            get
+            {
+                if (_justTimingBeatBoxIndex == null || _currentOpenIndex < 0)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
+                {
+                    if (_currentOpenIndex == _justTimingBeatBoxIndex[i])
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
 
         public void StartGameplay()
         {
@@ -143,7 +167,6 @@ namespace KillChord.Runtime.View.InGame.Music
             if (isJustTiming && _effectConfig != null)
             {
                 _handles[openIndex] = CreateJustTimingMotion(openIndex, beatColor);
-                PlayJustTimingVignette(beatColor);
                 return;
             }
 
@@ -152,7 +175,34 @@ namespace KillChord.Runtime.View.InGame.Music
             _handles[openIndex] = CreateNormalTimingMotion(openIndex, targetSizeDelta, ease);
         }
 
+        /// <summary>
+        ///     現在のビート位置に応じたVignette演出のパラメータを取得する。
+        /// </summary>
+        /// <param name="color"> Vignetteへ反映するビート色。 </param>
+        /// <param name="ease"> Vignetteのイージング。 </param>
+        /// <param name="duration"> Vignetteの再生時間。 </param>
+        /// <returns> 演出が有効でパラメータを取得できた場合はtrue。 </returns>
+        public bool TryGetVignetteParameter(out Color color, out Ease ease, out float duration)
+        {
+            color = default;
+            ease = Ease.InCirc;
+            duration = 0f;
 
+            if (_effectConfig == null
+                || !_effectConfig.IsVignetteEnabled
+                || _beatColor == null
+                || _beatColor.Length == 0)
+            {
+                return false;
+            }
+
+            // 入力時点でカーソルが乗っているブロックの色を採用する。
+            int beatIndex = Mathf.Max(0, _currentOpenIndex);
+            color = _beatColor[GetBeatSectionIndex(beatIndex, _scale, _beatWidth)];
+            ease = _effectConfig.FlashEase;
+            duration = _effectConfig.FlashDuration;
+            return true;
+        }
 
         [Space]
 
@@ -197,10 +247,6 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField] private float _outTimingSizeDelta;
         [Tooltip("ビートのアニメーションのDuration")]
         [SerializeField] private float _outTimingDuration;
-
-        [Space]
-        [SerializeField]
-        private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
 
         private RectTransform[] _leftBeatRectTransforms;
         private Image[] _leftBeatImages;
@@ -412,21 +458,6 @@ namespace KillChord.Runtime.View.InGame.Music
             markerImage.color = _effectConfig.MarkerColor;
             markerImage.raycastTarget = false;
             return markerRectTransform;
-        }
-
-        /// <summary>
-        ///     ビート色に連動した全画面Vignetteを再生する。
-        /// </summary>
-        /// <param name="beatColor"> Vignetteへ反映するビート色。 </param>
-        private void PlayJustTimingVignette(Color beatColor)
-        {
-            if (_effectConfig == null || !_effectConfig.IsVignetteEnabled || _rhythmGuidePostEffectView == null)
-            {
-                return;
-            }
-
-            _rhythmGuidePostEffectView.SetColor(beatColor);
-            _rhythmGuidePostEffectView.OneShotRatio(_effectConfig.FlashEase, _effectConfig.FlashDuration);
         }
 
         /// <summary>
