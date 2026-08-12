@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -302,10 +303,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
                 playerBattleState,
+                actionRestrictionState,
                 skillController,
                 targetSystemContainer.TargetSystemController,
                 attackIntervalEvaluator,
@@ -315,6 +318,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _player.transform,
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
+            _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);

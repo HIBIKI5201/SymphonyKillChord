@@ -39,14 +39,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="actionType"> 行動種別です。 </param>
         /// <param name="beatType"> 現在ビートです。 </param>
-        /// <param name="unscaledTime"> 現在時刻です。 </param>
-        public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        /// <param name="time"> 現在時刻です。 </param>
+        /// <param name="canUseSkill"> スキル発動できるか。 </param>
+        public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float time, bool canUseSkill)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
 
+            // スキル発動不可の場合、処理を終了する
+            if (!canUseSkill)
+            {
+                return;
+            }
+
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType);
+                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, time, actionType);
                 if (result.ResultType == SkillExecutionResultType.Executed)
                 {
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);
