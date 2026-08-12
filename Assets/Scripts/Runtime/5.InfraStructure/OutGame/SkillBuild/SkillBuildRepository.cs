@@ -4,7 +4,7 @@ using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,15 +19,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
     public class SkillBuildRepository : ScriptableObject, ISkillBuildRepository
     {
         private const int EMPTY_SKILL_ID = -1;
-
-        /// <summary>
-        ///     セーブデータシステムを初期化する。
-        /// </summary>
-        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
-        public void Initialize(SavedataSystem savedataSystem)
-        {
-            _savedataSystem = savedataSystem ?? throw new System.ArgumentNullException(nameof(savedataSystem));
-        }
 
         /// <summary>
         ///     プレイヤーの装備スキルのリストを非同期で取得する。
@@ -51,9 +42,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         public async ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild()
         {
             ValidateDependencies();
-            ValidateSavedataSystem();
-
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             BuildEquippedSkills(saveData.SkillBuild.EquipmentSkillIDs);
             return _equippedSkills.AsReadOnly();
         }
@@ -70,19 +61,20 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 throw new System.ArgumentNullException(nameof(equippedSkills));
             }
 
-            ValidateSavedataSystem();
             List<int> skillIds = BuildSkillIds(equippedSkills);
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             List<int> previousSkillIds = new(saveData.SkillBuild.EquipmentSkillIDs);
 
             saveData.SkillBuild.SetEquipmentSkillIDs(skillIds);
             try
             {
-                await _savedataSystem.SaveAsync(saveData);
+                await SaveStore.SaveAsync<SaveData>();
             }
             catch
             {
-                // SavedataSystem は同一インスタンスをキャッシュするため、
+                // SaveStore は同一インスタンスをキャッシュするため、
                 // 書き込み失敗時はキャッシュ上の値も保存前へ戻す。
                 saveData.SkillBuild.SetEquipmentSkillIDs(previousSkillIds);
                 throw;
@@ -95,7 +87,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         private SkillRepository _skillRepository;
 
         private List<EquippedSkill> _equippedSkills;
-        private SavedataSystem _savedataSystem;
 
         /// <summary>
         ///    依存関係が設定されているか確認する。
@@ -106,18 +97,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             if (_skillRepository == null)
             {
                 throw new System.InvalidOperationException("SkillRepository が設定されていません。");
-            }
-        }
-
-        /// <summary>
-        ///     セーブデータシステムが設定されているか確認する。
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException"></exception>
-        private void ValidateSavedataSystem()
-        {
-            if (_savedataSystem == null)
-            {
-                throw new System.InvalidOperationException("SavedataSystem が設定されていません。");
             }
         }
 
