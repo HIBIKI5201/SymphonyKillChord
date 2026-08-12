@@ -8,10 +8,18 @@ using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
+    /// <summary>
+    ///     AC風リズムガイドのビート表示と判定ゾーンを描画するViewです。
+    /// </summary>
     public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable
     {
+        /// <summary> ガイド表示の更新タイミングを通知します。 </summary>
         public event Action OnUpdate;
+
+        /// <summary> ゲームプレイ開始を通知します。 </summary>
         public event Action OnStartGameplay;
+
+        /// <summary> ゲームプレイ停止を通知します。 </summary>
         public event Action OnStopGameplay;
 
         /// <summary>
@@ -39,11 +47,17 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
+        /// <summary>
+        ///     ゲームプレイ開始を購読側へ通知する。
+        /// </summary>
         public void StartGameplay()
         {
             OnStartGameplay?.Invoke();
         }
 
+        /// <summary>
+        ///     ゲームプレイ停止を購読側へ通知する。
+        /// </summary>
         public void StopGameplay()
         {
             OnStopGameplay?.Invoke();
@@ -156,7 +170,8 @@ namespace KillChord.Runtime.View.InGame.Music
                 || _leftBeatImages == null
                 || _rightBeatImages == null
                 || openIndex < 0
-                || openIndex >= _handles.Length)
+                || openIndex >= _handles.Length
+                || _effectConfig == null)
             {
                 return;
             }
@@ -164,7 +179,7 @@ namespace KillChord.Runtime.View.InGame.Music
             _handles[openIndex].TryComplete();
             Color beatColor = _beatColor[GetBeatSectionIndex(openIndex, _scale, _beatWidth)];
 
-            if (isJustTiming && _effectConfig != null)
+            if (isJustTiming)
             {
                 _handles[openIndex] = CreateJustTimingMotion(openIndex, beatColor);
                 return;
@@ -193,6 +208,12 @@ namespace KillChord.Runtime.View.InGame.Music
             color = _beatColor[GetBeatSectionIndex(beatIndex, _scale, _beatWidth)];
             return true;
         }
+
+        /// <summary> ビート描画の基準全長の既定値。 </summary>
+        private const float DEFAULT_DISPLAY_LENGTH = 120f;
+
+        /// <summary> ゲージ全長が表す小節数。Justは小節内正規化位置(1/BeatCount)をこの値で割った位置になる。 </summary>
+        private const float GUIDE_LENGTH_IN_BARS = 1.5f;
 
         [Space]
 
@@ -621,8 +642,5 @@ namespace KillChord.Runtime.View.InGame.Music
 
             return _zoneStarts.Length - 1;
         }
-        private const float DEFAULT_DISPLAY_LENGTH = 120f;
-        /// <summary> ゲージ全長が表す小節数。Justは小節内正規化位置(1/BeatCount)をこの値で割った位置になる。 </summary>
-        private const float GUIDE_LENGTH_IN_BARS = 1.5f;
     }
 }

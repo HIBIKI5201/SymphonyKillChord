@@ -19,9 +19,8 @@ namespace KillChord.Runtime.Composition
     ///     AC風リズムガイドを初期化するモジュールです。
     /// </summary>
     public class ACLikeRhythmGuideInitializer : InGameInitializationModuleBase
-    { /// <summary>
-      ///     リズムガイド機能を初期化する。
-      /// </summary>
+    {
+        /// <summary> モジュール名です。 </summary>
         public override string ModuleName => nameof(ACLikeRhythmGuideInitializer);
 
         /// <summary> 実行順です。 </summary>
@@ -80,7 +79,7 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-
+            // ガイド表示と判定は、音楽同期とターゲット状態の双方を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
                 new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
@@ -117,11 +116,24 @@ namespace KillChord.Runtime.Composition
             _postEffectViewModel = null;
         }
 
+        [Tooltip("リズム判定定義アセット。")]
+        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
+        [Tooltip("リズムガイドView。")]
+        [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
+        [Tooltip("リズムガイドのフルスクリーン演出View。")]
+        [SerializeField] private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
+        [Tooltip("リズムガイドの演出設定。ACLikeRhythmGuideViewに設定した物と同じアセットを指定。")]
+        [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
+
+        private bool _isRegisteredToPlayDirector;
+        private RhythmGuidePostEffectViewModel _postEffectViewModel;
+
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
         /// </summary>
         private void RegisterGameplayControllable()
         {
+            // 再初期化で多重登録されないようにする。
             if (_isRegisteredToPlayDirector)
             {
                 return;
@@ -137,17 +149,5 @@ namespace KillChord.Runtime.Composition
             inGamePlayDirector.AddGamePlayControllable(_rhythmGuideView);
             _isRegisteredToPlayDirector = true;
         }
-
-        [Tooltip("リズム判定定義アセット。")]
-        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
-        [Tooltip("リズムガイドView。")]
-        [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
-        [Tooltip("リズムガイドのフルスクリーン演出View。")]
-        [SerializeField] private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
-        [Tooltip("リズムガイドの演出設定。ACLikeRhythmGuideViewに設定した物と同じアセットを指定。")]
-        [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
-
-        private bool _isRegisteredToPlayDirector;
-        private RhythmGuidePostEffectViewModel _postEffectViewModel;
     }
 }

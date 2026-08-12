@@ -30,7 +30,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
 
             if (_playerAttackController != null)
             {
-                _playerAttackController.OnAttackExecuted += HandleAttackExecuted;
+                _playerAttackController.OnAttackExecuted += AttackExecutedHandler;
             }
         }
 
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
                 return;
             }
 
-            _playerAttackController.OnAttackExecuted -= HandleAttackExecuted;
+            _playerAttackController.OnAttackExecuted -= AttackExecutedHandler;
             _playerAttackController = null;
         }
 
@@ -58,7 +58,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         /// </summary>
         /// <param name="attackName"> 実行された攻撃名。演出には使用しない。 </param>
         /// <param name="hasHit"> 敵にヒットしたか。演出には使用しない。 </param>
-        private void HandleAttackExecuted(string attackName, bool hasHit)
+        private void AttackExecutedHandler(string attackName, bool hasHit)
         {
             if (_postEffectView == null || _rhythmGuideView == null || _effectConfig == null)
             {
