@@ -53,8 +53,14 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング成立時のVignette強度。 </summary>
         public float VignetteIntensity => _vignetteIntensity;
 
+        /// <summary> ジャストタイミング以外の入力時のVignette強度。 </summary>
+        public float NormalVignetteIntensity => _normalVignetteIntensity;
+
         /// <summary> ジャストタイミング成立時のVignette時間。 </summary>
         public float VignetteDuration => _vignetteDuration;
+
+        /// <summary> ジャストタイミング以外の入力時のVignette時間。 </summary>
+        public float NormalVignetteDuration => _normalVignetteDuration;
 
         /// <summary> ジャストタイミング成立時のVignette境界の滑らかさ。 </summary>
         public float VignetteSmoothness => _vignetteSmoothness;
@@ -114,8 +120,14 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング成立時のVignette強度。")]
         private float _vignetteIntensity = 0.22f;
 
+        [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング以外の入力時のVignette強度。")]
+        private float _normalVignetteIntensity = 0.1f;
+
         [SerializeField, Min(0.01f), Tooltip("ジャストタイミング成立時のVignette時間（秒）。")]
         private float _vignetteDuration = 0.28f;
+
+        [SerializeField, Min(0.01f), Tooltip("ジャストタイミング以外の入力時のVignette時間（秒）。")]
+        private float _normalVignetteDuration = 0.14f;
 
         [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング成立時のVignette境界の滑らかさ。")]
         private float _vignetteSmoothness = 0.45f;

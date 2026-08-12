@@ -171,36 +171,26 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta;
-            Ease ease = _effectConfig != null ? _effectConfig.NormalTimingEase : Ease.OutCirc;
+            Ease ease = _effectConfig.NormalTimingEase;
             _handles[openIndex] = CreateNormalTimingMotion(openIndex, targetSizeDelta, ease);
         }
 
         /// <summary>
-        ///     現在のビート位置に応じたVignette演出のパラメータを取得する。
+        ///     現在カーソルが乗っているビートブロックの色を取得する。
         /// </summary>
-        /// <param name="color"> Vignetteへ反映するビート色。 </param>
-        /// <param name="ease"> Vignetteのイージング。 </param>
-        /// <param name="duration"> Vignetteの再生時間。 </param>
-        /// <returns> 演出が有効でパラメータを取得できた場合はtrue。 </returns>
-        public bool TryGetVignetteParameter(out Color color, out Ease ease, out float duration)
+        /// <param name="color"> ビートブロックの色。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetCurrentBeatColor(out Color color)
         {
             color = default;
-            ease = Ease.InCirc;
-            duration = 0f;
 
-            if (_effectConfig == null
-                || !_effectConfig.IsVignetteEnabled
-                || _beatColor == null
-                || _beatColor.Length == 0)
+            if (_beatColor == null || _beatColor.Length == 0)
             {
                 return false;
             }
 
-            // 入力時点でカーソルが乗っているブロックの色を採用する。
             int beatIndex = Mathf.Max(0, _currentOpenIndex);
             color = _beatColor[GetBeatSectionIndex(beatIndex, _scale, _beatWidth)];
-            ease = _effectConfig.FlashEase;
-            duration = _effectConfig.FlashDuration;
             return true;
         }
 
