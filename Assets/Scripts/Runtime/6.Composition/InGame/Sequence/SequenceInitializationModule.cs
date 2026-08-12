@@ -10,7 +10,6 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -145,18 +144,17 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState)
-                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] "
-                    + "ステージ選択状態またはセーブシステムを取得できませんでした。",
+                    + "ステージ選択状態を取得できませんでした。",
                     this);
                 return false;
             }
 
             _stageProgressSaveDataService =
-                new StageProgressSaveDataService(savedataSystem);
+                new StageProgressSaveDataService();
 
             ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
 

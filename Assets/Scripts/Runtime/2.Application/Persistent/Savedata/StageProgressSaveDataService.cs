@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,15 +14,6 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
     /// </summary>
     public class StageProgressSaveDataService
     {
-        /// <summary>
-        ///     ステージ進行保存サービスを生成します。
-        /// </summary>
-        /// <param name="savedataSystem"> 使用するセーブシステムです。 </param>
-        public StageProgressSaveDataService(SavedataSystem savedataSystem)
-        {
-            _savedataSystem = savedataSystem ?? throw new ArgumentNullException(nameof(savedataSystem));
-        }
-
         /// <summary>
         ///     ステージクリア結果を保存する。
         /// </summary>
@@ -44,7 +35,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             }
 
             List<string> achievedEvaluationIds = BuildAchievedEvaluationIds(result);
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
@@ -67,7 +60,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// <returns> セーブ内容が変化した場合はtrue。 </returns>
         public async ValueTask<bool> SaveClearAsync(StageId stageId, StageReward reward)
         {
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
@@ -86,7 +81,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// </summary>
         public async ValueTask<StageProgressData> LoadAsync()
         {
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             return saveData.StageProgress;
         }
 
@@ -145,7 +142,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// <param name="stageId"> クリアしたステージID。</param>
         /// <param name="reward"> 初回クリア時に付与する報酬。</param>
         /// <param name="isFirstClear"> 初回クリアの場合はtrue。</param>
-        private async ValueTask SaveAndLogRewardAsync(
+        private static async ValueTask SaveAndLogRewardAsync(
             SaveData saveData,
             StageId stageId,
             StageReward reward,
@@ -158,7 +155,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                     GrantReward(saveData, reward);
                 }
 
-                await _savedataSystem.SaveAsync(saveData);
+                await SaveStore.SaveAsync<SaveData>();
 
                 if (isFirstClear)
                 {
@@ -178,7 +175,5 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 throw;
             }
         }
-
-        private readonly SavedataSystem _savedataSystem;
     }
 }

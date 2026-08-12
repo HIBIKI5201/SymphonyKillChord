@@ -4,7 +4,7 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Threading;
 using UnityEngine;
@@ -43,23 +43,19 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         {
             _loadedInitialSkillLoadout = await _initialSkillLoadoutKey.LoadAssetAsync<InitialSkillLoadoutAsset>(this, cancellationToken);
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(InitialSkillLoadoutInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
-                return false;
-            }
-
             _initialSkillLoadoutService = new InitialSkillLoadoutService(
                 _loadedInitialSkillLoadout.GetUnlockedSkillIds(),
                 _loadedInitialSkillLoadout.GetEquippedSkillIds());
 
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (_initialSkillLoadoutService.TryApply(saveData))
             {
-                await savedataSystem.SaveAsync(saveData);
+                await SaveStore.SaveAsync<SaveData>();
             }
 
             return true;

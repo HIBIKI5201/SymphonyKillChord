@@ -9,9 +9,9 @@ using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Threading;
@@ -62,7 +62,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
         private int _loadedOwnedPoints;
-        private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -80,16 +79,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             {
                 return false;
             }
-
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(SkillBuildInitializer)}] SavedataSystem が取得できませんでした。", this);
-                return false;
-            }
-
-            _savedataSystem = savedataSystem;
-            _loadedOwnedSkillRepository.Initialize(_savedataSystem);
-            _loadedSkillBuildRepository.Initialize(_savedataSystem);
 
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
@@ -133,7 +122,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
             _loadedOwnedPoints = 0;
-            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -284,7 +272,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 現在の所持ポイントです。 </returns>
         private async ValueTask<int> GetOwnedPointsAsync()
         {
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             return saveData.SkillBuild.SkillLevelupPoint;
         }
 

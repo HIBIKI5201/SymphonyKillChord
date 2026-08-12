@@ -12,11 +12,11 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading.Tasks;
@@ -67,7 +67,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private BattleSortieSelectionService _battleSortieSelectionService;
-        private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
@@ -83,21 +82,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
-            if (!ServiceLocator.TryGetInstance(out _savedataSystem))
-            {
-                Debug.LogError(
-                    $"[{nameof(TitleSceneInitializer)}] {nameof(SavedataSystem)}を取得できませんでした。",
-                    this);
-                return false;
-            }
-
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
             _loadedEnemyWaveDefinitionRepository =
                 await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
                     this,
                     cancellationToken);
-            _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
+            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             return _loadedRuleData != null
                 && _loadedStageTreeAsset != null
                 && _loadedEnemyWaveDefinitionRepository != null
@@ -138,7 +131,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SceneTransitionController sceneTransitionController;
             MusicPlayer musicPlayer;
             SoundEffectVolumeManager sePlayer;
-            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out _savedataSystem))
+            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -280,7 +273,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleStartController = null;
             _battleSortieSelectionService = null;
             _screenController = null;
-            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -292,16 +284,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="sceneTransitionController"></param>
         /// <param name="musicPlayer"></param>
         /// <param name="sePlayer"></param>
-        /// <param name="savedataSystem"> セーブシステム。 </param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
-            out SoundEffectVolumeManager sePlayer, out SavedataSystem savedataSystem)
+            out SoundEffectVolumeManager sePlayer)
         {
             sceneTransitionController = null;
             musicPlayer = null;
             sePlayer = null;
-            savedataSystem = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -323,14 +313,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: SoundEffectVolumeManager が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out savedataSystem))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystem が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
@@ -424,7 +406,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             try
             {
-                await _savedataSystem.DeleteSaveDataAsync<SaveData>();
+                await SaveStore.DeleteAsync<SaveData>();
             }
             catch (Exception ex)
             {
@@ -481,7 +463,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             try
             {
-                await _savedataSystem.SaveAsync(_loadedSaveData);
+                await SaveStore.SaveAsync<SaveData>();
             }
             catch (Exception ex)
             {
@@ -537,7 +519,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SaveData saveData = null;
             try
             {
-                saveData = await _savedataSystem.LoadAsync<SaveData>();
+                saveData = SaveStore.IsLoaded<SaveData>()
+                    ? SaveStore.Get<SaveData>()
+                    : await SaveStore.LoadAsync<SaveData>();
                 return saveData;
             }
             catch (Exception ex)
