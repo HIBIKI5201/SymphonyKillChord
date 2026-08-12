@@ -60,6 +60,12 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         /// </summary>
         private void Awake()
         {
+            if (_material == null)
+            {
+                Debug.LogError($"[{nameof(RhythmGuidePostEffectView)}] Materialが設定されていません。", this);
+                return;
+            }
+
             _defaultAlpha = _material.GetFloat(ALPHA);
         }
 
