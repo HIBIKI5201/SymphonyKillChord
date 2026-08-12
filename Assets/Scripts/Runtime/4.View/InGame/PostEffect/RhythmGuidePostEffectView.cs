@@ -24,7 +24,10 @@ namespace KillChord.Runtime.View.InGame.PostEffect
         /// <param name="ease"> 減衰のイージング。 </param>
         /// <param name="duration"> 減衰にかける秒数。 </param>
         /// <param name="from"> 再生開始時の濃度。 </param>
-        public void OneShotRatio(Ease ease = Ease.InCirc, float duration = 0.1f, float from = 1f)
+        public void OneShotRatio(
+            Ease ease = Ease.InCirc,
+            float duration = DEFAULT_DURATION,
+            float from = DEFAULT_FROM_RATIO)
         {
             // 再生中のアニメーションが残っていると値が競合するため、先に完了させる。
             _handle.TryComplete();
@@ -34,17 +37,23 @@ namespace KillChord.Runtime.View.InGame.PostEffect
                 .BindToMaterialFloat(_material, RATIO);
         }
 
-        /// <summary> 演出色のShaderプロパティID。 </summary>
-        private static readonly int COLOR = Shader.PropertyToID("_Color");
+        /// <summary> 呼び出し側が指定しない場合の減衰時間（秒）。 </summary>
+        private const float DEFAULT_DURATION = 0.1f;
 
-        /// <summary> 演出濃度のShaderプロパティID。 </summary>
-        private static readonly int RATIO = Shader.PropertyToID("_Alpha");
+        /// <summary> 呼び出し側が指定しない場合の再生開始時の濃度。 </summary>
+        private const float DEFAULT_FROM_RATIO = 1f;
 
         [Tooltip("フルスクリーン演出のMaterial。RendererFeatureに設定した物と同じアセットを指定")]
         [SerializeField] private Material _material;
 
         private float _defaultRatio;
         private MotionHandle _handle;
+
+        /// <summary> 演出色のShaderプロパティID。 </summary>
+        private static readonly int COLOR = Shader.PropertyToID("_Color");
+
+        /// <summary> 演出濃度のShaderプロパティID。 </summary>
+        private static readonly int RATIO = Shader.PropertyToID("_Alpha");
 
         /// <summary>
         ///     Materialの初期濃度を控えておく。

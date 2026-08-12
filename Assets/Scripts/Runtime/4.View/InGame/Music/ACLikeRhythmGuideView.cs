@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Sequence;
 using LitMotion;
 using LitMotion.Extensions;
@@ -11,7 +12,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     AC風リズムガイドのビート表示と判定ゾーンを描画するViewです。
     /// </summary>
-    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable
+    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel
     {
         /// <summary> ガイド表示の更新タイミングを通知します。 </summary>
         public event Action OnUpdate;
@@ -268,7 +269,6 @@ namespace KillChord.Runtime.View.InGame.Music
         private MotionHandle[] _handles;
         private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
-        private float _lastVignetteTimestamp = float.NegativeInfinity;
         private float[] _zoneStarts = Array.Empty<float>();
         private float[] _zoneEnds = Array.Empty<float>();
         private int[] _zoneBeatCounts = Array.Empty<int>();

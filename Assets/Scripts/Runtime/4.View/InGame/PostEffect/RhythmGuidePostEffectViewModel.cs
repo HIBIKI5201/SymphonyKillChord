@@ -1,91 +1,61 @@
-using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Music;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.PostEffect
 {
     /// <summary>
-    ///     攻撃入力に応じてリズムガイドの全画面Vignetteを再生するViewModelです。
+    ///     リズムガイドの全画面Vignetteの表示設定を保持し、Viewへ反映するViewModelです。
     /// </summary>
-    public sealed class RhythmGuidePostEffectViewModel : IDisposable
+    public sealed class RhythmGuidePostEffectViewModel : IRhythmGuidePostEffectViewModel
     {
         /// <summary>
-        ///     ViewModelを生成し、攻撃実行の通知へ購読する。
+        ///     反映先のViewと演出設定を受け取る。
         /// </summary>
         /// <param name="postEffectView"> 全画面演出View。 </param>
-        /// <param name="rhythmGuideView"> リズムガイドView。ジャスト成否とビート色の取得元。 </param>
         /// <param name="effectConfig"> リズムガイドの演出設定。 </param>
-        /// <param name="playerAttackController"> 攻撃実行の通知元。 </param>
         public RhythmGuidePostEffectViewModel(
             RhythmGuidePostEffectView postEffectView,
-            ACLikeRhythmGuideView rhythmGuideView,
-            ACLikeRhythmGuideEffectConfig effectConfig,
-            PlayerAttackController playerAttackController)
+            ACLikeRhythmGuideEffectConfig effectConfig)
         {
+            if (postEffectView == null)
+            {
+                throw new ArgumentNullException(nameof(postEffectView));
+            }
+
+            if (effectConfig == null)
+            {
+                throw new ArgumentNullException(nameof(effectConfig));
+            }
+
             _postEffectView = postEffectView;
-            _rhythmGuideView = rhythmGuideView;
             _effectConfig = effectConfig;
-            _playerAttackController = playerAttackController;
-
-            if (_playerAttackController != null)
-            {
-                _playerAttackController.OnAttackExecuted += AttackExecutedHandler;
-            }
         }
 
         /// <summary>
-        ///     攻撃実行通知の購読を解除する。
+        ///     ジャスト成否に応じた強さと時間で全画面Vignetteを再生する。
         /// </summary>
-        public void Dispose()
+        /// <param name="dto"> 反映する表示データ。 </param>
+        public void Play(in RhythmGuidePostEffectDto dto)
         {
-            if (_playerAttackController == null)
+            if (!_effectConfig.IsVignetteEnabled || _postEffectView == null)
             {
                 return;
             }
 
-            _playerAttackController.OnAttackExecuted -= AttackExecutedHandler;
-            _playerAttackController = null;
-        }
-
-        private readonly RhythmGuidePostEffectView _postEffectView;
-        private readonly ACLikeRhythmGuideView _rhythmGuideView;
-        private readonly ACLikeRhythmGuideEffectConfig _effectConfig;
-        private PlayerAttackController _playerAttackController;
-
-        /// <summary>
-        ///     攻撃入力時にジャスト成否へ応じた強さでVignetteを再生する。
-        /// </summary>
-        /// <param name="attackName"> 実行された攻撃名。演出には使用しない。 </param>
-        /// <param name="hasHit"> 敵にヒットしたか。演出には使用しない。 </param>
-        private void AttackExecutedHandler(string attackName, bool hasHit)
-        {
-            if (_postEffectView == null || _rhythmGuideView == null || _effectConfig == null)
-            {
-                return;
-            }
-
-            if (!_effectConfig.IsVignetteEnabled)
-            {
-                return;
-            }
-
-            if (!_rhythmGuideView.TryGetCurrentBeatColor(out Color color))
-            {
-                return;
-            }
-
-            // ガイド上のJustTimingMarkerにカーソルが乗っている入力のみをジャストとして扱う。
-            bool isJustTiming = _rhythmGuideView.IsOnJustTiming;
-            float intensity = isJustTiming
+            // ジャスト時は濃く長く、通常入力時は控えめに出して打鍵感の差を付ける。
+            float intensity = dto.IsJustTiming
                 ? _effectConfig.VignetteIntensity
                 : _effectConfig.NormalVignetteIntensity;
-            float duration = isJustTiming
+            float duration = dto.IsJustTiming
                 ? _effectConfig.VignetteDuration
                 : _effectConfig.NormalVignetteDuration;
 
-            _postEffectView.SetColor(color);
+            _postEffectView.SetColor(dto.Color);
             _postEffectView.OneShotRatio(_effectConfig.VignetteEase, duration, intensity);
         }
+
+        private readonly RhythmGuidePostEffectView _postEffectView;
+        private readonly ACLikeRhythmGuideEffectConfig _effectConfig;
     }
 }

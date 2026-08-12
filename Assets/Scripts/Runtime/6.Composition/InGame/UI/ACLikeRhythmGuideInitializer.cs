@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -13,7 +14,7 @@ using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
 
-namespace KillChord.Runtime.Composition
+namespace KillChord.Runtime.Composition.InGame.UI
 {
     /// <summary>
     ///     AC風リズムガイドを初期化するモジュールです。
@@ -88,7 +89,12 @@ namespace KillChord.Runtime.Composition
 
             new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
 
-            // 攻撃入力に応じた全画面Vignetteの再生をViewModelへ委譲する。
+            if (_rhythmGuidePostEffectView == null || _effectConfig == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] 全画面演出Viewまたは演出設定が未設定です。", this);
+                return false;
+            }
+
             PlayerAttackController playerAttackController =
                 ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackController;
 
@@ -98,22 +104,23 @@ namespace KillChord.Runtime.Composition
                 return false;
             }
 
-            _postEffectViewModel = new RhythmGuidePostEffectViewModel(
-                _rhythmGuidePostEffectView,
+            // 攻撃入力の購読とジャスト判定はPresenterが持ち、ViewModelは設定に基づく表示反映のみを担う。
+            _postEffectPresenter = new RhythmGuidePostEffectPresenter(
+                playerAttackController,
                 _rhythmGuideView,
-                _effectConfig,
-                playerAttackController);
+                new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
             return true;
         }
 
         /// <summary>
-        ///     全画面Vignette用ViewModelを破棄する。
+        ///     全画面Vignette用Presenterを破棄する。
         /// </summary>
         public override void Shutdown()
         {
-            _postEffectViewModel?.Dispose();
-            _postEffectViewModel = null;
+            _postEffectPresenter?.Dispose();
+            _postEffectPresenter = null;
+            _isRegisteredToPlayDirector = false;
         }
 
         [Tooltip("リズム判定定義アセット。")]
@@ -126,7 +133,7 @@ namespace KillChord.Runtime.Composition
         [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
 
         private bool _isRegisteredToPlayDirector;
-        private RhythmGuidePostEffectViewModel _postEffectViewModel;
+        private RhythmGuidePostEffectPresenter _postEffectPresenter;
 
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
