@@ -6,6 +6,7 @@ using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -53,9 +54,22 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
                 : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
+            int[] previousUnlockedSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
+            List<int> previousEquipmentSkillIds = new(saveData.SkillBuild.EquipmentSkillIDs);
+
             if (_initialSkillLoadoutService.TryApply(saveData))
             {
-                await SaveStore.SaveAsync<SaveData>();
+                try
+                {
+                    await SaveStore.SaveAsync<SaveData>();
+                }
+                catch
+                {
+                    // SaveStore が返すキャッシュ参照を、補完前の状態へ戻す。
+                    saveData.SkillUnlock.SetUnlockedSkillIds(previousUnlockedSkillIds);
+                    saveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);
+                    throw;
+                }
             }
 
             return true;

@@ -413,6 +413,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
 #endif
+                // 削除に失敗した状態で再読み込みと初期スキル補完を続けると、
+                // リセットできていないデータをリセット済みとして扱ってしまう。
+                return;
             }
 
             // セーブデータをロードして、初期状態に戻す。

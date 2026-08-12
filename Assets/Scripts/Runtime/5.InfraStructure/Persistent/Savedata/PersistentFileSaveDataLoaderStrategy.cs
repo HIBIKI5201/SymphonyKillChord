@@ -82,9 +82,12 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             string tempPath = filePath + ".tmp";
             await File.WriteAllTextAsync(tempPath, json);
 
+            // 削除してから移動すると、その間に異常終了した場合セーブデータが失われる。
+            // 既存ファイルがある場合は原子的に置換する。
             if (File.Exists(filePath))
             {
-                File.Delete(filePath);
+                File.Replace(tempPath, filePath, null);
+                return;
             }
 
             File.Move(tempPath, filePath);
