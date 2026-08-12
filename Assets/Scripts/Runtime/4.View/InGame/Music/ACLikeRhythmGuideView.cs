@@ -207,7 +207,12 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             int beatIndex = Mathf.Max(0, _currentOpenIndex);
-            color = _beatColor[GetBeatSectionIndex(beatIndex, _scale, _beatWidth)];
+            int index = GetBeatSectionIndex(beatIndex, _scale, _beatWidth);
+            if (index < 0)
+            {
+                return false;
+            }
+            color = _beatColor[index];
             return true;
         }
 
