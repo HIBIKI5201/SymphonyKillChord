@@ -79,6 +79,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 SkillEffectParameterId.DurationSeconds => "{DurationSeconds}",
                 SkillEffectParameterId.LifeStealRate => "{LifeStealRate}",
                 SkillEffectParameterId.HealPerHitCap => "{HealPerHitCap}",
+                SkillEffectParameterId.DamageReductionRate => "{DamageReductionRate}",
+                SkillEffectParameterId.DamageReductionHitCount => "{DamageReductionHitCount}",
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(id),
                     id,

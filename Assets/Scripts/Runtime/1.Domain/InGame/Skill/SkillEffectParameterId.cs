@@ -14,5 +14,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         DurationSeconds = 6,
         LifeStealRate = 7,
         HealPerHitCap = 8,
+        DamageReductionRate = 9,
+        DamageReductionHitCount = 10,
     }
 }

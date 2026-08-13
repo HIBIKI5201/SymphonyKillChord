@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             resolver.Register(SkillEffectType.Skill07, new Skill_07(null, attackController));
             resolver.Register(SkillEffectType.Skill08, new Skill_08(null));
             resolver.Register(SkillEffectType.Skill09, new Skill_09(null));
-            resolver.Register(SkillEffectType.Skill10, new Skill_10(null));
+            resolver.Register(SkillEffectType.Skill10, new Skill_10());
             resolver.Register(SkillEffectType.Skill13, new Skill_13(null));
         }
     }
