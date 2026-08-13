@@ -1,7 +1,6 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using KillChord.Runtime.Utility.OutGame.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFrameWork.System.SaveSystem;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -37,14 +36,10 @@ namespace KillChord.Develop.Composition.OutGame
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(DevelopSkillUnlockInitializer)}] SavedataSystem が取得できませんでした。", this);
-                return false;
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData == null)
@@ -58,7 +53,7 @@ namespace KillChord.Develop.Composition.OutGame
                 return true;
             }
 
-            await savedataSystem.SaveAsync(saveData);
+            await SaveStore.SaveAsync<SaveData>();
             return true;
         }
 

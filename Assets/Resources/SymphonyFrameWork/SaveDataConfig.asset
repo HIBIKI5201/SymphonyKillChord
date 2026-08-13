@@ -18,5 +18,5 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1841141166107001087
-      type: {class: NewtonsoftSaveDataLoaderStrategy, ns: SymphonyFrameWork.System.SaveSystem, asm: SymphonyFrameWork}
+      type: {class: PersistentFileSaveDataLoaderStrategy, ns: KillChord.Runtime.InfraStructure.Persistent.Savedata, asm: KillChord.Structure}
       data: 
