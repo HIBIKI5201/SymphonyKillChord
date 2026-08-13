@@ -1,0 +1,37 @@
+using KillChord.Runtime.Domain.InGame.Battle;
+
+namespace KillChord.Runtime.Domain.InGame.StatusEffect
+{
+    /// <summary>
+    ///     キャラクターが保持する状態効果を管理するシステムの共通インターフェース。
+    /// </summary>
+    public interface IStatusEffectSystem
+    {
+        /// <summary> 状態効果を追加します。 </summary>
+        void Add(IStatusEffect statusEffect);
+
+        /// <summary> 指定した状態効果を削除します。 </summary>
+        void Remove(IStatusEffect statusEffect);
+
+        /// <summary> すべての状態効果をクリアします。 </summary>
+        void Clear();
+
+        /// <summary> 与ダメージ補正を適用します。 </summary>
+        AttackResult ApplyOutgoingDamageModifiers(
+            IAttacker attacker,
+            IDefender defender,
+            AttackResult attackResult);
+
+        /// <summary> 被ダメージ補正を適用します。 </summary>
+        AttackResult ApplyIncomingDamageModifiers(
+            IAttacker attacker,
+            IDefender defender,
+            AttackResult attackResult);
+
+        /// <summary>
+        ///     ダメージを与えたことを通知します。
+        /// </summary>
+        /// <param name="context"> ダメージが与えられた際のコンテキスト情報。 </param>
+        void NotifyDamageDealt(in DamageDealtContext context);
+    }
+}
