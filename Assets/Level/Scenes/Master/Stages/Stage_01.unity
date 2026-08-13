@@ -4273,6 +4273,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1676881198}
   - component: {fileID: 1676881199}
+  - component: {fileID: 1676881200}
   m_Layer: 0
   m_Name: Barrage
   m_TagString: Untagged
@@ -4288,12 +4289,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1676881197}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1963956445}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!320 &1676881199
 PlayableDirector:
@@ -4306,13 +4307,34 @@ PlayableDirector:
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: 2a66fa46139e520448ba1e0bc6a5a53d, type: 2}
   m_InitialState: 1
-  m_WrapMode: 2
+  m_WrapMode: 1
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
   m_SceneBindings: []
   m_ExposedReferences:
     m_References:
     - 802d151a5c6af8642a13a87cfee14347: {fileID: 0}
+--- !u!114 &1676881200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1676881197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45a335734b1572644a6a5d09d87adc65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Scenes::Unity.Scenes.SubScene
+  _SceneAsset: {fileID: 102900000, guid: 2b5babb32d3e071419a333eba60e5139, type: 3}
+  _HierarchyColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  AutoLoadScene: 1
+  _SceneGUID:
+    Value:
+      x: 1002091954
+      y: 1097917394
+      z: 3191028369
+      w: 2467684458
 --- !u!43 &1696850340
 Mesh:
   m_ObjectHideFlags: 0
@@ -5641,6 +5663,7 @@ Transform:
   - {fileID: 741715725}
   - {fileID: 2049387106}
   - {fileID: 1040051875}
+  - {fileID: 1676881198}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1978300395
@@ -6236,4 +6259,3 @@ SceneRoots:
   - {fileID: 1898020734}
   - {fileID: 1804559881}
   - {fileID: 1532834463}
-  - {fileID: 1676881198}
