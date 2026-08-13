@@ -10,10 +10,17 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     public class SkillBase : ISkillEffectExecutor
     {
         /// <summary>
+        ///     状態効果基盤を使用するスキルを初期化します。
+        /// </summary>
+        protected SkillBase()
+        {
+        }
+
+        /// <summary>
         ///     スキル基底クラスを初期化します。
         /// </summary>
         /// <param name="buff"> 付与するバフです。 </param>
-        public SkillBase(IBuff buff)
+        protected SkillBase(IBuff buff)
         {
             _buff = buff;
         }
