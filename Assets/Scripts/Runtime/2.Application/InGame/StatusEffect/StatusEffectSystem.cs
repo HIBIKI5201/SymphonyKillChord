@@ -217,6 +217,42 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             }
         }
 
+        /// <inheritdoc />
+        public void NotifyDamageTaken(in DamageTakenContext context)
+        {
+            float currentTime = _timeProvider();
+
+            RemoveExpiredEffects(currentTime);
+
+            for (int i = 0; i < _statusEffects.Count; i++)
+            {
+                if (_statusEffects[i].Effect is IDamageTakenHandler handler)
+                {
+                    handler.OnDamageTaken(context);
+                }
+            }
+
+            RemoveConsumedEffects();
+        }
+
+        private readonly Func<float> _timeProvider;
+        private readonly List<StatusEffectRuntimeEntity> _statusEffects = new();
+
+        /// <summary>
+        ///     消費された状態効果を削除する。
+        /// </summary>
+        private void RemoveConsumedEffects()
+        {
+            for (int i = _statusEffects.Count - 1; i >= 0; i--)
+            {
+                if (_statusEffects[i].Effect is IConsumableStatusEffect consumable && consumable.IsConsumed)
+                {
+                    Debug.Log($"{_statusEffects[i].Effect.Id}の状態効果が消費されたため削除されました。");
+                    _statusEffects.RemoveAt(i);
+                }
+            }
+        }
+
         /// <summary>
         ///     現在の時間を取得する。
         /// </summary>
@@ -225,8 +261,5 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
         {
             return Time.time;
         }
-
-        private readonly Func<float> _timeProvider;
-        private readonly List<StatusEffectRuntimeEntity> _statusEffects = new();
     }
 }

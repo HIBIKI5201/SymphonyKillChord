@@ -42,6 +42,13 @@ namespace KillChord.Runtime.Application.InGame.Battle
             Damage appliedDamage = defender.TakeDamage(result.FinalDamage);
             result = result.WithAppliedDamage(appliedDamage);
 
+            defender.StatusEffectSystem.NotifyDamageTaken(
+                new DamageTakenContext(
+                    attacker,
+                    defender,
+                    result,
+                    attackType));
+
             attacker.StatusEffectSystem.NotifyDamageDealt(
                 new DamageDealtContext(
                     attacker,

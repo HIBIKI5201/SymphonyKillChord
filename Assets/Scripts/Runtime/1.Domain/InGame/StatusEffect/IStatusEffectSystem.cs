@@ -33,5 +33,11 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
         /// </summary>
         /// <param name="context"> ダメージが与えられた際のコンテキスト情報。 </param>
         void NotifyDamageDealt(in DamageDealtContext context);
+
+        /// <summary>
+        ///     ダメージを受けたことを通知します。
+        /// </summary>
+        /// <param name="context"> ダメージが受けられた際のコンテキスト情報。 </param>
+        void NotifyDamageTaken(in DamageTakenContext context);
     }
 }
