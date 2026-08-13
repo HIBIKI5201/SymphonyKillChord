@@ -9,11 +9,13 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         ///     攻撃結果のインスタンスを初期化するコンストラクタ。
         ///     値を直接指定して初期化するためのコンストラクタ。
         /// </summary>
-        /// <param name="finalDamage"></param>
-        /// <param name="isCritical"></param>
-        public AttackResult(Damage finalDamage, bool isCritical)
+        /// <param name="finalDamage"> 最終的なダメージ量。 </param>
+        /// <param name="isCritical"> クリティカルヒットかどうかを示すフラグ。 </param>
+        /// <param name="appliedDamage"> 実際に適用されたダメージ量。 </param>
+        public AttackResult(Damage finalDamage, bool isCritical, Damage appliedDamage = default)
         {
             FinalDamage = finalDamage;
+            AppliedDamage = appliedDamage;
             IsCritical = isCritical;
         }
 
@@ -21,17 +23,39 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         ///     攻撃結果のインスタンスを初期化するコンストラクタ。
         ///     攻撃処理の文脈から値を抽出して初期化するためのコンストラクタ。
         /// </summary>
-        /// <param name="attackStepContext"></param>
+        /// <param name="attackStepContext"> 攻撃処理の文脈情報。 </param>
         public AttackResult(in AttackStepContext attackStepContext)
         {
             FinalDamage = attackStepContext.Damage;
+            AppliedDamage = default;
             IsCritical = attackStepContext.CriticalCount > 0;
         }
 
         /// <summary> 最終的なダメージ量。 </summary>
         public Damage FinalDamage { get; }
 
+        /// <summary> 実際に適用されたダメージ量。 </summary>
+        public Damage AppliedDamage { get; }
+
         /// <summary> クリティカルヒットかどうかを示すフラグを取得する。 </summary>
         public bool IsCritical { get; }
+
+        /// <summary>
+        ///     最終ダメージを変更した新しいAttackResultを返す。
+        ///　 </summary>
+        public AttackResult WithFinalDamage(Damage finalDamage)
+        {
+            return new AttackResult(finalDamage, IsCritical, AppliedDamage);
+        }
+
+        /// <summary>
+        ///     実適用ダメージを設定した新しいAttackResultを返す。
+        /// </summary>
+        /// <param name="appliedDamage"> 実際に適用されたダメージ量。 </param>
+        /// <returns> 新しいAttackResultのインスタンス。 </returns>
+        public AttackResult WithAppliedDamage(Damage appliedDamage)
+        {
+            return new AttackResult(FinalDamage, IsCritical, appliedDamage);
+        }
     }
 }
