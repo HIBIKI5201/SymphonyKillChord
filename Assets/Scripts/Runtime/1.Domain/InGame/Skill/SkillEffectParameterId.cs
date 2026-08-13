@@ -10,5 +10,9 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         HealthCostRatio = 2,
         HitCount = 3,
         CriticalMultiplier = 4,
+        DamageTakenIncreaseRate = 5,
+        DurationSeconds = 6,
+        LifeStealRate = 7,
+        HealPerHitCap = 8,
     }
 }

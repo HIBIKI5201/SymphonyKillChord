@@ -29,6 +29,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="musicSyncService"></param>
         /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
         /// <param name="playerTransform"> 判定の原点となるプレイヤーTransformです。 </param>
+        /// <param name="pendingAttackEffectService"> 攻撃の多段ヒットを管理するサービスです。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerBattleState battleState,
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             MusicSyncState musicSyncState,
             TargetAreaQuery targetAreaQuery,
             Transform playerTransform,
+            PendingAttackEffectService pendingAttackEffectService,
             float attackRotationSpeed,
             float attackCooldown
         )
@@ -51,6 +53,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _musicSyncService = musicSyncService;
             _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
+            _pendingAttackEffectService = pendingAttackEffectService ?? throw new ArgumentNullException(nameof(pendingAttackEffectService));
             AttackRotationSpeed = attackRotationSpeed;
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
@@ -98,6 +101,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             bool hasTarget = TryUpdateCurrentTarget();
             _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
+            IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
+
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
             if (attackDefinition == null)
@@ -126,13 +131,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return true;
             }
 
-            bool hasHit = ApplyHit(attackDefinition);
+            bool hasHit = ApplyHit(attackDefinition, pendingHitEffects);
 
             // 2発目以降は毎フレーム更新で消化する。
             int remainingHits = attackDefinition.HitCount - 1;
             if (remainingHits > 0)
             {
                 _pendingAttackDefinition = attackDefinition;
+                _pendingHitEffects = pendingHitEffects;
                 _pendingHitCount = remainingHits;
                 _pendingHitTimer = attackDefinition.HitInterval;
             }
@@ -180,6 +186,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitCount = 0;
             _pendingHitTimer = 0d;
             _pendingAttackDefinition = null;
+            _pendingHitEffects = Array.Empty<IAttackHitEffect>();
         }
 
         /// <summary>
@@ -203,7 +210,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitCount--;
             _pendingHitTimer += definition.HitInterval;
 
-            ApplyHit(definition);
+            ApplyHit(definition, _pendingHitEffects);
 
             if (_pendingHitCount <= 0)
             {
@@ -249,8 +256,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         ///     単体攻撃の場合は生存している最も近い1体のみを対象とする。
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <param name="pendingHitEffects"> 保留中の多段ヒットのエフェクト。 </param>
         /// <returns> 1体以上に命中した場合はtrue。 </returns>
-        private bool ApplyHit(AttackDefinition attackDefinition)
+        private bool ApplyHit(AttackDefinition attackDefinition, IReadOnlyList<IAttackHitEffect> pendingHitEffects)
         {
             _hitDefenders.Clear();
             _attackTargets.Clear();
@@ -285,7 +293,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _attackTargets,
                 false,
                 _battleState.Attacker.BaseDamage,
-                _hitResults);
+                _hitResults,
+                pendingHitEffects);
 
             for (int i = 0; i < _hitResults.Count; i++)
             {
@@ -396,10 +405,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly IMusicSyncService _musicSyncService;
         private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
+        private readonly PendingAttackEffectService _pendingAttackEffectService;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
         private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
         private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
+        private IReadOnlyList<IAttackHitEffect> _pendingHitEffects = Array.Empty<IAttackHitEffect>();
         private double _attackCooldownRemainig;
         private double _attackCooldown;
         private AttackDefinition _pendingAttackDefinition;

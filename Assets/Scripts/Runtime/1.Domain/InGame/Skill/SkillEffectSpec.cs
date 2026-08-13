@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
 using System.Collections.Generic;
 
@@ -14,14 +15,17 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <param name="effectType"> 効果種別です。 </param>
         /// <param name="targetingType"> 対象解決ルールです。 </param>
         /// <param name="parameters"> 効果処理と表示で共有する数値パラメータです。 </param>
+        /// <param name="reapplyPolicy"> 状態効果の再付与ポリシーです。 </param>
         public SkillEffectSpec(
             SkillEffectType effectType,
             SkillTargetingType targetingType,
-            IReadOnlyList<SkillEffectParameter> parameters = null)
+            IReadOnlyList<SkillEffectParameter> parameters = null,
+            StatusEffectReapplyPolicy reapplyPolicy = StatusEffectReapplyPolicy.Ignore)
         {
             EffectType = effectType;
             TargetingType = targetingType;
             _parameters = CopyParameters(parameters);
+            ReapplyPolicy = reapplyPolicy;
         }
 
         /// <summary> 効果種別です。 </summary>
@@ -29,6 +33,9 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         /// <summary> 対象解決ルールです。 </summary>
         public SkillTargetingType TargetingType { get; }
+
+        /// <summary> 状態効果の再付与ポリシーです。 </summary>
+        public StatusEffectReapplyPolicy ReapplyPolicy { get; }
 
         /// <summary> 効果処理と表示で共有する数値パラメータです。 </summary>
         public IReadOnlyList<SkillEffectParameter> Parameters => _parameters ?? Array.Empty<SkillEffectParameter>();

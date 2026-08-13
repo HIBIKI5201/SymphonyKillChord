@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -155,8 +156,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 playerModuleContainer.PlayerView.transform,
                 playerModuleContainer.PlayerStatusBonus.AreaAttackRangeAddition);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
+            PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController);
+            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);
@@ -171,6 +173,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
             _moduleContainer.SetSkillController(_skillController);
+            _moduleContainer.SetPendingAttackEffectService(pendingAttackEffectService);
             return true;
         }
 
