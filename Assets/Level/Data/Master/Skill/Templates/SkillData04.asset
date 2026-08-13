@@ -17,8 +17,9 @@ MonoBehaviour:
     _hashId: -860903574
   _displayName: 4
   _pattern: 020000000400000004000000
-  _skillDetail: "5秒間、攻撃で与えたダメージの30％の過剰HP（バリア）を獲得する。\nバフを獲得した後4拍の攻撃を行う。"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 84dbe340ca37c2e478b3609e71f533df, type: 3}
+  _skillDetail: "5\u79D2\u9593\u3001\u653B\u6483\u3067\u4E0E\u3048\u305F\u30C0\u30E1\u30FC\u30B8\u306E30\uFF05\u306E\u904E\u5270HP\uFF08\u30D0\u30EA\u30A2\uFF09\u3092\u7372\u5F97\u3059\u308B\u3002\n\u30D0\u30D5\u3092\u7372\u5F97\u3057\u305F\u5F8C4\u62CD\u306E\u653B\u6483\u3092\u884C\u3046\u3002"
+  _tips: 
   _effectDisplayMode: 0
   _effectParameters:
   - _id: 0

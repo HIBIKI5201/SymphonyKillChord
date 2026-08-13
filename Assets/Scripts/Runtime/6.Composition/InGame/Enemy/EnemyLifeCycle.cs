@@ -11,7 +11,6 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
-using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
@@ -182,6 +181,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyBattleAIFacade.Initialize(aiController);
             _enemyStateFacade.Initialize(aiController, target, _raycastView, battleState);
             //_enemySharedFacade.Initialize(target);
+
+            ResetDeathEffect();
         }
 
         /// <summary>
