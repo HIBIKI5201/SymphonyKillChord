@@ -25,7 +25,6 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<BarrageFireState>();
-            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         /// <summary>
@@ -37,11 +36,10 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         {
             float deltaTime = SystemAPI.Time.DeltaTime;
 
-            // 生成は次フレーム冒頭のECBへ集約する。
-            // TransformSystemGroupより前に再生されるため、初回描画からLocalToWorldが正しく求まる。
-            EntityCommandBuffer commandBuffer =
-                SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
-                    .CreateCommandBuffer(state.WorldUnmanaged);
+            // 生成は同フレーム内で再生し切る。
+            // 次フレームまで持ち越すと、その間にSubSceneがライブ再ベイクされた場合に
+            // 記録済みの弾プレハブEntityが破棄され、Instantiateが無効なEntityを掴んで落ちる。
+            EntityCommandBuffer commandBuffer = new(state.WorldUpdateAllocator);
 
             foreach ((RefRW<BarrageFireState> fireState, RefRW<TurretRandom> turretRandom, RefRO<TurretConfig> config, RefRO<LocalToWorld> localToWorld, Entity entity)
                      in SystemAPI.Query<RefRW<BarrageFireState>, RefRW<TurretRandom>, RefRO<TurretConfig>, RefRO<LocalToWorld>>()
@@ -55,7 +53,9 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
                 fireState.ValueRW.Timer -= deltaTime;
 
                 // 弾の性能はプレハブ側に持たせているため、発射ごとではなくタレット単位で一度だけ読む。
+                // 再ベイク直後は参照が古いままの場合があるため、実在するEntityかを先に確かめる。
                 bool canFire = turretConfig.BulletPrefab != Entity.Null
+                    && state.EntityManager.Exists(turretConfig.BulletPrefab)
                     && SystemAPI.HasComponent<BulletSpeed>(turretConfig.BulletPrefab);
                 LocalTransform prefabTransform = default;
                 float bulletSpeed = 0f;
@@ -98,6 +98,8 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
                     commandBuffer.SetComponentEnabled<BarrageFireState>(entity, false);
                 }
             }
+
+            commandBuffer.Playback(state.EntityManager);
         }
 
         private const float MINIMUM_FIRE_INTERVAL_SECONDS = 0.01f;
