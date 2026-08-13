@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace KillChord.Runtime.Adaptor.OutGame.Screen
 {
     /// <summary>
@@ -21,28 +18,25 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary> クレジット画面を表示します。 </summary>
         void ShowCredit();
 
-        /// <summary> 現在画面を即座に閉じます。 </summary>
-        void CloseCurrentImmediately();
-
         /// <summary> ホーム画面を表示します。 </summary>
-        Task ShowHome(CancellationToken token);
+        void ShowHome();
 
         /// <summary> 作戦画面を表示します。 </summary>
-        Task ShowStageSelect(CancellationToken token);
+        void ShowStageSelect();
 
         /// <summary> 研究画面を表示します。 </summary>
-        Task ShowSkillTree(CancellationToken token);
+        void ShowSkillTree();
 
         /// <summary> 改造画面を表示します。 </summary>
-        Task ShowSkillBuild(CancellationToken token);
+        void ShowSkillBuild();
 
         /// <summary> 戦闘準備画面を表示します。 </summary>
-        Task ShowBattlePreparation(string targetSceneName, CancellationToken token);
+        void ShowBattlePreparation();
 
         /// <summary> 設定画面を表示します。 </summary>
-        Task ShowSetting(CancellationToken token);
+        void ShowSetting();
 
         /// <summary> 現在画面を閉じます。 </summary>
-        Task CloseCurrent(CancellationToken token);
+        void CloseCurrent();
     }
 }

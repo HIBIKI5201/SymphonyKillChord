@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using System;
@@ -78,14 +79,23 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     敵生成処理。
         /// </summary>
-        public async void SpawnEnemy(int amount, Action callback)
+        /// <param name="enemyDefinitionId"> 生成する個別の敵定義IDです。 </param>
+        /// <param name="amount"> 生成数です。 </param>
+        /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。 </param>
+        /// <param name="callback"> 生成完了時に呼ばれます。 </param>
+        public async void SpawnEnemy(
+            EnemyDefinitionId enemyDefinitionId,
+            int amount,
+            IReadOnlyList<int> candidateSpawnPointHashes,
+            Action callback)
         {
             for (int i = 0;  i < amount; i++)
             {
                 try
                 {
-                    SpawnPositionPair positionPair = await _spawnPositionSearcher.GetRandomSpawnPositionAsync();
-                    EnemyLifeCycle lifeCycle = _enemyPools.GetArtillery();
+                    SpawnPositionPair positionPair =
+                        await _spawnPositionSearcher.GetRandomSpawnPositionAsync(candidateSpawnPointHashes);
+                    EnemyLifeCycle lifeCycle = _enemyPools.GetEnemy(enemyDefinitionId);
                     SpawnEnemyAsync(lifeCycle, positionPair, callback);
                 }
                 catch (OperationCanceledException)

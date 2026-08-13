@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
+using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -37,10 +38,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
 
             string resultText = _missionRuntimeService.MissionProgress.EndReason.ToString();
+            string mainMissionText = GetMainMissionText();
 
             MissionHudDTO dto = new MissionHudDTO(
-                _missionRuntimeService.MissionDefinition.MainMissionText,
-                resultText,
+                mainMissionText,
                 evaluationItems);
 
             _missionHudViewModel.Apply(dto);
@@ -50,6 +51,29 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private readonly MissionRuntimeService _missionRuntimeService;
         /// <summary> ミッションHUDビューモデル。 </summary>
         private readonly IMissionHudViewModel _missionHudViewModel;
+
+        /// <summary>
+        ///     現在の進行状態に対応するメインミッション表示文を取得します。
+        /// </summary>
+        /// <returns> 表示するメインミッション文です。 </returns>
+        private string GetMainMissionText()
+        {
+            int stepIndex = _missionRuntimeService.MissionProgress.ObjectiveStepIndex;
+            ObjectiveSequenceStep step = _missionRuntimeService.MissionDefinition.ClearCondition.GetStep(stepIndex);
+            if (string.IsNullOrWhiteSpace(step?.GuideMessageText))
+            {
+                return _missionRuntimeService.MissionDefinition.MainMissionText;
+            }
+
+            if (step.Condition is IObjectiveProgressReporter progressReporter
+                && progressReporter.RequiredCount > 0)
+            {
+                int currentCount = progressReporter.CurrentCount(_missionRuntimeService.MissionProgress);
+                return $"{step.GuideMessageText}({currentCount}/{progressReporter.RequiredCount}回)";
+            }
+
+            return step.GuideMessageText;
+        }
 
         private MissionEvaluationDisplayState ConvertDisplayState(
             MissionEvaluationDisplaySituation situation)

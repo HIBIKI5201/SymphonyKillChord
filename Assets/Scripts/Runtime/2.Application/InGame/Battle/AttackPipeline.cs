@@ -44,6 +44,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 currentContext = _attackSteps[i].Execute(currentContext);
             }
 
+            // ダメージの内部値は丸めない。端数の処理は表示側の責務とする。
             return new AttackResult(currentContext);
         }
 

@@ -17,6 +17,9 @@
         /// <summary> BotトークンでのREST送信の代わりに使用するWebhook URL。 </summary>
         public const string DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
 
+        /// <summary> Discordログの取得対象にするチャンネルID配列。 </summary>
+        public const string DISCORD_LOG_CHANNEL_IDS = "DISCORD_LOG_CHANNEL_IDS";
+
         public const string NOTION_TOKEN = "NOTION_TOKEN";
         public const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
         public const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";

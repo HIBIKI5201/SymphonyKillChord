@@ -11,7 +11,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <summary>
         ///     詳細画面を表示します。
         /// </summary>
-        /// <param name="token"> キャンセルトークン。</param>
-        Task Show(CancellationToken token);
+        ValueTask Show(CancellationToken cancellationToken = default);
     }
 }

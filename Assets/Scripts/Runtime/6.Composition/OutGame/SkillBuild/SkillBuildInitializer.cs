@@ -1,7 +1,9 @@
+using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -11,7 +13,6 @@ using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.ServiceLocate;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildRepository _loadedSkillBuildRepository;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
+        private int _loadedOwnedPoints;
         private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -89,9 +91,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _loadedOwnedSkillRepository.Initialize(_savedataSystem);
             _loadedSkillBuildRepository.Initialize(_savedataSystem);
 
-            _loadedEquippedSkills = await GetEquippedSkillAsync();
+            _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
+            _loadedOwnedPoints = await GetOwnedPointsAsync();
 
             return _loadedEquippedSkills != null && _loadedOwnedSkillTemplates != null;
         }
@@ -129,6 +132,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _loadedSkillBuildRepository = null;
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
+            _loadedOwnedPoints = 0;
             _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -190,16 +194,24 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                         : SkillBuildDefinition.INITIAL_SLOT_COUNT);
             }
 
-            SkillBuildUseCase skillBuildUseCase = new(_skillBuildDefinition, _savedataSystem);
-            _skillBuildViewModel = new(_outGameUIEvent);
-            _skillBuildPresenter = new(_skillBuildViewModel);
-            _skillBuildController = new(skillBuildUseCase, _skillBuildViewModel, _loadedOwnedSkillTemplates);
+            SkillBuildUseCase skillBuildUseCase =
+                new(_skillBuildDefinition, _loadedSkillBuildRepository);
+            _skillBuildController = new(skillBuildUseCase, _loadedOwnedSkillTemplates);
+            _skillBuildViewModel = new(_skillBuildController);
+            SkillEffectDescriptionFormatter skillEffectDescriptionFormatter =
+                new SkillEffectDescriptionFormatter();
+            SkillDisplayTextFormatter textFormatter =
+                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
+            _skillBuildPresenter = new(_skillBuildViewModel, textFormatter);
 
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(_uiDocument, _skillBuildViewModel);
 
             _skillBuildScreenView.InitializeSkillList(_skillElementTemplate, _skillElementDragAndDropSetup.SetupDraggable);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
-            _skillBuildPresenter.Push(_skillBuildDefinition.EquippedSkills, _loadedOwnedSkillTemplates);
+            _skillBuildPresenter.Push(
+                _skillBuildDefinition.EquippedSkills,
+                _loadedOwnedSkillTemplates,
+                _loadedOwnedPoints);
 
             _isInitialized = true;
             return true;
@@ -260,22 +272,52 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         ///     装備済みスキル一覧を取得します。
         /// </summary>
         /// <returns> 装備済みスキル一覧です。 </returns>
-        private async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkillAsync()
+        private async ValueTask<IReadOnlyList<EquippedSkill>> GetEquippedSkillsAsync()
         {
             return await _loadedSkillBuildRepository.GetEquippedSkills();
         }
 
         /// <summary>
+        ///     所持ポイントを取得します。
+        ///     <para> スキルのレベルアップに使用できるポイントです。 </para>
+        /// </summary>
+        /// <returns> 現在の所持ポイントです。 </returns>
+        private async ValueTask<int> GetOwnedPointsAsync()
+        {
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            return saveData.SkillBuild.SkillLevelupPoint;
+        }
+
+        /// <summary>
         ///     入手済みスキル一覧を再取得して画面へ反映します。
         /// </summary>
-        private async void RefreshOwnedSkills()
+        /// <param name="resetsDetailToDefault"> 更新後に装備スロット1を既定表示する場合は true。 </param>
+        private async void RefreshOwnedSkills(bool resetsDetailToDefault)
         {
             try
             {
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
+                IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
+                int ownedPoints = await GetOwnedPointsAsync();
                 SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
+                if (_skillBuildDefinition == null || !_isInitialized)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError($"[{nameof(SkillBuildInitializer)}] SkillBuildDefinition が null です。", this);
+#endif
+                    return;
+                }
+
+                _skillBuildDefinition.UpdateEquippedSkills(ToArray(equippedSkills));
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
-                _skillBuildPresenter?.Push(_skillBuildDefinition.EquippedSkills, ownedSkillData);
+                _skillBuildPresenter?.Push(
+                    _skillBuildDefinition.EquippedSkills,
+                    ownedSkillData,
+                    ownedPoints);
+                if (resetsDetailToDefault)
+                {
+                    _skillBuildViewModel?.ResetDetailToDefault();
+                }
             }
             catch (System.Exception exception)
             {
@@ -320,7 +362,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void DisposeComponents()
         {
-            _skillBuildController?.Dispose();
             _skillBuildController = null;
 
             if (_skillBuildScreenView != null)
@@ -370,7 +411,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void HandleOwnedSkillChangedHandler()
         {
-            RefreshOwnedSkills();
+            RefreshOwnedSkills(false);
         }
 
         /// <summary>
@@ -378,7 +419,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void HandleShownSkillBuildScreenHandler()
         {
-            RefreshOwnedSkills();
+            RefreshOwnedSkills(true);
         }
     }
 }

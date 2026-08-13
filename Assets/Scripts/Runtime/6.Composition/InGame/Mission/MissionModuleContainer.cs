@@ -26,8 +26,5 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         /// <summary> ミッションイベント制御です。 </summary>
         public MissionEventController MissionEventController { get; }
-
-        /// <summary> 戦闘実績値を記録するControllerです。 </summary>
-        public MissionProgressRecorderController MissionProgressRecorderController { get; set; }
     }
 }

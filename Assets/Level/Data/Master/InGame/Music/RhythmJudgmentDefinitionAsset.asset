@@ -21,9 +21,9 @@ MonoBehaviour:
     EndNormalized: 0.2083
   - BeatType: 4
     StartNormalized: 0.2083
-    EndNormalized: 0.34
+    EndNormalized: 0.3
   - BeatType: 3
-    StartNormalized: 0.34
+    StartNormalized: 0.3
     EndNormalized: 0.4167
   - BeatType: 2
     StartNormalized: 0.4167

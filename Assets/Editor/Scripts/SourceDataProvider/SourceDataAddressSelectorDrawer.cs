@@ -58,12 +58,17 @@ namespace KillChord.Editor.SourceDataProvider
             Rect popupRect = new(
                 position.x,
                 position.y,
-                position.width - PING_BUTTON_WIDTH - EditorGUIUtility.standardVerticalSpacing,
+                position.width - PING_BUTTON_WIDTH - JUMP_BUTTON_WIDTH - 2f * EditorGUIUtility.standardVerticalSpacing,
                 position.height);
             Rect pingRect = new(
                 popupRect.xMax + EditorGUIUtility.standardVerticalSpacing,
                 position.y,
                 PING_BUTTON_WIDTH,
+                position.height);
+            Rect jumpRect = new(
+                pingRect.xMax + EditorGUIUtility.standardVerticalSpacing,
+                position.y,
+                JUMP_BUTTON_WIDTH,
                 position.height);
 
             EditorGUI.BeginProperty(position, label, property);
@@ -82,6 +87,12 @@ namespace KillChord.Editor.SourceDataProvider
                         out ScriptableObject sourceAsset))
                 {
                     EditorGUIUtility.PingObject(sourceAsset);
+                }
+
+                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton)
+                    && PlannerMasterDataWindow.TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                {
+                    window.NavigateToSourceAsset(property.stringValue);
                 }
             }
             EditorGUI.EndProperty();
@@ -138,7 +149,9 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         private const float PING_BUTTON_WIDTH = 48f;
+        private const float JUMP_BUTTON_WIDTH = 56f;
         private const string PING_LABEL = "Ping";
+        private const string JUMP_LABEL = "Planner";
         private const string UNASSIGNED_LABEL = "<未設定>";
     }
 }

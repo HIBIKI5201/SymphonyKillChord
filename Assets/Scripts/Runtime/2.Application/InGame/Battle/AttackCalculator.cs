@@ -14,16 +14,18 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
+        /// <param name="isOutOfRange"> 対象が射程外にいる場合はtrue。ダメージ減衰の判定に使う。 </param>
         /// <returns> 攻撃結果。 </returns>
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
             IAttacker attacker,
             IDefender defender,
             bool isJustHit,
-            Damage baseDamage
+            Damage baseDamage,
+            bool isOutOfRange = false
             )
         {
-            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit, baseDamage);
+            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }

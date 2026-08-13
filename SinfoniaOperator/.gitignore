@@ -6,8 +6,12 @@
 /NotionMarkdownExporter/obj/
 /NotionMarkdownExporter/bin/
 /NotionMarkdownExporter/publish/
+/DiscordLogExporter/obj/
+/DiscordLogExporter/bin/
+/DiscordLogExporter/publish/
 
 # Exception for specific project file
 !/SinfoniaOperator/SinfoniaOperator.csproj
 !/SinfoniaOperator.Core/SinfoniaOperator.Core.csproj
 !/NotionMarkdownExporter/NotionMarkdownExporter.csproj
+!/DiscordLogExporter/DiscordLogExporter.csproj
