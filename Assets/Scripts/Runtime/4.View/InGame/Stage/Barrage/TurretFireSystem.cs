@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -7,12 +6,11 @@ using Unity.Transforms;
 namespace KillChord.Runtime.View.InGame.Stage.Barrage
 {
     /// <summary>
-    ///     発射中のタレットから、設定された間隔で弾を生成します。
+    ///     発射中のタレットから、設定された間隔で弾を1発ずつ生成します。
     /// </summary>
     /// <remarks>
     ///     タレット数はステージ内で数十程度を想定しているため、
     ///     ジョブ化の待ち合わせコストが上回らないようメインスレッドで処理します。
-    ///     負荷の中心は弾の生成コマンドなので、そちらを一括化しています。
     /// </remarks>
     [BurstCompile]
     [UpdateInGroup(typeof(BarrageSystemGroup))]
@@ -45,8 +43,8 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
                 SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                     .CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach ((RefRW<BarrageFireState> fireState, RefRO<TurretConfig> config, RefRO<LocalToWorld> localToWorld, Entity entity)
-                     in SystemAPI.Query<RefRW<BarrageFireState>, RefRO<TurretConfig>, RefRO<LocalToWorld>>()
+            foreach ((RefRW<BarrageFireState> fireState, RefRW<TurretRandom> turretRandom, RefRO<TurretConfig> config, RefRO<LocalToWorld> localToWorld, Entity entity)
+                     in SystemAPI.Query<RefRW<BarrageFireState>, RefRW<TurretRandom>, RefRO<TurretConfig>, RefRO<LocalToWorld>>()
                          .WithEntityAccess())
             {
                 TurretConfig turretConfig = config.ValueRO;
@@ -56,7 +54,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
 
                 fireState.ValueRW.Timer -= deltaTime;
 
-                // 弾の性能はプレハブ側に持たせているため、斉射ごとではなくタレット単位で一度だけ読む。
+                // 弾の性能はプレハブ側に持たせているため、発射ごとではなくタレット単位で一度だけ読む。
                 bool canFire = turretConfig.BulletPrefab != Entity.Null
                     && SystemAPI.HasComponent<BulletSpeed>(turretConfig.BulletPrefab);
                 LocalTransform prefabTransform = default;
@@ -67,13 +65,16 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
                     bulletSpeed = SystemAPI.GetComponent<BulletSpeed>(turretConfig.BulletPrefab).Value;
                 }
 
+                Random random = turretRandom.ValueRO.Value;
+
                 // 1フレームに複数回の発射タイミングが重なっても取りこぼさない。
                 while (fireState.ValueRO.Timer <= 0f && fireState.ValueRO.RemainingShots != 0)
                 {
                     if (canFire)
                     {
-                        FireBullets(
+                        FireBullet(
                             ref commandBuffer,
+                            ref random,
                             turretConfig,
                             localToWorld.ValueRO,
                             prefabTransform,
@@ -88,6 +89,9 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
                     }
                 }
 
+                // 進めた乱数の状態を書き戻し、次の発射で同じ方向へ飛ばないようにする。
+                turretRandom.ValueRW.Value = random;
+
                 // 撃ち切ったタレットは次フレームからクエリ対象外にする。
                 if (fireState.ValueRO.RemainingShots == 0)
                 {
@@ -99,53 +103,44 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         private const float MINIMUM_FIRE_INTERVAL_SECONDS = 0.01f;
 
         /// <summary>
-        ///     1回分の弾をまとめて生成します。
+        ///     拡散円錐内のランダムな方向へ弾を1発生成します。
         /// </summary>
         /// <param name="commandBuffer"> 生成コマンドを積むコマンドバッファです。 </param>
+        /// <param name="random"> 発射ごとに進める乱数の状態です。 </param>
         /// <param name="config"> タレットの発射設定です。 </param>
         /// <param name="localToWorld"> タレットの現在のワールド変換です。 </param>
         /// <param name="prefabTransform"> 弾プレハブの変換です。スケールの引き継ぎに使用します。 </param>
         /// <param name="bulletSpeed"> 弾プレハブに設定された初速です。 </param>
-        private static void FireBullets(
+        private static void FireBullet(
             ref EntityCommandBuffer commandBuffer,
+            ref Random random,
             in TurretConfig config,
             in LocalToWorld localToWorld,
             in LocalTransform prefabTransform,
             float bulletSpeed)
         {
-            int wayCount = math.max(config.WayCount, 1);
-
             // 砲口はローカル指定なので、その時点のワールド変換で解決する。
             float3 muzzlePosition = math.transform(localToWorld.Value, config.MuzzleOffsetLocal);
             float3 up = localToWorld.Up;
-            float3 forward = localToWorld.Forward;
 
-            // 1コマンドで一括複製し、Playback時のコマンド数を弾数分から1つへ減らす。
-            NativeArray<Entity> bullets = new(wayCount, Allocator.Temp);
-            commandBuffer.Instantiate(config.BulletPrefab, bullets);
+            float3 direction = BarrageSpread.GetRandomDirection(
+                ref random,
+                localToWorld.Forward,
+                up,
+                config.SpreadAngleDegrees);
 
-            for (int i = 0; i < wayCount; i++)
+            Entity bullet = commandBuffer.Instantiate(config.BulletPrefab);
+
+            // プレハブのスケールを維持したまま、位置と向きだけ差し替える。
+            LocalTransform bulletTransform = prefabTransform;
+            bulletTransform.Position = muzzlePosition;
+            bulletTransform.Rotation = quaternion.LookRotationSafe(direction, up);
+
+            commandBuffer.SetComponent(bullet, bulletTransform);
+            commandBuffer.SetComponent(bullet, new BulletVelocity
             {
-                float3 direction = BarrageSpread.GetDirection(
-                    forward,
-                    up,
-                    wayCount,
-                    config.SpreadAngleDegrees,
-                    i);
-
-                // プレハブのスケールを維持したまま、位置と向きだけ差し替える。
-                LocalTransform bulletTransform = prefabTransform;
-                bulletTransform.Position = muzzlePosition;
-                bulletTransform.Rotation = quaternion.LookRotationSafe(direction, up);
-
-                commandBuffer.SetComponent(bullets[i], bulletTransform);
-                commandBuffer.SetComponent(bullets[i], new BulletVelocity
-                {
-                    Value = direction * bulletSpeed,
-                });
-            }
-
-            bullets.Dispose();
+                Value = direction * bulletSpeed,
+            });
         }
     }
 }

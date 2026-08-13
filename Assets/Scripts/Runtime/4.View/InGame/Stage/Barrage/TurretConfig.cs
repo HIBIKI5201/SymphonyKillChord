@@ -18,10 +18,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         /// <summary> 1回の発射から次の発射までの間隔（秒）です。 </summary>
         public float FireIntervalSeconds;
 
-        /// <summary> 1回の発射で同時に撃つ弾数です。 </summary>
-        public int WayCount;
-
-        /// <summary> 同時発射する弾を扇状に広げる角度（度）です。 </summary>
+        /// <summary> 弾がランダムにばらける円錐の開き角（度）です。 </summary>
         public float SpreadAngleDegrees;
 
         /// <summary> 1回の開始命令で発射する回数です。0以下の場合は停止命令まで撃ち続けます。 </summary>
