@@ -26,6 +26,9 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// </summary>
         Health MaxHealth { get; }
 
+        /// <summary> 防御者がダメージを受けられるかどうかを取得する。 </summary>
+        bool CanTakeDamage { get; }
+
         /// <summary>
         ///     防御者側のバフシステムを取得する。
         /// </summary>

@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     キャラクターの基本的な情報を保持するクラス。
     /// </summary>
-    public class CharacterEntity : IAttacker, IDefender
+    public class CharacterEntity : IAttacker, IDefender,IBarrierHolder
     {
         /// <summary>
         ///     コンストラクタ。
@@ -90,6 +90,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> キャラクターの会心率を取得する。 </summary>
         public CriticalChance CriticalChance => _criticalChance;
 
+        /// </inheritdoc />
+        public bool CanTakeDamage => !IsDead && !IsInvincible;
+
+        /// <inheritdoc />
+        public float CurrentBarrier => _barrierEntity.CurrentValue;
+
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
@@ -162,10 +168,33 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _health.ChangeHealth(new Health(_health.MaxHealth.Value));
 
             _statusEffectSystem.Clear();
+            _barrierEntity.Clear();
 
             _isDeadNotified = false;
             _isInvincible = false;
         }
+
+        /// <inheritdoc />
+        public void AddBarrier(float amount)
+        {
+            _barrierEntity.Add(amount);
+        }
+
+        /// <inheritdoc />
+        public Damage AbsorbBarrier(Damage damage, out Damage absorbedDamage)
+        {
+            return _barrierEntity.Absorb(
+                damage, 
+                out absorbedDamage);
+        }
+
+        /// <inheritdoc />
+        public void ClearBarrier()
+        {
+            _barrierEntity.Clear();
+        }
+
+        private readonly BarrierEntity _barrierEntity = new();
         private IBuffSystem _buffSystem;
         private CharacterName _name;
         private HealthEntity _health;

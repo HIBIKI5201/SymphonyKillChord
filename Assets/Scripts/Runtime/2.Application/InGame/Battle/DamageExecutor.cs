@@ -33,28 +33,50 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(defender));
             }
 
+            // キャラクターのステータス効果によるダメージ修正を適用する
             var result = attacker.StatusEffectSystem.ApplyOutgoingDamageModifiers(
                 attacker, defender, attackResult);
-
             result = defender.StatusEffectSystem.ApplyIncomingDamageModifiers(
                 attacker, defender, result);
 
-            Damage appliedDamage = defender.TakeDamage(result.FinalDamage);
-            result = result.WithAppliedDamage(appliedDamage);
+            // バリアを持つ防御者の場合、バリアでダメージを吸収する
+            Damage damageToHealth = result.FinalDamage;
+            Damage barrierDamage = default;
 
+            if (defender.CanTakeDamage &&
+                defender is IBarrierHolder barrierHolder)
+            {
+                damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
+            }
+
+            Damage appliedDamage = default;
+
+            // 防御者がダメージを受けることができる場合、またはダメージが0より大きい場合にのみ、ダメージを適用する
+            if (damageToHealth.Value > 0f ||
+                !defender.CanTakeDamage)
+            {
+                appliedDamage = defender.TakeDamage(damageToHealth);
+            }
+
+            // 攻撃結果にバリアダメージと適用されたダメージを設定する
+            result = result
+                .WithBarrierDamage(barrierDamage)
+                .WithAppliedDamage(appliedDamage);
+
+            // 攻撃者と防御者のステータス効果システムにダメージを通知する
             defender.StatusEffectSystem.NotifyDamageTaken(
                 new DamageTakenContext(
                     attacker,
                     defender,
                     result,
                     attackType));
-
             attacker.StatusEffectSystem.NotifyDamageDealt(
                 new DamageDealtContext(
                     attacker,
                     defender,
                     result,
                     attackType));
+
             return result;
         }
     }

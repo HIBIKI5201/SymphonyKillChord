@@ -12,11 +12,17 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="finalDamage"> 最終的なダメージ量。 </param>
         /// <param name="isCritical"> クリティカルヒットかどうかを示すフラグ。 </param>
         /// <param name="appliedDamage"> 実際に適用されたダメージ量。 </param>
-        public AttackResult(Damage finalDamage, bool isCritical, Damage appliedDamage = default)
+        /// <param name="barrierDamage"> バリアに吸収されたダメージ量。 </param>
+        public AttackResult(
+            Damage finalDamage,
+            bool isCritical,
+            Damage appliedDamage = default,
+            Damage barrierDamage = default)
         {
             FinalDamage = finalDamage;
             AppliedDamage = appliedDamage;
             IsCritical = isCritical;
+            BarrierDamage = barrierDamage;
         }
 
         /// <summary>
@@ -28,6 +34,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         {
             FinalDamage = attackStepContext.Damage;
             AppliedDamage = default;
+            BarrierDamage = default;
             IsCritical = attackStepContext.CriticalCount > 0;
         }
 
@@ -37,6 +44,9 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary> 実際に適用されたダメージ量。 </summary>
         public Damage AppliedDamage { get; }
 
+        /// <summary> バリアに吸収されたダメージ量。 </summary>
+        public Damage BarrierDamage { get; }
+
         /// <summary> クリティカルヒットかどうかを示すフラグを取得する。 </summary>
         public bool IsCritical { get; }
 
@@ -45,7 +55,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         ///　 </summary>
         public AttackResult WithFinalDamage(Damage finalDamage)
         {
-            return new AttackResult(finalDamage, IsCritical, AppliedDamage);
+            return new AttackResult(finalDamage, IsCritical, AppliedDamage, BarrierDamage);
         }
 
         /// <summary>
@@ -55,7 +65,17 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <returns> 新しいAttackResultのインスタンス。 </returns>
         public AttackResult WithAppliedDamage(Damage appliedDamage)
         {
-            return new AttackResult(FinalDamage, IsCritical, appliedDamage);
+            return new AttackResult(FinalDamage, IsCritical, appliedDamage, BarrierDamage);
+        }
+
+        /// <summary>
+        ///     バリアで吸収されたダメージを設定した新しいAttackResultを返す。
+        /// </summary>
+        /// <param name="barrierDamage"> バリアで吸収されたダメージ量。 </param>
+        /// <returns> 新しいAttackResultのインスタンス。 </returns>
+        public AttackResult WithBarrierDamage(Damage barrierDamage)
+        {
+            return new AttackResult(FinalDamage, IsCritical, AppliedDamage, barrierDamage);
         }
     }
 }
