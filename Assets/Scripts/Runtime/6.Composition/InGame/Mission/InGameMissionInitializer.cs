@@ -519,6 +519,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             if (_scenarioRoot != null && _scenarioRoot.activeSelf != isActive)
             {
                 _scenarioRoot.SetActive(isActive);
+                // ScenarioViewは自身を非Activateにするため、ここでActiveにする
+                _scenarioView.gameObject.SetActive(isActive);
             }
         }
 
