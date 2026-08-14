@@ -3,7 +3,9 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Persistent;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -18,35 +20,60 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="context"> 実行コンテキストです。 </param>
         public override void Execute(in SkillEffectContext context)
         {
-            float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
-                SkillEffectParameterId.DamageMultiplier);
-            // ダメージ倍率が 0 の場合は、基本倍率を使用する。
-            if (damageMultiplier == 0f)
+            if (context.TargetEntity == null)
             {
-                damageMultiplier = BASE_DAMAGE_MULTIPLIER;
+                return;
             }
 
-            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            AttackResult result = AttackCalculator.Calculate(
-                attackDefinition,
-                context.PlayerEntity,
-                context.TargetEntity,
-                false,
-                context.PlayerEntity.BaseDamage * damageMultiplier);
+            float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
+                SkillEffectParameterId.DamageMultiplier);
+
+            float secondaryDamageRate = (float)context.EffectSpec.GetRequiredValue(
+                SkillEffectParameterId.SecondaryDamageRate);
+
+            AttackDefinition attackDefinition =
+                context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
+
+            ApplyDamage(context.PlayerEntity, context.TargetEntity, attackDefinition, damageMultiplier, false);
 
             ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
+
+            float secondaryDamageMultiplier = damageMultiplier * secondaryDamageRate;
+
+            // 2次ターゲットに対してダメージを適用する
             for (int i = 0; i < targets.Length; i++)
             {
                 CharacterEntity target = targets[i];
-                if (target == null || ReferenceEquals(target, context.TargetEntity))
+                if (target == null || target.IsDead || ReferenceEquals(target, context.TargetEntity))
                 {
                     continue;
                 }
 
-                target.TakeDamage(result.FinalDamage / damageMultiplier);
+                ApplyDamage(context.PlayerEntity, target, attackDefinition, secondaryDamageMultiplier, true);
             }
         }
 
         private const float BASE_DAMAGE_MULTIPLIER = 1f;
+
+        private static void ApplyDamage(
+            CharacterEntity attacker,
+            CharacterEntity defender,
+            AttackDefinition attackDefinition,
+            float damageMultiplier,
+            bool isSecondaryTarget)
+        {
+            AttackResult result = AttackCalculator.Calculate(
+                attackDefinition,
+                attacker,
+                defender,
+                false,
+                attacker.BaseDamage * damageMultiplier);
+
+            result = DamageExecutor.Execute(attacker, defender, result, DamageAttackType.Skill);
+
+            Debug.Log($"[Skill_03] 発動。" +
+                $"Target: {defender}" +
+                $"Secondary: {isSecondaryTarget}");
+        }
     }
 }

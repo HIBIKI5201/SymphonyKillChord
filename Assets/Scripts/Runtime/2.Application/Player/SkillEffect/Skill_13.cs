@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
@@ -19,41 +20,44 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         {
             float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.DamageMultiplier);
+
             int attackCount = (int)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.HitCount);
+
             float criticalMultiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.CriticalMultiplier);
-            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            //  武器なし攻撃を実装するための箱替え。
-            AttackDefinition unbulletDefinition = new AttackDefinition(
-                attackDefinition.AttackName,
-                attackDefinition.AttackSpec,
-                attackDefinition.AttackPipeline,
-                attackDefinition.BeatType,
-                attackDefinition.JustDamageMultiplier,
-                attackDefinition.WeaponDamageMultiplier,
-                attackDefinition.Range,
-                attackDefinition.HalfAngleDegrees,
-                attackDefinition.IsMultiTarget,
-                attackDefinition.HitCount,
-                attackDefinition.HitInterval);
 
+            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec
+                .GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
             for (int i = 0; i < attackCount; i++)
             {
-                AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage);
-                Damage damage = result.FinalDamage * damageMultiplier;
-                if (result.IsCritical)
-                {
-                    damage /= unbulletDefinition.AttackSpec.CriticalMultiplier.Value; //元の攻撃定義のクリティカル倍率でダメージを補正してから、スキル固有のクリティカル倍率を適用
-                    damage *= criticalMultiplier; //クリティカルヒットのダメージを補正
-                }
-                context.TargetEntity.TakeDamage(damage);
-#if UNITY_EDITOR
-                Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{damage}ダメージです。 ");
-#endif
-            }
+                AttackResult result =
+                    AttackCalculator.Calculate(attackDefinition,
+                    context.PlayerEntity,
+                    context.TargetEntity,
+                    false,
+                    context.PlayerEntity.BaseDamage,
+                    criticalDamageMultiplierOverride: criticalMultiplier);
 
+                result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
+                result = DamageExecutor.Execute(
+                    context.PlayerEntity,
+                    context.TargetEntity,
+                    result,
+                    DamageAttackType.Skill);
+
+                Debug.Log($"[Skill_13] 発動　{i + 1}ヒット目" +
+                    $"[FinalDamage: {result.FinalDamage}" +
+                    $" AppliedDamage: {result.AppliedDamage}," +
+                    $"IsCritical: {result.IsCritical}]");
+
+
+                if (context.TargetEntity.IsDead)
+                {
+                    break;
+                }
+            }
         }
     }
 }

@@ -151,7 +151,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             // ランダムに対象をシャッフルして攻撃を実行
             for (int i = 0; i < attackCount; i++)
             {
-                int randomIndex = Random.Range(0, _candidateIndices.Count);
+                int randomIndex = Random.Range(i, _candidateIndices.Count);
 
                 (_candidateIndices[i], _candidateIndices[randomIndex]) =
                     (_candidateIndices[randomIndex], _candidateIndices[i]);
