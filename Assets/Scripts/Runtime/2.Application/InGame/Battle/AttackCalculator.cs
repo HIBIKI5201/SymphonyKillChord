@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
 {
@@ -14,7 +13,10 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
+        /// <param name="baseDamage"> 攻撃の基礎ダメージ。 </param>
         /// <param name="isOutOfRange"> 対象が射程外にいる場合はtrue。ダメージ減衰の判定に使う。 </param>
+        /// <param name="isCriticalForced"> クリティカルヒットが強制されている場合はtrue。 </param>
+        /// <param name="criticalDamageMultiplierOverride"> この攻撃特有のクリティカルダメージ倍率のオーバーライド。 </param>
         /// <returns> 攻撃結果。 </returns>
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
@@ -22,10 +24,20 @@ namespace KillChord.Runtime.Application.InGame.Battle
             IDefender defender,
             bool isJustHit,
             Damage baseDamage,
-            bool isOutOfRange = false
+            bool isOutOfRange = false,
+            bool isCriticalForced = false,
+            float? criticalDamageMultiplierOverride = null
             )
         {
-            AttackStepContext stepContext = new AttackStepContext(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
+            AttackStepContext stepContext = new AttackStepContext(
+                attackDefinition,
+                attacker,
+                defender,
+                isJustHit,
+                baseDamage,
+                isOutOfRange,
+                isCriticalForced,
+                criticalDamageMultiplierOverride);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }

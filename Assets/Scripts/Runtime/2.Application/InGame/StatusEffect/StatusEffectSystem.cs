@@ -259,6 +259,27 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             return false;
         }
 
+        /// <inheritdoc />
+        public float ApplyCriticalDamageMultiplierModifiers(
+            IAttacker attacker, IDefender defender, float criticalDamageMultiplier)
+        {
+            float currentTime = _timeProvider();
+
+            RemoveExpiredEffects(currentTime);
+
+            float modifiedMultiplier = criticalDamageMultiplier;
+
+            for (int i = 0; i < _statusEffects.Count; i++)
+            {
+                if (_statusEffects[i].Effect is ICriticalDamageMultiplierModifier modifier)
+                {
+                    modifiedMultiplier = modifier.ModifyCriticalDamageMultiplier(attacker, defender, modifiedMultiplier);
+                }
+            }
+
+            return modifiedMultiplier;
+        }
+
         private readonly Func<float> _timeProvider;
         private readonly List<StatusEffectRuntimeEntity> _statusEffects = new();
 

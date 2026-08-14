@@ -47,5 +47,15 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
         /// <param name="statusEffect"> 取得した状態効果 </param>
         /// <returns> 状態効果が存在する場合はtrue、それ以外の場合はfalse </returns>
         bool TryGet(StatusEffectId id, out IStatusEffect statusEffect);
+
+        /// <summary>
+        ///     クリティカルダメージ倍率補正を適用します。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者です。 </param>
+        /// <param name="defender"> 防御者です。 </param>
+        /// <param name="criticalDamageMultiplier"> 現在のクリティカルダメージ倍率です。 </param>
+        /// <returns> 修正後のクリティカルダメージ倍率です。 </returns>
+        float ApplyCriticalDamageMultiplierModifiers(
+            IAttacker attacker, IDefender defender, float criticalDamageMultiplier);
     }
 }
