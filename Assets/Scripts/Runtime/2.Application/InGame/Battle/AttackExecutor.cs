@@ -1,6 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
-using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -48,12 +46,9 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(defender));
             }
 
-            ExecuteBuffBeforeAttack(attacker, defender);
-
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
 
-            result = ExecuteBuffAfterAttack(attacker, defender, result);
             result = DamageExecutor.Execute(attacker, defender, result, damageAttackType);
 
             ApplyHitEffects(attacker, defender, result, hitEffects);
@@ -108,40 +103,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 results.Add(Execute(
                     attackDefinition, attacker, target.Defender, isJustHit, baseDamage, target.IsOutOfRange, hitEffects, damageAttackType));
             }
-        }
-
-        /// <summary>
-        ///     攻撃計算前のバフを実行する。
-        /// </summary>
-        /// <param name="attacker"> 攻撃者。 </param>
-        /// <param name="defender"> 攻撃対象。 </param>
-        private static void ExecuteBuffBeforeAttack(IAttacker attacker, IDefender defender)
-        {
-            CharacterEntity attackerEntity = attacker as CharacterEntity;
-            CharacterEntity defenderEntity = defender as CharacterEntity;
-
-            attacker.BuffSystem.Execute(
-                new BuffContext(attackerEntity, defenderEntity),
-                BuffExecuteTiming.Attack_Logic_Before);
-        }
-
-        /// <summary>
-        ///     攻撃計算後のバフを実行し、補正済みの攻撃結果を返す。
-        /// </summary>
-        /// <param name="attacker"> 攻撃者。 </param>
-        /// <param name="defender"> 攻撃対象。 </param>
-        /// <param name="result"> 補正前の攻撃結果。 </param>
-        /// <returns> 補正後の攻撃結果。 </returns>
-        private static AttackResult ExecuteBuffAfterAttack(IAttacker attacker, IDefender defender, AttackResult result)
-        {
-            CharacterEntity attackerEntity = attacker as CharacterEntity;
-            CharacterEntity defenderEntity = defender as CharacterEntity;
-
-            BuffContext buffContext = new BuffContext(attackerEntity, defenderEntity, result);
-            buffContext = attacker.BuffSystem.Execute(buffContext, BuffExecuteTiming.Attack_Logic_After);
-            buffContext = defender.BuffSystem.Execute(buffContext, BuffExecuteTiming.Defense_Logic_Before);
-
-            return buffContext.AttackResult;
         }
 
         /// <summary>

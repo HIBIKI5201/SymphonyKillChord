@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
@@ -13,14 +12,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_03 : SkillBase
     {
-        /// <summary>
-        ///     スキル効果を初期化します。
-        /// </summary>
-        /// <param name="buff"> 付与バフです。 </param>
-        public Skill_03(IBuff buff) : base(buff)
-        {
-        }
-
         /// <summary>
         ///     スキル効果を実行します。
         /// </summary>

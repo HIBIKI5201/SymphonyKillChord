@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -12,10 +11,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_13 : SkillBase
     {
-        public Skill_13(IBuff buff) : base(buff)
-        {
-
-        }
         /// <summary>
         ///     スキル効果を実行するメソッド。スキルの効果を対象のキャラクターエンティティに適用する。
         /// </summary>

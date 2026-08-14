@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
 
@@ -8,7 +7,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     キャラクターの基本的な情報を保持するクラス。
     /// </summary>
-    public class CharacterEntity : IAttacker, IDefender,IBarrierHolder
+    public class CharacterEntity : IAttacker, IDefender, IBarrierHolder
     {
         /// <summary>
         ///     コンストラクタ。
@@ -23,7 +22,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
             CharacterCombatSpec combatSpec,
             AttackInterval attackInterval,
             Damage baseDamage,
-            IBuffSystem buffSystem,
             IStatusEffectSystem statusEffectSystem,
             CriticalChance criticalChance = default
         )
@@ -38,7 +36,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _combatSpec = combatSpec;
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
             _baseDamage = baseDamage;
-            _buffSystem = buffSystem;
             _statusEffectSystem = statusEffectSystem ?? throw new ArgumentNullException(nameof(statusEffectSystem));
             _criticalChance = criticalChance;
         }
@@ -51,8 +48,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
-        /// <summary> キャラクターが対象にダメージを与えた時に発火するイベント。 </summary>
-        public event Action<Damage> OnSetDamage;
 
         /// <summary> 回避成功時に発火するイベント。 </summary>
         public event Action<Damage> OnDamageAvoided;
@@ -82,7 +77,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
         /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
         public Damage BaseDamage => _baseDamage;
-        public IBuffSystem BuffSystem => _buffSystem;
 
         /// <summary> 状態効果システムを取得する。 </summary>
         public IStatusEffectSystem StatusEffectSystem => _statusEffectSystem;
@@ -99,10 +93,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
-        }
-        public void SetDamage(Damage damage)
-        {
-            OnSetDamage?.Invoke(damage);
         }
 
         /// </inheritdoc> 
@@ -184,7 +174,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public Damage AbsorbBarrier(Damage damage, out Damage absorbedDamage)
         {
             return _barrierEntity.Absorb(
-                damage, 
+                damage,
                 out absorbedDamage);
         }
 
@@ -195,7 +185,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
         }
 
         private readonly BarrierEntity _barrierEntity = new();
-        private IBuffSystem _buffSystem;
         private CharacterName _name;
         private HealthEntity _health;
         private CharacterCombatSpec _combatSpec;

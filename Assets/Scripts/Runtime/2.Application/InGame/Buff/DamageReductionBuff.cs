@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class DamageReductionBuff : StatusEffectBase, IIncomingDamageModifier
     {
-        public DamageReductionBuff(float reductionRate, StatusEffectReapplyPolicy reapplyPolicy) 
+        public DamageReductionBuff(float reductionRate, StatusEffectReapplyPolicy reapplyPolicy)
             : base(
                 EFFECT_ID,
                 StatusEffectCategory.Buff,

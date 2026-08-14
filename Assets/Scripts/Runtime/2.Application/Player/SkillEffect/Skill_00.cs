@@ -1,6 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 using UnityEngine;
@@ -12,9 +11,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_00 : SkillBase
     {
-        public Skill_00(IBuff buff) : base(buff)
-        {
-        }
         public override void Execute(in SkillEffectContext context)
         {
             float multiplier = (float)context.EffectSpec.GetRequiredValue(

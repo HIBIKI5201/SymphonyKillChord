@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 
@@ -9,11 +8,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// </summary>
     public interface IAttacker
     {
-        /// <summary>
-        ///     攻撃者側のバフシステムを取得する。
-        /// </summary>
-        IBuffSystem BuffSystem { get; }
-
         /// <summary> 状態効果システムを取得する。 </summary>
         IStatusEffectSystem StatusEffectSystem { get; }
 

@@ -302,7 +302,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 EventBus<EOnTakeDamage>.Raise(
                     new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id, DamageAttackType.Normal));
 
-                _battleState.Attacker.SetDamage(result.FinalDamage);
                 _presenter.Push(result);
             }
 

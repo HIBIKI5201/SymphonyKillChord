@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
@@ -28,11 +27,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 防御者がダメージを受けられるかどうかを取得する。 </summary>
         bool CanTakeDamage { get; }
-
-        /// <summary>
-        ///     防御者側のバフシステムを取得する。
-        /// </summary>
-        IBuffSystem BuffSystem { get; }
 
         /// <summary> 状態効果システムを取得する。 </summary>
         IStatusEffectSystem StatusEffectSystem { get; }

@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
@@ -70,7 +69,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 combatSpec,
                 new AttackInterval(data.AttackInterval),
                 new Damage(data.BaseDamage * attackPowerMultiplier),
-                new BuffSystem(),
                 new StatusEffectSystem(),
                 criticalChance
             );
