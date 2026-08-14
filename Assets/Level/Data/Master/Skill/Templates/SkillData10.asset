@@ -17,8 +17,9 @@ MonoBehaviour:
     _hashId: -757509582
   _displayName: 10
   _pattern: 02000000040000000400000002000000
-  _skillDetail: "n回までs％のダメージを軽減するバフを自身に与える。（重複不可）"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: ee9f84548485a134dab8deaf6fe24043, type: 3}
+  _skillDetail: "n\u56DE\u307E\u3067s\uFF05\u306E\u30C0\u30E1\u30FC\u30B8\u3092\u8EFD\u6E1B\u3059\u308B\u30D0\u30D5\u3092\u81EA\u8EAB\u306B\u4E0E\u3048\u308B\u3002\uFF08\u91CD\u8907\u4E0D\u53EF\uFF09"
+  _tips: 
   _effectDisplayMode: 0
   _effectParameters:
   - _id: 0

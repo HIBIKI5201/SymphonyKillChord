@@ -10,9 +10,9 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,7 +90,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillNodeDataRepo _loadedSkillNodeDataRepo;
         private SkillNodeBindRepo _loadedSkillNodeBindRepo;
         private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
-        private SavedataSystem _savedataSystem;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -113,14 +112,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(SkillTreeInitializer)}] SavedataSystem が取得できませんでした。", this);
-                return false;
-            }
-
-            _savedataSystem = savedataSystem;
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             if (saveData == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] SaveData が取得できませんでした。", this);
@@ -172,7 +166,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _loadedSkillNodeBindRepo = null;
             _loadedSkillNodePhaseBindRepo = null;
             _skillUnlockData = null;
-            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -280,7 +273,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillUnlockData.ResearchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
-            SkillTreeService skillTreeService = new(_skillNodeEntities, _savedataSystem);
+            SkillTreeService skillTreeService = new(_skillNodeEntities);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
