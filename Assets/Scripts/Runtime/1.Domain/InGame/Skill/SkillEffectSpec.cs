@@ -16,16 +16,19 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <param name="targetingType"> 対象解決ルールです。 </param>
         /// <param name="parameters"> 効果処理と表示で共有する数値パラメータです。 </param>
         /// <param name="reapplyPolicy"> 状態効果の再付与ポリシーです。 </param>
+        /// <param name="skillNormalAttackDamagePolicy"> スキル発動時の通常攻撃ダメージの計算ポリシーです。 </param>
         public SkillEffectSpec(
             SkillEffectType effectType,
             SkillTargetingType targetingType,
             IReadOnlyList<SkillEffectParameter> parameters = null,
-            StatusEffectReapplyPolicy reapplyPolicy = StatusEffectReapplyPolicy.Ignore)
+            StatusEffectReapplyPolicy reapplyPolicy = StatusEffectReapplyPolicy.Ignore,
+            SkillNormalAttackDamagePolicy skillNormalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Apply)
         {
             EffectType = effectType;
             TargetingType = targetingType;
             _parameters = CopyParameters(parameters);
             ReapplyPolicy = reapplyPolicy;
+            SkillNormalAttackDamagePolicy = skillNormalAttackDamagePolicy;
         }
 
         /// <summary> 効果種別です。 </summary>
@@ -36,6 +39,9 @@ namespace KillChord.Runtime.Domain.InGame.Skill
 
         /// <summary> 状態効果の再付与ポリシーです。 </summary>
         public StatusEffectReapplyPolicy ReapplyPolicy { get; }
+
+        /// <summary> スキル発動時の通常攻撃ダメージの計算ポリシーです。 </summary>
+        public SkillNormalAttackDamagePolicy SkillNormalAttackDamagePolicy { get; }
 
         /// <summary> 効果処理と表示で共有する数値パラメータです。 </summary>
         public IReadOnlyList<SkillEffectParameter> Parameters => _parameters ?? Array.Empty<SkillEffectParameter>();

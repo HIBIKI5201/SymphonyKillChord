@@ -54,7 +54,8 @@ namespace KillChord.Runtime.InfraStructure.Player
             _skillEffectType,
             _skillTargetingType,
             BuildEffectParameters(),
-            _statusEffectReapplyPolicy);
+            _statusEffectReapplyPolicy,
+            _skillNormalAttackDamagePolicy);
 
         /// <summary> アニメーションキーです。 </summary>
         public string AnimationKey => _animationKey;
@@ -115,6 +116,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("状態効果の再付与ポリシーです。")]
         private StatusEffectReapplyPolicy _statusEffectReapplyPolicy = StatusEffectReapplyPolicy.Ignore;
+
+        [SerializeField, Tooltip("スキル発動時の通常攻撃ダメージの計算ポリシーです。")]
+        private SkillNormalAttackDamagePolicy _skillNormalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Apply;
 
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;

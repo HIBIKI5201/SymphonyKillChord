@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
@@ -155,10 +156,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetAreaQuery,
                 playerModuleContainer.PlayerView.transform,
                 playerModuleContainer.PlayerStatusBonus.AreaAttackRangeAddition);
+            PlayerTargetRangeQuery targetRangeQuery = new PlayerTargetRangeQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                playerModuleContainer.PlayerView.transform);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService);
+            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);

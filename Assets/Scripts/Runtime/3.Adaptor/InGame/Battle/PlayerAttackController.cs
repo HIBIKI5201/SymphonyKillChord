@@ -6,6 +6,7 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             BeatType beatType = _musicSyncService.GetCurrentBeatType();
 
             bool hasTarget = TryUpdateCurrentTarget();
-            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
 
             IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
 
@@ -127,6 +128,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             if (!TryResolveHitTargets(attackDefinition))
             {
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
+                return true;
+            }
+
+            if (normalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
+            {
+                Debug.Log("[PlayerAttackController] 通常攻撃のダメージ適用をスキップします。");
+
                 OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
                 return true;
             }

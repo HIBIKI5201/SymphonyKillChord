@@ -19,5 +19,6 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         BarrierGainRate = 11,
         AttackPowerReductionRate = 12,
         AttackPowerReductionStackLimit = 13,
+        SecondaryDamageRate = 14,
     }
 }

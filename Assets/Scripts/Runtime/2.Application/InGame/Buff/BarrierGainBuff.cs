@@ -50,6 +50,14 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
             float barrierAmount = appliedDamage * _barrierGainRate;
 
+            if (barrierAmount <= 0f)
+            {
+                return;
+            }
+
+            _owner.AddBarrier(barrierAmount);
+
+
             Debug.Log($"[Skill04] バリア獲得: {barrierAmount}");
         }
 

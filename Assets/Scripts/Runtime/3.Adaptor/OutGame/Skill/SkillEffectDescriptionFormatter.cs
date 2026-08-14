@@ -84,6 +84,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 SkillEffectParameterId.BarrierGainRate => "{BarrierGainRate}",
                 SkillEffectParameterId.AttackPowerReductionRate => "{AttackPowerReductionRate}",
                 SkillEffectParameterId.AttackPowerReductionStackLimit => "{AttackPowerReductionStackLimit}",
+                SkillEffectParameterId.SecondaryDamageRate => "{SecondaryDamageRate}",
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(id),
                     id,

@@ -71,7 +71,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 _skillRhythmState.Clear();
                 _skillCooldownState.SetSkillCooldown(now);
                 _progressController.SkillTriggered(now, _skillCooldownState.SkillReadyTimestamp);
-                return new SkillExecutionResult(SkillExecutionResultType.Executed, _skillDefinition.AnimationKey);
+                return new SkillExecutionResult(
+                    SkillExecutionResultType.Executed,
+                    _skillDefinition.AnimationKey,
+                    _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy);
             }
 
             ApplyFailurePolicy(now);
