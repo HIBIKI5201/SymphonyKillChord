@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <returns></returns>
         public bool Pause()
         {
-            if (_isScenarioPauseActive || !_isPaused || _module == null)
+            if (_isScenarioPauseActive || _isPaused || _module == null)
             {
                 return false;
             }
@@ -75,7 +75,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <returns></returns>
         public bool Resume()
         {
-            if (!_isPaused || _module == null)
+            if (_isScenarioPauseActive || !_isPaused || _module == null)
             {
                 return false;
             }
