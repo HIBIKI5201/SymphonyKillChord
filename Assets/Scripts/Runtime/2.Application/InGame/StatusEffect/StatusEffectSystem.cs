@@ -52,6 +52,14 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             StatusEffectRuntimeEntity runtime = _statusEffects[index];
             float beforeDuration = runtime.GetRemainingDuration(currentTime);
 
+            // 状態効果がIAccumulatingStatusEffectを実装している場合、再付与ポリシーに従って状態効果を累積する。
+            if (runtime.Effect is IAccumulatingStatusEffect accumulatingStatusEffect &&
+                statusEffect.ReapplyPolicy != StatusEffectReapplyPolicy.Replace &&
+                statusEffect.ReapplyPolicy != StatusEffectReapplyPolicy.Ignore)
+            {
+                accumulatingStatusEffect.Accumulate(statusEffect);
+            }
+
             // 再付与ポリシーに従って処理する。
             switch (statusEffect.ReapplyPolicy)
             {
@@ -233,6 +241,22 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             }
 
             RemoveConsumedEffects();
+        }
+
+        /// <inheritdoc />
+        public bool TryGet(StatusEffectId id, out IStatusEffect statusEffect)
+        {
+            RemoveExpiredEffects(_timeProvider());
+
+            int index = FindEffectIndex(id);
+            if (index >= 0)
+            {
+                statusEffect = _statusEffects[index].Effect;
+                return true;
+            }
+
+            statusEffect = null;
+            return false;
         }
 
         private readonly Func<float> _timeProvider;

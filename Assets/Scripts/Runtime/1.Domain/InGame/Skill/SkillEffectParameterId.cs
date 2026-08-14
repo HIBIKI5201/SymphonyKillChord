@@ -16,5 +16,8 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         HealPerHitCap = 8,
         DamageReductionRate = 9,
         DamageReductionHitCount = 10,
+        BarrierGainRate = 11,
+        AttackPowerReductionRate = 12,
+        AttackPowerReductionStackLimit = 13,
     }
 }

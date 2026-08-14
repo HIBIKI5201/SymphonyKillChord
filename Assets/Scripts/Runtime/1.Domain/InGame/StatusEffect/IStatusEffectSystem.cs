@@ -39,5 +39,13 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
         /// </summary>
         /// <param name="context"> ダメージが受けられた際のコンテキスト情報。 </param>
         void NotifyDamageTaken(in DamageTakenContext context);
+
+        /// <summary>
+        ///     指定した状態効果を取得します。
+        /// </summary>
+        /// <param name="id"> 取得する状態効果のID </param>
+        /// <param name="statusEffect"> 取得した状態効果 </param>
+        /// <returns> 状態効果が存在する場合はtrue、それ以外の場合はfalse </returns>
+        bool TryGet(StatusEffectId id, out IStatusEffect statusEffect);
     }
 }
