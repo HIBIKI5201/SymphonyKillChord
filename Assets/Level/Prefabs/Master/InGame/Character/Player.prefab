@@ -4634,6 +4634,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3246823200832017395}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 703303106090174236}
   m_SourcePrefab: {fileID: 100100000, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
 --- !u!4 &133838188508236879 stripped
 Transform:
@@ -5038,6 +5041,71 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
   _animator: {fileID: 7554209699097654958}
+--- !u!114 &703303106090174236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3854533494831789678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71e68a03ec943444ca5ff7c2c00a60ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DevelopProducts-SilToon::DevelopProducts.ToonShader.SilToonShadowCaster
+  _renderers:
+  - {fileID: 4689814437495599951}
+  - {fileID: 9111900509705142931}
+  - {fileID: 2618895376217334355}
+  - {fileID: 7753153404771500684}
+  - {fileID: 5278440216493268755}
+  - {fileID: 8436164599163110902}
+  - {fileID: 7543373888331807904}
+  - {fileID: 5508077610152321308}
+  - {fileID: 1750203306242819706}
+  - {fileID: 7208911271205984841}
+  - {fileID: 3289365668521660681}
+  - {fileID: 7008354466590272418}
+  - {fileID: 3150120640759993160}
+  - {fileID: 6073456294220500220}
+  - {fileID: 8008637470486568568}
+  - {fileID: 7528475107957102731}
+  - {fileID: 6408272052205848095}
+  - {fileID: 3344658687474088431}
+  - {fileID: 8991423643670025787}
+  - {fileID: 8216780650505844630}
+  - {fileID: 7579786607276661293}
+  - {fileID: 8000216470673874718}
+  - {fileID: 2366431122818429972}
+  - {fileID: 1748772903124256685}
+  - {fileID: 8511253951356579556}
+  - {fileID: 4274814876435079615}
+  - {fileID: 7318026993940479105}
+  - {fileID: 5924861600186928127}
+  - {fileID: 7149495195593611413}
+  - {fileID: 7267090891370590765}
+  - {fileID: 7958874378361604685}
+  - {fileID: 6425436062114487366}
+  - {fileID: 8767206159945543794}
+  - {fileID: 5063025534534533308}
+  - {fileID: 8509629401289515613}
+  - {fileID: 3962495569984676440}
+  - {fileID: 4704463579910368570}
+  - {fileID: 5486239685737371750}
+  - {fileID: 8113222381318286510}
+  - {fileID: 1393757285212190398}
+  - {fileID: 7889176892993940711}
+  - {fileID: 4025813707904691928}
+  - {fileID: 488562012548352883}
+  - {fileID: 2219559797043974954}
+  - {fileID: 4443902390198800434}
+  - {fileID: 1793136572436912987}
+  - {fileID: 8330352464562169311}
+  - {fileID: 288832665210042943}
+  - {fileID: 4951215041599145384}
+  - {fileID: 8641160683218637874}
+  - {fileID: 8148004679493761661}
+  - {fileID: 5775244101618659086}
 --- !u!4 &3902374432798108195 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1123473033512182044, guid: f5b8638ee9b525440b2d52b0f96d7710, type: 3}
