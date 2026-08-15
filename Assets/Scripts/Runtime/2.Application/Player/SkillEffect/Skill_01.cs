@@ -38,7 +38,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             Debug.Log($"[Skill_01] 発動" +
                         $"Multiplier: {damageMultiplier}" +
-                        $"FinalDamage: {result.FinalDamage}");
+                        $"FinalDamage: {result.FinalDamage.Value}");
         }
     }
 }

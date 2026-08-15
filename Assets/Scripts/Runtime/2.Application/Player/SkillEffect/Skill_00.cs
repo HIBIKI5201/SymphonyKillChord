@@ -36,7 +36,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 DamageAttackType.Skill);
 #if UNITY_EDITOR
             Debug.Log($"Skill_00 発動" +
-                $"Damage: {result.FinalDamage}," +
+                $"Damage: {result.FinalDamage.Value}," +
                 $" Critical: {result.IsCritical}");
 #endif
         }

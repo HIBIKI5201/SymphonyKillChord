@@ -67,8 +67,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 attacker,
                 defender,
                 false,
-                attacker.BaseDamage * damageMultiplier);
+                attacker.BaseDamage);
 
+            result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
             result = DamageExecutor.Execute(attacker, defender, result, DamageAttackType.Skill);
 
             Debug.Log($"[Skill_03] 発動。" +

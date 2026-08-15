@@ -280,6 +280,25 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             return modifiedMultiplier;
         }
 
+        /// <inheritdoc />
+        public Damage ApplyAttackPowerModifiers(IAttacker attacker, IDefender defender, Damage attackPower)
+        {
+            float currentTime = _timeProvider();
+
+            RemoveExpiredEffects(currentTime);
+
+            Damage modifiedPower = attackPower;
+
+            for (int i = 0; i < _statusEffects.Count; i++)
+            {
+                if (_statusEffects[i].Effect is IAttackPowerModifier modifier)
+                {
+                    modifiedPower = modifier.ModifyAttackPower(attacker, defender, modifiedPower);
+                }
+            }
+            return modifiedPower;
+        }
+
         private readonly Func<float> _timeProvider;
         private readonly List<StatusEffectRuntimeEntity> _statusEffects = new();
 

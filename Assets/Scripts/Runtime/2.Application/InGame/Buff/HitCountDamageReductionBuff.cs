@@ -64,8 +64,11 @@ namespace KillChord.Runtime.Application.InGame.Buff
                 return;
             }
 
-            // ダメージが適用されなかった場合はヒットカウントを減らさない
-            if (context.AttackResult.AppliedDamage.Value <= 0f)
+            float landedDamage =
+                context.AttackResult.AppliedDamage.Value +
+                context.AttackResult.BarrierDamage.Value;
+
+            if (landedDamage <= 0f)
             {
                 return;
             }
