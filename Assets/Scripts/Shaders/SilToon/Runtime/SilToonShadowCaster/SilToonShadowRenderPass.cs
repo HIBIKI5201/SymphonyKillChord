@@ -68,6 +68,15 @@ namespace DevelopProducts.ToonShader
 
         private Quaternion _directionEulerOffset = Quaternion.identity;
 
+        /// <summary>
+        /// キャラ影の合成を無効化する。強度0を伝えることでSilToon側は影取得を1(影なし)に固定する。
+        /// パスが実行されないフレームでは前フレームの行列とシャドウマップが残るため、必ず呼ぶこと。
+        /// </summary>
+        public static void DisableGlobalShadow()
+        {
+            Shader.SetGlobalVector(_idCharShadowParams, Vector4.zero);
+        }
+
         public void Setup(int resolution, float depthBias, float normalBias, float boundsPadding, float shadowStrength, in Vector3 eulerOffset)
         {
             _resolution = Mathf.Max(64, resolution);
@@ -85,7 +94,7 @@ namespace DevelopProducts.ToonShader
             if (_frameDrawCalls.Count == 0 || !TryGetCasterBounds(out Bounds boundsWS))
             {
                 // 影なしフレーム: 強度0を伝えてシェーダー側の合成を無効化する
-                Shader.SetGlobalVector(_idCharShadowParams, Vector4.zero);
+                DisableGlobalShadow();
                 return;
             }
 
