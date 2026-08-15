@@ -142,7 +142,15 @@ jobs:
               Push-Location $Workspace
               try {
                 git clean -ffdx
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git clean が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
                 git reset --hard
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
                 Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
               } catch {
                 Write-Host "[WARN]: git clean に失敗しました: $_"
