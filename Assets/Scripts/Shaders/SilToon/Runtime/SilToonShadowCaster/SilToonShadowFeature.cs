@@ -8,8 +8,13 @@ namespace DevelopProducts.ToonShader
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
             CameraType cameraType = renderingData.cameraData.cameraType;
-            if (cameraType != CameraType.Game && cameraType != CameraType.SceneView) return;
-            if (SilToonShadowCaster.Instances.Count == 0) return;
+            if (cameraType != CameraType.Game && cameraType != CameraType.SceneView
+                || SilToonShadowCaster.Instances.Count == 0)
+            {
+                // パスを積まないフレームは前フレームのグローバルが残るため、影取得を1に固定させる
+                SilToonShadowRenderPass.DisableGlobalShadow();
+                return;
+            }
 
             _silToonShadowRenderPass.Setup(_resolution, _depthBias, _normalBias, _boundsPadding, _shadowStrength, _eulerOffset);
             renderer.EnqueuePass(_silToonShadowRenderPass);
@@ -17,6 +22,9 @@ namespace DevelopProducts.ToonShader
 
         public override void Create()
         {
+            // 設定変更でFeatureが作り直された直後は、まだこのフレームのパスが走っていないため無効値から始める
+            SilToonShadowRenderPass.DisableGlobalShadow();
+
             _silToonShadowRenderPass = new SilToonShadowRenderPass();
             _silToonShadowRenderPass.renderPassEvent = _renderPassEvent;
         }
