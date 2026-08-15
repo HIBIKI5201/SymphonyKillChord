@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
+using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,39 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     [CreateAssetMenu(fileName = nameof(MissionDefinition), menuName = "KillChord/Mission/" + nameof(MissionDefinition))]
     public class MissionDefinitionAsset : ScriptableObject
     {
+        /// <summary> ミッションを一意に識別するIDを取得する。 </summary>
+        public MissionId Id => new(_missionId.Id);
+
+        /// <summary> ミッションHUDに表示される説明文を取得する。クリア条件の解決は行わない。 </summary>
+        public string MainMissionText => _mainMissionText;
+
+        /// <summary>
+        ///     評価条件の説明文一覧を取得します。敵ミッションキーの解決を必要としないため、
+        ///     OutGame側のプレビュー表示でも利用できます。
+        /// </summary>
+        /// <returns> 評価条件の説明文一覧です。 </returns>
+        public IReadOnlyList<string> GetEvaluationDescriptions()
+        {
+            List<string> descriptions = new(_evaluationConditions.Count);
+            for (int i = 0; i < _evaluationConditions.Count; i++)
+            {
+                if (_evaluationConditions[i] == null)
+                {
+                    continue;
+                }
+
+                descriptions.Add(_evaluationConditions[i].Create().GetDescription());
+            }
+
+            return descriptions;
+        }
+
         /// <summary>
         ///     ミッション定義を生成します。
         /// </summary>
+        /// <param name="missionKeyRepository"> 敵ミッションキーの解決に使うリポジトリです。 </param>
         /// <returns> ミッション定義。 </returns>
-        public MissionDefinition Create()
+        public MissionDefinition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             List<ObjectiveSequenceStep> steps = new();
 
@@ -29,10 +58,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                     if (_clearConditionSteps[i] == null)
                     {
                         throw new InvalidOperationException(
-                            $"クリア条件ステップ[{i}]が未設定です。 MissionId: {_missionId}");
+                            $"クリア条件ステップ[{i}]が未設定です。 MissionId: {_missionId.Id}");
                     }
 
-                    steps.Add(_clearConditionSteps[i].Create());
+                    steps.Add(_clearConditionSteps[i].Create(missionKeyRepository));
                 }
             }
 
@@ -57,14 +86,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 {
                     throw new InvalidOperationException(
                         $"評価条件[{i}]のEvaluationIdが未設定です。" +
-                        $" MissionId: {_missionId}");
+                        $" MissionId: {_missionId.Id}");
                 }
 
                 if (!evaluationIds.Add(evaluationId))
                 {
                     throw new InvalidOperationException(
                         $"EvaluationIdが重複しています。" +
-                        $" MissionId: {_missionId}, " +
+                        $" MissionId: {_missionId.Id}, " +
                         $"EvaluationId: {evaluationId}");
                 }
 
@@ -72,7 +101,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             }
 
             return new MissionDefinition(
-                new MissionId(_missionId),
+                Id,
                 _displayName,
                 _mainMissionText,
                 clearCondition,
@@ -87,7 +116,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [SerializeField, TextArea, Tooltip("プランナー向けのメモ。ゲームには影響しません。")] private string _plannerMemo;
 #endif
         [Header("基礎情報")]
-        [SerializeField, Tooltip("ミッションを一意に識別するID。")] private string _missionId;
+        [SerializeField, SourceDataCollection("Mission"), Tooltip("ミッションを一意に識別するID。")] private DataID _missionId;
         [SerializeField, Tooltip("ミッションの表示名。")] private string _displayName;
 
         [Header("UI情報")]

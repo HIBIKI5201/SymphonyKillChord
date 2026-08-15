@@ -22,7 +22,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             string returnSceneName)
         {
             if (stageDefinition == null
-                || stageDefinition.MissionDefinition == null
+                || stageDefinition.MissionId.Value == 0
                 || string.IsNullOrWhiteSpace(stageDefinition.BattleSceneName)
                 || string.IsNullOrWhiteSpace(returnSceneName))
             {
@@ -32,7 +32,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             SelectedBattleStageState selectedBattleStageState = ResolveSelectedBattleStageState();
             SelectedMissionState selectedMissionState = ResolveSelectedMissionState();
             selectedBattleStageState.SelectBattleStage(stageDefinition, returnSceneName);
-            new OutGameMissionSelectController(selectedMissionState).Select(stageDefinition.MissionDefinition);
+            new OutGameMissionSelectController(selectedMissionState).Select(stageDefinition.MissionId);
             return true;
         }
 

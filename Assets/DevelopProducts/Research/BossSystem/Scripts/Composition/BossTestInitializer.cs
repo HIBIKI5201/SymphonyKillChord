@@ -58,7 +58,7 @@ namespace DevelopProducts.Boss
 
             if (_enemyPools != null)
             {
-                _enemyPools.Initialize();
+                _enemyPools.InitializeShellOnly();
             }
 
             // ボス初期化。attackControllerGenerator はボスでは未使用のため null。

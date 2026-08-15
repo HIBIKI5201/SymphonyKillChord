@@ -15,11 +15,14 @@ namespace SinfoniaStudio.NotionMarkdownExporter
     {
         private readonly NotionApiClient _apiClient;
         private readonly ExporterOptions _options;
+        private readonly StallWatchdog _watchdog;
         private readonly HashSet<string> _reservedPaths = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, PageExportNode> _pagesById = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, DatabaseExportNode> _databasesById = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<PageExportNode> _pages = new();
         private readonly List<DatabaseExportNode> _databases = new();
+        private readonly object _reservedPathsLock = new();
+        private readonly object _warningLock = new();
         private readonly string _stagingRootDirectory;
         private readonly string _stagingDirectory;
         private int _warningCount;
@@ -29,10 +32,12 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// </summary>
         /// <param name="apiClient">Notion APIクライアント。</param>
         /// <param name="options">エクスポート設定。</param>
-        internal NotionExporter(NotionApiClient apiClient, ExporterOptions options)
+        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
+        internal NotionExporter(NotionApiClient apiClient, ExporterOptions options, StallWatchdog watchdog)
         {
             _apiClient = apiClient;
             _options = options;
+            _watchdog = watchdog;
             _stagingRootDirectory = Path.Combine(
                 Path.GetTempPath(),
                 "SinfoniaStudio",
@@ -57,6 +62,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 if (previousManifest != null)
                 {
                     Console.WriteLine("前回のエクスポートデータをクリーンアップします。");
+                    _watchdog.ReportProgress("前回エクスポートデータのクリーンアップ");
                     ExportManifest.DeleteGeneratedFiles(
                         previousManifest,
                         _options.OutputDirectory,
@@ -74,9 +80,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 HashSet<string> generatedFiles = new(StringComparer.OrdinalIgnoreCase);
                 int assetCount = 0;
 
-                using AssetDownloader assetDownloader = new();
+                using AssetDownloader assetDownloader = new(_watchdog);
                 foreach (PageExportNode page in _pages)
                 {
+                    _watchdog.ReportProgress($"Markdown出力: {page.Title}");
                     string rawMarkdown = await File.ReadAllTextAsync(page.StagingFilePath, Encoding.UTF8);
                     string markdown = CreatePageMarkdown(page, rawMarkdown);
                     rawMarkdown = string.Empty;
@@ -106,11 +113,13 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
                 foreach (DatabaseExportNode database in _databases)
                 {
+                    _watchdog.ReportProgress($"データベース出力: {database.Metadata.Title}");
                     string markdown = CreateDatabaseMarkdown(database);
                     await WriteMarkdownAsync(database.FilePath, markdown);
                     generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, database.FilePath));
                 }
 
+                _watchdog.ReportProgress("マニフェストの保存");
                 await ExportManifest.SaveAsync(_options.OutputDirectory, _options.RootPageId, generatedFiles);
 
                 return new ExportSummary(
@@ -128,6 +137,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
         /// <summary>
         ///     ページを取得して保存先を割り当て、子ページとデータベースを再帰的に収集する。
+        ///     子参照は並列に取得するが、同一ページIDへの再入（循環参照や複数箇所からの参照）は
+        ///     登録済みノードを即座に返すことで、待機による無限ループを避ける。
         /// </summary>
         /// <param name="pageId">ページID。</param>
         /// <param name="parentDirectory">保存先の親ディレクトリ。</param>
@@ -138,7 +149,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             string parentDirectory,
             PageMetadata? knownMetadata)
         {
-            if (_pagesById.TryGetValue(pageId, out PageExportNode? existing)) { return existing; }
+            lock (_pagesById)
+            {
+                if (_pagesById.TryGetValue(pageId, out PageExportNode? existing)) { return existing; }
+            }
 
             PageMetadata metadata = knownMetadata ?? await _apiClient.GetPageAsync(pageId);
             Console.WriteLine($"  ページ取得: {metadata.Title}");
@@ -152,45 +166,75 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             string stagingFilePath = Path.Combine(_stagingDirectory, metadata.Id + ".md");
             await File.WriteAllTextAsync(stagingFilePath, payload.Markdown, new UTF8Encoding(false));
 
-            string nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
-            string filePath = Path.Combine(parentDirectory, nodeName + ".md");
-            string childDirectory = Path.Combine(parentDirectory, nodeName);
-            string propertiesMarkdown = PropertyFormatter.CreateMarkdownTable(metadata.Properties);
-            PageExportNode node = new(metadata, propertiesMarkdown, stagingFilePath, filePath, childDirectory);
-            _pagesById[metadata.Id] = node;
-            _pages.Add(node);
-            payload = null!;
-            metadata = null!;
+            PageExportNode node;
+            string childDirectory;
+            lock (_pagesById)
+            {
+                // 別の並列経路が待機中に同じページを先に登録している場合は、その結果を採用する。
+                if (_pagesById.TryGetValue(pageId, out PageExportNode? raceExisting)) { return raceExisting; }
 
+                string nodeName;
+                lock (_reservedPathsLock)
+                {
+                    nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                }
+
+                string filePath = Path.Combine(parentDirectory, nodeName + ".md");
+                childDirectory = Path.Combine(parentDirectory, nodeName);
+                string propertiesMarkdown = PropertyFormatter.CreateMarkdownTable(metadata.Properties);
+                node = new(metadata, propertiesMarkdown, stagingFilePath, filePath, childDirectory);
+                _pagesById[metadata.Id] = node;
+                _pages.Add(node);
+            }
+
+            List<Task> childTasks = new();
             foreach (MarkdownReference pageReference in pageReferences)
             {
-                if (_pagesById.ContainsKey(pageReference.Id)) { continue; }
-
-                try
-                {
-                    await BuildPageAsync(pageReference.Id, childDirectory, null);
-                }
-                catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
-                {
-                    WriteWarning($"子ページ「{pageReference.Title}」を権限不足のため取得できませんでした。");
-                }
+                childTasks.Add(BuildChildPageAsync(pageReference, childDirectory));
             }
 
             foreach (MarkdownReference databaseReference in databaseReferences)
             {
-                if (_databasesById.ContainsKey(databaseReference.Id)) { continue; }
-
-                try
-                {
-                    await BuildDatabaseAsync(databaseReference.Id, childDirectory);
-                }
-                catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
-                {
-                    WriteWarning($"データベース「{databaseReference.Title}」を権限不足のため取得できませんでした。");
-                }
+                childTasks.Add(BuildChildDatabaseAsync(databaseReference, childDirectory));
             }
 
+            await Task.WhenAll(childTasks);
+
             return node;
+        }
+
+        /// <summary>
+        ///     子ページ参照を取得する。権限不足は警告に変換して無視する。
+        /// </summary>
+        /// <param name="pageReference">子ページ参照。</param>
+        /// <param name="childDirectory">保存先の親ディレクトリ。</param>
+        private async Task BuildChildPageAsync(MarkdownReference pageReference, string childDirectory)
+        {
+            try
+            {
+                await BuildPageAsync(pageReference.Id, childDirectory, null);
+            }
+            catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
+            {
+                WriteWarning($"子ページ「{pageReference.Title}」を権限不足のため取得できませんでした。");
+            }
+        }
+
+        /// <summary>
+        ///     子データベース参照を取得する。権限不足は警告に変換して無視する。
+        /// </summary>
+        /// <param name="databaseReference">子データベース参照。</param>
+        /// <param name="childDirectory">保存先の親ディレクトリ。</param>
+        private async Task BuildChildDatabaseAsync(MarkdownReference databaseReference, string childDirectory)
+        {
+            try
+            {
+                await BuildDatabaseAsync(databaseReference.Id, childDirectory);
+            }
+            catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
+            {
+                WriteWarning($"データベース「{databaseReference.Title}」を権限不足のため取得できませんでした。");
+            }
         }
 
         /// <summary>
@@ -200,16 +244,32 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// <param name="parentDirectory">保存先の親ディレクトリ。</param>
         private async Task BuildDatabaseAsync(string databaseId, string parentDirectory)
         {
-            if (_databasesById.ContainsKey(databaseId)) { return; }
+            lock (_databasesById)
+            {
+                if (_databasesById.ContainsKey(databaseId)) { return; }
+            }
 
             DatabaseMetadata metadata = await _apiClient.GetDatabaseAsync(databaseId);
             Console.WriteLine($"  データベース取得: {metadata.Title}");
-            string nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
-            string directoryPath = Path.Combine(parentDirectory, nodeName);
-            string filePath = Path.Combine(directoryPath, "_database.md");
-            DatabaseExportNode node = new(metadata, filePath, directoryPath);
-            _databasesById[metadata.Id] = node;
-            _databases.Add(node);
+
+            DatabaseExportNode node;
+            string directoryPath;
+            lock (_databasesById)
+            {
+                if (_databasesById.ContainsKey(databaseId)) { return; }
+
+                string nodeName;
+                lock (_reservedPathsLock)
+                {
+                    nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                }
+
+                directoryPath = Path.Combine(parentDirectory, nodeName);
+                string filePath = Path.Combine(directoryPath, "_database.md");
+                node = new(metadata, filePath, directoryPath);
+                _databasesById[metadata.Id] = node;
+                _databases.Add(node);
+            }
 
             if (metadata.DataSources.Count == 0)
             {
@@ -218,35 +278,64 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
 
             bool hasMultipleSources = metadata.DataSources.Count > 1;
-            foreach (DataSourceReference sourceReference in metadata.DataSources)
-            {
-                try
-                {
-                    DataSourceSchema schema = await _apiClient.GetDataSourceAsync(sourceReference.Id);
-                    DataSourceExportNode sourceNode = new(sourceReference, schema);
-                    node.DataSources.Add(sourceNode);
+            IEnumerable<Task> sourceTasks = metadata.DataSources.Select(sourceReference =>
+                BuildDataSourceAsync(sourceReference, node, directoryPath, hasMultipleSources));
+            await Task.WhenAll(sourceTasks);
+        }
 
-                    string pageDirectory = directoryPath;
-                    if (hasMultipleSources)
+        /// <summary>
+        ///     データソースのスキーマと全ページを取得し、データベースノードへ登録する。
+        /// </summary>
+        /// <param name="sourceReference">データソース参照。</param>
+        /// <param name="node">登録先のデータベースノード。</param>
+        /// <param name="directoryPath">データベースの保存先ディレクトリ。</param>
+        /// <param name="hasMultipleSources">データベースが複数データソースを持つかどうか。</param>
+        private async Task BuildDataSourceAsync(
+            DataSourceReference sourceReference,
+            DatabaseExportNode node,
+            string directoryPath,
+            bool hasMultipleSources)
+        {
+            try
+            {
+                DataSourceSchema schema = await _apiClient.GetDataSourceAsync(sourceReference.Id);
+                DataSourceExportNode sourceNode = new(sourceReference, schema);
+                lock (_databasesById)
+                {
+                    node.DataSources.Add(sourceNode);
+                }
+
+                string pageDirectory = directoryPath;
+                if (hasMultipleSources)
+                {
+                    string sourceName;
+                    lock (_reservedPathsLock)
                     {
-                        string sourceName = PathUtility.ReserveName(
+                        sourceName = PathUtility.ReserveName(
                             directoryPath,
                             sourceReference.Name,
                             sourceReference.Id,
                             _reservedPaths);
-                        pageDirectory = Path.Combine(directoryPath, sourceName);
                     }
 
-                    await foreach (PageMetadata page in _apiClient.QueryDataSourcePagesAsync(sourceReference.Id))
-                    {
-                        PageExportNode pageNode = await BuildPageAsync(page.Id, pageDirectory, page);
-                        if (!sourceNode.Pages.Contains(pageNode)) { sourceNode.Pages.Add(pageNode); }
-                    }
+                    pageDirectory = Path.Combine(directoryPath, sourceName);
                 }
-                catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
+
+                List<Task<PageExportNode>> pageTasks = new();
+                await foreach (PageMetadata page in _apiClient.QueryDataSourcePagesAsync(sourceReference.Id))
                 {
-                    WriteWarning($"データソース「{sourceReference.Name}」を権限不足のため取得できませんでした。");
+                    pageTasks.Add(BuildPageAsync(page.Id, pageDirectory, page));
                 }
+
+                PageExportNode[] pageNodes = await Task.WhenAll(pageTasks);
+                foreach (PageExportNode pageNode in pageNodes)
+                {
+                    if (!sourceNode.Pages.Contains(pageNode)) { sourceNode.Pages.Add(pageNode); }
+                }
+            }
+            catch (NotionApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
+            {
+                WriteWarning($"データソース「{sourceReference.Name}」を権限不足のため取得できませんでした。");
             }
         }
 
@@ -420,8 +509,11 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// <param name="message">警告内容。</param>
         private void WriteWarning(string message)
         {
-            _warningCount++;
-            Console.Error.WriteLine($"  [警告] {message}");
+            lock (_warningLock)
+            {
+                _warningCount++;
+                Console.Error.WriteLine($"  [警告] {message}");
+            }
         }
     }
 }

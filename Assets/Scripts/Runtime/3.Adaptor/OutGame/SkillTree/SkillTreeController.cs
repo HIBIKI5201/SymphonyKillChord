@@ -1,8 +1,8 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
-using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -81,9 +81,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillDetailPresenter.Push(dto);
             _skillDetailView.Show();
             view.SetSelected();
-
-            // TODO プレイヤーステータスの反映
-            _playerStatusPresenter.Push();
         }
 
         /// <summary>
@@ -125,7 +122,54 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
+        }
+
+        /// <summary>
+        ///     スキルツリーをリセットした場合に返却される研究ポイントを取得する。
+        /// </summary>
+        /// <returns> 返却予定の研究ポイント。 </returns>
+        public int GetResetRefundPoints()
+        {
+            return _skillTreeService.CalculateResetRefundPoints(_skillTreeStatusEntity.UnlockedNodes);
+        }
+
+        /// <summary>
+        ///     スキルツリーをリセットして保存し、画面表示を更新する。
+        /// </summary>
+        /// <returns> リセットに成功した場合はtrue。 </returns>
+        public async Task<bool> ResetSkillTreeAsync(CancellationToken cancellationToken)
+        {
+            if (_isResetting || GetResetRefundPoints() <= 0)
+            {
+                return false;
+            }
+
+            _isResetting = true;
+            try
+            {
+                SkillTreeResetResult result = await _skillTreeService.ResetSkillTreeAsync(
+                    _skillTreeStatusEntity.UnlockedNodes,
+                    _skillTreeStatusEntity.UnlockedSkillIds,
+                    _skillTreeStatusEntity.CurrentPoints);
+                cancellationToken.ThrowIfCancellationRequested();
+                ApplyResetResult(result);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[{nameof(SkillTreeController)}] スキルツリーのリセットに失敗しました: {exception}");
+                return false;
+            }
+            finally
+            {
+                _isResetting = false;
+            }
         }
 
         /// <summary>
@@ -167,6 +211,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private Action _ownedSkillChanged;
         private int _costToUnlock = -1;
         private int _selectedNodeId = -1;
+        private bool _isResetting;
 
         private const string CURRENT_POINTS_LABEL_TEXT = "所持ポイント：";
 
@@ -198,5 +243,58 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 }
             }
         }
+
+        /// <summary>
+        ///     保存済みのリセット結果をDomainとViewへ反映する。
+        /// </summary>
+        /// <param name="result"> 保存済みのリセット結果。 </param>
+        private void ApplyResetResult(SkillTreeResetResult result)
+        {
+            foreach (SkillNodeEntity node in _skillNodeEntities.Values)
+            {
+                node.Lock();
+                _skillNodeViews[node.SkillNodeIdVO.Id].SetLocked();
+            }
+
+            foreach (ISkillNodeConnViewModel connectionView in _nodeConns.Values)
+            {
+                connectionView.SetNotPassed();
+            }
+
+            foreach (VisualElement unlockPhase in _unlockPhases.Values)
+            {
+                if (unlockPhase != null)
+                {
+                    unlockPhase.visible = false;
+                }
+            }
+
+            ReadOnlySpan<SkillNodeId> unlockedNodeIds = result.UnlockedNodeIds.Span;
+            for (int i = 0; i < unlockedNodeIds.Length; i++)
+            {
+                SkillNodeId nodeId = unlockedNodeIds[i];
+                if (!_skillNodeEntities.TryGetValue(nodeId, out SkillNodeEntity node))
+                {
+                    continue;
+                }
+
+                node.Unlock();
+                _skillNodeViews[nodeId.Id].SetUnlocked();
+                UpdateConns(nodeId.Id);
+                UpdateUnlockPhase(nodeId.Id);
+            }
+
+            _skillTreeStatusEntity.Reset(
+                result.CurrentPoints,
+                result.UnlockedNodeIds,
+                result.UnlockedSkillIds);
+            _nodesOnPath.Clear();
+            _selectedNodeId = -1;
+            _costToUnlock = -1;
+            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + result.CurrentPoints.ToString();
+            _playerStatusPresenter.Push();
+            _ownedSkillChanged?.Invoke();
+        }
+
     }
 }

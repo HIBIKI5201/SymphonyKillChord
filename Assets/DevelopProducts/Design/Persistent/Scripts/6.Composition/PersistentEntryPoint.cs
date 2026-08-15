@@ -20,7 +20,7 @@ namespace DevelopProducts.Persistent.Composition
 
             if (!SceneLoader.GetExistScene(_firstSceneName, out _))
             {
-                bool success = await SceneLoader.LoadScene(_firstSceneName,
+                bool success = await SceneLoader.LoadSceneAsync(_firstSceneName,
                     null,
                     LoadSceneMode.Additive,
                     token: _cancellationTokenSource.Token
