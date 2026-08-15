@@ -41,6 +41,12 @@ Material:
     - _IsForFace: 1
     - _NormalMapIntensity: 0
     - _SSSOn: 0
+    - _StencilComp: 8
+    - _StencilFail: 0
+    - _StencilPass: 2
+    - _StencilReadMask: 2
+    - _StencilRef: 2
+    - _StencilWriteMask: 2
     - _ZOffset: 0.01
     m_Colors:
     - _ColorMiddle: {r: 1, g: 0.7905139, b: 0.798419, a: 1}

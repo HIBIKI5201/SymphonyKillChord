@@ -145,22 +145,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535ba71651c02f2469918f19291b4862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Enemy.EnemyMoveDebugInitializer
-  _characterRepositoryKey: CharacterDefinitionRepository
-  _characterId:
-    _id: enemy
-    _hashId: -710926916
-  _moveDataKey: ExampleEnemyMoveData
-  _encounterMusicDataKey: ExampleEncountMusicData
-  _battleMusicDataKey: ExampleBattleMusicData
-  _attackIndex: 0
   _view: {fileID: 6024709665745219317}
   _healthView: {fileID: -5582845147010298855}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -1587367200165867470}
-  _missionKeyRepositoryKey: EnemyMissionKeyRepository
-  _missionKeyId:
-    _id: enemy_red
-    _hashId: 1401557065
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
@@ -750,8 +738,8 @@ MonoBehaviour:
     serializedVersion: 0
     m_Bits: 1
   m_ScaleMode: 1
-  m_Offset: {x: 0, y: 2, z: 2}
-  m_Size: {x: 1, y: 5, z: 4}
+  m_Offset: {x: 0, y: 2, z: 0}
+  m_Size: {x: 1, y: 5, z: 1.1}
   m_FadeFactor: 0.5
   version: 1
   m_DecalLayerMask: 1
