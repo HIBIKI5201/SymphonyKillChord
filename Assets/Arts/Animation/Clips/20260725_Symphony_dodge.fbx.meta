@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f38f64bbdea02544fb384457acfd5c05
+guid: 553ff9dfb0c892444a5a4c843d1548fb
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -17,26 +17,7 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'Symphony_DefaultPose0624:spine_C0_spine_01_Jnt'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_neck_02_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
-      has scale animation that will be discarded.\n"
+    animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -48,36 +29,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      internalID: 1827226128182048838
-      firstFrame: 0
-      lastFrame: 60
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 0
   meshes:
     lODScreenPercentages: []
