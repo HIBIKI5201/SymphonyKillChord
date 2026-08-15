@@ -1,10 +1,10 @@
-#ifndef TOON_PBR_INCLUDED
+﻿#ifndef TOON_PBR_INCLUDED
 #define TOON_PBR_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/Lights.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/SilToonInput.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/Lights.hlsl"
 
 // トゥーンランプ(リム込み)の上にPBRのスペキュラ/環境反射を合成する。
 // 拡散はトゥーン側の結果を brdfData.diffuse (アルベド×非金属率) で減衰させることで
