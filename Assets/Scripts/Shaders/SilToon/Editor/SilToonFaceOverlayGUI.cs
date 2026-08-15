@@ -110,14 +110,18 @@ namespace DevelopProducts.ToonShader
             DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
                 EditorGUILayout.LabelField("Presets", EditorStyles.boldLabel);
+                // このパスは ZTest Always で深度を無視するため、通常の半透明(Queue 3000)より
+                // 後に描くとキャラの手前にある半透明オブジェクトを貫通して表示されてしまう。
+                // Queue は必ず 3000 未満に置くこと。
+                // 眉毛(2998)が先に bit0 を Zero で落とし、目(2999)がその残りに描かれる。
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("透過目 (Transparent Eye)"))
                 {
-                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Keep, 3010);
+                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Keep, 2999);
                 }
                 if (GUILayout.Button("透過眉毛 (Transparent Eyebrow)"))
                 {
-                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Zero, 3000);
+                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Zero, 2998);
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.Space(5);

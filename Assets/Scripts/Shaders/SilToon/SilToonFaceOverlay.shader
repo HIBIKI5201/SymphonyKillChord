@@ -29,8 +29,10 @@
         [IntRange] _StencilRef ("Stencil ID", Range(0, 255)) = 1
 
         // 用途ごとにビットを分けるためのマスク。bit0:目の透け / bit1:顔領域(FakeShadow用)
-        [IntRange] _StencilReadMask ("Stencil Read Mask", Range(0, 255)) = 255
-        [IntRange] _StencilWriteMask ("Stencil Write Mask", Range(0, 255)) = 255
+        // 既定値は bit0 のみ。255にすると未設定のマテリアルが他機能のビットまで読み書きして壊すため、
+        // 「自分の用途以外には触らない」側を初期値にしている。
+        [IntRange] _StencilReadMask ("Stencil Read Mask", Range(0, 255)) = 1
+        [IntRange] _StencilWriteMask ("Stencil Write Mask", Range(0, 255)) = 1
 
         [Enum(UnityEngine.Rendering.StencilOp)]
         _StencilPass ("Stencil Pass Op", Float) = 0

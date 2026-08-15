@@ -70,11 +70,13 @@
         _StencilRef ("Stencil ID", Range(0, 255)) = 1
 
         // 用途ごとにビットを分けるためのマスク。bit0:目の透け / bit1:顔領域(FakeShadow用)
+        // 既定値は bit0 のみ。255にすると未設定のマテリアルが他機能のビットまで読み書きして壊すため、
+        // 「自分の用途以外には触らない」側を初期値にしている。
         [IntRange]
-        _StencilReadMask ("Stencil Read Mask", Range(0, 255)) = 255
+        _StencilReadMask ("Stencil Read Mask", Range(0, 255)) = 1
 
         [IntRange]
-        _StencilWriteMask ("Stencil Write Mask", Range(0, 255)) = 255
+        _StencilWriteMask ("Stencil Write Mask", Range(0, 255)) = 1
 
         [Enum(UnityEngine.Rendering.CompareFunction)]
         _StencilComp ("Stencil Comp", Float) = 8
@@ -177,7 +179,7 @@
             // ステンシルの用途はStencilBits.csと対応する。ここは意味が固定なのでリテラルで持つ。
             //   Ref 2      : bit1 = 顔領域 (顔マテリアルが書き込む)
             //   ReadMask 6 : bit1(顔領域) と bit2(描画済みマーク) を見る
-            //   WriteMask 4 / Pass Invert : 最初の1フラグメントだけ bit2 を立てる
+            //   WriteMask 4 / Pass Invert : 最初の1フラグメントだけ bit2 (FakeShadowDrawn) を立てる
             //   → 髪の重なりで同じピクセルが多重に暗くなるのを防ぐ
             Stencil{
                 Ref 2
