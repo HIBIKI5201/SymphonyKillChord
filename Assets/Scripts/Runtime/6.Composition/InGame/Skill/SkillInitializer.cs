@@ -151,10 +151,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             PlayerTargetRangeQuery targetRangeQuery = new PlayerTargetRangeQuery(
                 targetSystemContainer.TargetSystemViewModel,
                 playerModuleContainer.PlayerView.transform);
+            TargetRadiusQuery targetRadiusQuery = new TargetRadiusQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                targetSystemContainer.TargetEntityRegistry);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery);
+            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery, targetRadiusQuery);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);

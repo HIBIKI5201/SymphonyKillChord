@@ -18,7 +18,10 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         DamageReductionHitCount = 10,
         BarrierGainRate = 11,
         AttackPowerReductionRate = 12,
-        AttackPowerReductionStackLimit = 13,
+        AttackPowerReductionCap = 13,
         SecondaryDamageRate = 14,
+        InfectionRange = 15,
+        InfectionTriggerCount = 16,
+        InfectionDamageRate = 17,
     }
 }
