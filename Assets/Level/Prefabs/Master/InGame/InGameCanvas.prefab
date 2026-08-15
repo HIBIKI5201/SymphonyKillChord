@@ -877,7 +877,6 @@ MonoBehaviour:
   _inTimingSizeDelta: 128
   _outTimingSizeDelta: 16
   _outTimingDuration: 1
-  _rhythmGuidePostEffectView: {fileID: 7679647516716562303}
 --- !u!114 &7679647516716562303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1701,6 +1700,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.ACLikeRhythmGuideInitializer
   _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
   _rhythmGuideView: {fileID: 3310711898840515315}
+  _rhythmGuidePostEffectView: {fileID: 7679647516716562303}
+  _effectConfig: {fileID: 11400000, guid: b7d4a821f0c54e33a97b6c8d1e2f3045, type: 2}
 --- !u!114 &3245619258000581200
 MonoBehaviour:
   m_ObjectHideFlags: 0

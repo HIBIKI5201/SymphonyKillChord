@@ -16,7 +16,6 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -72,17 +71,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return true;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
-                return true;
-            }
-
             try
             {
                 SkillBuildRepository skillBuildRepository =
                     await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
-                skillBuildRepository.Initialize(savedataSystem);
                 IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
                 _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
             }
