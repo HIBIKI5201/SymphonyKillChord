@@ -142,7 +142,15 @@ jobs:
               Push-Location $Workspace
               try {
                 git clean -ffdx
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git clean が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
                 git reset --hard
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
                 Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
               } catch {
                 Write-Host "[WARN]: git clean に失敗しました: $_"
@@ -166,6 +174,22 @@ jobs:
           Get-ChildItem -Path $env:TEMP -Filter "pkg_*" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "[INFO]: 一時パッケージディレクトリ ($($_.Name)) を削除しました。"
+          }
+
+          # 3. ワークスペース外に蓄積するグローバルキャッシュの削除（Gradle / NuGet）
+          $GlobalCacheTargets = @(
+            "$env:USERPROFILE\.gradle\caches",
+            "$env:USERPROFILE\.nuget\packages"
+          )
+          foreach ($CachePath in $GlobalCacheTargets) {
+            if (Test-Path $CachePath) {
+              $SizeBytes = (Get-ChildItem -Path $CachePath -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+              $SizeGB = [Math]::Round($SizeBytes / 1GB, 2)
+              Remove-Item -Path $CachePath -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "[INFO]: グローバルキャッシュ ($CachePath, $SizeGB GB) を削除しました。"
+            } else {
+              Write-Host "[INFO]: グローバルキャッシュが存在しないためスキップ: $CachePath"
+            }
           }
 
           Write-Host "::endgroup::"
