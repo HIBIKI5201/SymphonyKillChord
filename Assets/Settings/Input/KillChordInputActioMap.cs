@@ -1186,7 +1186,29 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             ]
         }
     ],
-    ""controlSchemes"": []
+    ""controlSchemes"": [
+        {
+            ""name"": ""PC_Keyboard-Mouse"",
+            ""bindingGroup"": ""PC_Keyboard-Mouse"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Keyboard>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<Mouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<VirtualMouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        }
+    ]
 }");
         // Common
         m_Common = asset.FindActionMap("Common", throwIfNotFound: true);
@@ -2027,6 +2049,19 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     /// Provides a new <see cref="ScenarioActions" /> instance referencing this action map.
     /// </summary>
     public ScenarioActions @Scenario => new ScenarioActions(this);
+    private int m_PC_KeyboardMouseSchemeIndex = -1;
+    /// <summary>
+    /// Provides access to the input control scheme.
+    /// </summary>
+    /// <seealso cref="UnityEngine.InputSystem.InputControlScheme" />
+    public InputControlScheme PC_KeyboardMouseScheme
+    {
+        get
+        {
+            if (m_PC_KeyboardMouseSchemeIndex == -1) m_PC_KeyboardMouseSchemeIndex = asset.FindControlSchemeIndex("PC_Keyboard-Mouse");
+            return asset.controlSchemes[m_PC_KeyboardMouseSchemeIndex];
+        }
+    }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Common" which allows adding and removing callbacks.
     /// </summary>
