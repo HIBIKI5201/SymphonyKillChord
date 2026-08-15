@@ -501,7 +501,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         private static async ValueTask WaitForEditorReady()
         {
-            await SymphonyTask.WaitUntil(() =>
+            await SymphonyAwaitable.WaitUntil(() =>
             {
                 if (EditorApplication.isCompiling)
                 {

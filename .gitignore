@@ -93,3 +93,16 @@ Docs/DiscordLog/
 # Python (scripts/)
 __pycache__/
 *.py[cod]
+
+# Claude Code のローカル設定（各自の環境依存のため共有しない）
+.claude/settings.local.json
+
+# Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
+Packages/com.singularitygroup.hotreload/
+
+# Entities のSubSceneベイクで生成されるキャッシュ
+Assets/SceneDependencyCache/
+Assets/SceneDependencyCache.meta
+
+# uloop-cli の出力
+.uloop/

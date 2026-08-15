@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
@@ -12,27 +13,33 @@ namespace KillChord.Runtime.Composition.InGame.UI
     ///     リズムGUI下部の <see cref="Skill.SkillInputProgressUIInitializer"/>（次の1拍のみ表示）や
     ///     クロスヘア用UIとは独立した、常時表示の一覧UIを担当する。
     /// </summary>
-    public sealed class SkillListUIInitializer : MonoBehaviour
+    public sealed class SkillListUIInitializer : InGameInitializationModuleBase
     {
-        private void Awake()
+        public override string ModuleName => nameof(SkillListUIInitializer);
+
+        public override int Order => 441;
+
+        public override bool Build()
         {
             if (_uiConfig == null)
             {
                 Debug.LogError($"[{nameof(SkillListUIInitializer)}] {nameof(_uiConfig)} が未設定です。", this);
-                return;
+                return false;
             }
             if (_rowViewPrefab == null || _stepViewPrefab == null || _rowRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillListUIInitializer)}] Prefabまたは配置先Transformが未設定です。", this);
-                return;
+                return false;
             }
 
             _viewSetting = _uiConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
+
+            return true;
         }
 
-        private void OnDestroy()
+        public override void Shutdown()
         {
             if (_isRegistered)
                 ServiceLocator.UnregisterInstance(this);
@@ -74,5 +81,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private SkillInputProgressViewSetting _viewSetting;
         private bool _isRegistered;
+
     }
 }

@@ -1,8 +1,9 @@
-using KillChord.Runtime.Application.InGame.Buff;
+using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Character
 {
@@ -53,11 +54,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
             {
                 attackDefinitions[i] = AttackDefinitionFactory.Create(
                     attackDefinitionAssets[i],
-                    criticalChanceAddition,
                     criticalMultiplierAddition);
             }
 
             CharacterCombatSpec combatSpec = new CharacterCombatSpec(attackDefinitions);
+
+            // 会心率はキャラクターが持つため、加算値もここで適用する。
+            CriticalChance criticalChance = new CriticalChance(
+                Mathf.Clamp01(data.CriticalChance + criticalChanceAddition));
 
             return new CharacterEntity(
                 new CharacterName(data.CharacterName),
@@ -65,7 +69,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 combatSpec,
                 new AttackInterval(data.AttackInterval),
                 new Damage(data.BaseDamage * attackPowerMultiplier),
-                new BuffSystem()
+                new StatusEffectSystem(),
+                criticalChance
             );
         }
     }

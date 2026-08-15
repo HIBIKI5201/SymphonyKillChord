@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -52,7 +51,6 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 targetResult.TargetEntities,
                 skillDefinition.EffectSpec);
             executor.Execute(context);
-            _playerEntity.BuffSystem.Execute(new BuffContext(_playerEntity, targetResult.PrimaryTargetEntity), BuffExecuteTiming.Skill);
             return true;
         }
 

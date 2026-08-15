@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 05914eb9c35ddf14497e3bc124bf8c6a
-    m_Address: MobileStickFlickInput
+    m_Address: MobileStickFlickInputConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -37,6 +37,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 134672bf4f515f4439a46323fff09e2a
     m_Address: OwnedSkillRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15fe0f095e508f8469f9de96caa0247c
+    m_Address: EnemyDefinitionRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -122,6 +127,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9c44a325b8ad84f498216394b6a9d584
     m_Address: AnimationCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9feea8387900e4446bb1f6f882caafca
+    m_Address: EnemyDirectionIndicatorConfig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

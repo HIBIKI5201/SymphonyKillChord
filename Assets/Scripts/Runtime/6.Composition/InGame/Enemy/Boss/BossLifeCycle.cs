@@ -194,10 +194,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
             // View接続
             _view.Initialize(aiController, target);

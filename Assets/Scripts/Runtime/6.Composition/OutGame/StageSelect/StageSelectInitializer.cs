@@ -14,7 +14,7 @@ using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -172,14 +172,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
-                ReleaseLoadedResources();
-                return false;
-            }
-
-            _loadedSaveData = await savedataSystem.LoadAsync<SaveData>();
+            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             if (_loadedSaveData == null)
             {
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SaveData)} が取得できませんでした。", this);
@@ -285,14 +280,40 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _selectedScenarioState.SelectScenario(scenarioStageDefinition);
             }
 
-            bool requested = await _outGameSortieController.RequestSortieAsync(
-                stageDefinition.StageType,
-                _currentSceneName,
-                stageDefinition.TargetSceneName,
-                _cts.Token);
+            bool isScenarioStage = stageDefinition is ScenarioStageDefinition;
+            if (isScenarioStage)
+            {
+                _detailScreenView.HideImmediately();
+            }
+
+            bool requested;
+            try
+            {
+                requested = await _outGameSortieController.RequestSortieAsync(
+                    stageDefinition.StageType,
+                    _currentSceneName,
+                    stageDefinition.TargetSceneName,
+                    _cts.Token);
+            }
+            catch
+            {
+                if (isScenarioStage)
+                {
+                    _ = _detailScreenView.Show();
+                }
+
+                throw;
+            }
+
             if (!requested)
             {
+                if (isScenarioStage)
+                {
+                    _ = _detailScreenView.Show();
+                }
+
                 _pendingNodeTransitionState?.Clear();
+                return;
             }
         }
 
