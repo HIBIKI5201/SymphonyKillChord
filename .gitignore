@@ -99,3 +99,4 @@ __pycache__/
 
 # Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
 Packages/com.singularitygroup.hotreload/
+Assets/Arts/
