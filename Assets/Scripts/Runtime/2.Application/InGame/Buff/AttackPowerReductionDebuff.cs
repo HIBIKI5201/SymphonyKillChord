@@ -1,17 +1,17 @@
 using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Buff
 {
     public class AttackPowerReductionDebuff
-        : StatusEffectBase, IOutgoingDamageModifier, IAccumulatingStatusEffect
+        : StatusEffectBase, IAttackPowerModifier, IAccumulatingStatusEffect
     {
         public AttackPowerReductionDebuff(
-            float reductionRatePerStack,
-            int stackCount,
-            int maxStackCount,
+            float reductionAmount,
+            float reductionCap,
             float durationInSeconds)
             : base(
                   EFFECT_ID,
@@ -19,40 +19,30 @@ namespace KillChord.Runtime.Application.InGame.Buff
                   StatusEffectDuration.FromSeconds(durationInSeconds),
                   StatusEffectReapplyPolicy.RefreshDuration)
         {
-            if (!float.IsFinite(reductionRatePerStack) || reductionRatePerStack < 0f)
+            if (!float.IsFinite(reductionAmount) || reductionAmount < 0f)
             {
                 throw new System.ArgumentOutOfRangeException(
-                    nameof(reductionRatePerStack),
+                    nameof(reductionAmount),
                     "攻撃力減少率は0以上の有限の数でなければなりません。");
             }
 
-            if (stackCount <= 0)
+            if (!float.IsFinite(reductionCap) ||
+                reductionCap < 0f)
             {
-                throw new System.ArgumentOutOfRangeException(
-                    nameof(stackCount),
-                    "スタック数は0以上でなければなりません。");
+                throw new ArgumentOutOfRangeException(
+                    nameof(reductionCap),
+                    "攻撃力減少上限は0以上の有限値で指定してください。");
             }
 
-            if (maxStackCount <= 0)
-            {
-                throw new System.ArgumentOutOfRangeException(
-                    nameof(maxStackCount),
-                    "最大スタック数は0より大きい必要があります。");
-            }
-
-            _reductionRatePerStack = reductionRatePerStack;
-            _maxStackCount = maxStackCount;
-            _stackCount = Mathf.Min(stackCount, maxStackCount);
+            _reductionCap = reductionCap;
+            _reductionAmount = Mathf.Min(reductionAmount, reductionCap);
         }
 
         /// <summary> 状態効果の識別子。 </summary>
         public static StatusEffectId EffectId => EFFECT_ID;
 
-        /// <summary> スタック数。 </summary>
-        public int StackCount => _stackCount;
-
-        /// <summary> 現在の合計攻撃力減少率。 </summary>
-        public float TotalReductionRate => Mathf.Clamp01(_reductionRatePerStack * _stackCount);
+        /// <summary> 現在の攻撃力減少量。 </summary>
+        public float ReductionAmount => _reductionAmount;
 
         public void Accumulate(IStatusEffect statusEffect)
         {
@@ -62,21 +52,22 @@ namespace KillChord.Runtime.Application.InGame.Buff
                     "異なる種類の状態効果を累積することはできません。",
                     nameof(statusEffect));
             }
-            _stackCount = Mathf.Min(_stackCount + debuff.StackCount, _maxStackCount);
+            
+            _reductionAmount = Mathf.Min(
+                _reductionAmount + debuff.ReductionAmount,
+                _reductionCap);
         }
 
-        public AttackResult ModifyOutgoingDamage(IAttacker attacker, IDefender defender, AttackResult attackResult)
+        public Damage ModifyAttackPower(IAttacker attacker, IDefender defender, Damage attackPower)
         {
-            Damage damage = attackResult.FinalDamage * (1f - TotalReductionRate);
-            return attackResult.WithFinalDamage(damage);
+            return attackPower - _reductionAmount;
         }
 
         private static readonly StatusEffectId EFFECT_ID =
             new("Skill07.AttackPowerReductionDebuff");
 
-        private readonly float _reductionRatePerStack;
-        private readonly int _maxStackCount;
+        private readonly float _reductionCap;
 
-        private int _stackCount;
+        private float _reductionAmount;
     }
 }

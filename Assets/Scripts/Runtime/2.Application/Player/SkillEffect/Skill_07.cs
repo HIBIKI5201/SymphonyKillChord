@@ -49,42 +49,34 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 (float)context.EffectSpec.GetRequiredValue(
                     SkillEffectParameterId.AttackPowerReductionRate);
 
-            int stackLimit =
-                (int)context.EffectSpec.GetRequiredValue(
-                    SkillEffectParameterId.AttackPowerReductionStackLimit);
+            float reductionCap =
+                (float)context.EffectSpec.GetRequiredValue(
+                    SkillEffectParameterId.AttackPowerReductionCap);
 
             float durationSeconds =
                 (float)context.EffectSpec.GetRequiredValue(
                     SkillEffectParameterId.DurationSeconds);
 
-            if (context.EffectSpec.ReapplyPolicy != StatusEffectReapplyPolicy.Replace)
-            {
-                throw new InvalidOperationException(
-                    "Skill_07 は ReapplyPolicy が Replace である必要があります。");
-            }
-
             // 攻撃回数を初期化して攻撃を実行
             _hitCounts.Clear();
             ExecuteAttacks(targets, attackCount);
 
-            // 攻撃力減少デバフを適用し、プレイヤーの攻撃力増加率を計算
-            float playerIncreaseRate = ApplyDebuffs(
+            // 攻撃力減少デバフを適用し、プレイヤーの攻撃力増加量を計算
+            float playerIncreaseAmount = ApplyDebuffs(
                 reductionRate,
-                stackLimit,
+                reductionCap,
                 durationSeconds);
 
             context.PlayerEntity.StatusEffectSystem.Add(
                 new AttackPowerIncreaseBuff(
-                    playerIncreaseRate,
-                    durationSeconds,
-                    context.EffectSpec.ReapplyPolicy));
+                    playerIncreaseAmount,
+                    durationSeconds));
 
             Debug.Log($"[Skill07]発動。" +
                 $"攻撃回数:{attackCount}、" +
                 $"減少率:{reductionRate}、" +
-                $"スタック上限:{stackLimit}、" +
                 $"持続時間:{durationSeconds}秒、" +
-                $"プレイヤー増加率:{playerIncreaseRate}");
+                $"プレイヤー増加量:{playerIncreaseAmount}");
         }
 
         private readonly IAttackController _attackController;
@@ -183,43 +175,54 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         }
 
         /// <summary>
-        ///     攻撃力減少デバフを適用し、プレイヤーの攻撃力増加率を計算します。
+        ///     攻撃力減少デバフを適用し、プレイヤーの攻撃力増加量を計算します。
         /// </summary>
         /// <param name="reductionRate"> 攻撃力減少率です。 </param>
-        /// <param name="stackLimit"> デバフのスタック上限です。 </param>
+        /// <param name="reductionCap"> 攻撃力減少量の上限です。 </param>
         /// <param name="durationSeconds"> デバフの持続時間（秒）です。 </param>
-        /// <returns> プレイヤーの攻撃力増加率です。 </returns>
+        /// <returns> プレイヤーの攻撃力増加量です。 </returns>
         private float ApplyDebuffs(
             float reductionRate,
-            int stackLimit,
+            float reductionCap,
             float durationSeconds)
         {
-            float totalReductionRate = 0f;
+            float totalReductionAmount = 0f;
 
             foreach (var kvp in _hitCounts)
             {
                 CharacterEntity target = kvp.Key;
-                int beforeStackCount = GetReductionStackCount(target);
+                float currentReductionAmount = GetReductionAmount(target);
+                float baseAttackPower = target.BaseDamage.Value;
+                float maxReductionAmount = Mathf.Min(reductionCap, baseAttackPower);
+                float reductionPerHit = baseAttackPower * reductionRate;
+                float requestedReductionAmount = reductionPerHit * kvp.Value;
+                float nextReductionAmount = Mathf.Min(
+                    currentReductionAmount + requestedReductionAmount,
+                    maxReductionAmount);
+                float addedReductionAmount = Mathf.Max(
+                    0f,
+                    nextReductionAmount - currentReductionAmount);
 
-                target.StatusEffectSystem.Add(
-                    new AttackPowerReductionDebuff(
-                        reductionRate,
-                        kvp.Value,
-                        stackLimit,
-                        durationSeconds));
+                if (maxReductionAmount > 0f)
+                {
+                    target.StatusEffectSystem.Add(
+                        new AttackPowerReductionDebuff(
+                            addedReductionAmount,
+                            maxReductionAmount,
+                            durationSeconds));
+                }
 
-                int afterStackCount = GetReductionStackCount(target);
-                int addedStackCount = Mathf.Max(0, afterStackCount - beforeStackCount);
-                totalReductionRate += reductionRate * addedStackCount;
+                totalReductionAmount += addedReductionAmount;
 
                 Debug.Log($"[Skill07]対象:{target.Name}、" +
                     $"攻撃回数:{kvp.Value}、" +
+                    $"基礎攻撃力:{baseAttackPower}、" +
                     $"減少率:{reductionRate}、" +
-                    $"スタック上限:{stackLimit}、" +
+                    $"減少上限:{maxReductionAmount}、" +
                     $"持続時間:{durationSeconds}秒、" +
-                    $"スタック増加数:{addedStackCount}");
+                    $"追加減少量:{addedReductionAmount}");
             }
-            return totalReductionRate;
+            return totalReductionAmount;
         }
 
         /// <summary>
@@ -252,20 +255,20 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         }
 
         /// <summary>
-        ///     指定された対象の攻撃力減少デバフのスタック数を取得します。
+        ///     指定された対象の攻撃力減少量を取得します。
         /// </summary>
         /// <param name="target"> 攻撃対象のキャラクターエンティティです。 </param>
-        /// <returns> 攻撃力減少デバフのスタック数です。 </returns>
-        private static int GetReductionStackCount(CharacterEntity target)
+        /// <returns> 攻撃力減少量です。 </returns>
+        private static float GetReductionAmount(CharacterEntity target)
         {
             if (!target.StatusEffectSystem.TryGet(
                 AttackPowerReductionDebuff.EffectId,
                 out IStatusEffect effect))
             {
-                return 0;
+                return 0f;
             }
 
-            return effect is AttackPowerReductionDebuff debuff ? debuff.StackCount : 0;
+            return effect is AttackPowerReductionDebuff debuff ? debuff.ReductionAmount : 0f;
         }
     }
 }

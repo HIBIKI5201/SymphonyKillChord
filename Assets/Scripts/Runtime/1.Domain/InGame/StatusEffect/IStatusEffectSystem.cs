@@ -57,5 +57,15 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
         /// <returns> 修正後のクリティカルダメージ倍率です。 </returns>
         float ApplyCriticalDamageMultiplierModifiers(
             IAttacker attacker, IDefender defender, float criticalDamageMultiplier);
+
+        /// <summary>
+        ///     攻撃力補正を適用します。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者です。 </param>
+        /// <param name="defender"> 防御者です。 </param>
+        /// <param name="attackPower"> 現在の攻撃力です。 </param>
+        /// <returns> 修正後の攻撃力です。 </returns>
+        Damage ApplyAttackPowerModifiers(
+            IAttacker attacker, IDefender defender, Damage attackPower);
     }
 }

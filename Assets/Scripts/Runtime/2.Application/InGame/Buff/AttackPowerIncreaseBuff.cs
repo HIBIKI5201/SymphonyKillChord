@@ -5,42 +5,40 @@ using KillChord.Runtime.Domain.InGame.StatusEffect;
 namespace KillChord.Runtime.Application.InGame.Buff
 {
     /// <summary>
-    ///     攻撃力を一定割合増加させるバフです。
+    ///     攻撃力を一定量増加させるバフです。
     /// </summary>
     public class AttackPowerIncreaseBuff
-        : StatusEffectBase, IOutgoingDamageModifier
+        : StatusEffectBase, IAttackPowerModifier
     {
         public AttackPowerIncreaseBuff(
-            float increaseRate,
-            float durationSeconds,
-            StatusEffectReapplyPolicy reapplyPolicy)
+            float increaseAmount,
+            float durationSeconds)
             : base(
                 EFFECT_ID,
                 StatusEffectCategory.Buff,
                 StatusEffectDuration.FromSeconds(durationSeconds),
-                reapplyPolicy)
+                StatusEffectReapplyPolicy.Replace)
         {
-            if (!float.IsFinite(increaseRate) || increaseRate < 0f)
+            if (!float.IsFinite(increaseAmount) || increaseAmount < 0f)
             {
                 throw new System.ArgumentOutOfRangeException(
-                    nameof(increaseRate),
-                    "攻撃力増加率は0以上の有限の数でなければなりません。");
+                    nameof(increaseAmount),
+                    "攻撃力増加量は0以上の有限の数でなければなりません。");
             }
 
-            _increaseRate = increaseRate;
+            _increaseAmount = increaseAmount;
         }
 
         ///</inheritdoc/>
-        public AttackResult ModifyOutgoingDamage(IAttacker attacker, IDefender defender, AttackResult attackResult)
+        public Damage ModifyAttackPower(IAttacker attacker, IDefender defender, Damage attackPower)
         {
-            Damage damage = attackResult.FinalDamage * (1f + _increaseRate);
-            return attackResult.WithFinalDamage(damage);
+            return attackPower + _increaseAmount;
         }
 
         private static readonly StatusEffectId EFFECT_ID =
             new("Skill07.AttackPowerIncreaseBuff");
 
-        private readonly float _increaseRate;
+        private readonly float _increaseAmount;
 
     }
 }

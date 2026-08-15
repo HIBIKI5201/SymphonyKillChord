@@ -26,15 +26,24 @@ namespace KillChord.Runtime.Application.InGame.Battle
             Damage baseDamage,
             bool isOutOfRange = false,
             bool isCriticalForced = false,
-            float? criticalDamageMultiplierOverride = null
+            float? criticalDamageMultiplierOverride = null,
+            bool applyAttackerModifiers = true
             )
         {
+            Damage modifiedDamage = baseDamage;
+
+            if(attacker != null && applyAttackerModifiers)
+            {
+                modifiedDamage = attacker.StatusEffectSystem.ApplyAttackPowerModifiers(
+                    attacker, defender, baseDamage);
+            }
+
             AttackStepContext stepContext = new AttackStepContext(
                 attackDefinition,
                 attacker,
                 defender,
                 isJustHit,
-                baseDamage,
+                modifiedDamage,
                 isOutOfRange,
                 isCriticalForced,
                 criticalDamageMultiplierOverride);
