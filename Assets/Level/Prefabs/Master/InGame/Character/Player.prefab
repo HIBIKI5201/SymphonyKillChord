@@ -881,6 +881,8 @@ MonoBehaviour:
   - {fileID: 8148004679493761661}
   - {fileID: 5775244101618659086}
   _dodgeSmearsPower: 7
+  _damageEffectInterval: 0.1
+  _damageEffectMaterial: {fileID: 2100000, guid: a9babcd2a43f65b49b6a2f74990276cc, type: 2}
   _voiceSource: {fileID: 795784838904872616}
   _damageVoiceCueName: VOICE_Damage_Light
   _stageStartVoiceCueName: VOICE_Battlestart
