@@ -98,6 +98,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             float now = Time.unscaledTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType();
+            bool isJustHit = RhythmJustService.Instance.IsJustHit();
 
             bool hasTarget = TryUpdateCurrentTarget();
             var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
@@ -140,7 +141,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return true;
             }
 
-            bool hasHit = ApplyHit(attackDefinition, pendingHitEffects);
+            bool hasHit = ApplyHit(attackDefinition, pendingHitEffects, isJustHit);
 
             // 2発目以降は毎フレーム更新で消化する。
             int remainingHits = attackDefinition.HitCount - 1;
@@ -150,6 +151,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 _pendingHitEffects = pendingHitEffects;
                 _pendingHitCount = remainingHits;
                 _pendingHitTimer = attackDefinition.HitInterval;
+                _pendingIsJustHit = isJustHit;
             }
 
             OnAttackExecuted?.Invoke(attackDefinition.AttackName, hasHit);
@@ -196,6 +198,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitTimer = 0d;
             _pendingAttackDefinition = null;
             _pendingHitEffects = Array.Empty<IAttackHitEffect>();
+            _pendingIsJustHit = false;
         }
 
         /// <summary>
@@ -219,7 +222,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitCount--;
             _pendingHitTimer += definition.HitInterval;
 
-            ApplyHit(definition, _pendingHitEffects);
+            ApplyHit(definition, _pendingHitEffects, _pendingIsJustHit);
 
             if (_pendingHitCount <= 0)
             {
@@ -266,8 +269,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
         /// <param name="pendingHitEffects"> 保留中の多段ヒットのエフェクト。 </param>
+        /// <param name="isJustHit"> ジャスト入力による攻撃かどうかを示すフラグ。 </param>
         /// <returns> 1体以上に命中した場合はtrue。 </returns>
-        private bool ApplyHit(AttackDefinition attackDefinition, IReadOnlyList<IAttackHitEffect> pendingHitEffects)
+        private bool ApplyHit(
+            AttackDefinition attackDefinition,
+            IReadOnlyList<IAttackHitEffect> pendingHitEffects,
+            bool isJustHit)
         {
             _hitDefenders.Clear();
             _attackTargets.Clear();
@@ -300,7 +307,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 attackDefinition,
                 _battleState.Attacker,
                 _attackTargets,
-                false,
+                isJustHit,
                 _battleState.Attacker.BaseDamage,
                 _hitResults,
                 pendingHitEffects);
@@ -424,5 +431,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private AttackDefinition _pendingAttackDefinition;
         private int _pendingHitCount;
         private double _pendingHitTimer;
+        private bool _pendingIsJustHit;
     }
 }

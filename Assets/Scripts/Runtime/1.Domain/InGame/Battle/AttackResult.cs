@@ -17,12 +17,14 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             Damage finalDamage,
             bool isCritical,
             Damage appliedDamage = default,
-            Damage barrierDamage = default)
+            Damage barrierDamage = default,
+            bool isJustHit = false)
         {
             FinalDamage = finalDamage;
             AppliedDamage = appliedDamage;
             IsCritical = isCritical;
             BarrierDamage = barrierDamage;
+            IsJustHit = isJustHit;
         }
 
         /// <summary>
@@ -36,6 +38,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             AppliedDamage = default;
             BarrierDamage = default;
             IsCritical = attackStepContext.CriticalCount > 0;
+            IsJustHit = attackStepContext.IsJustHit;
         }
 
         /// <summary> 最終的なダメージ量。 </summary>
@@ -50,12 +53,15 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary> クリティカルヒットかどうかを示すフラグを取得する。 </summary>
         public bool IsCritical { get; }
 
+        /// <summary> ジャスト入力による攻撃かどうかを示すフラグを取得する。 </summary>
+        public bool IsJustHit { get; }
+
         /// <summary>
         ///     最終ダメージを変更した新しいAttackResultを返す。
         ///　 </summary>
         public AttackResult WithFinalDamage(Damage finalDamage)
         {
-            return new AttackResult(finalDamage, IsCritical, AppliedDamage, BarrierDamage);
+            return new AttackResult(finalDamage, IsCritical, AppliedDamage, BarrierDamage, IsJustHit);
         }
 
         /// <summary>
@@ -65,7 +71,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <returns> 新しいAttackResultのインスタンス。 </returns>
         public AttackResult WithAppliedDamage(Damage appliedDamage)
         {
-            return new AttackResult(FinalDamage, IsCritical, appliedDamage, BarrierDamage);
+            return new AttackResult(FinalDamage, IsCritical, appliedDamage, BarrierDamage, IsJustHit);
         }
 
         /// <summary>
@@ -75,7 +81,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <returns> 新しいAttackResultのインスタンス。 </returns>
         public AttackResult WithBarrierDamage(Damage barrierDamage)
         {
-            return new AttackResult(FinalDamage, IsCritical, AppliedDamage, barrierDamage);
+            return new AttackResult(FinalDamage, IsCritical, AppliedDamage, barrierDamage, IsJustHit);
         }
     }
 }
