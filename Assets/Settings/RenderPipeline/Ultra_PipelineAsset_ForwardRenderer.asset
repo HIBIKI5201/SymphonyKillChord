@@ -35,7 +35,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
   m_Active: 1
   settings:
-    passTag: RenderObjects
+    passTag: CharacterFakeShadow
     Event: 500
     filterSettings:
       RenderQueueType: 0
@@ -93,7 +93,8 @@ MonoBehaviour:
   - {fileID: 4680951800045123779}
   - {fileID: 4587295231979920038}
   - {fileID: -6073543164445794132}
-  m_RendererFeatureMap: b9374d6a3ef53e8ec3386a84dc14f640a69a017eb558a93face034c3ab70b6ab
+  - {fileID: 972391168933292799}
+  m_RendererFeatureMap: b9374d6a3ef53e8ec3386a84dc14f640a69a017eb558a93face034c3ab70b6abffeafebe9da07e0d
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -122,6 +123,26 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &972391168933292799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: DamageEffect
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 0
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: a9babcd2a43f65b49b6a2f74990276cc, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
 --- !u!114 &4587295231979920038
 MonoBehaviour:
   m_ObjectHideFlags: 0
