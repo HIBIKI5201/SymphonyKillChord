@@ -525,7 +525,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraUpdateFrame BuildFrame(float deltaTime)
         {
             Vector2 input = ApplyInvert(_input * _lookSensitivity);
-            CameraUpdateContext context = new(_playerT.position, _playerT.forward, input, _moveInput, deltaTime);
+            CameraUpdateContext context = new(_playerT.position, input, _moveInput, deltaTime);
 
             Vector3 targetPosition = Vector3.zero;
             if (IsLockOn())
