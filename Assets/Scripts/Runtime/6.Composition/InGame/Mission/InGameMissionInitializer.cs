@@ -1,13 +1,19 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Skill;
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Mission;
-using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Combo;
 using KillChord.Runtime.View.InGame.Mission;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Mission
@@ -22,6 +28,49 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         /// <summary> 実行順です。 </summary>
         public override int Order => 600;
+
+        /// <summary>
+        ///     OutGameで選択されたミッションIDから、ミッション定義を非同期で解決します。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState)
+                || !selectedMissionState.HasSelectedMission)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] OutGameでミッションが選択されていません。",
+                    this);
+                return false;
+            }
+
+            _loadedMissionDefinitionRepository =
+                await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
+            _loadedEnemyMissionKeyRepository =
+                await _enemyMissionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
+
+            if (_loadedMissionDefinitionRepository == null || _loadedEnemyMissionKeyRepository == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] ミッション関連リポジトリのロードに失敗しました。",
+                    this);
+                return false;
+            }
+
+            if (!_loadedMissionDefinitionRepository.TryCreateMissionDefinition(
+                    selectedMissionState.CurrentMissionId,
+                    _loadedEnemyMissionKeyRepository,
+                    out _resolvedMissionDefinition))
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] ミッションIDに対応する定義が見つかりません。",
+                    this);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         ///     ミッションシステムを構築してContainerを登録します。
@@ -73,7 +122,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
                     _moduleContainer.MissionRuntimeService.MissionProgress,
-                    _moduleContainer.MissionEventController);
+                    _moduleContainer.MissionEventController,
+                    _comboHudPresenter);
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
                 playerModuleContainer.PlayerController,
@@ -91,7 +141,6 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                     playerModuleContainer.InputSuppressionState,
                     _popupInputSuppressionDuration);
             }
-
             _playerBuffController = new MissionPlayerBuffController(
                 _moduleContainer.MissionRuntimeService,
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
@@ -103,6 +152,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <summary>
         ///     初期化処理を行います。
         /// </summary>
+        /// <param name="missionRuntimeService"> 構築したミッション実行サービスです。 </param>
+        /// <returns> 初期化に成功した場合はtrue。 </returns>
         public bool TryInitialize(out MissionRuntimeService missionRuntimeService)
         {
             missionRuntimeService = null;
@@ -112,28 +163,17 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(
-            out SelectedMissionState selectedMissionState))
+            if (_resolvedMissionDefinition == null)
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] " +
-                    $"{nameof(SelectedMissionState)}を取得できませんでした。",
+                    "ミッション定義が解決されていません。",
                     this);
 
                 return false;
             }
 
-            if (!selectedMissionState.HasSelectedMission)
-            {
-                Debug.LogError(
-                    $"[{nameof(InGameMissionInitializer)}] " +
-                    "OutGameでミッションが選択されていません。",
-                    this);
-
-                return false;
-            }
-
-            MissionDefinition definition = selectedMissionState.CurrentMissionDefinition;
+            MissionDefinition definition = _resolvedMissionDefinition;
             MissionProgress progress = new MissionFactory().CreateMissionProgress();
 
             missionRuntimeService = new MissionRuntimeService(
@@ -156,8 +196,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 missionRuntimeService,
                 missionHudPresenter);
 
+            ComboHudViewModel comboHudViewModel = new ComboHudViewModel();
+            _comboHudPresenter = new ComboHudPresenter(comboHudViewModel);
+
             _missionHudView.Initialize(missionHudViewModel);
             _missionLoopView.Initialize(missionEventController);
+            _comboHudView.Initialize(comboHudViewModel, _comboVisibleCount);
 
             missionHudPresenter.Present();
 
@@ -179,6 +223,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _popupController?.Dispose();
             _playerBuffController?.Dispose();
 
+            _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            _enemyMissionKeyRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedMissionDefinitionRepository = null;
+            _loadedEnemyMissionKeyRepository = null;
+            _resolvedMissionDefinition = null;
+
             if (!_isModuleRegistered)
             {
                 return;
@@ -192,7 +242,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
+        [SerializeField, Tooltip("現在のコンボ数を表示するビュー。")] private ComboHudView _comboHudView;
         [SerializeField, Min(0f), Tooltip("説明ポップアップ表示直後にプレイヤー入力を無効化する秒数。")] private float _popupInputSuppressionDuration = MissionStepPopupController.DefaultInputSuppressionDuration;
+        [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
+        private string _missionDefinitionRepositoryKey;
+        [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")]
+        private string _enemyMissionKeyRepositoryKey;
+        [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
+        private int _comboVisibleCount = 1;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
@@ -201,6 +258,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionProgressRecorderController _recorderController;
         private MissionStepPopupController _popupController;
         private MissionPlayerBuffController _playerBuffController;
+        private ComboHudPresenter _comboHudPresenter;
+        private MissionDefinitionRepository _loadedMissionDefinitionRepository;
+        private EnemyMissionKeyRepository _loadedEnemyMissionKeyRepository;
+        private MissionDefinition _resolvedMissionDefinition;
 
         private void OnDestroy()
         {
@@ -238,6 +299,15 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] " +
                     $"{nameof(_missionLoopView)}が設定されていません。",
+                    this);
+
+                return false;
+            }
+            if(_comboHudView == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(_comboHudView)}が設定されていません。",
                     this);
 
                 return false;

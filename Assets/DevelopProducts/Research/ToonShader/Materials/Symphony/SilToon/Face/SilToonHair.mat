@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
   - _CHAR_SHADOW_ON
+  - _FAKE_SHADOW_ON
   - _PBR_ON
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
@@ -42,16 +43,24 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _FakeShadowDepthBias: 0.01
+    - _FakeShadowDistance: 0.005
+    - _FakeShadowOn: 1
     - _Metallic: 0
     - _NormalMapIntensity: 0
     - _OutlineWidthLit: 0.0001
     - _OutlineWidthShadow: 0.0005
     - _PBROn: 1
     - _StencilComp: 8
-    - _StencilFail: 1
+    - _StencilFail: 0
+    - _StencilPass: 1
+    - _StencilReadMask: 1
+    - _StencilRef: 1
+    - _StencilWriteMask: 2
     m_Colors:
     - _ColorMiddle: {r: 0.9647059, g: 0.8235294, b: 0.84705883, a: 1}
     - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
+    - _FakeShadowColor: {r: 0.9, g: 0.81, b: 0.81, a: 1}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

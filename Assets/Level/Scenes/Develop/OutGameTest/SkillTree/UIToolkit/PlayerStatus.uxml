@@ -8,6 +8,8 @@
             <ui:Label text="10&#10;" name="AttackPreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
             <ui:Label text="クリティカル率：" name="CriticalChanceLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
             <ui:Label text="5%" name="CriticalChancePreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
+            <ui:Label text="クリティカルダメージ：" name="CriticalDamageLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
+            <ui:Label text="50%" name="CriticalDamagePreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

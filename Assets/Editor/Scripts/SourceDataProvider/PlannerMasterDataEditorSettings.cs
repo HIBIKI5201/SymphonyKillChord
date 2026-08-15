@@ -71,14 +71,18 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         "StageTreeAsset",
                         "EnemyWaveDefinitionRepository",
-                        "EnemyMissionKeyRepository"
+                        "EnemyDefinitionRepository",
+                        "EnemyMissionKeyRepository",
+                        "MissionDefinitionRepository"
                     },
                     new List<string>
                     {
                         "StageAsset",
                         "StageBind",
                         "Wave",
-                        "EnemyMissionKey"
+                        "EnemyData",
+                        "EnemyMissionKey",
+                        "Mission"
                     }),
                 new(
                     "Player",
@@ -99,9 +103,15 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         "CameraConfig",
                         "SkillInputProgressViewConfigAsset",
-                        "RhythmJudgmentDefinitionAsset"
+                        "RhythmJudgmentDefinitionAsset",
+                        "TitleScreenRuleData",
+                        "OutGameScreenRuleData"
                     },
-                    new List<string>()),
+                    new List<string>
+                    {
+                        "TitleScreenRule",
+                        "OutGameScreenRule"
+                    }),
                 new(
                     "Enemy",
                     new List<string>
@@ -109,11 +119,16 @@ namespace KillChord.Editor.SourceDataProvider
                         "ExampleEnemyMoveData",
                         "ShellAttackData",
                         "BossAttackEntryRepo",
-                        "CharacterDefinitionRepository"
+                        "EnemyDefinitionRepository",
+                        "CharacterDefinitionRepository",
+                        "ExampleBattleMusicData",
+                        "ExampleEncountMusicData",
+                        "ShellMusicData"
                     },
                     new List<string>
                     {
                         "BossAttackEntry",
+                        "EnemyData",
                         "Character"
                     }),
                 new(
@@ -122,13 +137,15 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         "SkillNodeDataRepo",
                         "SkillNodeBindRepo",
-                        "OutGameSkillRepository"
+                        "OutGameSkillRepository",
+                        "SkillNodePhaseBindDataRepo"
                     },
                     new List<string>
                     {
                         "SkillNode",
                         "SkillNodeBind",
-                        "Skill"
+                        "Skill",
+                        "SkillNodePhaseBind"
                     }),
                 new(
                     "Scenario",
@@ -136,7 +153,8 @@ namespace KillChord.Editor.SourceDataProvider
                     {
                         "BackgroundCatalogAsset",
                         "AnimationCatalogAsset",
-                        "PortraitCatalogAsset"
+                        "PortraitCatalogAsset",
+                        "ScenarioSettingsAsset"
                     },
                     new List<string>
                     {

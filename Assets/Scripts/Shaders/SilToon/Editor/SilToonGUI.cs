@@ -16,6 +16,7 @@ namespace DevelopProducts.ToonShader
         static bool showOutline = true;
         static bool showSmears = true;
         static bool showPerspective = true;
+        static bool showFakeShadow = true;
         static bool showRenderState = false;
 
         private static class Styles
@@ -88,7 +89,14 @@ namespace DevelopProducts.ToonShader
             MaterialProperty perspectiveRadius = Find("_PerspectiveRemovalRadius", props);
             MaterialProperty head = Find("_Head", props);
 
+            MaterialProperty fakeShadowOn = Find("_FakeShadowOn", props);
+            MaterialProperty fakeShadowColor = Find("_FakeShadowColor", props);
+            MaterialProperty fakeShadowDistance = Find("_FakeShadowDistance", props);
+            MaterialProperty fakeShadowDepthBias = Find("_FakeShadowDepthBias", props);
+
             MaterialProperty stencilRef = Find("_StencilRef", props);
+            MaterialProperty stencilReadMask = Find("_StencilReadMask", props);
+            MaterialProperty stencilWriteMask = Find("_StencilWriteMask", props);
             MaterialProperty stencilComp = Find("_StencilComp", props);
             MaterialProperty stencilPass = Find("_StencilPass", props);
             MaterialProperty stencilFail = Find("_StencilFail", props);
@@ -204,6 +212,21 @@ namespace DevelopProducts.ToonShader
                 materialEditor.VectorProperty(head, "Head Position (World)");
             });
 
+            DrawSection("Fake Shadow", ref showFakeShadow, () =>
+            {
+                materialEditor.ShaderProperty(fakeShadowOn, new GUIContent("Enable", "髪など、顔に落とす擬似影を描くマテリアルで有効化"));
+                if (fakeShadowOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(fakeShadowColor, new GUIContent("Color (Multiply)", "顔に乗算する色。暗いほど濃い影になる"));
+                    materialEditor.ShaderProperty(fakeShadowDistance, new GUIContent("Distance", "ライトの進行方向へ頂点をずらす距離"));
+                    materialEditor.ShaderProperty(fakeShadowDepthBias, new GUIContent("Depth Bias", "カメラ側への引き戻し量。影が欠ける場合に上げる"));
+                    EditorGUI.indentLevel--;
+
+                    EditorGUILayout.HelpBox("影を受ける顔マテリアル側で Stencil プリセット「顔（FakeShadow受け）」を設定してください。", MessageType.Info);
+                }
+            });
+
             DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
                 EditorGUILayout.LabelField("Presets", EditorStyles.boldLabel);
@@ -214,6 +237,10 @@ namespace DevelopProducts.ToonShader
                         materialEditor,
                         stencilRef,
                         1,
+                        stencilReadMask,
+                        StencilBits.EyeThrough,
+                        stencilWriteMask,
+                        StencilBits.EyeThrough,
                         stencilComp,
                         CompareFunction.Disabled,
                         stencilPass,
@@ -228,6 +255,10 @@ namespace DevelopProducts.ToonShader
                         materialEditor,
                         stencilRef,
                         1,
+                        stencilReadMask,
+                        StencilBits.EyeThrough,
+                        stencilWriteMask,
+                        StencilBits.EyeThrough,
                         stencilComp,
                         CompareFunction.Always,
                         stencilPass,
@@ -239,23 +270,50 @@ namespace DevelopProducts.ToonShader
                 }
                 if (GUILayout.Button("透過処理（髪）"))
                 {
+                    // 髪が覆ったピクセルの顔領域ビットを落とし、FakeShadowが髪の上に乗らないようにする。
+                    // 目の透け用ビット(bit0)はWriteMaskで保護される。
                     SetStencil(
                         materialEditor,
                         stencilRef,
                         1,
+                        stencilReadMask,
+                        StencilBits.EyeThrough,
+                        stencilWriteMask,
+                        StencilBits.FaceRegion,
                         stencilComp,
                         CompareFunction.Always,
                         stencilPass,
-                        StencilOp.Keep,
-                        stencilFail,
                         StencilOp.Zero,
+                        stencilFail,
+                        StencilOp.Keep,
                         2010
+                    );
+                }
+                if (GUILayout.Button("顔（FakeShadow受け）"))
+                {
+                    SetStencil(
+                        materialEditor,
+                        stencilRef,
+                        StencilBits.FaceRegion,
+                        stencilReadMask,
+                        StencilBits.FaceRegion,
+                        stencilWriteMask,
+                        StencilBits.FaceRegion,
+                        stencilComp,
+                        CompareFunction.Always,
+                        stencilPass,
+                        StencilOp.Replace,
+                        stencilFail,
+                        StencilOp.Keep,
+                        2001
                     );
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.Space(5);
 
                 materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値 (0-255)"));
+                materialEditor.ShaderProperty(stencilReadMask, new GUIContent("Read Mask", "比較に使うビット。bit0(1):目の透け / bit1(2):顔領域"));
+                materialEditor.ShaderProperty(stencilWriteMask, new GUIContent("Write Mask", "書き込むビット。他用途のビットを壊さないよう限定する"));
                 materialEditor.ShaderProperty(stencilComp, new GUIContent("Compare Function", "ステンシル比較関数"));
                 materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass Operation", "ステンシル成功時の処理"));
                 materialEditor.ShaderProperty(stencilFail, new GUIContent("Fail Operation", "ステンシル失敗時の処理"));
@@ -366,10 +424,12 @@ namespace DevelopProducts.ToonShader
             }
         }
 
-        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pComp, CompareFunction vComp, MaterialProperty pPass, StencilOp vPass, MaterialProperty pFail, StencilOp vFail, int queue)
+        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pReadMask, int vReadMask, MaterialProperty pWriteMask, int vWriteMask, MaterialProperty pComp, CompareFunction vComp, MaterialProperty pPass, StencilOp vPass, MaterialProperty pFail, StencilOp vFail, int queue)
         {
             editor.RegisterPropertyChangeUndo("Set Stencil Template");
             pRef.floatValue = vRef;
+            if (pReadMask != null) pReadMask.floatValue = vReadMask;
+            if (pWriteMask != null) pWriteMask.floatValue = vWriteMask;
             if (pComp != null) pComp.floatValue = (float)vComp;
             if (pPass != null) pPass.floatValue = (float)vPass;
             if (pFail != null) pFail.floatValue = (float)vFail;

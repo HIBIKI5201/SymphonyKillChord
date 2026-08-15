@@ -13,6 +13,11 @@ float3 _CharShadowLightDirection;
 
 half SampleCharacterShadow(float3 positionWS,half3 normalWS)
 {
+    // SilToonShadowFeatureが動いていない(未登録/無効/描画対象なし)フレームでは
+    // _CharShadowmapも_CharWorldToShadowも有効な値ではないため、影なしで固定する。
+    if (_CharShadowParams.x <= 0.0)
+        return 1.0h;
+
     // 正射影なのでw除算は不要
     float3 coord = mul(_CharWorldToShadow, float4(positionWS, 1.0)).xyz * round(saturate(dot(normalWS, _CharShadowLightDirection)));
 
