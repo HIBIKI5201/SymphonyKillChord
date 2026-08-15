@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
     public static class DamageExecutor
     {
         /// <summary>
-        ///     ダメージ計算を実行します。
+        ///     通常のダメージ計算を実行します。
         /// </summary>
         /// <param name="attacker"> 攻撃者です。 </param>
         /// <param name="defender"> 防御者です。 </param>
@@ -23,6 +23,43 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackResult attackResult,
             DamageAttackType attackType)
         {
+            return ExecuteInternal(attacker, defender, attackResult, attackType, true);
+        }
+
+        /// <summary>
+        ///     派生ダメージ計算を実行します。
+        ///     攻撃者のステータス効果によるダメージ修正は適用されません。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者です。 </param>
+        /// <param name="defender"> 防御者です。 </param>
+        /// <param name="attackResult"> 攻撃結果です。 </param>
+        /// <param name="attackType"> 攻撃タイプです。 </param>
+        /// <returns> 計算結果の攻撃結果です。 </returns>
+        public static AttackResult ExecuteDerived(
+            IAttacker attacker,
+            IDefender defender,
+            AttackResult attackResult,
+            DamageAttackType attackType)
+        {
+            return ExecuteInternal(attacker, defender, attackResult, attackType, false);
+        }
+
+        /// <summary>
+        ///     ダメージ計算を実行します。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者です。 </param>
+        /// <param name="defender"> 防御者です。 </param>
+        /// <param name="attackResult"> 攻撃結果です。 </param>
+        /// <param name="attackType"> 攻撃タイプです。 </param>
+        /// <param name="applyOutgoingModifiers"> 攻撃者のステータス効果によるダメージ修正を適用するかどうかを示す値です。 </param>
+        /// <returns> 計算結果の攻撃結果です。 </returns>
+        public static AttackResult ExecuteInternal(
+            IAttacker attacker,
+            IDefender defender,
+            AttackResult attackResult,
+            DamageAttackType attackType,
+            bool applyOutgoingModifiers)
+        {
             if (attacker == null)
             {
                 throw new ArgumentNullException(nameof(attacker));
@@ -33,9 +70,15 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(defender));
             }
 
+            var result = attackResult;
+
             // キャラクターのステータス効果によるダメージ修正を適用する
-            var result = attacker.StatusEffectSystem.ApplyOutgoingDamageModifiers(
-                attacker, defender, attackResult);
+            if (applyOutgoingModifiers)
+            {
+                result = attacker.StatusEffectSystem.ApplyOutgoingDamageModifiers(
+                    attacker, defender, result);
+            }
+
             result = defender.StatusEffectSystem.ApplyIncomingDamageModifiers(
                 attacker, defender, result);
 
