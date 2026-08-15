@@ -228,7 +228,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length * 2);
-                SkillInputProgressController progressController = BuildSkillProgressModules(definition);
+                SkillInputProgressController progressController = BuildSkillProgressModules(definition, skillTemplate.Icon);
                 SkillExecutionController executionController = new SkillExecutionController(
                     skillResultPresenter,
                     progressController,
@@ -247,9 +247,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary>
         ///     装備中1スキル分の入力進捗UIモジュール一式を構築する。
         /// </summary>
-        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition)
+        /// <param name="definition"> 対象のスキル定義です。 </param>
+        /// <param name="skillIcon"> 対象のスキルアイコンです。未設定の場合はnull。 </param>
+        /// <returns> 構築した入力進捗Controllerです。 </returns>
+        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition, Sprite skillIcon)
         {
-            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition);
+            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition, skillIcon);
 
             ISkillCrosshairProgressView crosshairView = null;
             SkillCrosshairProgressController crosshairController = null;
@@ -260,7 +263,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             ISkillInputProgressRowView listRowView = _skillListUIInitializer != null
-                ? _skillListUIInitializer.CreateSkillListRow(definition)
+                ? _skillListUIInitializer.CreateSkillListRow(definition, skillIcon)
                 : null;
 
             SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
