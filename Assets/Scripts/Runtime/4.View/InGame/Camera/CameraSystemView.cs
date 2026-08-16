@@ -264,6 +264,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void OnDestroy()
         {
+            // 破棄後もPunchモーションが動き続けないよう停止する。
+            _shakeCalculator?.Reset();
+
             if (_inputView == null) { return; }
 
 #if UNITY_ANDROID
@@ -489,8 +492,8 @@ namespace KillChord.Runtime.View.InGame.Camera
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
 
             // シェイクはカメラ計算結果へ後乗せし、揺れが次フレームの計算へ影響しないようにする。
-            _shakeCalculator.Update(deltaTime, out Vector3 shakeOffset, out Quaternion shakeRotation);
-            _cameraT.SetPositionAndRotation(position + (rotation * shakeOffset), rotation * shakeRotation);
+            Vector3 shakeOffset = _shakeCalculator.PositionOffset;
+            _cameraT.SetPositionAndRotation(position + (rotation * shakeOffset), rotation);
             _hasCompletedInitialUpdate = true;
         }
 

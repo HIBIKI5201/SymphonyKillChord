@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 {
     /// <summary>
     ///     カメラシェイク1回分の揺れ方を定義するパラメータ。
+    ///     LitMotionのPunchモーションの設定値として使用する。
     /// </summary>
     [Serializable]
     public struct CameraShakeParameter
@@ -13,49 +14,79 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     各パラメータを指定してカメラシェイク設定を生成するコンストラクタ。
         /// </summary>
         /// <param name="duration"> 揺れの継続時間(秒)。</param>
-        /// <param name="positionAmplitude"> 位置の揺れ幅(メートル)。</param>
-        /// <param name="rotationAmplitude"> 回転の揺れ幅(度)。</param>
-        /// <param name="frequency"> 揺れの周波数。</param>
-        public CameraShakeParameter(float duration, float positionAmplitude, float rotationAmplitude, float frequency)
+        /// <param name="strengthRangeX"> X(左右)方向の振動の強さの抽選範囲。xが最小値、yが最大値。</param>
+        /// <param name="strengthRangeY"> Y(上下)方向の振動の強さの抽選範囲。xが最小値、yが最大値。</param>
+        /// <param name="strengthRangeZ"> Z(前後)方向の振動の強さの抽選範囲。xが最小値、yが最大値。</param>
+        /// <param name="frequency"> 継続時間中の振動回数。</param>
+        /// <param name="dampingRatio"> 振動の減衰比。1で完全に減衰し、0で減衰しない。</param>
+        public CameraShakeParameter(
+            float duration,
+            Vector2 strengthRangeX,
+            Vector2 strengthRangeY,
+            Vector2 strengthRangeZ,
+            Vector2 frequency,
+            float dampingRatio)
         {
             _duration = duration;
-            _positionAmplitude = positionAmplitude;
-            _rotationAmplitude = rotationAmplitude;
+            _strengthRangeX = strengthRangeX;
+            _strengthRangeY = strengthRangeY;
+            _strengthRangeZ = strengthRangeZ;
             _frequency = frequency;
+            _dampingRatio = dampingRatio;
         }
 
         /// <summary> 揺れの継続時間(秒)。 </summary>
         public readonly float Duration => _duration;
 
-        /// <summary> 位置の揺れ幅(メートル)。 </summary>
-        public readonly float PositionAmplitude => _positionAmplitude;
+        /// <summary> X(左右)方向の振動の強さの抽選範囲。xが最小値、yが最大値。 </summary>
+        public readonly Vector2 StrengthRangeX => _strengthRangeX;
 
-        /// <summary> 回転の揺れ幅(度)。 </summary>
-        public readonly float RotationAmplitude => _rotationAmplitude;
+        /// <summary> Y(上下)方向の振動の強さの抽選範囲。xが最小値、yが最大値。 </summary>
+        public readonly Vector2 StrengthRangeY => _strengthRangeY;
 
-        /// <summary> 揺れの周波数。 </summary>
-        public readonly float Frequency => _frequency;
+        /// <summary> Z(前後)方向の振動の強さの抽選範囲。xが最小値、yが最大値。</summary>
+        public readonly Vector2 StrengthRangeZ => _strengthRangeZ;
 
-        /// <summary> 位置と回転の揺れ幅を比較可能な1つの強さへ換算した値。 </summary>
-        public readonly float Power => _positionAmplitude + (_rotationAmplitude * ROTATION_POWER_WEIGHT);
+        /// <summary> 継続時間中の振動回数の抽選は範囲。xが最小値、yが最大値。 </summary>
+        public readonly Vector2 Frequency => _frequency;
 
-        /// <summary> 回転の揺れ幅(度)を位置の揺れ幅(メートル)相当へ換算する重み。 </summary>
-        private const float ROTATION_POWER_WEIGHT = 0.02f;
+        /// <summary> 振動の減衰比。1で完全に減衰し、0で減衰しない。 </summary>
+        public readonly float DampingRatio => _dampingRatio;
+
+        /// <summary> 抽選範囲から取り得る最大の強さ。シェイク同士の強弱比較に使用する。 </summary>
+        public readonly float MaxPower => new Vector3(
+            GetRangeMaxAbsolute(_strengthRangeX),
+            GetRangeMaxAbsolute(_strengthRangeY),
+            GetRangeMaxAbsolute(_strengthRangeZ)).magnitude;
 
         [Min(0f)]
         [SerializeField, Tooltip("揺れの継続時間(秒)。0以下の場合はシェイクしません。")]
         private float _duration;
 
-        [Min(0f)]
-        [SerializeField, Tooltip("位置の揺れ幅(メートル)。")]
-        private float _positionAmplitude;
+        [SerializeField, Tooltip("X(左右)方向の振動の強さ(メートル)の抽選範囲。x=最小値, y=最大値。")]
+        private Vector2 _strengthRangeX;
 
-        [Min(0f)]
-        [SerializeField, Tooltip("回転の揺れ幅(度)。")]
-        private float _rotationAmplitude;
+        [SerializeField, Tooltip("Y(上下)方向の振動の強さ(メートル)の抽選範囲。x=最小値, y=最大値。")]
+        private Vector2 _strengthRangeY;
 
-        [Min(0f)]
-        [SerializeField, Tooltip("揺れの周波数。大きいほど細かく振動します。")]
-        private float _frequency;
+        [SerializeField, Tooltip("Z(前後)方向の振動の強さ(メートル)の抽選範囲。x=最小値, y=最大値。")]
+        private Vector2 _strengthRangeZ;
+
+        [SerializeField, Tooltip("継続時間中の振動回数の抽選範囲（小数は四捨五入）。大きいほど細かく振動します。")]
+        private Vector2 _frequency;
+
+        [Range(0f, 1f)]
+        [SerializeField, Tooltip("振動の減衰比。1で完全に減衰し、0で減衰せず一定の強さで振動します。")]
+        private float _dampingRatio;
+
+        /// <summary>
+        ///     抽選範囲の絶対値の最大を返す。
+        /// </summary>
+        /// <param name="range"> 抽選範囲。xが最小値、yが最大値。</param>
+        /// <returns> 範囲内で取り得る強さの絶対値の最大。</returns>
+        private static float GetRangeMaxAbsolute(in Vector2 range)
+        {
+            return Mathf.Max(Mathf.Abs(range.x), Mathf.Abs(range.y));
+        }
     }
 }
