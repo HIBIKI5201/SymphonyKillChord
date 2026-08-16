@@ -436,7 +436,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return;
             }
 
-            _shakeCalculator.RequestShake(config);
+            _shakeCalculator.TryRequestShake(config);
         }
 
         /// <summary>
@@ -449,7 +449,6 @@ namespace KillChord.Runtime.View.InGame.Camera
                 || _updateCandidateAction == null || _trySetTargetByIdFunc == null || _followCalculator == null || _lockOnRotationCalculator == null
                 || _freeLookRotationCalculator == null || _lookAtRotationCalculator == null
                 || _lockOnRangeChecker == null || _lockOnBreakTracker == null
-                || _shakeCalculator == null
                 || _playerT == null || _cameraT == null)
             {
                 return;
@@ -495,7 +494,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
 
             // シェイクはカメラ計算結果へ後乗せし、揺れが次フレームの計算へ影響しないようにする。
-            Vector3 shakeOffset = _shakeCalculator.PositionOffset;
+            Vector3 shakeOffset = _shakeCalculator?.PositionOffset ?? Vector3.zero;
             _cameraT.SetPositionAndRotation(position + (rotation * shakeOffset), rotation);
             _hasCompletedInitialUpdate = true;
         }

@@ -16,17 +16,20 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     発生中のシェイクより弱い要求は、演出が弱まらないよう無視する。
         /// </summary>
         /// <param name="config"> 要求するシェイクの設定。</param>
-        public void RequestShake(CameraShakeConfig config)
+        public bool TryRequestShake(CameraShakeConfig config)
         {
             if (config == null)
             {
-                return;
+                return false;
             }
 
-            // 継続時間か強さが無い設定は演出として成立しないため無視する。
             if (config.Priority < _currentPriority)
             {
-                return;
+                return false;
+            }
+            if(config.Duration <= 0)
+            {
+                return false;
             }
 
             // 発生中のモーションを破棄してから、新しいシェイクへ差し替える。
@@ -45,6 +48,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
                 .Run(x => x.WithOnComplete(() => _currentPriority = int.MinValue));
             _currentPriority = config.Priority;
+            return true;
         }
 
         /// <summary>

@@ -43,6 +43,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("Z(前後)方向の振動の強さ(メートル)の抽選範囲。x=最小値, y=最大値。")]
         private Vector2 _strengthRangeZ;
 
+        [Min(0f)]
         [SerializeField, Tooltip("継続時間中の振動回数の抽選範囲（小数は四捨五入）。大きいほど細かく振動します。")]
         private Vector2 _frequency;
     }
