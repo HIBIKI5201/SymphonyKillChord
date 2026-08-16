@@ -365,10 +365,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     ボス死亡時に実行する処理。
         /// </summary>
-        private void HandleEnemyDied(CharacterEntity _)
+        /// <param name="diedEnemy"> 死亡したボスのEntity。</param>
+        private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
             // 撃破演出用に、ボスの撃破を通知する。
-            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(_enemyEntity.Id));
+            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
 
             if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {

@@ -26,34 +26,35 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return false;
             }
 
-            // 発生中のシェイクより優先度が低い要求は、強い演出を上書きしないよう無視する。
-            if (config.Priority < _currentPriority)
-            {
-                return false;
-            }
-
             // 継続時間が無い設定は揺れが発生しないため、モーションを確保せず無視する。
             if (config.Duration <= 0)
             {
                 return false;
             }
 
+            // 発生中のシェイクより優先度が低い要求は、強い演出を上書きしないよう無視する。
+            if (config.Priority < _currentPriority && _positionHandle.IsActive())
+            {
+                return false;
+            }
+
+
             // 発生中のモーションを破棄してから、新しいシェイクへ差し替える。
             Reset();
             _positionHandle = LSequence.Create()
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeX.x, config.StrengthRangeX.y), config.Duration)
-                    .WithFrequency(Mathf.RoundToInt(Random.Range(config.Frequency.x, config.Frequency.y)))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
                     .Bind(this, static (value, state) => state._positionOffset.x = value))
 
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeY.x, config.StrengthRangeY.y), config.Duration)
-                    .WithFrequency(Mathf.RoundToInt(Random.Range(config.Frequency.x, config.Frequency.y)))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
                     .Bind(this, static (value, state) => state._positionOffset.y = value))
 
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeZ.x, config.StrengthRangeZ.y), config.Duration)
-                    .WithFrequency(Mathf.RoundToInt(Random.Range(config.Frequency.x, config.Frequency.y)))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
                 // 完了時に優先度を解放し、次の要求を受け付けられるようにする。
-                .Run(x => x.WithOnComplete(() => _currentPriority = int.MinValue));
+                .Run();
             _currentPriority = config.Priority;
             return true;
         }
