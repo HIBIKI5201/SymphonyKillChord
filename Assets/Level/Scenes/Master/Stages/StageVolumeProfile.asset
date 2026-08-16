@@ -207,7 +207,7 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 0.9
+    m_Value: 1
   intensity:
     m_OverrideState: 1
     m_Value: 2
@@ -225,7 +225,7 @@ MonoBehaviour:
     m_Value: 0
   filter:
     m_OverrideState: 1
-    m_Value: 2
+    m_Value: 0
   downscale:
     m_OverrideState: 1
     m_Value: 0
