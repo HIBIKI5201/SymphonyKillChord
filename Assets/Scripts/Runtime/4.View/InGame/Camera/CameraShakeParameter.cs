@@ -20,6 +20,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="frequency"> 継続時間中の振動回数。</param>
         /// <param name="dampingRatio"> 振動の減衰比。1で完全に減衰し、0で減衰しない。</param>
         public CameraShakeParameter(
+            int priority,
             float duration,
             Vector2 strengthRangeX,
             Vector2 strengthRangeY,
@@ -27,6 +28,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Vector2 frequency,
             float dampingRatio)
         {
+            _priority = priority;
             _duration = duration;
             _strengthRangeX = strengthRangeX;
             _strengthRangeY = strengthRangeY;
@@ -34,6 +36,8 @@ namespace KillChord.Runtime.View.InGame.Camera
             _frequency = frequency;
             _dampingRatio = dampingRatio;
         }
+        /// <summary>優先順位（高い数字ほど優先）</summary>
+        public readonly int Priority => _priority;
 
         /// <summary> 揺れの継続時間(秒)。 </summary>
         public readonly float Duration => _duration;
@@ -53,11 +57,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 振動の減衰比。1で完全に減衰し、0で減衰しない。 </summary>
         public readonly float DampingRatio => _dampingRatio;
 
-        /// <summary> 抽選範囲から取り得る最大の強さ。シェイク同士の強弱比較に使用する。 </summary>
-        public readonly float MaxPower => new Vector3(
-            GetRangeMaxAbsolute(_strengthRangeX),
-            GetRangeMaxAbsolute(_strengthRangeY),
-            GetRangeMaxAbsolute(_strengthRangeZ)).magnitude;
+        [SerializeField,Tooltip("エフェクト実行の優先順位（高い数字ほど優先）")]
+        private int _priority;
 
         [Min(0f)]
         [SerializeField, Tooltip("揺れの継続時間(秒)。0以下の場合はシェイクしません。")]
