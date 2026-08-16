@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 553ff9dfb0c892444a5a4c843d1548fb
+guid: 08775fc75f38ca745ae88b4eb4550be2
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
-    materialImportMode: 2
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -17,7 +17,20 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
+      might lower retargeting quality:\nNote: Activate translation DOF on avatar
+      to improve retargeting quality.\n\t'spine_C0_spine_02_Jnt' has translation
+      animation that will be discarded.\n\t'spine_C0_spine_02_Jnt' has scale animation
+      that will be discarded.\n\t'spine_C0_spine_03_Jnt' has translation animation
+      that will be discarded.\n\t'spine_C0_spine_03_Jnt' has scale animation that
+      will be discarded.\n\t'spine_C0_spine_04_Jnt' has translation animation that
+      will be discarded.\n\t'spine_C0_spine_04_Jnt' is inbetween humanoid transforms
+      and has rotation animation that will be discarded.\n\t'spine_C0_spine_04_Jnt'
+      has scale animation that will be discarded.\n\t'finger_L1_0_Jnt' has translation
+      animation that will be discarded.\n\t'neck_C0_neck_02_Jnt' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n\t'finger_R0_0_Jnt'
+      has translation animation that will be discarded.\n\t'finger_R3_0_Jnt' has
+      translation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -29,7 +42,36 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Take 001
+      takeName: Take 001
+      internalID: 1827226128182048838
+      firstFrame: 0
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 0
   meshes:
     lODScreenPercentages: []
