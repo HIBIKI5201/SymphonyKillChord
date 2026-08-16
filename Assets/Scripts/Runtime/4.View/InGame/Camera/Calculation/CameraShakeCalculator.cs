@@ -43,15 +43,15 @@ namespace KillChord.Runtime.View.InGame.Camera
             Reset();
             _positionHandle = LSequence.Create()
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeX.x, config.StrengthRangeX.y), config.Duration)
-                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y + 1))
                     .Bind(this, static (value, state) => state._positionOffset.x = value))
 
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeY.x, config.StrengthRangeY.y), config.Duration)
-                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y + 1))
                     .Bind(this, static (value, state) => state._positionOffset.y = value))
 
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeZ.x, config.StrengthRangeZ.y), config.Duration)
-                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y))
+                    .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y + 1))
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
                 // 完了時に優先度を解放し、次の要求を受け付けられるようにする。
                 .Run();
