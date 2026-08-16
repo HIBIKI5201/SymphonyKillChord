@@ -10,6 +10,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
+using LitMotion.Extensions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -42,6 +43,15 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避中に到達させるSmearsPowerの最大値。")]
         private float _dodgeSmearsPower = 1f;
+
+        [SerializeField, Tooltip("被弾時のポストエフェクトのfrom値。")]
+        private float _damageEffectFrom = 50f;
+
+        [SerializeField,Tooltip("被弾時のポストエフェクト再生間隔。")]
+        private float _damageEffectInterval = 0.1f;
+        [SerializeField, Tooltip("被弾時のポストエフェクトMaterial。")]
+        private Material _damageEffectMaterial;
+
         [Space]
 
         [Header("Voice")]
@@ -92,9 +102,10 @@ namespace KillChord.Runtime.View.InGame.Player
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
-        private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
-        private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
-        private static readonly int SmearsDirectionPropertyId = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int SMEARS_ON_PROPERTY_ID = Shader.PropertyToID("_SmearsOn");
+        private static readonly int SMEARS_POWER_PROPERTY_ID = Shader.PropertyToID("_SmearsPower");
+        private static readonly int SMEARS_DIRECTION_PROPERTY_ID = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int DAMAGED_EFFECT_PROPERTY_ID = Shader.PropertyToID("_Pixel");
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
@@ -114,6 +125,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
         private MotionHandle _dodgeMaterialEffectHandle;
+        private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
 
         private float _attackFacingRemaining = 0f;
@@ -157,6 +169,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _dodgeMaterialEffectHandle.TryCancel();
+            _damageEffectHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -244,6 +257,9 @@ namespace KillChord.Runtime.View.InGame.Player
             _dodgeMaterialEffectHandle.TryCancel();
             ResetDodgeMaterialEffect();
 
+            // 被弾ポストエフェクトの再生途中の値を持ち越さない。
+            _damageEffectHandle.TryCancel();
+
             // 位置と回転をスタート地点へ戻す。
             if (_cacheTransform != null)
             {
@@ -285,16 +301,20 @@ namespace KillChord.Runtime.View.InGame.Player
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
 
-            if (_damageEffectView == null)
+            // パーティクル演出はViewが設定されている場合のみ再生する。
+            if (_damageEffectView != null)
             {
-                return;
+                Vector3 effectPosition = _damageEffectPoint != null
+                    ? _damageEffectPoint.position
+                    : transform.position;
+
+                _damageEffectView.PlayAt(effectPosition);
             }
 
-            Vector3 effectPosition = _damageEffectPoint != null
-                ? _damageEffectPoint.position
-                : transform.position;
-
-            _damageEffectView.PlayAt(effectPosition);
+            // ポストエフェクトはパーティクル演出の有無に関わらず再生する。
+            _damageEffectHandle.TryCancel();
+            _damageEffectHandle = LMotion.Create(_damageEffectFrom, 0f, _damageEffectInterval)
+                .BindToMaterialFloat(_damageEffectMaterial, DAMAGED_EFFECT_PROPERTY_ID);
         }
 
         /// <summary>
@@ -360,8 +380,6 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
         public void PlayDodgeMaterialEffect(float duration, in Vector3 direction)
         {
-            direction.Normalize();
-
             if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
             {
                 return;
@@ -380,8 +398,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 renderer.material.EnableKeyword(SMEARS_ON_KEYWORD);
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsOnPropertyId, 0f);
-                _dodgeMaterialPropertyBlock.SetVector(SmearsDirectionPropertyId, -direction);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_ON_PROPERTY_ID, 0f);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, _dodgeSmearsPower);
+                _dodgeMaterialPropertyBlock.SetVector(SMEARS_DIRECTION_PROPERTY_ID, -direction.normalized);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
 
@@ -405,7 +424,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsPowerPropertyId, value);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, value);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
         }

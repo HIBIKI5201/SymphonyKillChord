@@ -1,15 +1,15 @@
-#ifndef OUTLINE_INCLUDED
+﻿#ifndef OUTLINE_INCLUDED
 #define OUTLINE_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\UVToSmoothNormal.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZeroZ.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\ZOffset.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\LuminanceToOutlineThickness.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\PerspectiveRemoval\PerspectiveRemoval.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\Dither\Dither.hlsl"
-#include "Assets\DevelopProducts\Research\ToonShader\Scripts\Runtime\Shaders\HLSL\OutLine\Smears.hlsl"
-#include "Assets/DevelopProducts/Research/ToonShader/Scripts/Runtime/Shaders/HLSL/SilToonInput.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/UVToSmoothNormal.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/ZeroZ.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/ZOffset.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/LuminanceToOutlineThickness.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/PerspectiveRemoval/PerspectiveRemoval.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/Dither/Dither.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/OutLine/Smears.hlsl"
+#include "Assets/Scripts/Shaders/SilToon/HLSL/SilToonInput.hlsl"
 
 struct appdata
 {
