@@ -141,12 +141,12 @@ jobs:
               Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
               Push-Location $Workspace
               try {
-                git clean -ffdx
+                git -c core.longpaths=true clean -ffdx
                 if ($LASTEXITCODE -ne 0) {
                   throw "git clean が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
                 }
 
-                git reset --hard
+                git -c core.longpaths=true reset --hard
                 if ($LASTEXITCODE -ne 0) {
                   throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
                 }
