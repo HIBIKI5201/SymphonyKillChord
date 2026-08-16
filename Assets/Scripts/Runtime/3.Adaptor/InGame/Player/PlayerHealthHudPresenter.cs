@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Player
@@ -66,6 +67,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
             if (amountChanged < 0f)
             {
                 OnDamaged?.Invoke();
+
+                // 被弾演出用に、プレイヤーの被弾を通知する。
+                EventBus<EOnPlayerTakeDamage>.Raise(new EOnPlayerTakeDamage(-amountChanged));
             }
         }
 

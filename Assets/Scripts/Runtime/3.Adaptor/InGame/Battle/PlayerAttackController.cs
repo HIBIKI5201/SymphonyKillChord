@@ -110,6 +110,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             OnAttackBeatExecuted?.Invoke(beatType);
             resultBeatType = (int)beatType;
 
+            // 攻撃演出用に、攻撃が成立したことを通知する。
+            EventBus<EOnPlayerAttackExecuted>.Raise(new EOnPlayerAttackExecuted(hasTarget && HasCurrentLockOnTarget));
+
             // 前回の多段ヒットが残っている場合は破棄する。ヒット間隔が攻撃硬直より長い設定になっている。
             DiscardPendingHits(attackDefinition);
 

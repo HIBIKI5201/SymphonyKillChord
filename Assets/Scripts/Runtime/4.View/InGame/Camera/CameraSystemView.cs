@@ -39,6 +39,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="lookAtRotationCalculator"> カメラ回転計算クラス。</param>
         /// <param name="lockOnRangeChecker"> 自動ロックオン対象の視野内判定クラス。</param>
         /// <param name="lockOnBreakTracker"> 強い視点操作によるロックオン解除判定クラス。</param>
+        /// <param name="shakeCalculator"> カメラシェイクの揺れ量計算クラス。</param>
         /// <param name="viewSettings"> View が利用するカメラ設定値。</param>
         /// <param name="playerT"> プレイヤーの Transform。</param>
         /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
@@ -55,6 +56,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             CameraLookAtRotationCalculator lookAtRotationCalculator,
             CameraLockOnRangeChecker lockOnRangeChecker,
             CameraLockOnBreakTracker lockOnBreakTracker,
+            CameraShakeCalculator shakeCalculator,
             CameraConfig viewSettings,
             Transform playerT,
             PlayerInputView playerInputView)
@@ -71,6 +73,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lookAtRotationCalculator = lookAtRotationCalculator;
             _lockOnRangeChecker = lockOnRangeChecker;
             _lockOnBreakTracker = lockOnBreakTracker;
+            _shakeCalculator = shakeCalculator;
             _viewSettings = viewSettings;
             _playerT = playerT;
             _inputView = playerInputView;
@@ -93,6 +96,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
             EventBus<EOnTakeDamage>.Register(OnTakeDamage);
+            EventBus<EOnEnemyDefeated>.Register(EnemyDefeatedHandler);
+            EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
+            EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
         }
 
         /// <summary>
@@ -205,6 +211,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLookAtRotationCalculator _lookAtRotationCalculator;
         private CameraLockOnRangeChecker _lockOnRangeChecker;
         private CameraLockOnBreakTracker _lockOnBreakTracker;
+        private CameraShakeCalculator _shakeCalculator;
         private Action<Vector3, Vector3> _changeTargetAction;
         private Action<Vector3, Vector3> _updateCandidateAction;
         private Action _clearTargetAction;
@@ -271,6 +278,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLockOnInput -= LockOnHandler;
             _inputView.OnAttackInput -= OnAttack;
             EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
+            EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
+            EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
+            EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
         }
 
         /// <summary>
@@ -377,6 +387,53 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
+        ///     敵の撃破イベントを受け取り、撃破時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> 敵撃破イベント。 </param>
+        private void EnemyDefeatedHandler(EOnEnemyDefeated eventData)
+        {
+            if (_viewSettings == null) { return; }
+
+            RequestShake(_viewSettings.EnemyDefeatedShake);
+        }
+
+        /// <summary>
+        ///     プレイヤーの攻撃実行イベントを受け取り、攻撃時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> プレイヤー攻撃実行イベント。 </param>
+        private void PlayerAttackExecutedHandler(EOnPlayerAttackExecuted eventData)
+        {
+            if (_viewSettings == null) { return; }
+
+            RequestShake(_viewSettings.PlayerAttackShake);
+        }
+
+        /// <summary>
+        ///     プレイヤーの被弾イベントを受け取り、被弾時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> プレイヤー被弾イベント。 </param>
+        private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
+        {
+            if (_viewSettings == null) { return; }
+
+            RequestShake(_viewSettings.PlayerDamageShake);
+        }
+
+        /// <summary>
+        ///     カメラシェイクの発生を要求する。
+        /// </summary>
+        /// <param name="parameter"> 要求するシェイクのパラメータ。 </param>
+        private void RequestShake(in CameraShakeParameter parameter)
+        {
+            if (_shakeCalculator == null)
+            {
+                return;
+            }
+
+            _shakeCalculator.RequestShake(parameter);
+        }
+
+        /// <summary>
         ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
         /// </summary>
         /// <param name="deltaTime"> 前フレームからの経過時間。</param>
@@ -386,6 +443,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 || _updateCandidateAction == null || _trySetTargetByIdFunc == null || _followCalculator == null || _lockOnRotationCalculator == null
                 || _freeLookRotationCalculator == null || _lookAtRotationCalculator == null
                 || _lockOnRangeChecker == null || _lockOnBreakTracker == null
+                || _shakeCalculator == null
                 || _playerT == null || _cameraT == null)
             {
                 return;
@@ -429,7 +487,10 @@ namespace KillChord.Runtime.View.InGame.Camera
                 frame.TargetPosition);
 
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
-            _cameraT.SetPositionAndRotation(position, rotation);
+
+            // シェイクはカメラ計算結果へ後乗せし、揺れが次フレームの計算へ影響しないようにする。
+            _shakeCalculator.Update(deltaTime, out Vector3 shakeOffset, out Quaternion shakeRotation);
+            _cameraT.SetPositionAndRotation(position + (rotation * shakeOffset), rotation * shakeRotation);
             _hasCompletedInitialUpdate = true;
         }
 
@@ -653,12 +714,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     カメラ操作に使用する入力値を初期化します。
+        ///     カメラ操作に使用する入力値と、発生中のシェイクを初期化します。
         /// </summary>
         private void ClearInputState()
         {
             _input = Vector2.zero;
             _moveInput = Vector2.zero;
+
+            // 外部制御への切り替えや位置リセットをまたいで揺れが残らないようにする。
+            _shakeCalculator?.Reset();
         }
 
         /// <summary>

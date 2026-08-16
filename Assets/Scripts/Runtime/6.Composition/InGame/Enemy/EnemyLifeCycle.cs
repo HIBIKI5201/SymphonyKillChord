@@ -14,6 +14,7 @@ using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.Utility.Rendering;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
@@ -682,6 +683,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="_"></param>
         private void HandleEnemyDied(CharacterEntity _)
         {
+            // 撃破演出用に、敵の撃破を通知する。
+            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(_enemyEntity.Id));
+
             DieAsync();
         }
 
