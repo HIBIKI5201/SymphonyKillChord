@@ -269,12 +269,18 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     入力イベントの購読解除を行う。
+        ///     カメラシェイクを停止し、EventBusと入力イベントの購読解除を行う。
         /// </summary>
         private void OnDestroy()
         {
             // 破棄後もPunchモーションが動き続けないよう停止する。
             _shakeCalculator?.Reset();
+
+            // EventBusはstaticでシーンをまたいで生存するため、_inputViewの状態に関わらず必ず解除する。
+            EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
+            EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
+            EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
+            EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
 
             if (_inputView == null) { return; }
 
@@ -289,10 +295,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnMoveInput -= MoveHandler;
             _inputView.OnLockOnInput -= LockOnHandler;
             _inputView.OnAttackInput -= OnAttack;
-            EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
-            EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
-            EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
-            EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
         }
 
         /// <summary>
