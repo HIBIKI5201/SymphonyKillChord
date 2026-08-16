@@ -194,6 +194,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("モバイルのカメラ感度")]
         private int _mobileLookSensitivity = 10;
 
+        [SerializeField, Tooltip("敵を撃破した時のカメラシェイク設定")]
+        private CameraShakeConfig _enemyDefeatedShakeConfig;
+
+        [SerializeField, Tooltip("プレイヤーが攻撃を実行した時のカメラシェイク設定")]
+        private CameraShakeConfig _playerAttackShakeConfig;
+
+        [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定")]
+        private CameraShakeConfig _playerDamageShakeConfig;
+
         private PlayerInputView _inputView;
         private UnityEngine.Camera _camera;
         private Transform _playerT;
@@ -395,9 +404,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="eventData"> 敵撃破イベント。 </param>
         private void EnemyDefeatedHandler(EOnEnemyDefeated eventData)
         {
-            if (_viewSettings == null) { return; }
-
-            RequestShake(_viewSettings.EnemyDefeatedShake);
+            RequestShake(_enemyDefeatedShakeConfig);
         }
 
         /// <summary>
@@ -406,9 +413,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="eventData"> プレイヤー攻撃実行イベント。 </param>
         private void PlayerAttackExecutedHandler(EOnPlayerAttackExecuted eventData)
         {
-            if (_viewSettings == null) { return; }
-
-            RequestShake(_viewSettings.PlayerAttackShake);
+            RequestShake(_playerAttackShakeConfig);
         }
 
         /// <summary>
@@ -417,23 +422,21 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="eventData"> プレイヤー被弾イベント。 </param>
         private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
         {
-            if (_viewSettings == null) { return; }
-
-            RequestShake(_viewSettings.PlayerDamageShake);
+            RequestShake(_playerDamageShakeConfig);
         }
 
         /// <summary>
         ///     カメラシェイクの発生を要求する。
         /// </summary>
-        /// <param name="parameter"> 要求するシェイクのパラメータ。 </param>
-        private void RequestShake(in CameraShakeParameter parameter)
+        /// <param name="config"> 要求するシェイクの設定。 </param>
+        private void RequestShake(CameraShakeConfig config)
         {
             if (_shakeCalculator == null)
             {
                 return;
             }
 
-            _shakeCalculator.RequestShake(parameter);
+            _shakeCalculator.RequestShake(config);
         }
 
         /// <summary>
