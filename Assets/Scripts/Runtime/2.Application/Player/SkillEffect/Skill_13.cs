@@ -36,7 +36,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     AttackCalculator.Calculate(attackDefinition,
                     context.PlayerEntity,
                     context.TargetEntity,
-                    false,
+                    context.IsJustHit,
                     context.PlayerEntity.BaseDamage,
                     criticalDamageMultiplierOverride: criticalMultiplier);
 

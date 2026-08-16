@@ -41,8 +41,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="actionType"> 行動種別です。 </param>
         /// <param name="beatType"> 現在ビートです。 </param>
         /// <param name="unscaledTime"> 現在時刻です。 </param>
+        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> スキル発動の結果、通常攻撃のダメージを適用するかどうかのポリシーです。 </returns>
-        public SkillNormalAttackDamagePolicy TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        public SkillNormalAttackDamagePolicy TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime, bool isJustHit)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
             SkillNormalAttackDamagePolicy normalAttackDamagePolicy =
@@ -50,7 +51,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType);
+                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType, isJustHit);
                 if (result.ResultType == SkillExecutionResultType.Executed)
                 {
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);

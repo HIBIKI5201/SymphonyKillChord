@@ -101,7 +101,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             bool isJustHit = RhythmJustService.Instance.IsJustHit();
 
             bool hasTarget = TryUpdateCurrentTarget();
-            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, isJustHit);
 
             IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
 

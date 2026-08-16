@@ -23,11 +23,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 attackDefinition,
                 context.PlayerEntity,
                 context.TargetEntity,
-                false, context.
-                PlayerEntity.BaseDamage);
-            result = new AttackResult(
-                result.FinalDamage * multiplier,
-                result.IsCritical);
+                context.IsJustHit,
+                context.PlayerEntity.BaseDamage);
+            result = result.WithFinalDamage(result.FinalDamage * multiplier);
 
             result = DamageExecutor.Execute(
                 context.PlayerEntity,

@@ -59,7 +59,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             // 攻撃回数を初期化して攻撃を実行
             _hitCounts.Clear();
-            ExecuteAttacks(targets, attackCount);
+            ExecuteAttacks(targets, attackCount, context.IsJustHit);
 
             // 攻撃力減少デバフを適用し、プレイヤーの攻撃力増加量を計算
             float playerIncreaseAmount = ApplyDebuffs(
@@ -88,7 +88,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// </summary>
         /// <param name="targets"> 攻撃対象のキャラクターエンティティのスパンです。 </param>
         /// <param name="attackCount"> 実行する攻撃回数です。 </param>
-        private void ExecuteAttacks(ReadOnlySpan<CharacterEntity> targets, int attackCount)
+        /// <param name="isJustHit"> ジャストヒットかどうか </param>
+        private void ExecuteAttacks(ReadOnlySpan<CharacterEntity> targets, int attackCount, bool isJustHit)
         {
             if (attackCount <= 0)
             {
@@ -98,7 +99,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             // 対象数が攻撃回数以上の場合は、対象を重複させずに攻撃を実行
             if (targets.Length >= attackCount)
             {
-                ExecuteUniqueTargets(targets, attackCount);
+                ExecuteUniqueTargets(targets, attackCount, isJustHit);
                 return;
             }
 
@@ -107,7 +108,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             // 対象数が攻撃回数未満の場合は、対象を重複させて攻撃を実行
             for (int i = 0; i < targets.Length && executedCount < attackCount; i++)
             {
-                ExecuteAttack(targets[i]);
+                ExecuteAttack(targets[i], isJustHit);
                 executedCount++;
             }
 
@@ -121,7 +122,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     break;
                 }
 
-                ExecuteAttack(target);
+                ExecuteAttack(target, isJustHit);
                 executedCount++;
             }
         }
@@ -131,7 +132,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// </summary>
         /// <param name="targets"> 攻撃対象のキャラクターエンティティのスパンです。 </param>
         /// <param name="attackCount"> 実行する攻撃回数です。 </param>
-        private void ExecuteUniqueTargets(ReadOnlySpan<CharacterEntity> targets, int attackCount)
+        /// <param name="isJustHit"> ジャストヒットかどうか </param>
+        private void ExecuteUniqueTargets(ReadOnlySpan<CharacterEntity> targets, int attackCount, bool isJustHit)
         {
             _candidateIndices.Clear();
 
@@ -148,7 +150,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 (_candidateIndices[i], _candidateIndices[randomIndex]) =
                     (_candidateIndices[randomIndex], _candidateIndices[i]);
 
-                ExecuteAttack(targets[_candidateIndices[i]]);
+                ExecuteAttack(targets[_candidateIndices[i]], isJustHit);
             }
         }
 
@@ -156,14 +158,15 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         ///     指定された対象に攻撃を実行します。
         /// </summary>
         /// <param name="target"> 攻撃対象のキャラクターエンティティです。 </param>
-        private void ExecuteAttack(CharacterEntity target)
+        /// <param name="isJustHit"> ジャストヒットかどうか </param>
+        private void ExecuteAttack(CharacterEntity target , bool isJustHit)
         {
             if (target == null)
             {
                 return;
             }
 
-            _attackController.Execute((int)BeatType.Four, target);
+            _attackController.Execute((int)BeatType.Four, target, isJustHit);
 
             if (_hitCounts.TryGetValue(target, out int currentCount))
             {
@@ -196,23 +199,17 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 float maxReductionAmount = Mathf.Min(reductionCap, baseAttackPower);
                 float reductionPerHit = baseAttackPower * reductionRate;
                 float requestedReductionAmount = reductionPerHit * kvp.Value;
-                float nextReductionAmount = Mathf.Min(
-                    currentReductionAmount + requestedReductionAmount,
-                    maxReductionAmount);
-                float addedReductionAmount = Mathf.Max(
-                    0f,
-                    nextReductionAmount - currentReductionAmount);
+                float reductionAmount = Mathf.Min(requestedReductionAmount, maxReductionAmount);
 
                 if (maxReductionAmount > 0f)
                 {
                     target.StatusEffectSystem.Add(
                         new AttackPowerReductionDebuff(
-                            addedReductionAmount,
-                            maxReductionAmount,
+                            reductionAmount,
                             durationSeconds));
                 }
 
-                totalReductionAmount += addedReductionAmount;
+                totalReductionAmount += reductionAmount;
 
                 Debug.Log($"[Skill07]対象:{target.Name}、" +
                     $"攻撃回数:{kvp.Value}、" +
@@ -220,7 +217,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     $"減少率:{reductionRate}、" +
                     $"減少上限:{maxReductionAmount}、" +
                     $"持続時間:{durationSeconds}秒、" +
-                    $"追加減少量:{addedReductionAmount}");
+                    $"追加減少量:{reductionAmount}");
             }
             return totalReductionAmount;
         }
