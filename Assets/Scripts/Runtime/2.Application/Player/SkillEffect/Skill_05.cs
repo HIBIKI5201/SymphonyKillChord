@@ -29,10 +29,19 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             // プレイヤーの体力を消費して、スキルのダメージを計算する
             Health consumedHealth = context.PlayerEntity.ConsumeHealth(requestHealthCost);
-            Damage skillDamage = new Damage(consumedHealth.Value * damageMultiplier);
+
+            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec
+                .GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
             // スキルのダメージをターゲットに適用する
-            var result = new AttackResult(skillDamage, false);
+            var result = AttackCalculator.Calculate(
+                attackDefinition,
+                context.PlayerEntity,
+                context.TargetEntity,
+                context.IsJustHit,
+                new Damage(consumedHealth.Value),
+                applyAttackerModifiers : false);
+            result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
             result = DamageExecutor.Execute(
                 context.PlayerEntity, context.TargetEntity, result, DamageAttackType.Skill);
 
