@@ -15,6 +15,6 @@ MonoBehaviour:
   _priority: 0
   _duration: 0.1
   _strengthRangeX: {x: 0, y: 0}
-  _strengthRangeY: {x: 0.03, y: 0.05}
+  _strengthRangeY: {x: 0.02, y: 0.04}
   _strengthRangeZ: {x: 0, y: 0}
   _frequency: {x: 2, y: 2}
