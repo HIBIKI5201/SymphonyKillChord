@@ -24,7 +24,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> Z(前後)方向の振動の強さの抽選範囲。xが最小値、yが最大値。 </summary>
         public Vector2 StrengthRangeZ => _strengthRangeZ;
 
-        /// <summary> 継続時間中の振動回数の抽選範囲。xが最小値、yが最大値。 </summary>
+        /// <summary> 継続時間中の振動回数の抽選範囲。xが最小値、yが最大値。1未満を指定した場合は1として扱う。 </summary>
         public Vector2Int Frequency => Vector2Int.Max(_frequency, Vector2Int.one);
 
         [SerializeField, Tooltip("エフェクト実行の優先順位（高い数字ほど優先）")]
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("Z(前後)方向の振動の強さ(メートル)の抽選範囲。x=最小値, y=最大値。")]
         private Vector2 _strengthRangeZ;
 
-        [SerializeField, Tooltip("継続時間中の振動回数の抽選範囲（小数は整数へ丸められます）。大きいほど細かく振動します。負値を入れると揺れが減衰せず増幅するため、0以上を指定してください。")]
+        [SerializeField, Tooltip("継続時間中の振動回数の抽選範囲。x=最小値, y=最大値。大きいほど細かく振動します。1未満を指定した場合は1として扱われます。")]
         private Vector2Int _frequency;
     }
 }

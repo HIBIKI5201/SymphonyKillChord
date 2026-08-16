@@ -33,6 +33,8 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             // 発生中のシェイクより優先度が低い要求は、強い演出を上書きしないよう無視する。
+            // 優先度はシェイク発生中のみ有効。モーションが終了すると IsActive() が false になり、
+            // _currentPriority の値に関わらず次の要求を受け付ける。
             if (config.Priority < _currentPriority && _positionHandle.IsActive())
             {
                 return false;
@@ -53,7 +55,6 @@ namespace KillChord.Runtime.View.InGame.Camera
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeZ.x, config.StrengthRangeZ.y), config.Duration)
                     .WithFrequency(Random.Range(config.Frequency.x, config.Frequency.y + 1))
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
-                // 完了時に優先度を解放し、次の要求を受け付けられるようにする。
                 .Run();
             _currentPriority = config.Priority;
             return true;
@@ -75,7 +76,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 現在の揺れ量。カメラのローカル空間での位置オフセット。 </summary>
         private Vector3 _positionOffset;
 
-        /// <summary> 発生中のシェイクの優先度。シェイクしていない場合は <see cref="int.MinValue"/>。 </summary>
+        /// <summary> 直近に受け付けたシェイクの優先度。モーション終了後も値は残るため、<see cref="_positionHandle"/> が有効な間のみ意味を持つ。 </summary>
         private int _currentPriority;
     }
 }

@@ -3,7 +3,8 @@ using System;
 namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
-    ///     イベント定義：敵を撃破した時
+    ///     イベント定義：敵を撃破した時。
+    ///     通常敵とボスの双方で、死亡通知を受けた時点で発火する。
     /// </summary>
     public readonly struct EOnEnemyDefeated : IEvent
     {

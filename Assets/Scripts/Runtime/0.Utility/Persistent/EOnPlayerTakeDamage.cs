@@ -1,7 +1,8 @@
 namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
-    ///     イベント定義：プレイヤーがダメージを受けた時
+    ///     イベント定義：プレイヤーがダメージを受けた時。
+    ///     HPの減少時のみ発火し、回復時と無敵による回避時は発火しない。
     /// </summary>
     public readonly struct EOnPlayerTakeDamage : IEvent
     {
