@@ -19,7 +19,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         public void RequestShake(in CameraShakeParameter parameter)
         {
             // 継続時間か強さが無い設定は演出として成立しないため無視する。
-            if (parameter.Priority <= _currentPriority)
+            if (parameter.Priority < _currentPriority)
             {
                 return;
             }
@@ -42,7 +42,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                     .WithFrequency(Mathf.RoundToInt(Random.Range(parameter.Frequency.x, parameter.Frequency.y)))
                     .WithDampingRatio(parameter.DampingRatio)
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
-                .Run();
+                .Run(x => x.WithOnComplete(() => _currentPriority = int.MinValue));
             _currentPriority = parameter.Priority;
         }
 

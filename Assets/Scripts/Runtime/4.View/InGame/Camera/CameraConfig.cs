@@ -160,6 +160,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         [Header("Shake")]
         [SerializeField, Tooltip("敵を撃破した時のカメラシェイク設定。")]
         private CameraShakeParameter _enemyDefeatedShake = new CameraShakeParameter(
+            1000,
             0.3f,
             new Vector2(-0.08f, 0.08f),
             new Vector2(-0.14f, 0.14f),
@@ -169,6 +170,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField, Tooltip("プレイヤーが攻撃を実行した時のカメラシェイク設定。")]
         private CameraShakeParameter _playerAttackShake = new CameraShakeParameter(
+            0,
             0.14f,
             new Vector2(-0.03f, 0.03f),
             new Vector2(-0.03f, 0.03f),
@@ -178,6 +180,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定。")]
         private CameraShakeParameter _playerDamageShake = new CameraShakeParameter(
+            2000,
             0.4f,
             new Vector2(-0.14f, 0.14f),
             new Vector2(-0.18f, 0.18f),
