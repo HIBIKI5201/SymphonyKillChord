@@ -59,6 +59,6 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         private MotionHandle _positionHandle;
         private Vector3 _positionOffset;
-        private float _currentPriority;
+        private int _currentPriority;
     }
 }
