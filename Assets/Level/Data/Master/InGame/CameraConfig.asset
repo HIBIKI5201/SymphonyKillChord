@@ -24,7 +24,6 @@ MonoBehaviour:
   _followRotationSpeed: 1.5
   _moveFollowRotationSpeed: 90
   _moveFollowIdleLookThreshold: 0.01
-  _moveFollowAngleDeadZone: 20
   _lockOnLookAtRatio: 1
   _lockOnRotationSpeed: 20
   _lockOnViewportMargin: 0.05

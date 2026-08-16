@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: f38f64bbdea02544fb384457acfd5c05
+guid: 08775fc75f38ca745ae88b4eb4550be2
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
-    materialImportMode: 2
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -19,24 +19,18 @@ ModelImporter:
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
       might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'Symphony_DefaultPose0624:spine_C0_spine_01_Jnt'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_02_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_03_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:spine_C0_spine_04_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_neck_02_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Symphony_DefaultPose0624:neck_C0_head_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_L0_eye_base_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:eye_base_R0_eye_base_Jnt'
-      has scale animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
-      has translation animation that will be discarded.\n\t'Symphony_DefaultPose0624:chain_L3_chain_01_Jnt'
-      has scale animation that will be discarded.\n"
+      to improve retargeting quality.\n\t'spine_C0_spine_02_Jnt' has translation
+      animation that will be discarded.\n\t'spine_C0_spine_02_Jnt' has scale animation
+      that will be discarded.\n\t'spine_C0_spine_03_Jnt' has translation animation
+      that will be discarded.\n\t'spine_C0_spine_03_Jnt' has scale animation that
+      will be discarded.\n\t'spine_C0_spine_04_Jnt' has translation animation that
+      will be discarded.\n\t'spine_C0_spine_04_Jnt' is inbetween humanoid transforms
+      and has rotation animation that will be discarded.\n\t'spine_C0_spine_04_Jnt'
+      has scale animation that will be discarded.\n\t'finger_L1_0_Jnt' has translation
+      animation that will be discarded.\n\t'neck_C0_neck_02_Jnt' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n\t'finger_R0_0_Jnt'
+      has translation animation that will be discarded.\n\t'finger_R3_0_Jnt' has
+      translation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -54,18 +48,18 @@ ModelImporter:
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0
-      lastFrame: 60
+      lastFrame: 30
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
       keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0

@@ -56,6 +56,8 @@ namespace DevelopProducts.ToonShader
             MaterialProperty head = Find("_Head", props);
 
             MaterialProperty stencilRef = Find("_StencilRef", props);
+            MaterialProperty stencilReadMask = Find("_StencilReadMask", props);
+            MaterialProperty stencilWriteMask = Find("_StencilWriteMask", props);
             MaterialProperty stencilPass = Find("_StencilPass", props);
 
             // ===== Sections =====
@@ -108,19 +110,25 @@ namespace DevelopProducts.ToonShader
             DrawSection("Render State & Stencil", ref showRenderState, () =>
             {
                 EditorGUILayout.LabelField("Presets", EditorStyles.boldLabel);
+                // このパスは ZTest Always で深度を無視するため、通常の半透明(Queue 3000)より
+                // 後に描くとキャラの手前にある半透明オブジェクトを貫通して表示されてしまう。
+                // Queue は必ず 3000 未満に置くこと。
+                // 眉毛(2998)が先に bit0 を Zero で落とし、目(2999)がその残りに描かれる。
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("透過目 (Transparent Eye)"))
                 {
-                    SetStencil(materialEditor, stencilRef, 1, stencilPass, StencilOp.Keep, 3010);
+                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Keep, 2999);
                 }
                 if (GUILayout.Button("透過眉毛 (Transparent Eyebrow)"))
                 {
-                    SetStencil(materialEditor, stencilRef, 1, stencilPass, StencilOp.Zero, 3000);
+                    SetStencil(materialEditor, stencilRef, 1, stencilReadMask, stencilWriteMask, StencilBits.EyeThrough, stencilPass, StencilOp.Zero, 2998);
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.Space(5);
 
                 materialEditor.ShaderProperty(stencilRef, new GUIContent("Stencil ID", "ステンシル参照値"));
+                materialEditor.ShaderProperty(stencilReadMask, new GUIContent("Read Mask", "比較に使うビット。bit0(1):目の透け / bit1(2):顔領域"));
+                materialEditor.ShaderProperty(stencilWriteMask, new GUIContent("Write Mask", "書き込むビット。他用途のビットを壊さないよう限定する"));
                 materialEditor.ShaderProperty(stencilPass, new GUIContent("Pass Operation", "成功時処理"));
 
                 EditorGUILayout.HelpBox("This shader uses 'ZTest Always' and 'Comp Equal' for eye-through effect.", MessageType.Info);
@@ -227,9 +235,11 @@ namespace DevelopProducts.ToonShader
             }
         }
 
-        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pPass, StencilOp vPass, int queue)
+        private void SetStencil(MaterialEditor editor, MaterialProperty pRef, float vRef, MaterialProperty pReadMask, MaterialProperty pWriteMask, int vMask, MaterialProperty pPass, StencilOp vPass, int queue)
         {
             editor.RegisterPropertyChangeUndo("Set Stencil Template");
+            if (pReadMask != null) pReadMask.floatValue = vMask;
+            if (pWriteMask != null) pWriteMask.floatValue = vMask;
             pRef.floatValue = vRef;
             if (pPass != null) pPass.floatValue = (float)vPass;
 
