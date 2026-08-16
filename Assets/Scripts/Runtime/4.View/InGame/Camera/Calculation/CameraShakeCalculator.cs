@@ -69,19 +69,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private float _maxPower;
 
         /// <summary>
-        ///     設定された抽選範囲から、軸ごとに振動の強さを抽選する。
-        /// </summary>
-        /// <param name="parameter"> 抽選範囲を持つシェイクのパラメータ。</param>
-        /// <returns> 抽選した振動の強さ。</returns>
-        private static Vector3 CreateRandomStrength(in CameraShakeParameter parameter)
-        {
-            return new Vector3(
-                Random.Range(parameter.StrengthRangeX.x, parameter.StrengthRangeX.y),
-                Random.Range(parameter.StrengthRangeY.x, parameter.StrengthRangeY.y),
-                Random.Range(parameter.StrengthRangeZ.x, parameter.StrengthRangeZ.y));
-        }
-
-        /// <summary>
         ///     発生中のシェイクの現在の強さを返す。
         /// </summary>
         /// <returns> 減衰を反映した現在の強さ。シェイクしていない場合は0。</returns>
