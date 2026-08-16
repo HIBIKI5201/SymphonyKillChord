@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                         attackDefinition,
                         context.PlayerEntity,
                         context.TargetEntity,
-                        false,
+                        context.IsJustHit,
                         context.PlayerEntity.BaseDamage,
                         isCriticalForced: true);
 

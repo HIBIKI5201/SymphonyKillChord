@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackDefinition attackDefinition =
                 context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
-            ApplyDamage(context.PlayerEntity, context.TargetEntity, attackDefinition, damageMultiplier, false);
+            ApplyDamage(context.PlayerEntity, context.TargetEntity, attackDefinition, damageMultiplier, false, context.IsJustHit);
 
             ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
 
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     continue;
                 }
 
-                ApplyDamage(context.PlayerEntity, target, attackDefinition, secondaryDamageMultiplier, true);
+                ApplyDamage(context.PlayerEntity, target, attackDefinition, secondaryDamageMultiplier, true, context.IsJustHit);
             }
         }
 
@@ -60,13 +60,14 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             CharacterEntity defender,
             AttackDefinition attackDefinition,
             float damageMultiplier,
-            bool isSecondaryTarget)
+            bool isSecondaryTarget,
+            bool isJustHit)
         {
             AttackResult result = AttackCalculator.Calculate(
                 attackDefinition,
                 attacker,
                 defender,
-                false,
+                isJustHit,
                 attacker.BaseDamage);
 
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
