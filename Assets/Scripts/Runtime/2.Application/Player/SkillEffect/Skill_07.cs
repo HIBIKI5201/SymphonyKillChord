@@ -3,7 +3,6 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
 using System;
 using System.Collections.Generic;
@@ -159,7 +158,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// </summary>
         /// <param name="target"> 攻撃対象のキャラクターエンティティです。 </param>
         /// <param name="isJustHit"> ジャストヒットかどうか </param>
-        private void ExecuteAttack(CharacterEntity target , bool isJustHit)
+        private void ExecuteAttack(CharacterEntity target, bool isJustHit)
         {
             if (target == null)
             {
@@ -194,7 +193,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             foreach (var kvp in _hitCounts)
             {
                 CharacterEntity target = kvp.Key;
-                float currentReductionAmount = GetReductionAmount(target);
                 float baseAttackPower = target.BaseDamage.Value;
                 float maxReductionAmount = Mathf.Min(reductionCap, baseAttackPower);
                 float reductionPerHit = baseAttackPower * reductionRate;
@@ -249,23 +247,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             }
 
             return highestHealthTarget;
-        }
-
-        /// <summary>
-        ///     指定された対象の攻撃力減少量を取得します。
-        /// </summary>
-        /// <param name="target"> 攻撃対象のキャラクターエンティティです。 </param>
-        /// <returns> 攻撃力減少量です。 </returns>
-        private static float GetReductionAmount(CharacterEntity target)
-        {
-            if (!target.StatusEffectSystem.TryGet(
-                AttackPowerReductionDebuff.EffectId,
-                out IStatusEffect effect))
-            {
-                return 0f;
-            }
-
-            return effect is AttackPowerReductionDebuff debuff ? debuff.ReductionAmount : 0f;
         }
     }
 }
