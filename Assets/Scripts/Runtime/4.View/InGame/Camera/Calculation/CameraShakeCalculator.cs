@@ -13,21 +13,27 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         /// <summary>
         ///     シェイクの発生を要求する。
-        ///     発生中のシェイクより弱い要求は、演出が弱まらないよう無視する。
+        ///     発生中のシェイクより優先度が低い要求は、演出が弱まらないよう無視する。
+        ///     優先度が同値の場合は、新しい要求で上書きする。
         /// </summary>
         /// <param name="config"> 要求するシェイクの設定。</param>
+        /// <returns> シェイクを開始した場合は true。要求を無視した場合は false。</returns>
         public bool TryRequestShake(CameraShakeConfig config)
         {
+            // 設定が未割り当ての場合は演出として成立しないため無視する。
             if (config == null)
             {
                 return false;
             }
 
+            // 発生中のシェイクより優先度が低い要求は、強い演出を上書きしないよう無視する。
             if (config.Priority < _currentPriority)
             {
                 return false;
             }
-            if(config.Duration <= 0)
+
+            // 継続時間が無い設定は揺れが発生しないため、モーションを確保せず無視する。
+            if (config.Duration <= 0)
             {
                 return false;
             }
@@ -46,6 +52,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 .Join(LMotion.Punch.Create(0f, Random.Range(config.StrengthRangeZ.x, config.StrengthRangeZ.y), config.Duration)
                     .WithFrequency(Mathf.RoundToInt(Random.Range(config.Frequency.x, config.Frequency.y)))
                     .Bind(this, static (value, state) => state._positionOffset.z = value))
+                // 完了時に優先度を解放し、次の要求を受け付けられるようにする。
                 .Run(x => x.WithOnComplete(() => _currentPriority = int.MinValue));
             _currentPriority = config.Priority;
             return true;
@@ -61,8 +68,13 @@ namespace KillChord.Runtime.View.InGame.Camera
             _currentPriority = int.MinValue;
         }
 
+        /// <summary> 発生中のシェイクを再生するモーションハンドル。 </summary>
         private MotionHandle _positionHandle;
+
+        /// <summary> 現在の揺れ量。カメラのローカル空間での位置オフセット。 </summary>
         private Vector3 _positionOffset;
+
+        /// <summary> 発生中のシェイクの優先度。シェイクしていない場合は <see cref="int.MinValue"/>。 </summary>
         private int _currentPriority;
     }
 }
