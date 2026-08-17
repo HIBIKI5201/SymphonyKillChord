@@ -7,7 +7,7 @@
 | **モジュール名** | Player |
 | **カテゴリ** | InGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -20,17 +20,28 @@
 | **`PlayerMovementApplication`** | Application | 通常移動時の物理演算・補間 |
 | **`PlayerDodgeMovementApplication`** | Application | 回避アクションのタイムラインと無敵時間処理 |
 | **`PlayerController`** | Adaptor | 入力バッファから操作を取り出してApplicationに委譲するコントローラー（`IPlayerController`実装） |
+| **`PlayerHealthHudPresenter`** | Adaptor | プレイヤーHPをHUDへ反映するPresenter |
+| **`PlayerInputSuppressionState`** | Adaptor | プレイヤー入力を一定時間だけ無効化する状態を管理 |
 | **`PlayerAttackController`** | Adaptor | プレイヤーの攻撃実行を制御。`OnAttackExecuted`イベントを公開し、Missionモジュール等から購読される（namespace上は`Adaptor.InGame.Battle`） |
 | **`PlayerView`** | View | 実際のRigidbodyやTransformを操作するMonoBehaviour |
+| **`PlayerAttackWeaponView`** | View | 攻撃BeatTypeに応じた武器モデルの表示切替と攻撃SE再生 |
+| **`WeaponItemView`** | View | 武器1本分の表示切替・SE再生・エフェクト再生 |
+| **`PlayerAttackWeaponConfig`** / **`PlayerAttackAnimationConfig`** / **`PlayerAttackAnimationEntry`** | View | 攻撃時の武器とアニメーションの対応設定 |
+| **`PlayerGroundOffsetView`** | View | 接地位置の補正 |
+| **`PlayerSpawnPoint`** | View | プレイヤー生成位置を示すマーカー |
+| **`PlayerMoveSpecAsset`** | Infrastructure | 移動・回避の設定値を保持するScriptableObject（`PlayerMoveSpec`の供給元） |
 | **`PlayerInitializer`** | Composition | インプット、カメラ、HUD、攻撃制御などのシステムをプレイヤー具象にDIする |
 | **`PlayerModuleContainer`** | Composition | `PlayerInitializer`/`PlayerView`/`PlayerEntity`/`PlayerAttackController`をServiceLocatorへ公開するContainer。Enemy/Bossモジュールが参照する |
+| **`PlayerStatusBonusInitializer`** / **`PlayerStatusBonusModuleContainer`** | Composition | インゲームで適用するステータスボーナスの初期化と公開（Order 490） |
+| **`StageSceneInitializer`** / **`IStageSceneInstance`** | Composition | ステージシーン内で共有する参照（生成位置など）の登録と公開 |
+| **`PlayerMoveSpecDebug`** | Composition | 移動設定値をデバッグ表示・調整するための補助 |
 
 ### 🧩 Composition初期化情報
 
 | 項目 | 内容 |
 | --- | --- |
 | **Initializerクラス** | `PlayerInitializer` |
-| **Order** | 500 |
+| **Order** | 500（`PlayerInitializer`）／490（`PlayerStatusBonusInitializer`） |
 | **公開する ModuleContainer / ServiceLocator登録型** | `PlayerModuleContainer`（`PlayerInitializer`, `PlayerView`, `PlayerEntity`（`CharacterEntity`）, `PlayerAttackController`を保持） |
 
 ---
@@ -128,9 +139,9 @@ graph TD
 ### ④ View
 実際のRigidbodyやTransformを操作する`PlayerView`が、MonoBehaviourとしての表示・物理制御を担当します。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+`PlayerMoveSpecAsset`が移動・回避の設定値をScriptableObjectとして保持し、Domainの`PlayerMoveSpec`へ供給します。
 ### ⑥ Composition
-`PlayerInitializer`（Order 500）がインプット・カメラ・HUD・攻撃制御などのシステムをプレイヤー具象にDIし、`PlayerModuleContainer`として他モジュールへ公開します。
+`PlayerInitializer`（Order 500）がインプット・カメラ・HUD・攻撃制御などのシステムをプレイヤー具象にDIし、`PlayerModuleContainer`として他モジュールへ公開します。`PlayerStatusBonusInitializer`（Order 490）が先に走り、スキルビルド由来のステータスボーナスを適用します。`StageSceneInitializer`はステージシーン内で共有する参照を`IStageSceneInstance`として公開します。
 
 ## 🔌 拡張ポイント
 
@@ -138,7 +149,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① 通常移動フロー（毎フレーム）
 入力バッファから取り出した移動操作を、カメラ正面方向を基準に補正して反映します。

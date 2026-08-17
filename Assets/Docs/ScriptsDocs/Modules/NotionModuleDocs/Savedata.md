@@ -7,7 +7,7 @@
 | **モジュール名** | Savedata |
 | **カテゴリ** | Persistent |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -21,19 +21,21 @@
 | **`StageProgressData`** | Domain | 全ステージのクリア記録（`StageClearData`のリスト）を保持。`RecordClear`/`IsStageCleared` |
 | **`StageClearData`** | Domain | 1ステージ分のクリア記録（StageId＋達成済み評価条件IDリスト、複数プレイ分を和集合でマージ） |
 | **`TutorialData`** | Domain | チュートリアル完了フラグ（`IsTutorialCompleted`）。`Complete()`で確定 |
-| **`SaveBase`** | Utility | セーブデータの抽象基底。JSON読み書き（`ReadAsync`/`WriteAsync`）、ファイルパス解決を提供 |
-| **`SavedataSystem`** | Utility | 型ごとのロード・保存・削除・キャッシュ・排他制御・世代管理を行うランタイムサービス |
+| **`SaveStore`** | SymphonyFrameWork | 型ごとのロード・保存・削除・キャッシュを行うフレームワーク側のAPI。旧`SaveBase`/`SavedataSystem`はこれへ統合され、当リポジトリからは削除済み |
+| **`PersistentFileSaveDataLoaderStrategy`** | Infrastructure | セーブデータを永続化領域のJSONファイルへ読み書きするローダー |
 | **`StageProgressSaveDataService`** | Application | ステージクリア時の評価結果を`StageProgressData`へ記録し保存する窓口。チュートリアル完了もあわせて記録 |
-| **`SaveDataClearStageRepository`** | Infrastructure | `IStageClearRepository`実装。`StageProgressData`からクリア済みステージID一覧を取得（StageSelectモジュールへ提供） |
-| **`SavedataSystemInitializer`** | Composition | `SavedataSystem`の生成とServiceLocatorへの登録 |
+| **`InitialSkillLoadoutService`** | Application | セーブデータへ初期解放・初期装備スキルを補完する。起動時とセーブデータリセット後の双方で使う |
+| **`SavedataSystemInitializer`** | Composition | セーブ機構の初期化とServiceLocatorへの登録（Order 10） |
+| **`InitialSkillLoadoutInitializer`** | Composition | `InitialSkillLoadoutService`の構築と初期スキルの補完（Order 20） |
+| **`LegacyDataIdMigration`** | Composition | ID統一前の連番IDを現在のハッシュIDへ移行する内部クラス |
 
 ### 🧩 Composition初期化情報
 
 | 項目 | 内容 |
 | --- | --- |
-| **Initializerクラス** | `SavedataSystemInitializer` |
-| **Order** | 10（Persistentシーン内。ほぼ最初期に初期化される） |
-| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。`SavedataSystem`インスタンス自体を直接ServiceLocatorへ登録 |
+| **Initializerクラス** | `SavedataSystemInitializer`（保存機構）／`InitialSkillLoadoutInitializer`（初期スキル補完） |
+| **Order** | 10（保存機構。Persistentシーン内でほぼ最初期）／20（初期スキル補完） |
+| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。`InitialSkillLoadoutService`をServiceLocatorへ登録し、保存の入口はSymphonyFrameWorkの`SaveStore`（静的API）を直接使う |
 
 ---
 
@@ -44,12 +46,12 @@ graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph SavedataModule [Savedata モジュール]
         SD_Domain["Domain<br>SaveData, StageProgressData, TutorialData"]
-        SD_Utility["Utility<br>SavedataSystem, SaveBase"]
+        SD_Store["SymphonyFrameWork<br>SaveStore"]
         SD_App["Application<br>StageProgressSaveDataService"]
-        SD_Composition["Composition<br>SavedataSystemInitializer"]
-        SD_Domain --> SD_Utility
-        SD_App --> SD_Utility
-        SD_Composition --> SD_Utility
+        SD_Composition["Composition<br>SavedataSystemInitializer, InitialSkillLoadoutInitializer"]
+        SD_Domain --> SD_Store
+        SD_App --> SD_Store
+        SD_Composition --> SD_Store
     end
 
     subgraph SequenceModule [Sequence モジュール]
@@ -71,8 +73,8 @@ graph TD
     %% 依存関係
     SQ_Composition -->|"クリア時の評価結果を保存"| SD_App
     SS_Infra -->|"クリア済みステージID一覧の取得"| SD_Domain
-    T_Composition -->|"チュートリアル完了判定・データリセット"| SD_Utility
-    SK_Composition -->|"具象SavedataSystemを直接コンストラクタ注入（DIP違反）"| SD_Utility
+    T_Composition -->|"チュートリアル完了判定・データリセット・初期スキル再適用"| SD_Composition
+    SK_Composition -->|"SaveStore経由でセーブデータを読み書き"| SD_Store
 ```
 
 ### 📥 依存しているもの
@@ -89,11 +91,11 @@ graph TD
   * *参照箇所*: `SaveDataClearStageRepository`（`IStageClearRepository`実装）
   * *詳細*: クリア済みステージ一覧をステージマップの解放判定に使用します。
 * **`Title`**
-  * *参照箇所*: `SavedataSystem.LoadAsync<SaveData>()` / `DeleteSaveDataAsync<SaveData>()`
-  * *詳細*: 初回起動判定（`TutorialData.IsTutorialCompleted`）とセーブデータリセット機能で使用します。
+  * *参照箇所*: `SaveStore.LoadAsync<SaveData>()` / `SaveStore.DeleteAsync<SaveData>()`, `InitialSkillLoadoutService`
+  * *詳細*: 初回起動判定（`TutorialData.IsTutorialCompleted`）とセーブデータリセットで使用します。リセット後は初期スキルの再補完も呼びます。
 * **`Skill`**
-  * *参照箇所*: `SavedataSystem`（具象クラス）
-  * *詳細*: `SkillBuildInitializer`/`SkillTreeInitializer`が`ServiceLocator`経由で取得し、`SkillBuildUseCase`/`SkillTreeService`へ具象のまま直接コンストラクタ注入しています（DIP違反、Skillモジュールの既知の課題を参照）。
+  * *参照箇所*: `SaveStore`
+  * *詳細*: `SkillBuildInitializer`/`SkillTreeInitializer`がスキル解放・装備状態の読み書きに使用します。
 
 ---
 
@@ -104,15 +106,15 @@ graph TD
 ### ① Domain
 `SaveData`を頂点に、`SkillUnlockData`/`SkillBuildData`/`StageProgressData`/`TutorialData`という4つのサブデータを保持します。いずれも「公開プロパティは読み取り専用、変更は意図が伝わるメソッド経由」という設計規約（`Architecture.txt`参照）に従っています。
 ### ② Application
-`StageProgressSaveDataService`が、ステージクリア時の評価結果を`StageProgressData.RecordClear`へ変換して保存する橋渡しを行います。
+`StageProgressSaveDataService`が、ステージクリア時の評価結果を`StageProgressData.RecordClear`へ変換して保存する橋渡しを行います。`InitialSkillLoadoutService`が初期解放・初期装備スキルの補完を担当します。
 ### ③ Adaptor
 当モジュールでは使用していません。
 ### ④ View
 当モジュールでは使用していません。
 ### ⑤ Infrastructure
-`SaveDataClearStageRepository`が`IStageClearRepository`を実装し、StageSelectモジュールへクリア済みステージ情報を提供します。
+`PersistentFileSaveDataLoaderStrategy`が、永続化領域のJSONファイルへの読み書きを担当します。クリア済みステージ情報を提供する`SaveDataClearStageRepository`はStageSelectモジュール側にあります。
 ### ⑥ Composition
-`SavedataSystemInitializer`（Order 10）が`SavedataSystem`を生成しServiceLocatorへ登録します。
+`SavedataSystemInitializer`（Order 10）が保存機構を初期化し、`InitialSkillLoadoutInitializer`（Order 20）が初期解放・初期装備スキルを補完します。`LegacyDataIdMigration`がID統一前の連番IDをハッシュIDへ移行します。
 
 ## 🔌 拡張ポイント
 
@@ -120,7 +122,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① セーブデータ読み込みフロー（初回アクセス時）
 

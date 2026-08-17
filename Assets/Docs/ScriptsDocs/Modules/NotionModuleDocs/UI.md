@@ -7,7 +7,7 @@
 | **モジュール名** | UI / HUD |
 | **カテゴリ** | InGame |
 | **ステータス** | 実装済み（既知の課題を参照） |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -22,14 +22,28 @@
 | **`HUDEnemyHealthPresenter`** | Adaptor | 毎フレーム`TargetSystemController`をポーリングし、ロックオン中の敵体力を`HUDEnemyHealthDTO`へ変換する（イベント駆動ではない） |
 | **`IHUDEnemyHealthViewModel`** | Adaptor | ロックオン中敵体力表示のViewModelインターフェース |
 | **`IIngameHudViewModel` / `IngameHudDTO`** | Adaptor | ※死んだコード（既知の課題を参照） |
+| **`EnemyDirectionIndicatorPresenter`** | Adaptor | 登録済みの敵から画面外方向表示の対象を選び、表示スロットへ割り当てる |
+| **`EnemyDirectionIndicatorDTO`** | Adaptor | 敵方向表示の1スロット分の表示情報 |
+| **`IEnemyDirectionIndicatorViewModel`** | Adaptor | 敵方向表示のViewModelインターフェース |
+| **`LockOnDisplayState`** | Adaptor | ロックオンHUDの表示状態 |
 | **`HealthHudView`** | View | 二層構造（即時反映＋追いつき演出）のHPバーとテキスト表示 |
 | **`HealthHudViewModel`** | View | `IHealthHudViewModel`実装 |
 | **`HUDEnemyHealthView`** | View | ロックオン中の敵体力を画面空間に表示するウィジェット |
 | **`HUDEnemyHealthViewModel`** | View | `HUDEnemyHealthDTO`をリアクティブな比率・画面座標へ変換 |
 | **`IngameHudView` / `IngameHudViewModel`** | View | ※死んだコード（既知の課題を参照） |
+| **`EnemyDirectionIndicatorView`** | View | 画面外の敵方向を3Dマーカーとして描画 |
+| **`EnemyDirectionIndicatorSlot`** | View | 3Dマーカー1つ分とフェード状態を保持 |
+| **`EnemyDirectionIndicatorConfig`** | View | 表示数・位置・距離・フェードの設定 |
+| **`LetterBoxAnimationGUI`** | View | レターボックス演出の描画 |
+| **`ParticleController`** | View | パーティクルエフェクトの再生 |
 | **`InGameHudInitializer`** | Composition | プレイヤーHPバーの構築窓口（`InGameInitializationModuleBase`を継承しない、Awake時に自己登録するプレーンMonoBehaviour） |
 | **`HUDEnemyHealthInitializer`** | Composition | ロックオン敵体力ウィジェットの構築 |
 | **`SkillInputProgressUIInitializer`** | Composition | スキル入力進捗行の生成窓口（実体はSkillモジュールのプレハブ・データを扱う。namespace上も`Composition.InGame.Skill`でありフォルダとの不一致がある） |
+| **`SkillCrosshairProgressUIInitializer`** | Composition | クロスヘア上のリズムコマンドUI（拍子アイコンの点灯/消灯のみ）の初期化 |
+| **`SkillListUIInitializer`** | Composition | 装備中スキルをコマンド全拍付き一覧として表示するUIの初期化 |
+| **`EnemyDirectionIndicatorInitializer`** | Composition | 敵方向インジケーターの構築 |
+| **`ACLikeRhythmGuideInitializer`** | Composition | AC風リズムガイドの初期化 |
+| **`PlatformSpecificUI`** | Composition | プラットフォームに応じたUIの表示切替 |
 
 > `PlayerHealthHudPresenter`（Player/Adaptorモジュール）・`EnemyHealthHudPresenter`（Enemy/Adaptorモジュール）は本モジュールのクラスではなく、それぞれPlayer/Enemyモジュールが本モジュールの`HealthHudDTO`/`IHealthHudViewModel`契約を利用して実装しています。
 
@@ -102,9 +116,9 @@ graph TD
 ### ② Application
 当モジュールでは使用していません。
 ### ③ Adaptor
-`HealthHudDTO`/`IHealthHudViewModel`/`IHealthHudPresenter`というHPバー共通契約と、ロックオン敵体力用の`HUDEnemyHealthPresenter`/`HUDEnemyHealthDTO`を定義します。
+`HealthHudDTO`/`IHealthHudViewModel`/`IHealthHudPresenter`というHPバー共通契約と、ロックオン敵体力用の`HUDEnemyHealthPresenter`/`HUDEnemyHealthDTO`を定義します。画面外の敵を指し示す`EnemyDirectionIndicatorPresenter`も同層にあり、Targetモジュールの`ITargetBoundsViewModel`から対象のBoundsを取得します。
 ### ④ View
-二層アニメーション付きのHPバー（`HealthHudView`）、ロックオン敵体力ウィジェット（`HUDEnemyHealthView`）を担当します。
+二層アニメーション付きのHPバー（`HealthHudView`）、ロックオン敵体力ウィジェット（`HUDEnemyHealthView`）、画面外の敵方向を示す3Dマーカー（`EnemyDirectionIndicatorView`）を担当します。マーカーの表示数やフェードは`EnemyDirectionIndicatorConfig`で調整します。
 ### ⑤ Infrastructure
 当モジュールでは使用していません。
 ### ⑥ Composition
@@ -116,7 +130,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① プレイヤーHPバー更新フロー（被ダメージ時）
 
