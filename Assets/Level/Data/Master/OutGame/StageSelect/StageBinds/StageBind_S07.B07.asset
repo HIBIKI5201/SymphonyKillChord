@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 811ade3eb9c044fcb1b02f50cee40a23, type: 3}
-  m_Name: StageBind_09
+  m_Name: StageBind_S07.B07
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset
   _fromStageId:
-    _id: scenario_stage_09
-    _hashId: -231824958
+    _id: scenario_stage_07
+    _hashId: 362187973
   _toStageId:
-    _id: scenario_stage_10
-    _hashId: -1830213593
+    _id: stage_07
+    _hashId: -1756028471
   _advanceMode: 0

@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85625acbabd549f080e9b621c889f688, type: 3}
-  m_Name: BattleStage_03
+  m_Name: BattleStage_Boss
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
   _plannerMemo: 
   _stageId:
-    _id: stage_03
-    _hashId: -1875319344
+    _id: stage_Boss
+    _hashId: 2031084639
   _isInitiallyUnlocked: 0
-  _stageName: Stage_03
-  _flavorText: "\u30C6\u30B9\u30C8\u30B7\u30FC\u30F3"
+  _stageName: 
+  _flavorText: 
   _targetSceneName: InGame
-  _rewardSkillBuildPoint: 2
-  _rewardSkillUnlockPoint: 2
+  _rewardSkillBuildPoint: 0
+  _rewardSkillUnlockPoint: 0
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_01
-    _hashId: 480330467
+    _id: enemy_wave_default
+    _hashId: -1074717099
   _missionDefinitionId:
-    _id: AllKill
-    _hashId: 1531565721
+    _id: Test
+    _hashId: 418143992
