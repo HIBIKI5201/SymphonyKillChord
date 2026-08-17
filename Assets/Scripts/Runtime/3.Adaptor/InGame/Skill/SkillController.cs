@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
@@ -35,24 +36,35 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         }
 
         /// <summary>
-        ///   指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
+        ///     指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
         /// </summary>
         /// <param name="actionType"> 行動種別です。 </param>
         /// <param name="beatType"> 現在ビートです。 </param>
         /// <param name="unscaledTime"> 現在時刻です。 </param>
-        public void TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime)
+        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
+        /// <returns> スキル発動の結果、通常攻撃のダメージを適用するかどうかのポリシーです。 </returns>
+        public SkillNormalAttackDamagePolicy TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime, bool isJustHit)
         {
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
+            SkillNormalAttackDamagePolicy normalAttackDamagePolicy =
+                SkillNormalAttackDamagePolicy.Apply;
 
             for (int i = 0; i < _skillExecutionControllers.Length; i++)
             {
-                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType);
+                SkillExecutionResult result = _skillExecutionControllers[i].TryExecuteSkill(beatType, unscaledTime, actionType, isJustHit);
                 if (result.ResultType == SkillExecutionResultType.Executed)
                 {
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);
                     OnSkillVoiceRequested?.Invoke();
+
+                    if (result.SkillNormalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
+                    {
+                        normalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Skip;
+                    }
                 }
             }
+
+            return normalAttackDamagePolicy;
         }
 
         private SkillExecutionController[] _skillExecutionControllers;
