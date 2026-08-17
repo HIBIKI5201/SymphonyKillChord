@@ -43,6 +43,8 @@ namespace KillChord.Runtime.View.InGame.Skill
             _isPositioned = _rhythmGuideView == null;
             ApplyVisibility();
             ApplyStep(0);
+
+            SetCooldownFillAmount(1f);
         }
 
         /// <inheritdoc />
@@ -310,7 +312,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
             for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
             {
-                _cooldownBackgroundImage[i].fillAmount = fillAmount;
+                _cooldownBackgroundImage[i].fillAmount = 1f - fillAmount;
             }
         }
 
