@@ -13,18 +13,30 @@ MonoBehaviour:
   m_Name: EnemyAnimationConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationCatalogConfig
   _entries:
-  - State: 0
+  - ClipType: 0
     Key: 
     Clip: {fileID: -5915048150722811134, guid: b2e3122f9ea999f48a65a7151a5469ae, type: 3}
-  - State: 1
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 1
     Key: 
-    Clip: {fileID: 8993902097722301239, guid: 90d0c7ae3b6e9dc488b2a77ed6980770, type: 3}
-  - State: 2
+    Clip: {fileID: 3094330708855449807, guid: c133e3c197c12e04a9dd23bd0966910f, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 2
     Key: 
     Clip: {fileID: -4304836385353429653, guid: 95e613e51aff0ec498aa4e750143c845, type: 3}
-  - State: 3
-    Key: Enemy_AttackReserved
-    Clip: {fileID: 8889684233018283023, guid: ca1ddf0ebc721674ea13f6a2d3f6977f, type: 3}
-  - State: 3
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 3
     Key: 
-    Clip: {fileID: 2914187182157092610, guid: c5dd4d6c703302246b0918e71e72d8fb, type: 3}
+    Clip: {fileID: 3094330708855449807, guid: 5e9b37dd2b8b41648a4731a21c853b2f, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  - ClipType: 4
+    Key: 
+    Clip: {fileID: -57794709565900691, guid: 84781f800961561439ffe31c702436b5, type: 3}
+    EnterBlendFrameCount: 0
+    ExitBlendFrameCount: 0
+  _enterBlendFrameCount: 4
+  _exitBlendFrameCount: 8

@@ -62,6 +62,11 @@ namespace KillChord.Runtime.View
             _locomotionCalculator.SetVelocity(_context.ViewModel.Velocity);
             Array.Clear(_weights, 0, _weights.Length);
             _locomotionCalculator.ApplyBaseWeights(_weights);
+            if (_context.ViewModel.IsReserving)
+            {
+                Array.Clear(_weights, 0, _weights.Length);
+                _weights[(int)CharacterAnimationClipType.Reserved] = 1f;
+            }
             ApplyOverlayWeight();
 
             _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed);

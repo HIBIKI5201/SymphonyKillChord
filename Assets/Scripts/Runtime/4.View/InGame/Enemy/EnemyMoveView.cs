@@ -59,6 +59,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            _characterAnimationViewModel?.SetReserving(false);
             SyncFootstepTiming();
         }
 
@@ -204,6 +205,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _enemyAIController.On1BeatBefore -= On1BeatBefore;
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
+            _characterAnimationViewModel?.SetReserving(false);
         }
 
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
@@ -248,7 +250,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private ParticleSystem _attackHitEffectInstance;
         private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;
-        private bool _isReservedAnimationPlaying;
 
         /// <summary>
         ///     初期化時に必要な参照を取得します。
@@ -293,10 +294,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectReserved()
         {
             if (!_isPlaying) return;
-
+            StopMoving();      
+            StopRotating();
+            FaceTarget();
             PlayAttackEffect(_attackReserveEffectInstance);
-            PlayOneShot(_attackAttackReservedAnimation);
-            _isReservedAnimationPlaying = true;
+            _characterAnimationViewModel?.SetReserving(true);
         }
         /// <summary>
         ///     攻撃を実行するエフェクトを再生する。
@@ -305,21 +307,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             if (!_isPlaying) return;
 
-            // 構えアニメが再生中の場合、ここで明示的にキャンセル
-            if (_isReservedAnimationPlaying)
-            {
-                // 構えアニメをキャンセルするために、速度をゼロにして状態をリセット
-                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
-                _isReservedAnimationPlaying = false;
-            }
-
+            _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
             PlaySound(_attackSoundSource, null);
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
             _characterAnimationSignal?.RequestAttack();
         }
+        /// <summary>
+        ///    ターゲットの方向を向く。
+        /// </summary>
+        private void FaceTarget()
+        {
+            if (_target == null) return;
 
+            Vector3 dir = _target.position - transform.position;
+            dir.y = 0f;                              // 水平だけ見る（上下に傾かない）
+            if (dir.sqrMagnitude < 0.0001f) return;  // ほぼ真上＝向き不定は無視
+
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
         /// <summary>
         ///     現在の足元に対応する足音SE設定を取得します。
         /// </summary>
@@ -526,7 +533,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 return;
             }
-
+            Debug.Log($"[{nameof(EnemyMoveView)}] OneShot要求 key={key} t={Time.time:F2}", this);
             _characterAnimationSignal?.TryRequestOneShot(key, out _);
         }
 
