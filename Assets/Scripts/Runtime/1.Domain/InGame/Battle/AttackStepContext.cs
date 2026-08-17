@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="defender"></param>
         /// <param name="isCriticalForced"> クリティカルヒットが強制されているかどうか </param>
         /// <param name="criticalDamageMultiplierOverride"> この攻撃特有のクリティカルダメージ倍率のオーバーライド </param>
+        /// <param name="applyWeaponDamageMultiplier"> 武器のダメージ倍率を適用するかどうか </param>
         public AttackStepContext(
             AttackDefinition attackDefinition,
             IAttacker attacker, IDefender defender,
@@ -21,7 +22,8 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             Damage baseDamage = default,
             bool isOutOfRange = false,
             bool isCriticalForced = false,
-            float? criticalDamageMultiplierOverride = null)
+            float? criticalDamageMultiplierOverride = null,
+            bool applyWeaponDamageMultiplier = true)
         {
             _attackDefinition = attackDefinition;
             _baseDamage = baseDamage;
@@ -33,6 +35,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _isOutOfRange = isOutOfRange;
             _isCriticalForced = isCriticalForced;
             _criticalDamageMultiplierOverride = criticalDamageMultiplierOverride;
+            _applyWeaponDamageMultiplier = applyWeaponDamageMultiplier;
         }
 
         /// <summary>
@@ -54,6 +57,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _isOutOfRange = attackStepContext._isOutOfRange;
             _isCriticalForced = attackStepContext._isCriticalForced;
             _criticalDamageMultiplierOverride = attackStepContext._criticalDamageMultiplierOverride;
+            _applyWeaponDamageMultiplier = attackStepContext._applyWeaponDamageMultiplier;
         }
 
         /// <summary> 攻撃定義を取得する。 </summary>
@@ -85,6 +89,9 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary> この攻撃特有のクリティカルダメージ倍率のオーバーライドを取得する。 </summary>
         public float? CriticalDamageMultiplierOverride => _criticalDamageMultiplierOverride;
 
+        /// <summary> 武器のダメージ倍率を適用するかを取得する。 </summary>
+        public bool ApplyWeaponDamageMultiplier => _applyWeaponDamageMultiplier;
+
         private readonly AttackDefinition _attackDefinition;
         private readonly Damage _damage;
         private readonly Damage _baseDamage;
@@ -95,5 +102,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         private readonly bool _isOutOfRange;
         private readonly bool _isCriticalForced;
         private readonly float? _criticalDamageMultiplierOverride;
+        private readonly bool _applyWeaponDamageMultiplier;
     }
 }
