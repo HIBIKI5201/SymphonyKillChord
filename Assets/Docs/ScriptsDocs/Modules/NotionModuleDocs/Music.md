@@ -7,7 +7,7 @@
 | **モジュール名** | Music |
 | **カテゴリ** | InGame + Persistent / Core System |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -16,20 +16,38 @@
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
 | **`BeatType`** | Domain | 一拍・四拍・裏拍などの拍の種類を表す `enum` |
+| **`MusicTimingCalculator`** | Domain | 音楽の実行タイミングを計算する静的クラス |
+| **`MusicSyncSpec`** / **`ScheduledAction`** / **`ExecuteRequestTiming`** | Domain | 同期予約に使うタイミング情報と、予約されたアクション |
+| **`RhythmPattern`** / **`RhythmDefinition`** | Domain | リズムパターンとその定義を表す値オブジェクト |
+| **`RhythmJudgmentDefinition`** / **`RhythmJudgmentRange`** | Domain | リズム判定の範囲定義 |
+| **`RhythmState`** / **`RhythmInputRecord`** | Domain | リズム入力の履歴管理と1入力分の記録 |
+| **`SkillBgmSelectorTable`** / **`BgmSelectorSequence`** | Domain | スキルIDとBGMセレクターラベルの対応、および小節ごとの再生シーケンス |
 | **`IMusicSyncService`** | Application | 再生タイムに基づくビート更新・アクション予約・拍履歴取得などを定義するサービスインターフェース |
 | **`IMusicActionScheduler`** | Application | ビートタイミングでコールバックを予約・実行するスケジューラーのインターフェース |
 | **`RhythmJustService`** | Application | ジャストタイミング発生の通知と判定状態の管理を行うシングルトンサービス（`IDisposable` を実装） |
+| **`MusicSyncService`** | Application | `IMusicSyncService`実装。音楽同期とアクション実行予約を管理 |
+| **`EquipmentBgmService`** | Application | 装備スキル構成から組んだシーケンスを保持し、小節の進行に応じてBGMを切り替える |
+| **`RhythmGuideUsecase`** | Application | リズムガイドの計算ロジック |
 | **`MusicSyncController`** | Adaptor | 毎フレーム `MusicSyncState.UpdatePlayTime` と `IMusicSyncService.Update` を呼び出すコントローラー |
 | **`MusicSyncState`** | Adaptor | 現在の BPM・再生時間・次の拍までのカウントなどのリズム状態を保持するクラス |
 | **`MusicSchedulerAdaptor`** | Adaptor | `IMusicActionScheduler` の実装。`EnemyMusicSpec` を `ExecuteRequestTiming` に変換し `IMusicSyncService.RegisterAction` を呼ぶ。Enemy/Stageモジュールから利用される |
 | **`RhythmGuideDto`** | Adaptor | リズムインジケータ（UI）へ送る readonly ref struct DTO |
 | **`RhythmGuideZoneDto`** | Adaptor | ガイド表示エリアの描画データを保持する readonly struct DTO |
+| **`RhythmGuidePresenter`** | Adaptor | リズムガイドの表示用データを生成 |
+| **`EquipmentBgmController`** | Adaptor | 装備BGM切り替えの窓口 |
 | **`MusicSyncView`** | View | Unity の `AudioSource` と連携して BGM を再生し、毎フレーム `MusicSyncController.Tick` を呼び出して再生タイムスタンプを更新する MonoBehaviour |
 | **`MusicPlayer`** | View | BGM/SE/Voice の音源管理およびボリュームマネージャーとの仲介を担う MonoBehaviour（`IVolumeManager` を実装） |
 | **`MusicViewModel`** | View | 楽曲情報の表示状態を保持する ViewModel（`IMusicViewModel` を実装） |
+| **`RhythmGuideView`** / **`RhythmGuideViewModel`** / **`RhythmGuideLabelView`** / **`RhythmGuideUpdateView`** | View | リズムガイドの描画とラベル表示 |
+| **`ACLikeRhythmGuideView`** / **`ACLikeRhythmGuideViewModel`** / **`ACLikeRhythmGuideEffectConfig`** | View | AC風リズムガイドのビート表示・判定ゾーン描画とその演出設定 |
+| **`SoundEffectSource`** / **`SoundEffectVolumeManager`** / **`AttackSoundConfig`** | View (Persistent) | SEの再生元・音量管理・攻撃SE設定 |
+| **`RhythmJudgmentDefinitionAsset`** / **`BgmSelectorLabelTableAsset`** | Infrastructure | 判定定義とBGMセレクターラベル表のScriptableObject |
 | **`MusicSyncInitializer`** | Composition (InGame) | 楽曲とタイミング制御エンジンの結びつけ・ServiceLocator への登録 |
 | **`RhythmGuideInitializer`** | Composition (InGame) | リズムガイド UI の紐付け初期化 |
 | **`MusicPlayerInitializer`** | Composition (Persistent) | `MusicPlayer` を常駐シーンでセットアップする初期化クラス |
+| **`MusicSyncModuleContainer`** | Composition (InGame) | 音楽同期まわりをServiceLocatorへ公開するContainer |
+| **`EquipmentBgmInitializer`** / **`EquipmentBgmModuleContainer`** | Composition (InGame) | 装備BGM切り替えの構築と公開 |
+| **`SoundEffectInitializer`** | Composition (Persistent) | SE再生系の初期化 |
 
 ---
 
@@ -116,7 +134,7 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-> 拍（ビート）の種類を表現する `BeatType` などの、タイミング制御・ジャスト同期に必須のデータ定義を保持します。
+> 拍（ビート）の種類を表す`BeatType`に加え、タイミング計算（`MusicTimingCalculator`）、リズムパターンと判定範囲の定義、入力履歴（`RhythmState`）、装備スキルからBGMを決める`SkillBgmSelectorTable`を保持します。
 
 ### ② Application
 > 再生時間に基づくビート更新（`IMusicSyncService`）、指定ビート後への非同期コールバック管理（`IMusicActionScheduler`）、およびタイミング判定・ジャスト検知（`RhythmJustService`）などの核心的なビジネスロジックを実装します。`IMusicSyncService`/`IMusicActionScheduler`のAPI設計上、`BattleActionType`（Battleモジュール）や`EnemyMusicSpec`（Enemyモジュール）というDomain型を直接扱うため、厳密には他モジュールへの依存が存在します。
@@ -128,14 +146,14 @@ graph TD
 > Unityの `AudioSource` と直接対話して再生時間を監視する `MusicSyncView`、BGM/SE/Voiceソースのマネジメントを担う `MusicPlayer`（音量変更の窓口インターフェースを含む）などのUnity依存制御を担当します。
 
 ### ⑤ Infrastructure
-> 当モジュールでは使用していません。
+> `RhythmJudgmentDefinitionAsset`が判定定義を、`BgmSelectorLabelTableAsset`がBGMセレクターラベル表をScriptableObjectとして供給します。
 
 ### ⑥ Composition
 > ゲーム内BGMとタイミング同期システムをリンクさせる `MusicSyncInitializer`、UI側のタイミング連動を行う `RhythmGuideInitializer`、常駐シーンの `MusicPlayerInitializer` など、アプリ全域へのDIセットアップを担当します。
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① BGM 再生とリズム同期の更新フロー（毎フレーム）
 AudioSource の再生タイムを元に、毎フレーム BPM・拍情報が更新される処理フローです。

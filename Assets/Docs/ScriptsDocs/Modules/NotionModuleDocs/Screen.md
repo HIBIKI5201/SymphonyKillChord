@@ -7,7 +7,7 @@
 | **モジュール名** | Screen |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -25,13 +25,16 @@
 | **`CloseCurrentScreenUseCase`** | Application | 履歴を1つ戻す（`TryGoBack`） |
 | **`ResetToHomeScreenUseCase`** | Application | 履歴をクリアしHome画面へ強制リセット |
 | **`IScreenPresenter`** | Application | 画面遷移結果の出力境界 |
-| **`ScreenController`** | Adaptor | `ShowHome`/`ShowStageSelect`等、用途別メソッドで3つのUseCaseをラップする窓口 |
+| **`ShowScreenCommand`** | Application | 表示要求（対象画面と付随情報）を表すコマンド |
+| **`ScreenTransitionResult`** | Application | 遷移の結果（表示・非表示にする画面）を表す戻り値 |
+| **`ScreenController`** / **`IScreenController`** | Adaptor | `ShowHome`/`ShowStageSelect`等、用途別メソッドで3つのUseCaseをラップする窓口とその抽象 |
 | **`ScreenPresenter`** | Adaptor | 遷移結果を`ScreenViewDTO`へ変換し`IScreenTransitionApplicable`へ渡す |
 | **`ScreenViewApplicator`** | Adaptor | `IScreenViewRegistry`経由で実際のView表示/非表示を実行 |
 | **`IScreenViewRegistry`** | Adaptor | 画面IDと具象View（Composition層で構築）を仲介する抽象 |
 | **`OutGameUIEvent`** | View | OutGameシーン全体で共有される約25個のAction/Funcを持つイベントバス。`OutGameSceneInitializer`（Order 0）が最初に登録し、Screen以外の全モジュールからも参照される |
 | **`ScreenViewBase`** | View | 表示/非表示・入力ブロック・トランジション終了待機を実装する画面基底クラス |
-| **`HomeScreenView` / `SettingScreenView` / `SkillTreeScreenView` / `StageSelectScreenView` / `BattlePreparationScreen`** | View | 各画面のコンテナ・戻るボタン等の薄いシェル（中身は各機能モジュールが構築） |
+| **`IScreenView`** | View | 画面Viewの共通契約 |
+| **`HomeScreenView` / `SettingScreenView` / `SkillTreeScreenView` / `SkillBuildScreenView` / `StageSelectScreenView` / `BattlePreparationScreen`** | View | 各画面のコンテナ・戻るボタン等の薄いシェル（中身は各機能モジュールが構築） |
 | **`ScreenRuleData`** | Infrastructure | 画面ごとの遷移ルールを定義するScriptableObject |
 | **`ScreenRuleRepository`** | Infrastructure | `ScreenRuleData`から`Dictionary<ScreenId, ScreenTransitionRule>`を構築 |
 | **`ScreenStateRepository`** | Infrastructure | `ScreenTransitionState`の単純な保持実装 |
@@ -123,7 +126,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① 画面遷移フロー（ボタン押下→新画面表示）
 Home画面からStageSelect画面への遷移を例にした標準的な流れです。
