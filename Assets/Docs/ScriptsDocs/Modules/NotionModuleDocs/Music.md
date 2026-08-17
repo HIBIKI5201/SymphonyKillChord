@@ -41,6 +41,8 @@
 | **`RhythmGuideView`** / **`RhythmGuideViewModel`** / **`RhythmGuideLabelView`** / **`RhythmGuideUpdateView`** | View | リズムガイドの描画とラベル表示 |
 | **`ACLikeRhythmGuideView`** / **`ACLikeRhythmGuideViewModel`** / **`ACLikeRhythmGuideEffectConfig`** | View | AC風リズムガイドのビート表示・判定ゾーン描画とその演出設定 |
 | **`SoundEffectSource`** / **`SoundEffectVolumeManager`** / **`AttackSoundConfig`** | View (Persistent) | SEの再生元・音量管理・攻撃SE設定 |
+| **`VoiceSource`** / **`VoiceVolumeManager`** | View (Persistent) | Voice再生用のCRI Atom Sourceの登録と、音量の一括管理 |
+| **`PersistentAudioVolumeRegistryView`** | View (Persistent) | 永続音量管理の登録窓口 |
 | **`RhythmJudgmentDefinitionAsset`** / **`BgmSelectorLabelTableAsset`** | Infrastructure | 判定定義とBGMセレクターラベル表のScriptableObject |
 | **`MusicSyncInitializer`** | Composition (InGame) | 楽曲とタイミング制御エンジンの結びつけ・ServiceLocator への登録 |
 | **`RhythmGuideInitializer`** | Composition (InGame) | リズムガイド UI の紐付け初期化 |
