@@ -51,7 +51,7 @@
 | --- | --- |
 | **Initializerクラス** | `InGameMissionInitializer` |
 | **Order** | 600 |
-| **公開する ModuleContainer / ServiceLocator登録型** | `MissionModuleContainer`（`MissionRuntimeService`, `MissionEventController`, `MissionProgressRecorderController`を保持）。ただし`MissionRuntimeService`/`MissionEventController`は現状Containerとは別に生の型としても`ServiceLocator`へ二重登録されている（既知の課題を参照） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `MissionModuleContainer`（`MissionRuntimeService`, `MissionEventController`, `MissionProgressRecorderController`を保持）。ただし`MissionRuntimeService`/`MissionEventController`は現状Containerとは別に生の型としても`ServiceLocator`へ二重登録されている |
 
 ---
 
@@ -106,7 +106,7 @@ graph TD
 
 * **`Enemy`**
   * *参照箇所*: `MissionEventController.NotifyEnemyKilled`
-  * *詳細*: `EnemyLifeCycle`/`BossLifeCycle`が敵撃破時に呼び出します。ただし`ServiceLocator.GetInstance<MissionEventController>()`による直接取得であり、`MissionModuleContainer`を介していません（既知の課題を参照）。
+  * *詳細*: `EnemyLifeCycle`/`BossLifeCycle`が敵撃破時に呼び出します。ただし`ServiceLocator.GetInstance<MissionEventController>()`による直接取得であり、`MissionModuleContainer`を介していません。
 * **`Sequence`**
   * *参照箇所*: `MissionModuleContainer.MissionRuntimeService`, `MissionEvaluationResult`
   * *詳細*: `SequenceInitializationModule`が`MissionRuntimeService.OnMissionFinished`を購読し、クリア時に評価結果を生成してセーブ・リザルト表示へ橋渡しします（Order 1000、Missionの600より後に初期化）。

@@ -6,7 +6,7 @@
 | --- | --- |
 | **モジュール名** | StageSelect |
 | **カテゴリ** | OutGame |
-| **ステータス** | 実装済み（一部TODO残存、既知の課題を参照） |
+| **ステータス** | 実装済み（一部TODO残存） |
 | **最終更新日** | 2026-07-22 |
 
 ---
@@ -59,7 +59,7 @@
 | --- | --- |
 | **Initializerクラス** | `StageSelectInitializer` / `OutGameSortieInitializer` |
 | **Order** | `StageSelectInitializer` = 110（`ScreenInitializer`(100)の後、`SkillTreeInitializer`(120)の前） / `OutGameSortieInitializer` = 20 |
-| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無く、`SelectedBattleStageState`・`SelectedMissionState`（個別インスタンス）・`OutGameSortieController`をServiceLocatorへ直接登録（既知の課題を参照） |
+| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無く、`SelectedBattleStageState`・`SelectedMissionState`（個別インスタンス）・`OutGameSortieController`をServiceLocatorへ直接登録 |
 
 ---
 

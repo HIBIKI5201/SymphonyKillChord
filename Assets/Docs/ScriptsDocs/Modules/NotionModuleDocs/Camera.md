@@ -168,13 +168,3 @@ sequenceDiagram
 | 一定時間ターゲットへ働きかけがない | `AutoLockOnReleaseDelay`を超えた |
 | 対象が画面外へ出た | 猶予時間（`AutoLockOnViewportGraceDuration`）経過後に`CameraLockOnRangeChecker`が範囲外と判定 |
 | 強い視点操作が入った | `CameraLockOnBreakTracker`が蓄積量のしきい値超えを検出 |
-
-## 📝 アーキテクチャ上の特徴・既知の課題
-
-### ✅ 設計上の見どころ
-* **ロックオン機能のモジュール分離**: ロックオン対象の選択・管理は独立した「Target」モジュールへ切り出され、Cameraは`ITargetSystemViewModel`越しに問い合わせるだけの立場です。Targetモジュールは Camera 以外に Player・Enemy・UI・Skill からも使われるハブになっています。
-* **解除条件の分離**: オートロックオンの解除判定が`CameraLockOnBreakTracker`と`CameraLockOnRangeChecker`へ切り出され、`CameraSystemView`側は条件の組み合わせだけを持ちます。
-
-### ⚠️ 既知の課題・改善ポイント
-* **View層への計算集約**: 追従・回転計算がView層の計算クラス群へ統合されています。`MonoBehaviour`である`CameraSystemView`から直接呼ぶ構成のため、Unityに依存しない単体テストは行いにくい状態です。
-* **未使用の公開API**: `BeginExternalControl()` / `EndExternalControl()` は外部からカメラ制御を奪うためのAPIですが、現在は呼び出し元がありません。演出側での利用予定が無いなら削除の候補です。

@@ -6,7 +6,7 @@
 | --- | --- |
 | **モジュール名** | UI / HUD |
 | **カテゴリ** | InGame |
-| **ステータス** | 実装済み（既知の課題を参照） |
+| **ステータス** | 実装済み |
 | **最終更新日** | 2026-08-17 |
 
 ---
@@ -21,7 +21,7 @@
 | **`HUDEnemyHealthDTO`** | Adaptor | ロックオン中の敵体力ウィジェット用データ（ref struct。体力・ロックオン中か・画面上の対象位置） |
 | **`HUDEnemyHealthPresenter`** | Adaptor | 毎フレーム`TargetSystemController`をポーリングし、ロックオン中の敵体力を`HUDEnemyHealthDTO`へ変換する（イベント駆動ではない） |
 | **`IHUDEnemyHealthViewModel`** | Adaptor | ロックオン中敵体力表示のViewModelインターフェース |
-| **`IIngameHudViewModel` / `IngameHudDTO`** | Adaptor | ※死んだコード（既知の課題を参照） |
+| **`IIngameHudViewModel` / `IngameHudDTO`** | Adaptor | ※死んだコード |
 | **`EnemyDirectionIndicatorPresenter`** | Adaptor | 登録済みの敵から画面外方向表示の対象を選び、表示スロットへ割り当てる |
 | **`EnemyDirectionIndicatorDTO`** | Adaptor | 敵方向表示の1スロット分の表示情報 |
 | **`IEnemyDirectionIndicatorViewModel`** | Adaptor | 敵方向表示のViewModelインターフェース |
@@ -30,7 +30,7 @@
 | **`HealthHudViewModel`** | View | `IHealthHudViewModel`実装 |
 | **`HUDEnemyHealthView`** | View | ロックオン中の敵体力を画面空間に表示するウィジェット |
 | **`HUDEnemyHealthViewModel`** | View | `HUDEnemyHealthDTO`をリアクティブな比率・画面座標へ変換 |
-| **`IngameHudView` / `IngameHudViewModel`** | View | ※死んだコード（既知の課題を参照） |
+| **`IngameHudView` / `IngameHudViewModel`** | View | ※死んだコード |
 | **`EnemyDirectionIndicatorView`** | View | 画面外の敵方向を3Dマーカーとして描画 |
 | **`EnemyDirectionIndicatorSlot`** | View | 3Dマーカー1つ分とフェード状態を保持 |
 | **`EnemyDirectionIndicatorConfig`** | View | 表示数・位置・距離・フェードの設定 |

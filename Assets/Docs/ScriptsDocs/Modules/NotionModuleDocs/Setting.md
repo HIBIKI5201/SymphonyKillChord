@@ -6,7 +6,7 @@
 | --- | --- |
 | **モジュール名** | Setting |
 | **カテゴリ** | OutGame |
-| **ステータス** | 実装済み（画面設定タブは未完成、既知の課題を参照） |
+| **ステータス** | 実装済み（画面設定タブは未完成） |
 | **最終更新日** | 2026-08-17 |
 
 ---
@@ -20,7 +20,7 @@
 | **`SettingSlider` / `SettingToggle` / `SettingDropDown`** | View | `SettingBase`を継承した汎用バインド可能UIコントロール（`Bind(getter, setter)`） |
 | **`AudioSettingData`** | View | Master/BGM/SE/Voiceの4音量値と、それぞれの変更通知イベントを保持するプレーンモデル |
 | **`AudioConfig`** | View | 音声設定タブのUI一式（スライダー群）を構築するScriptableObject |
-| **`ScreenSettingData`** | View | 解像度インデックス・画面モード・VSync有無を保持する構造体（既知の課題を参照） |
+| **`ScreenSettingData`** | View | 解像度インデックス・画面モード・VSync有無を保持する構造体 |
 | **`ScreenConfig`** | View | 画面設定タブのUI一式（解像度/画面モードドロップダウン・VSyncトグル）を構築するScriptableObject |
 | **`SettingComposition`** | Composition | `ServiceLocator`から音量管理クラスを取得し、`AudioConfig`/`ScreenConfig`を構築する唯一のComposition層クラス |
 

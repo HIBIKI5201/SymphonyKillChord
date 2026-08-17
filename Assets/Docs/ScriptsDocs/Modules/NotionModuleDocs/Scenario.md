@@ -6,7 +6,7 @@
 | --- | --- |
 | **モジュール名** | Scenario |
 | **カテゴリ** | OutGame |
-| **ステータス** | 実装済み（パフォーマンス上の既知の課題あり） |
+| **ステータス** | 実装済み |
 | **最終更新日** | 2026-08-17 |
 
 ---
@@ -39,7 +39,7 @@
 | **`ScenarioInputView`** | View | `PlayerInputView`を購読し、進行/早送り/一時停止/スキップ/オート/UI非表示を`ScenarioInputController`へ伝達 |
 | **`ViewModel`** | View | 全`I*ViewSink`を実装し、表示通知を集約して`ScenarioView`へ渡す |
 | **`ScenarioUIHideView` / `ScenarioUIRaycastView` / `CommandBarToggleView`** | View | UIの一時非表示、レイキャスト制御、コマンドバーの開閉 |
-| **`ScenarioCsvUtility`** | Infrastructure | CSVパースの内部ユーティリティ（既知の課題を参照） |
+| **`ScenarioCsvUtility`** | Infrastructure | CSVパースの内部ユーティリティ |
 | **`ScenarioRepository`** | Infrastructure | `IScenarioRepository`実装。CSVファイル/URLからシナリオを読み込みパースする |
 | **`InMemoryScenarioRepository`** | Infrastructure | 開発用のハードコードされたテストシナリオ |
 | **`AnimationRepository` / `BackgroundRepository` / `PortraitRepository`** | Infrastructure | 各種カタログAssetを背景としたリポジトリ実装 |
