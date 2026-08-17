@@ -7,7 +7,7 @@
 | **モジュール名** | Target |
 | **カテゴリ** | InGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -16,9 +16,12 @@
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
 | **`ITargetableViewModel`** | Adaptor | ターゲットシステムが扱う対象の共通インターフェース |
+| **`ITargetBoundsViewModel`** | Adaptor | ターゲットのワールド空間Boundsを公開するインターフェース |
 | **`ITargetSystemViewModel`** | Adaptor | ターゲット登録・選択・現在ターゲット取得を仲介するViewModelインターフェース |
 | **`TargetSystemController`** | Adaptor | ターゲット選択ViewModelとEntityレジストリを仲介するコントローラー。他モジュールからの主要な窓口 |
 | **`TargetEntityRegistry`** | Adaptor | ターゲットIDと`CharacterEntity`の対応を管理するレジストリ |
+| **`TargetAreaQuery`** | Adaptor | 登録済みターゲットから扇形範囲に入る対象をXZ平面で検索するクエリ |
+| **`TargetAreaHit`** | Adaptor | 範囲クエリの検出結果1件を表すreadonly struct（対象・Entity・水平距離） |
 | **`ITargetable`** | View | `ITargetableViewModel`を継承した、ターゲット選択システムが扱う対象の共通インターフェース |
 | **`TargetingSystem`** | View | ターゲットの登録・選択・位置取得を一元管理するクラス（`ITargetSystemViewModel`実装）。正面方向の内積を優先し、負の場合は距離を優先して最適対象を選択する |
 | **`TransformTargetable`** | View | `Transform`をターゲット選択用の対象として扱うラッパークラス（`ITargetable`実装、`IDisposable`） |
@@ -34,7 +37,7 @@
 | --- | --- |
 | **Initializerクラス** | `TargetSystemInitializationModule`（内部で`TargetSystemInitializer`を使用） |
 | **Order** | 100 |
-| **公開する ModuleContainer / ServiceLocator登録型** | `TargetSystemModuleContainer`（`TargetSystemController`, `ITargetSystemViewModel`, `TargetEntityRegistry`を保持） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `TargetSystemModuleContainer`（`TargetSystemController`, `ITargetSystemViewModel`, `TargetEntityRegistry`, `TargetAreaQuery`を保持） |
 
 ---
 
@@ -99,8 +102,14 @@ graph TD
   * *参照箇所*: `TargetSystemController`
   * *詳細*: `HUDEnemyHealthPresenter`が敵の体力表示のため対象情報を参照します。
 * **`Skill`**
-  * *参照箇所*: `TargetSystemController`
-  * *詳細*: `SkillTargetResolver`がスキル発動時のターゲット解決に使用します。
+  * *参照箇所*: `TargetSystemController`, `TargetAreaQuery`
+  * *詳細*: `SkillTargetResolver`がスキル発動時のターゲット解決と、範囲スキルの対象列挙に使用します。
+* **`Battle`**
+  * *参照箇所*: `TargetAreaQuery`
+  * *詳細*: `PlayerAttackController`が攻撃の当たり判定として扇形範囲の対象を取得します。
+* **`UI`**
+  * *参照箇所*: `ITargetBoundsViewModel`
+  * *詳細*: `EnemyDirectionIndicatorPresenter`が画面外の敵を指し示すため、対象のBoundsを参照します。
 
 ---
 
@@ -113,7 +122,7 @@ graph TD
 ### ② Application
 当モジュールでは使用していません。
 ### ③ Adaptor
-`TargetSystemController`がターゲット選択ViewModelとEntityレジストリを仲介し、他モジュールからの主要な窓口になります。`TargetEntityRegistry`がターゲットIDと`CharacterEntity`の対応を管理します。
+`TargetSystemController`がターゲット選択ViewModelとEntityレジストリを仲介し、他モジュールからの主要な窓口になります。`TargetEntityRegistry`がターゲットIDと`CharacterEntity`の対応を管理します。`TargetAreaQuery`は登録済みターゲットへの扇形範囲検索を提供し、攻撃判定と範囲スキルの対象列挙に使われます。
 ### ④ View
 `TargetingSystem`がターゲットの登録・選択・位置取得を一元管理し、正面方向の内積優先→距離優先という選択アルゴリズムを実装します。`TransformTargetable`が実際のUnity `Transform`をラップして対象化します。
 ### ⑤ Infrastructure
@@ -127,7 +136,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① ターゲット登録フロー（敵出現時）
 敵がスポーンした際、自身をターゲットシステムへ登録します。
@@ -161,4 +170,22 @@ sequenceDiagram
     TSys -->> Controller: 選択結果を保持
     Camera ->> Controller: 現在ターゲット位置の取得要求
     Controller -->> Camera: ターゲット位置を返却
+```
+
+### ③ 範囲判定フロー（攻撃・範囲スキル）
+
+攻撃や範囲スキルは、コライダーではなく登録済みターゲットへの扇形クエリで対象を決めます。判定はXZ平面で行い、高低差は無視されます。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Attack as PlayerAttackController / SkillTargetResolver
+    participant Query as TargetAreaQuery
+    participant TSys as TargetingSystem
+    participant Registry as TargetEntityRegistry
+
+    Attack ->> Query: QueryFanArea(原点, 方向, 射程, 半角)
+    Query ->> TSys: 登録済みターゲットを走査
+    Query ->> Registry: 対応するCharacterEntityを解決
+    Query -->> Attack: TargetAreaHit を水平距離の昇順で返却
 ```

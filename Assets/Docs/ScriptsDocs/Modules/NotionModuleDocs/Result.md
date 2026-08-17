@@ -7,7 +7,7 @@
 | **モジュール名** | Result |
 | **カテゴリ** | InGame |
 | **ステータス** | 実装済み（既知の課題を参照） |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -24,6 +24,9 @@
 | **`StageResultView`** | View | ボタン押下ハンドリング、勝敗UIの出し分け、サブミッション行の生成を行うMonoBehaviour |
 | **`StageResultViewModel`** | View | `IStageResultViewModel`実装。R3の`ReactiveProperty`で各表示項目を保持 |
 | **`StageResultMissionItemView` / `StageResultMissionItemViewModel`** | View | サブミッション1行分の表示 |
+| **`ResultTextSlideIn`** | View | UI要素を左から右へスライドインさせる共通演出。LitMotionで位置とalphaを同時に動かす静的クラス |
+| **`ResultTextSlideInSetting`** | View | スライドイン演出の設定（有効・遅延・時間など）を持つSerializableクラス |
+| **`ResultCountUpSetting`** | View | 数値のカウントアップ演出の設定を持つSerializableクラス |
 | **`StageResultInitializationModule`** | Composition | Presenter/Controllerの構築とView初期化 |
 | **`StageResultModuleContainer`** | Composition | `View`/`Presenter`/`Controller`をServiceLocatorへ公開するContainer。Sequenceモジュールが参照する |
 
@@ -102,7 +105,7 @@ graph TD
 ### ③ Adaptor
 `StageResultController`がシーン遷移を、`StageResultPresenter`が評価結果からDTOへの変換を担当します。
 ### ④ View
-`StageResultView`が勝敗UIの出し分け・ボタン処理・サブミッション行生成を行い、`StageResultViewModel`がリアクティブなデータバインドを担います。
+`StageResultView`が勝敗UIの出し分け・ボタン処理・サブミッション行生成を行い、`StageResultViewModel`がリアクティブなデータバインドを担います。表示演出は`ResultTextSlideIn`とその設定クラス群へ切り出され、Inspectorから有効・無効と時間を調整できます。
 ### ⑤ Infrastructure
 当モジュールでは使用していません。
 ### ⑥ Composition
@@ -110,11 +113,16 @@ graph TD
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。表示項目を追加する場合は`StageResultDTO`へのフィールド追加と`StageResultPresenter`での値設定という形になります。
+ポリモーフィックな拡張点（`SubclassSelector`等）はありません。
+
+| 拡張したいこと | 実装する場所 | 追加登録の要否 |
+| --- | --- | --- |
+| 表示項目を追加したい | `StageResultDTO`へフィールドを追加し、`StageResultPresenter`で値を設定、`StageResultViewModel`と`StageResultView`へ反映先を足す | 不要 |
+| 演出の時間や有無を変えたい | `StageResultView`のInspectorにある`ResultTextSlideInSetting` / `ResultCountUpSetting` | 不要（コード変更なし） |
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① クリア → 完了ボタン → OutGame帰還フロー
 

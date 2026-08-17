@@ -7,7 +7,7 @@
 | **モジュール名** | SceneManagement |
 | **カテゴリ** | Persistent |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -106,7 +106,7 @@ graph TD
 ### ④ View
 `LoadingScreenView`がロード画面の表示/非表示を、`SceneTransitionView`がデバッグ表示を担当します。
 ### ⑤ Infrastructure
-`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出します。
+`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出します。非同期APIはSymphonyFrameworkの`Async`命名と`Awaitable`へ追従済みです。既に読み込まれているシーンのアクティブ化に失敗した場合は、そのシーンを再ロードして復帰します。
 ### ⑥ Composition
 `SceneTransitionInitializer`（Order 0）が上記スタック全体を構築し、既存インスタンスが無い場合のみ新規登録します（Persistentシーンの再読み込み等での二重登録を防止）。
 
@@ -116,7 +116,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① シーン追加ロード＋初期化完了待機フロー
 

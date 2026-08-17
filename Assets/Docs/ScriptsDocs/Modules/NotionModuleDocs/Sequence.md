@@ -7,7 +7,7 @@
 | **モジュール名** | Sequence |
 | **カテゴリ** | InGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -15,9 +15,15 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
+| **`ReturnToTitleController`** | Adaptor | インゲームからタイトルシーンへ復帰するシーン遷移を実行 |
 | **`IGameplayControllable`** | View | `StartGameplay()`/`StopGameplay()`の2メソッドのみを持つ契約。Enemy/Player/Music/Input/Mission等、多数のクラスがこれを実装する |
 | **`StageSequenceView`** | View | 開始/クリア/ゲームオーバーの3つの`PlayableDirector`（Timeline）を保持し、再生完了を待機する |
 | **`StageSequenceMessageView`** | View | 「Mission Start!」「Stage Clear!」「Game Over!」等の一時的なメッセージ表示を担当 |
+| **`StageSequenceVoiceView`** | View | 開始演出中のボイス再生。Playerは動的生成されるため`StageSequenceView`から`PlayerView`を受け取る |
+| **`StageStartFadeView`** | View | ステージ開始時の黒画面とフェードアウト表示 |
+| **`StageStartConstraintView`** | View | 開始演出のDollyCameraが向く方向を提供 |
+| **`StageStartSequenceConfig`** | View | 開始演出の設定を保持するScriptableObject |
+| **`ReturnToTitleInitializer`** | Composition | ESC長押しでタイトルへ復帰する機能の初期化（Order 450） |
 | **`InGamePlayDirector`** | Composition | Inspectorで手動登録された`IGameplayControllable`群へ`StartGameplay`/`StopGameplay`を一斉に伝播するファンアウト役。自身も`IGameplayControllable`を実装する |
 | **`InGameSequenceDirector`** | Composition | 演出＋ゲームプレイ制御＋リザルト表示までを統括する実際のオーケストレーター（プレーンC#クラス） |
 | **`InputGamePlayControllable`** | Composition | `IGameplayControllable`実装。入力マップを`InGame`/`Common`間で切り替える |
@@ -28,8 +34,8 @@
 
 | 項目 | 内容 |
 | --- | --- |
-| **Initializerクラス** | `SequenceInitializationModule` |
-| **Order** | 1000（InGame内で最も遅い。Mission(600)・Result(400)が確実に完了した後に実行される） |
+| **Initializerクラス** | `SequenceInitializationModule`（本体）／`ReturnToTitleInitializer`（タイトル復帰） |
+| **Order** | 1000（InGame内で最も遅い。Mission(600)・Result(400)が確実に完了した後に実行される）／450（`ReturnToTitleInitializer`） |
 | **公開する ModuleContainer / ServiceLocator登録型** | `SequenceModuleContainer`（`SequenceDirector`を保持。現状これを参照する他モジュールは無い） |
 
 ---
@@ -105,9 +111,9 @@ graph TD
 ### ② Application
 当モジュールでは使用していません。
 ### ③ Adaptor
-当モジュールでは使用していません。
+`ReturnToTitleController`がインゲームからタイトルシーンへの復帰を実行します。
 ### ④ View
-`IGameplayControllable`という共通契約、演出再生（`StageSequenceView`）とメッセージ表示（`StageSequenceMessageView`）を担当します。
+`IGameplayControllable`という共通契約、演出再生（`StageSequenceView`）とメッセージ表示（`StageSequenceMessageView`）を担当します。開始演出はフェード（`StageStartFadeView`）・ボイス（`StageSequenceVoiceView`）・カメラ方向（`StageStartConstraintView`）へ分かれ、設定は`StageStartSequenceConfig`が持ちます。
 ### ⑤ Infrastructure
 当モジュールでは使用していません。
 ### ⑥ Composition
@@ -119,7 +125,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① ステージ開始演出フロー
 InGameシーン起動直後、開始演出を再生してからゲームプレイを開放します。
@@ -161,4 +167,21 @@ sequenceDiagram
     SeqDirector ->> ResultPresenter: PresentVictory(evaluationResult)
     SeqDirector ->> ResultView: Show()
     Note over SeqDirector: ゲームプレイは再開されず、以降の操作はResultモジュールへ移る
+```
+
+### ③ タイトル復帰フロー（ESC長押し）
+
+プレイ中にESCを長押しすると、リザルトを経由せずタイトルシーンへ戻ります。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Player as プレイヤー
+    participant Init as ReturnToTitleInitializer
+    participant Ctrl as ReturnToTitleController
+    participant SceneUC as SceneTransitionUsecase
+
+    Player ->> Init: ESCを長押し
+    Init ->> Ctrl: タイトル復帰要求
+    Ctrl ->> SceneUC: インゲームをアンロードしてタイトルへ遷移
 ```

@@ -7,7 +7,7 @@
 | **モジュール名** | Title |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -77,13 +77,16 @@ graph TD
 
 * **`Persistent/Savedata`**
   * *依存箇所*: `SaveData`, `TutorialData`
-  * *詳細*: `SaveData.Tutorial.IsTutorialCompleted`で初回起動判定を行い、データリセット時は`SavedataSystem.DeleteSaveDataAsync<SaveData>()`を呼びます。
+  * *詳細*: `SaveData.Tutorial.IsTutorialCompleted`で初回起動判定を行います。読み書きはSymphonyFrameworkの`SaveStore`（`IsLoaded`/`Get`/`LoadAsync`/`DeleteAsync`）へ統合されました。
 * **`Music` / `Persistent`**
   * *依存箇所*: `MusicPlayer`, `SoundEffectVolumeManager`（具象クラス）
   * *詳細*: `VolumeSettingsTabView`がBGM/SE音量スライダーを直接バインドします。既存の`IVolumeManager`抽象は使用していません。
 * **`Persistent/SceneManagement`**
   * *依存箇所*: `SceneTransitionController`
   * *詳細*: `TitleStartController.StartGameAsync`が追加ロード・アンロードに使用します（`ISceneInitializationReadiness`によるモジュール初期化完了待機の恩恵を受けます）。
+* **`Persistent/Savedata`（初期スキル）**
+  * *依存箇所*: `InitialSkillLoadoutService`
+  * *詳細*: セーブデータ削除後に初期スキル構成を再適用します。これが無いとリセット直後にスキルが未装備のまま出撃できてしまいます。
 * **`StageSelect`**
   * *依存箇所*: `TutorialSortieRequestState`
   * *詳細*: 初回起動時・データリセット後に`RequestTutorialSortie()`がこの状態を登録・リクエストし、遷移先シーンでStageSelectモジュールが消費します。
@@ -118,7 +121,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けています。
 
 ### ① 通常起動フロー
 セーブデータのチュートリアル完了フラグに応じて遷移先を決定します。
@@ -132,7 +135,7 @@ sequenceDiagram
     actor Player as プレイヤー
     participant StartCtrl as TitleStartController
 
-    Init ->> Save: LoadAsync<SaveData>()
+    Init ->> Save: SaveStore.IsLoaded / Get / LoadAsync<SaveData>()
     Save -->> Init: SaveData（Tutorial.IsTutorialCompleted含む）
     alt IsTutorialCompleted == true
         Init ->> View: SetTargetSceneName(_targetSceneName)
@@ -142,7 +145,7 @@ sequenceDiagram
     end
     Player ->> View: 画面タップ
     View ->> StartCtrl: StartGameAsync(currentScene, targetScene)
-    StartCtrl ->> StartCtrl: 対象シーンを追加ロード（初期化完了待機）→ Titleシーンをアンロード
+    StartCtrl ->> StartCtrl: ChangeSceneKeepingLoadingAsync もしくは LoadAdditiveAsync → Titleシーンを UnloadAsync
 ```
 
 ### ② セーブデータリセットフロー
@@ -159,8 +162,9 @@ sequenceDiagram
 
     Player ->> ResetTab: リセットボタン押下
     ResetTab -->> Init: OutGameUIEvent.OnDataResetButtonClicked
-    Init ->> Save: DeleteSaveDataAsync<SaveData>()
-    Init ->> Save: LoadAsync<SaveData>()（再読込）
+    Init ->> Save: SaveStore.DeleteAsync<SaveData>()
+    Init ->> Save: SaveStore.LoadAsync<SaveData>()（再読込）
+    Init ->> Save: InitialSkillLoadoutService で初期スキルを再適用
     Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
     Init ->> Init: RequestTutorialSortie()（再アーム）
 ```
