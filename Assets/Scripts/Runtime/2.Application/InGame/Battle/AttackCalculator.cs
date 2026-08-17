@@ -27,7 +27,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             bool isOutOfRange = false,
             bool isCriticalForced = false,
             float? criticalDamageMultiplierOverride = null,
-            bool applyAttackerModifiers = true
+            bool applyAttackerModifiers = true,
+            bool applyWeaponDamageMultiplier = true
             )
         {
             Damage modifiedDamage = baseDamage;
@@ -46,7 +47,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 modifiedDamage,
                 isOutOfRange,
                 isCriticalForced,
-                criticalDamageMultiplierOverride);
+                criticalDamageMultiplierOverride,
+                applyWeaponDamageMultiplier);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }
