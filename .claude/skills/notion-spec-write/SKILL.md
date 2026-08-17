@@ -11,6 +11,14 @@ Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を�
 
 `notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。
 
+## 書く前に読むもの
+
+| 参照先 | いつ読むか |
+| --- | --- |
+| [references/writing-rules.md](./references/writing-rules.md) | 仕様書のページを書く・直すとき。**である調**、句点、H1の背景色 |
+| [references/notion-markdown.md](./references/notion-markdown.md) | 表・トグル・子ページ・Mermaidを含む本文を書くとき |
+| [references/module-docs.md](./references/module-docs.md) | システムリストのモジュール文書を書くとき |
+
 ## 絶対に守ること
 
 - **`--confirm`は、その会話でユーザーが明示的に承認してから付ける。** Notionは共有ワークスペースであり、
@@ -19,6 +27,8 @@ Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を�
   「更新しました」と報告しないこと。
 - **エクスポート済みの`.md`を編集の材料にしない。** リンク変換と装飾マーカー除去で原文と食い違うため、
   必ず`pull`で取得した原文を編集する。
+- **文体はライティング規則に従う。** である調で書く。既存ページの一部だけを直す場合も、
+  周囲がです・ます調のまま残っていないか確認する。
 - Notion APIの`replace_content`と既存ページの削除はツールが実装していない。ページの削除を要求されたら
   Notion上での手作業を案内する。
 - 本文を全面的に書き換える場合は`push --whole`を使う。`update_content`の枠内で、本文全体を1件の置換として
