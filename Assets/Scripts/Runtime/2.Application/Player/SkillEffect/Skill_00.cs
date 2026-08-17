@@ -24,7 +24,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 context.PlayerEntity,
                 context.TargetEntity,
                 context.IsJustHit,
-                context.PlayerEntity.BaseDamage);
+                context.PlayerEntity.BaseDamage,
+                applyWeaponDamageMultiplier: false);
             result = result.WithFinalDamage(result.FinalDamage * multiplier);
 
             result = DamageExecutor.Execute(
