@@ -33,7 +33,7 @@
 | --- | --- |
 | **Initializerクラス** | `TitleSceneInitializer` |
 | **Order** | 20（Titleシーン内） |
-| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。初回起動/データリセット時に`TutorialSortieRequestState`（StageSelectモジュールの型）を`ServiceLocator`へ登録しリクエストする |
+| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。初回起動/データリセット時にチュートリアルステージの出撃準備を行い、遷移先を`TitleStartController`へ設定する |
 
 ---
 
@@ -63,14 +63,14 @@ graph TD
     end
 
     subgraph StageSelectModule [StageSelect モジュール]
-        SS_Adaptor["Adaptor<br>TutorialSortieRequestState"]
+        SS_Adaptor["Adaptor<br>BattleSortieSelectionService"]
     end
 
     %% 依存関係
     T_Composition -->|"IsTutorialCompleted判定・データリセット"| SD_Domain
     T_View -->|"音量取得・設定"| M_View
     T_Adaptor -->|"追加ロード・アンロード（初期化完了待機込み）"| SM_Adaptor
-    T_Composition -->|"チュートリアル自動出撃要求"| SS_Adaptor
+    T_Composition -->|"チュートリアルステージの出撃準備"| SS_Adaptor
 ```
 
 ### 📥 依存しているもの
@@ -88,13 +88,13 @@ graph TD
   * *依存箇所*: `InitialSkillLoadoutService`
   * *詳細*: セーブデータ削除後に初期スキル構成を再適用する。これが無いとリセット直後にスキルが未装備のまま出撃できてしまう
 * **`StageSelect`**
-  * *依存箇所*: `TutorialSortieRequestState`
-  * *詳細*: 初回起動時・データリセット後に`RequestTutorialSortie()`がこの状態を登録・リクエストし、遷移先シーンでStageSelectモジュールが消費する
+  * *依存箇所*: `StageTreeAsset`, `BattleSortieSelectionService`, `SelectedBattleStageState`
+  * *詳細*: 初回起動時・データリセット後に`TryPrepareTutorialBattleSortie()`がステージツリーからチュートリアルノードを引き、バトル出撃の選択状態を組み立てて`TitleStartController`へ遷移先シーンを渡す
 
 ### 📤 依存されているもの
 
 * なし
-  * *詳細*: Titleはアプリケーションの入口であり、他モジュールから直接参照されることはない。StageSelectが`TutorialSortieRequestState`を経由して間接的にTitleの意図を受け取るのみである
+  * *詳細*: Titleはアプリケーションの入口であり、他モジュールから直接参照されることはない。チュートリアルの出撃準備もTitle側で完結しており、StageSelectはその結果として設定された選択状態を読むだけである
 
 ---
 
@@ -146,7 +146,7 @@ sequenceDiagram
         Init ->> View: SetTargetSceneName(_targetSceneName)
     else 初回起動
         Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
-        Init ->> Init: RequestTutorialSortie()
+        Init ->> Init: TryPrepareTutorialBattleSortie()
     end
     Player ->> View: 画面タップ
     View ->> StartCtrl: StartGameAsync(currentScene, targetScene)
@@ -171,5 +171,5 @@ sequenceDiagram
     Init ->> Save: SaveStore.LoadAsync<SaveData>()（再読込）
     Init ->> Save: InitialSkillLoadoutService で初期スキルを再適用
     Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
-    Init ->> Init: RequestTutorialSortie()（再アーム）
+    Init ->> Init: TryPrepareTutorialBattleSortie()（再準備）
 ```
