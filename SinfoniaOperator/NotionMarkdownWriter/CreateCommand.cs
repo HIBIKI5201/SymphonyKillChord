@@ -133,7 +133,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             }
 
             NotionPageInfo createdPage = await client.CreatePageAsync(
-                new Dictionary<string, string> { ["database_id"] = database.Id },
+                new Dictionary<string, string> { ["data_source_id"] = database.DataSourceId },
                 markdown,
                 properties);
             WriteCreated(createdPage);

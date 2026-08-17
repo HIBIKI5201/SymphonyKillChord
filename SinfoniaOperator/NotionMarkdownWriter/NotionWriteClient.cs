@@ -94,12 +94,14 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <param name="propertyTypes">プロパティ名とNotion上の型。</param>
         internal NotionDatabaseInfo(
             string id,
+            string dataSourceId,
             string url,
             string title,
             NotionParentReference parent,
             IReadOnlyDictionary<string, string> propertyTypes)
         {
             Id = id;
+            DataSourceId = dataSourceId;
             Url = url;
             Title = title;
             Parent = parent;
@@ -107,6 +109,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         internal string Id { get; }
+
+        /// <summary> スキーマを持つデータソースのID。行の作成先にはこちらを指定する。 </summary>
+        internal string DataSourceId { get; }
         internal string Url { get; }
         internal string Title { get; }
         internal NotionParentReference Parent { get; }
@@ -254,8 +259,24 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             using JsonDocument document = JsonDocument.Parse(responseBody);
             JsonElement root = document.RootElement;
 
+            string id = root.TryGetProperty("id", out JsonElement idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
+            string url = root.TryGetProperty("url", out JsonElement urlElement) ? urlElement.GetString() ?? string.Empty : string.Empty;
+
+            // Notion-Version 2026-03-11 では、プロパティのスキーマはデータベースではなくデータソースが持つ。
+            string dataSourceId = ParseFirstDataSourceId(root);
+            if (string.IsNullOrEmpty(dataSourceId))
+            {
+                throw new WriterException($"データベース {id} にデータソースがありません。");
+            }
+
+            string schemaBody = await SendAsync(
+                HttpMethod.Get,
+                $"{API_BASE_URL}/data_sources/{Uri.EscapeDataString(dataSourceId)}",
+                null,
+                true);
+            using JsonDocument schemaDocument = JsonDocument.Parse(schemaBody);
             Dictionary<string, string> propertyTypes = new();
-            if (root.TryGetProperty("properties", out JsonElement properties) &&
+            if (schemaDocument.RootElement.TryGetProperty("properties", out JsonElement properties) &&
                 properties.ValueKind == JsonValueKind.Object)
             {
                 foreach (JsonProperty property in properties.EnumerateObject())
@@ -268,9 +289,31 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 }
             }
 
-            string id = root.TryGetProperty("id", out JsonElement idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
-            string url = root.TryGetProperty("url", out JsonElement urlElement) ? urlElement.GetString() ?? string.Empty : string.Empty;
-            return new NotionDatabaseInfo(id, url, ParseRichTextTitle(root), ParseParent(root), propertyTypes);
+            return new NotionDatabaseInfo(id, dataSourceId, url, ParseRichTextTitle(root), ParseParent(root), propertyTypes);
+        }
+
+        /// <summary>
+        ///     データベースJSONから最初のデータソースIDを取り出す。
+        /// </summary>
+        /// <param name="root">データベースオブジェクトのJSON。</param>
+        /// <returns>データソースID。存在しない場合は空文字。</returns>
+        private static string ParseFirstDataSourceId(JsonElement root)
+        {
+            if (!root.TryGetProperty("data_sources", out JsonElement dataSources) ||
+                dataSources.ValueKind != JsonValueKind.Array)
+            {
+                return string.Empty;
+            }
+
+            foreach (JsonElement dataSource in dataSources.EnumerateArray())
+            {
+                if (dataSource.TryGetProperty("id", out JsonElement idElement))
+                {
+                    return idElement.GetString() ?? string.Empty;
+                }
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
