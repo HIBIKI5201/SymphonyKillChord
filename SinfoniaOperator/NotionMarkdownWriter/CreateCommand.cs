@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -261,12 +262,16 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 case "phone_number":
                     return new Dictionary<string, object> { [type] = value };
                 case "checkbox":
-                    return new Dictionary<string, object>
+                    // 解釈できない値を黙ってfalseにすると、指定の取り違えに気付けない。
+                    if (!bool.TryParse(value, out bool isChecked))
                     {
-                        ["checkbox"] = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
-                    };
+                        throw new WriterException($"true か false で指定してください: {name}={value}");
+                    }
+
+                    return new Dictionary<string, object> { ["checkbox"] = isChecked };
                 case "number":
-                    if (!double.TryParse(value, out double number))
+                    // 実行環境のカルチャに依存すると、小数点の解釈が変わって別の値が書き込まれる。
+                    if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double number))
                     {
                         throw new WriterException($"数値として解釈できません: {name}={value}");
                     }

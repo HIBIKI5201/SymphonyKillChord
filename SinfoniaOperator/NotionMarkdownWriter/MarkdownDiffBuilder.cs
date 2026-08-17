@@ -78,11 +78,40 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 resolvedHunks.Add(resolved);
             }
 
-            return resolvedHunks
+            List<ContentUpdate> updates = resolvedHunks
                 .Select(hunk => new ContentUpdate(
                     Join(baseLines, hunk.BaseStart, hunk.BaseEnd),
                     Join(editLines, hunk.EditStart, hunk.EditEnd)))
                 .ToList();
+            ValidateSequentialApplication(normalizedBaseline, updates);
+            return updates;
+        }
+
+        /// <summary>
+        ///     置換を順に適用した本文に対して、各置換対象が一意であることを検証する。
+        ///     Notionは content_updates を順番に適用するため、pull時点の本文だけで一意性を見ると、
+        ///     先行する置換が生んだ文面や消した文面によって後続が誤った位置へ当たりうる。
+        /// </summary>
+        /// <param name="baseline">pull時点の本文。</param>
+        /// <param name="updates">適用する置換。</param>
+        private static void ValidateSequentialApplication(string baseline, IReadOnlyList<ContentUpdate> updates)
+        {
+            string current = baseline;
+            for (int index = 0; index < updates.Count; index++)
+            {
+                ContentUpdate update = updates[index];
+                int count = CountOccurrences(current, update.OldString);
+                if (count != 1)
+                {
+                    throw new WriterException(
+                        $"{index + 1}件目の置換対象が、先行する置換を適用した後の本文中で{count}箇所見つかりました。" +
+                        "このまま送るとNotion側で意図しない位置へ適用されます。" +
+                        "--whole を付けて本文全体の置換として送信してください。");
+                }
+
+                int position = current.IndexOf(update.OldString, StringComparison.Ordinal);
+                current = current[..position] + update.NewString + current[(position + update.OldString.Length)..];
+            }
         }
 
         /// <summary>

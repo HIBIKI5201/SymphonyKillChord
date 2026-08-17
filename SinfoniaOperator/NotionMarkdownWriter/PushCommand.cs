@@ -42,7 +42,11 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
-            IReadOnlyList<ContentUpdate> updates = MarkdownDiffBuilder.Build(baseline, edited);
+            // --whole は本文全体を1件で置き換えるため、部分差分を組み立てる必要がない。
+            // 先に組み立てると、一意なold_strを作れない編集で全体置換へ到達する前に失敗する。
+            IReadOnlyList<ContentUpdate> updates = replacesWholeBody
+                ? new[] { new ContentUpdate(baseline, edited) }
+                : MarkdownDiffBuilder.Build(baseline, edited);
             if (updates.Count == 0)
             {
                 Console.WriteLine("変更がありません。");
@@ -62,18 +66,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "pullし直してから編集内容を作り直してください。");
             }
 
-            WritePlan(page, allowedRootId, updates);
-
-            // 全面刷新では置換が多数に分かれ、途中で一致しなくなると中途半端に適用されうる。
-            // 本文全体を1件の置換として送ることで、適用の成否をページ単位に揃える。
-            IReadOnlyList<ContentUpdate> sentUpdates = replacesWholeBody
-                ? new[] { new ContentUpdate(baseline, edited) }
-                : updates;
-            if (replacesWholeBody)
-            {
-                Console.WriteLine();
-                Console.WriteLine("--whole が指定されているため、上記をまとめて本文全体の置換1件として送信します。");
-            }
+            WritePlan(page, allowedRootId, updates, replacesWholeBody);
 
             if (!isConfirmed)
             {
@@ -82,9 +75,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
-            await client.UpdateMarkdownAsync(page.Id, sentUpdates);
+            await client.UpdateMarkdownAsync(page.Id, updates);
             Console.WriteLine();
-            Console.WriteLine($"{sentUpdates.Count}件の変更を反映しました: {page.Url}");
+            Console.WriteLine($"{updates.Count}件の変更を反映しました: {page.Url}");
 
             await VerifyAsync(client, workFilePath, snapshot, edited, isQuiet);
             return 0;
@@ -96,12 +89,18 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <param name="page">対象ページ。</param>
         /// <param name="allowedRootId">一致した許可ルートページID。</param>
         /// <param name="updates">置換一覧。</param>
-        private static void WritePlan(NotionPageInfo page, string allowedRootId, IReadOnlyList<ContentUpdate> updates)
+        private static void WritePlan(
+            NotionPageInfo page,
+            string allowedRootId,
+            IReadOnlyList<ContentUpdate> updates,
+            bool replacesWholeBody)
         {
             Console.WriteLine($"対象ページ: {page.Title}");
             Console.WriteLine($"URL: {page.Url}");
             Console.WriteLine($"許可ルート: {allowedRootId}");
-            Console.WriteLine($"変更点: {updates.Count}件（update_contentによる部分置換）");
+            Console.WriteLine(replacesWholeBody
+                ? "変更点: 本文全体の置換1件（update_content）"
+                : $"変更点: {updates.Count}件（update_contentによる部分置換）");
 
             for (int index = 0; index < updates.Count; index++)
             {

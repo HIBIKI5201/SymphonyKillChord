@@ -67,8 +67,20 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "編集する前に pull コマンドで作業ファイルを取得してください。");
             }
 
-            PullSnapshot? snapshot = JsonSerializer.Deserialize<PullSnapshot>(
-                File.ReadAllText(sidecarPath, Encoding.UTF8));
+            PullSnapshot? snapshot;
+            try
+            {
+                snapshot = JsonSerializer.Deserialize<PullSnapshot>(
+                    File.ReadAllText(sidecarPath, Encoding.UTF8));
+            }
+            catch (JsonException ex)
+            {
+                throw new WriterException(
+                    $"pull情報が壊れています: {sidecarPath}{Environment.NewLine}" +
+                    $"{ex.Message}{Environment.NewLine}" +
+                    "pullし直してから編集内容を作り直してください。");
+            }
+
             if (snapshot == null) { throw new WriterException($"pull情報を読み取れませんでした: {sidecarPath}"); }
             if (snapshot.Version != CURRENT_VERSION)
             {
