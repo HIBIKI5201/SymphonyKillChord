@@ -1,7 +1,7 @@
 using KillChord.Runtime.Application.InGame.Mission;
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
 using System.Collections.Generic;
 
@@ -39,13 +39,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         public void Dispose()
         {
             _missionRuntimeService.OnObjectiveStepChanged -= HandleObjectiveStepChanged;
-            RemoveActiveBuffs();
+            RemoveActiveStatusEffect();
         }
 
         private readonly MissionRuntimeService _missionRuntimeService;
         private readonly ObjectiveSequenceClearCondition _objectiveSequence;
         private readonly CharacterEntity _playerEntity;
-        private readonly List<IBuff> _activeBuffs = new();
+        private readonly List<IStatusEffect> _activeStatusEffects = new();
 
         /// <summary>
         ///     目標ステップの変化に応じてプレイヤーへのバフ・デバフ付与を切り替えます。
@@ -53,7 +53,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <param name="stepIndex"> 開始した目標ステップのIndexです。 </param>
         private void HandleObjectiveStepChanged(int stepIndex)
         {
-            RemoveActiveBuffs();
+            RemoveActiveStatusEffect();
 
             ObjectiveSequenceStep step = _objectiveSequence.GetStep(stepIndex);
             PlayerBuffClearCondition buffCondition = step != null ? ClearConditionChain.Find<PlayerBuffClearCondition>(step.Condition) : null;
@@ -62,24 +62,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 return;
             }
 
-            for (int i = 0; i < buffCondition.Buffs.Count; i++)
+            // このステップで付与するバフ・デバフをプレイヤーへ付与します。
+            for (int i = 0; i < buffCondition.StatusEffects.Count; i++)
             {
-                IBuff buff = buffCondition.Buffs[i];
-                _playerEntity.BuffSystem.Add(buff);
-                _activeBuffs.Add(buff);
+                IStatusEffect statusEffect = buffCondition.StatusEffects[i];
+                _playerEntity.StatusEffectSystem.Add(statusEffect);
+                _activeStatusEffects.Add(statusEffect);
             }
         }
 
         /// <summary>
         ///     前のステップで付与したバフ・デバフを全て解除します。
         /// </summary>
-        private void RemoveActiveBuffs()
+        private void RemoveActiveStatusEffect()
         {
-            for (int i = 0; i < _activeBuffs.Count; i++)
+            for (int i = 0; i < _activeStatusEffects.Count; i++)
             {
-                _playerEntity.BuffSystem.Remove(_activeBuffs[i]);
+                _playerEntity.StatusEffectSystem.Remove(_activeStatusEffects[i]);
             }
-            _activeBuffs.Clear();
+            _activeStatusEffects.Clear();
         }
     }
 }

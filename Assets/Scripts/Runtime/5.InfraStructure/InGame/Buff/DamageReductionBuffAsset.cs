@@ -1,5 +1,5 @@
 using KillChord.Runtime.Application.InGame.Buff;
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
 using UnityEngine;
 
@@ -12,9 +12,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Buff
     public sealed class DamageReductionBuffAsset : PlayerBuffDefinitionAssetBase
     {
         /// <inheritdoc />
-        public override IBuff Create()
+        public override IStatusEffect Create()
         {
-            return new DamageReductionBuff(_reductionRate);
+            return new DamageReductionBuff(_reductionRate, ReapplyPolicy);
         }
 
         [SerializeField, Range(0f, 1f), Tooltip("被ダメージ軽減割合。1で被ダメージ0(無敵相当)。")]

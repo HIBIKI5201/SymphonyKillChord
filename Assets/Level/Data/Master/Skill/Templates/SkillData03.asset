@@ -25,10 +25,15 @@ MonoBehaviour:
   - _id: 0
     _value: 2
     _displayFormat: 3
+  - _id: 14
+    _value: 0.5
+    _displayFormat: 2
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
   _skillEffectType: 3
   _skillTargetingType: 4
+  _statusEffectReapplyPolicy: 4
+  _skillNormalAttackDamagePolicy: 1
   _animationKey: Skill_Right

@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         Skill01 = 1,
         Skill02 = 2,
         Skill03 = 3,
+        Skill04 = 4,
         Skill05 = 5,
         Skill06 = 6,
         Skill07 = 7,

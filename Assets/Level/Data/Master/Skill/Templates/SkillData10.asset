@@ -22,13 +22,18 @@ MonoBehaviour:
   _tips: 
   _effectDisplayMode: 0
   _effectParameters:
-  - _id: 0
-    _value: 5
-    _displayFormat: 3
+  - _id: 9
+    _value: 0.3
+    _displayFormat: 2
+  - _id: 10
+    _value: 3
+    _displayFormat: 4
   _skillType: 01000000
   _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
-  _skillEffectType: 0
+  _skillEffectType: 10
   _skillTargetingType: 1
+  _statusEffectReapplyPolicy: 3
+  _skillNormalAttackDamagePolicy: 0
   _animationKey: 

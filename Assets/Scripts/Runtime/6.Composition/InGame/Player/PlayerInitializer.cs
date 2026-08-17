@@ -215,13 +215,18 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             SkillModuleContainer skillModuleContainer = ServiceLocator.GetInstance<SkillModuleContainer>();
-            if (skillModuleContainer == null || skillModuleContainer.SkillController == null)
+            if (skillModuleContainer == null ||
+                skillModuleContainer.SkillController == null ||
+                skillModuleContainer.PendingAttackEffectService == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SkillModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            Initialize(sceneDependencyContainer.InputComposition, skillModuleContainer.SkillController);
+            Initialize(
+                sceneDependencyContainer.InputComposition,
+                skillModuleContainer.SkillController,
+                skillModuleContainer.PendingAttackEffectService);
 
             InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             if (inGamePlayDirector != null && _player != null)
@@ -237,7 +242,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         /// <param name="inputComposition"> 入力Compositionです。 </param>
         /// <param name="skillController"> スキルControllerです。 </param>
-        public void Initialize(InputComposition inputComposition, SkillController skillController)
+        /// <param name="pendingAttackEffectService"> スキル攻撃の演出を管理するサービスです。 </param>
+        public void Initialize(
+            InputComposition inputComposition,
+            SkillController skillController,
+            PendingAttackEffectService pendingAttackEffectService)
         {
             if (_player == null)
             {
@@ -313,6 +322,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 musicSyncState,
                 targetSystemContainer.TargetAreaQuery,
                 _player.transform,
+                pendingAttackEffectService,
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
