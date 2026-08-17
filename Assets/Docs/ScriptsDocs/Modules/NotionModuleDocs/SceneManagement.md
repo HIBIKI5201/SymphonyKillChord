@@ -30,6 +30,8 @@
 | **`SceneTransitionService`** | Infrastructure | `ISceneTransitionService`実装。実際に`SceneLoader`（Unity）を呼び出す |
 | **`SceneTransitionInitializer`** | Composition | 上記スタック一式の構築・ServiceLocatorへの登録 |
 
+> ロード画面まわりのクラス（`ILoadingOperationExecutor`・`LoadingOperationExecutor`・`ILoadingSession`・`ILoadingSessionFactory`・`LoadingExecutionOptions`・`LoadingProgressRange`・`LoadingScreenController`・`LoadingScreenView`）は`Persistent/Load/`配下にある。シーン遷移と一体で動くため、独立したモジュール文書は設けず本書で扱う。
+
 ### 🧩 Composition初期化情報
 
 | 項目 | 内容 |
