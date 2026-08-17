@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> ロックオン対象（ターゲット）の登録・選択・現在位置取得を一元管理するモジュールです。旧Cameraモジュールに内包されていたロックオン機能がリファクタリングにより独立し、Camera・Player・Enemy・UI・Skillなど複数モジュールから利用されるハブ的な存在になっています。
+> ロックオン対象（ターゲット）の登録・選択・現在位置取得を一元管理するモジュールである。旧Cameraモジュールに内包されていたロックオン機能がリファクタリングにより独立し、Camera・Player・Enemy・UI・Skillなど複数モジュールから利用されるハブ的な存在になっている。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -29,7 +29,7 @@
 | **`TargetSystemInitializer`** | Composition | ターゲットシステムの依存解決とサービス登録を行う初期化クラス（`IDisposable`） |
 | **`TargetSystemInitializationModule`** | Composition | `TargetSystemInitializer`をInGame初期化ライフサイクルに統合するモジュール |
 
-> 現状、Domain層・Application層・InfraStructure層のクラスはありません。ターゲット選択ロジック（内積・距離による優先順位判定）はView層の`TargetingSystem`に実装されています。
+> 現状、Domain層・Application層・InfraStructure層のクラスはない。ターゲット選択ロジック（内積・距離による優先順位判定）はView層の`TargetingSystem`に実装されている。
 
 ### 🧩 Composition初期化情報
 
@@ -84,32 +84,33 @@ graph TD
 
 ### 📥 依存しているもの
 
-* なし
-  * *詳細*: Targetモジュールは他モジュールのDomain/Application型に依存しません。登録される`ITargetable`実装（`TransformTargetable`等）を介して間接的にキャラクター位置を扱うのみです。
+* **`Character&Battle`**
+  * *依存箇所*: `CharacterEntity`
+  * *詳細*: `TargetEntityRegistry`がターゲットIDと`CharacterEntity`を対応付け、`TargetAreaHit`が範囲判定の結果として`CharacterEntity`を返す
 
 ### 📤 依存されているもの
 
 * **`Camera`**
   * *参照箇所*: `ITargetSystemViewModel`
-  * *詳細*: ロックオン中の現在ターゲット位置取得や、ロックオン対象の有無判定に使用します。
+  * *詳細*: ロックオン中の現在ターゲット位置取得や、ロックオン対象の有無判定に使用する
 * **`Player`**
   * *参照箇所*: `TargetSystemController`, `ITargetableViewModel`
-  * *詳細*: `PlayerAttackController`が攻撃対象の解決に使用します。
+  * *詳細*: `PlayerAttackController`が攻撃対象の解決に使用する
 * **`Enemy`**
   * *参照箇所*: `ITargetable`
-  * *詳細*: 敵キャラクターがプレイヤー/カメラからロックオン対象として扱われるよう、自身を`TargetingSystem`へ登録します。
+  * *詳細*: 敵キャラクターがプレイヤー/カメラからロックオン対象として扱われるよう、自身を`TargetingSystem`へ登録する
 * **`UI`**
   * *参照箇所*: `TargetSystemController`
-  * *詳細*: `HUDEnemyHealthPresenter`が敵の体力表示のため対象情報を参照します。
+  * *詳細*: `HUDEnemyHealthPresenter`が敵の体力表示のため対象情報を参照する
 * **`Skill`**
   * *参照箇所*: `TargetSystemController`, `TargetAreaQuery`
-  * *詳細*: `SkillTargetResolver`がスキル発動時のターゲット解決と、範囲スキルの対象列挙に使用します。
+  * *詳細*: `SkillTargetResolver`がスキル発動時のターゲット解決と、範囲スキルの対象列挙に使用する
 * **`Battle`**
   * *参照箇所*: `TargetAreaQuery`
-  * *詳細*: `PlayerAttackController`が攻撃の当たり判定として扇形範囲の対象を取得します。
+  * *詳細*: `PlayerAttackController`が攻撃の当たり判定として扇形範囲の対象を取得する
 * **`UI`**
   * *参照箇所*: `ITargetBoundsViewModel`
-  * *詳細*: `EnemyDirectionIndicatorPresenter`が画面外の敵を指し示すため、対象のBoundsを参照します。
+  * *詳細*: `EnemyDirectionIndicatorPresenter`が画面外の敵を指し示すため、対象のBoundsを参照する
 
 ---
 
@@ -118,28 +119,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ③ Adaptor
-`TargetSystemController`がターゲット選択ViewModelとEntityレジストリを仲介し、他モジュールからの主要な窓口になります。`TargetEntityRegistry`がターゲットIDと`CharacterEntity`の対応を管理します。`TargetAreaQuery`は登録済みターゲットへの扇形範囲検索を提供し、攻撃判定と範囲スキルの対象列挙に使われます。
+`TargetSystemController`がターゲット選択ViewModelとEntityレジストリを仲介し、他モジュールからの主要な窓口になる。`TargetEntityRegistry`がターゲットIDと`CharacterEntity`の対応を管理する。`TargetAreaQuery`は登録済みターゲットへの扇形範囲検索を提供し、攻撃判定と範囲スキルの対象列挙に使われる。
 ### ④ View
-`TargetingSystem`がターゲットの登録・選択・位置取得を一元管理し、正面方向の内積優先→距離優先という選択アルゴリズムを実装します。`TransformTargetable`が実際のUnity `Transform`をラップして対象化します。
+`TargetingSystem`がターゲットの登録・選択・位置取得を一元管理し、正面方向の内積優先→距離優先という選択アルゴリズムを実装する。`TransformTargetable`が実際のUnity `Transform`をラップして対象化する。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-`TargetSystemInitializationModule`（Order 100、他モジュールより早期に初期化）が`TargetSystemInitializer`経由でターゲットシステムを構築し、`TargetSystemModuleContainer`として公開します。
+`TargetSystemInitializationModule`（Order 100、他モジュールより早期に初期化）が`TargetSystemInitializer`経由でターゲットシステムを構築し、`TargetSystemModuleContainer`として公開する。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しい対象種別を追加する場合は`ITargetable`を実装した新しいクラスを作成し、`TargetingSystem`に登録するだけで対応できます（Enumやswitch文への追記は不要）。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しい対象種別を追加する場合は`ITargetable`を実装した新しいクラスを作成し、`TargetingSystem`に登録するだけで対応できる（Enumやswitch文への追記は不要）。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けています。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① ターゲット登録フロー（敵出現時）
-敵がスポーンした際、自身をターゲットシステムへ登録します。
+敵がスポーンした際、自身をターゲットシステムへ登録する。
 
 ```mermaid
 sequenceDiagram
@@ -155,7 +156,7 @@ sequenceDiagram
 ```
 
 ### ② ターゲット選択フロー（ロックオン入力時）
-プレイヤーがロックオン入力を行った際、正面方向・距離に基づいて最適な対象を選択します。
+プレイヤーがロックオン入力を行った際、正面方向・距離に基づいて最適な対象を選択する。
 
 ```mermaid
 sequenceDiagram
@@ -174,7 +175,7 @@ sequenceDiagram
 
 ### ③ 範囲判定フロー（攻撃・範囲スキル）
 
-攻撃や範囲スキルは、コライダーではなく登録済みターゲットへの扇形クエリで対象を決めます。判定はXZ平面で行い、高低差は無視されます。
+攻撃や範囲スキルは、コライダーではなく登録済みターゲットへの扇形クエリで対象を決める。判定はXZ平面で行い、高低差は無視される。
 
 ```mermaid
 sequenceDiagram

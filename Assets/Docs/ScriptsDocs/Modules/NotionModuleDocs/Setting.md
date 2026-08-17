@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> アウトゲームの設定画面（音声・画面・キー設定タブ）を構築するモジュールです。ドメインロジックを持たない薄いUI構築層で、既存の音量管理クラス（Music/Persistentモジュール）へ直接バインドします。Titleシーンにも独立した音量設定UI（`VolumeSettingsTabView`）が別途存在し、本モジュールとは重複した実装になっています。
+> アウトゲームの設定画面（音声・画面・キー設定タブ）を構築するモジュールである。ドメインロジックを持たない薄いUI構築層で、既存の音量管理クラス（Music/Persistentモジュール）へ直接バインドする。Titleシーンにも独立した音量設定UI（`VolumeSettingsTabView`）が別途存在し、本モジュールとは重複した実装になっている。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -62,10 +62,10 @@ graph TD
 
 * **`Music` / `Persistent`**
   * *依存箇所*: `MusicPlayer`, `SoundEffectVolumeManager`, `VoiceVolumeManager`（いずれも具象クラス）
-  * *詳細*: `SettingComposition.Build()`がこれらを`ServiceLocator`から取得し、現在の音量を`AudioSettingData`の初期値として読み込み、変更イベントを各Managerの`SetVolume`へ直結します。
+  * *詳細*: `SettingComposition.Build()`がこれらを`ServiceLocator`から取得し、現在の音量を`AudioSettingData`の初期値として読み込み、変更イベントを各Managerの`SetVolume`へ直結する
 * **`Screen`**
   * *依存箇所*: `OutGameUIEvent`, `ScreenInitializer`が構築する`SettingContainer`
-  * *詳細*: Screenモジュールが用意したコンテナへ設定UIを構築します（Order 140、Screenの100より後）。
+  * *詳細*: Screenモジュールが用意したコンテナへ設定UIを構築する（Order 140、Screenの100より後）
 
 ### 📤 依存されているもの
 
@@ -78,28 +78,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ③ Adaptor
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ④ View
-`SettingBase`派生の汎用バインド可能コントロール（Slider/Toggle/DropDown）と、それらを組み立てる`AudioConfig`/`ScreenConfig`というScriptableObjectビルダーを実装します。
+`SettingBase`派生の汎用バインド可能コントロール（Slider/Toggle/DropDown）と、それらを組み立てる`AudioConfig`/`ScreenConfig`というScriptableObjectビルダーを実装する。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-`SettingComposition`（Order 140）が音量管理クラス群を`ServiceLocator`から取得し、`AudioConfig`/`ScreenConfig`のUI構築を呼び出します。
+`SettingComposition`（Order 140）が音量管理クラス群を`ServiceLocator`から取得し、`AudioConfig`/`ScreenConfig`のUI構築を呼び出す。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しい設定タブを追加する場合は`Category` Enumへ値を追加し、対応する`Config`クラス（`SettingBase`派生）を実装、`SettingComposition`から呼び出す形になります。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しい設定タブを追加する場合は`Category` Enumへ値を追加し、対応する`Config`クラス（`SettingBase`派生）を実装、`SettingComposition`から呼び出す形になる。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けています。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① 音量設定変更フロー
-設定画面のスライダー操作が、直接音量管理クラスへ反映されます。
+設定画面のスライダー操作が、直接音量管理クラスへ反映される。
 
 ```mermaid
 sequenceDiagram

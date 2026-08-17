@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> ステージのクリア条件・失敗条件・サブミッション（評価条件）の判定、進行状況の記録、クリア時のランク算出を司るモジュールです。リザルト画面（Result）は別モジュールですが、`MissionEvaluationResult`を介して密接に連携します。
+> ステージのクリア条件・失敗条件・サブミッション（評価条件）の判定、進行状況の記録、クリア時のランク算出を司るモジュールである。リザルト画面（Result）は別モジュールであるが、`MissionEvaluationResult`を介して密接に連携する。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -43,7 +43,7 @@
 | **`InGameMissionInitializer`** | Composition | ミッション関連オブジェクトの構築・登録・破棄を担当 |
 | **`MissionModuleContainer`** | Composition | `MissionRuntimeService`/`MissionEventController`/`MissionProgressRecorderController`をServiceLocatorへ公開するContainer |
 
-> リザルト画面（`StageResultController`/`StageResultPresenter`/`StageResultDTO`/`StageRankCalculator`呼び出し）は別モジュール「Result」に属しますが、`MissionEvaluationResult`を直接消費するため本ページでも参照します。
+> リザルト画面（`StageResultController`/`StageResultPresenter`/`StageResultDTO`/`StageRankCalculator`呼び出し）は別モジュール「Result」に属するが、`MissionEvaluationResult`を直接消費するため本ページでも参照する。
 
 ### 🧩 Composition初期化情報
 
@@ -100,22 +100,22 @@ graph TD
 
 * **`Player`**
   * *依存箇所*: `CharacterEntity.OnHealthChanged`, `PlayerAttackController.OnAttackExecuted`
-  * *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をサブミッション評価条件の記録に使います。
+  * *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をサブミッション評価条件の記録に使う
 
 ### 📤 依存されているもの
 
 * **`Enemy`**
   * *参照箇所*: `MissionEventController.NotifyEnemyKilled`
-  * *詳細*: `EnemyLifeCycle`/`BossLifeCycle`が敵撃破時に呼び出します。ただし`ServiceLocator.GetInstance<MissionEventController>()`による直接取得であり、`MissionModuleContainer`を介していません。
+  * *詳細*: `EnemyLifeCycle`/`BossLifeCycle`が敵撃破時に呼び出す。ただし`ServiceLocator.GetInstance<MissionEventController>()`による直接取得であり、`MissionModuleContainer`を介していない
 * **`Sequence`**
   * *参照箇所*: `MissionModuleContainer.MissionRuntimeService`, `MissionEvaluationResult`
-  * *詳細*: `SequenceInitializationModule`が`MissionRuntimeService.OnMissionFinished`を購読し、クリア時に評価結果を生成してセーブ・リザルト表示へ橋渡しします（Order 1000、Missionの600より後に初期化）。
+  * *詳細*: `SequenceInitializationModule`が`MissionRuntimeService.OnMissionFinished`を購読し、クリア時に評価結果を生成してセーブ・リザルト表示へ橋渡しする（Order 1000、Missionの600より後に初期化）
 * **`Persistent/Savedata`**
   * *参照箇所*: `MissionEvaluationResult`（`StageProgressSaveDataService.SaveClearAsync`の引数）
-  * *詳細*: クリア時の評価結果からステージクリア状態・達成サブミッションIDを永続化します。
+  * *詳細*: クリア時の評価結果からステージクリア状態・達成サブミッションIDを永続化する
 * **`Result`**
   * *参照箇所*: `MissionEvaluationResult`, `StageRankCalculator`
-  * *詳細*: `StageResultPresenter.PresentVictory`が評価結果を受け取り`StageRankCalculator.Calculate`でランクを算出し表示します。
+  * *詳細*: `StageResultPresenter.PresentVictory`が評価結果を受け取り`StageRankCalculator.Calculate`でランクを算出し表示す
 
 ---
 
@@ -124,17 +124,17 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-ミッション定義（`MissionDefinition`）、進行状態（`MissionProgress`）、クリア/失敗/評価条件の抽象と具象実装、ランク算出（`StageRankCalculator`）といった、ミッションシステムの中核データ・ルールを保持します。
+ミッション定義（`MissionDefinition`）、進行状態（`MissionProgress`）、クリア/失敗/評価条件の抽象と具象実装、ランク算出（`StageRankCalculator`）といった、ミッションシステムの中核データ・ルールを保持する。
 ### ② Application
-`MissionRuntimeService`を中心に、条件判定（`MissionRuleRunner`）・評価結果構築（`MissionEvaluationRunner`）・進行更新の各ユースケースを実装します。ServiceLocatorに一切依存しない、コンストラクタ注入のみのピュアな構成です。
+`MissionRuntimeService`を中心に、条件判定（`MissionRuleRunner`）・評価結果構築（`MissionEvaluationRunner`）・進行更新の各ユースケースを実装する。ServiceLocatorに一切依存しない、コンストラクタ注入のみのピュアな構成である。
 ### ③ Adaptor
-Compositionからの通知窓口`MissionEventController`、Player側イベントを購読して実績を記録する`MissionProgressRecorderController`、HUDへのデータ橋渡しを行う`MissionHudPresenter`、およびOutGame側のミッション選択状態を保持します。
+Compositionからの通知窓口`MissionEventController`、Player側イベントを購読して実績を記録する`MissionProgressRecorderController`、HUDへのデータ橋渡しを行う`MissionHudPresenter`、およびOutGame側のミッション選択状態を保持する。
 ### ④ View
-`MissionLoopView`が毎フレーム`MissionEventController.Tick`を駆動し、`MissionHudView`/`MissionHudViewModel`がHUD表示のMVVMチェーンを構成します。
+`MissionLoopView`が毎フレーム`MissionEventController.Tick`を駆動し、`MissionHudView`/`MissionHudViewModel`がHUD表示のMVVMチェーンを構成する。
 ### ⑤ Infrastructure
-`MissionDefinitionAsset`が`[SerializeReference, SubclassSelector]`でクリア/失敗/評価条件をインスペクタから多態的に構成できるようにし、`Create()`でDomainオブジェクトへ変換します。
+`MissionDefinitionAsset`が`[SerializeReference, SubclassSelector]`でクリア/失敗/評価条件をインスペクタから多態的に構成できるようにし、`Create()`でDomainオブジェクトへ変換する。
 ### ⑥ Composition
-`InGameMissionInitializer`（Order 600）がミッション関連オブジェクトを構築し、`Ready()`で`PlayerModuleContainer`から`PlayerEntity`/`PlayerAttackController`を取得して`MissionProgressRecorderController`を紐付けます。
+`InGameMissionInitializer`（Order 600）がミッション関連オブジェクトを構築し、`Ready()`で`PlayerModuleContainer`から`PlayerEntity`/`PlayerAttackController`を取得して`MissionProgressRecorderController`を紐付ける。
 
 ## 🔌 拡張ポイント
 
@@ -145,10 +145,10 @@ Compositionからの通知窓口`MissionEventController`、Player側イベント
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローごとに分けて記述する。
 
 ### ① ミッション開始フロー（ステージ読み込み時）
-アウトゲームで選択したミッションが、インゲーム側で構築されます。
+アウトゲームで選択したミッションが、インゲーム側で構築される。
 
 ```mermaid
 sequenceDiagram
@@ -169,7 +169,7 @@ sequenceDiagram
 ```
 
 ### ② 敵撃破→クリア判定→保存→リザルト表示フロー
-敵を撃破しクリア条件が満たされると、評価結果が生成・保存され、リザルト画面へ反映されます。
+敵を撃破しクリア条件が満たされると、評価結果が生成・保存され、リザルト画面へ反映される。
 
 ```mermaid
 sequenceDiagram
@@ -196,7 +196,7 @@ sequenceDiagram
 ```
 
 ### ③ サブミッション進捗のHUD表示フロー（毎フレーム／イベント時）
-プレイ中、達成済み・挑戦中・未達成の状態がリアルタイムでHUDに反映されます（保存はされない、表示専用の再計算）。
+プレイ中、達成済み・挑戦中・未達成の状態がリアルタイムでHUDに反映される（保存はされない、表示専用の再計算）。
 
 ```mermaid
 sequenceDiagram

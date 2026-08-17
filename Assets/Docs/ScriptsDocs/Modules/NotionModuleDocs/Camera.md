@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲーム中のカメラ追従・視点操作・ロックオン演出を司るモジュールです。ロックオン対象の選択・管理そのものは、別モジュール「Target」に分離されています。
+> インゲーム中のカメラ追従・視点操作・ロックオン演出を司るモジュールである。ロックオン対象の選択・管理そのものは、別モジュール「Target」に分離されている。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -30,7 +30,7 @@
 | **`CameraInitializer`** | Composition (Persistent) | `ICameraTransform`を実装し、常駐カメラを初期化 |
 | **`ICameraTransform`** | Composition (Persistent) | カメラの座標/向きを他モジュールへ公開する抽象 |
 
-計算系クラスは `View/InGame/Camera/Calculation/` 配下にまとまっています。
+計算系クラスは `View/InGame/Camera/Calculation/` 配下にまとまっている。
 
 ### 🧩 Composition初期化情報
 
@@ -40,7 +40,7 @@
 | **Order** | 600（InGame）／40（Persistent） |
 | **公開する ServiceLocator登録型** | `CameraInitializer`が`ICameraTransform`として登録（`LocateTypeEnum.Locator`） |
 
-`CameraSystemInitializer.Ready()`は`TargetSystemModuleContainer`をServiceLocatorから取得します。取得できない場合は初期化を失敗として扱うため、Targetモジュールより後に初期化される必要があります。
+`CameraSystemInitializer.Ready()`は`TargetSystemModuleContainer`をServiceLocatorから取得する。取得できない場合は初期化を失敗として扱うため、Targetモジュールより後に初期化される必要がある。
 
 ---
 
@@ -66,31 +66,36 @@ graph TD
         PlayerComposition["Composition<br>PlayerInitializer"]
     end
 
+    subgraph BattleModule [Battle モジュール]
+        BattleDomain["Domain<br>EOnTakeDamage"]
+    end
+
     %% 依存関係
     InputView -->|視点・攻撃・ロックオン入力| View
     View -->|ターゲット位置の取得・切替| TargetAdaptor
     Composition --> View
     PlayerComposition -->|向きのリセット要求| View
     PlayerComposition -->|カメラTransformの取得| Composition
+    BattleDomain -->|被弾イベントの通知| View
 ```
 
 ### 📥 依存しているもの
 
 * **`Persistent/Input`**
   * *依存箇所*: `PlayerInputView`、`MobileInput`（Androidのみ）
-  * *詳細*: 視点移動・移動・ロックオン・攻撃の各入力イベントを購読します。Android実行時は`CameraSystemInitializer`が`MobileInput`と`PlayerInputView`を結線します。
+  * *詳細*: 視点移動・移動・ロックオン・攻撃の各入力イベントを購読する。Android実行時は`CameraSystemInitializer`が`MobileInput`と`PlayerInputView`を結線する
 * **`InGame/Target`**
   * *依存箇所*: `TargetSystemModuleContainer`、`ITargetSystemViewModel`
-  * *詳細*: ロックオン対象の選択・切替・現在位置の取得をTargetモジュールへ委譲します。対象の登録・選択ロジックはCameraモジュールの外にあります。
+  * *詳細*: ロックオン対象の選択・切替・現在位置の取得をTargetモジュールへ委譲する。対象の登録・選択ロジックはCameraモジュールの外にある
 * **`InGame/Battle`**
   * *依存箇所*: `EOnTakeDamage`
-  * *詳細*: 被弾イベントを購読し、攻撃してきた相手へオートロックオンを向け直します。
+  * *詳細*: 被弾イベントを購読し、攻撃してきた相手へオートロックオンを向け直す
 
 ### 📤 依存されているもの
 
 * **`InGame/Player`**
   * *参照箇所*: `PlayerInitializer`
-  * *詳細*: リスポーンや初期配置の際に`CameraSystemView.ResetOrientation()`でカメラの向きを揃えます。また`ICameraTransform`を取得してカメラ基準の移動方向を求めます。
+  * *詳細*: リスポーンや初期配置の際に`CameraSystemView.ResetOrientation()`でカメラの向きを揃える。また`ICameraTransform`を取得してカメラ基準の移動方向を求める
 
 ---
 
@@ -99,29 +104,29 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ③ Adaptor
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ④ View
-`CameraConfig`によるパラメータ管理、`CameraSystemView`による入力購読とTransform反映、`Calculation/`配下の計算クラス群を持ちます。
+`CameraConfig`によるパラメータ管理、`CameraSystemView`による入力購読とTransform反映、`Calculation/`配下の計算クラス群を持つ。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-InGameシーンの`CameraSystemInitializer`が計算クラス群の生成とTarget/Inputモジュールとの結線を行い、Persistentシーンの`CameraInitializer`が`ICameraTransform`として常駐カメラを公開します。
+InGameシーンの`CameraSystemInitializer`が計算クラス群の生成とTarget/Inputモジュールとの結線を行い、Persistentシーンの`CameraInitializer`が`ICameraTransform`として常駐カメラを公開する。
 
 ## 🔌 拡張ポイント
 
-ポリモーフィックな拡張点（`SubclassSelector`等）はありません。新しい視点モードを追加する場合は、計算クラスを`Calculation/`へ追加し、`CameraSystemView.Tick()`から呼び出す形になります。パラメータの追加は`CameraConfig`へのフィールド追加で完結します。
+ポリモーフィックな拡張点（`SubclassSelector`等）はない。新しい視点モードを追加する場合は、計算クラスを`Calculation/`へ追加し、`CameraSystemView.Tick()`から呼び出す形になる。パラメータの追加は`CameraConfig`へのフィールド追加で完結する。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けています。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① 通常追従・回転フロー（毎フレーム）
 
-`UpdateModeEnum`で選んだタイミング（Update / FixedUpdate / LateUpdate）で1フレーム分の状態を組み立て、Transformへ反映します。
+`UpdateModeEnum`で選んだタイミング（Update / FixedUpdate / LateUpdate）で1フレーム分の状態を組み立て、Transformへ反映する。
 
 ```mermaid
 sequenceDiagram
@@ -144,7 +149,7 @@ sequenceDiagram
 
 ### ② ロックオン開始フロー（入力・被弾時）
 
-攻撃入力ではオートロックオン、ロックオン入力ではマニュアルロックオンへ遷移します。マニュアル中はオートによる上書きが起きません。
+攻撃入力ではオートロックオン、ロックオン入力ではマニュアルロックオンへ遷移する。マニュアル中はオートによる上書きが起きない。
 
 ```mermaid
 sequenceDiagram
@@ -161,7 +166,7 @@ sequenceDiagram
 
 ### ③ オートロックオン解除フロー
 
-オートロックオンは次の3条件のいずれかで解除されます。マニュアルロックオンはこの判定の対象外です。
+オートロックオンは次の3条件のいずれかで解除される。マニュアルロックオンはこの判定の対象外である。
 
 | 条件 | 判定 |
 | --- | --- |

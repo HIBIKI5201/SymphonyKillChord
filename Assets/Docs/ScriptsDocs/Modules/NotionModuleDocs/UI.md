@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲームのHUD（プレイヤー体力バー、敵体力バー、ロックオン中の敵体力表示、スキル入力進捗インジケータ）を司るモジュールです。ドメイン・アプリケーション層は持たず、他モジュール（Character&Battle、Target、Skill）のイベント・状態を表示に変換するだけの終端モジュールです。
+> インゲームのHUD（プレイヤー体力バー、敵体力バー、ロックオン中の敵体力表示、スキル入力進捗インジケータ）を司るモジュールである。ドメイン・アプリケーション層は持たず、他モジュール（Character&Battle、Target、Skill）のイベント・状態を表示に変換するだけの終端モジュールである。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -45,7 +45,7 @@
 | **`ACLikeRhythmGuideInitializer`** | Composition | AC風リズムガイドの初期化 |
 | **`PlatformSpecificUI`** | Composition | プラットフォームに応じたUIの表示切替 |
 
-> `PlayerHealthHudPresenter`（Player/Adaptorモジュール）・`EnemyHealthHudPresenter`（Enemy/Adaptorモジュール）は本モジュールのクラスではなく、それぞれPlayer/Enemyモジュールが本モジュールの`HealthHudDTO`/`IHealthHudViewModel`契約を利用して実装しています。
+> `PlayerHealthHudPresenter`（Player/Adaptorモジュール）・`EnemyHealthHudPresenter`（Enemy/Adaptorモジュール）は本モジュールのクラスではなく、それぞれPlayer/Enemyモジュールが本モジュールの`HealthHudDTO`/`IHealthHudViewModel`契約を利用して実装している。
 
 ### 🧩 Composition初期化情報
 
@@ -92,18 +92,18 @@ graph TD
 
 * **`Character & Battle`**
   * *依存箇所*: `CharacterEntity.OnHealthChanged`（`IDefender`）
-  * *詳細*: `PlayerHealthHudPresenter`/`EnemyHealthHudPresenter`（それぞれPlayer/Enemyモジュール側に実装）がこのイベントを購読し、本モジュールの`HealthHudDTO`/`IHealthHudViewModel`へ変換します。
+  * *詳細*: `PlayerHealthHudPresenter`/`EnemyHealthHudPresenter`（それぞれPlayer/Enemyモジュール側に実装）がこのイベントを購読し、本モジュールの`HealthHudDTO`/`IHealthHudViewModel`へ変換する
 * **`Target`**
   * *依存箇所*: `TargetSystemController.TryGetCurrentTargetEntity`/`TryGetCurrentTargetPosition`
-  * *詳細*: `HUDEnemyHealthPresenter`が毎フレームポーリングし、現在ロックオン中の敵の体力・位置を取得します（ロックオン変更イベントは無く、ポーリング方式）。
+  * *詳細*: `HUDEnemyHealthPresenter`が毎フレームポーリングし、現在ロックオン中の敵の体力・位置を取得する（ロックオン変更イベントは無く、ポーリング方式）
 * **`Skill`**
   * *依存箇所*: `SkillDefinition`, `BeatType`, `SkillBeatVisualSetting`
-  * *詳細*: `SkillInputProgressUIInitializer.CreateInputProgressRow`が進捗行の見た目（ステップ数等）を生成するために参照します。実際の入力判定ロジック（`SkillRhythmState`/`SkillCheckService`）はSkillモジュール側が保持します。
+  * *詳細*: `SkillInputProgressUIInitializer.CreateInputProgressRow`が進捗行の見た目（ステップ数等）を生成するために参照する。実際の入力判定ロジック（`SkillRhythmState`/`SkillCheckService`）はSkillモジュール側が保持する
 
 ### 📤 依存されているもの
 
 * なし
-  * *詳細*: 本モジュールは表示の終端であり、`*ModuleContainer`も公開していないため、他モジュールから参照されることはありません。Player/Enemy/Skillの各モジュールが本モジュールの公開クラス・メソッドを一方的に呼び出す構造です。
+  * *詳細*: 本モジュールは表示の終端であり、`*ModuleContainer`も公開していないため、他モジュールから参照されることはない。Player/Enemy/Skillの各モジュールが本モジュールの公開クラス・メソッドを一方的に呼び出す構造である
 
 ---
 
@@ -112,25 +112,25 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ③ Adaptor
-`HealthHudDTO`/`IHealthHudViewModel`/`IHealthHudPresenter`というHPバー共通契約と、ロックオン敵体力用の`HUDEnemyHealthPresenter`/`HUDEnemyHealthDTO`を定義します。画面外の敵を指し示す`EnemyDirectionIndicatorPresenter`も同層にあり、Targetモジュールの`ITargetBoundsViewModel`から対象のBoundsを取得します。
+`HealthHudDTO`/`IHealthHudViewModel`/`IHealthHudPresenter`というHPバー共通契約と、ロックオン敵体力用の`HUDEnemyHealthPresenter`/`HUDEnemyHealthDTO`を定義する。画面外の敵を指し示す`EnemyDirectionIndicatorPresenter`も同層にあり、Targetモジュールの`ITargetBoundsViewModel`から対象のBoundsを取得する。
 ### ④ View
-二層アニメーション付きのHPバー（`HealthHudView`）、ロックオン敵体力ウィジェット（`HUDEnemyHealthView`）、画面外の敵方向を示す3Dマーカー（`EnemyDirectionIndicatorView`）を担当します。マーカーの表示数やフェードは`EnemyDirectionIndicatorConfig`で調整します。
+二層アニメーション付きのHPバー（`HealthHudView`）、ロックオン敵体力ウィジェット（`HUDEnemyHealthView`）、画面外の敵方向を示す3Dマーカー（`EnemyDirectionIndicatorView`）を担当する。マーカーの表示数やフェードは`EnemyDirectionIndicatorConfig`で調整する。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-`HUDEnemyHealthInitializer`（Order 650）のみが正式な初期化ライフサイクルに参加し、`InGameHudInitializer`/`SkillInputProgressUIInitializer`はUnityの`Awake()`タイミングのみに依存する素朴な自己登録で動作します。
+`HUDEnemyHealthInitializer`（Order 650）のみが正式な初期化ライフサイクルに参加し、`InGameHudInitializer`/`SkillInputProgressUIInitializer`はUnityの`Awake()`タイミングのみに依存する素朴な自己登録で動作する。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しいHUD要素を追加する場合は、対応するDTO/ViewModel/Viewの3点セットを既存パターンに倣って新規作成する形になります。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しいHUD要素を追加する場合は、対応するDTO/ViewModel/Viewの3点セットを既存パターンに倣って新規作成する形になる。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けています。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① プレイヤーHPバー更新フロー（被ダメージ時）
 

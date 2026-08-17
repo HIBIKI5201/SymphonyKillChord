@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> ステージマップ（ノードグラフ）の表示・選択、クリア状態に基づくステージ解放、および選択ステージへの出撃（Sortie）を司るアウトゲームモジュールです。バトル出撃・シナリオ出撃・チュートリアル自動出撃という3種類の出撃経路を持ちます。
+> ステージマップ（ノードグラフ）の表示・選択、クリア状態に基づくステージ解放、および選択ステージへの出撃（Sortie）を司るアウトゲームモジュールである。バトル出撃・シナリオ出撃・チュートリアル自動出撃という3種類の出撃経路を持つ。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -113,28 +113,28 @@ graph TD
 
 * **`Title`**
   * *依存箇所*: `TutorialSortieRequestState`
-  * *詳細*: Titleが初回起動時等に登録・リクエストした一発フラグを`StageSelectInitializer.Ready()`が消費し、チュートリアルステージへ自動出撃します。
+  * *詳細*: Titleが初回起動時等に登録・リクエストした一発フラグを`StageSelectInitializer.Ready()`が消費し、チュートリアルステージへ自動出撃する
 * **`Mission`**
   * *依存箇所*: `SelectedMissionState`, `OutGameMissionSelectController`
-  * *詳細*: バトル出撃時に選択ステージの`MissionDefinition`をミッション選択状態へ設定します。
+  * *詳細*: バトル出撃時に選択ステージの`MissionDefinition`をミッション選択状態へ設定する
 * **`Scenario`**
   * *依存箇所*: `SelectedScenarioState`
-  * *詳細*: シナリオ種別のステージ出撃時に、選択シナリオIDを設定します。
+  * *詳細*: シナリオ種別のステージ出撃時に、選択シナリオIDを設定する
 * **`Persistent/Savedata`**
   * *依存箇所*: `StageProgressData`, `SaveData`
-  * *詳細*: `SaveDataClearStageRepository`がクリア済みステージ一覧を読み込み、`StageSelectOpenUseCase`が画面表示時に一括反映します。
+  * *詳細*: `SaveDataClearStageRepository`がクリア済みステージ一覧を読み込み、`StageSelectOpenUseCase`が画面表示時に一括反映す
 
 ### 📤 依存されているもの
 
 * **`Enemy`**
   * *参照箇所*: `SelectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionId`
-  * *詳細*: `EnemyInitializer`（Order 700）が共通のWave定義リポジトリからステージ固有の定義をID検索するために参照します。選択が無い場合やIDが未登録の場合は初期化に失敗します。
+  * *詳細*: `EnemyInitializer`（Order 700）が共通のWave定義リポジトリからステージ固有の定義をID検索するために参照する。選択が無い場合やIDが未登録の場合は初期化に失敗する
 * **`InGame Bootstrap`**
   * *参照箇所*: `SelectedBattleStageState.HasSelectedBattleStage`, `BattleSceneName`
-  * *詳細*: `IngameComposition`がInGameシーン起動時にこの状態を読み取り、バトルシーンを追加ロードします。選択が無い場合は初期化が失敗します。
+  * *詳細*: `IngameComposition`がInGameシーン起動時にこの状態を読み取り、バトルシーンを追加ロードする。選択が無い場合は初期化が失敗する
 * **`Result`**
   * *参照箇所*: `SelectedBattleStageState`
-  * *詳細*: リザルト画面がクリアデータの書き戻し等に選択中ステージ情報を参照します。
+  * *詳細*: リザルト画面がクリアデータの書き戻し等に選択中ステージ情報を参照する
 
 ---
 
@@ -143,28 +143,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-ステージの識別（`StageId`）、種別（`StageType`）、状態（`StageStatus`）、報酬（`StageReward`）、接続関係（`StageNodeConnection`）、そして全体を束ねる集約`StageTree`を保持します。重複IDや複数チュートリアルノードは構築時に例外で検出します。
+ステージの識別（`StageId`）、種別（`StageType`）、状態（`StageStatus`）、報酬（`StageReward`）、接続関係（`StageNodeConnection`）、そして全体を束ねる集約`StageTree`を保持する。重複IDや複数チュートリアルノードは構築時に例外で検出する。
 ### ② Application
-ステージクリア時の状態更新（`StageProgressService`）、画面表示時のセーブデータ同期（`StageSelectOpenUseCase`）、および出撃種別に応じた分岐処理（`OutGameSortieUseCase`）を実装します。
+ステージクリア時の状態更新（`StageProgressService`）、画面表示時のセーブデータ同期（`StageSelectOpenUseCase`）、および出撃種別に応じた分岐処理（`OutGameSortieUseCase`）を実装する。
 ### ③ Adaptor
-ノード選択・詳細表示を仲介する`StageSelectController`、クロスシーン状態（`SelectedBattleStageState`、`TutorialSortieRequestState`）、出撃要求の薄いパススルー（`OutGameSortieController`）を定義します。
+ノード選択・詳細表示を仲介する`StageSelectController`、クロスシーン状態（`SelectedBattleStageState`、`TutorialSortieRequestState`）、出撃要求の薄いパススルー（`OutGameSortieController`）を定義する。
 ### ④ View
-ステージ詳細画面（`StageDetailScreenView`）、ノード（`StageNodeView`）、接続線アニメーション（`StageNodeConnectionView`）というUI Toolkitコンポーネント群を担当します。画面のコンテナ自体（表示/非表示の切り替え）はScreenモジュールが所有し、StageSelectはその中身を構築します。
+ステージ詳細画面（`StageDetailScreenView`）、ノード（`StageNodeView`）、接続線アニメーション（`StageNodeConnectionView`）というUI Toolkitコンポーネント群を担当する。画面のコンテナ自体（表示/非表示の切り替え）はScreenモジュールが所有し、StageSelectはその中身を構築する。
 ### ⑤ Infrastructure
-`BattleStageAsset`/`ScenarioStageAsset`がステージ内容、`StageBindAsset`が接続と進行方法、`StageTreeAsset`が全体構成を保持します。`SaveDataClearStageRepository`はクリア済みステージIDをセーブデータから取得します。
+`BattleStageAsset`/`ScenarioStageAsset`がステージ内容、`StageBindAsset`が接続と進行方法、`StageTreeAsset`が全体構成を保持する。`SaveDataClearStageRepository`はクリア済みステージIDをセーブデータから取得する。
 ### ⑥ Composition
-`StageSelectInitializer`（Order 110）がステージマップ構築・出撃仲介・チュートリアル自動出撃トリガーを担当し、`OutGameSortieInitializer`（Order 20）が出撃ユースケース一式を構築します。
+`StageSelectInitializer`（Order 110）がステージマップ構築・出撃仲介・チュートリアル自動出撃トリガーを担当し、`OutGameSortieInitializer`（Order 20）が出撃ユースケース一式を構築する。
 
 ## 🔌 拡張ポイント
 
-> 新しいバトルまたはシナリオステージは対応する具象Assetを作成し、`StageBindAsset`と`StageTreeAsset`へ登録するデータ追加のみで対応できます。接続元と接続先のステージ種別の組み合わせに制限はありません。
+> 新しいバトルまたはシナリオステージは対応する具象Assetを作成し、`StageBindAsset`と`StageTreeAsset`へ登録するデータ追加のみで対応できる。接続元と接続先のステージ種別の組み合わせに制限はない。
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローごとに分けて記述する。
 
 ### ① 通常バトル出撃フロー（ステージ選択→戦闘準備画面）
-プレイヤーがステージノードを選択し、出撃ボタンを押すまでの流れです。
+プレイヤーがステージノードを選択し、出撃ボタンを押すまでの流れである。
 
 ```mermaid
 sequenceDiagram
@@ -188,7 +188,7 @@ sequenceDiagram
 ```
 
 ### ② チュートリアル自動出撃フロー（初回起動時）
-Titleが要求したフラグをStageSelectが消費し、戦闘準備画面を経由せず直接出撃します。
+Titleが要求したフラグをStageSelectが消費し、戦闘準備画面を経由せず直接出撃する。
 
 ```mermaid
 sequenceDiagram

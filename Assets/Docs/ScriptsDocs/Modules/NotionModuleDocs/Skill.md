@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> 戦闘中のスキル発動を司るモジュールです。リズムコマンドの入力判定、クールダウン管理、効果の実行、発動状況のUI表示までを担当します。装備スキルの編成（SkillBuild）とスキルツリーの解放（SkillTree）は、別モジュールへ分離されました。
+> 戦闘中のスキル発動を司るモジュールである。リズムコマンドの入力判定、クールダウン管理、効果の実行、発動状況のUI表示までを担当する。装備スキルの編成（SkillBuild）とスキルツリーの解放（SkillTree）は、別モジュールへ分離されました。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -106,28 +106,28 @@ graph TD
 
 * **`Music`**
   * *依存箇所*: `MusicSyncModuleContainer`
-  * *詳細*: リズムコマンドの判定に拍タイミングを使用します。
+  * *詳細*: リズムコマンドの判定に拍タイミングを使用する
 * **`Target`**
   * *依存箇所*: `TargetSystemModuleContainer`（`TargetAreaQuery`を含む）
-  * *詳細*: `SkillTargetResolver`が単体・範囲スキルの対象を解決します。
+  * *詳細*: `SkillTargetResolver`が単体・範囲スキルの対象を解決する
 * **`Player`**
   * *依存箇所*: `PlayerModuleContainer`
-  * *詳細*: `SkillAttackController`がスキル由来の攻撃を実行します。
+  * *詳細*: `SkillAttackController`がスキル由来の攻撃を実行する
 * **`SkillBuild`**
   * *依存箇所*: `SkillBuildDefinition`
-  * *詳細*: 装備中のスキル構成を取得し、インゲームで発動可能なスキルを決めます。
+  * *詳細*: 装備中のスキル構成を取得し、インゲームで発動可能なスキルを決める
 * **`UI`**
   * *依存箇所*: `SkillInputProgressUIInitializer`, `SkillCrosshairProgressUIInitializer`, `SkillListUIInitializer`
-  * *詳細*: コマンド入力の進捗表示UIを生成します。
+  * *詳細*: コマンド入力の進捗表示UIを生成する
 
 ### 📤 依存されているもの
 
 * **`Mission`**
   * *参照箇所*: `SkillModuleContainer`
-  * *詳細*: `InGameMissionInitializer`がスキル発動を購読し、ミッション条件の達成判定に使用します。
+  * *詳細*: `InGameMissionInitializer`がスキル発動を購読し、ミッション条件の達成判定に使用する
 * **`Player`**
   * *参照箇所*: `SkillModuleContainer`
-  * *詳細*: `PlayerInitializer`がスキル発動と通常攻撃の結線に使用します。
+  * *詳細*: `PlayerInitializer`がスキル発動と通常攻撃の結線に使用する
 
 ---
 
@@ -136,17 +136,17 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-スキル定義（`SkillDefinition`）、発動に必要な入力パターン（`SkillPattern`）、入力履歴（`SkillRhythmState`）、効果の定義（`SkillEffectSpec`）とクールダウン時間を保持します。
+スキル定義（`SkillDefinition`）、発動に必要な入力パターン（`SkillPattern`）、入力履歴（`SkillRhythmState`）、効果の定義（`SkillEffectSpec`）とクールダウン時間を保持する。
 ### ② Application
-リズムコマンドの正誤判定（`SkillCheckService`）、発動判定と実行（`SkillUseCase`）、効果種別から実行器を引く解決テーブル（`SkillEffectExecutorResolver`）を実装します。
+リズムコマンドの正誤判定（`SkillCheckService`）、発動判定と実行（`SkillUseCase`）、効果種別から実行器を引く解決テーブル（`SkillEffectExecutorResolver`）を実装する。
 ### ③ Adaptor
-発動制御（`SkillExecutionController`）、クールダウン管理（`SkillCooldownState`）、ターゲット解決（`SkillTargetResolver`）、結果通知（`SkillResultPresenter`）を担当します。`SkillUI/`配下に入力進捗の表示制御がまとまっています。
+発動制御（`SkillExecutionController`）、クールダウン管理（`SkillCooldownState`）、ターゲット解決（`SkillTargetResolver`）、結果通知（`SkillResultPresenter`）を担当する。`SkillUI/`配下に入力進捗の表示制御がまとまっている。
 ### ④ View
-発動結果の表示（`SkillResultView`）と、コマンド入力の進捗表示（クロスヘア進捗・ガイド・装備スキル一覧）を担当します。拍アイコンの見た目は設定クラスでInspectorから調整できます。
+発動結果の表示（`SkillResultView`）と、コマンド入力の進捗表示（クロスヘア進捗・ガイド・装備スキル一覧）を担当する。拍アイコンの見た目は設定クラスでInspectorから調整できる。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。スキル定義のアセットはマスターデータ側から供給されます。
+当モジュールでは使用していない。スキル定義のアセットはマスターデータ側から供給される。
 ### ⑥ Composition
-`SkillInitializer`（Order 450）がスキル発動まわりを構築し、`SkillModuleContainer`として公開します。
+`SkillInitializer`（Order 450）がスキル発動まわりを構築し、`SkillModuleContainer`として公開する。
 
 ## 🔌 拡張ポイント
 
@@ -157,11 +157,11 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けています。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① スキル発動フロー（リズムコマンド入力）
 
-拍に合わせた入力列がスキルのパターンと一致したとき、クールダウンとターゲットを確認して効果を実行します。
+拍に合わせた入力列がスキルのパターンと一致したとき、クールダウンとターゲットを確認して効果を実行する。
 
 ```mermaid
 sequenceDiagram
@@ -190,7 +190,7 @@ sequenceDiagram
 
 ### ② 入力進捗の表示フロー
 
-入力途中の状態を、クロスヘア・ガイド・装備スキル一覧の3か所へ同時に反映します。
+入力途中の状態を、クロスヘア・ガイド・装備スキル一覧の3か所へ同時に反映する。
 
 ```mermaid
 sequenceDiagram

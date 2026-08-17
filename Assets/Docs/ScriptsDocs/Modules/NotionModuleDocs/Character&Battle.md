@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲーム中のキャラクターパラメータ管理、戦闘時の攻撃力・防御力・クリティカル計算、ダメージパイプライン、およびバフ（ステータス効果）システムを司るモジュールです。
+> インゲーム中のキャラクターパラメータ管理、戦闘時の攻撃力・防御力・クリティカル計算、ダメージパイプライン、およびバフ（ステータス効果）システムを司るモジュールである。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -46,7 +46,7 @@
 | **`AttackResultView`** | View | 攻撃結果（ダメージ数値・クリティカルエフェクト等）を画面に表示する MonoBehaviour |
 | **`AttackResultViewModel`** | View | 攻撃結果の表示状態を保持する ViewModel（`IAttackResultViewModel` を実装） |
 
-> `PlayerHealthHudPresenter` / `EnemyHealthHudPresenter` / `IHealthHudViewModel` / `HealthHudDTO` は、実体が`InGame/UI`モジュール（namespace `Adaptor.InGame.UI`）に属するため、本表からは除外しています。HP変化通知（`CharacterEntity.OnHealthChanged`）の連携先として、処理フロー②で参照します。
+> `PlayerHealthHudPresenter` / `EnemyHealthHudPresenter` / `IHealthHudViewModel` / `HealthHudDTO` は、実体が`InGame/UI`モジュール（namespace `Adaptor.InGame.UI`）に属するため、本表からは除外している。HP変化通知（`CharacterEntity.OnHealthChanged`）の連携先として、処理フロー②で参照する。
 
 ---
 
@@ -94,22 +94,22 @@ graph TD
 
 * **`Music`**
   * *依存箇所*: `MusicSyncState`
-  * *詳細*: `PlayerAttackController`が攻撃クールダウンの時間をBPMに基づいてスケーリングするために参照します。ジャスト入力ボーナスは`BeatStep`が`AttackDefinition.JustDamageMultiplier`で計算しており、バフの持続時間計算とは無関係です。
+  * *詳細*: `PlayerAttackController`が攻撃クールダウンの時間をBPMに基づいてスケーリングするために参照する。ジャスト入力ボーナスは`BeatStep`が`AttackDefinition.JustDamageMultiplier`で計算しており、バフの持続時間計算とは無関係である
 * **`Target`**
   * *依存箇所*: `TargetSystemController`, `ITargetableViewModel`
-  * *詳細*: `PlayerAttackController`が攻撃対象の解決にTargetモジュールを利用します。
+  * *詳細*: `PlayerAttackController`が攻撃対象の解決にTargetモジュールを利用する
 
 ### 📤 依存されているもの
 
 * **`InGame/Player`**
   * *参照箇所*: `CharacterEntity`, `PlayerAttackController`, `AttackExecutor`
-  * *詳細*: プレイヤーキャラクターのHP・ステータス情報を `CharacterEntity` として保持し、攻撃アクションのトリガーとして `PlayerAttackController` および `AttackExecutor` を介してダメージフローを実行します。
+  * *詳細*: プレイヤーキャラクターのHP・ステータス情報を `CharacterEntity` として保持し、攻撃アクションのトリガーとして `PlayerAttackController` および `AttackExecutor` を介してダメージフローを実行する
 * **`InGame/Enemy`**
   * *参照箇所*: `CharacterEntity`, `EnemyBattleState`, `AttackExecutor`
-  * *詳細*: 敵キャラクターがパラメータを `CharacterEntity` で表現し、被弾時の状態維持やAIの攻撃契機などで `EnemyBattleState` や `AttackExecutor` を使用します。
+  * *詳細*: 敵キャラクターがパラメータを `CharacterEntity` で表現し、被弾時の状態維持やAIの攻撃契機などで `EnemyBattleState` や `AttackExecutor` を使用する
 * **`InGame/Mission`**
   * *参照箇所*: `CharacterEntity.OnHealthChanged`, `PlayerAttackController.OnAttackExecuted`
-  * *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をミッション評価条件として記録します（新規）。
+  * *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をミッション評価条件として記録する（新規）
 
 ---
 
@@ -118,29 +118,29 @@ graph TD
 <h2>🧅レイヤー情報</h2>
 
 ### ① Domain
-> キャラクターの基本戦闘能力（HP、攻撃力、クリティカル率など）を保持するEntityや、ダメージ計算パイプラインのインターフェース（`IAttackPipeline`）、コンテキストを定義する純粋なドメインルール層です。
+> キャラクターの基本戦闘能力（HP、攻撃力、クリティカル率など）を保持するEntityや、ダメージ計算パイプラインのインターフェース（`IAttackPipeline`）、コンテキストを定義する純粋なドメインルール層である。
 
 ### ② Application
-> 各種計算処理の抽象化（`AttackCalculator`, `AttackExecutor`）や、ダメージ計算における個別ロジック（`CriticalStep`, `ConfirmedDamage`）、バフシステム（`DamageDownBuff`, `LifeStealBuff`）などのビジネスロジックを実装します。
+> 各種計算処理の抽象化（`AttackCalculator`, `AttackExecutor`）や、ダメージ計算における個別ロジック（`CriticalStep`, `ConfirmedDamage`）、バフシステム（`DamageDownBuff`, `LifeStealBuff`）などのビジネスロジックを実装する。
 
 ### ③ Adaptor
-> 攻撃コマンドを実行する `PlayerAttackController`、戦闘中のバフ状態等を管理する `PlayerBattleState` や `EnemyBattleState`、および計算・変動したデータをUI側へ中継する各種Presenter（`AttackResultPresenter`, `PlayerHealthHudPresenter`）を定義します。
+> 攻撃コマンドを実行する `PlayerAttackController`、戦闘中のバフ状態等を管理する `PlayerBattleState` や `EnemyBattleState`、および計算・変動したデータをUI側へ中継する各種Presenter（`AttackResultPresenter`, `PlayerHealthHudPresenter`）を定義する。
 
 ### ④ View
-> Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当します。
+> Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当する。
 
 ### ⑤ Infrastructure
-> 当モジュールでは使用していません。
+> 当モジュールでは使用していない。
 
 ### ⑥ Composition
-> 当モジュールのクラスの依存解決（DI）は、呼び出し側となる Player または Enemy モジュールの初期化コンポーネント内で行われます。
+> 当モジュールのクラスの依存解決（DI）は、呼び出し側となる Player または Enemy モジュールの初期化コンポーネント内で行われる。
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローごとに分けて記述する。
 
 ### ① プレイヤー攻撃実行フロー（入力イベント時）
-プレイヤーが攻撃ボタンを押した際、ターゲット取得・バフ適用・パイプライン計算・ダメージ反映までの一連の処理です。
+プレイヤーが攻撃ボタンを押した際、ターゲット取得・バフ適用・パイプライン計算・ダメージ反映までの一連の処理である。
 
 ```mermaid
 sequenceDiagram
@@ -170,7 +170,7 @@ sequenceDiagram
 ```
 
 ### ② HP 変化とHUDへの反映フロー（ダメージ被弾時）
-ダメージを受けた際に Entity の HP が変化し、HUD（HPバー）へ即時反映される処理フローです。
+ダメージを受けた際に Entity の HP が変化し、HUD（HPバー）へ即時反映される処理フローである。
 
 ```mermaid
 sequenceDiagram
@@ -190,7 +190,7 @@ sequenceDiagram
 ```
 
 ### ③ バフ適用フロー（攻撃前後タイミング）
-攻撃実行の前後でバフシステムが起動し、ダメージ増幅やライフスティールを処理する流れです。
+攻撃実行の前後でバフシステムが起動し、ダメージ増幅やライフスティールを処理する流れである。
 
 ```mermaid
 sequenceDiagram

@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールです。Addressables経由で共通のWave定義リポジトリをロードし、選択ステージのIDに対応するWaveを生成して、Wave開始をイベントで他モジュールへ通知します。
+> インゲーム中の敵キャラクター（雑魚敵からボスまで）のAI意思決定、移動制御、攻撃予約（リズム同期）、およびスポナー（出現制御）を司るモジュールである。Addressables経由で共通のWave定義リポジトリをロードし、選択ステージのIDに対応するWaveを生成して、Wave開始をイベントで他モジュールへ通知する。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -100,25 +100,25 @@ graph TD
 
 * **`Player`**
   * *依存箇所*: `PlayerModuleContainer` (Composition), `PlayerEntity` (Domain)
-  * *詳細*: AI移動において追従ターゲットとするためにプレイヤーの座標や`PlayerEntity`情報を参照します。`EnemyInitializer`・`BossInitializer`双方が`ServiceLocator.GetInstance<PlayerModuleContainer>()`で直接取得しており、強い結合が残っています。
+  * *詳細*: AI移動において追従ターゲットとするためにプレイヤーの座標や`PlayerEntity`情報を参照する。`EnemyInitializer`・`BossInitializer`双方が`ServiceLocator.GetInstance<PlayerModuleContainer>()`で直接取得しており、強い結合が残っている
 * **`Music`**
   * *依存箇所*: `IMusicSyncService`, `IMusicActionScheduler` (Adaptor)
-  * *詳細*: ビート同期攻撃を予約・実行するためにMusicモジュールの非同期アクション予約システムを利用します。
+  * *詳細*: ビート同期攻撃を予約・実行するためにMusicモジュールの非同期アクション予約システムを利用する
 * **`Target`**
   * *依存箇所*: `ITargetable`実装の登録
-  * *詳細*: 敵がプレイヤーやカメラのロックオン対象として扱われるよう、自身をTargetモジュールへ登録します。
+  * *詳細*: 敵がプレイヤーやカメラのロックオン対象として扱われるよう、自身をTargetモジュールへ登録する
 * **`OutGame/StageSelect`**
   * *依存箇所*: `SelectedBattleStageState`, `BattleStageDefinition.EnemyWaveDefinitionId`
-  * *詳細*: 選択中ステージに紐づくWave定義IDを取得し、Addressablesロード済みの共通リポジトリからステージごとに異なる敵Wave構成を生成します。
+  * *詳細*: 選択中ステージに紐づくWave定義IDを取得し、Addressablesロード済みの共通リポジトリからステージごとに異なる敵Wave構成を生成する
 
 ### 📤 依存されているもの
 
 * **`Mission`**
   * *参照箇所*: `MissionModuleContainer.MissionEventController`（`EnemyLifeCycle`/`BossLifeCycle`がServiceLocatorから`MissionModuleContainer`を取得して参照）
-  * *詳細*: 敵が撃破された際のイベントをミッションモジュールに通知し、ステージクリアの条件判定等に利用されます。以前は`ServiceLocator.GetInstance<MissionEventController>()`による直接取得でしたが、`MissionModuleContainer`経由に統一されました。
+  * *詳細*: 敵が撃破された際のイベントをミッションモジュールに通知し、ステージクリアの条件判定等に利用される。以前は`ServiceLocator.GetInstance<MissionEventController>()`による直接取得だったが、`MissionModuleContainer`経由に統一されました
 * **`Stage`**
   * *参照箇所*: `EnemyWaveSpawnerState.OnWaveStarted`（`EnemyModuleContainer`経由）
-  * *詳細*: `StageEffectInitializer`がWave開始イベントを購読し、`EnemyWaveDefinition.StageEffectIds`（演出IDのリスト）を受け取ります。以前は`IStageEffectDefinition`（Stage側のDomain型）をEnemyのDomain層が直接保持していましたが、2026-07-16の疎結合化でIDのみのやり取りに変更され、EnemyのDomain層からStageのDomain型への参照は無くなりました（詳細は`Assets/Docs/Enemy-Stageモジュール結合改善計画書.md`参照）。ただし`EnemyModuleContainer.StageEffectCatalog`（`EnemyWaveDefinitionAsset.CreateStageEffectCatalog()`が生成）が、`StageEffectInitializer`側で独自のカタログ（`_stageEffectCatalogAssets`）が未設定の場合の互換フォールバックとして残っており、この経路ではEnemyのInfrastructure層が`IStageEffectDefinition`を引き続き参照しています。現状は全シーンでこのフォールバックが使われている状態です。
+  * *詳細*: `StageEffectInitializer`がWave開始イベントを購読し、`EnemyWaveDefinition.StageEffectIds`（演出IDのリスト）を受け取る。以前は`IStageEffectDefinition`（Stage側のDomain型）をEnemyのDomain層が直接保持していましたが、2026-07-16の疎結合化でIDのみのやり取りに変更され、EnemyのDomain層からStageのDomain型への参照は無くなりました（詳細は`Assets/Docs/Enemy-Stageモジュール結合改善計画書.md`参照）。ただし`EnemyModuleContainer.StageEffectCatalog`（`EnemyWaveDefinitionAsset.CreateStageEffectCatalog()`が生成）が、`StageEffectInitializer`側で独自のカタログ（`_stageEffectCatalogAssets`）が未設定の場合の互換フォールバックとして残っており、この経路ではEnemyのInfrastructure層が`IStageEffectDefinition`を引き続き参照している。現状は全シーンでこのフォールバックが使われている状態である
 
 ---
 
@@ -127,17 +127,17 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-出現敵とウェーブ数の対応データ（`EnemyWaveDefinition`）、ウェーブ全体のループ・進行管理（`EnemyWaves`）、および毎フレームAIが移動すべき情報（`EnemyMoveDecision`）といった基本行動データ定義を保持します。
+出現敵とウェーブ数の対応データ（`EnemyWaveDefinition`）、ウェーブ全体のループ・進行管理（`EnemyWaves`）、および毎フレームAIが移動すべき情報（`EnemyMoveDecision`）といった基本行動データ定義を保持する。
 ### ② Application
-索敵、最適な攻撃立ち位置の探索、移動意思決定（`EnemyMoveUsecase`）、およびビートと同期させて2拍前・1拍前・攻撃のタイミングをコールバック処理する「攻撃予約」（`EnemyAttackReservationUsecase`）などのビジネスロジックを実装します。
+索敵、最適な攻撃立ち位置の探索、移動意思決定（`EnemyMoveUsecase`）、およびビートと同期させて2拍前・1拍前・攻撃のタイミングをコールバック処理する「攻撃予約」（`EnemyAttackReservationUsecase`）などのビジネスロジックを実装する。
 ### ③ Adaptor
-AIの主要な状態管理とユースケースの連携を担う`EnemyAIController`、戦闘中フラグ（`EnemyBattleState`）、ウェーブ撃破検知と次ウェーブ生成指示・`OnWaveStarted`通知を行う`EnemyWaveSpawnerController`/`EnemyWaveSpawnerState`などのアダプターを提供します。
+AIの主要な状態管理とユースケースの連携を担う`EnemyAIController`、戦闘中フラグ（`EnemyBattleState`）、ウェーブ撃破検知と次ウェーブ生成指示・`OnWaveStarted`通知を行う`EnemyWaveSpawnerController`/`EnemyWaveSpawnerState`などのアダプターを提供する。
 ### ④ View
-ウェーブの制限時間を画面上に描画・表示制御する`EnemyWaveTimerView`などを担当します。
+ウェーブの制限時間を画面上に描画・表示制御する`EnemyWaveTimerView`などを担当する。
 ### ⑤ Infrastructure
-`EnemyWaveDefinitionAsset`が敵Wave構成・Wave毎の`StageEffectAssetBase`一覧を個別に保持し、`EnemyWaveDefinitionRepository`が複数アセットをID検索できるよう集約します。Addressables対象は共通リポジトリであり、`EnemyInitializer`が選択ステージのIDに対応する定義を取得します。Domain変換（`ToDefinition()`）では各`StageEffectAssetBase`の`EffectId`のみを抽出して`EnemyWaveDefinition.StageEffectIds`に渡し、Stage側のDomain型は生成しません。別途`CreateStageEffectCatalog()`が、Stage側の独自カタログが未設定の場合の互換フォールバック用に`IStageEffectDefinition`のカタログを生成します（📤依存されているもの→Stage参照）。
+`EnemyWaveDefinitionAsset`が敵Wave構成・Wave毎の`StageEffectAssetBase`一覧を個別に保持し、`EnemyWaveDefinitionRepository`が複数アセットをID検索できるよう集約する。Addressables対象は共通リポジトリであり、`EnemyInitializer`が選択ステージのIDに対応する定義を取得する。Domain変換（`ToDefinition()`）では各`StageEffectAssetBase`の`EffectId`のみを抽出して`EnemyWaveDefinition.StageEffectIds`に渡し、Stage側のDomain型は生成しない。別途`CreateStageEffectCatalog()`が、Stage側の独自カタログが未設定の場合の互換フォールバック用に`IStageEffectDefinition`のカタログを生成する（📤依存されているもの→Stage参照）。
 ### ⑥ Composition
-一般敵の`EnemyInitializer`、ボスの`BossInitializer`（テスト専用）、オブジェクトプールにより大量の敵歩兵を動的に管理する`EnemyInfantrySpawner`などの生成・依存注入、ライフサイクル管理を担当します。`EnemyModuleContainer`が他モジュールへの公開窓口です。
+一般敵の`EnemyInitializer`、ボスの`BossInitializer`（テスト専用）、オブジェクトプールにより大量の敵歩兵を動的に管理する`EnemyInfantrySpawner`などの生成・依存注入、ライフサイクル管理を担当する。`EnemyModuleContainer`が他モジュールへの公開窓口である。
 
 ## 🔌 拡張ポイント
 
@@ -148,10 +148,10 @@ AIの主要な状態管理とユースケースの連携を担う`EnemyAIControl
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローごとに分けて記述する。
 
 ### ① AI 移動制御フロー（毎フレーム）
-敵がプレイヤーを追尾・接近し、攻撃範囲に入った際に攻撃を予約する処理フローです。
+敵がプレイヤーを追尾・接近し、攻撃範囲に入った際に攻撃を予約する処理フローである。
 
 ```mermaid
 sequenceDiagram
@@ -176,7 +176,7 @@ sequenceDiagram
 ```
 
 ### ② リズム同期攻撃予約フロー（非同期・イベント駆動）
-敵の攻撃は「2拍前・1拍前・攻撃本番」と3段階で非同期に予約・実行されます。
+敵の攻撃は「2拍前・1拍前・攻撃本番」と3段階で非同期に予約・実行される。
 
 ```mermaid
 sequenceDiagram
@@ -201,7 +201,7 @@ sequenceDiagram
 ```
 
 ### ③ ウェーブスポナー & Wave開始通知フロー（ウェーブクリア／開始時）
-ウェーブ内の全敵が撃破されると次ウェーブが生成され、Wave開始が他モジュールへ通知されます。
+ウェーブ内の全敵が撃破されると次ウェーブが生成され、Wave開始が他モジュールへ通知される。
 
 ```mermaid
 sequenceDiagram
