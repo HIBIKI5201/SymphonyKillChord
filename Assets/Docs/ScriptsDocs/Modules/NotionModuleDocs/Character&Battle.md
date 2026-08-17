@@ -7,7 +7,7 @@
 | **モジュール名** | Character & Battle |
 | **カテゴリ** | InGame / Core |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -15,36 +15,41 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
-| **`CharacterEntity`** | Domain | キャラクター（プレイヤー/敵共通）の基底 Entity。`IAttacker` / `IDefender` を実装し HP や攻撃力などのコアデータを保持 |
-| **`HealthEntity`** | Domain | HP 変化の状態管理クラス。`OnHealthChanged` イベントを発行して変化を通知 |
-| **`Health`** | Domain | HP 値を表す readonly struct（ValueObject） |
-| **`AttackPower`** | Domain | 攻撃力を表す readonly struct（ValueObject） |
-| **`CriticalChance`** | Domain | クリティカル確率を表す readonly struct（ValueObject） |
-| **`AttackDefinition`** | Domain | 攻撃定義クラス。`IAttackPipeline` を保持し、ステップの構成を管理 |
-| **`AttackResult`** | Domain | 攻撃計算の結果（最終ダメージ・クリティカル有無）を保持する readonly struct |
-| **`AttackStepContext`** | Domain | 各パイプラインステップに渡されるコンテキスト（攻撃者/防御者/定義/isJustHit等）の readonly ref struct |
-| **`IAttackPipeline`** | Domain | ダメージ計算ステップのパイプラインを定義するインターフェース |
-| **`IBuff`** | Domain | バフの振る舞いを定義する抽象。`BuffContext`/`BuffMetaData`を受け取る |
-| **`IBuffSystem`** | Domain | バフ実行機構の抽象 |
-| **`BuffContext`** | Domain | バフ実行時に渡されるコンテキスト |
-| **`BuffMetaData`** | Domain | バフのメタ情報（付与者・持続時間等） |
-| **`BuffExecuteTiming`** | Domain | バフを実行するタイミング（Attack_Logic_Before/After等）を表す列挙 |
-| **`AttackCalculator`** | Application | `IAttackPipeline.Execute` を呼び出し `AttackResult` を返すピュア静的クラス |
-| **`AttackExecutor`** | Application | `AttackCalculator` を通じて計算し、`IDefender.TakeDamage` でダメージを適用するピュア静的クラス |
-| **`IAttackStep`** | Application | パイプラインの1ステップを表すインターフェース |
-| **`ConfirmedDamage`** | Application | 最終ダメージを確定するパイプラインステップ（`IAttackStep` を実装） |
-| **`CriticalStep`** | Application | クリティカル発生を抽選するパイプラインステップ（`IAttackStep` を実装） |
-| **`BuffBase`** | Application | バフの基底クラス（`IBuff` を実装）。`DamageDownBuff` / `LifeStealBuff` がこれを継承 |
-| **`BuffSystem`** | Application | `IBuff`実装を`BuffExecuteTiming`のタイミングで実行するバフ実行基盤（`IBuffSystem`実装） |
-| **`DamageDownBuff`** | Application | 防御バフの適用ロジック（`BuffBase` を継承） |
-| **`LifeStealBuff`** | Application | 与ダメージ回復バフの適用ロジック（`BuffBase` を継承） |
-| **`PlayerAttackController`** | Adaptor | プレイヤーの攻撃アクションを制御する Adaptor。`AttackExecutor`/`BuffSystem`を呼び出し、`OnAttackExecuted`イベントを公開する。実体はPlayerモジュールのComposition層（`PlayerModuleContainer`）が保持する |
-| **`PlayerBattleState`** | Adaptor | プレイヤーの戦闘中のバフ・ステータスを保持する状態クラス |
-| **`EnemyBattleState`** | Adaptor | 敵の戦闘中のバフ・ステータスを保持する状態クラス |
-| **`AttackResultPresenter`** | Adaptor | 攻撃結果（ダメージ・クリティカル）を View に通知する Presenter |
-| **`AttackResultDTO`** | Adaptor | ダメージ通知・クリティカル発生などを View へ伝えるための readonly struct DTO |
-| **`AttackResultView`** | View | 攻撃結果（ダメージ数値・クリティカルエフェクト等）を画面に表示する MonoBehaviour |
-| **`AttackResultViewModel`** | View | 攻撃結果の表示状態を保持する ViewModel（`IAttackResultViewModel` を実装） |
+| **`CharacterEntity`** | Domain | キャラクター（プレイヤー/敵共通）の基底Entity。`IAttacker`/`IDefender`を実装し、HPや攻撃力などのコアデータを保持 |
+| **`HealthEntity`** / **`Health`** | Domain | HP変化の状態管理と、HP値を表すValueObject。`OnHealthChanged`で変化を通知 |
+| **`BarrierEntity`** | Domain | キャラクターが保持するバリア |
+| **`CharacterCombatSpec`** | Domain | そのキャラクターが使用できる攻撃定義を管理する |
+| **`CharacterDefinitionId`** / **`CharacterName`** | Domain | キャラクター定義の識別子と表示名 |
+| **`AttackPower`** / **`CriticalChance`** / **`CriticalMultiplier`** | Domain | 攻撃力・クリティカル率・クリティカル倍率のValueObject |
+| **`AttackCooldown`** / **`AttackRangeMin`** / **`AttackRangeMax`** / **`AttackRotationSpeed`** | Domain | 攻撃の間隔・射程・旋回速度のValueObject |
+| **`MoveSpeed`** / **`DodgeSpeed`** / **`DodgeDuration`** / **`DodgeCooldown`** | Domain | 移動と回避のValueObject |
+| **`AttackDefinition`** / **`AttackSpec`** | Domain | 攻撃定義と、攻撃に使うパラメータをまとめた構造体 |
+| **`AttackInterval`** / **`AttackIntervalEntity`** | Domain | 攻撃間隔の値と、その進行を管理するEntity |
+| **`AttackResult`** / **`Damage`** | Domain | 攻撃計算の結果と、ダメージ値 |
+| **`AttackStepContext`** | Domain | 各パイプラインステップへ渡すコンテキストのreadonly ref struct |
+| **`DamageDealtContext`** / **`DamageTakenContext`** | Domain | ダメージを与えた側・受けた側それぞれの情報 |
+| **`AttackTarget`** / **`BattleActionType`** | Domain | 攻撃対象の指定と、バトルアクションの種別 |
+| **`IAttacker`** / **`IDefender`** / **`IBarrierHolder`** | Domain | 攻撃側・防御側・バリア保持者の契約 |
+| **`IAttackPipeline`** / **`IAttackController`** | Domain | ダメージ計算パイプラインと、攻撃制御の契約 |
+| **`AttackPipeline`** | Application | 複数の攻撃処理ステップを順番に実行する |
+| **`AttackCalculator`** / **`AttackExecutor`** / **`DamageExecutor`** | Application | 計算・適用を担うピュアクラス群 |
+| **`IAttackStep`** | Application | パイプラインの1ステップを表す契約 |
+| **`ConfirmedDamage`** / **`CriticalStep`** / **`WeaponDamageStep`** / **`OutOfRangeDamageStep`** | Application | ダメージ確定・クリティカル抽選・武器倍率・射程外減衰の各ステップ |
+| **`AttackIntervalEvaluator`** | Application | 攻撃開始からの硬直時間を計測し、攻撃中フラグを管理する |
+| **`PendingAttackEffectService`** | Application | 次の通常攻撃へ付与する追加効果を管理する |
+| **`IAttackHitEffect`** | Application | 命中時の追加効果の契約 |
+| **`PlayerAttackController`** | Adaptor | プレイヤーの攻撃を制御し、`OnAttackExecuted`を公開する。実体はPlayerモジュールの`PlayerModuleContainer`が保持する |
+| **`PlayerBattleState`** | Adaptor | プレイヤーの戦闘中の状態を保持する |
+| **`IDamageable`** | Adaptor | ダメージを受けられるオブジェクトの契約 |
+| **`AttackResultPresenter`** / **`AttackResultDTO`** / **`IAttackResultViewModel`** | Adaptor | 攻撃結果をViewへ通知する経路 |
+| **`AttackResultView`** / **`AttackResultViewModel`** | View | 攻撃結果（ダメージ数値・クリティカル演出）の表示 |
+| **`IOneShotVisualEffect`** | View | ワンショット演出の再生契約 |
+| **`ParticleSystemPoolView`** / **`ParticleSystemRingBufferView`** / **`ReusableParticleSystemView`** | View | ParticleSystemのワンショット再生をプール・リングバッファで管理する |
+| **`ParticleSystemOneShotVisualEffect`** / **`PooledParticleSystemOneShotVisualEffect`** / **`VisualEffectGraphOneShotVisualEffect`** / **`SoundEffectOneShotVisualEffect`** | View | `IOneShotVisualEffect`の各実装 |
+| **`FootStepView`** | View | 足音演出の再生 |
+| **`CharacterDefinitionAsset`** / **`CharacterDefinitionRepository`** / **`CharacterFactory`** | Infrastructure | キャラクター定義アセットの保持・ID検索と、そこからの`CharacterEntity`生成 |
+| **`AttackDefinitionAsset`** / **`AttackDefinitionFactory`** / **`AttackSpecAsset`** / **`AttackPilpelineAsset`** | Infrastructure | 攻撃定義・攻撃パラメータ・パイプラインのScriptableObjectと生成 |
+
 
 > `PlayerHealthHudPresenter` / `EnemyHealthHudPresenter` / `IHealthHudViewModel` / `HealthHudDTO` は、実体が`InGame/UI`モジュール（namespace `Adaptor.InGame.UI`）に属するため、本表からは除外している。HP変化通知（`CharacterEntity.OnHealthChanged`）の連携先として、処理フロー②で参照する。
 
@@ -84,7 +89,7 @@ graph TD
     P_Adaptor -->|"CharacterEntity, IAttackPipeline 等を使用"| CB_Domain
     P_Adaptor -->|"PlayerAttackController, AttackExecutor を利用"| CB_Adaptor
     E_Adaptor -->|"CharacterEntity, Health, AttackPower を参照"| CB_Domain
-    E_Adaptor -->|"EnemyBattleState, AttackExecutor を利用"| CB_Adaptor
+    E_Adaptor -->|"CharacterEntity, AttackExecutor を利用"| CB_Adaptor
     CB_Adaptor -->|"MusicSyncState から BPM 取得し攻撃クールダウンをスケーリング"| M_Adaptor
     CB_Adaptor -->|"攻撃対象の解決"| T_Adaptor
     MS_Adaptor -->|"OnAttackExecuted / OnHealthChanged を購読"| CB_Adaptor
@@ -105,8 +110,8 @@ graph TD
   * *参照箇所*: `CharacterEntity`, `PlayerAttackController`, `AttackExecutor`
   * *詳細*: プレイヤーキャラクターのHP・ステータス情報を `CharacterEntity` として保持し、攻撃アクションのトリガーとして `PlayerAttackController` および `AttackExecutor` を介してダメージフローを実行する
 * **`InGame/Enemy`**
-  * *参照箇所*: `CharacterEntity`, `EnemyBattleState`, `AttackExecutor`
-  * *詳細*: 敵キャラクターがパラメータを `CharacterEntity` で表現し、被弾時の状態維持やAIの攻撃契機などで `EnemyBattleState` や `AttackExecutor` を使用する
+  * *参照箇所*: `CharacterEntity`, `AttackExecutor`, `IDamageable`
+  * *詳細*: 敵キャラクターがパラメータを`CharacterEntity`で表現し、AIの攻撃契機や被弾処理で攻撃実行と`IDamageable`を使用する。敵側の戦闘状態を持つ`EnemyBattleState`はEnemyモジュールに属する
 * **`InGame/Mission`**
   * *参照箇所*: `CharacterEntity.OnHealthChanged`, `PlayerAttackController.OnAttackExecuted`
   * *詳細*: `MissionProgressRecorderController`がこれらのイベントを購読し、被ダメージ量・使用武器種・コンボ数をミッション評価条件として記録する（新規）
@@ -121,10 +126,10 @@ graph TD
 > キャラクターの基本戦闘能力（HP、攻撃力、クリティカル率など）を保持するEntityや、ダメージ計算パイプラインのインターフェース（`IAttackPipeline`）、コンテキストを定義する純粋なドメインルール層である。
 
 ### ② Application
-> 各種計算処理の抽象化（`AttackCalculator`, `AttackExecutor`）や、ダメージ計算における個別ロジック（`CriticalStep`, `ConfirmedDamage`）、バフシステム（`DamageDownBuff`, `LifeStealBuff`）などのビジネスロジックを実装する。
+> 攻撃計算の実行（`AttackPipeline`, `AttackCalculator`, `AttackExecutor`, `DamageExecutor`）と、その構成要素であるステップ（`CriticalStep`, `ConfirmedDamage`, `WeaponDamageStep`, `OutOfRangeDamageStep`）を実装する。攻撃の硬直管理（`AttackIntervalEvaluator`）と、次の通常攻撃への追加効果（`PendingAttackEffectService`）もここに属する。バフ・デバフの実体はStatusEffectモジュールとBuffモジュールにある。
 
 ### ③ Adaptor
-> 攻撃コマンドを実行する `PlayerAttackController`、戦闘中のバフ状態等を管理する `PlayerBattleState` や `EnemyBattleState`、および計算・変動したデータをUI側へ中継する各種Presenter（`AttackResultPresenter`, `PlayerHealthHudPresenter`）を定義する。
+> 攻撃コマンドを実行する`PlayerAttackController`、プレイヤーの戦闘状態を持つ`PlayerBattleState`、ダメージを受けられる対象の契約`IDamageable`、および結果をUI側へ中継する`AttackResultPresenter`を定義する。
 
 ### ④ View
 > Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当する。
@@ -137,7 +142,7 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述する。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① プレイヤー攻撃実行フロー（入力イベント時）
 プレイヤーが攻撃ボタンを押した際、ターゲット取得・バフ適用・パイプライン計算・ダメージ反映までの一連の処理である。
@@ -161,7 +166,7 @@ sequenceDiagram
     PAC ->> AExec: 攻撃実行要求 (Execute: attackDefinition, attacker, defender, isJustHit, baseDamage)
     AExec ->> ACalc: ダメージ計算要求 (Calculate)
     ACalc ->> Pipeline: パイプライン実行 (Execute: AttackStepContext)
-    Pipeline -->> ACalc: AttackResult 返却 (CriticalStep → DamageDownBuff → ConfirmedDamage)
+    Pipeline -->> ACalc: AttackResult 返却 (WeaponDamageStep → CriticalStep → OutOfRangeDamageStep → ConfirmedDamage)
     ACalc -->> AExec: AttackResult 返却
     AExec ->> AExec: defender.TakeDamage にダメージを適用
     AExec -->> PAC: AttackResult 返却
@@ -189,22 +194,21 @@ sequenceDiagram
     HHudVM ->> HHudView: ReactiveProperty 経由で HP バーを更新
 ```
 
-### ③ バフ適用フロー（攻撃前後タイミング）
-攻撃実行の前後でバフシステムが起動し、ダメージ増幅やライフスティールを処理する流れである。
+### ③ 状態効果の適用フロー（攻撃前後）
+バフ・デバフは状態効果（StatusEffect）として実装され、ダメージの授受に合わせて呼び出される。効果の実体はStatusEffectモジュールとBuffモジュールにあり、当モジュールは呼び出し口とコンテキストを提供する。
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant PAC as PlayerAttackController
-    participant BuffSys as BuffSystem (CharacterEntity)
-    participant DABuff as DamageDownBuff / LifeStealBuff
+    participant Sys as StatusEffectSystem (StatusEffectモジュール)
+    participant Effect as IOutgoingDamageModifier / IDamageDealtHandler 実装
 
     Note over PAC: 攻撃処理開始
-    PAC ->> BuffSys: 攻撃前バフ実行 (Execute: Attack_Logic_Before)
-    BuffSys ->> DABuff: 各バフのロジック実行
-    DABuff -->> BuffSys: 変換後コンテキストを返却
-    Note over PAC: ここで AttackExecutor によるコアダメージ計算を実施
-    PAC ->> BuffSys: 攻撃後バフ実行 (Execute: Attack_Logic_After)
-    BuffSys ->> DABuff: ライフスティール等の後処理バフを実行
-    DABuff -->> PAC: 最終 BuffContext (AttackResult) を返却
+    PAC ->> Sys: 与ダメージの補正を要求
+    Sys ->> Effect: 付与中の状態効果を順に適用
+    Effect -->> Sys: 補正後のダメージ
+    Note over PAC: AttackPipeline によるコアダメージ計算を実施
+    PAC ->> Sys: DamageDealtContext を通知
+    Sys ->> Effect: ライフスティール等の後処理を実行
 ```
