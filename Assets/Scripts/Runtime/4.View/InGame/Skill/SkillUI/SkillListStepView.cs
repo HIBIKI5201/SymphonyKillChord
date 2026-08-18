@@ -26,7 +26,7 @@ namespace KillChord.Runtime.View.InGame.Skill
 
             if (_iconImage != null)
             {
-                _iconImage.sprite = data.Icon;
+                //_iconImage.sprite = data.Icon;
             }
 
             _onColor = data.ActiveColor;
@@ -40,6 +40,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         public void SetStepOn()
         {
             ApplyColor(_onColor);
+
+            _iconImage.color = Color.clear;
 
             if (_isActive)
             {
@@ -56,6 +58,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         public void SetStepOff()
         {
             ApplyColor(_offColor);
+
+            _iconImage.color = Color.black;
 
             if (_isActive)
             {
