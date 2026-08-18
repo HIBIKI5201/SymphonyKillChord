@@ -296,7 +296,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (!_isPlaying) return;
             StopMoving();      
             StopRotating();
-            FaceTarget();
+            FaceToTarget();
             PlayAttackEffect(_attackReserveEffectInstance);
             _characterAnimationViewModel?.SetReserving(true);
         }
@@ -317,7 +317,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///    ターゲットの方向を向く。
         /// </summary>
-        private void FaceTarget()
+        private void FaceToTarget()
         {
             if (_target == null) return;
 
