@@ -708,44 +708,27 @@ jobs:
 
 # ==================================================================================================
 
+      - name: .NET SDK のセットアップ
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
-
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
-
-          if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-            Write-Host "dotnet が見つかりません。.NET SDK をインストール中..."
-            $DotnetRoot = Join-Path $HOME ".dotnet"
-            if ($IsWindows) {
-              $Installer = Join-Path $env:RUNNER_TEMP "dotnet-install.ps1"
-              Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile $Installer
-              & $Installer -Channel LTS -InstallDir $DotnetRoot
-            } else {
-              $Installer = Join-Path $env:RUNNER_TEMP "dotnet-install.sh"
-              Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.sh" -OutFile $Installer
-              & chmod +x $Installer
-              & $Installer --channel LTS --install-dir $DotnetRoot
-            }
-            $env:DOTNET_ROOT = $DotnetRoot
-            $env:PATH = $DotnetRoot + [System.IO.Path]::PathSeparator + $env:PATH
-          }
-
           dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
-
           $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
           if (Test-Path $ToolsPath) {
             $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
           }
-
           & nugetforunity restore "${{ github.workspace }}"
           if ($LASTEXITCODE -ne 0) {
             Write-Host "[ERROR]: NuGet パッケージの復元に失敗しました (終了コード $LASTEXITCODE)。"
             Write-Host "::endgroup::"
             exit 1
           }
-
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
         shell: pwsh
