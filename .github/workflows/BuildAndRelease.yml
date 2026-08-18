@@ -457,7 +457,14 @@ jobs:
           if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
 
           $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
-            -ArgumentList @("-batchmode", "-quit", "-nographics", "-ignorecompilererrors", "-logFile", $LogPath) `
+            -ArgumentList @(
+              "-batchmode",
+              "-quit",
+              "-nographics",
+              "-projectPath", $env:GITHUB_WORKSPACE,
+              "-ignorecompilererrors",
+              "-logFile", $LogPath
+            ) `
             -PassThru -Wait -NoNewWindow
 
           Write-Host "Unity終了コード: $($Process.ExitCode)"
