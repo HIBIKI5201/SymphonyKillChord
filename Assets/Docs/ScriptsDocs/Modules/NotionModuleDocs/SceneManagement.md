@@ -108,7 +108,7 @@ graph TD
 ### ④ View
 `LoadingScreenView`がロード画面の表示/非表示を、`SceneTransitionView`がデバッグ表示を担当する。
 ### ⑤ Infrastructure
-`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出す。アクティブシーンの切り替えは`TrySetActiveScene`で成否を確認し、失敗した場合はエラーログを出して処理を中断する。`ReloadSceneAsync`は再読み込み中の退避先として、別のシーンを一時的にアクティブへ切り替える。
+`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出す。`ChangeSceneAsync`はロードとアンロードだけを行い、アクティブシーンは切り替えない。切り替えるのは`UnloadAndSetActiveAsync`と`ReloadSceneAsync`の2つで、いずれも`TrySetActiveScene`で成否を確認し、失敗した場合はエラーログを出して`false`を返す。`ReloadSceneAsync`は再読み込み中の退避先として、別のシーンを一時的にアクティブへ切り替える。
 ### ⑥ Composition
 `SceneTransitionInitializer`（Order 0）が上記スタック全体を構築し、既存インスタンスが無い場合のみ新規登録する（Persistentシーンの再読み込み等での二重登録を防止）。
 

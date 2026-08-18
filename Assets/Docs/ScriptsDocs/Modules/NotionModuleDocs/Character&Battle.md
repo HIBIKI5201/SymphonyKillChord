@@ -62,6 +62,7 @@ graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph CharacterBattleModule [Character & Battle モジュール]
         CB_Domain["Domain\n(CharacterEntity, IAttackPipeline, ActionParams 等)"]
+        CB_App["Application\n(AttackPipeline, AttackExecutor, DamageExecutor 等)"]
         CB_Adaptor["Adaptor\n(PlayerAttackController, PlayerBattleState 等)"]
     end
 
@@ -87,9 +88,11 @@ graph TD
 
     %% 依存関係
     P_Adaptor -->|"CharacterEntity, IAttackPipeline 等を使用"| CB_Domain
-    P_Adaptor -->|"PlayerAttackController, AttackExecutor を利用"| CB_Adaptor
+    P_Adaptor -->|"PlayerAttackController を利用"| CB_Adaptor
+    P_Adaptor -->|"AttackExecutor で攻撃を実行"| CB_App
     E_Adaptor -->|"CharacterEntity, Health, AttackPower を参照"| CB_Domain
-    E_Adaptor -->|"CharacterEntity, AttackExecutor を利用"| CB_Adaptor
+    E_Adaptor -->|"IDamageable で被弾を受ける"| CB_Adaptor
+    E_Adaptor -->|"AttackExecutor で攻撃を実行"| CB_App
     CB_Adaptor -->|"MusicSyncState から BPM 取得し攻撃クールダウンをスケーリング"| M_Adaptor
     CB_Adaptor -->|"攻撃対象の解決"| T_Adaptor
     MS_Adaptor -->|"OnAttackExecuted / OnHealthChanged を購読"| CB_Adaptor
@@ -135,7 +138,7 @@ graph TD
 > Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当する。
 
 ### ⑤ Infrastructure
-> 当モジュールでは使用していない。
+> `CharacterDefinitionAsset`と`CharacterDefinitionRepository`がキャラクター定義をIDで引けるようにし、`CharacterFactory`がそこから`CharacterEntity`を生成する。攻撃側は`AttackDefinitionAsset`・`AttackSpecAsset`・`AttackPilpelineAsset`が定義を保持し、`AttackDefinitionFactory`がDomainへ変換する。
 
 ### ⑥ Composition
 > 当モジュールのクラスの依存解決（DI）は、呼び出し側となる Player または Enemy モジュールの初期化コンポーネント内で行われる。

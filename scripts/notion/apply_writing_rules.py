@@ -94,8 +94,14 @@ def convert(text: str) -> str:
 
 
 def main() -> int:
+    paths = sys.argv[1:]
+    if not paths:
+        # 呼び出し側が失敗を検出できるよう、対象なしは異常終了として扱う。
+        print("使用方法: python apply_writing_rules.py <対象.md> [<対象.md> ...]", file=sys.stderr)
+        return 2
+
     changed = 0
-    for path in sys.argv[1:]:
+    for path in paths:
         source = io.open(path, encoding="utf-8").read()
         converted = convert(source)
         if converted != source:

@@ -75,8 +75,9 @@ graph TD
 
 ### 📤 依存されているもの
 
-* なし
-  * *詳細*: 他モジュールから参照されない表示専用のモジュールである。生成はUIモジュールの初期化が担う
+* **`UI`**
+  * *参照箇所*: `ACLikeRhythmGuideInitializer`
+  * *詳細*: AC風リズムガイドの初期化が、当モジュールのPresenter・ViewModel・Viewを生成して結線する。当モジュール側に専用のInitializerは無い
 
 ---
 

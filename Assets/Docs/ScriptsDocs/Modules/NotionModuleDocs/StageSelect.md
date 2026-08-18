@@ -47,12 +47,9 @@
 | **`BattleStageAsset`** | Infrastructure | バトル固有入力から`BattleStageDefinition`を生成するScriptableObject |
 | **`ScenarioStageAsset`** | Infrastructure | シナリオ固有入力から`ScenarioStageDefinition`を生成するScriptableObject |
 | **`StageBindAsset`** | Infrastructure | From/Toステージと`ManualSelection`/`AutoAdvance`を保持するScriptableObject |
-| **`StageTreeAsset`** | Infrastructure | ステージツリー全体の定義を保持するアセット |
-| **`SaveDataClearStageRepository`** | Infrastructure | `IStageClearRepository`実装。セーブデータからクリア済みステージIDを取得する |
 | **`StageTreeAsset`** | Infrastructure | ステージとBindを集約し、`OnValidate()`でID・参照・接続重複を検証するScriptableObject |
 | **`SaveDataClearStageRepository`** | Infrastructure | `IStageClearRepository`実装。`StageProgressData.ClearDatas`から実データを返す（スタブではない） |
 | **`StageSelectInitializer`** | Composition | StageTreeからノード・接続線を動的生成・配置し、出撃要求を仲介する |
-| **`StageSelectInitializer`** | Composition | ステージツリーの構築・登録（Order 110） |
 
 ### 🧩 Composition初期化情報
 

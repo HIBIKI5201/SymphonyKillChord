@@ -113,6 +113,16 @@ def main():
 
     io.open(os.path.join(out_dir, "body.md"), "w", encoding="utf-8", newline="").write(body)
 
+    # sync_module.py がタイトルを子ページの突き合わせキーに使う。
+    # 空や重複があると、同名の子ページを複数作った上で1ページだけを更新してしまう。
+    seen = set()
+    for title, _ in flows:
+        if not title.strip():
+            raise SystemExit(f"処理フローの見出しが空です: {source_path}")
+        if title in seen:
+            raise SystemExit(f"処理フローの見出しが重複しています: {title}（{source_path}）")
+        seen.add(title)
+
     titles = []
     for number, (title, content) in enumerate(flows, start=1):
         titles.append(title)

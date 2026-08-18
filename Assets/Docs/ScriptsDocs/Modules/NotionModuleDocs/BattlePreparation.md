@@ -60,13 +60,15 @@ graph TD
 
     subgraph SortieModule [Sortie モジュール]
         SO_App["Application<br>OutGameSortieUseCase"]
+        SO_Port["Composition<br>OutGameSortieOutputPort"]
+        SO_App --> SO_Port
     end
 
     %% 依存関係
     SB_Domain -->|"装備中スキルの提供"| BP_Adaptor
     BP_Adaptor -->|"スキル名・説明の整形"| SK_Adaptor
     SC_View -->|"画面のコンテナを提供"| BP_View
-    SO_App -->|"画面の表示要求"| SC_View
+    SO_Port -->|"ShowBattlePreparationScreen()"| SC_View
 ```
 
 ### 📥 依存しているもの
@@ -82,7 +84,7 @@ graph TD
 
 * **`Sortie`**
   * *参照箇所*: 戦闘準備画面
-  * *詳細*: バトルステージへの出撃時、`OutGameSortieUseCase`がこの画面の表示を要求する
+  * *詳細*: バトルステージへの出撃時、`OutGameSortieUseCase`が`IOutGameSortieOutputPort.ShowBattlePreparationScreen()`を呼び、その実装である`OutGameSortieOutputPort`がこの画面を表示する
 
 ---
 
@@ -126,7 +128,7 @@ sequenceDiagram
     participant Build as SkillBuildDefinition (SkillBuild)
     participant VM as BattlePreparationSkillViewModel
 
-    Sortie ->> Screen: 戦闘準備画面の表示要求
+    Sortie ->> Screen: ShowBattlePreparationScreen()（出力ポート経由）
     Presenter ->> Build: 装備中のスキル構成を取得
     Build -->> Presenter: 装備スキルの一覧
     Presenter ->> VM: BattlePreparationSkillViewDTO を反映

@@ -31,7 +31,7 @@
 | **`CharacterAnimationCatalogConfig`** / **`CharacterAnimationCatalogEntry`** | View | クリップの表示設定と、その1件分 |
 | **`AnimationComposition`** | Composition | アニメーションの依存関係を構築する |
 
-> Adaptor層の3つの契約は、フォルダ名が`InGame/Animaiton`（綴り誤り）になっている。実装側は`InGame/Animation`にあるため、シンボル検索で辿ること。
+> **注意**: Adaptor層の3契約だけが、綴りを誤ったフォルダに置かれている。正しくは`Animation`だが、実際のパスは`3.Adaptor/InGame/Animaiton/`（`i`と`o`が逆）である。実装側の`4.View/InGame/Animation/`とは綴りが異なるため、フォルダを辿ると見つからない。シンボル検索で辿ること。リネームはIssue #1312 で管理している。
 
 ### 🧩 Composition初期化情報
 
@@ -51,7 +51,7 @@ ServiceLocatorへは登録しない。アニメーションはキャラクター
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph AnimationModule [Animation モジュール]
-        A_Adaptor["Adaptor<br>ICharacterAnimationViewModel, ICharacterAnimationSignal"]
+        A_Adaptor["Adaptor<br>ICharacterAnimationViewModel, ICharacterAnimationSignal, ICharacterAnimationViewContext"]
         A_View["View<br>CharacterAnimationView, PlayableAnimationController"]
         A_Composition["Composition<br>AnimationComposition"]
         A_View --> A_Adaptor

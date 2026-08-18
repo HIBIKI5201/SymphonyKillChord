@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> 各シーンの初期化ライフサイクルを提供する基盤モジュールである。他モジュールの`~Initializer`はここで定義された基底クラスを継承し、`Order`の順に`Init → ResourceLoadAsync → Build → Ready`の各フェーズを実行される。
+> 各シーンの初期化ライフサイクルを提供する基盤モジュールである。他モジュールの`~Initializer`はここで定義された基底クラスを継承し、`Order`の順に`Init → ResourceLoadAsync → Build → Ready`の各フェーズが実行される。
 
 | 項目 | 内容 |
 | --- | --- |
