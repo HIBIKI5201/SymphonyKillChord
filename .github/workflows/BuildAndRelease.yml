@@ -297,7 +297,20 @@ jobs:
 
           # リポジトリ変数 UNITY_EXE_PATH があればそれを優先し、なければ
           # .github/unity-paths.json と ProjectVersion.txt から OS 別に解決する。
-          if ($env:UNITY_EXE_PATH) {
+          # 値の前後の空白は取り除く。コピー時に混入した空白や改行があると
+          # Test-Path が偽を返し、原因の分かりにくい失敗になるため。
+          $Override = if ($env:UNITY_EXE_PATH) { $env:UNITY_EXE_PATH.Trim() } else { '' }
+
+          if ($Override -and -not (Test-Path $Override)) {
+            Write-Host "[WARN]: リポジトリ変数 UNITY_EXE_PATH のパスがこのランナーに存在しません: $Override"
+            Write-Host "        このランナーのOSは '${{ runner.os }}' です。UNITY_EXE_PATH は全OSで同じ値が使われるため、"
+            Write-Host "        複数OSのランナーを運用する場合は変数を削除し、unity-paths.json による自動解決に任せてください。"
+            Write-Host "        今回は自動解決にフォールバックします。"
+            $Override = ''
+          }
+
+          if ($Override) {
+            $env:UNITY_EXE_PATH = $Override
             Write-Host "[INFO]: リポジトリ変数 UNITY_EXE_PATH が指定されているため、自動解決をスキップします。"
           } else {
             $OsKey      = "${{ runner.os }}"
