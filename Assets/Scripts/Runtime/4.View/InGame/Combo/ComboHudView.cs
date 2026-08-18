@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Combo
                       }
                       else
                       {
-                          _comboText.SetText("{0}コンボ", comboCount);
+                          _comboText.SetText("{0}", comboCount);
                       }
                   });
         }
