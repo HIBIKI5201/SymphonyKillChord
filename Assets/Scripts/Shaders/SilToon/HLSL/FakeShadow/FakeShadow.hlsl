@@ -24,10 +24,12 @@ v2f vert(appdata v)
     v2f o;
 
 #ifdef _FAKE_SHADOW_ON
+    float3 camFwd = GetViewForwardDir();
     float3 positionWS = TransformObjectToWorld(v.positionOS.xyz);
 
     // _MainLightPositionは「面からライトへ向かう」方向。影は光の進行方向へ伸ばすため反転する。
-    float3 lightDirWS = normalize(_MainLightPosition.xyz);
+    float3 lightDirWS = _MainLightPosition.xyz;
+    lightDirWS  -= camFwd * dot(camFwd, lightDirWS);
     positionWS -= lightDirWS * _FakeShadowDistance;
 
     // ZTest LEqual で顔より奥の髪を弾いているが、オフセットで顔の裏に潜った分まで
@@ -39,7 +41,6 @@ v2f vert(appdata v)
     // パス自体はSilToonの全マテリアルに存在するため、無効時は縮退させて破棄する
     o.pos = (float4)0;
 #endif
-
     return o;
 }
 
