@@ -46,6 +46,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 Console.WriteLine();
                 Console.WriteLine("エクスポートが完了しました。");
                 Console.WriteLine($"  ページ: {summary.PageCount}");
+                Console.WriteLine($"    更新: {summary.UpdatedPageCount}");
+                Console.WriteLine($"    省略: {summary.SkippedPageCount}");
                 Console.WriteLine($"  データベース: {summary.DatabaseCount}");
                 Console.WriteLine($"  添付ファイル: {summary.AssetCount}");
                 Console.WriteLine($"  出力先: {summary.OutputDirectory}");
