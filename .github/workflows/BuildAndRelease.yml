@@ -119,7 +119,7 @@ jobs:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
       GDRIVE_ASSET_SEARCH_QUERY: ${{ vars.GDRIVE_ASSET_SEARCH_QUERY }}
-      UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
+      UNITY_BUILD_OUTPUT_DIR: ''
       UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
       UNITY_BUILD_TIMEOUT_SEC: ${{ vars.UNITY_BUILD_TIMEOUT_SEC }}
@@ -229,9 +229,88 @@ jobs:
           Write-Host "ベースブランチ: $BaseRef -> ビルドモード: $BuildMode, タグの接頭辞: $TagPrefix"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
-          "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: ビルド出力先パスの取得（AutoBuilderSettingsから）
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::ビルド出力先パスの取得"
+
+          $SettingsPath = Join-Path $env:GITHUB_WORKSPACE "ProjectSettings\AutoBuilderSettings.asset"
+          if (-not (Test-Path $SettingsPath)) {
+            Write-Host "::error::AutoBuilderSettings.asset が見つかりません: $SettingsPath"
+            exit 1
+          }
+
+          # BUILD_MODE (Master / Development) から対象キー名を決定する。
+          # BUILD_MODE の値はそのまま "Path" と連結できない（Development -> DevelopPath であり DevelopmentPath ではない）ため、明示的にマッピングする。
+          switch ($env:BUILD_MODE) {
+            "Master"      { $TargetKey = "MasterPath" }
+            "Development" { $TargetKey = "DevelopPath" }
+            default {
+              Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
+              exit 1
+            }
+          }
+          Write-Host "対象キー: $TargetKey"
+
+          $AssetContent = Get-Content -Path $SettingsPath -Raw
+          $Pattern = "(?m)^\s*$TargetKey`:\s*(.+)\s*$"
+          $Match = [regex]::Match($AssetContent, $Pattern)
+
+          if (-not $Match.Success) {
+            Write-Host "::error::AutoBuilderSettings.asset 内に $TargetKey が見つかりません。"
+            exit 1
+          }
+
+          $RelativePath = $Match.Groups[1].Value.Trim().Trim('"').Trim("'")
+          if ([string]::IsNullOrWhiteSpace($RelativePath)) {
+            Write-Host "::error::$TargetKey の値が空です。"
+            exit 1
+          }
+
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE $RelativePath))
+
+          Write-Host "取得した相対パス: $RelativePath"
+          Write-Host "解決された絶対パス: $ResolvedOutputDir"
+
+          "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
+
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: Unityのインストール検証
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::Unityのインストール検証"
+          if (-not $env:UNITY_EXE_PATH) {
+            Write-Host "[ERROR]: UNITY_EXE_PATH が設定されていません。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
+          
+          if (Test-Path $env:UNITY_EXE_PATH) {
+            $FileInfo = Get-Item $env:UNITY_EXE_PATH
+            Write-Host "[OK]: Unity実行ファイルを検証しました。"
+            Write-Host "      ファイルサイズ: $($FileInfo.Length / 1MB) MB"
+            Write-Host "      最終更新日時: $($FileInfo.LastWriteTime)"
+          } else {
+            Write-Host "[ERROR]: 指定されたパスにUnity実行ファイルが見つかりません: $env:UNITY_EXE_PATH"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+          Write-Host "::endgroup::"
         shell: pwsh
 
 # ==================================================================================================
@@ -305,34 +384,6 @@ jobs:
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
           Write-Host "Unityビルドタイムアウト: $(if ($env:UNITY_BUILD_TIMEOUT_SEC) { "$env:UNITY_BUILD_TIMEOUT_SEC 秒" } else { '未設定 (デフォルト使用)' })"
-          Write-Host "::endgroup::"
-        shell: pwsh
-
-# ==================================================================================================
-
-      - name: Unityのインストール検証
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::Unityのインストール検証"
-          if (-not $env:UNITY_EXE_PATH) {
-            Write-Host "[ERROR]: UNITY_EXE_PATH が設定されていません。"
-            Write-Host "::endgroup::"
-            exit 1
-          }
-          Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
-          
-          if (Test-Path $env:UNITY_EXE_PATH) {
-            $FileInfo = Get-Item $env:UNITY_EXE_PATH
-            Write-Host "[OK]: Unity実行ファイルを検証しました。"
-            Write-Host "      ファイルサイズ: $($FileInfo.Length / 1MB) MB"
-            Write-Host "      最終更新日時: $($FileInfo.LastWriteTime)"
-          } else {
-            Write-Host "[ERROR]: 指定されたパスにUnity実行ファイルが見つかりません: $env:UNITY_EXE_PATH"
-            Write-Host "::endgroup::"
-            exit 1
-          }
           Write-Host "::endgroup::"
         shell: pwsh
 
