@@ -415,6 +415,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.CharacterAnimationView
   _animator: {fileID: 5164203254304523477}
+  _reserveBlendSeconds: 0.7
 --- !u!114 &2029437041226520640
 MonoBehaviour:
   m_ObjectHideFlags: 0

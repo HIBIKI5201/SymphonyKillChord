@@ -62,11 +62,21 @@ namespace KillChord.Runtime.View
             _locomotionCalculator.SetVelocity(_context.ViewModel.Velocity);
             Array.Clear(_weights, 0, _weights.Length);
             _locomotionCalculator.ApplyBaseWeights(_weights);
-            if (_context.ViewModel.IsReserving)
+
+            float target = _context.ViewModel.IsReserving ? 1f : 0f;
+            _reserveBlend = Mathf.MoveTowards(
+                _reserveBlend, target, Time.deltaTime / Mathf.Max(0.0001f, _reserveBlendSeconds));
+
+            if (_reserveBlend > 0f)
             {
-                Array.Clear(_weights, 0, _weights.Length);
-                _weights[(int)CharacterAnimationClipType.Reserved] = 1f;
+                for (int i = 0; i < _weights.Length; i++)
+                {
+                    _weights[i] *= (1f - _reserveBlend);   // ロコモーションを退ける
+                }
+                int reservedIndex = (int)CharacterAnimationClipType.Reserved;
+                _weights[reservedIndex] = Mathf.Max(_weights[reservedIndex], _reserveBlend);
             }
+
             ApplyOverlayWeight();
 
             _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed);
@@ -200,6 +210,8 @@ namespace KillChord.Runtime.View
 
         [SerializeField, Tooltip("Playableを駆動するAnimatorです。")]
         private Animator _animator;
+        [SerializeField, Tooltip("予約ブレンド時間です。")]
+        private float _reserveBlendSeconds = 0.1f;
 
         private PlayableAnimationController _playableController;
         private CharacterAnimationLocomotionCalculator _locomotionCalculator;
@@ -212,6 +224,7 @@ namespace KillChord.Runtime.View
         private float _overlayEnterBlendDuration;
         private float _overlayExitBlendDuration;
         private float _overlayElapsedBaseTime;
+        private float _reserveBlend;
         private int _overlayIndex = -1;
         private bool _shouldNotifyDodgeEnded;
         private bool _hasNotifiedOneShotEnded;
