@@ -18,10 +18,11 @@ namespace KillChord.Runtime.View.InGame.Skill
         public Transform StepRoot => _stepRoot;
 
         /// <summary>
-        ///     行全体のアニメーション設定を初期化する。
+        ///     行全体のアニメーション設定とスキルアイコンを初期化する。
         /// </summary>
         /// <param name="animationSetting"> アニメーション設定。 </param>
-        public void Initialize(SkillInputProgressAnimationSetting animationSetting)
+        /// <param name="skillIcon"> この行が担当するスキルのアイコン。未設定の場合はnull。 </param>
+        public void Initialize(SkillInputProgressAnimationSetting animationSetting, Sprite skillIcon)
         {
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
             _stepRootRectTransform = _stepRoot as RectTransform;
@@ -32,6 +33,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
 
             _stepRootBaseAnchoredPositionX = _stepRootRectTransform.anchoredPosition.x;
+
+            // スキルアイコンは入力進捗によらず不変のため、初期化時に一度だけ適用する。
+            ApplySkillIcon(skillIcon);
         }
 
         /// <summary>
@@ -125,6 +129,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Transform _stepRoot;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image _cooldownBackgroundImage;
+        [SerializeField, Tooltip("この行が担当するスキル自体のアイコンを表示するImage。未設定の場合はスキルアイコン表示なし。")]
+        private Image _skillIconImage;
         [SerializeField]
         private Material _material;
         [SerializeField]
@@ -192,6 +198,21 @@ namespace KillChord.Runtime.View.InGame.Skill
                 return;
             }
             _cooldownBackgroundImage.fillAmount = fillAmount;
+        }
+
+        /// <summary>
+        ///     この行が担当するスキルのアイコンを適用する。
+        ///     アイコン用Imageを持たないPrefab構成でも動作するよう、未設定時は何もしない。
+        /// </summary>
+        /// <param name="skillIcon"> 適用するスキルアイコン。未設定の場合はnull。 </param>
+        private void ApplySkillIcon(Sprite skillIcon)
+        {
+            if (_skillIconImage == null)
+            {
+                return;
+            }
+
+            _skillIconImage.sprite = skillIcon;
         }
 
         /// <summary>
