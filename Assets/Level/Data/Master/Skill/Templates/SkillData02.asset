@@ -21,11 +21,19 @@ MonoBehaviour:
   _skillDetail: "\u901A\u5E38\u653B\u6483\u306E\u30B7\u30E7\u30C3\u30C8\u30AC\u30F3\u306E\u653B\u6483\u3092\u767A\u52D5\u3057\u3001\n\u305D\u306E\u653B\u6483\u306B\u5F53\u305F\u3063\u305F\u5BFE\u8C61\u306B\u88AB\u30C0\u30E1\u30FC\u30B8\u91CF25%\u5897\u52A0\u306E\u30C7\u30D0\u30D5\u30925\u79D2\u9593\u4ED8\u4E0E\u3059\u308B\u3002"
   _tips: 
   _effectDisplayMode: 0
-  _effectParameters: []
+  _effectParameters:
+  - _id: 5
+    _value: 0.25
+    _displayFormat: 2
+  - _id: 6
+    _value: 5
+    _displayFormat: 5
   _skillType: 02000000
   _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
   _skillEffectType: 2
-  _skillTargetingType: 3
+  _skillTargetingType: 2
+  _statusEffectReapplyPolicy: 1
+  _skillNormalAttackDamagePolicy: 0
   _animationKey: Skill_Left

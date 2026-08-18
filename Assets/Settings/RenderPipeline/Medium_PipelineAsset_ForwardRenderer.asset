@@ -20,6 +20,26 @@ MonoBehaviour:
   _boundsPadding: 0.1
   _shadowStrength: 1
   _eulerOffset: {x: 40, y: 0, z: 0}
+--- !u!114 &-7965946791321905128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: DamageEffect
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 0
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: a9babcd2a43f65b49b6a2f74990276cc, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
 --- !u!114 &-5117565943436087665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,10 +128,12 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
+  - {fileID: 3207903285125933416}
   - {fileID: -5117565943436087665}
   - {fileID: -8492700274395961329}
   - {fileID: -3627226624617088721}
-  m_RendererFeatureMap: 8feeda72e3c0fab80f28c4c018de238a2ff9db4f9a80a9cd
+  - {fileID: -7965946791321905128}
+  m_RendererFeatureMap: 6869bda70ac3842c8feeda72e3c0fab80f28c4c018de238a2ff9db4f9a80a9cd1858984399457391
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -140,3 +162,24 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &3207903285125933416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1614fc811f8f184697d9bee70ab9fe5, type: 3}
+  m_Name: DecalRendererFeature
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.DecalRendererFeature
+  m_Active: 1
+  m_Settings:
+    technique: 2
+    maxDrawDistance: 1000
+    decalLayers: 0
+    dBufferSettings:
+      surfaceData: 2
+    screenSpaceSettings:
+      normalBlend: 0

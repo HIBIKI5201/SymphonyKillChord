@@ -1,5 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -146,9 +148,16 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetAreaQuery,
                 playerModuleContainer.PlayerView.transform,
                 playerModuleContainer.PlayerStatusBonus.AreaAttackRangeAddition);
+            PlayerTargetRangeQuery targetRangeQuery = new PlayerTargetRangeQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                playerModuleContainer.PlayerView.transform);
+            TargetRadiusQuery targetRadiusQuery = new TargetRadiusQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                targetSystemContainer.TargetEntityRegistry);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
+            PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController);
+            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery, targetRadiusQuery);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);
@@ -163,6 +172,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
             _moduleContainer.SetSkillController(_skillController);
+            _moduleContainer.SetPendingAttackEffectService(pendingAttackEffectService);
             return true;
         }
 
@@ -228,7 +238,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length * 2);
-                SkillInputProgressController progressController = BuildSkillProgressModules(definition);
+                SkillInputProgressController progressController = BuildSkillProgressModules(definition, skillTemplate.Icon);
                 SkillExecutionController executionController = new SkillExecutionController(
                     skillResultPresenter,
                     progressController,
@@ -247,9 +257,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary>
         ///     装備中1スキル分の入力進捗UIモジュール一式を構築する。
         /// </summary>
-        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition)
+        /// <param name="definition"> 対象のスキル定義です。 </param>
+        /// <param name="skillIcon"> 対象のスキルアイコンです。未設定の場合はnull。 </param>
+        /// <returns> 構築した入力進捗Controllerです。 </returns>
+        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition, Sprite skillIcon)
         {
-            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition);
+            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition, skillIcon);
 
             ISkillCrosshairProgressView crosshairView = null;
             SkillCrosshairProgressController crosshairController = null;
@@ -260,7 +273,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             ISkillInputProgressRowView listRowView = _skillListUIInitializer != null
-                ? _skillListUIInitializer.CreateSkillListRow(definition)
+                ? _skillListUIInitializer.CreateSkillListRow(definition, skillIcon)
                 : null;
 
             SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
