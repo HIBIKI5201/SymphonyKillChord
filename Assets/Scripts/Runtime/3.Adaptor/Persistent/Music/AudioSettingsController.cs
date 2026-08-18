@@ -98,7 +98,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Music
             SaveAndPresentSettings();
         }
 
-        private const float Volume_TO_VOLUME = 0.1f;
+        private const float INTERNAL_VOLUME_SCALE = 0.1f;
 
         private readonly AudioSettingsData _settings;
         private readonly AudioSettingsService _audioSettingsService;
@@ -129,10 +129,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.Music
         /// <summary>
         ///     0～10の表示値を0～1の内部音量へ変換する。
         /// </summary>
-        private static float ToInternalVolume(int Volume)
+        private static float ToInternalVolume(int volume)
         {
-            return Mathf.Clamp(Volume, AudioSettingsData.MIN_VOLUME, AudioSettingsData.MAX_VOLUME)
-                * Volume_TO_VOLUME;
+            return Mathf.Clamp(volume, AudioSettingsData.MIN_VOLUME, AudioSettingsData.MAX_VOLUME)
+                * INTERNAL_VOLUME_SCALE;
         }
     }
 }

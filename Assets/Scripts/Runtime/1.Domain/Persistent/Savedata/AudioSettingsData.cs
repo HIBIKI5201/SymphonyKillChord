@@ -90,9 +90,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary>
         ///     音量を有効範囲へ制限する。
         /// </summary>
-        private static int Clamp(int Volume)
+        private static int Clamp(int volume)
         {
-            return Mathf.Clamp(Volume, MIN_VOLUME, MAX_VOLUME);
+            return Mathf.Clamp(volume, MIN_VOLUME, MAX_VOLUME);
         }
     }
 }
