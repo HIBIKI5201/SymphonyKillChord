@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.View.InGame.Character;
+using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
 using System.Threading;
@@ -206,6 +207,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
             _characterAnimationViewModel?.SetReserving(false);
+            _weaponItemView?.HideWeapon();
         }
 
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
@@ -237,6 +239,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("攻撃構えのanimationString")]
         private string _attackAttackReservedAnimation = "Enemy_AttackReserved";
+
+        [SerializeField, Tooltip("武器アイテムビューです。")]
+        private WeaponItemView _weaponItemView;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private float _lastFootstepTime;
@@ -294,6 +299,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectReserved()
         {
             if (!_isPlaying) return;
+
+            _weaponItemView?.Play();
             StopMoving();      
             StopRotating();
             FaceToTarget();
@@ -306,7 +313,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-
+            
+            _weaponItemView?.Play();
             _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
             PlaySound(_attackSoundSource, null);
