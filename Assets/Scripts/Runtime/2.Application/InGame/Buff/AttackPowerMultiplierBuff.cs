@@ -1,5 +1,6 @@
+using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Buff
@@ -7,24 +8,34 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// <summary>
     ///     与えるダメージを一定倍率へ変更し続ける永続バフ。
     /// </summary>
-    public class AttackPowerMultiplierBuff : BuffBase
+    public class AttackPowerMultiplierBuff : StatusEffectBase, IOutgoingDamageModifier
     {
-        /// <summary>
-        ///     コンストラクタ。
-        /// </summary>
-        /// <param name="multiplier"> ダメージ倍率。0で攻撃力無効化相当。 </param>
-        public AttackPowerMultiplierBuff(float multiplier)
-            : base(new BuffMetaData(BuffExecuteTiming.Attack_Logic_After, isPersistent: true))
+        public AttackPowerMultiplierBuff(float multiplier, StatusEffectReapplyPolicy reapplyPolicy)
+            : base(
+                EFFECT_ID,
+                StatusEffectCategory.Buff,
+                StatusEffectDuration.UntilRemoved,
+                reapplyPolicy)
         {
             _multiplier = Mathf.Max(0f, multiplier);
         }
 
-        public override BuffContext ExecuteInstance(BuffContext context)
+        /// <inheritdoc />
+        public AttackResult ModifyOutgoingDamage(
+            IAttacker attacker,
+            IDefender defender,
+            AttackResult result)
         {
-            Damage multipliedDamage = context.AttackResult.FinalDamage * _multiplier;
-            AttackResult multipliedResult = new AttackResult(multipliedDamage, context.AttackResult.IsCritical);
-            return new BuffContext(context.Attacker, context.Target, multipliedResult);
+            Damage damage = result.FinalDamage * _multiplier;
+
+            return result.WithFinalDamage(damage);
         }
+
+        /// <summary>
+        ///     状態効果の識別子。
+        /// </summary>
+        private static readonly StatusEffectId EFFECT_ID =
+            new(nameof(AttackPowerMultiplierBuff));
 
         private readonly float _multiplier;
     }

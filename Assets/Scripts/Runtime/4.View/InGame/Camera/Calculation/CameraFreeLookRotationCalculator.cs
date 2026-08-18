@@ -37,19 +37,10 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 yaw += context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
             }
-            else if (context.MoveInput.sqrMagnitude > float.Epsilon && !IsMovingStraightBackward(context.MoveInput))
+            else
             {
-                Vector3 playerForward = context.PlayerForward;
-                playerForward.y = 0f;
-                if (playerForward.sqrMagnitude > float.Epsilon)
-                {
-                    float targetYaw = Quaternion.LookRotation(playerForward.normalized, Vector3.up).eulerAngles.y;
-                    float angleDifference = Mathf.Abs(Mathf.DeltaAngle(yaw, targetYaw));
-                    if (angleDifference > _parameter.MoveFollowAngleDeadZone)
-                    {
-                        yaw = Mathf.MoveTowardsAngle(yaw, targetYaw, _parameter.MoveFollowRotationSpeed * context.DeltaTime);
-                    }
-                }
+                float turnInput = Mathf.Clamp(context.MoveInput.x, -1f, 1f);
+                yaw += turnInput * _parameter.MoveFollowRotationSpeed * context.DeltaTime;
             }
 
             // ピッチ角の制限
@@ -64,20 +55,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> オイラー角の全周（負方向ピッチの正規化に使用するオフセット）。 </summary>
         private const float EULER_ANGLE_FULL = 360f;
 
-        /// <summary> 真後ろ入力として許容する、後方成分に対する横方向成分の割合。 </summary>
-        private const float STRAIGHT_BACKWARD_HORIZONTAL_RATIO = 0.1f;
-
         private readonly CameraConfig _parameter;
-
-        /// <summary>
-        ///     カメラの自動回転追従を停止する真後ろ入力かどうかを判定する。
-        /// </summary>
-        /// <param name="moveInput"> 移動操作の入力値。</param>
-        /// <returns> 横方向成分が許容範囲内で、後方へ入力されている場合は true。</returns>
-        private static bool IsMovingStraightBackward(in Vector2 moveInput)
-        {
-            return moveInput.y < 0f
-                && Mathf.Abs(moveInput.x) <= -moveInput.y * STRAIGHT_BACKWARD_HORIZONTAL_RATIO;
-        }
     }
 }
