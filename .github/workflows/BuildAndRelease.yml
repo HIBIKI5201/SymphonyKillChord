@@ -235,21 +235,19 @@ jobs:
 
 # ==================================================================================================
 
-      - name: ビルド出力先パスの取得（AutoBuilderSettingsから）
+      - name: ビルド出力先パスの取得
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::ビルド出力先パスの取得"
 
-          $SettingsPath = Join-Path $env:GITHUB_WORKSPACE "ProjectSettings\AutoBuilderSettings.asset"
+          $SettingsPath = Join-Path $env:GITHUB_WORKSPACE "ProjectSettings/KillChord/AutoBuilderSettings.asset"
           if (-not (Test-Path $SettingsPath)) {
             Write-Host "::error::AutoBuilderSettings.asset が見つかりません: $SettingsPath"
             exit 1
           }
 
-          # BUILD_MODE (Master / Development) から対象キー名を決定する。
-          # BUILD_MODE の値はそのまま "Path" と連結できない（Development -> DevelopPath であり DevelopmentPath ではない）ため、明示的にマッピングする。
           switch ($env:BUILD_MODE) {
             "Master"      { $TargetKey = "MasterPath" }
             "Development" { $TargetKey = "DevelopPath" }
