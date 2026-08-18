@@ -99,3 +99,10 @@ __pycache__/
 
 # Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
 Packages/com.singularitygroup.hotreload/
+
+# Entities のSubSceneベイクで生成されるキャッシュ
+Assets/SceneDependencyCache/
+Assets/SceneDependencyCache.meta
+
+# uloop-cli の出力
+.uloop/

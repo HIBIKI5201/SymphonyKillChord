@@ -19,7 +19,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2998
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -132,7 +132,9 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _StencilPass: 1
+    - _StencilReadMask: 255
     - _StencilRef: 1
+    - _StencilWriteMask: 255
     - _Surface: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
@@ -145,8 +147,8 @@ Material:
     - _ColorMiddle: {r: 0.9647059, g: 0.8235294, b: 0.84705883, a: 1}
     - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FaceUp: {r: -0.00000011920929, g: 0.9999999, b: -0.000000059604645, a: 0}
-    - _Head: {r: -0.00000000270408, g: 1.2650561, b: 0.57714033, a: 0}
+    - _FaceUp: {r: 0.0022517145, g: 0.99976754, b: 0.021457046, a: 0}
+    - _Head: {r: 2.2472775, g: 1.2653241, b: -1.5610399, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}

@@ -10,7 +10,6 @@ using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Scenario;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
@@ -207,13 +206,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(ScenarioCom)}] SavedataSystem が取得できませんでした。", this);
-                return false;
-            }
-
-            _stageProgressSaveDataService = new StageProgressSaveDataService(savedataSystem);
+            _stageProgressSaveDataService = new StageProgressSaveDataService();
 
             if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
             {
