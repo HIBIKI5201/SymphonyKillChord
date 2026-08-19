@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e39408d5a6c24ae42b9cf58f699ac310, type: 3}
+  m_Name: SkillEffectCatalogConfig
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.SkillEffectCatalogConfig
+  _entries:
+  - _skillId:
+      _id: skill_00
+      _hashId: -876453005
+    _definitions:
+    - {fileID: 11400000, guid: 36019801d9f3c4741b1ec289076d4fd4, type: 2}
+  - _skillId:
+      _id: skill_01
+      _hashId: -1127918619
+    _definitions:
+    - {fileID: 11400000, guid: 596f7746cc31c5f479ff668f8019ab36, type: 2}
+  - _skillId:
+      _id: skill_02
+      _hashId: 634126943
+    _definitions:
+    - {fileID: 11400000, guid: 6ba8155c3b96151429995f4074d59e63, type: 2}
+  - _skillId:
+      _id: skill_03
+      _hashId: 1389048521
+    _definitions:
+    - {fileID: 11400000, guid: 9e17c1553ce04d248b8122b7804e15a9, type: 2}
+  - _skillId:
+      _id: skill_04
+      _hashId: -860903574
+    _definitions:
+    - {fileID: 11400000, guid: 88d471f4323322c46b72abe061e97712, type: 2}
+  - _skillId:
+      _id: skill_05
+      _hashId: -1146578948
+    _definitions:
+    - {fileID: 11400000, guid: 0a2aee03a1f1e83458e8031db120da46, type: 2}
+  - _skillId:
+      _id: skill_06
+      _hashId: 581027398
+    _definitions:
+    - {fileID: 11400000, guid: 99f09ae310a9c674c921bfb972ea0f69, type: 2}
+  - _skillId:
+      _id: skill_07
+      _hashId: 1437005520
+    _definitions:
+    - {fileID: 11400000, guid: 103b716d96faf47418bd5e18c306e971, type: 2}
+  - _skillId:
+      _id: skill_08
+      _hashId: -988157119
+    _definitions:
+    - {fileID: 11400000, guid: 7b635f4394d2d3c47b5be641f56dea22, type: 2}
+  - _skillId:
+      _id: skill_09
+      _hashId: -1306600489
+    _definitions:
+    - {fileID: 11400000, guid: 3dfb5517b4847ab4c93b60b38958ddce, type: 2}
+  - _skillId:
+      _id: skill_10
+      _hashId: -757509582
+    _definitions:
+    - {fileID: 11400000, guid: 4d665c9ec584623448a5a0ca4570656c, type: 2}
+  - _skillId:
+      _id: skill_13
+      _hashId: 1271923592
+    _definitions:
+    - {fileID: 11400000, guid: 3b8927cda0e8750469e798391273145f, type: 2}
+  _commonDefinitions: []
