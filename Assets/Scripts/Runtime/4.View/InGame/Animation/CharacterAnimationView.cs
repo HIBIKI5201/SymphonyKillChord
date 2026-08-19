@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
@@ -260,7 +261,7 @@ namespace KillChord.Runtime.View
 
             // 停止を観測するまではキャンセルしない。硬直中に移動入力が無効化される前提で、
             // 「硬直解除後に移動を開始した」場合のみキャンセル対象とする。
-            if (_context.ViewModel.Velocity.magnitude < CharacterAnimationLocomotionCalculator.WALK_THRESHOLD)
+            if (_context.ViewModel.Velocity.sqrMagnitude <　Square(CharacterAnimationLocomotionCalculator.WALK_THRESHOLD))
             {
                 _hasStoppedSinceOverlayStarted = true;
                 return;
@@ -356,6 +357,14 @@ namespace KillChord.Runtime.View
             }
 
             return 1f;
+        }
+
+        /// <summary>
+        /// 2乗
+        /// </summary>
+        private float Square(float x)
+        {
+            return x * x;
         }
     }
 }
