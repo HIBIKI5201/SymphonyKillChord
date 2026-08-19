@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ScanlineOverlay from '../components/ScanlineOverlay.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 
 const testText = 'この文章は、テストです。1〜　⭐️';
 ---
@@ -11,7 +12,7 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		<section id="hero">
 			<p id="eyebrow">Rhythm Action</p>
 			<h1>Symphony Kill Chord</h1>
-			<p id="catch">リズムに乗せて「キルコード」を紡ぎ、戦況を切り開け。</p>
+			<p id="catch">独自のビートを刻み、KillChordで爽快にキルを重ねろ。</p>
 		</section>
 
 		<section id="type-scale">
@@ -24,10 +25,9 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 			<p class="body-small">{testText}</p>
 		</section>
 
-		<footer>
-			<p>&copy; Symphony Kill Chord</p>
-		</footer>
 	</main>
+
+	<SiteFooter />
 </Layout>
 
 <style>
@@ -40,8 +40,13 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 	}
 
 	#hero {
-		padding: 96px 0 64px;
+		padding: 48px 24px 64px;
+		margin: 0 -24px;
 		text-align: center;
+		background-image: linear-gradient(rgba(10, 13, 11, 0.55), rgba(10, 13, 11, 0.55)),
+			url('../assets/images/title_steel.jpg');
+		background-size: cover;
+		background-position: center;
 	}
 
 	#eyebrow {
@@ -50,7 +55,7 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		letter-spacing: var(--tracking-label);
 		font-size: 13px;
 		font-weight: 600;
-		color: var(--color-signal-dim);
+		color: var(--color-signal);
 		text-transform: uppercase;
 	}
 
@@ -62,11 +67,15 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		font-weight: 800;
 	}
 
+	#hero h1 {
+		color: var(--color-text-primary);
+	}
+
 	#catch {
 		margin: 0;
 		font-family: var(--font-body);
 		font-size: 18px;
-		color: #4b5563;
+		color: var(--color-text-primary);
 	}
 
 	#type-scale {
@@ -126,11 +135,4 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		color: #6b7280;
 	}
 
-	footer {
-		padding: 32px 0 64px;
-		text-align: center;
-		font-family: var(--font-mono);
-		font-size: 13px;
-		color: #9ca3af;
-	}
 </style>

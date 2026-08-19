@@ -1,5 +1,6 @@
 ---
 import '../styles/tokens.css';
+import SiteHeader from '../components/SiteHeader.astro';
 
 interface Props {
 	title?: string;
@@ -24,6 +25,7 @@ const {
 		<title>{title}</title>
 	</head>
 	<body>
+		<SiteHeader />
 		<slot />
 	</body>
 </html>
@@ -41,5 +43,9 @@ const {
 		background: var(--color-bg);
 		color: var(--color-text-primary);
 		font-family: var(--font-body);
+	}
+
+	body {
+		padding-top: 64px;
 	}
 </style>
