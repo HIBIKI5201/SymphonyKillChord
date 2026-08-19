@@ -1538,6 +1538,7 @@ GameObject:
   - component: {fileID: 438459095}
   - component: {fileID: 438459097}
   - component: {fileID: 438459098}
+  - component: {fileID: 438459099}
   m_Layer: 0
   m_Name: IngameComposition
   m_TagString: Untagged
@@ -1695,6 +1696,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Player.PlayerStatusBonusInitializer
   _skillNodeDataRepoKey: SkillNodeDataRepo
+--- !u!114 &438459099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438459088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf42068da715b8247b984b9e14ae9511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Skill.Effect.SkillEffectInitializer
+  _skillEffectSpawner: {fileID: 664140147}
+  _fallbackEquippedSkills: []
 --- !u!1 &446256741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2306,6 +2321,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 535389975}
   m_CullTransparentMesh: 1
+--- !u!1 &664140145
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 664140146}
+  - component: {fileID: 664140147}
+  m_Layer: 0
+  m_Name: SkillEffectSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &664140146
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664140145}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2100000001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &664140147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664140145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f85e45925a400748ab082a4b4c3fc2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.SkillEffectSpawner
+  _catalog: {fileID: 11400000, guid: 50e3639456c598241ac7c75ff4d6926e, type: 2}
+  _instanceRoot: {fileID: 0}
 --- !u!1 &708479943
 GameObject:
   m_ObjectHideFlags: 0
@@ -6109,6 +6170,7 @@ Transform:
   - {fileID: 1249666143}
   - {fileID: 2200000001}
   - {fileID: 1776231712}
+  - {fileID: 664140146}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2100000002
