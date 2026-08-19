@@ -721,11 +721,6 @@ jobs:
 
 # ==================================================================================================
 
-      - name: .NET SDK のセットアップ
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '9.0.x'
-
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
