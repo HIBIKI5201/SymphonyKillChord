@@ -1,8 +1,10 @@
 using KillChord.Editor.Utility;
+using KillChord.Runtime.Utility.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace KillChord.Editor.SourceDataProvider
@@ -15,7 +17,7 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     ウィンドウを開きます。
         /// </summary>
-        [MenuItem(ToolConst.TOOLS_PATH + "Source Data Provider/Planner Master Data Window")]
+        [MenuItem(EditorWindowPathConst.PLANNER_MASTER_DATA_WINDOW_PATH)]
         public static void ShowWindow()
         {
             PlannerMasterDataWindow window = GetWindow<PlannerMasterDataWindow>();
@@ -23,12 +25,31 @@ namespace KillChord.Editor.SourceDataProvider
             window.minSize = new Vector2(1080f, 640f);
         }
 
+        /// <summary>
+        ///     開いているウィンドウを取得し、無ければ新規に開きます。
+        /// </summary>
+        /// <param name="window"> 取得したウィンドウです。 </param>
+        /// <returns> ウィンドウを取得できた場合はtrueです。 </returns>
+        public static bool TryGetOrOpenWindow(out PlannerMasterDataWindow window)
+        {
+            window = Resources.FindObjectsOfTypeAll<PlannerMasterDataWindow>().FirstOrDefault();
+            if (window == null)
+            {
+                ShowWindow();
+                window = Resources.FindObjectsOfTypeAll<PlannerMasterDataWindow>().FirstOrDefault();
+            }
+
+            return window != null;
+        }
+
+        [SerializeField] private int _selectedPageIndex;
+        [SerializeField] private int _selectedCollectionItemIndex;
+        [SerializeField] private NavigationMode _navigationMode;
+        [SerializeField] private string _selectedSourceAssetKey = string.Empty;
+        [SerializeField] private string _selectedCollectionKey = string.Empty;
         private Vector2 _pageScrollPosition;
         private Vector2 _navigationScrollPosition;
         private Vector2 _contentScrollPosition;
-        private int _selectedPageIndex;
-        private string _selectedSourceAssetKey = string.Empty;
-        private string _selectedCollectionKey = string.Empty;
         private UnityEditor.Editor _cachedEditor;
         private UnityEngine.Object _cachedEditorTarget;
 
@@ -38,7 +59,9 @@ namespace KillChord.Editor.SourceDataProvider
         private void OnEnable()
         {
             SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            BattleSceneDataReader.ClearCache();
             EnsureSelection();
+            Undo.undoRedoPerformed += OnUndoRedoPerformed;
         }
 
         /// <summary>
@@ -46,7 +69,47 @@ namespace KillChord.Editor.SourceDataProvider
         /// </summary>
         private void OnDisable()
         {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
             ClearCachedEditor();
+        }
+
+        /// <summary>
+        ///     Undo/Redo実行時に選択状態を再描画します。
+        /// </summary>
+        private void OnUndoRedoPerformed()
+        {
+            EnsureSelection();
+            ClearCachedEditor();
+            Repaint();
+        }
+
+        /// <summary>
+        ///     ナビゲーション状態の変更前にUndo記録を行います。値が変わらない場合は記録しません。
+        /// </summary>
+        /// <param name="actionName"> Undo履歴へ表示するアクション名です。 </param>
+        /// <param name="nextPageIndex"> 変更後のページIndexです。 </param>
+        /// <param name="nextNavigationMode"> 変更後のNavigationModeです。 </param>
+        /// <param name="nextSourceAssetKey"> 変更後のSourceAssetキーです。 </param>
+        /// <param name="nextCollectionKey"> 変更後のCollectionKeyです。 </param>
+        /// <param name="nextCollectionItemIndex"> 変更後のCollection内選択Indexです。 </param>
+        private void RecordNavigationUndo(
+            string actionName,
+            int nextPageIndex,
+            NavigationMode nextNavigationMode,
+            string nextSourceAssetKey,
+            string nextCollectionKey,
+            int nextCollectionItemIndex)
+        {
+            if (_selectedPageIndex == nextPageIndex
+                && _navigationMode == nextNavigationMode
+                && string.Equals(_selectedSourceAssetKey, nextSourceAssetKey ?? string.Empty, StringComparison.Ordinal)
+                && string.Equals(_selectedCollectionKey, nextCollectionKey ?? string.Empty, StringComparison.Ordinal)
+                && _selectedCollectionItemIndex == nextCollectionItemIndex)
+            {
+                return;
+            }
+
+            Undo.RecordObject(this, actionName);
         }
 
         /// <summary>
@@ -82,6 +145,7 @@ namespace KillChord.Editor.SourceDataProvider
             if (pages.Count == 0)
             {
                 _selectedPageIndex = 0;
+                _selectedCollectionItemIndex = 0;
                 _selectedSourceAssetKey = string.Empty;
                 _selectedCollectionKey = string.Empty;
                 return;
@@ -89,17 +153,39 @@ namespace KillChord.Editor.SourceDataProvider
 
             _selectedPageIndex = Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1);
             PlannerMasterDataEditorSettings.PageDefinition page = pages[_selectedPageIndex];
-            if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey))
+            if (_navigationMode == NavigationMode.SourceAssets
+                && page.SourceAssetAddressableKeys.Count == 0
+                && page.CollectionCategories.Count > 0)
             {
-                _selectedSourceAssetKey = page.SourceAssetAddressableKeys.Count > 0
-                    ? page.SourceAssetAddressableKeys[0]
-                    : string.Empty;
+                _navigationMode = NavigationMode.Collections;
+            }
+            else if (_navigationMode == NavigationMode.Collections
+                && page.CollectionCategories.Count == 0
+                && page.SourceAssetAddressableKeys.Count > 0)
+            {
+                _navigationMode = NavigationMode.SourceAssets;
+            }
+
+            if (_navigationMode == NavigationMode.SourceAssets)
+            {
+                if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey))
+                {
+                    _selectedSourceAssetKey = page.SourceAssetAddressableKeys.Count > 0
+                        ? page.SourceAssetAddressableKeys[0]
+                        : string.Empty;
+                }
+                _selectedCollectionKey = string.Empty;
+                _selectedCollectionItemIndex = 0;
+                return;
             }
 
             if (!Contains(page.CollectionCategories, _selectedCollectionKey))
             {
-                _selectedCollectionKey = string.Empty;
+                _selectedCollectionKey = page.CollectionCategories.Count > 0
+                    ? page.CollectionCategories[0]
+                    : string.Empty;
             }
+            _selectedSourceAssetKey = string.Empty;
         }
 
         /// <summary>
@@ -123,7 +209,9 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
+                    RecordNavigationUndo("ページ切替", i, _navigationMode, string.Empty, string.Empty, 0);
                     _selectedPageIndex = i;
+                    _selectedCollectionItemIndex = 0;
                     _selectedSourceAssetKey = string.Empty;
                     _selectedCollectionKey = string.Empty;
                     ClearCachedEditor();
@@ -173,13 +261,14 @@ namespace KillChord.Editor.SourceDataProvider
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(72f)))
             {
                 SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+                BattleSceneDataReader.ClearCache();
                 ClearCachedEditor();
                 Repaint();
             }
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.HelpBox(
-                "左の一覧からSourceAssetまたはcollectionを選ぶと、右側で編集とプレビューを行えます。"
+                "Source Assetsではアセット全体を、Collectionsでは個別データを選択して編集できます。"
                 + " 新しい型の追加は、SourceDataProvider設定とページ設定の更新だけで反映できます。",
                 MessageType.Info);
 
@@ -197,12 +286,37 @@ namespace KillChord.Editor.SourceDataProvider
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(NAVIGATION_COLUMN_WIDTH));
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            NavigationMode nextMode = (NavigationMode)GUILayout.Toolbar(
+                (int)_navigationMode,
+                NAVIGATION_MODE_LABELS);
+            if (nextMode != _navigationMode)
+            {
+                RecordNavigationUndo(
+                    "表示モード切替",
+                    _selectedPageIndex,
+                    nextMode,
+                    string.Empty,
+                    string.Empty,
+                    0);
+                _navigationMode = nextMode;
+                _selectedSourceAssetKey = string.Empty;
+                _selectedCollectionKey = string.Empty;
+                _selectedCollectionItemIndex = 0;
+                ClearCachedEditor();
+                EnsureSelection();
+            }
+
             using (EditorGUILayout.ScrollViewScope scope = new(_navigationScrollPosition))
             {
                 _navigationScrollPosition = scope.scrollPosition;
-                DrawSourceAssetNavigation(page);
-                EditorGUILayout.Space();
-                DrawCollectionNavigation(page);
+                if (_navigationMode == NavigationMode.SourceAssets)
+                {
+                    DrawSourceAssetNavigation(page);
+                }
+                else
+                {
+                    DrawCollectionNavigation(page);
+                }
             }
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndVertical();
@@ -232,8 +346,16 @@ namespace KillChord.Editor.SourceDataProvider
                     continue;
                 }
 
+                RecordNavigationUndo(
+                    "Source Asset選択",
+                    _selectedPageIndex,
+                    _navigationMode,
+                    addressableKey,
+                    string.Empty,
+                    0);
                 _selectedSourceAssetKey = addressableKey;
                 _selectedCollectionKey = string.Empty;
+                _selectedCollectionItemIndex = 0;
                 ClearCachedEditor();
             }
         }
@@ -256,14 +378,73 @@ namespace KillChord.Editor.SourceDataProvider
                 string collectionKey = page.CollectionCategories[i];
                 string label = BuildCollectionLabel(collectionKey);
                 bool isSelected = string.Equals(_selectedCollectionKey, collectionKey, StringComparison.Ordinal);
-                if (!GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
+                if (GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
                 {
-                    continue;
+                    RecordNavigationUndo(
+                        "Collection選択",
+                        _selectedPageIndex,
+                        _navigationMode,
+                        string.Empty,
+                        collectionKey,
+                        0);
+                    _selectedCollectionKey = collectionKey;
+                    _selectedSourceAssetKey = string.Empty;
+                    _selectedCollectionItemIndex = 0;
+                    ClearCachedEditor();
                 }
 
-                _selectedCollectionKey = collectionKey;
-                ClearCachedEditor();
+                if (isSelected)
+                {
+                    DrawCollectionItemNavigation(collectionKey);
+                }
             }
+        }
+
+        /// <summary>
+        ///     選択中Collectionの個別要素一覧を描画します。
+        /// </summary>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        private void DrawCollectionItemNavigation(string collectionKey)
+        {
+            if (!TryResolveCollection(
+                    collectionKey,
+                    out _,
+                    out _,
+                    out _,
+                    out SerializedProperty collectionProperty)
+                || !collectionProperty.isArray)
+            {
+                return;
+            }
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("個別データ", EditorStyles.miniBoldLabel);
+            if (collectionProperty.arraySize == 0)
+            {
+                EditorGUILayout.LabelField("データなし", EditorStyles.centeredGreyMiniLabel);
+            }
+
+            for (int i = 0; i < collectionProperty.arraySize; i++)
+            {
+                SerializedProperty element = collectionProperty.GetArrayElementAtIndex(i);
+                string label = BuildCollectionItemLabel(element, i);
+                bool isSelected = i == _selectedCollectionItemIndex;
+                if (GUILayout.Button(
+                    label,
+                    isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
+                {
+                    RecordNavigationUndo(
+                        "個別データ選択",
+                        _selectedPageIndex,
+                        _navigationMode,
+                        _selectedSourceAssetKey,
+                        _selectedCollectionKey,
+                        i);
+                    _selectedCollectionItemIndex = i;
+                    ClearCachedEditor();
+                }
+            }
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>
@@ -275,11 +456,13 @@ namespace KillChord.Editor.SourceDataProvider
             using (EditorGUILayout.ScrollViewScope scope = new(_contentScrollPosition))
             {
                 _contentScrollPosition = scope.scrollPosition;
-                if (!string.IsNullOrWhiteSpace(_selectedCollectionKey))
+                if (_navigationMode == NavigationMode.Collections
+                    && !string.IsNullOrWhiteSpace(_selectedCollectionKey))
                 {
                     DrawCollectionDetail(_selectedCollectionKey);
                 }
-                else if (!string.IsNullOrWhiteSpace(_selectedSourceAssetKey))
+                else if (_navigationMode == NavigationMode.SourceAssets
+                    && !string.IsNullOrWhiteSpace(_selectedSourceAssetKey))
                 {
                     DrawSourceAssetDetail(_selectedSourceAssetKey);
                 }
@@ -317,53 +500,311 @@ namespace KillChord.Editor.SourceDataProvider
         /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
         private void DrawCollectionDetail(string collectionKey)
         {
-            if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(
+            if (!TryResolveCollection(
+                    collectionKey,
+                    out SourceDataProviderSettings.SourceCollectionMapping mapping,
+                    out ScriptableObject sourceAsset,
+                    out SerializedObject serializedObject,
+                    out SerializedProperty property))
+            {
+                EditorGUILayout.HelpBox(
+                    $"CollectionKey「{collectionKey}」のSourceAssetまたはProperty Pathを解決できません。",
+                    MessageType.Error);
+                return;
+            }
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            EditorGUILayout.LabelField($"Collection [{collectionKey}]", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Source Assetを開く", EditorStyles.toolbarButton))
+            {
+                NavigateToSourceAsset(mapping.SourceAssetAddressableKey);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            DrawCollectionMetadata(mapping);
+            if (!property.isArray)
+            {
+                EditorGUILayout.HelpBox(
+                    "Collection対象が配列またはListではありません。",
+                    MessageType.Error);
+                return;
+            }
+
+            if (IsStageTreeCollection(collectionKey))
+            {
+                int selectedStageIndex = string.Equals(
+                    collectionKey,
+                    STAGE_ASSET_COLLECTION_KEY,
+                    StringComparison.Ordinal)
+                    ? _selectedCollectionItemIndex
+                    : -1;
+                int graphSelection = PlannerStageTreeGraphRenderer.Draw(sourceAsset, selectedStageIndex);
+                if (selectedStageIndex >= 0 && graphSelection != selectedStageIndex)
+                {
+                    _selectedCollectionItemIndex = graphSelection;
+                    ClearCachedEditor();
+                }
+            }
+
+            DrawCollectionCommands(mapping, sourceAsset, property);
+            if (property.arraySize == 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "Collectionにデータがありません。「データを追加」から作成できます。",
+                    MessageType.Info);
+                return;
+            }
+
+            _selectedCollectionItemIndex = Mathf.Clamp(
+                _selectedCollectionItemIndex,
+                0,
+                property.arraySize - 1);
+            SerializedProperty element = property.GetArrayElementAtIndex(_selectedCollectionItemIndex);
+            DrawCollectionItemEditor(
                 collectionKey,
-                out SourceDataProviderSettings.SourceCollectionMapping mapping))
+                sourceAsset,
+                serializedObject,
+                element,
+                _selectedCollectionItemIndex);
+        }
+
+        /// <summary>
+        ///     Collectionの追加と登録解除操作を描画します。
+        /// </summary>
+        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="collectionProperty"> Collectionプロパティです。 </param>
+        private void DrawCollectionCommands(
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            ScriptableObject sourceAsset,
+            SerializedProperty collectionProperty)
+        {
+            if (!SourceDataProviderRepositoryResolver.TryGetCollectionElementType(
+                    sourceAsset,
+                    mapping.PropertyPath,
+                    out Type elementType))
             {
                 EditorGUILayout.HelpBox(
-                    $"CollectionKey「{collectionKey}」がSourceDataProviderへ登録されていません。",
-                    MessageType.Error);
+                    "Collectionの要素型を取得できないため、データを追加できません。",
+                    MessageType.Warning);
                 return;
             }
 
-            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
-                mapping.SourceAssetAddressableKey,
-                out ScriptableObject sourceAsset))
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("データを追加", GUILayout.Height(COMMAND_BUTTON_HEIGHT)))
+            {
+                ShowCollectionCreationMenu(mapping, sourceAsset, elementType);
+            }
+
+            using (new EditorGUI.DisabledScope(collectionProperty.arraySize == 0))
+            {
+                if (GUILayout.Button(
+                    "Collectionから外す",
+                    GUILayout.Height(COMMAND_BUTTON_HEIGHT)))
+                {
+                    RemoveSelectedCollectionItem(sourceAsset, mapping);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (typeof(ScriptableObject).IsAssignableFrom(elementType)
+                && string.IsNullOrWhiteSpace(mapping.AssetCreationDirectory))
             {
                 EditorGUILayout.HelpBox(
-                    $"Addressableキー「{mapping.SourceAssetAddressableKey}」からSourceAssetを解決できません。",
-                    MessageType.Error);
+                    "新規アセットの生成先はSource Data Provider設定のAsset Creation Directoryで指定します。",
+                    MessageType.Info);
+            }
+        }
+
+        /// <summary>
+        ///     Collection要素型に応じた作成メニューを表示します。
+        /// </summary>
+        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="elementType"> Collectionの要素型です。 </param>
+        private void ShowCollectionCreationMenu(
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            ScriptableObject sourceAsset,
+            Type elementType)
+        {
+            IReadOnlyList<Type> assetTypes =
+                PlannerCollectionItemCreator.GetCreatableAssetTypes(elementType);
+            if (assetTypes.Count == 0)
+            {
+                AddInlineCollectionItem(mapping, sourceAsset, elementType);
                 return;
             }
 
-            DrawObjectHeader($"Collection [{collectionKey}]", mapping.SourceAssetAddressableKey, sourceAsset);
-            DrawCollectionMetadata(mapping, sourceAsset);
+            if (assetTypes.Count == 1)
+            {
+                CreateCollectionAsset(mapping, sourceAsset, assetTypes[0]);
+                return;
+            }
+
+            GenericMenu menu = new();
+            for (int i = 0; i < assetTypes.Count; i++)
+            {
+                Type assetType = assetTypes[i];
+                menu.AddItem(
+                    new GUIContent(assetType.Name),
+                    false,
+                    () => CreateCollectionAsset(mapping, sourceAsset, assetType));
+            }
+            menu.ShowAsContext();
+        }
+
+        /// <summary>
+        ///     指定型のScriptableObjectを生成してCollectionへ追加します。
+        /// </summary>
+        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="assetType"> 生成する型です。 </param>
+        private void CreateCollectionAsset(
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            ScriptableObject sourceAsset,
+            Type assetType)
+        {
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
+            int newIndex = collectionProperty?.arraySize ?? 0;
+            if (!PlannerCollectionItemCreator.TryCreateAsset(
+                    sourceAsset,
+                    mapping,
+                    serializedObject,
+                    collectionProperty,
+                    assetType,
+                    out ScriptableObject createdAsset,
+                    out string errorMessage))
+            {
+                ShowNotification(new GUIContent(errorMessage));
+                return;
+            }
+
+            _selectedCollectionItemIndex = newIndex;
+            ClearCachedEditor();
+            EditorGUIUtility.PingObject(createdAsset);
+            Repaint();
+        }
+
+        /// <summary>
+        ///     インラインCollectionへ新規要素を追加します。
+        /// </summary>
+        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="elementType"> Collectionの要素型です。 </param>
+        private void AddInlineCollectionItem(
+            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            ScriptableObject sourceAsset,
+            Type elementType)
+        {
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
+            int newIndex = collectionProperty?.arraySize ?? 0;
+            if (!PlannerCollectionItemCreator.TryAddInlineItem(
+                    sourceAsset,
+                    serializedObject,
+                    collectionProperty,
+                    elementType,
+                    out string errorMessage))
+            {
+                ShowNotification(new GUIContent(errorMessage));
+                return;
+            }
+
+            _selectedCollectionItemIndex = newIndex;
+            ClearCachedEditor();
+            Repaint();
+        }
+
+        /// <summary>
+        ///     選択中要素をCollectionから登録解除します。
+        /// </summary>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="mapping"> Collection設定です。 </param>
+        private void RemoveSelectedCollectionItem(
+            ScriptableObject sourceAsset,
+            SourceDataProviderSettings.SourceCollectionMapping mapping)
+        {
+            if (!EditorUtility.DisplayDialog(
+                    "Collectionから外す",
+                    "選択中データをCollectionから外します。参照先アセット自体は削除しません。",
+                    "外す",
+                    "キャンセル"))
+            {
+                return;
+            }
 
             SerializedObject serializedObject = new(sourceAsset);
-            SerializedProperty property = string.IsNullOrWhiteSpace(mapping.PropertyPath)
-                ? null
-                : serializedObject.FindProperty(mapping.PropertyPath);
-            if (property == null)
+            SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
+            if (collectionProperty == null
+                || !collectionProperty.isArray
+                || collectionProperty.arraySize == 0)
             {
-                if (string.IsNullOrWhiteSpace(mapping.PropertyPath))
+                return;
+            }
+
+            int removeIndex = Mathf.Clamp(
+                _selectedCollectionItemIndex,
+                0,
+                collectionProperty.arraySize - 1);
+            Undo.RecordObject(sourceAsset, "Collectionからデータを外す");
+            int previousSize = collectionProperty.arraySize;
+            collectionProperty.DeleteArrayElementAtIndex(removeIndex);
+            if (collectionProperty.arraySize == previousSize)
+            {
+                collectionProperty.DeleteArrayElementAtIndex(removeIndex);
+            }
+            serializedObject.ApplyModifiedProperties();
+            SaveAssetIfDirty(sourceAsset);
+            _selectedCollectionItemIndex = Mathf.Max(0, removeIndex - 1);
+            ClearCachedEditor();
+        }
+
+        /// <summary>
+        ///     Collectionの選択中要素を編集します。
+        /// </summary>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
+        /// <param name="element"> 選択中要素です。 </param>
+        /// <param name="elementIndex"> 選択中インデックスです。 </param>
+        private void DrawCollectionItemEditor(
+            string collectionKey,
+            ScriptableObject sourceAsset,
+            SerializedObject serializedObject,
+            SerializedProperty element,
+            int elementIndex)
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(
+                $"個別データ {elementIndex + 1}: {BuildCollectionItemLabel(element, elementIndex)}",
+                EditorStyles.boldLabel);
+
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(element, new GUIContent("Asset"));
+                if (EditorGUI.EndChangeCheck())
                 {
-                    EditorGUILayout.HelpBox(
-                        "このcollectionはルートScriptableObjectをそのまま扱います。ルートのInspectorを表示します。",
-                        MessageType.None);
-                    DrawInspector(sourceAsset);
+                    serializedObject.ApplyModifiedProperties();
+                    SaveAssetIfDirty(sourceAsset);
+                    ClearCachedEditor();
                 }
-                else
+
+                if (element.objectReferenceValue != null)
                 {
-                    EditorGUILayout.HelpBox(
-                        $"Property Path「{mapping.PropertyPath}」を解決できません。Source Data Provider設定を確認してください。",
-                        MessageType.Error);
+                    DrawInspector(element.objectReferenceValue);
+                    EditorGUILayout.Space();
+                    DrawCollectionObjectReferencePreview(
+                        collectionKey,
+                        element.objectReferenceValue);
                 }
                 return;
             }
 
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(property, INCLUDE_CHILDREN);
+            EditorGUILayout.PropertyField(element, INCLUDE_CHILDREN);
             if (EditorGUI.EndChangeCheck())
             {
                 serializedObject.ApplyModifiedProperties();
@@ -371,7 +812,232 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             EditorGUILayout.Space();
-            DrawCollectionPreview(collectionKey, property);
+            DrawCollectionElementPreview(element);
+        }
+
+        /// <summary>
+        ///     Collection設定と対象プロパティをまとめて解決します。
+        /// </summary>
+        /// <param name="collectionKey"> CollectionKeyです。 </param>
+        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="sourceAsset"> SourceAssetです。 </param>
+        /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
+        /// <param name="collectionProperty"> Collectionプロパティです。 </param>
+        /// <returns> 全て解決できた場合はtrueです。 </returns>
+        private static bool TryResolveCollection(
+            string collectionKey,
+            out SourceDataProviderSettings.SourceCollectionMapping mapping,
+            out ScriptableObject sourceAsset,
+            out SerializedObject serializedObject,
+            out SerializedProperty collectionProperty)
+        {
+            mapping = null;
+            sourceAsset = null;
+            serializedObject = null;
+            collectionProperty = null;
+            if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out mapping)
+                || !SourceDataProviderRepositoryResolver.TryResolveAsset(
+                    mapping.SourceAssetAddressableKey,
+                    out sourceAsset))
+            {
+                return false;
+            }
+
+            serializedObject = new SerializedObject(sourceAsset);
+            collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
+            return collectionProperty != null;
+        }
+
+        /// <summary>
+        ///     指定Addressableキーを含むページのSource Assets画面へ移動します。
+        /// </summary>
+        /// <param name="addressableKey"> 移動先SourceAssetのAddressableキーです。 </param>
+        public void NavigateToSourceAsset(string addressableKey)
+        {
+            IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
+                PlannerMasterDataEditorSettings.instance.Pages;
+            for (int i = 0; i < pages.Count; i++)
+            {
+                if (!Contains(pages[i].SourceAssetAddressableKeys, addressableKey))
+                {
+                    continue;
+                }
+
+                RecordNavigationUndo(
+                    "Source Assetへ移動",
+                    i,
+                    NavigationMode.SourceAssets,
+                    addressableKey,
+                    string.Empty,
+                    0);
+                _selectedPageIndex = i;
+                _navigationMode = NavigationMode.SourceAssets;
+                _selectedSourceAssetKey = addressableKey;
+                _selectedCollectionKey = string.Empty;
+                _selectedCollectionItemIndex = 0;
+                ClearCachedEditor();
+                Repaint();
+                Focus();
+                return;
+            }
+
+            ShowNotification(new GUIContent(
+                $"SourceAsset「{addressableKey}」を表示するページが設定されていません。"));
+        }
+
+        /// <summary>
+        ///     指定CollectionKeyとDataIDに対応する個別データ画面へ移動します。
+        /// </summary>
+        /// <param name="collectionKey"> 移動先CollectionKeyです。 </param>
+        /// <param name="dataId"> 移動先の個別データIDです。 </param>
+        public void NavigateToCollectionItem(string collectionKey, string dataId)
+        {
+            IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
+                PlannerMasterDataEditorSettings.instance.Pages;
+            int pageIndex = -1;
+            for (int i = 0; i < pages.Count; i++)
+            {
+                if (!Contains(pages[i].CollectionCategories, collectionKey))
+                {
+                    continue;
+                }
+
+                pageIndex = i;
+                break;
+            }
+
+            if (pageIndex < 0)
+            {
+                ShowNotification(new GUIContent(
+                    $"Collection「{collectionKey}」を表示するページが設定されていません。"));
+                return;
+            }
+
+            int itemIndex = 0;
+            if (!string.IsNullOrWhiteSpace(dataId)
+                && TryResolveCollection(
+                    collectionKey,
+                    out _,
+                    out _,
+                    out _,
+                    out SerializedProperty collectionProperty)
+                && collectionProperty.isArray)
+            {
+                bool found = false;
+                for (int i = 0; i < collectionProperty.arraySize; i++)
+                {
+                    if (!ElementMatchesDataId(
+                        collectionProperty.GetArrayElementAtIndex(i),
+                        dataId,
+                        collectionKey))
+                    {
+                        continue;
+                    }
+
+                    itemIndex = i;
+                    found = true;
+                    break;
+                }
+
+                if (!found)
+                {
+                    ShowNotification(new GUIContent(
+                        $"CollectionKey「{collectionKey}」内にID「{dataId}」のデータが見つかりません。"));
+                }
+            }
+
+            RecordNavigationUndo(
+                "個別データへ移動",
+                pageIndex,
+                NavigationMode.Collections,
+                string.Empty,
+                collectionKey,
+                itemIndex);
+            _selectedPageIndex = pageIndex;
+            _navigationMode = NavigationMode.Collections;
+            _selectedCollectionKey = collectionKey;
+            _selectedSourceAssetKey = string.Empty;
+            _selectedCollectionItemIndex = itemIndex;
+            ClearCachedEditor();
+            Repaint();
+            Focus();
+        }
+
+        /// <summary>
+        ///     Collection要素が指定DataIDに一致するか判定します。
+        /// </summary>
+        /// <param name="element"> 対象要素です。 </param>
+        /// <param name="dataId"> 検索するDataIDです。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <returns> 一致する場合はtrueです。 </returns>
+        private static bool ElementMatchesDataId(
+            SerializedProperty element,
+            string dataId,
+            string collectionKey)
+        {
+            if (element == null)
+            {
+                return false;
+            }
+
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                return element.objectReferenceValue != null
+                    && ObjectHasMatchingAuthoringId(element.objectReferenceValue, collectionKey, dataId);
+            }
+
+            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
+            SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+            return string.Equals(idValueProperty?.stringValue, dataId, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        ///     対象オブジェクトが持つ直下のDataIDフィールド（参照ではなく定義側）が指定IDと一致するか判定します。
+        /// </summary>
+        /// <param name="target"> 対象オブジェクトです。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="dataId"> 検索するDataIDです。 </param>
+        /// <returns> 一致する場合はtrueです。 </returns>
+        private static bool ObjectHasMatchingAuthoringId(UnityEngine.Object target, string collectionKey, string dataId)
+        {
+            const BindingFlags BINDING_FLAGS =
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+            SerializedObject serializedObject = new(target);
+            for (Type current = target.GetType();
+                current != null && current != typeof(ScriptableObject);
+                current = current.BaseType)
+            {
+                FieldInfo[] fields = current.GetFields(BINDING_FLAGS);
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    FieldInfo field = fields[i];
+                    if (field.FieldType != typeof(DataID))
+                    {
+                        continue;
+                    }
+
+                    SourceDataCollectionAttribute attribute =
+                        field.GetCustomAttribute<SourceDataCollectionAttribute>();
+                    if (attribute == null
+                        || !string.Equals(attribute.CollectionKey, collectionKey, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    SerializedProperty dataIdProperty = serializedObject.FindProperty(field.Name);
+                    SerializedProperty idValueProperty =
+                        dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+                    if (string.Equals(idValueProperty?.stringValue, dataId, StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -402,7 +1068,7 @@ namespace KillChord.Editor.SourceDataProvider
         /// <param name="target"> 描画対象オブジェクトです。 </param>
         private void DrawInspector(UnityEngine.Object target)
         {
-            EditorGUILayout.LabelField("Inspector", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("全項目編集", EditorStyles.boldLabel);
             UnityEditor.Editor editor = GetOrCreateEditor(target);
             if (editor == null)
             {
@@ -411,7 +1077,7 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             EditorGUI.BeginChangeCheck();
-            editor.OnInspectorGUI();
+            editor.DrawDefaultInspector();
             if (EditorGUI.EndChangeCheck())
             {
                 SaveAssetIfDirty(target);
@@ -429,15 +1095,24 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (string.Equals(addressableKey, "StageTreeAsset", StringComparison.Ordinal))
             {
-                DrawStageTreePreview(sourceAsset);
+                PlannerStageTreeGraphRenderer.Draw(sourceAsset, -1);
                 return;
+            }
+
+            bool hasSpecialPreview = PlannerEnemyStatusPreview.CanDraw(addressableKey, sourceAsset);
+            if (hasSpecialPreview)
+            {
+                PlannerEnemyStatusPreview.Draw(sourceAsset);
             }
 
             IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
                 SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey);
             if (mappings.Count == 0)
             {
-                EditorGUILayout.HelpBox("このSourceAssetにはcollection設定がありません。", MessageType.None);
+                if (!hasSpecialPreview)
+                {
+                    EditorGUILayout.HelpBox("このSourceAssetには専用プレビューがありません。", MessageType.None);
+                }
                 return;
             }
 
@@ -452,87 +1127,6 @@ namespace KillChord.Editor.SourceDataProvider
                 }
 
                 DrawCollectionPreview(mapping.CollectionKey, property);
-            }
-        }
-
-        /// <summary>
-        ///     StageTreeAsset向けの可視化プレビューを描画します。
-        /// </summary>
-        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
-        private static void DrawStageTreePreview(ScriptableObject sourceAsset)
-        {
-            SerializedObject serializedObject = new(sourceAsset);
-            SerializedProperty nodeAssetsProperty = serializedObject.FindProperty(STAGE_NODE_ASSETS_PROPERTY_NAME);
-            SerializedProperty connectionsProperty = serializedObject.FindProperty(STAGE_CONNECTIONS_PROPERTY_NAME);
-
-            if (nodeAssetsProperty == null)
-            {
-                EditorGUILayout.HelpBox("ステージノード一覧を取得できません。", MessageType.Warning);
-                return;
-            }
-
-            EditorGUILayout.HelpBox(
-                $"ノード数: {nodeAssetsProperty.arraySize} / 接続数: {connectionsProperty?.arraySize ?? 0}",
-                MessageType.None);
-
-            int tutorialCount = 0;
-            for (int i = 0; i < nodeAssetsProperty.arraySize; i++)
-            {
-                SerializedProperty element = nodeAssetsProperty.GetArrayElementAtIndex(i);
-                if (element.objectReferenceValue is ScriptableObject nodeAsset)
-                {
-                    SerializedObject serializedNodeAsset = new(nodeAsset);
-                    SerializedProperty isTutorialProperty = serializedNodeAsset.FindProperty(STAGE_NODE_IS_TUTORIAL_PROPERTY_NAME);
-                    if (isTutorialProperty != null && isTutorialProperty.boolValue)
-                    {
-                        tutorialCount++;
-                    }
-                }
-            }
-
-            EditorGUILayout.LabelField($"Tutorial Nodes: {tutorialCount}", EditorStyles.miniBoldLabel);
-
-            EditorGUILayout.LabelField("Stage Nodes", EditorStyles.miniBoldLabel);
-            for (int i = 0; i < Mathf.Min(nodeAssetsProperty.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
-            {
-                SerializedProperty element = nodeAssetsProperty.GetArrayElementAtIndex(i);
-                if (element.objectReferenceValue is not ScriptableObject nodeAsset)
-                {
-                    continue;
-                }
-
-                Texture previewTexture = AssetPreview.GetMiniThumbnail(nodeAsset);
-                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                GUILayout.Label(previewTexture, GUILayout.Width(32f), GUILayout.Height(32f));
-                EditorGUILayout.LabelField(nodeAsset.name, GUILayout.Height(32f));
-                if (GUILayout.Button("Ping", GUILayout.Width(56f), GUILayout.Height(28f)))
-                {
-                    EditorGUIUtility.PingObject(nodeAsset);
-                    Selection.activeObject = nodeAsset;
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-
-            if (nodeAssetsProperty.arraySize > PREVIEW_ELEMENT_LIMIT)
-            {
-                EditorGUILayout.HelpBox(
-                    $"残り {nodeAssetsProperty.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
-                    MessageType.None);
-            }
-
-            if (connectionsProperty != null && connectionsProperty.arraySize > 0)
-            {
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("Connections", EditorStyles.miniBoldLabel);
-                for (int i = 0; i < Mathf.Min(connectionsProperty.arraySize, PREVIEW_CONNECTION_LIMIT); i++)
-                {
-                    SerializedProperty connection = connectionsProperty.GetArrayElementAtIndex(i);
-                    SerializedProperty fromProperty = connection.FindPropertyRelative(STAGE_CONNECTION_FROM_PROPERTY_NAME);
-                    SerializedProperty toProperty = connection.FindPropertyRelative(STAGE_CONNECTION_TO_PROPERTY_NAME);
-                    string fromLabel = GetDataIdLabel(fromProperty);
-                    string toLabel = GetDataIdLabel(toProperty);
-                    EditorGUILayout.LabelField($"{fromLabel} -> {toLabel}");
-                }
             }
         }
 
@@ -554,7 +1148,7 @@ namespace KillChord.Editor.SourceDataProvider
 
             if (string.Equals(label, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                DrawWaveCollectionPreview(property);
+                PlannerEnemyWavePreview.DrawRepository(property, PREVIEW_ELEMENT_LIMIT);
                 return;
             }
 
@@ -634,66 +1228,58 @@ namespace KillChord.Editor.SourceDataProvider
         ///     collection設定の補足情報を描画します。
         /// </summary>
         /// <param name="mapping"> 対象のcollection設定です。 </param>
-        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
         private static void DrawCollectionMetadata(
-            SourceDataProviderSettings.SourceCollectionMapping mapping,
-            ScriptableObject sourceAsset)
+            SourceDataProviderSettings.SourceCollectionMapping mapping)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             using (new EditorGUI.DisabledScope(true))
             {
                 EditorGUILayout.TextField("Collection Key", mapping.CollectionKey);
                 EditorGUILayout.TextField("Property Path", mapping.PropertyPath);
-                EditorGUILayout.TextField("Source Asset Type", sourceAsset.GetType().Name);
+                EditorGUILayout.TextField(
+                    "Asset Creation Directory",
+                    string.IsNullOrWhiteSpace(mapping.AssetCreationDirectory)
+                        ? "<未設定>"
+                        : mapping.AssetCreationDirectory);
             }
             EditorGUILayout.EndVertical();
         }
 
         /// <summary>
-        ///     Wave collection向けの専用プレビューを描画します。
+        ///     CollectionKeyに応じた参照アセットのプレビューを描画します。
         /// </summary>
-        /// <param name="property"> Wave配列プロパティです。 </param>
-        private static void DrawWaveCollectionPreview(SerializedProperty property)
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="target"> 参照先アセットです。 </param>
+        private static void DrawCollectionObjectReferencePreview(
+            string collectionKey,
+            UnityEngine.Object target)
         {
-            float totalDuration = 0f;
-            for (int i = 0; i < property.arraySize; i++)
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+            if (string.Equals(collectionKey, WAVE_COLLECTION_KEY, StringComparison.Ordinal))
             {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                if (durationProperty != null)
-                {
-                    totalDuration += durationProperty.floatValue;
-                }
-            }
-
-            EditorGUILayout.LabelField($"Total Duration: {totalDuration:0.##} sec", EditorStyles.miniBoldLabel);
-            for (int i = 0; i < Mathf.Min(property.arraySize, PREVIEW_ELEMENT_LIMIT); i++)
-            {
-                SerializedProperty wave = property.GetArrayElementAtIndex(i);
-                SerializedProperty detailsProperty = wave.FindPropertyRelative(WAVE_DETAILS_PROPERTY_NAME);
-                SerializedProperty durationProperty = wave.FindPropertyRelative(WAVE_DURATION_PROPERTY_NAME);
-                SerializedProperty stageEffectsProperty = wave.FindPropertyRelative(WAVE_STAGE_EFFECTS_PROPERTY_NAME);
-
-                int enemyTypeCount = detailsProperty?.arraySize ?? 0;
-                int spawnCount = CountWaveEnemies(detailsProperty);
-                int stageEffectCount = stageEffectsProperty?.arraySize ?? 0;
-                float duration = durationProperty?.floatValue ?? 0f;
-                float progress = totalDuration > 0f ? duration / totalDuration : 0f;
-
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.LabelField($"Wave {i + 1}", EditorStyles.miniBoldLabel);
-                EditorGUILayout.LabelField($"敵種類: {enemyTypeCount} / 総数: {spawnCount} / 演出: {stageEffectCount}");
-                Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
-                EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
+                PlannerEnemyWavePreview.Draw(target, PREVIEW_ELEMENT_LIMIT);
                 EditorGUILayout.EndVertical();
+                return;
             }
 
-            if (property.arraySize > PREVIEW_ELEMENT_LIMIT)
+            if (string.Equals(collectionKey, STAGE_ASSET_COLLECTION_KEY, StringComparison.Ordinal)
+                && TryGetBattleSceneName(target, out string battleSceneName))
             {
-                EditorGUILayout.HelpBox(
-                    $"残り {property.arraySize - PREVIEW_ELEMENT_LIMIT} 件はInspector側で確認してください。",
-                    MessageType.None);
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                PlannerBattleSceneMapRenderer.Draw(battleSceneName);
+                EditorGUILayout.EndVertical();
+                return;
             }
+
+            if (target is ScriptableObject scriptableObjectTarget
+                && PlannerEnemyStatusPreview.CanDraw(collectionKey, scriptableObjectTarget))
+            {
+                PlannerEnemyStatusPreview.Draw(scriptableObjectTarget);
+                return;
+            }
+
+            DrawObjectReferencePreview(target);
         }
 
         /// <summary>
@@ -709,21 +1295,25 @@ namespace KillChord.Editor.SourceDataProvider
                 SerializedProperty idValueProperty = idProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
                 SerializedProperty assetKeyProperty = element.FindPropertyRelative(CATALOG_ASSET_KEY_PROPERTY_NAME);
                 SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
+                UnityEngine.Object catalogAsset = assetProperty != null
+                    && assetProperty.propertyType == SerializedPropertyType.ObjectReference
+                    ? assetProperty.objectReferenceValue
+                    : null;
 
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    Texture preview = AssetPreview.GetAssetPreview(assetProperty.objectReferenceValue)
-                        ?? AssetPreview.GetMiniThumbnail(assetProperty.objectReferenceValue);
+                    Texture preview = AssetPreview.GetAssetPreview(catalogAsset)
+                        ?? AssetPreview.GetMiniThumbnail(catalogAsset);
                     GUILayout.Label(preview, GUILayout.Width(64f), GUILayout.Height(64f));
                 }
 
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField($"ID: {idValueProperty?.stringValue ?? "<未設定>"}");
                 EditorGUILayout.LabelField($"Key: {assetKeyProperty?.stringValue ?? "<未設定>"}");
-                if (assetProperty != null && assetProperty.objectReferenceValue != null)
+                if (catalogAsset != null)
                 {
-                    EditorGUILayout.ObjectField("Asset", assetProperty.objectReferenceValue, typeof(UnityEngine.Object), false);
+                    EditorGUILayout.ObjectField("Asset", catalogAsset, typeof(UnityEngine.Object), false);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndHorizontal();
@@ -828,7 +1418,7 @@ namespace KillChord.Editor.SourceDataProvider
             {
                 int collectionCount =
                     SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey).Count;
-                return $"{sourceAsset.GetType().Name} [{collectionCount}]";
+                return $"{sourceAsset.name} ({sourceAsset.GetType().Name}) [{collectionCount}]";
             }
 
             return addressableKey;
@@ -858,42 +1448,124 @@ namespace KillChord.Editor.SourceDataProvider
         }
 
         /// <summary>
-        ///     DataIDの表示用ラベルを取得します。
+        ///     Collection内の個別データ表示名を生成します。
         /// </summary>
-        /// <param name="property"> DataIDプロパティです。 </param>
-        /// <returns> 表示用ラベルです。 </returns>
-        private static string GetDataIdLabel(SerializedProperty property)
+        /// <param name="element"> Collection要素です。 </param>
+        /// <param name="index"> Collection内のインデックスです。 </param>
+        /// <returns> 個別データ表示名です。 </returns>
+        private static string BuildCollectionItemLabel(SerializedProperty element, int index)
         {
-            SerializedProperty idProperty = property?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-            return string.IsNullOrWhiteSpace(idProperty?.stringValue)
-                ? "<未設定>"
-                : idProperty.stringValue;
+            if (element == null)
+            {
+                return $"Element {index + 1}";
+            }
+
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                UnityEngine.Object referencedAsset = element.objectReferenceValue;
+                if (referencedAsset == null)
+                {
+                    return $"Element {index + 1}";
+                }
+
+                if (PlannerEnemyWavePreview.TryBuildItemLabel(
+                    referencedAsset,
+                    out string label))
+                {
+                    return label;
+                }
+
+                return referencedAsset.name;
+            }
+
+            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
+            SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
+                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+            if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
+            {
+                return idValueProperty.stringValue;
+            }
+
+            return $"Element {index + 1}";
         }
 
         /// <summary>
-        ///     Wave内の敵総数を集計します。
+        ///     StageTreeの構成Collectionか判定します。
         /// </summary>
-        /// <param name="detailsProperty"> Wave詳細配列です。 </param>
-        /// <returns> 敵総数です。 </returns>
-        private static int CountWaveEnemies(SerializedProperty detailsProperty)
+        /// <param name="collectionKey"> CollectionKeyです。 </param>
+        /// <returns> StageまたはBind Collectionの場合はtrueです。 </returns>
+        private static bool IsStageTreeCollection(string collectionKey)
         {
-            if (detailsProperty == null || !detailsProperty.isArray)
+            return string.Equals(collectionKey, STAGE_ASSET_COLLECTION_KEY, StringComparison.Ordinal)
+                || string.Equals(collectionKey, STAGE_BIND_COLLECTION_KEY, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        ///     対象がバトルステージシーン名を持つか判定し、値を取得します。
+        ///     シーン名はWave定義側が保持するため、ステージアセットの場合はWave定義を経由して解決します。
+        /// </summary>
+        /// <param name="target"> 対象アセットです。 </param>
+        /// <param name="battleSceneName"> 取得したシーン名です。 </param>
+        /// <returns> シーン名を取得できた場合はtrueです。 </returns>
+        private static bool TryGetBattleSceneName(UnityEngine.Object target, out string battleSceneName)
+        {
+            battleSceneName = null;
+            if (target == null)
             {
-                return 0;
+                return false;
             }
 
-            int count = 0;
-            for (int i = 0; i < detailsProperty.arraySize; i++)
+            SerializedObject serializedTarget = new(target);
+            if (TryReadBattleSceneName(serializedTarget, out battleSceneName))
             {
-                SerializedProperty detail = detailsProperty.GetArrayElementAtIndex(i);
-                SerializedProperty amountProperty = detail.FindPropertyRelative(WAVE_ENEMY_AMOUNT_PROPERTY_NAME);
-                if (amountProperty != null)
+                return true;
+            }
+
+            SerializedProperty waveIdHashProperty = serializedTarget
+                .FindProperty(ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME)
+                ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
+            if (waveIdHashProperty == null || waveIdHashProperty.intValue == 0)
+            {
+                return false;
+            }
+
+            IReadOnlyList<SourceDataIDOption> waveOptions =
+                SourceDataProviderRepositoryResolver.GetOptions(WAVE_COLLECTION_KEY);
+            for (int i = 0; i < waveOptions.Count; i++)
+            {
+                if (waveOptions[i].HashId != waveIdHashProperty.intValue || waveOptions[i].Source == null)
                 {
-                    count += amountProperty.intValue;
+                    continue;
                 }
+
+                return TryReadBattleSceneName(new SerializedObject(waveOptions[i].Source), out battleSceneName);
             }
 
-            return count;
+            return false;
+        }
+
+        /// <summary>
+        ///     SerializedObjectからバトルステージシーン名を読み取ります。
+        /// </summary>
+        /// <param name="serializedObject"> 読み取り対象です。 </param>
+        /// <param name="battleSceneName"> 取得したシーン名です。 </param>
+        /// <returns> シーン名を取得できた場合はtrueです。 </returns>
+        private static bool TryReadBattleSceneName(
+            SerializedObject serializedObject,
+            out string battleSceneName)
+        {
+            battleSceneName = null;
+            SerializedProperty sceneNameProperty = serializedObject.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
+            if (sceneNameProperty == null
+                || sceneNameProperty.propertyType != SerializedPropertyType.String
+                || string.IsNullOrEmpty(sceneNameProperty.stringValue))
+            {
+                return false;
+            }
+
+            battleSceneName = sceneNameProperty.stringValue;
+            return true;
         }
 
         /// <summary>
@@ -910,25 +1582,33 @@ namespace KillChord.Editor.SourceDataProvider
 
         private const float PAGE_SIDEBAR_WIDTH = 180f;
         private const float NAVIGATION_COLUMN_WIDTH = 280f;
+        private const float COMMAND_BUTTON_HEIGHT = 28f;
         private const int PREVIEW_ELEMENT_LIMIT = 8;
-        private const int PREVIEW_CONNECTION_LIMIT = 12;
         private const bool INCLUDE_CHILDREN = true;
-        private const string STAGE_NODE_ASSETS_PROPERTY_NAME = "_nodeAssets";
-        private const string STAGE_CONNECTIONS_PROPERTY_NAME = "_connections";
-        private const string STAGE_NODE_IS_TUTORIAL_PROPERTY_NAME = "_isTutorial";
-        private const string STAGE_CONNECTION_FROM_PROPERTY_NAME = "_fromStageId";
-        private const string STAGE_CONNECTION_TO_PROPERTY_NAME = "_toStageId";
         private const string COLLECTION_ASSET_PROPERTY_NAME = "Asset";
         private const string COLLECTION_ID_PROPERTY_NAME = "Id";
         private const string CATALOG_ASSET_KEY_PROPERTY_NAME = "AssetKey";
         private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
+        private const string STAGE_ID_PROPERTY_NAME = "_stageId";
+        private const string BATTLE_SCENE_NAME_PROPERTY_NAME = "_battleSceneName";
+        private const string ENEMY_WAVE_DEFINITION_ID_PROPERTY_NAME = "_enemyWaveDefinitionId";
+        private const string DATA_ID_HASH_PROPERTY_NAME = "_hashId";
+        private const string STAGE_ASSET_COLLECTION_KEY = "StageAsset";
+        private const string STAGE_BIND_COLLECTION_KEY = "StageBind";
         private const string WAVE_COLLECTION_KEY = "Wave";
         private const string SCENARIO_BACKGROUND_COLLECTION_KEY = "ScenarioBackground";
         private const string SCENARIO_ANIMATION_COLLECTION_KEY = "ScenarioAnimation";
         private const string SCENARIO_PORTRAIT_COLLECTION_KEY = "ScenarioPortrait";
-        private const string WAVE_DETAILS_PROPERTY_NAME = "Details";
-        private const string WAVE_DURATION_PROPERTY_NAME = "WaveDuration";
-        private const string WAVE_STAGE_EFFECTS_PROPERTY_NAME = "StageEffects";
-        private const string WAVE_ENEMY_AMOUNT_PROPERTY_NAME = "EnemyAmount";
+
+        private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
+
+        /// <summary>
+        ///     ナビゲーション列へ表示するデータ階層です。
+        /// </summary>
+        private enum NavigationMode
+        {
+            SourceAssets,
+            Collections,
+        }
     }
 }

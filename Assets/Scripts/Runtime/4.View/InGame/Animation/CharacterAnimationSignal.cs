@@ -64,6 +64,19 @@ namespace KillChord.Runtime.View
         private readonly CharacterAnimationOneShotTimingCalculator _timingCalculator;
 
         /// <summary>
+        ///     再生中のワンショットアニメーションを途中終了し、ロコモーションへ戻す。
+        /// </summary>
+        public void CancelOneShot()
+        {
+            OnCancelRequested?.Invoke();
+        }
+
+        /// <summary>
+        ///     内部ワンショット取り消し要求イベントです。
+        /// </summary>
+        internal event Action OnCancelRequested;
+
+        /// <summary>
         ///     指定インデックスのワンショット再生を要求する。
         /// </summary>
         /// <param name="index"> 再生インデックスです。 </param>

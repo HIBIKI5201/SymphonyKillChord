@@ -1,11 +1,12 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
-using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
 using KillChord.Runtime.Utility.Identity;
@@ -19,7 +20,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
@@ -58,10 +58,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ViewModel _viewModel;
         private InputComposition _inputComposition;
         private SelectedScenarioState _selectedScenarioState;
-        private SceneTransitionController _sceneTransitionController;
         private OutGameUIEvent _outGameUIEvent;
         private OutGameSortieController _outGameSortieController;
         private PendingNodeTransitionState _pendingNodeTransitionState;
+        private StageProgressSaveDataService _stageProgressSaveDataService;
         private BackgroundCatalogAsset _loadedBackgroundCatalog;
         private AnimationCatalogAsset _loadedAnimationCatalog;
         private PortraitCatalogAsset _loadedPortraitCatalog;
@@ -77,10 +77,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             try
             {
-            _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
-            _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
-            _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
-            _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
+                _loadedBackgroundCatalog = await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, destroyCancellationToken);
+                _loadedAnimationCatalog = await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, destroyCancellationToken);
+                _loadedPortraitCatalog = await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, destroyCancellationToken);
+                _loadedScenarioSettings = await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, destroyCancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
             return _loadedBackgroundCatalog != null
@@ -154,7 +154,19 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            _scenarioView.Initialize(_viewModel, backgroundMap, animationMap, portraitMap);
+            // レイヤー順は View が Domain を参照しないよう、文字列名へ変換して渡す。
+            var layerOrder = new List<string>(_loadedScenarioSettings.LayerBackToFront.Count);
+            foreach (ScenarioLayer layer in _loadedScenarioSettings.LayerBackToFront)
+            {
+                layerOrder.Add(layer.ToString());
+            }
+
+            _scenarioView.Initialize(
+                _viewModel,
+                backgroundMap,
+                animationMap,
+                portraitMap,
+                layerOrder);
             _isInitialized = true;
             return true;
         }
@@ -182,12 +194,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
-            {
-                Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
-                return false;
-            }
-
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] OutGameUIEvent が取得できませんでした。", this);
@@ -199,6 +205,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 Debug.LogError($"[{nameof(ScenarioCom)}] OutGameSortieController が取得できませんでした。", this);
                 return false;
             }
+
+            _stageProgressSaveDataService = new StageProgressSaveDataService();
 
             if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
             {
@@ -238,10 +246,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             _viewModel = null;
             _inputComposition = null;
             _selectedScenarioState = null;
-            _sceneTransitionController = null;
             _outGameUIEvent = null;
             _outGameSortieController = null;
             _pendingNodeTransitionState = null;
+            _stageProgressSaveDataService = null;
             _isInitialized = false;
         }
 
@@ -252,19 +260,35 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             try
             {
-                await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
-
-                if (TryExecutePendingNodeTransition())
+                while (true)
                 {
-                    _selectedScenarioState.Clear();
-                    _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
-                    return;
+                    ScenarioStageDefinition completedStageDefinition =
+                        _selectedScenarioState.CurrentStageDefinition;
+                    await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
+                    await CompleteScenarioStageAsync(completedStageDefinition);
+
+                    ScenarioTransitionResult transitionResult = TryExecutePendingNodeTransition();
+                    if (transitionResult == ScenarioTransitionResult.ContinueScenario)
+                    {
+                        continue;
+                    }
+
+                    if (transitionResult == ScenarioTransitionResult.ExternalStageStarted)
+                    {
+                        _selectedScenarioState.Clear();
+                        _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+                        return;
+                    }
+
+                    break;
                 }
 
-                bool transitioned = await _sceneTransitionController.UnloadAndSetActiveAsync(
-                    SceneManager.GetActiveScene().name,
-                    _returnSceneName,
-                    destroyCancellationToken);
+                string scenarioSceneName = gameObject.scene.name;
+                SelectedScenarioState selectedScenarioState = _selectedScenarioState;
+
+                bool transitioned = await _outGameSortieController.ReturnFromScenarioAsync(
+                    scenarioSceneName,
+                    _returnSceneName);
 
                 if (!transitioned)
                 {
@@ -272,10 +296,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     return;
                 }
 
-                _selectedScenarioState.Clear();
-                _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
-                _outGameUIEvent.OnOutGameUiVisibilityChanged?.Invoke(true);
-                _outGameUIEvent.OnShownHomeScreen?.Invoke();
+                selectedScenarioState.Clear();
             }
             catch (OperationCanceledException)
             {
@@ -287,22 +308,50 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         }
 
         /// <summary>
+        ///     シナリオステージのクリアを保存してランタイム進行へ通知する。
+        /// </summary>
+        /// <param name="stageDefinition"> 完了したシナリオステージ定義。</param>
+        private async Task CompleteScenarioStageAsync(ScenarioStageDefinition stageDefinition)
+        {
+            if (stageDefinition == null || _stageProgressSaveDataService == null)
+            {
+                return;
+            }
+
+            await _stageProgressSaveDataService.SaveClearAsync(
+                stageDefinition.StageId,
+                stageDefinition.Reward);
+            _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
+            _outGameUIEvent?.OnStageCleared?.Invoke(stageDefinition.StageId.Value);
+        }
+
+        /// <summary>
         ///     予約済みのノード連結を実行します。
         /// </summary>
-        /// <returns> 実行に成功した場合はtrueです。 </returns>
-        private bool TryExecutePendingNodeTransition()
+        /// <returns> 実行結果。 </returns>
+        private ScenarioTransitionResult TryExecutePendingNodeTransition()
         {
             if (_pendingNodeTransitionState == null
                 || _outGameSortieController == null
-                || !_pendingNodeTransitionState.TryConsume(out PendingNodeTransition pendingNodeTransition))
+                || !_pendingNodeTransitionState.TryConsumeCompleted(
+                    out PendingNodeTransition pendingNodeTransition))
             {
-                return false;
+                return ScenarioTransitionResult.None;
+            }
+
+            if (pendingNodeTransition.TargetStageDefinition
+                is ScenarioStageDefinition scenarioStageDefinition)
+            {
+                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
+                return ScenarioTransitionResult.ContinueScenario;
             }
 
             NodeTransitionExecutor executor = new(
                 new BattleSortieSelectionService(),
                 _outGameSortieController);
-            return executor.TryExecute(pendingNodeTransition);
+            return executor.TryExecute(pendingNodeTransition)
+                ? ScenarioTransitionResult.ExternalStageStarted
+                : ScenarioTransitionResult.None;
         }
 
         /// <summary>
@@ -322,6 +371,19 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             }
 
             return map;
+        }
+
+        /// <summary>
+        ///     シナリオ完了後の自動遷移実行結果。
+        /// </summary>
+        private enum ScenarioTransitionResult
+        {
+            /// <summary> 自動遷移を実行しない。 </summary>
+            None,
+            /// <summary> 同じシナリオシーンで次のシナリオを再生する。 </summary>
+            ContinueScenario,
+            /// <summary> バトルなど別ステージの開始要求に成功した。 </summary>
+            ExternalStageStarted,
         }
 
         /// <summary>

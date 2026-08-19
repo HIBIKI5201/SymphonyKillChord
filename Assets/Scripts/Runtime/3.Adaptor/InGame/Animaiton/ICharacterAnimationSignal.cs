@@ -18,5 +18,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Animation
         /// <param name="duration"> 再生時間です。 </param>
         /// <returns> 要求できた場合はtrue。 </returns>
         public bool TryRequestOneShot(string animationKey, out float duration);
+
+        /// <summary>
+        ///     再生中のワンショットアニメーションを途中終了し、ロコモーションへ戻す。
+        /// </summary>
+        public void CancelOneShot();
     }
 }

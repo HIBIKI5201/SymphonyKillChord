@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net.WebSocket" Version="3.19.0" />
-    <PackageReference Include="Notion.Net" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SinfoniaOperator.Core\SinfoniaOperator.Core.csproj" />
   </ItemGroup>
 
 </Project>

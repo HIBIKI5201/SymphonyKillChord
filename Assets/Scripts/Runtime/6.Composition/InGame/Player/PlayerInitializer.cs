@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -5,6 +6,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Application.InGame.Player;
@@ -18,21 +20,27 @@ using KillChord.Runtime.Composition.Persistent.Camera;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
-using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Domain.InGame.Player;
+using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
-using KillChord.Runtime.InfraStructure.InGame.Skill;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
+using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace KillChord.Runtime.Composition.InGame.Player
@@ -54,20 +62,31 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("プレイヤーViewプレハブです。")]
         private PlayerView _playerViewPrefab;
         [SerializeField, Tooltip("入力進捗UI設定です。")]
-        private SkillInputProgressViewConfigAsset _inputProgressViewConfigAsset;
+        private SkillInputProgressUIConfig _inputProgressUIConfig;
         [SerializeField, Tooltip("プレイヤー共通のアニメーション設定です。")]
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
 
         [SerializeField, Tooltip("プレイヤーの攻撃種別ごとのアニメーション設定です。")]
         private PlayerAttackAnimationConfig _playerAttackAnimationConfig;
 
+        [SerializeField, Tooltip("モバイルスティックフリック入力です。")]
+        private MobileStickFlickInput _mobileStickFlickInput;
+
+        [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
+        private string _mobileStickFlickInputConfigKey;
+
         [Space]
         [Header("キャラクターデータ（テスト用）")]
-        [SerializeField, Tooltip("プレイヤー定義アセットです。")]
-        private CharacterDefinitionAsset _playerData;
+        [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")]
+        private string _characterRepositoryKey;
+        [SerializeField, SourceDataCollection("Character"), Tooltip("プレイヤーが使用するキャラクター定義のIDです。")]
+        private DataID _playerCharacterId;
         [Header("装備中スキル（テスト用）")]
-        [SerializeField, Tooltip("テスト用装備スキル一覧です。")]
-        private SkillTemplateAsset[] _equippedSkills;
+        [SerializeField, SourceDataCollection("Skill"), Tooltip("テスト用装備スキルID一覧です。")]
+        private DataID[] _equippedSkills;
+
+        private CharacterDefinitionAsset _loadedPlayerData;
+        private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
@@ -77,6 +96,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private bool _isModuleRegistered;
         private PlayerModuleContainer _moduleContainer;
         private PlayerView _player;
+        private PlayerInputView _playerInputView;
+        private CameraSystemView _cameraSystemView;
         private SkillView[] _skillVisuals;
         private CharacterAnimationView _characterAnimationView;
 
@@ -90,17 +111,51 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public SkillView[] SkillVisuals => _skillVisuals;
 
         /// <summary> スキル入力進捗UI設定です。 </summary>
-        public SkillInputProgressViewConfigAsset SkillInputProgressViewConfigAsset => _inputProgressViewConfigAsset;
+        public SkillInputProgressUIConfig SkillInputProgressUIConfig => _inputProgressUIConfig;
 
-        /// <summary> テスト用装備スキル一覧です。 </summary>
-        public SkillTemplateAsset[] EquippedSkillAssets => _equippedSkills;
+        /// <summary> テスト用装備スキルID一覧です。 </summary>
+        public SkillId[] EquippedSkillIds => ConvertToSkillIds(_equippedSkills);
 
         /// <summary>
         ///     ServiceLocatorへ自身を登録します。
         /// </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+        }
+
+        /// <summary>
+        ///     プレイヤーキャラクター定義とモバイル入力設定を非同期でロードします。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            CharacterDefinitionRepository characterRepository =
+                await _characterRepositoryKey.LoadAssetAsync<CharacterDefinitionRepository>(this, cancellationToken);
+            if (characterRepository == null
+                || !characterRepository.TryGetAsset(new CharacterDefinitionId(_playerCharacterId.Id), out _loadedPlayerData))
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤーキャラクター定義の解決に失敗しました。", this);
+                return false;
+            }
+
+#if UNITY_ANDROID || UNITY_EDITOR
+            if (_mobileStickFlickInput != null)
+            {
+                _loadedMobileStickFlickInputConfig =
+                    await _mobileStickFlickInputConfigKey.LoadAssetAsync<MobileStickFlickInputConfig>(this, cancellationToken);
+                if (_loadedMobileStickFlickInputConfig == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInputConfig)} のロードに失敗しました。",
+                        this);
+                    return false;
+                }
+            }
+#endif
+
+            return true;
         }
 
         /// <summary>
@@ -114,18 +169,36 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
+            {
+                Debug.LogError(
+                    $"[{nameof(PlayerInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} が見つかりません。",
+                    this);
+                return false;
+            }
+
             if (!TryInstantiatePlayerView(out Transform spawnPointTransform))
             {
                 return false;
             }
 
-            _playerEntity = CharacterFactory.Create(_playerData);
+            _playerEntity = CharacterFactory.Create(
+                _loadedPlayerData,
+                playerStatusBonusContainer.PlayerStatusBonus.MaxHealthMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.AttackPowerMultiplier,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalChanceAddition,
+                playerStatusBonusContainer.PlayerStatusBonus.CriticalMultiplierAddition);
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
+            _playerEntity.OnHealthChanged += HandlePlayerHealthChanged;
 
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
-            _moduleContainer = new PlayerModuleContainer(this, _player, _playerEntity);
+            _moduleContainer = new PlayerModuleContainer(
+                this,
+                _player,
+                _playerEntity,
+                playerStatusBonusContainer.PlayerStatusBonus);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -145,13 +218,18 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             SkillModuleContainer skillModuleContainer = ServiceLocator.GetInstance<SkillModuleContainer>();
-            if (skillModuleContainer == null || skillModuleContainer.SkillController == null)
+            if (skillModuleContainer == null ||
+                skillModuleContainer.SkillController == null ||
+                skillModuleContainer.PendingAttackEffectService == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SkillModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            Initialize(sceneDependencyContainer.InputComposition, skillModuleContainer.SkillController);
+            Initialize(
+                sceneDependencyContainer.InputComposition,
+                skillModuleContainer.SkillController,
+                skillModuleContainer.PendingAttackEffectService);
 
             InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             if (inGamePlayDirector != null && _player != null)
@@ -167,7 +245,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         /// <param name="inputComposition"> 入力Compositionです。 </param>
         /// <param name="skillController"> スキルControllerです。 </param>
-        public void Initialize(InputComposition inputComposition, SkillController skillController)
+        /// <param name="pendingAttackEffectService"> スキル攻撃の演出を管理するサービスです。 </param>
+        public void Initialize(
+            InputComposition inputComposition,
+            SkillController skillController,
+            PendingAttackEffectService pendingAttackEffectService)
         {
             if (_player == null)
             {
@@ -211,6 +293,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
+            // 位置リセット入力を購読する。
+            _playerInputView = inputView;
+            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
+
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
             {
@@ -228,18 +314,23 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
                 playerBattleState,
+                actionRestrictionState,
                 skillController,
                 targetSystemContainer.TargetSystemController,
                 attackIntervalEvaluator,
                 musicSyncService,
                 musicSyncState,
+                targetSystemContainer.TargetAreaQuery,
+                _player.transform,
+                pendingAttackEffectService,
                 (float)parameter.AttackRotationSpeed,
-                (float)parameter.AttackCooldown.Value,
-                (int)_playerEntity.BaseDamage.Value);
+                (float)parameter.AttackCooldown.Value);
+            _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
@@ -253,8 +344,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerAttackAnimationConfig);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
-            dodge.OnDodgeStarted += duration => _playerEntity.SetInvincible(true);
-            dodge.OnDodgeEnded += () => _playerEntity.SetInvincible(false);
+            dodge.OnDodgeStarted += (duration, direction) =>
+            {
+                _playerEntity.SetInvincible(true);
+                _player.PlayDodgeMaterialEffect(duration, direction);
+            };
+            dodge.OnDodgeEnded += () =>
+            {
+                _playerEntity.SetInvincible(false);
+                _player.ResetDodgeMaterialEffect();
+            };
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
             _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
@@ -263,6 +362,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerMovementApplication move = new PlayerMovementApplication(parameter);
             PlayerApplication application = new PlayerApplication(move, dodge);
             PlayerController playerMovementController = new PlayerController(application, inputComposition.GetBufferedInputBuffer);
+            _moduleContainer.SetPlayerController(playerMovementController);
+
+            PlayerInputSuppressionState inputSuppressionState = new PlayerInputSuppressionState();
+            _moduleContainer.SetInputSuppressionState(inputSuppressionState);
 
             _player.Initialize(
                 playerMovementController,
@@ -271,7 +374,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 musicSyncState,
                 cameraTransform.Transform,
                 inputView,
-                healthHudPresenter);
+                healthHudPresenter,
+                inputSuppressionState);
+
+            InitializeMobileStickFlickInput(inputView);
 
             _inGameHudInitializer.InitializePlayerHpHud(healthHudViewModel);
 
@@ -280,6 +386,64 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .AddComponent<PlayerMoveSpecDebug>()
                 .SetPlayerMoveSpec(parameter);
 #endif
+        }
+
+        /// <summary>
+        ///     プレイヤーをステージのスタート地点へ戻します。
+        /// </summary>
+        public void ResetPlayerToSpawn()
+        {
+            if (_player == null)
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
+                return;
+            }
+
+            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
+            {
+                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
+                return;
+            }
+
+            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
+
+            // カメラの向きもスタート時の前方へ戻す。
+            ResetCameraOrientation(spawnPointTransform.forward);
+        }
+
+        /// <summary>
+        ///     カメラの向きを指定した前方へ戻します。
+        /// </summary>
+        /// <param name="forward"> カメラを向ける前方(ワールド空間)です。 </param>
+        private void ResetCameraOrientation(Vector3 forward)
+        {
+            if (_cameraSystemView == null)
+            {
+                _cameraSystemView = FindFirstObjectByType<CameraSystemView>();
+            }
+
+            if (_cameraSystemView == null)
+            {
+                Debug.LogWarning($"[{nameof(PlayerInitializer)}] {nameof(CameraSystemView)} が見つからないためカメラの向きをリセットできません。", this);
+                return;
+            }
+
+            _cameraSystemView.ResetOrientation(forward);
+        }
+
+        /// <summary>
+        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
+        /// </summary>
+        /// <param name="input"> 位置リセット入力です。 </param>
+        private void HandleResetPositionInput(InputContext<float> input)
+        {
+            // 押下開始時のみ実行する。
+            if (input.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+
+            ResetPlayerToSpawn();
         }
 
         /// <summary>
@@ -301,10 +465,36 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーのHP変化を受け取り、被弾時のみ演出用イベントを通知します。
+        /// </summary>
+        /// <param name="currentHealth"> 変化後の現在HPです。 </param>
+        /// <param name="maxHealth"> 最大HPです。 </param>
+        /// <param name="amountChanged"> HPの変化量です。ダメージは負、回復は正になります。 </param>
+        private void HandlePlayerHealthChanged(float currentHealth, float maxHealth, float amountChanged)
+        {
+            // 回復では演出を出さないため、減少時のみ通知する。
+            if (amountChanged >= 0f)
+            {
+                return;
+            }
+
+            // 被弾演出用に、プレイヤーの被弾を正の値へ直して通知する。
+            EventBus<EOnPlayerTakeDamage>.Raise(new EOnPlayerTakeDamage(-amountChanged));
+        }
+
+        /// <summary>
         ///     破棄時の購読解除を行います。
         /// </summary>
         private void OnDestroy()
         {
+            UninitializeMobileStickFlickInput();
+
+            if (_playerInputView != null)
+            {
+                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
+                _playerInputView = null;
+            }
+
             if (_characterAnimationSignal != null && _onDodgeEndedHandler != null)
             {
                 _characterAnimationSignal.OnDodgeEnded -= _onDodgeEndedHandler;
@@ -324,6 +514,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
+                _playerEntity.OnHealthChanged -= HandlePlayerHealthChanged;
             }
         }
 
@@ -332,6 +523,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            UninitializeMobileStickFlickInput();
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
+            _loadedMobileStickFlickInputConfig = null;
+#endif
+            _characterRepositoryKey.ReleaseLoadedAsset(this);
+            _loadedPlayerData = null;
+
             if (!_isModuleRegistered)
             {
                 return;
@@ -343,6 +542,63 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     Androidの仮想スティックフリック入力を入力Viewへ接続する。
+        /// </summary>
+        /// <param name="inputView"> フリック入力の通知先。 </param>
+        private void InitializeMobileStickFlickInput(PlayerInputView inputView)
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            if (_mobileStickFlickInput == null)
+            {
+#if UNITY_ANDROID
+                Debug.LogWarning(
+                    $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInput)} が設定されていません。",
+                    this);
+#endif
+                return;
+            }
+
+            _mobileStickFlickInput.Initialize(inputView, _loadedMobileStickFlickInputConfig);
+#endif
+        }
+
+        /// <summary>
+        ///     仮想スティックフリック入力と入力Viewの接続を解除する。
+        /// </summary>
+        private void UninitializeMobileStickFlickInput()
+        {
+#if UNITY_ANDROID || UNITY_EDITOR
+            _mobileStickFlickInput?.Uninitialize();
+#endif
+        }
+
+        /// <summary>
+        ///     DataID配列をSkillId配列へ変換します。
+        /// </summary>
+        /// <param name="dataIds"> 変換元のDataID配列です。 </param>
+        /// <returns> 変換後のSkillId配列です。 </returns>
+        private static SkillId[] ConvertToSkillIds(DataID[] dataIds)
+        {
+            if (dataIds == null || dataIds.Length == 0)
+            {
+                return Array.Empty<SkillId>();
+            }
+
+            List<SkillId> ids = new List<SkillId>(dataIds.Length);
+            for (int i = 0; i < dataIds.Length; i++)
+            {
+                if (dataIds[i].Id == 0)
+                {
+                    continue;
+                }
+
+                ids.Add(new SkillId(dataIds[i].Id));
+            }
+
+            return ids.ToArray();
+        }
+
+        /// <summary>
         ///     Buildフェーズで必要な参照を検証します。
         /// </summary>
         /// <returns> 参照が有効な場合はtrue。 </returns>
@@ -350,7 +606,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         {
             if (_playerConfig == null
                 || _playerViewPrefab == null
-                || _playerData == null
+                || _loadedPlayerData == null
                 || _characterAnimationConfig == null
                 || _playerAttackAnimationConfig == null)
             {

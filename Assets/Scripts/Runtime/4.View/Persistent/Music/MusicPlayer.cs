@@ -10,7 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
-    public class MusicPlayer : MonoBehaviour, IVolumeManager
+    public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmSelectorPlayer
     {
         /// <summary> 音楽用ビューモデル。 </summary>
         public MusicViewModel MusicVM => _musicVm;
@@ -46,11 +46,51 @@ namespace KillChord.Runtime.View.Persistent.Music
             return _cri.volume;
         }
 
+        /// <summary>
+        ///     再生中BGMのセレクターラベルを設定する。
+        ///     実際の音の切り替えはCRI側のブロック境界で反映される。
+        /// </summary>
+        /// <param name="selectorName"> セレクター名。 </param>
+        /// <param name="labelName"> 設定するセレクターラベル名。 </param>
+        public void SetSelectorLabel(string selectorName, string labelName)
+        {
+            if (_cri == null || string.IsNullOrEmpty(selectorName) || string.IsNullOrEmpty(labelName))
+            {
+                return;
+            }
+
+            _cri.player.SetSelectorLabel(selectorName, labelName);
+
+            // 再生中のプレイバックへ反映する。未再生時はUpdateの対象が無く、
+            // 設定値は次のPlayに引き継がれるため呼び出さない。
+            if (_isPlaying)
+            {
+                _cri.player.Update(_playback);
+            }
+        }
+
+        /// <summary>
+        ///     BGM再生、及び再生時間を一時停止する。
+        /// </summary>
+        public void PauseBGM()
+        {
+            _cri.Pause(true);
+        }
+
+        /// <summary>
+        ///     BGM再生、及び再生時間の進行を再開する。
+        /// </summary>
+        public void ResumeBGM()
+        {
+            _cri.Pause(false);
+        }
+
         private const double MILLISECONDS_PER_SECOND = 1000d;
 
         private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
+        private bool _isPlaying;
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -77,6 +117,7 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             _cri.cueName = cueName;
             _playback = _cri.Play();
+            _isPlaying = true;
         }
 
         /// <summary>
@@ -86,6 +127,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _playback.Stop();
             _cri.cueName = string.Empty;
+            _isPlaying = false;
         }
 
     }

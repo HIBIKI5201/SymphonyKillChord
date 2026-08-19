@@ -1,27 +1,23 @@
-using System;
-using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
 {
     /// <summary>
-    ///    攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
+    ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
-    public class PlayerAttackWeaponView : MonoBehaviour
+    public sealed class PlayerAttackWeaponView : MonoBehaviour
     {
         /// <summary>
         ///     拍子に応じた演出を再生します。
         /// </summary>
         /// <param name="beatType"> 拍子。 </param>
-        /// <param name="clipSeconds"> クリップの長さ。 </param>
-        public void Play(int beatType, float clipSeconds)
+        public void Play(int beatType)
         {
-            CancelPlayingWeapon();
-            HideAllWeapons();
+            HideAllWeaponsImmediate();
 
             if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
-                Debug.LogError($"BeatType {beatType} に対応する武器設定が見つかりませんでした。");
+                Debug.LogError($"BeatType {beatType} に対応する武器設定が見つかりませんでした。", this);
                 return;
             }
 
@@ -32,9 +28,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _currentWeaponView = definition.WeaponItem;
-            _cts = new CancellationTokenSource();
-
-            PlayWeaponAsync(_currentWeaponView, clipSeconds, _cts.Token);
+            _currentWeaponView.Play();
         }
 
         /// <summary>
@@ -71,68 +65,46 @@ namespace KillChord.Runtime.View.InGame.Player
             _currentWeaponView = null;
         }
 
+        /// <summary>
+        ///     全武器をフェードを挟まずに即座に非表示にする。
+        /// </summary>
+        public void HideAllWeaponsImmediate()
+        {
+            if (_definitions == null)
+            {
+                _currentWeaponView = null;
+                return;
+            }
+            for (int i = 0; i < _definitions.Length; i++)
+            {
+                if (_definitions[i].WeaponItem == null)
+                {
+                    continue;
+                }
+                _definitions[i].WeaponItem?.HideWeaponImmediate();
+            }
+            _currentWeaponView = null;
+        }
+
         [SerializeField, Tooltip("BeatTypeごとの武器表示と攻撃SE設定。")]
         private PlayerAttackWeaponConfig[] _definitions;
 
         private WeaponItemView _currentWeaponView;
-        private CancellationTokenSource _cts;
 
+        /// <summary>
+        ///     初期状態では武器を表示しないため、全武器を即座に非表示にする。
+        /// </summary>
         private void Awake()
         {
-            HideAllWeapons();
+            HideAllWeaponsImmediate();
         }
 
+        /// <summary>
+        ///     無効化中はMotionの更新が見えないため、フェードを挟まず全武器を非表示にする。
+        /// </summary>
         private void OnDisable()
         {
-            CancelPlayingWeapon();
-            HideAllWeapons();
-        }
-
-        /// <summary>
-        ///     武器に応じた演出を再生する。
-        /// </summary>
-        /// <param name="weaponItemView"> 再生させるItemView。 </param>
-        /// <param name="clipSeconds"> クリップの長さ。 </param>
-        /// <param name="ct"> CancellationToken。 </param>
-        /// <returns></returns>
-        private async Awaitable PlayWeaponAsync(WeaponItemView weaponItemView, float clipSeconds, CancellationToken ct)
-        {
-            try
-            {
-                //TODO : アニメーション時間が短すぎて表示がわかりにくいため、今が+2秒いれている。
-                await weaponItemView.PlayAsync(clipSeconds + 2, ct);
-            }
-            catch (OperationCanceledException)
-            {
-                weaponItemView.HideWeapon();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-                weaponItemView.HideWeapon();
-            }
-            finally
-            {
-                if (_currentWeaponView == weaponItemView)
-                {
-                    _currentWeaponView = null;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     再生中の武器表示をキャンセルします。
-        /// </summary>
-        private void CancelPlayingWeapon()
-        {
-            if (_cts == null)
-            {
-                return;
-            }
-
-            _cts.Cancel();
-            _cts.Dispose();
-            _cts = null;
+            HideAllWeaponsImmediate();
         }
 
         /// <summary>

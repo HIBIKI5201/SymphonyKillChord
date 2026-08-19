@@ -1,6 +1,21 @@
 /SinfoniaOperator/Properties/launchSettings.json
 /SinfoniaOperator/obj/
 /SinfoniaOperator/bin/
+/SinfoniaOperator.Core/obj/
+/SinfoniaOperator.Core/bin/
+/NotionMarkdownExporter/obj/
+/NotionMarkdownExporter/bin/
+/NotionMarkdownExporter/publish/
+/NotionMarkdownWriter/obj/
+/NotionMarkdownWriter/bin/
+/NotionMarkdownWriter/publish/
+/DiscordLogExporter/obj/
+/DiscordLogExporter/bin/
+/DiscordLogExporter/publish/
 
 # Exception for specific project file
 !/SinfoniaOperator/SinfoniaOperator.csproj
+!/SinfoniaOperator.Core/SinfoniaOperator.Core.csproj
+!/NotionMarkdownExporter/NotionMarkdownExporter.csproj
+!/NotionMarkdownWriter/NotionMarkdownWriter.csproj
+!/DiscordLogExporter/DiscordLogExporter.csproj

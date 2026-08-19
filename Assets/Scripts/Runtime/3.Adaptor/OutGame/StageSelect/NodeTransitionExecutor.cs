@@ -36,12 +36,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 return false;
             }
 
-            if (pendingNodeTransition.ActionType != NodeTransitionActionType.StartBattle)
+            if (pendingNodeTransition.TargetStageDefinition
+                is not BattleStageDefinition targetStageDefinition)
             {
                 return false;
             }
-
-            StageDefinition targetStageDefinition = pendingNodeTransition.TargetStageDefinition;
             if (!_battleSortieSelectionService.TryPrepareBattleSortie(
                     targetStageDefinition,
                     pendingNodeTransition.ReturnSceneName))
@@ -49,7 +48,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 return false;
             }
 
-            return _outGameSortieController.RequestImmediateBattleSortie(targetStageDefinition.TargetSceneName);
+            return _outGameSortieController.RequestImmediateBattleSortie();
         }
 
         private readonly BattleSortieSelectionService _battleSortieSelectionService;

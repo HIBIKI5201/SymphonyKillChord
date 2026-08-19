@@ -8,14 +8,17 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// <summary>
         ///     戦闘準備画面の表示を要求する。
         /// </summary>
-        /// <param name="targetSceneName"> 表示する戦闘準備画面のシーン名。 </param>
-        void ShowBattlePreparationScreen(string targetSceneName);
+        void ShowBattlePreparationScreen();
 
         /// <summary>
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
-        /// <param name="targetSceneName"> 遷移先シーン名です。 </param>
-        void StartBattle(string targetSceneName);
+        void StartBattle();
+
+        /// <summary>
+        ///     ホーム画面の表示を要求します。
+        /// </summary>
+        void ShowHomeScreen();
 
         /// <summary>
         ///    シナリオステージの出撃処理を要求する。

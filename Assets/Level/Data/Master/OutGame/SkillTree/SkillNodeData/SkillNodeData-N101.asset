@@ -21,4 +21,13 @@ MonoBehaviour:
   UnlockCost: 5
   SkillDetail: 
   PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 101001
+  references:
+    version: 2
+    RefIds:
+    - rid: 101001
+      type: {class: MaxHealthMultiplierEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
+      data:
+        _multiplier: 0.0625
   _unlockSkills: []

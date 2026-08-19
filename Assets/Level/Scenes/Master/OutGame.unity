@@ -788,6 +788,7 @@ GameObject:
   - component: {fileID: 510963397}
   - component: {fileID: 510963398}
   - component: {fileID: 510963399}
+  - component: {fileID: 510963400}
   m_Layer: 0
   m_Name: ScreenInitializer
   m_TagString: Untagged
@@ -809,6 +810,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.StageSelect.StageSelectInitializer
   _uiDocument: {fileID: 2119823347}
   _stageTreeAssetKey: StageTreeAsset
+  _missionDefinitionRepositoryKey: MissionDefinitionRepository
+  _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -863,6 +866,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 2119823347}
+  _playerData: {fileID: 11400000, guid: 358a8447b7fd7f54690a994853695aa1, type: 2}
   _skillNodeDataRepoKey: SkillNodeDataRepo
   _skillNodeBindRepoKey: SkillNodeBindRepo
   _skillNodePhaseBindRepoKey: SkillNodePhaseBindDataRepo
@@ -883,6 +887,18 @@ MonoBehaviour:
   _ownedSkillRepositoryKey: OwnedSkillRepository
   _skillBuildRepositoryKey: SkillBuildRepository
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
+--- !u!114 &510963400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510963393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7a2d0a3a6bd48e5a52ddc9b52082163, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.BattlePreparation.BattlePreparationSkillInitializer
 --- !u!1 &959266667
 GameObject:
   m_ObjectHideFlags: 0

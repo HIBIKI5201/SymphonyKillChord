@@ -12,35 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dae99f30a27f7a45889615497dfa6d0, type: 3}
   m_Name: StageTreeAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageTreeAsset
-  _nodeAssets:
-  - {fileID: 11400000, guid: 312205736429ccf4891c016ca3d8c168, type: 2}
-  - {fileID: 11400000, guid: fe1142573c33fb644a28e8d2a1c5e575, type: 2}
-  - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
-  - {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
+  _stageAssets:
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
+  - {fileID: 11400000, guid: 312205736429ccf4891c016ca3d8c168, type: 2}
+  - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
   - {fileID: 11400000, guid: 04123e05c10c54f40b481e84e40d29eb, type: 2}
-  _connections:
-  - _fromStageId:
-      _id: stage_tutorial
-      _hashId: 1217260097
-    _toStageId:
-      _id: stage_02
-      _hashId: 413055761
-  - _fromStageId:
-      _id: stage_02
-      _hashId: 413055761
-    _toStageId:
-      _id: stage_03
-      _hashId: 1872333703
-  - _fromStageId:
-      _id: stage_03
-      _hashId: 1872333703
-    _toStageId:
-      _id: stage_04
-      _hashId: -235069916
-  - _fromStageId:
-      _id: stage_04
-      _hashId: -235069916
-    _toStageId:
-      _id: stage_05
-      _hashId: -2030424398
+  - {fileID: 11400000, guid: 4821ac1dab24aec45bdaa99f61322c14, type: 2}
+  - {fileID: 11400000, guid: e3bb375abbc0199449b48165f5970e8d, type: 2}
+  _bindAssets:
+  - {fileID: 11400000, guid: 694e9657f9a24ba68c1a9e883f466917, type: 2}
+  - {fileID: 11400000, guid: dd2e8c55b6355f44bb52b973ae4819ff, type: 2}
+  - {fileID: 11400000, guid: 2b0ddfb4236443ef9d74dda0077404d6, type: 2}
+  - {fileID: 11400000, guid: a36afe7a83c64daeaed10a502b9dfb45, type: 2}
+  - {fileID: 11400000, guid: d2f67ec89a57aba4297a7b72977ea7e9, type: 2}

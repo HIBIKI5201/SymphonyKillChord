@@ -1,7 +1,6 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using KillChord.Runtime.Utility.OutGame.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFrameWork.System.SaveSystem;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -19,15 +18,33 @@ namespace KillChord.Develop.Composition.OutGame
         /// <summary> 実行順です。 </summary>
         public override int Order => 110;
 
+        private const int SKILL_00_ID = -876453005;
         private const int SKILL_01_ID = -1127918619;
         private const int SKILL_02_ID = 634126943;
         private const int SKILL_03_ID = 1389048521;
+        private const int SKILL_04_ID = -860903574;
+        private const int SKILL_05_ID = -1146578948;
+        private const int SKILL_06_ID = 581027398;
+        private const int SKILL_07_ID = 1437005520;
+        private const int SKILL_08_ID = -988157119;
+        private const int SKILL_09_ID = -1306600489;
+        private const int SKILL_10_ID = -757509582;
+        private const int SKILL_13_ID = 1271923592;
 
         private static readonly int[] DEVELOP_UNLOCKED_SKILL_IDS =
         {
-            SKILL_01_ID,
-            SKILL_02_ID,
-            SKILL_03_ID
+                SKILL_00_ID,
+    SKILL_01_ID,
+    SKILL_02_ID,
+    SKILL_03_ID,
+    SKILL_04_ID,
+    SKILL_05_ID,
+    SKILL_06_ID,
+    SKILL_07_ID,
+    SKILL_08_ID,
+    SKILL_09_ID,
+    SKILL_10_ID,
+    SKILL_13_ID
         };
 
         /// <summary>
@@ -37,14 +54,10 @@ namespace KillChord.Develop.Composition.OutGame
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(DevelopSkillUnlockInitializer)}] SavedataSystem が取得できませんでした。", this);
-                return false;
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData == null)
@@ -58,7 +71,7 @@ namespace KillChord.Develop.Composition.OutGame
                 return true;
             }
 
-            await savedataSystem.SaveAsync(saveData);
+            await SaveStore.SaveAsync<SaveData>();
             return true;
         }
 

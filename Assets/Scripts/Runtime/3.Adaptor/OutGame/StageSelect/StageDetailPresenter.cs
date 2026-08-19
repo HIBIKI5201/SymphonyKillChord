@@ -1,5 +1,7 @@
-using UnityEngine;
+using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 {
@@ -12,9 +14,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     StageDetailPresenter を初期化します。
         /// </summary>
         /// <param name="viewModel"> 反映先の ViewModel。</param>
-        public StageDetailPresenter(IStageDetailViewModel viewModel)
+        /// <param name="missionPreviewProvider"> ミッションテキストプレビューの解決に使うプロバイダー。 </param>
+        public StageDetailPresenter(
+            IStageDetailViewModel viewModel,
+            IMissionPreviewProvider missionPreviewProvider)
         {
             _viewModel = viewModel ?? throw new System.ArgumentNullException(nameof(viewModel));
+            _missionPreviewProvider = missionPreviewProvider;
         }
 
         /// <summary>
@@ -34,22 +40,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             var def = node.Definition;
 
             // シナリオパートはミッションテキストなし
-            var mainMissionText = def.StageType == StageType.Battle && def.MissionDefinition != null
-                ? def.MissionDefinition.MainMissionText
-                : null;
-
-            var subMissionTexts = def.StageType == StageType.Battle && def.MissionDefinition != null
-                ? new string[def.MissionDefinition.EvaluationConditions.Count]
-                : null;
-
-            if (subMissionTexts != null)
+            BattleStageDefinition battleDefinition = def as BattleStageDefinition;
+            string mainMissionText = null;
+            IReadOnlyList<string> evaluationDescriptions = null;
+            if (battleDefinition != null && _missionPreviewProvider != null)
             {
-                // 全てのサブミッションテキストを取得。
-                for(int i = 0; i < subMissionTexts.Length; i++)
-                {
-                    subMissionTexts[i] = def.MissionDefinition.EvaluationConditions[i].GetDescription();
-                }
+                _missionPreviewProvider.TryGetPreview(
+                    battleDefinition.MissionId,
+                    out mainMissionText,
+                    out evaluationDescriptions);
             }
+
+            var subMissionTexts = evaluationDescriptions?.ToArray();
 
             // TODO: セーブデータから、ミッション達成状況を取得して反映する。
 
@@ -65,5 +67,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         }
 
         private readonly IStageDetailViewModel _viewModel;
+        private readonly IMissionPreviewProvider _missionPreviewProvider;
     }
 }
