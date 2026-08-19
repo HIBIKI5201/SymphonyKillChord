@@ -32,7 +32,7 @@ namespace KillChord.Editor.AutoBuilder
             {
                 EditorGUILayout.HelpBox("MasterPathが不正です。", MessageType.Error);
             }
-            else if (!AutoBuilderSettings.IsBuildProfilesValid(settings.DevelopBuildProfiles))
+            else if (!AutoBuilderSettings.IsBuildProfilesValid(settings.MasterBuildProfiles))
             {
                 EditorGUILayout.HelpBox("MasterBuildProfilesが不正です。", MessageType.Error);
             }

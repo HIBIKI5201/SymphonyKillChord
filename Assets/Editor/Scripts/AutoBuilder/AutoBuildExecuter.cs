@@ -194,6 +194,7 @@ namespace KillChord.Editor.AutoBuilder
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            ReplayPendingLogIfAny();
             if (!IsRunning)
             {
                 return;
@@ -201,7 +202,6 @@ namespace KillChord.Editor.AutoBuilder
 
             LogDebug("初期化処理（ドメインリロード後）を開始");
             Application.logMessageReceived += HandleLogMessage;
-            ReplayPendingLogIfAny();
 
             EditorApplication.delayCall += Resume;
         }
