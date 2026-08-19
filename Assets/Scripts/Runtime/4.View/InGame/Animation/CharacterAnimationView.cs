@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace KillChord.Runtime.View
