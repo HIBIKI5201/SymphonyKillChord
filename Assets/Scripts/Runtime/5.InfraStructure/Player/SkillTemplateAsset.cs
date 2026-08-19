@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Utility.Identity;
 using System;
@@ -52,7 +53,9 @@ namespace KillChord.Runtime.InfraStructure.Player
         public SkillEffectSpec EffectSpec => new SkillEffectSpec(
             _skillEffectType,
             _skillTargetingType,
-            BuildEffectParameters());
+            BuildEffectParameters(),
+            _statusEffectReapplyPolicy,
+            _skillNormalAttackDamagePolicy);
 
         /// <summary> アニメーションキーです。 </summary>
         public string AnimationKey => _animationKey;
@@ -110,6 +113,12 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("スキル対象の解決ルールです。")]
         private SkillTargetingType _skillTargetingType;
+
+        [SerializeField, Tooltip("状態効果の再付与ポリシーです。")]
+        private StatusEffectReapplyPolicy _statusEffectReapplyPolicy = StatusEffectReapplyPolicy.Ignore;
+
+        [SerializeField, Tooltip("スキル発動時の通常攻撃ダメージの計算ポリシーです。")]
+        private SkillNormalAttackDamagePolicy _skillNormalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Apply;
 
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;
