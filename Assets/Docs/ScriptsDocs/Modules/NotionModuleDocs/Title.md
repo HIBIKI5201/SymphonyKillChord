@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> タイトル画面の表示、初回起動判定によるチュートリアル自動出撃のトリガー、オプション画面（音量設定・セーブデータリセット）を司るモジュールです。他モジュールから参照されることのない、アプリケーションの入口です。
+> タイトル画面の表示、初回起動判定によるチュートリアル自動出撃のトリガー、オプション画面（音量設定・セーブデータリセット）を司るモジュールである。他モジュールから参照されることのない、アプリケーションの入口である。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Title |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -25,7 +25,7 @@
 | **`TitleSceneInitializer`** | Composition | 初回起動判定、各種View構築、データリセット処理を担当 |
 | **`TitleScreenViewRegistry`** | Composition | `ScreenId`（Title/Menu/Options/Credit）と各Viewの対応表 |
 
-> セーブデータリセット処理専用のクラスは存在せず、`TitleSceneInitializer.HandleDataResetButtonClicked`という私有メソッドとして実装されています。
+> セーブデータリセット処理専用のクラスは存在せず、`TitleSceneInitializer.HandleDataResetButtonClicked`という私有メソッドとして実装されている。
 
 ### 🧩 Composition初期化情報
 
@@ -33,7 +33,7 @@
 | --- | --- |
 | **Initializerクラス** | `TitleSceneInitializer` |
 | **Order** | 20（Titleシーン内） |
-| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。初回起動/データリセット時に`TutorialSortieRequestState`（StageSelectモジュールの型）を`ServiceLocator`へ登録しリクエストする |
+| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。初回起動/データリセット時にチュートリアルステージの出撃準備を行い、遷移先を`TitleStartController`へ設定する |
 
 ---
 
@@ -63,35 +63,38 @@ graph TD
     end
 
     subgraph StageSelectModule [StageSelect モジュール]
-        SS_Adaptor["Adaptor<br>TutorialSortieRequestState"]
+        SS_Adaptor["Adaptor<br>BattleSortieSelectionService"]
     end
 
     %% 依存関係
     T_Composition -->|"IsTutorialCompleted判定・データリセット"| SD_Domain
     T_View -->|"音量取得・設定"| M_View
     T_Adaptor -->|"追加ロード・アンロード（初期化完了待機込み）"| SM_Adaptor
-    T_Composition -->|"チュートリアル自動出撃要求"| SS_Adaptor
+    T_Composition -->|"チュートリアルステージの出撃準備"| SS_Adaptor
 ```
 
 ### 📥 依存しているもの
 
 * **`Persistent/Savedata`**
   * *依存箇所*: `SaveData`, `TutorialData`
-  * *詳細*: `SaveData.Tutorial.IsTutorialCompleted`で初回起動判定を行い、データリセット時は`SavedataSystem.DeleteSaveDataAsync<SaveData>()`を呼びます。
+  * *詳細*: `SaveData.Tutorial.IsTutorialCompleted`で初回起動判定を行う。読み書きはSymphonyFrameworkの`SaveStore`（`IsLoaded`/`Get`/`LoadAsync`/`DeleteAsync`）へ統合されました
 * **`Music` / `Persistent`**
   * *依存箇所*: `MusicPlayer`, `SoundEffectVolumeManager`（具象クラス）
-  * *詳細*: `VolumeSettingsTabView`がBGM/SE音量スライダーを直接バインドします。既存の`IVolumeManager`抽象は使用していません。
+  * *詳細*: `VolumeSettingsTabView`がBGM/SE音量スライダーを直接バインドする。既存の`IVolumeManager`抽象は使用していない
 * **`Persistent/SceneManagement`**
   * *依存箇所*: `SceneTransitionController`
-  * *詳細*: `TitleStartController.StartGameAsync`が追加ロード・アンロードに使用します（`ISceneInitializationReadiness`によるモジュール初期化完了待機の恩恵を受けます）。
+  * *詳細*: `TitleStartController.StartGameAsync`が追加ロード・アンロードに使用する（`ISceneInitializationReadiness`によるモジュール初期化完了待機の恩恵を受ける）
+* **`Persistent/Savedata`（初期スキル）**
+  * *依存箇所*: `InitialSkillLoadoutService`
+  * *詳細*: セーブデータ削除後に初期スキル構成を再適用する。これが無いとリセット直後にスキルが未装備のまま出撃できてしまう
 * **`StageSelect`**
-  * *依存箇所*: `TutorialSortieRequestState`
-  * *詳細*: 初回起動時・データリセット後に`RequestTutorialSortie()`がこの状態を登録・リクエストし、遷移先シーンでStageSelectモジュールが消費します。
+  * *依存箇所*: `StageTreeAsset`, `BattleSortieSelectionService`, `SelectedBattleStageState`
+  * *詳細*: 初回起動時・データリセット後に`TryPrepareTutorialBattleSortie()`がステージツリーからチュートリアルノードを引き、バトル出撃の選択状態を組み立てて`TitleStartController`へ遷移先シーンを渡す
 
 ### 📤 依存されているもの
 
 * なし
-  * *詳細*: Titleはアプリケーションの入口であり、他モジュールから直接参照されることはありません。StageSelectが`TutorialSortieRequestState`を経由して間接的にTitleの意図を受け取るのみです。
+  * *詳細*: Titleはアプリケーションの入口であり、他モジュールから直接参照されることはない。チュートリアルの出撃準備もTitle側で完結しており、StageSelectはその結果として設定された選択状態を読むだけである
 
 ---
 
@@ -100,28 +103,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-当モジュールでは使用していません（汎用Screenモジュールの`ShowScreenUseCase`等を利用しますが、Title固有のApplication層クラスはありません）。
+当モジュールでは使用していない（汎用Screenモジュールの`ShowScreenUseCase`等を利用するが、Title固有のApplication層クラスはない）。
 ### ③ Adaptor
-`TitleStartController`がシーン遷移を駆動し、多重タップを防止します。
+`TitleStartController`がシーン遷移を駆動し、多重タップを防止する。
 ### ④ View
-`TitleSceneView`/`MenuScreenView`/`OptionsScreenView`/`CreditScreenView`という画面遷移チェーンと、`VolumeSettingsTabView`/`DataResetTabView`というオプションタブを担当します。
+`TitleSceneView`/`MenuScreenView`/`OptionsScreenView`/`CreditScreenView`という画面遷移チェーンと、`VolumeSettingsTabView`/`DataResetTabView`というオプションタブを担当する。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-`TitleSceneInitializer`（Order 20）が、初回起動判定・各View構築・イベント購読・データリセット処理を一手に担います。
+`TitleSceneInitializer`（Order 20）が、初回起動判定・各View構築・イベント購読・データリセット処理を一手に担う。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しいオプションタブを追加する場合は、`VolumeSettingsTabView`/`DataResetTabView`と同様の`IDisposable`実装クラスを追加し、`TitleSceneInitializer`に組み込む形になります。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しいオプションタブを追加する場合は、`VolumeSettingsTabView`/`DataResetTabView`と同様の`IDisposable`実装クラスを追加し、`TitleSceneInitializer`に組み込む形になる。
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① 通常起動フロー
-セーブデータのチュートリアル完了フラグに応じて遷移先を決定します。
+セーブデータのチュートリアル完了フラグに応じて遷移先を決定する。
 
 ```mermaid
 sequenceDiagram
@@ -132,21 +135,26 @@ sequenceDiagram
     actor Player as プレイヤー
     participant StartCtrl as TitleStartController
 
-    Init ->> Save: LoadAsync<SaveData>()
+    Init ->> Save: SaveStore.IsLoaded<SaveData>()
+    alt 読み込み済み
+        Init ->> Save: SaveStore.Get<SaveData>()
+    else 未読み込み
+        Init ->> Save: SaveStore.LoadAsync<SaveData>()
+    end
     Save -->> Init: SaveData（Tutorial.IsTutorialCompleted含む）
     alt IsTutorialCompleted == true
         Init ->> View: SetTargetSceneName(_targetSceneName)
     else 初回起動
         Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
-        Init ->> Init: RequestTutorialSortie()
+        Init ->> Init: TryPrepareTutorialBattleSortie()
     end
     Player ->> View: 画面タップ
     View ->> StartCtrl: StartGameAsync(currentScene, targetScene)
-    StartCtrl ->> StartCtrl: 対象シーンを追加ロード（初期化完了待機）→ Titleシーンをアンロード
+    StartCtrl ->> StartCtrl: ChangeSceneKeepingLoadingAsync もしくは LoadAdditiveAsync → Titleシーンを UnloadAsync
 ```
 
 ### ② セーブデータリセットフロー
-オプション画面からセーブデータを削除し、初回起動状態へ戻します。
+オプション画面からセーブデータを削除し、初回起動状態へ戻す。
 
 ```mermaid
 sequenceDiagram
@@ -159,8 +167,9 @@ sequenceDiagram
 
     Player ->> ResetTab: リセットボタン押下
     ResetTab -->> Init: OutGameUIEvent.OnDataResetButtonClicked
-    Init ->> Save: DeleteSaveDataAsync<SaveData>()
-    Init ->> Save: LoadAsync<SaveData>()（再読込）
+    Init ->> Save: SaveStore.DeleteAsync<SaveData>()
+    Init ->> Save: SaveStore.LoadAsync<SaveData>()（再読込）
+    Init ->> Save: InitialSkillLoadoutService で初期スキルを再適用
     Init ->> View: SetTargetSceneName(_firstLaunchTargetSceneName)
-    Init ->> Init: RequestTutorialSortie()（再アーム）
+    Init ->> Init: TryPrepareTutorialBattleSortie()（再準備）
 ```
