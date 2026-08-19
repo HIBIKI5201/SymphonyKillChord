@@ -476,7 +476,7 @@ namespace KillChord.Runtime.View.InGame.Music
             markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            markerRectTransform.anchoredPosition = anchoredPosition;
+            markerRectTransform.anchoredPosition = anchoredPosition + Vector2.up * (_effectConfig.MarkerHeight * 0.5f - 20f);
             markerRectTransform.sizeDelta = new Vector2(
                 Mathf.Max(0.1f, _effectConfig.MarkerWidth),
                 Mathf.Max(0.1f, _effectConfig.MarkerHeight));
