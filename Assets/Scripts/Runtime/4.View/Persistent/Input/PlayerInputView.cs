@@ -21,6 +21,9 @@ namespace KillChord.Runtime.View.Persistent.Input
         // イベント群。
         public event Action<InputContext<float>> OnOptionInput;
 
+        /// <summary> 戦闘ポーズ入力を通知するイベント。 </summary>
+        public event Action<InputContext<float>> OnBattlePauseInput;
+
         public event Action<InputContext<float>> OnSubmitInput;
         public event Action<InputContext<float>> OnCancelInput;
 
@@ -58,6 +61,19 @@ namespace KillChord.Runtime.View.Persistent.Input
                 InputActionKind.Option, context, time);
             OnOptionInput?.Invoke(inputContext);
         }
+
+        /// <summary>
+        ///     ポーズ入力を通知する。
+        /// </summary>
+        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
+        public void OnBattlePause(InputAction.CallbackContext context)
+        {
+            float time = _timestampProvider.GetCurrentTimestamp();
+            InputContext<float> inputContext = new InputContext<float>(
+                InputActionKind.BattlePause, context, time);
+            OnBattlePauseInput?.Invoke(inputContext);
+        }
+
 
         public void OnSubmit(InputAction.CallbackContext context)
         {
@@ -273,6 +289,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         }
 
         private const string OPTION_ACTION_NAME = "Option";
+        private const string BATTLE_PAUSE_ACTION_NAME = "BattlePause";
         private const string SUBMIT_ACTION_NAME = "Submit";
         private const string CANCEL_ACTION_NAME = "Cancel";
         private const string DODGE_ACTION_NAME = "Dodge";
@@ -294,6 +311,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputTimestampProvider _timestampProvider;
 
         private InputAction _optionAction;
+        private InputAction _battlePauseAction;
 
         private InputAction _submitAction;
         private InputAction _cancelAction;
@@ -336,6 +354,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private void OnEnable()
         {
             RegisterAction(_optionAction, OnOption);
+            RegisterAction(_battlePauseAction, OnBattlePause);
             RegisterAction(_submitAction, OnSubmit);
             RegisterAction(_cancelAction, OnCancel);
             RegisterAction(_dodgeAction, OnDodge);
@@ -357,6 +376,7 @@ namespace KillChord.Runtime.View.Persistent.Input
         private void OnDisable()
         {
             UnregisterAction(_optionAction, OnOption);
+            UnregisterAction(_battlePauseAction, OnBattlePause);
             UnregisterAction(_submitAction, OnSubmit);
             UnregisterAction(_cancelAction, OnCancel);
             UnregisterAction(_dodgeAction, OnDodge);
@@ -383,6 +403,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             InputActionAsset actions = _playerInput.actions;
 
             _optionAction = actions.FindAction($"{InputMapNames.Common}/{OPTION_ACTION_NAME}", true);
+            _battlePauseAction = actions.FindAction($"{InputMapNames.Common}/{BATTLE_PAUSE_ACTION_NAME}", true);
             _submitAction = actions.FindAction($"{InputMapNames.OutGame}/{SUBMIT_ACTION_NAME}", true);
             _cancelAction = actions.FindAction($"{InputMapNames.OutGame}/{CANCEL_ACTION_NAME}", true);
             _dodgeAction = actions.FindAction($"{InputMapNames.InGame}/{DODGE_ACTION_NAME}", true);
