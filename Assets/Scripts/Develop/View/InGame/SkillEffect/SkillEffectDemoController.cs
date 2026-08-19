@@ -146,7 +146,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         /// <param name="skillId"> 再生するスキルのIDです。 </param>
         private void PlaySkillEffect(int skillId)
         {
-            _skillEffectPlayer.PlaySkillEffects(skillId, CreateContext());
+            _skillEffectPlayer.PlaySkillEffect(skillId, CreateContext());
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace KillChord.Runtime.View.InGame.Skill
                 return;
             }
 
-            _skillEffectPlayer.PlaySkillEffects(Id, _contextFactory.Create());
+            _skillEffectPlayer.PlaySkillEffect(Id, _contextFactory.Create());
         }
 
         /// <summary>

@@ -29,6 +29,10 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         [SerializeField, Min(0), Tooltip("この個体が使用する区画の番号です。")]
         private int _sectorIndex;
 
+        [SerializeField, Range(0f, 359f)]
+        [Tooltip("プレイヤーから見た奥方向を中心に、到達点の候補から除外する角度です。")]
+        private float _excludedAngleDegrees = 60f;
+
         [SerializeField, Min(0f), Tooltip("移動開始までの待機時間です。")]
         private float _delaySeconds = 0.625f;
 
@@ -39,6 +43,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         private Ease _ease = Ease.OutQuad;
 
         private const float FULL_TURN_DEGREES = 360f;
+        private const float MINIMUM_SQR_MAGNITUDE = 0.0001f;
 
         /// <summary>
         ///     移動対象の参照を解決する。
@@ -58,8 +63,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// <returns> 生成したTweenのハンドルです。 </returns>
         protected override MotionHandle CreateMotion(in SkillEffectContext context)
         {
-            Vector3 endLocalPosition = ResolveScatteredLocalPosition();
-
             // 親はエフェクト原点(対象位置)に追従するため、ローカル座標で補間して追従を保つ。
             Transform parent = _travelTarget.parent;
             Vector3 startWorldPosition = context.PlayerTransform != null
@@ -68,6 +71,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             Vector3 startLocalPosition = parent != null
                 ? parent.InverseTransformPoint(startWorldPosition)
                 : startWorldPosition;
+
+            Vector3 endLocalPosition = ResolveScatteredLocalPosition(parent, startWorldPosition);
 
             _travelTarget.localPosition = startLocalPosition;
 
@@ -86,18 +91,38 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// <summary>
         ///     円周上の到達点をローカル座標で求める。
         /// </summary>
+        /// <param name="parent"> 到達点の基準となる親Transformです。 </param>
+        /// <param name="playerWorldPosition"> プレイヤーのワールド座標です。 </param>
         /// <returns> 到達点のローカル座標です。 </returns>
-        private Vector3 ResolveScatteredLocalPosition()
+        private Vector3 ResolveScatteredLocalPosition(Transform parent, Vector3 playerWorldPosition)
         {
-            // 区画ごとにランダム角を取り、ばらけさせつつ重なりを避ける。
-            float sectorSize = FULL_TURN_DEGREES / _sectorCount;
-            float angleDegrees = (sectorSize * _sectorIndex) + Random.Range(0f, sectorSize);
-            float angleRadians = angleDegrees * Mathf.Deg2Rad;
+            Vector3 origin = parent != null ? parent.position : Vector3.zero;
 
-            return new Vector3(
+            // プレイヤーから見た奥方向を基準角とし、その周囲を候補から外す。
+            Vector3 awayDirection = origin - playerWorldPosition;
+            awayDirection.y = 0f;
+            float baseAngleDegrees = awayDirection.sqrMagnitude > MINIMUM_SQR_MAGNITUDE
+                ? Mathf.Atan2(awayDirection.z, awayDirection.x) * Mathf.Rad2Deg
+                : 0f;
+
+            // 除外角を除いた範囲を区画に分け、ばらけさせつつ重なりを避ける。
+            float allowedSpan = FULL_TURN_DEGREES - _excludedAngleDegrees;
+            float sectorSize = allowedSpan / _sectorCount;
+            float offsetDegrees = (_excludedAngleDegrees * 0.5f)
+                + (sectorSize * _sectorIndex)
+                + Random.Range(0f, sectorSize);
+
+            float angleRadians = (baseAngleDegrees + offsetDegrees) * Mathf.Deg2Rad;
+            Vector3 worldOffset = new Vector3(
                 Mathf.Cos(angleRadians) * _ringRadius,
-                _ringHeight,
+                0f,
                 Mathf.Sin(angleRadians) * _ringRadius);
+
+            Vector3 localOffset = parent != null
+                ? parent.InverseTransformVector(worldOffset)
+                : worldOffset;
+            localOffset.y = _ringHeight;
+            return localOffset;
         }
     }
 }

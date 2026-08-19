@@ -6,53 +6,46 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Skill.Effect
 {
     /// <summary>
-    ///     スキルIDとエフェクト定義の対応を保持するConfig。
-    ///     装備スキルに応じた事前生成対象の解決に使用する。
+    ///     スキルIDとエフェクトプレハブの対応だけを保持するConfig。
+    ///     エフェクトの内容や配置はプレハブ側が持ち、ここは対応表に徹する。
     /// </summary>
     [CreateAssetMenu(
         fileName = "SkillEffectCatalogConfig",
         menuName = "KillChord/View/Skill/Skill Effect Catalog")]
     public sealed class SkillEffectCatalogConfig : ScriptableObject
     {
-        /// <summary> 登録されている全エフェクト定義です。 </summary>
-        public IReadOnlyList<SkillEffectDefinitionConfig> CommonDefinitions => _commonDefinitions;
+        /// <summary> 装備状況に関わらず常に事前生成するエフェクトです。 </summary>
+        public IReadOnlyList<SkillEffectInstance> CommonPrefabs => _commonPrefabs;
 
         /// <summary>
-        ///     指定スキルに紐づくエフェクト定義一覧を取得する。
+        ///     指定スキルに対応するエフェクトプレハブを取得する。
         /// </summary>
         /// <param name="skillId"> 対象のスキルIDです。 </param>
-        /// <param name="definitions"> 取得したエフェクト定義一覧です。 </param>
-        /// <returns> 定義が存在する場合はtrue。 </returns>
-        public bool TryGetDefinitions(int skillId, out IReadOnlyList<SkillEffectDefinitionConfig> definitions)
+        /// <param name="prefab"> 取得したエフェクトプレハブです。 </param>
+        /// <returns> 対応するプレハブが存在する場合はtrue。 </returns>
+        public bool TryGetPrefab(int skillId, out SkillEffectInstance prefab)
         {
             EnsureIndexBuilt();
-            if (_definitionIndex.TryGetValue(skillId, out SkillEffectDefinitionConfig[] entryDefinitions))
-            {
-                definitions = entryDefinitions;
-                return true;
-            }
-
-            definitions = Array.Empty<SkillEffectDefinitionConfig>();
-            return false;
+            return _prefabIndex.TryGetValue(skillId, out prefab) && prefab != null;
         }
 
-        [SerializeField, Tooltip("スキルごとのエフェクト定義の対応表です。")]
+        [SerializeField, Tooltip("スキルとエフェクトプレハブの対応表です。")]
         private SkillEffectEntry[] _entries;
 
-        [SerializeField, Tooltip("装備状況に関わらず常に事前生成するエフェクト定義です。")]
-        private SkillEffectDefinitionConfig[] _commonDefinitions;
+        [SerializeField, Tooltip("装備状況に関わらず常に事前生成するエフェクトです。")]
+        private SkillEffectInstance[] _commonPrefabs;
 
         /// <summary>
         ///     スキルID索引を必要時に構築する。
         /// </summary>
         private void EnsureIndexBuilt()
         {
-            if (_definitionIndex != null)
+            if (_prefabIndex != null)
             {
                 return;
             }
 
-            _definitionIndex = new Dictionary<int, SkillEffectDefinitionConfig[]>();
+            _prefabIndex = new Dictionary<int, SkillEffectInstance>();
             if (_entries == null)
             {
                 return;
@@ -61,12 +54,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             for (int i = 0; i < _entries.Length; i++)
             {
                 SkillEffectEntry entry = _entries[i];
-                if (entry == null || entry.SkillId == 0 || entry.Definitions == null)
+                if (entry == null || entry.SkillId == 0 || entry.Prefab == null)
                 {
                     continue;
                 }
 
-                _definitionIndex[entry.SkillId] = entry.Definitions;
+                _prefabIndex[entry.SkillId] = entry.Prefab;
             }
         }
 
@@ -75,13 +68,13 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         private void OnValidate()
         {
-            _definitionIndex = null;
+            _prefabIndex = null;
         }
 
-        private Dictionary<int, SkillEffectDefinitionConfig[]> _definitionIndex;
+        private Dictionary<int, SkillEffectInstance> _prefabIndex;
 
         /// <summary>
-        ///     スキル1つ分のエフェクト定義対応を保持するクラス。
+        ///     スキル1つ分のエフェクト対応を保持するクラス。
         /// </summary>
         [Serializable]
         private sealed class SkillEffectEntry
@@ -89,14 +82,14 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             /// <summary> 対象のスキルIDです。 </summary>
             public int SkillId => _skillId.Id;
 
-            /// <summary> 対象スキルが使用するエフェクト定義です。 </summary>
-            public SkillEffectDefinitionConfig[] Definitions => _definitions;
+            /// <summary> 対象スキルのエフェクトプレハブです。 </summary>
+            public SkillEffectInstance Prefab => _prefab;
 
             [SerializeField, SourceDataCollection("Skill"), Tooltip("対象のスキルIDです。")]
             private DataID _skillId;
 
-            [SerializeField, Tooltip("対象スキルが使用するエフェクト定義です。")]
-            private SkillEffectDefinitionConfig[] _definitions;
+            [SerializeField, Tooltip("対象スキルのエフェクトプレハブです。")]
+            private SkillEffectInstance _prefab;
         }
     }
 }

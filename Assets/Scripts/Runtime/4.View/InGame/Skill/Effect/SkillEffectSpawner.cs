@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
-using KillChord.Runtime.View.InGame.Skill.Effect.Placement;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +27,14 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Clear();
 
             // 装備状況に関わらず使用する共通エフェクトを先に生成する。
-            RegisterDefinitions(_catalog.CommonDefinitions);
+            IReadOnlyList<SkillEffectInstance> commonPrefabs = _catalog.CommonPrefabs;
+            if (commonPrefabs != null)
+            {
+                for (int i = 0; i < commonPrefabs.Count; i++)
+                {
+                    RegisterPrefab(COMMON_POOL_KEY - i, commonPrefabs[i]);
+                }
+            }
 
             if (equippedSkillIds == null)
             {
@@ -37,26 +43,27 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
             for (int i = 0; i < equippedSkillIds.Count; i++)
             {
-                if (!_catalog.TryGetDefinitions(equippedSkillIds[i], out IReadOnlyList<SkillEffectDefinitionConfig> definitions))
+                int skillId = equippedSkillIds[i];
+                if (!_catalog.TryGetPrefab(skillId, out SkillEffectInstance prefab))
                 {
                     continue;
                 }
 
-                RegisterDefinitions(definitions);
+                RegisterPrefab(skillId, prefab);
             }
         }
 
         /// <summary>
-        ///     指定IDのスキルエフェクトを再生する。
+        ///     指定スキルのエフェクトを再生する。
         /// </summary>
-        /// <param name="effectId"> 再生するエフェクトのIDです。 </param>
+        /// <param name="skillId"> 再生するスキルのIDです。 </param>
         /// <param name="context"> エフェクトの参照点です。 </param>
         /// <returns> 再生に成功した場合はハンドル、失敗した場合はnull。 </returns>
-        public ISkillEffectHandle Play(SkillEffectId effectId, in SkillEffectContext context)
+        public ISkillEffectHandle PlaySkillEffect(int skillId, in SkillEffectContext context)
         {
-            if (!_pools.TryGetValue(effectId, out SkillEffectPoolEntry entry))
+            if (!_pools.TryGetValue(skillId, out SkillEffectPoolEntry entry))
             {
-                Debug.LogError($"[{nameof(SkillEffectSpawner)}] 事前生成されていないエフェクトIDです。 Id: {effectId}", this);
+                Debug.LogError($"[{nameof(SkillEffectSpawner)}] 事前生成されていないスキルIDです。 Id: {skillId}", this);
                 return null;
             }
 
@@ -64,7 +71,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
             // 再生が即座に完了しても返却処理が追跡できるよう、開始前に登録する。
             _activeInstances.Add(instance);
-            if (instance.Play(entry.Placement, context, entry.ReleaseHandler))
+            if (instance.Play(context, entry.ReleaseHandler))
             {
                 return instance;
             }
@@ -73,31 +80,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _activeInstances.Remove(instance);
             entry.Pool.Release(instance);
             return null;
-        }
-
-        /// <summary>
-        ///     指定スキルに紐づくスキルエフェクトをすべて再生する。
-        /// </summary>
-        /// <param name="skillId"> 再生するスキルのIDです。 </param>
-        /// <param name="context"> エフェクトの参照点です。 </param>
-        public void PlaySkillEffects(int skillId, in SkillEffectContext context)
-        {
-            if (_catalog == null
-                || !_catalog.TryGetDefinitions(skillId, out IReadOnlyList<SkillEffectDefinitionConfig> definitions))
-            {
-                return;
-            }
-
-            for (int i = 0; i < definitions.Count; i++)
-            {
-                SkillEffectDefinitionConfig definition = definitions[i];
-                if (definition == null || !definition.IsValid)
-                {
-                    continue;
-                }
-
-                Play(definition.Id, context);
-            }
         }
 
         /// <summary>
@@ -119,7 +101,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         {
             StopAll();
             _activeInstances.Clear();
-            foreach (KeyValuePair<SkillEffectId, SkillEffectPoolEntry> pair in _pools)
+            foreach (KeyValuePair<int, SkillEffectPoolEntry> pair in _pools)
             {
                 pair.Value.Pool.Clear();
             }
@@ -127,7 +109,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _pools.Clear();
         }
 
-        [SerializeField, Tooltip("スキルIDとエフェクト定義の対応表です。")]
+        [SerializeField, Tooltip("スキルIDとエフェクトプレハブの対応表です。")]
         private SkillEffectCatalogConfig _catalog;
 
         [SerializeField, Tooltip("生成したエフェクトの親Transformです。未設定時は自身を使用します。")]
@@ -142,54 +124,32 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     エフェクト定義一覧のプールを生成する。
+        ///     エフェクトプレハブ1件分のプールを生成する。
         /// </summary>
-        /// <param name="definitions"> 生成対象のエフェクト定義一覧です。 </param>
-        private void RegisterDefinitions(IReadOnlyList<SkillEffectDefinitionConfig> definitions)
+        /// <param name="poolKey"> プールを識別するキーです。 </param>
+        /// <param name="prefab"> 生成対象のエフェクトプレハブです。 </param>
+        private void RegisterPrefab(int poolKey, SkillEffectInstance prefab)
         {
-            if (definitions == null)
+            if (prefab == null || _pools.ContainsKey(poolKey))
             {
                 return;
             }
 
-            for (int i = 0; i < definitions.Count; i++)
-            {
-                RegisterDefinition(definitions[i]);
-            }
-        }
-
-        /// <summary>
-        ///     エフェクト定義1件分のプールを生成する。
-        /// </summary>
-        /// <param name="definition"> 生成対象のエフェクト定義です。 </param>
-        private void RegisterDefinition(SkillEffectDefinitionConfig definition)
-        {
-            if (definition == null || !definition.IsValid)
-            {
-                return;
-            }
-
-            SkillEffectId effectId = definition.Id;
-            if (_pools.ContainsKey(effectId))
-            {
-                return;
-            }
-
-            SkillEffectPoolEntry entry = new SkillEffectPoolEntry(definition, InstantiateInstance, ReleaseInstance);
-            _pools.Add(effectId, entry);
+            SkillEffectPoolEntry entry = new SkillEffectPoolEntry(poolKey, prefab, InstantiateInstance, ReleaseInstance);
+            _pools.Add(poolKey, entry);
             entry.Prewarm();
         }
 
         /// <summary>
-        ///     エフェクト定義からインスタンスを生成する。
+        ///     エフェクトプレハブからインスタンスを生成する。
         /// </summary>
-        /// <param name="definition"> 生成元のエフェクト定義です。 </param>
+        /// <param name="prefab"> 生成元のエフェクトプレハブです。 </param>
         /// <returns> 生成したインスタンスです。 </returns>
-        private SkillEffectInstance InstantiateInstance(SkillEffectDefinitionConfig definition)
+        private SkillEffectInstance InstantiateInstance(SkillEffectInstance prefab)
         {
             Transform parent = _instanceRoot != null ? _instanceRoot : transform;
-            SkillEffectInstance instance = Instantiate(definition.Prefab, parent);
-            instance.name = definition.Prefab.name;
+            SkillEffectInstance instance = Instantiate(prefab, parent);
+            instance.name = prefab.name;
             instance.Prewarm();
             return instance;
         }
@@ -197,9 +157,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <summary>
         ///     再生完了したインスタンスをプールへ返却する。
         /// </summary>
-        /// <param name="effectId"> 対象のエフェクトIDです。 </param>
+        /// <param name="poolKey"> 対象のプールキーです。 </param>
         /// <param name="instance"> 返却するインスタンスです。 </param>
-        private void ReleaseInstance(SkillEffectId effectId, SkillEffectInstance instance)
+        private void ReleaseInstance(int poolKey, SkillEffectInstance instance)
         {
             if (instance == null)
             {
@@ -207,7 +167,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             }
 
             _activeInstances.Remove(instance);
-            if (_pools.TryGetValue(effectId, out SkillEffectPoolEntry entry))
+            if (_pools.TryGetValue(poolKey, out SkillEffectPoolEntry entry))
             {
                 entry.Pool.Release(instance);
                 return;
@@ -216,46 +176,45 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Destroy(instance.gameObject);
         }
 
-        private readonly Dictionary<SkillEffectId, SkillEffectPoolEntry> _pools = new();
+        private const int COMMON_POOL_KEY = int.MinValue;
+
+        private readonly Dictionary<int, SkillEffectPoolEntry> _pools = new();
         private readonly List<SkillEffectInstance> _activeInstances = new();
 
         /// <summary>
-        ///     エフェクト定義1件分のプールと配置ストラテジーを保持するクラス。
+        ///     エフェクトプレハブ1件分のプールを保持するクラス。
         /// </summary>
         private sealed class SkillEffectPoolEntry
         {
             /// <summary>
             ///     プールエントリを生成する。
             /// </summary>
-            /// <param name="definition"> 対象のエフェクト定義です。 </param>
+            /// <param name="poolKey"> プールを識別するキーです。 </param>
+            /// <param name="prefab"> 対象のエフェクトプレハブです。 </param>
             /// <param name="instantiator"> インスタンス生成処理です。 </param>
             /// <param name="releaser"> インスタンス返却処理です。 </param>
             public SkillEffectPoolEntry(
-                SkillEffectDefinitionConfig definition,
-                Func<SkillEffectDefinitionConfig, SkillEffectInstance> instantiator,
-                Action<SkillEffectId, SkillEffectInstance> releaser)
+                int poolKey,
+                SkillEffectInstance prefab,
+                Func<SkillEffectInstance, SkillEffectInstance> instantiator,
+                Action<int, SkillEffectInstance> releaser)
             {
-                _definition = definition;
-                SkillEffectId effectId = definition.Id;
+                _prefab = prefab;
 
                 // 再生完了コールバックは毎回同じデリゲートを渡し、再生ごとのアロケーションを避ける。
-                ReleaseHandler = instance => releaser(effectId, instance);
-                Placement = SkillEffectPlacementResolver.Resolve(definition.AttachMode, definition.BetweenRatio);
+                ReleaseHandler = instance => releaser(poolKey, instance);
                 Pool = new ObjectPool<SkillEffectInstance>(
-                    createFunc: () => instantiator(definition),
+                    createFunc: () => instantiator(prefab),
                     actionOnGet: OnGetFromPool,
                     actionOnRelease: OnReleaseToPool,
                     actionOnDestroy: OnDestroyInstance,
                     collectionCheck: true,
-                    defaultCapacity: Mathf.Max(1, definition.PrewarmCount),
-                    maxSize: definition.MaxPoolSize);
+                    defaultCapacity: Mathf.Max(1, prefab.PrewarmCount),
+                    maxSize: prefab.MaxPoolSize);
             }
 
             /// <summary> インスタンスのプールです。 </summary>
             public IObjectPool<SkillEffectInstance> Pool { get; }
-
-            /// <summary> 配置ストラテジーです。 </summary>
-            public ISkillEffectPlacement Placement { get; }
 
             /// <summary> 再生完了時に呼ぶ返却処理です。 </summary>
             public Action<SkillEffectInstance> ReleaseHandler { get; }
@@ -265,7 +224,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             /// </summary>
             public void Prewarm()
             {
-                int prewarmCount = _definition.PrewarmCount;
+                int prewarmCount = _prefab.PrewarmCount;
                 if (prewarmCount <= 0)
                 {
                     return;
@@ -326,7 +285,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 UnityEngine.Object.Destroy(instance.gameObject);
             }
 
-            private readonly SkillEffectDefinitionConfig _definition;
+            private readonly SkillEffectInstance _prefab;
         }
     }
 }

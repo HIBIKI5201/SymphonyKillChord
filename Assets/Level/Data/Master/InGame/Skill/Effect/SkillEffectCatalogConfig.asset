@@ -16,62 +16,49 @@ MonoBehaviour:
   - _skillId:
       _id: skill_00
       _hashId: -876453005
-    _definitions:
-    - {fileID: 11400000, guid: 36019801d9f3c4741b1ec289076d4fd4, type: 2}
+    _prefab: {fileID: 6817359740537845376, guid: 9299be83614ec434fac2a238894b3f87, type: 3}
   - _skillId:
       _id: skill_01
       _hashId: -1127918619
-    _definitions:
-    - {fileID: 11400000, guid: 596f7746cc31c5f479ff668f8019ab36, type: 2}
+    _prefab: {fileID: 5612698327699888543, guid: 8dfb48a2cf378a94ba095dbf7681121b, type: 3}
   - _skillId:
       _id: skill_02
       _hashId: 634126943
-    _definitions:
-    - {fileID: 11400000, guid: 6ba8155c3b96151429995f4074d59e63, type: 2}
+    _prefab: {fileID: 3256655499764873674, guid: c2d6746169c7d9d489d1b37f2c8296e3, type: 3}
   - _skillId:
       _id: skill_03
       _hashId: 1389048521
-    _definitions:
-    - {fileID: 11400000, guid: 9e17c1553ce04d248b8122b7804e15a9, type: 2}
+    _prefab: {fileID: 7718956007282565482, guid: 17c8ee36a2f04954d9217c5627bdc329, type: 3}
   - _skillId:
       _id: skill_04
       _hashId: -860903574
-    _definitions:
-    - {fileID: 11400000, guid: 88d471f4323322c46b72abe061e97712, type: 2}
+    _prefab: {fileID: 4886934866763053749, guid: 721610e9f25e78a42af63382007e23f6, type: 3}
   - _skillId:
       _id: skill_05
       _hashId: -1146578948
-    _definitions:
-    - {fileID: 11400000, guid: 0a2aee03a1f1e83458e8031db120da46, type: 2}
+    _prefab: {fileID: 5163408257388201018, guid: 1fe88331c93ec8b47b100a95977ef1a6, type: 3}
   - _skillId:
       _id: skill_06
       _hashId: 581027398
-    _definitions:
-    - {fileID: 11400000, guid: 99f09ae310a9c674c921bfb972ea0f69, type: 2}
+    _prefab: {fileID: 3043799496614143345, guid: 0bd7ff3201aa63a4089c157e2f31e2ed, type: 3}
   - _skillId:
       _id: skill_07
       _hashId: 1437005520
-    _definitions:
-    - {fileID: 11400000, guid: 103b716d96faf47418bd5e18c306e971, type: 2}
+    _prefab: {fileID: 348504895726282823, guid: 9f90efaf4549af749b646cd0ee901d5e, type: 3}
   - _skillId:
       _id: skill_08
       _hashId: -988157119
-    _definitions:
-    - {fileID: 11400000, guid: 7b635f4394d2d3c47b5be641f56dea22, type: 2}
+    _prefab: {fileID: 6710341776422760132, guid: a81a03f3d44fda54d82600b1148a12ff, type: 3}
   - _skillId:
       _id: skill_09
       _hashId: -1306600489
-    _definitions:
-    - {fileID: 11400000, guid: 3dfb5517b4847ab4c93b60b38958ddce, type: 2}
+    _prefab: {fileID: 4086692410389517197, guid: dc429391bc841fc45b86f13bf497d495, type: 3}
   - _skillId:
       _id: skill_10
       _hashId: -757509582
-    _definitions:
-    - {fileID: 11400000, guid: 4d665c9ec584623448a5a0ca4570656c, type: 2}
+    _prefab: {fileID: 3562997322564143715, guid: 1d1d65f3bfc56594d9e9ad70bd6b8873, type: 3}
   - _skillId:
       _id: skill_13
       _hashId: 1271923592
-    _definitions:
-    - {fileID: 11400000, guid: 3b8927cda0e8750469e798391273145f, type: 2}
-    - {fileID: 11400000, guid: 8310d60ce9de4174d8dcd928d1cfdd2e, type: 2}
-  _commonDefinitions: []
+    _prefab: {fileID: 1174767335462118641, guid: 9bdff612ad877f34f84e0c3606a1704a, type: 3}
+  _commonPrefabs: []
