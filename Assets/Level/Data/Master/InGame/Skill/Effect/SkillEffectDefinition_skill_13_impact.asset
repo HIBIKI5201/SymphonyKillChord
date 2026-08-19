@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd581596ee259f8408cabe5c31d50166, type: 3}
-  m_Name: SkillEffectDefinition_skill_13
+  m_Name: SkillEffectDefinition_skill_13_impact
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.SkillEffectDefinitionConfig
-  _key: skill_13_main
-  _prefab: {fileID: 1796517344892739640, guid: 26ca73fbe811e454caf3993eae23a627, type: 3}
-  _attachMode: 0
+  _key: skill_13_impact
+  _prefab: {fileID: 1168829429462260247, guid: a5b640c214ceb454a8b91b26595e0fd5, type: 3}
+  _attachMode: 3
   _betweenRatio: 0.5
   _prewarmCount: 1
   _maxPoolSize: 4

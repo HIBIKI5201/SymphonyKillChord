@@ -49,7 +49,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 return false;
             }
 
-            _followTransform = placement.IsFollow ? pose.FollowTransform : null;
+            _placement = placement.IsFollow ? placement : null;
+            _context = context;
             _onFinished = onFinished;
             _elapsedSeconds = 0f;
             _isPlaying = true;
@@ -205,7 +206,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
             Action<SkillEffectInstance> onFinished = _onFinished;
             _onFinished = null;
-            _followTransform = null;
+            _placement = null;
+            _context = default;
 
             _completionSource.TrySetResult();
             onFinished?.Invoke(this);
@@ -236,16 +238,17 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     追従対象へ位置と回転を追従させる。
+        ///     追従型の場合に、配置ストラテジーへ姿勢を再計算させる。
         /// </summary>
         private void UpdateFollow()
         {
-            if (_followTransform == null)
+            // 追従先はTransformとは限らないため、位置の決定はストラテジーへ委ねる。
+            if (_placement == null || !_placement.TryResolve(_context, out SkillEffectPose pose))
             {
                 return;
             }
 
-            ApplyPose(_followTransform.position, _followTransform.rotation);
+            ApplyPose(pose.Position, pose.Rotation);
         }
 
         /// <summary>
@@ -255,7 +258,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <param name="rotation"> 基準となるワールド回転です。 </param>
         private void ApplyPose(Vector3 position, Quaternion rotation)
         {
-            Quaternion appliedRotation = _followsRotation || _followTransform == null
+            Quaternion appliedRotation = _followsRotation || _placement == null
                 ? rotation * Quaternion.Euler(_rotationOffset)
                 : transform.rotation;
             transform.SetPositionAndRotation(position + rotation * _positionOffset, appliedRotation);
@@ -265,7 +268,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         private Awaitable[] _runningPlaybacks;
         private CancellationTokenSource _cancellationTokenSource;
         private Action<SkillEffectInstance> _onFinished;
-        private Transform _followTransform;
+        private ISkillEffectPlacement _placement;
+        private SkillEffectContext _context;
         private float _elapsedSeconds;
         private bool _isPlaying;
     }

@@ -240,7 +240,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
                 // 再生完了コールバックは毎回同じデリゲートを渡し、再生ごとのアロケーションを避ける。
                 ReleaseHandler = instance => releaser(effectId, instance);
-                Placement = SkillEffectPlacementResolver.Resolve(definition.AttachMode);
+                Placement = SkillEffectPlacementResolver.Resolve(definition.AttachMode, definition.BetweenRatio);
                 Pool = new ObjectPool<SkillEffectInstance>(
                     createFunc: () => instantiator(definition),
                     actionOnGet: OnGetFromPool,

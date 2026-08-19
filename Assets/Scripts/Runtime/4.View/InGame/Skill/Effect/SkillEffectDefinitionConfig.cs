@@ -23,6 +23,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <summary> エフェクトの配置方式です。 </summary>
         public SkillEffectAttachMode AttachMode => _attachMode;
 
+        /// <summary> 2点間配置で使用する補間比率です。プレイヤーが0、対象が1です。 </summary>
+        public float BetweenRatio => _betweenRatio;
+
         /// <summary> シーンロード時に事前生成する数です。 </summary>
         public int PrewarmCount => _prewarmCount;
 
@@ -40,6 +43,10 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         [SerializeField, Tooltip("エフェクトの配置方式です。")]
         private SkillEffectAttachMode _attachMode = SkillEffectAttachMode.PlayerPoint;
+
+        [SerializeField, Range(0f, 1f)]
+        [Tooltip("2点間配置で使用する補間比率です。プレイヤーが0、対象が1です。")]
+        private float _betweenRatio = 0.5f;
 
         [SerializeField, Min(0), Tooltip("シーンロード時に事前生成する数です。同時再生数の想定値を設定します。")]
         private int _prewarmCount = 2;

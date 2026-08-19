@@ -73,4 +73,5 @@ MonoBehaviour:
       _hashId: 1271923592
     _definitions:
     - {fileID: 11400000, guid: 3b8927cda0e8750469e798391273145f, type: 2}
+    - {fileID: 11400000, guid: 8310d60ce9de4174d8dcd928d1cfdd2e, type: 2}
   _commonDefinitions: []

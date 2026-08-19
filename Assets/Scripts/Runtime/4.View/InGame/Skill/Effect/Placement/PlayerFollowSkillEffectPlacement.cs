@@ -12,7 +12,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
         public bool IsFollow => true;
 
         /// <summary>
-        ///     プレイヤーTransformへの追従情報を解決する。
+        ///     プレイヤーの現在の姿勢を解決する。毎フレーム呼ばれることで追従になる。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
         /// <param name="pose"> 解決した配置結果です。 </param>
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
                 return false;
             }
 
-            pose = new SkillEffectPose(playerTransform.position, playerTransform.rotation, playerTransform);
+            pose = new SkillEffectPose(playerTransform.position, playerTransform.rotation);
             return true;
         }
     }
