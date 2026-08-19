@@ -21,14 +21,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         {
             var hideId = screenViewDTO.ScreenToHideId;
             var showId = screenViewDTO.ScreenToShowId;
-            var targetSceneName = screenViewDTO.TargetSceneName;
 
             if (hideId.HasValue)
             {
                 _screenViewRegistry.Hide(hideId.Value);
             }
 
-            _screenViewRegistry.Show(showId, targetSceneName);
+            _screenViewRegistry.Show(showId);
         }
 
         private readonly IScreenViewRegistry _screenViewRegistry;

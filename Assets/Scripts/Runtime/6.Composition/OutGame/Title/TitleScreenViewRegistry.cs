@@ -38,8 +38,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         ///    指定された画面 ID の View を表示状態にします。
         /// </summary>
         /// <param name="screenId"></param>
-        /// <param name="targetSceneName"></param>
-        public void Show(ScreenId screenId, string targetSceneName = null)
+        public void Show(ScreenId screenId)
         {
             if (!_views.TryGetValue(screenId, out var view))
             {

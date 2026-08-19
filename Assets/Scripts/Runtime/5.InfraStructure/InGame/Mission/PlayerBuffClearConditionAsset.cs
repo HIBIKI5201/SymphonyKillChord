@@ -1,5 +1,5 @@
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.InfraStructure.InGame.Buff;
 using SymphonyFrameWork.Attribute;
 using System;
@@ -15,26 +15,26 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     public sealed class PlayerBuffClearConditionAsset : MissionClearConditionAssetBase
     {
         /// <inheritdoc />
-        public override IMissionClearCondition Create()
+        public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
             if (_innerCondition == null)
             {
                 throw new InvalidOperationException($"{nameof(_innerCondition)} is required.");
             }
 
-            List<IBuff> buffs = new();
+            List<IStatusEffect> statusEffects = new();
             if (_buffs != null)
             {
                 for (int i = 0; i < _buffs.Count; i++)
                 {
                     if (_buffs[i] != null)
                     {
-                        buffs.Add(_buffs[i].Create());
+                        statusEffects.Add(_buffs[i].Create());
                     }
                 }
             }
 
-            return new PlayerBuffClearCondition(_innerCondition.Create(), buffs);
+            return new PlayerBuffClearCondition(_innerCondition.Create(missionKeyRepository), statusEffects);
         }
 
         /// <inheritdoc />

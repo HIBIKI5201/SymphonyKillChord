@@ -17,12 +17,16 @@ MonoBehaviour:
     _sourceAssetAddressableKeys:
     - StageTreeAsset
     - EnemyWaveDefinitionRepository
+    - EnemyDefinitionRepository
     - EnemyMissionKeyRepository
+    - MissionDefinitionRepository
     _collectionCategories:
     - StageAsset
     - StageBind
     - Wave
+    - EnemyData
     - EnemyMissionKey
+    - Mission
   - _displayName: Player
     _sourceAssetAddressableKeys:
     - Player
@@ -36,30 +40,42 @@ MonoBehaviour:
     - CameraConfig
     - SkillInputProgressViewConfigAsset
     - RhythmJudgmentDefinitionAsset
-    _collectionCategories: []
+    - TitleScreenRuleData
+    - OutGameScreenRuleData
+    _collectionCategories:
+    - TitleScreenRule
+    - OutGameScreenRule
   - _displayName: Enemy
     _sourceAssetAddressableKeys:
     - ExampleEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
+    - EnemyDefinitionRepository
     - CharacterDefinitionRepository
+    - ExampleBattleMusicData
+    - ExampleEncountMusicData
+    - ShellMusicData
     _collectionCategories:
     - BossAttackEntry
+    - EnemyData
     - Character
   - _displayName: Skill Tree
     _sourceAssetAddressableKeys:
     - SkillNodeDataRepo
     - SkillNodeBindRepo
     - OutGameSkillRepository
+    - SkillNodePhaseBindDataRepo
     _collectionCategories:
     - SkillNode
     - SkillNodeBind
     - Skill
+    - SkillNodePhaseBind
   - _displayName: Scenario
     _sourceAssetAddressableKeys:
     - BackgroundCatalogAsset
     - AnimationCatalogAsset
     - PortraitCatalogAsset
+    - ScenarioSettingsAsset
     _collectionCategories:
     - ScenarioBackground
     - ScenarioAnimation

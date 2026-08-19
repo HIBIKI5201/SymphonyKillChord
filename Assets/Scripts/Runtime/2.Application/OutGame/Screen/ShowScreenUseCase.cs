@@ -44,8 +44,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
             ScreenTransitionResult result = new(
                 hidePreviousScreen ? previousScreenId : null,
                 command.TargetScreenId,
-                rule.TransitionType == ScreenTransitionType.Reset,
-                command.TargetSceneName);
+                rule.TransitionType == ScreenTransitionType.Reset);
 
             _screenPresenter.Present(result);
         }

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: SkillNodeBindData6
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeIdBindData
   NodeName: N6
-  SkillNodeData: {fileID: 11400000, guid: 6cd6005cd1a84d44ba0c86645cf92aea, type: 2}
   FromConnNames:
   - C110-6
   - C112-6
@@ -22,3 +21,6 @@ MonoBehaviour:
   - C6-118
   - C6-120
   - C6-122
+  _skillNodeId:
+    _id: node_n6
+    _hashId: 1679495253

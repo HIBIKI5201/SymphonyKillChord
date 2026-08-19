@@ -1,7 +1,9 @@
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
-using KillChord.Runtime.Domain.InGame.Buff;
-
+using KillChord.Runtime.Utility.Persistent;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -10,15 +12,33 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_01 : SkillBase
     {
-        public Skill_01(IBuff buff) : base(buff)
-        {
-        }
         public override void Execute(in SkillEffectContext context)
         {
-            Damage damage = new Damage(context.TargetEntity.CurrentHealth.Value * _multiplier);
-            context.TargetEntity.TakeDamage(damage);
-        }
+            float damageMultiplier =
+                (float)context.EffectSpec.GetRequiredValue(
+                    SkillEffectParameterId.DamageMultiplier);
 
-        private float _multiplier = 0.9f; //強力な一回攻撃。
+            AttackDefinition attackDefinition =
+                context.PlayerEntity.CombatSpec
+                    .GetAttackDefinitionByBeatType(context.CurrentBeatType);
+
+            AttackResult result =
+                AttackCalculator.Calculate(
+                        attackDefinition,
+                        context.PlayerEntity,
+                        context.TargetEntity,
+                        context.IsJustHit,
+                        context.PlayerEntity.BaseDamage,
+                        isCriticalForced: true);
+
+            result =
+                result.WithFinalDamage(result.FinalDamage * damageMultiplier);
+            result = DamageExecutor.Execute(
+                context.PlayerEntity, context.TargetEntity, result, DamageAttackType.Skill);
+
+            Debug.Log($"[Skill_01] 発動" +
+                        $"Multiplier: {damageMultiplier}" +
+                        $"FinalDamage: {result.FinalDamage.Value}");
+        }
     }
 }

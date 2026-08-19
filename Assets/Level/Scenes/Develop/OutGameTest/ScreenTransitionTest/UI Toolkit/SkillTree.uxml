@@ -123,7 +123,8 @@
         </ui:ScrollView>
         <ui:Label text="研究" name="Title" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: 1%;"/>
         <ui:Label text="所持ポイント：XXXX" name="Points" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: auto; bottom: 1%;"/>
-        <ui:Button text="戻る" name="BackButton" tabindex="-1" class="button back-button" style="width: 200px; height: 100px; color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; top: 1%;"/>
+        <ui:Button text="振り直す" name="ResetButton" class="button" style="position: absolute; width: 200px; height: 100px; right: auto; bottom: 5%; left: 3%; background-color: rgb(188, 188, 188); border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; font-size: 30px;"/>
+        <ui:Button text="戻る" name="BackButton" tabindex="-1" class="button back-button" style="width: 200px; height: 100px; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; top: 1%;"/>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; top: 0; left: 0; right: auto; bottom: auto; display: flex; visibility: visible; opacity: 1; background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); width: 100%; height: 100%;">
         <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 0; left: 0; display: flex; align-self: flex-start; width: 500px; height: 100%;"/>
@@ -131,6 +132,16 @@
         <ui:VisualElement name="PreviewVideoContainer" picking-mode="Position" enabled="true" style="flex-grow: 0; align-content: center; align-items: center; flex-shrink: 1; justify-content: center; background-color: rgba(0, 0, 0, 0.24); display: flex; visibility: visible; align-self: stretch; width: 100%; height: 100%;">
             <ui:VisualElement name="PreviewVideo" style="flex-grow: 0; width: 66%; height: 66%; background-color: rgb(155, 155, 155); display: flex;"/>
             <ui:Button text="動画を閉じる" name="ClosePreviewButton" style="font-size: 24px; -unity-font-style: bold;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="SkillTreeResetDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
+        <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 40%; align-self: center; justify-content: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
+            <ui:Label text="スキルツリーをリセットしますか？" name="ResetMessage" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; white-space: normal;"/>
+            <ui:VisualElement style="flex-direction: row; justify-content: center;">
+                <ui:Button text="キャンセル" name="ResetCancelButton" class="button" style="font-size: 24px;"/>
+                <ui:VisualElement style="width: 10%; max-width: 100px;"/>
+                <ui:Button text="リセット" name="ResetConfirmButton" class="button" style="font-size: 24px;"/>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

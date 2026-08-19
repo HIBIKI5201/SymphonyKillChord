@@ -1,21 +1,22 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Mission;
-using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
@@ -87,28 +88,33 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(BossMoveView)}の参照がありません。");
                 return;
             }
-                
+
             if (_healthView == null)
             {
                 Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
                 return;
             }
-                
+
             if (_raycastView == null)
             {
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
                 return;
             }
-                
+
             if (_attackPositionSearchView == null)
             {
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
                 return;
             }
-                
+
             if (_loadedAttackEntryRepo?.AttackEntries == null || _loadedAttackEntryRepo.AttackEntries.Length == 0)
             {
                 Debug.LogError("攻撃エントリ(_attackEntryRepo)が設定されていません。");
+                return;
+            }
+            if (_targetTransform == null)
+            {
+                Debug.LogError("_targetTransformの参照がありません", this);
                 return;
             }
 
@@ -175,7 +181,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 {
                     raycastViews[typeof(EnemyInfantryAttackController)] = _raycastView;
                 }
-                if(controller is EnemyTripleShotAttackController)
+                if (controller is EnemyTripleShotAttackController)
                 {
                     raycastViews[typeof(EnemyTripleShotAttackController)] = _tripleShotRaycastView;
                 }
@@ -189,10 +195,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
             // View接続
             _view.Initialize(aiController, target);
@@ -336,6 +342,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
         [SerializeField] private NavMeshAgent _navMeshAgent;
 
+        [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
+        private Transform _targetTransform;
+
         [Header("砲撃攻撃を含む場合に必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
 
@@ -356,8 +365,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     ボス死亡時に実行する処理。
         /// </summary>
-        private void HandleEnemyDied(CharacterEntity _)
+        /// <param name="diedEnemy"> 死亡したボスのEntity。</param>
+        private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
+            // 撃破演出用に、ボスの撃破を通知する。
+            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
+
             if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);

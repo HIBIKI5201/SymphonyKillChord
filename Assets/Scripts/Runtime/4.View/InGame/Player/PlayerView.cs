@@ -10,8 +10,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
-using System.Threading;
-using System.Threading.Tasks;
+using LitMotion.Extensions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -44,6 +43,15 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避中に到達させるSmearsPowerの最大値。")]
         private float _dodgeSmearsPower = 1f;
+
+        [SerializeField, Tooltip("被弾時のポストエフェクトのfrom値。")]
+        private float _damageEffectFrom = 50f;
+
+        [SerializeField,Tooltip("被弾時のポストエフェクト再生間隔。")]
+        private float _damageEffectInterval = 0.1f;
+        [SerializeField, Tooltip("被弾時のポストエフェクトMaterial。")]
+        private Material _damageEffectMaterial;
+
         [Space]
 
         [Header("Voice")]
@@ -92,16 +100,20 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _footstepInterval = 0.35f;
 
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
-        private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
-        private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
-        private static readonly int SmearsDirectionPropertyId = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int SMEARS_ON_PROPERTY_ID = Shader.PropertyToID("_SmearsOn");
+        private static readonly int SMEARS_POWER_PROPERTY_ID = Shader.PropertyToID("_SmearsPower");
+        private static readonly int SMEARS_DIRECTION_PROPERTY_ID = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int DAMAGED_EFFECT_PROPERTY_ID = Shader.PropertyToID("_Pixel");
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
         private string _pendingSkillAnimationKey;
         private Vector2 _moveVector;
-        private Vector2 _dogeVector;
+        private Vector2 _dodgeVector;
+        private Vector3 _cacheVelocity;
+        private Quaternion _cacheRotation;
         private Transform _cacheTransform;
         private Transform _cameraTransform;
         private IPlayerController _controller;
@@ -109,13 +121,15 @@ namespace KillChord.Runtime.View.InGame.Player
         private ICharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
-        private CancellationTokenSource _cancellationTokenSource;
-        private Quaternion _rotation;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
         private MotionHandle _dodgeMaterialEffectHandle;
+        private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
+
+        private float _attackFacingRemaining = 0f;
+        private Quaternion _attackFacingRotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -132,6 +146,14 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerAttackController?.UpdateAttackCooldown(Time.deltaTime);
             UpdateMovement();
         }
+        private void FixedUpdate()
+        {
+            if (!_isInitialized || !_isPlaying || _controller == null)
+            {
+                return;
+            }
+            UpdateRigidbody();
+        }
 
         private void OnDestroy()
         {
@@ -147,6 +169,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _dodgeMaterialEffectHandle.TryCancel();
+            _damageEffectHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -190,6 +213,8 @@ namespace KillChord.Runtime.View.InGame.Player
             RegisterActions();
             SyncFootstepTiming();
             _isPlaying = true;
+            _cacheRotation = _rb != null ? _rb.rotation : _cacheTransform.rotation;
+            _cacheVelocity = Vector3.zero;
         }
 
         /// <summary> ゲームプレイを停止し、入力イベントの購読を解除する。 </summary>
@@ -202,7 +227,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
             UnRegisterActions();
 
+            // 多段ヒットの残りを持ち越さない。プレイ再開時に前回の攻撃が飛ぶのを防ぐ。
+            PlayerAttackController?.ClearPendingHits();
+
             _moveVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
             _isPlaying = false;
 
@@ -224,12 +253,12 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="rotation"> 戻す回転です。 </param>
         public void ResetToSpawn(Vector3 position, Quaternion rotation)
         {
-            // 攻撃時の回転補間を停止する。
-            CancelAttackRotate();
-
             // 回避関連の状態と演出をリセットする。
             _dodgeMaterialEffectHandle.TryCancel();
             ResetDodgeMaterialEffect();
+
+            // 被弾ポストエフェクトの再生途中の値を持ち越さない。
+            _damageEffectHandle.TryCancel();
 
             // 位置と回転をスタート地点へ戻す。
             if (_cacheTransform != null)
@@ -250,9 +279,14 @@ namespace KillChord.Runtime.View.InGame.Player
                 _rb.angularVelocity = Vector3.zero;
             }
 
+            _cacheRotation = rotation;
+            _cacheVelocity = Vector3.zero;
+            _attackFacingRemaining = 0f;
+            _attackFacingRotation = rotation;
+
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
-            _dogeVector = Vector2.zero;
+            _dodgeVector = Vector2.zero;
             _isDodge = false;
 
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
@@ -267,16 +301,20 @@ namespace KillChord.Runtime.View.InGame.Player
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
 
-            if (_damageEffectView == null)
+            // パーティクル演出はViewが設定されている場合のみ再生する。
+            if (_damageEffectView != null)
             {
-                return;
+                Vector3 effectPosition = _damageEffectPoint != null
+                    ? _damageEffectPoint.position
+                    : transform.position;
+
+                _damageEffectView.PlayAt(effectPosition);
             }
 
-            Vector3 effectPosition = _damageEffectPoint != null
-                ? _damageEffectPoint.position
-                : transform.position;
-
-            _damageEffectView.PlayAt(effectPosition);
+            // ポストエフェクトはパーティクル演出の有無に関わらず再生する。
+            _damageEffectHandle.TryCancel();
+            _damageEffectHandle = LMotion.Create(_damageEffectFrom, 0f, _damageEffectInterval)
+                .BindToMaterialFloat(_damageEffectMaterial, DAMAGED_EFFECT_PROPERTY_ID);
         }
 
         /// <summary>
@@ -340,10 +378,8 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         /// <param name="duration"> 回避の継続時間です。 </param>
         /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
-        public void PlayDodgeMaterialEffect(float duration, Vector3 direction)
+        public void PlayDodgeMaterialEffect(float duration, in Vector3 direction)
         {
-            direction.Normalize();
-
             if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
             {
                 return;
@@ -362,8 +398,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 renderer.material.EnableKeyword(SMEARS_ON_KEYWORD);
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsOnPropertyId, 0f);
-                _dodgeMaterialPropertyBlock.SetVector(SmearsDirectionPropertyId, -direction);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_ON_PROPERTY_ID, 0f);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, _dodgeSmearsPower);
+                _dodgeMaterialPropertyBlock.SetVector(SMEARS_DIRECTION_PROPERTY_ID, -direction.normalized);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
 
@@ -387,7 +424,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsPowerPropertyId, value);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, value);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
         }
@@ -422,6 +459,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView.OnMoveInput += OnMove;
             _playerInputView.OnAttackInput += OnAttack;
             _playerInputView.OnDodgeInput += OnDodge;
+            _playerInputView.OnMobileDodgeFlickInput += OnMobileDodgeFlick;
         }
 
         /// <summary> 入力イベントの購読を解除する。 </summary>
@@ -430,6 +468,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _playerInputView.OnMoveInput -= OnMove;
             _playerInputView.OnAttackInput -= OnAttack;
             _playerInputView.OnDodgeInput -= OnDodge;
+            _playerInputView.OnMobileDodgeFlickInput -= OnMobileDodgeFlick;
         }
 
         /// <summary> 移動入力を保持する。 </summary>
@@ -441,20 +480,13 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <summary> 回避入力を受け取ったら回避要求フラグを立てる。 </summary>
         private void OnDodge(InputContext<float> input)
         {
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
-            {
-                return;
-            }
+            RequestDodge(input.Phase, _moveVector);
+        }
 
-            if (input.Phase == InputActionPhase.Started)
-            {
-                if (_controller.IsDodging)
-                {
-                    return;
-                }
-                _dogeVector = _moveVector;
-                _isDodge = true;
-            }
+        /// <summary> モバイル仮想スティックの方向付き回避入力を受け取る。 </summary>
+        private void OnMobileDodgeFlick(InputContext<Vector2> input)
+        {
+            RequestDodge(input.Phase, input.Value);
         }
 
         /// <summary>
@@ -501,18 +533,19 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
-                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
+                _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
-                    CancelAttackRotate();
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    RotateToTargetAsync(
-                        PlayerAttackController.CurrentLockOnTargetPosition,
-                        PlayerAttackController.AttackRotationSpeed,
-                        _cancellationTokenSource.Token);
+                    StartAttackRotate();
                 }
             }
+        }
+
+        private void UpdateRigidbody()
+        {
+            _rb.linearVelocity = _cacheVelocity;
+            _rb.MoveRotation(_cacheRotation);
         }
 
         /// <summary> 入力に基づいて移動と向きを更新する。 </summary>
@@ -525,16 +558,17 @@ namespace KillChord.Runtime.View.InGame.Player
 
             Vector2 dir = _moveVector;
 
-            if (PlayerAttackController.IsAttacking)
+            if (PlayerAttackController.IsAttacking
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed))
             {
-                // 攻撃時、入力をキャンセルする。
+                // 攻撃中・入力抑制中は移動入力をキャンセルする。
                 dir = Vector2.zero;
             }
-
-            if (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+            else if (dir.sqrMagnitude > ATTACK_CANCEL_INPUT_THRESHOLD_SQR
+                && !_isDodge
+                && !_controller.IsDodging)
             {
-                // ポップアップ表示直後など、入力抑制中は移動入力をキャンセルする。
-                dir = Vector2.zero;
+                _characterAnimationSignal?.CancelOneShot();
             }
 
             //_animator.SetFloat(_blendName, Mathf.Min(1f, dir.magnitude));
@@ -542,11 +576,11 @@ namespace KillChord.Runtime.View.InGame.Player
 
             if (_isDodge)
             {
-                Vector2 dodgeDir = _dogeVector;
+                Vector2 dodgeDir = _dodgeVector;
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
-                    var fwd = _cacheTransform.forward;
+                    Vector3 fwd = _cacheRotation * Vector3.forward;
                     dodgeDir.x = fwd.x;
                     dodgeDir.y = fwd.z;
                 }
@@ -562,76 +596,58 @@ namespace KillChord.Runtime.View.InGame.Player
                 _isDodge = false;
             }
 
-            Quaternion rotation = _cacheTransform.rotation;
-            if (_cancellationTokenSource != null)
-            {
-                rotation = _rotation;
-            }
+
+            Quaternion rotation = _cacheRotation;
+
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
-            _rb.linearVelocity = velocity;
-            _cacheTransform.rotation = rotation;
+            _cacheVelocity = velocity;
+            _cacheRotation = rotation;
+
+            // 攻撃向きロック：0.1秒間は移動入力による回転を上書きして敵方向を維持する
+            if (_attackFacingRemaining > 0f)
+            {
+                _attackFacingRemaining -= Time.deltaTime;
+                _cacheRotation = _attackFacingRotation;
+            }
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
         }
 
         /// <summary>
-        ///     攻撃時にターゲット方向へ滑らかに回転する Task 実装。
-        ///     回転は Exp ベースの収束係数で行い、攻撃終了またはターゲット無効で停止する。
+        ///     入力状態を確認し、次の移動更新へ回避を要求する。
         /// </summary>
-        private async Task RotateToTargetAsync(Vector3 targetPosition, float speed, CancellationToken ct)
+        /// <param name="phase"> 入力フェーズ。 </param>
+        /// <param name="direction"> 要求する回避方向。 </param>
+        private void RequestDodge(InputActionPhase phase, in Vector2 direction)
         {
-            _rotation = _cacheTransform.rotation;
-
-            try
+            if (phase != InputActionPhase.Started
+                || _isDodge
+                || (_inputSuppressionState != null && _inputSuppressionState.IsSuppressed)
+                || _controller.IsDodging)
             {
-                while (!ct.IsCancellationRequested
-                    && PlayerAttackController != null
-                    && PlayerAttackController.IsAttacking
-                    && PlayerAttackController.HasCurrentLockOnTarget)
-                {
-                    Vector3 dirToTarget = targetPosition - _cacheTransform.position;
-                    dirToTarget.y = 0f;
-                    if (dirToTarget.sqrMagnitude <= float.Epsilon) break;
-
-                    Quaternion targetRot = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
-                    float t = 1f - Mathf.Exp(-Mathf.Max(0f, speed) * Time.deltaTime);
-                    _rotation = Quaternion.Slerp(_rotation, targetRot, t);
-
-                    if (Quaternion.Angle(_rotation, targetRot) < 0.5f)
-                    {
-                        _rotation = targetRot;
-                        break;
-                    }
-
-                    await Task.Yield();
-                }
+                return;
             }
-            catch (System.Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-            finally
-            {
-                if (_cancellationTokenSource != null && _cancellationTokenSource.Token == ct)
-                {
-                    try { _cancellationTokenSource.Dispose(); } catch { }
-                    _cancellationTokenSource = null;
-                }
-            }
+
+            _dodgeVector = direction;
+            _isDodge = true;
         }
 
-        private void CancelAttackRotate()
+        /// <summary> 攻撃時にターゲット方向への要求回転を更新する。 </summary>
+        private void StartAttackRotate()
         {
-            if (_cancellationTokenSource != null)
+            Vector3 dir = PlayerAttackController.CurrentLockOnTargetPosition - _cacheTransform.position;
+            dir.y = 0;
+
+            if (dir.sqrMagnitude <= float.Epsilon)
             {
-                try
-                {
-                    _cancellationTokenSource.Cancel();
-                }
-                catch { }
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
+                _attackFacingRotation = _cacheRotation;
+                _attackFacingRemaining = 0f;
+                return;
             }
+
+            _attackFacingRotation = Quaternion.LookRotation(dir, Vector3.up);
+            _attackFacingRemaining = 0.1f;
+            _cacheRotation = _attackFacingRotation;
         }
 
         /// <summary>
@@ -722,7 +738,7 @@ namespace KillChord.Runtime.View.InGame.Player
         ///     足音SEをテンポ同期で再生します。
         /// </summary>
         /// <param name="velocity"> 現在速度です。 </param>
-        private void PlayFootstepSound(Vector3 velocity)
+        private void PlayFootstepSound(in Vector3 velocity)
         {
             if (_controller == null || _controller.IsDodging)
             {
