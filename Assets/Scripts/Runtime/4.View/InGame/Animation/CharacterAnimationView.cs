@@ -112,14 +112,21 @@ namespace KillChord.Runtime.View
             }
 
             int index = request.Index;
+            bool shouldSkipEnterBlend = request.SkipEnterBlendOnSameClip
+                && HasActiveOverlay()
+                && _overlayIndex == index;
             _playableController.PlayOneShot(index);
             _overlayIndex = index;
             _overlayBaseDuration = request.BaseDurationSeconds;
-            _overlayEnterBlendDuration = request.EnterBlendDurationSeconds;
+            _overlayEnterBlendDuration = shouldSkipEnterBlend
+                ? 0f
+                : request.EnterBlendDurationSeconds;
             _overlayExitBlendDuration = request.ExitBlendDurationSeconds;
             _overlayElapsedBaseTime = 0f;
             _shouldNotifyDodgeEnded = request.ShouldNotifyDodgeEnded;
+            _canCancelOverlayByMovement = request.CanCancelByMovement;
             _hasNotifiedOneShotEnded = false;
+            ResetOverlayCancellation();
         }
 
         /// <summary>
@@ -146,27 +153,6 @@ namespace KillChord.Runtime.View
         }
 
         /// <summary>
-        ///     ワンショットの終了処理を行い、オーバーレイ状態を解除する。
-        /// </summary>
-        private void CompleteOverlay()
-        {
-            _overlayElapsedBaseTime = _overlayBaseDuration;
-
-            if (_hasNotifiedOneShotEnded)
-            {
-                return;
-            }
-
-            _hasNotifiedOneShotEnded = true;
-            if (_shouldNotifyDodgeEnded && _context.Signal is CharacterAnimationSignal signal)
-            {
-                signal.NotifyDodgeEnded();
-            }
-
-            _overlayIndex = -1;
-        }
-
-        /// <summary>
         ///     ワンショットのオーバーレイウェイトを反映する。
         /// </summary>
         private void ApplyOverlayWeight()
@@ -176,7 +162,10 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            float weight = CalculateOverlayWeight();
+            TryStartOverlayCancellation();
+            float weight = _isOverlayCancelling
+                ? CalculateOverlayCancellationWeight()
+                : CalculateOverlayWeight();
 
             _weights[_overlayIndex] = Mathf.Max(_weights[_overlayIndex], weight);
 
@@ -191,20 +180,25 @@ namespace KillChord.Runtime.View
                 _weights[i] *= otherScale;
             }
 
-            _overlayElapsedBaseTime += _oneShotTimingCalculator.GetBaseProgressDelta(
+            float progressDelta = _oneShotTimingCalculator.GetBaseProgressDelta(
                 Time.deltaTime,
                 _locomotionCalculator.AnimationSpeed);
 
-            if (_overlayElapsedBaseTime >= _overlayBaseDuration && !_hasNotifiedOneShotEnded)
+            if (_isOverlayCancelling)
             {
-                _hasNotifiedOneShotEnded = true;
-                if (_shouldNotifyDodgeEnded
-                    && _context.Signal is CharacterAnimationSignal signal)
+                _overlayCancelElapsedBaseTime += progressDelta;
+                if (_overlayCancelElapsedBaseTime >= _overlayExitBlendDuration)
                 {
-                    signal.NotifyDodgeEnded();
+                    CompleteOverlay();
                 }
 
-                _overlayIndex = -1;
+                return;
+            }
+
+            _overlayElapsedBaseTime += progressDelta;
+            if (_overlayElapsedBaseTime >= _overlayBaseDuration)
+            {
+                CompleteOverlay();
             }
         }
 
@@ -224,9 +218,13 @@ namespace KillChord.Runtime.View
         private float _overlayEnterBlendDuration;
         private float _overlayExitBlendDuration;
         private float _overlayElapsedBaseTime;
+        private float _overlayCancelStartWeight;
+        private float _overlayCancelElapsedBaseTime;
         private float _reserveBlend;
         private int _overlayIndex = -1;
         private bool _shouldNotifyDodgeEnded;
+        private bool _canCancelOverlayByMovement;
+        private bool _isOverlayCancelling;
         private bool _hasNotifiedOneShotEnded;
 
         /// <summary>
@@ -236,10 +234,82 @@ namespace KillChord.Runtime.View
         private bool HasActiveOverlay()
         {
             return _overlayBaseDuration > 0f
-                && _overlayElapsedBaseTime < _overlayBaseDuration
                 && _weights != null
                 && _overlayIndex >= 0
-                && _overlayIndex < _weights.Length;
+                && _overlayIndex < _weights.Length
+                && (_isOverlayCancelling || _overlayElapsedBaseTime < _overlayBaseDuration);
+        }
+
+        /// <summary>
+        ///     移動速度がしきい値を超えた場合にオーバーレイのキャンセルを開始する。
+        /// </summary>
+        private void TryStartOverlayCancellation()
+        {
+            if (!_canCancelOverlayByMovement || _isOverlayCancelling)
+            {
+                return;
+            }
+
+            float exitBlendDuration = Mathf.Clamp(_overlayExitBlendDuration, 0f, _overlayBaseDuration);
+            float exitBlendStart = Mathf.Max(0f, _overlayBaseDuration - exitBlendDuration);
+            if (_overlayElapsedBaseTime >= exitBlendStart)
+            {
+                return;
+            }
+
+            if (_context.ViewModel.Velocity.magnitude < CharacterAnimationLocomotionCalculator.WALK_THRESHOLD)
+            {
+                return;
+            }
+
+            _overlayCancelStartWeight = CalculateOverlayWeight();
+            _overlayCancelElapsedBaseTime = 0f;
+            _isOverlayCancelling = true;
+        }
+
+        /// <summary>
+        ///     キャンセル開始時のウェイトから終了ブレンド時間をかけて0へ補間する。
+        /// </summary>
+        /// <returns> キャンセル中のオーバーレイウェイトです。 </returns>
+        private float CalculateOverlayCancellationWeight()
+        {
+            if (_overlayExitBlendDuration <= 0f)
+            {
+                return 0f;
+            }
+
+            float progress = _overlayCancelElapsedBaseTime / _overlayExitBlendDuration;
+            return Mathf.Lerp(_overlayCancelStartWeight, 0f, progress);
+        }
+
+        /// <summary>
+        ///     オーバーレイを終了し、必要に応じて回避終了を通知する。
+        /// </summary>
+        private void CompleteOverlay()
+        {
+            if (!_hasNotifiedOneShotEnded)
+            {
+                _hasNotifiedOneShotEnded = true;
+                if (_shouldNotifyDodgeEnded
+                    && _context.Signal is CharacterAnimationSignal signal)
+                {
+                    signal.NotifyOneShotEnded();
+                }
+            }
+
+            _overlayIndex = -1;
+            _canCancelOverlayByMovement = false;
+            ResetOverlayCancellation();
+        }
+
+        /// <summary>
+        ///     移動キャンセルの進行状態を初期化する。
+        /// </summary>
+        private void ResetOverlayCancellation()
+        {
+            _isOverlayCancelling = false;
+            _overlayCancelStartWeight = 0f;
+            _overlayCancelElapsedBaseTime = 0f;
         }
 
         /// <summary>
