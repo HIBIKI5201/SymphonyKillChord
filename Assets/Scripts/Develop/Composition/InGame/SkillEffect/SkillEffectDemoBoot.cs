@@ -1,0 +1,121 @@
+using KillChord.Runtime.Composition.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace KillChord.Develop.Composition.InGame.SkillEffect
+{
+    /// <summary>
+    ///     デモシーン向けに、常駐シーンのフローを介さずインゲーム初期化モジュールを実行するブートクラス。
+    ///     ロード画面やステージシーンの読み込みを伴わないため、単体シーンで動作確認ができる。
+    /// </summary>
+    public sealed class SkillEffectDemoBoot : MonoBehaviour
+    {
+        /// <summary> 初期化が完了しているかどうかです。 </summary>
+        public bool IsInitialized => _isInitialized;
+
+        /// <summary>
+        ///     初期化完了を待機します。
+        /// </summary>
+        /// <returns> 初期化完了を待機するAwaitableです。 </returns>
+        public Awaitable WaitForInitializationAsync()
+        {
+            return _completionSource.Awaitable;
+        }
+
+        [SerializeField, Tooltip("シーン内の初期化モジュールを自動収集するかです。falseの場合は手動指定分のみ実行します。")]
+        private bool _collectsModulesInScene = true;
+
+        [SerializeField, Tooltip("手動で実行する初期化モジュールです。自動収集を使わない場合に指定します。")]
+        private InGameInitializationModuleBase[] _modules;
+
+        /// <summary>
+        ///     初期化ライフサイクルを開始します。
+        /// </summary>
+        private async void Start()
+        {
+            try
+            {
+                List<IInGameInitializationModule> modules = ResolveModules();
+                if (modules.Count == 0)
+                {
+                    Debug.LogWarning($"[{nameof(SkillEffectDemoBoot)}] 初期化モジュールが見つかりません。", this);
+                    CompleteInitialization(true);
+                    return;
+                }
+
+                bool isSuccess = await _initializationCoordinator.InitializeAsync(
+                    modules,
+                    null,
+                    destroyCancellationToken);
+                if (!isSuccess)
+                {
+                    Debug.LogError($"[{nameof(SkillEffectDemoBoot)}] 初期化に失敗しました。", this);
+                }
+
+                _executedModules = modules;
+                CompleteInitialization(isSuccess);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                CompleteInitialization(false);
+            }
+        }
+
+        /// <summary>
+        ///     登録順の逆順でモジュールを終了します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_executedModules == null)
+            {
+                return;
+            }
+
+            for (int i = _executedModules.Count - 1; i >= 0; i--)
+            {
+                _executedModules[i]?.Shutdown();
+            }
+
+            _executedModules = null;
+        }
+
+        /// <summary>
+        ///     実行対象の初期化モジュールを実行順に並べて取得します。
+        /// </summary>
+        /// <returns> 実行対象モジュール一覧です。 </returns>
+        private List<IInGameInitializationModule> ResolveModules()
+        {
+            IEnumerable<InGameInitializationModuleBase> sourceModules = _collectsModulesInScene
+                ? FindObjectsByType<InGameInitializationModuleBase>(FindObjectsSortMode.None)
+                : _modules ?? Array.Empty<InGameInitializationModuleBase>();
+
+            return sourceModules
+                .Where(module => module != null && module.isActiveAndEnabled)
+                .Cast<IInGameInitializationModule>()
+                .OrderBy(module => module.Order)
+                .ToList();
+        }
+
+        /// <summary>
+        ///     初期化完了を確定し、待機者へ通知します。
+        /// </summary>
+        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
+        private void CompleteInitialization(bool isSuccess)
+        {
+            _isInitialized = isSuccess;
+            _completionSource.TrySetResult();
+        }
+
+        private readonly AwaitableCompletionSource _completionSource = new();
+        private readonly InGameInitializationCoordinator _initializationCoordinator = new();
+        private List<IInGameInitializationModule> _executedModules;
+        private bool _isInitialized;
+    }
+}
